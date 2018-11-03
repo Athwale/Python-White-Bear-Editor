@@ -37,6 +37,6 @@ class FileParser:
             if description is None:
                 raise WrongFromatException(Strings.exception_meta_description_twice + " " + html_file_object.get_name())
 
-        parsed.set_title(title)
-        parsed.set_description(description)
-        parsed.set_keywords(keywords)
+        html_file_object.set_title(title)
+        html_file_object.set_description(description)
+        html_file_object.set_keywords(keywords)
