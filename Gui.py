@@ -59,3 +59,4 @@ class Ui_main_window(object):
         self.actionExit.setText(_translate("main_window", "Exit"))
         self.actionAbout.setText(_translate("main_window", "About"))
 
+
