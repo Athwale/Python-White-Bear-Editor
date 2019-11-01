@@ -2,40 +2,35 @@ import os
 import glob
 
 from Exceptions.AccessException import AccessException
-from FileIdentifier import FileIdentifier
 from Strings.Strings import Strings
-from FileParser import FileParser
 
 
 class DirectoryLoader:
-    """This class loads and parses white bear root directory. The output is a dict of objects representing everything needed
-    about the individual html files. If the directory is not readable or writable or the files are not, AccessException is
-    thrown.
+    """This class loads and parses white bear web root directory. The output is a dictionary of filenames + path to them
+    on the system. If the directory is not readable or writable or the files are not readable or writeable,
+    AccessException is raised.
     """
 
     __directory_path = None
-    __file_identifier = None
     __files = {}
 
     def __init__(self, directory_path):
         self.__directory_path = directory_path
         if self.is_white_bear_directory(directory_path):
-            self.__file_identifier = FileIdentifier()
             self.__files = self.prepare_files(self.__directory_path)
 
     def get_file_dict(self):
-        """
-
-        :return:
+        """Return the parsed white bear directory as a dictionary of HtmlFile objects identified by their names.
+        :return: Dictionary {website name:HtmlFile object}
         """
         return self.__files
 
     @staticmethod
     def is_white_bear_directory(path):
-        """Checks whether chosen directory belongs to whitebear web.
-        Throws: FileNotFoundError if index.html is not present
-        Throws: IndexError if <title>White Bear is noy in index.html
-        :param path:
+        """Checks whether chosen directory belongs to a whitebear web.
+        :raises FileNotFoundError if index.html is not present
+        :raises IndexError if <title>White Bear is noy in index.html
+        :param path: Path to the root of the whitebear web directory.
         :return: True if path is a white bear directory
         """
         if not os.access(path, os.R_OK) or not os.access(path, os.W_OK):
@@ -51,23 +46,19 @@ class DirectoryLoader:
             raise FileNotFoundError(ex, Strings.exception_index)
         return True
 
-    def prepare_files(self, path):
+    @staticmethod
+    def prepare_files(path):
         """
-
-        :param path:
+        :raises AccessException if files are not readable or not writeable.
+        :param path: Path to the whitebear root directory.
         :return:
         """
         # Check all html files in directory are readable and writable
         os.chdir(path)
         files = {}
-        parser = FileParser()
-        for file in glob.glob("*.html"):
+        for file in glob.glob("*"):
             if not os.access(file, os.R_OK) or not os.access(file, os.W_OK):
                 raise AccessException(Strings.exception_access_html + " " + file)
             else:
-                file_object = self.__file_identifier.create(os.path.realpath(file))
-                parser.parse_file(file_object)
-                # print(file_object)
-                files[file] = file_object
+                files[file] = os.path.realpath(file)
         return files
-
