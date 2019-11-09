@@ -1,5 +1,6 @@
 import wx
-import os
+from Strings.Strings import Strings
+from DirectoryLoader import DirectoryLoader
 
 
 class Gui(wx.Frame):
@@ -55,7 +56,8 @@ class Gui(wx.Frame):
         self.Bind(wx.EVT_MENU, self.about_button_handler, self.file_menu_item_about)
         self.Bind(wx.EVT_MENU, self.open_button_handler, self.file_menu_item_open)
 
-
+        # Prepare tools
+        self.directory_loader = None
 
     def quit_button_handler(self, event):
         """
@@ -71,15 +73,13 @@ class Gui(wx.Frame):
         :param event:
         :return:
         """
-        dirname = ''
-        dlg = wx.FileDialog(self, "Choose a file", dirname, "", "*.*", wx.FD_OPEN)
+        dlg = wx.DirDialog(self, "Choose a directory", "", wx.DD_DIR_MUST_EXIST | wx.DD_CHANGE_DIR)
+        dlg.SetPath(Strings.home_directory)
         # Modal means the user is locked into this dialog an can not use the rest of the application
         if dlg.ShowModal() == wx.ID_OK:
-            filename = dlg.GetFilename()
-            dirname = dlg.GetDirectory()
-            f = open(os.path.join(dirname, filename), 'r')
+            self.directory_loader = DirectoryLoader(dlg.GetPath())
+            self.page_list.InsertItems(list(self.directory_loader.get_file_dict().keys()), 0)
 
-            f.close()
         dlg.Destroy()
 
     def about_button_handler(self, event):

@@ -1,4 +1,8 @@
+import os.path
+
+
 class Strings:
+    home_directory = os.path.expanduser('~')
     exception_access = "Main directory not readable"
     exception_access_html = "File can not be accessed"
     exception_index = "index.html is not in directory"
