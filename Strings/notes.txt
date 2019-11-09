@@ -2,7 +2,10 @@ wx.ID_ANY have wxWidgets pick an id for us
 You almost always want to use wx.ID_ANY or another standard ID (v2.8) provided by wxWidgets.
 
 Frame reprezentuje okno na obrazovce
-Window je zakladni trida ze ktere dedi vsechny prvky, tlacitka, seznamy,..
+Window je zakladni trida ze ktere dedi vsechny prvky, tlacitka, seznamy,...
+    wx.Panel, which is a container to hold your various wx.Control objects. Putting your wx.Control objects inside a wx.Panel means that the user can tab from one UI widget to the next.
+
+All visual elements (wxWindow objects and their subclasses) can hold sub-elements. Thus, for example, a wx.Frame might hold a number of wx.Panel objects, which in turn hold a number of wx.Button,
 
 
 
