@@ -44,10 +44,11 @@ class Gui(wx.Frame):
         self.left_column_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.SetSizer(self.left_column_sizer)
         self.SetAutoLayout(1)
-        self.left_column_sizer.Fit(self)
+        # Resize to fit all components, makes the window as small as possible
+        # self.left_column_sizer.Fit(self)
 
         # Create a list
-        self.page_list = wx.ListBox(self, name="page list")
+        self.page_list = wx.ListBox(self, wx.LB_SINGLE | wx.LB_SORT, name="page list")
         # Add the list into the sizer, give it a sizing weight and let it expand
         self.left_column_sizer.Add(self.page_list, 2, wx.EXPAND)
 
@@ -55,6 +56,7 @@ class Gui(wx.Frame):
         self.Bind(wx.EVT_MENU, self.quit_button_handler, self.file_menu_item_quit)
         self.Bind(wx.EVT_MENU, self.about_button_handler, self.file_menu_item_about)
         self.Bind(wx.EVT_MENU, self.open_button_handler, self.file_menu_item_open)
+        self.Bind(wx.EVT_LISTBOX, self.list_item_click_handler, self.page_list)
 
         # Prepare tools
         self.directory_loader = None
@@ -93,13 +95,9 @@ class Gui(wx.Frame):
         about_frame.ShowModal()
         about_frame.Destroy()
 
-    def OnEvent(self, event):
-        """
-        Handles otherwise unhandled events
-        :param event:
-        :return:
-        """
-        print('Unknown event occurred')
+    def list_item_click_handler(self, event):
+        print(self.page_list.GetStringSelection())
+
 
 app = wx.App()
 frame = Gui(None, 'Okno')
