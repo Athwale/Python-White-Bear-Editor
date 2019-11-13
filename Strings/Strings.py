@@ -2,6 +2,8 @@ import os.path
 
 
 class Strings:
+    """This class holds string variables which are used in the program. This simplifies changes.
+    """
     editor_name = 'Whitebear editor'
     home_directory = os.path.expanduser('~')
     exception_access = 'Main directory not readable'

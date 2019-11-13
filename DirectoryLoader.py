@@ -5,8 +5,8 @@ from Strings.Strings import Strings
 
 
 class DirectoryLoader:
-    """This class loads and parses white bear web root directory. The output is a dictionary of filenames + path to them
-    on the system. If the directory is not readable or writable or the files are not readable or writeable,
+    """This class loads and parses white bear web root directory. The output is a dictionary of file names + path full
+    to them on the system. If the directory is not readable or writable or the files are not readable or writeable,
     AccessException is raised.
     """
 
@@ -14,23 +14,27 @@ class DirectoryLoader:
     __files = {}
 
     def __init__(self, directory_path):
+        """Constructor takes the path to the whitebear directory and also creates the output dictionary.
+        :param directory_path: Path to the whitebear web root directory.
+        """
         self.__directory_path = directory_path
         if self.is_white_bear_directory(directory_path):
             self.__files = self.prepare_files(self.__directory_path)
 
     def get_file_dict(self):
-        """Return the parsed white bear directory as a dictionary of HtmlFile objects identified by their names.
-        :return: Dictionary {website name:HtmlFile object}
+        """Return the read white bear directory as a dictionary of paths to files with file names as keys.
+        :return: Dictionary {file name:path to the file}
         """
         return self.__files
 
     @staticmethod
     def is_white_bear_directory(path):
-        """Checks whether chosen directory belongs to a whitebear web.
+        """Checks whether chosen directory belongs to the whitebear web.
         :raises FileNotFoundError if index.html is not present
         :raises IndexError if <title>White Bear is noy in index.html
+        :raises AccessException if the directory can no be read or written to.
         :param path: Path to the root of the whitebear web directory.
-        :return: True if path is a white bear directory
+        :return: True if path is an accessible white bear directory
         """
         if not os.access(path, os.R_OK) or not os.access(path, os.W_OK):
             raise AccessException(Strings.exception_access)
@@ -47,10 +51,11 @@ class DirectoryLoader:
 
     @staticmethod
     def prepare_files(path):
-        """
-        :raises AccessException if files are not readable or not writeable.
+        """Opens the path which should lead to a whitebear web root. Goes through all files which have to be readable
+        and writeable and constructs a dictionary {file name:path to the file}.
+        :raises AccessException if the files are not readable or not writeable.
         :param path: Path to the whitebear root directory.
-        :return:
+        :return: Dictionary {file name:path to the file}
         """
         # Check all html files in directory are readable and writable
         files = {}
