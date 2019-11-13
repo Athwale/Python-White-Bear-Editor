@@ -1,5 +1,4 @@
 import os
-import glob
 
 from Exceptions.AccessException import AccessException
 from Strings.Strings import Strings
@@ -54,11 +53,11 @@ class DirectoryLoader:
         :return:
         """
         # Check all html files in directory are readable and writable
-        os.chdir(path)
         files = {}
-        for file in glob.glob("*"):
-            if not os.access(file, os.R_OK) or not os.access(file, os.W_OK):
-                raise AccessException(Strings.exception_access_html + " " + file)
-            else:
-                files[file] = os.path.realpath(file)
+        for file in os.listdir(path):
+            if os.path.isfile(os.path.join(path, file)):
+                if not os.access(file, os.R_OK) or not os.access(file, os.W_OK):
+                    raise AccessException(Strings.exception_access_html + " " + file)
+                else:
+                    files[file] = os.path.realpath(file)
         return files
