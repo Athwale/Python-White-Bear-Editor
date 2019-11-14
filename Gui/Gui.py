@@ -1,6 +1,7 @@
 import wx
 
 from DirectoryLoader import DirectoryLoader
+from FileParser import FileParser
 from Strings.Strings import Strings
 
 
@@ -62,6 +63,8 @@ class Gui(wx.Frame):
 
         # Prepare tools
         self.directory_loader = None
+        self.file_parser = FileParser()
+        self.page_dictionary = None
 
     def quit_button_handler(self, event):
         """
@@ -82,7 +85,8 @@ class Gui(wx.Frame):
         # Modal means the user is locked into this dialog an can not use the rest of the application
         if dlg.ShowModal() == wx.ID_OK:
             self.directory_loader = DirectoryLoader()
-            self.page_list.InsertItems(list(self.directory_loader.get_file_dict(dlg.GetPath()).keys()), 0)
+            self.page_dictionary = self.directory_loader.get_file_dict(dlg.GetPath())
+            self.page_list.InsertItems(list(self.page_dictionary.keys()), 0)
         dlg.Destroy()
 
     def about_button_handler(self, event):
@@ -97,8 +101,9 @@ class Gui(wx.Frame):
         about_frame.Destroy()
 
     def list_item_click_handler(self, event):
-        print(self.page_list.GetStringSelection())
-
+        selected_name = self.page_list.GetStringSelection()
+        output = self.file_parser.create((selected_name, self.page_dictionary[selected_name]))
+        print(output)
 
 app = wx.App()
 frame = Gui(None, Strings.editor_name)
