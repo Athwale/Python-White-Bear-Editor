@@ -13,6 +13,7 @@ class Strings:
     exception_file_unrecognized = 'This is not a white-bear html file'
     exception_only_one_title_allowed = 'Wrong file format, title tag found twice'
     exception_meta_description_twice = 'Wrong file format, meta description found twice'
+    exception_not_bool = 'Modified can only be of type bool'
     label_file = '&File'
     label_quit = '&Quit'
     label_quit_hint = 'Quit'
