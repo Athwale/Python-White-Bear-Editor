@@ -206,7 +206,7 @@ class ParsedFile:
         self.set_modified(True)
 
     def __str__(self) -> str:
-        return "White bear file {}, Type {}, Modified {}, Path {}, Title {}, Keywords {}, Description {}".\
+        return "White bear file {}, Type {}, Modified {}, Path {}, Title {}, Keywords {}, Description {}". \
             format(self.get_name(), self.__string_type(), self.is_modified(), self.get_path(), self.get_title(),
                    self.get_keywords(), self.get_description())
 

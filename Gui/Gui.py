@@ -1,6 +1,7 @@
 import wx
-from Strings.Strings import Strings
+
 from DirectoryLoader import DirectoryLoader
+from Strings.Strings import Strings
 
 
 class Gui(wx.Frame):

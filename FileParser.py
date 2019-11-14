@@ -1,6 +1,6 @@
-from Strings.Strings import Strings
 from Exceptions.WrongFormatException import WrongFormatException
 from ParsedFile import ParsedFile
+from Strings.Strings import Strings
 
 
 class FileParser:

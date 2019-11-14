@@ -1,5 +1,7 @@
-from bs4 import BeautifulSoup
 import os
+
+from bs4 import BeautifulSoup
+
 from ParsedFile import ParsedFile
 
 
@@ -110,4 +112,3 @@ class FileIdentifier:
         :return: True if the parsed file is a whitebear css stylesheet.
         """
         raise NotImplemented('Not yet implemented')
-
