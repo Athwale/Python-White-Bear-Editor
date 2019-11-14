@@ -10,7 +10,7 @@ class FileParser:
     @staticmethod
     def parse_file(html_file_object):
         """
-
+        :raises WrongFormatException
         :param html_file_object:
         :return:
         """

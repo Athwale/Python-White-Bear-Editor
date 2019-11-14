@@ -1,7 +1,6 @@
 class UnrecognizedFileException(Exception):
     """Exception representing and unrecognized file type that does not belong to the whitebear website
     """
-    __message = None
 
     def __init__(self, message):
         """Create new exception and store the user readable message.

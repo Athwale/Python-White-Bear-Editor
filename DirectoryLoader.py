@@ -10,21 +10,18 @@ class DirectoryLoader:
     AccessException is raised.
     """
 
-    __directory_path = None
-    __files = {}
+    def __init__(self):
+        self.__directory_path = None
+        self.__files = {}
 
-    def __init__(self, directory_path):
-        """Constructor takes the path to the whitebear directory and also creates the output dictionary.
+    def get_file_dict(self, directory_path):
+        """Return the read white bear directory as a dictionary of paths to files with file names as keys.
         :param directory_path: Path to the whitebear web root directory.
+        :return: Dictionary {file name:path to the file}
         """
         self.__directory_path = directory_path
         if self.is_white_bear_directory(directory_path):
             self.__files = self.prepare_files(self.__directory_path)
-
-    def get_file_dict(self):
-        """Return the read white bear directory as a dictionary of paths to files with file names as keys.
-        :return: Dictionary {file name:path to the file}
-        """
         return self.__files
 
     @staticmethod

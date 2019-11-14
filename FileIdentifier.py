@@ -1,7 +1,6 @@
 import os
 
 from bs4 import BeautifulSoup
-
 from ParsedFile import ParsedFile
 
 

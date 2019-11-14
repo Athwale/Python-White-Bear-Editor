@@ -1,7 +1,6 @@
 class WrongFormatException(Exception):
     """Exception representing incorrectly formated whitebear website file error.
     """
-    __message = None
 
     def __init__(self, message):
         """Create new exception and store the user readable message.

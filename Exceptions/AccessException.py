@@ -1,7 +1,6 @@
 class AccessException(Exception):
     """Exception representing an error while accessing a file.
     """
-    __message = None
 
     def __init__(self, message):
         """Create new exception and store the user readable message.

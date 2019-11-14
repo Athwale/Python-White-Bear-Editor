@@ -16,15 +16,6 @@ class ParsedFile:
     TYPE_CSS = 6
     TYPE_OTHER = 7
 
-    __modified = False
-    __path = None
-    __name = None
-    __file_type = None
-    __parsed_html = None
-    __title = None
-    __description = None
-    __keywords = None
-
     def __init__(self, name, path, file_type, parsed_html):
         """Create a new ParsedFile object.
         :param name: Name of the parsed file.
@@ -36,6 +27,10 @@ class ParsedFile:
         self.__path = path
         self.__file_type = file_type
         self.__parsed_html = parsed_html
+        self.__modified = False
+        self.__title = None
+        self.__description = None
+        self.__keywords = None
 
     def is_modified(self):
         """Return True if this file was modified in the editor.

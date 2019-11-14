@@ -81,9 +81,8 @@ class Gui(wx.Frame):
         dlg.SetPath(Strings.home_directory)
         # Modal means the user is locked into this dialog an can not use the rest of the application
         if dlg.ShowModal() == wx.ID_OK:
-            self.directory_loader = DirectoryLoader(dlg.GetPath())
-            self.page_list.InsertItems(list(self.directory_loader.get_file_dict().keys()), 0)
-
+            self.directory_loader = DirectoryLoader()
+            self.page_list.InsertItems(list(self.directory_loader.get_file_dict(dlg.GetPath()).keys()), 0)
         dlg.Destroy()
 
     def about_button_handler(self, event):
