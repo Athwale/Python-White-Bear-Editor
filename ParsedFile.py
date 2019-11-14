@@ -1,21 +1,22 @@
-class HtmlFile:
+class ParsedFile:
+    """This class represents a parsed file belonging to the whitebear website. It contains all information associated
+    with the file along with getters and setters for easy access and methods for working with the file.
     """
 
-    """
     TYPE_INDEX = 0
     TYPE_ARTICLE = 1
     TYPE_MENU = 2
     TYPE_CONTACT = 3
     TYPE_GALLERY = 4
     TYPE_MISC = 5
-    TYPE_OTHER = 6
+    TYPE_CSS = 6
+    TYPE_OTHER = 7
 
     __modified = False
     __path = None
     __name = None
     __file_type = None
     __parsed_html = None
-
     __title = None
     __description = None
     __keywords = None
@@ -31,6 +32,11 @@ class HtmlFile:
 
     def is_article(self):
         if self.__file_type == self.TYPE_ARTICLE:
+            return True
+        return False
+
+    def is_css(self):
+        if self.__file_type == self.TYPE_CSS:
             return True
         return False
 
@@ -119,5 +125,9 @@ class HtmlFile:
             return "misc"
         elif self.is_contact():
             return "contact"
+        elif self.is_css():
+            return "css"
+        elif self.is_other():
+            return "other file type"
         else:
             return "index"

@@ -1,6 +1,6 @@
 from Strings.Strings import Strings
 from Exceptions.WrongFormatException import WrongFormatException
-from HtmlFile import HtmlFile
+from ParsedFile import ParsedFile
 
 
 class FileParser:
@@ -19,7 +19,7 @@ class FileParser:
         description = None
         parsed = html_file_object.get_parsed_html()
 
-        if html_file_object.get_type() != HtmlFile.TYPE_OTHER:
+        if html_file_object.get_type() != ParsedFile.TYPE_OTHER:
             # Set title
             if len(parsed.find_all('title')) != 1:
                 raise WrongFormatException(Strings.exception_only_one_title_allowed + " " + html_file_object.get_name())
