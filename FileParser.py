@@ -9,7 +9,7 @@ class FileParser:
     """
 
     # name_path is a syntax for unpacking a tuple
-    def create(self, name_path):
+    def create(self, name_path: str) -> ParsedFile:
         """Parse a file which is a whitebear html file. Identify the file type and create an object representing the
         file.
         :param name_path: Tuple (filename, file path).

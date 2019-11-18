@@ -1,4 +1,5 @@
 import os
+from typing import Dict
 
 from Exceptions.AccessException import AccessException
 from Strings.Strings import Strings
@@ -9,12 +10,14 @@ class DirectoryLoader:
     to them on the system. If the directory is not readable or writable or the files are not readable or writeable,
     AccessException is raised.
     """
+    __files: Dict[str, str]
+    __directory_path: str
 
     def __init__(self):
-        self.__directory_path = None
+        self.__directory_path = ''
         self.__files = {}
 
-    def get_file_dict(self, directory_path):
+    def get_file_dict(self, directory_path: str) -> Dict[str, str]:
         """Return the read white bear directory as a dictionary of paths to files with file names as keys.
         :param directory_path: Path to the whitebear web root directory.
         :return: Dictionary {file name:path to the file}
