@@ -28,7 +28,7 @@ class DirectoryLoader:
         return self.__files
 
     @staticmethod
-    def is_white_bear_directory(path):
+    def is_white_bear_directory(path: str) -> bool:
         """Checks whether chosen directory belongs to the whitebear web.
         :raises FileNotFoundError if index.html is not present
         :raises IndexError if <title>White Bear is noy in index.html
@@ -50,7 +50,7 @@ class DirectoryLoader:
         return True
 
     @staticmethod
-    def prepare_files(path):
+    def prepare_files(path: str) -> Dict[str, str]:
         """Opens the path which should lead to a whitebear web root. Goes through all files which have to be readable
         and writeable and constructs a dictionary {file name:path to the file}.
         :raises AccessException if the files are not readable or not writeable.
@@ -58,7 +58,8 @@ class DirectoryLoader:
         :return: Dictionary {file name:path to the file}
         """
         # Check all html files in directory are readable and writable
-        files = {}
+        files: Dict[str, str] = {}
+        file: str
         for file in os.listdir(path):
             if os.path.isfile(os.path.join(path, file)):
                 if not os.access(file, os.R_OK) or not os.access(file, os.W_OK):

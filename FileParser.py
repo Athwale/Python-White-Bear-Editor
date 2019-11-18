@@ -1,3 +1,4 @@
+from typing import Tuple, List
 from Exceptions.WrongFormatException import WrongFormatException
 from ParsedFile import ParsedFile
 from Strings.Strings import Strings
@@ -9,53 +10,48 @@ class FileParser:
     """
 
     # name_path is a syntax for unpacking a tuple
-    def create(self, name_path: str) -> ParsedFile:
+    def create(self, name_path: Tuple[str, str]) -> ParsedFile:
         """Parse a file which is a whitebear html file. Identify the file type and create an object representing the
         file.
         :param name_path: Tuple (filename, file path).
         :return: ParsedFile instance containing the contents of the file.
         """
+        file_name: str
+        file_path: str
         file_name, file_path = name_path
         # Open file and pass file handle to beautiful soap.
-        with open(file_path, "r") as html:
-            parsed_html = BeautifulSoup(html, "html5lib")
-
-        file_type = self.__find_type(parsed_html)
+        with open(file_path, 'r') as html:
+            parsed_html: BeautifulSoup = BeautifulSoup(html, 'html5lib')
         # TODO ---------------------------------------
-        parsed_file_instance = None
-        return parsed_file_instance
+        return self.__parse_file(parsed_html, file_name)
 
-    @staticmethod
-    def __parse_file(parsed_html):
+    def __parse_file(self, parsed_html: BeautifulSoup, file_name: str) -> ParsedFile:
         """
         :raises WrongFormatException
         :param parsed_html:
         :return:
         """
-        title = None
-        keywords = None
-        description = None
-        html_file_object = None
-
-        if html_file_object.get_type() != ParsedFile.TYPE_OTHER:
+        file_type: int = self.__find_type(parsed_html)
+        if file_type != ParsedFile.TYPE_OTHER:
             # Set title
             if len(parsed_html.find_all('title')) != 1:
-                raise WrongFormatException(Strings.exception_only_one_title_allowed + " " + html_file_object.get_name())
+                raise WrongFormatException(Strings.exception_only_one_title_allowed + ' ' + file_name)
             else:
-                # Finds first occurrence, but there is only one anyway
-                title = parsed_html.title.string
+                # Finds first occurrence, but there is only one anyway at this point
+                title: str = parsed_html.title.string
 
             # Set description
             meta_tags = parsed_html.find_all('meta')
+            description = ''
             for tag in meta_tags:
                 try:
                     if tag['name'] == 'description':
-                        description = tag['content']
+                        description: str = tag['content']
                 except KeyError:
                     continue
             # No description found
-            if description is None:
-                raise WrongFormatException(Strings.exception_meta_description_twice + " " + html_file_object.get_name())
+            if not description:
+                raise WrongFormatException(Strings.exception_meta_description_twice + ' ' + file_name)
 
         html_file_object.set_title(title)
         html_file_object.set_description(description)
