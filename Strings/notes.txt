@@ -9,10 +9,10 @@ wx.Panel means that the user can tab from one UI widget to the next.
 All visual elements (wxWindow objects and their subclasses) can hold sub-elements. Thus, for example, a wx.Frame might
 hold a number of wx.Panel objects, which in turn hold a number of wx.Button,
 
-
-
-
-
+Python je strongly typed, neprovadi implicitni konverzi napriklad v print.
+global jmeno uvnitr funkce pouzije promennou deklarovanou venku z funkce, globalni
+del jmeno vymaze deklarovanou promennou, ne obsah, celou promennou.
+*args, promenny pocet argumentu, predava se ve funkci jako seznam. Vzdy musi byt posledni.
 
 
 

@@ -25,7 +25,7 @@ class FileParser:
         # TODO ---------------------------------------
         return self.__parse_file(parsed_html, file_name)
 
-    def __parse_file(self, parsed_html: BeautifulSoup, file_name: str) -> ParsedFile:
+    def __parse_file(self, parsed_html: BeautifulSoup, file_name: str, file_path: str) -> ParsedFile:
         """
         :raises WrongFormatException
         :param parsed_html:
