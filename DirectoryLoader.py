@@ -2,7 +2,7 @@ import os
 from typing import Dict
 
 from Exceptions.AccessException import AccessException
-from Strings.Strings import Strings
+from Constants.Strings import Strings
 
 
 class DirectoryLoader:

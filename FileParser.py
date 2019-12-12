@@ -1,7 +1,7 @@
 from typing import Tuple, List
 from Exceptions.WrongFormatException import WrongFormatException
 from ParsedFile import ParsedFile
-from Strings.Strings import Strings
+from Constants.Strings import Strings
 from bs4 import BeautifulSoup
 
 
@@ -22,8 +22,7 @@ class FileParser:
         # Open file and pass file handle to beautiful soap.
         with open(file_path, 'r') as html:
             parsed_html: BeautifulSoup = BeautifulSoup(html, 'html5lib')
-        # TODO ---------------------------------------
-        return self.__parse_file(parsed_html, file_name)
+        return self.__parse_file(parsed_html, file_name, file_path)
 
     def __parse_file(self, parsed_html: BeautifulSoup, file_name: str, file_path: str) -> ParsedFile:
         """
@@ -33,29 +32,14 @@ class FileParser:
         """
         file_type: int = self.__find_type(parsed_html)
         if file_type != ParsedFile.TYPE_OTHER:
-            # Set title
-            if len(parsed_html.find_all('title')) != 1:
-                raise WrongFormatException(Strings.exception_only_one_title_allowed + ' ' + file_name)
-            else:
-                # Finds first occurrence, but there is only one anyway at this point
-                title: str = parsed_html.title.string
+            # This will be a regular kind of web site
+            # TODO
+            pass
 
-            # Set description
-            meta_tags = parsed_html.find_all('meta')
-            description = ''
-            for tag in meta_tags:
-                try:
-                    if tag['name'] == 'description':
-                        description: str = tag['content']
-                except KeyError:
-                    continue
-            # No description found
-            if not description:
-                raise WrongFormatException(Strings.exception_meta_description_twice + ' ' + file_name)
-
-        html_file_object.set_title(title)
-        html_file_object.set_description(description)
-        html_file_object.set_keywords(keywords)
+        else:
+            # This will be something special, normal text,...
+            # TODO
+            pass
 
     def __find_type(self, parsed_html):
         """Find out the type of the parsed file and return a constant representing the type.
@@ -66,12 +50,6 @@ class FileParser:
             return ParsedFile.TYPE_ARTICLE
         elif self.__is_menu(parsed_html):
             return ParsedFile.TYPE_MENU
-        elif self.__is_gallery(parsed_html):
-            return ParsedFile.TYPE_GALLERY
-        elif self.__is_misc(parsed_html):
-            return ParsedFile.TYPE_MISC
-        elif self.__is_contact(parsed_html):
-            return ParsedFile.TYPE_CONTACT
         elif self.__is_index(parsed_html):
             return ParsedFile.TYPE_INDEX
         else:
@@ -94,38 +72,6 @@ class FileParser:
         :return: True if the parsed file is a whitebear menu html.
         """
         if len(parsed_html.findAll('main', id="menu")) != 1:
-            return False
-        return True
-
-    @staticmethod
-    def __is_gallery(parsed_html):
-        """Return True if the parsed file is a whitebear gallery html.
-        :param parsed_html: File parsed by beautifulsoup.
-        :return: True if the parsed file is a whitebear gallery html.
-        """
-        if len(parsed_html.findAll('article', id="main", class_="wholePage")) != 1:
-            return False
-        if len(parsed_html.findAll('div', id="gallery")) != 1:
-            return False
-        return True
-
-    @staticmethod
-    def __is_misc(parsed_html):
-        """Return True if the parsed file is a whitebear misc html.
-        :param parsed_html: File parsed by beautifulsoup.
-        :return: True if the parsed file is a whitebear misc html.
-        """
-        if len(parsed_html.findAll('main', id="misc")) != 1:
-            return False
-        return True
-
-    @staticmethod
-    def __is_contact(parsed_html):
-        """Return True if the parsed file is a whitebear contact page html.
-        :param parsed_html: File parsed by beautifulsoup.
-        :return: True if the parsed file is a whitebear contact page html.
-        """
-        if len(parsed_html.findAll('main', id="contact")) != 1:
             return False
         return True
 

@@ -1,4 +1,4 @@
-from Strings.Strings import Strings
+from Constants.Strings import Strings
 
 
 class ParsedFile:
@@ -10,9 +10,6 @@ class ParsedFile:
     TYPE_INDEX = 0
     TYPE_ARTICLE = 1
     TYPE_MENU = 2
-    TYPE_CONTACT = 3
-    TYPE_GALLERY = 4
-    TYPE_MISC = 5
     TYPE_CSS = 6
     TYPE_OTHER = 7
 
@@ -62,35 +59,11 @@ class ParsedFile:
             return True
         return False
 
-    def is_gallery(self):
-        """Return True if this file is of type ParsedFile.TYPE_GALLERY.
-        :return: True if this file is of type ParsedFile.TYPE_GALLERY.
-        """
-        if self.__file_type == self.TYPE_GALLERY:
-            return True
-        return False
-
     def is_index(self):
         """Return True if this file is of type ParsedFile.TYPE_INDEX.
         :return: True if this file is of type ParsedFile.TYPE_INDEX.
         """
         if self.__file_type == self.TYPE_INDEX:
-            return True
-        return False
-
-    def is_misc(self):
-        """Return True if this file is of type ParsedFile.TYPE_MISC.
-        :return: True if this file is of type ParsedFile.TYPE_MISC.
-        """
-        if self.__file_type == self.TYPE_INDEX:
-            return True
-        return False
-
-    def is_contact(self):
-        """Return True if this file is of type ParsedFile.TYPE_CONTACT.
-        :return: True if this file is of type ParsedFile.TYPE_CONTACT.
-        """
-        if self.__file_type == self.TYPE_CONTACT:
             return True
         return False
 
@@ -213,15 +186,9 @@ class ParsedFile:
             return "article"
         elif self.is_menu():
             return "menu"
-        elif self.is_gallery():
-            return "gallery"
-        elif self.is_misc():
-            return "misc"
-        elif self.is_contact():
-            return "contact"
         elif self.is_css():
             return "css"
-        elif self.is_other():
-            return "other file type"
-        else:
+        elif self.is_index():
             return "index"
+        else:
+            return "other"

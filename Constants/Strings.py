@@ -25,3 +25,4 @@ class Strings:
     label_choose_dir: str = 'Choose whitebear directory'
     text_about_contents: str = 'Unfinished whitebear web editor'
     label_about_window_name: str = 'About'
+    label_menu_logo: str = "Menu logo"

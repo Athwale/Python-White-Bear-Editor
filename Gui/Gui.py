@@ -2,7 +2,8 @@ import wx
 
 from DirectoryLoader import DirectoryLoader
 from FileParser import FileParser
-from Strings.Strings import Strings
+from Constants.Strings import Strings
+from Constants.Numbers import Numbers
 
 
 class Gui(wx.Frame):
@@ -16,7 +17,7 @@ class Gui(wx.Frame):
         :param parent:
         :param title:
         """
-        super(Gui, self).__init__(parent, title=title, size=(250, 400))
+        super(Gui, self).__init__(parent, title=title)
         self.Centre()
         self.Update()
         self.CreateStatusBar()
@@ -43,17 +44,48 @@ class Gui(wx.Frame):
         self.file_menu_item_open = wx.MenuItem(self.file_menu, wx.ID_OPEN, Strings.label_open, Strings.label_open_hint)
         self.file_menu.Append(self.file_menu_item_open)
 
+        # Sizer configuration
+        # Main window - main horizontal sizer
+        #  left vertical sizer = (article logo, title, alt, logo name}, date, (article image, title, alt, name), files
+        #  middle vertical sizer = title, keywords, description, text area
+        #  right vertical sizer = aside images
+
         # Create sizers
-        self.left_column_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.SetSizer(self.left_column_sizer)
+        self.main_horizontal_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.left_column_sizer = wx.BoxSizer(wx.VERTICAL)
+        self.middle_column_sizer = wx.BoxSizer(wx.VERTICAL)
+        self.right_column_sizer = wx.BoxSizer(wx.VERTICAL)
+
+        self.main_horizontal_sizer.Add(self.left_column_sizer, 1, wx.EXPAND)
+        self.main_horizontal_sizer.Add(self.middle_column_sizer, 1, wx.EXPAND)
+        self.main_horizontal_sizer.Add(self.right_column_sizer, 1, wx.EXPAND)
+
+        # Set layout into the window
+        self.SetSizer(self.main_horizontal_sizer)
         self.SetAutoLayout(1)
         # Resize to fit all components, makes the window as small as possible
         # self.left_column_sizer.Fit(self)
 
+        # Left column gui elements
+        # Menu logo
+        self.label_menu_logo = wx.StaticText(self, -1, Strings.label_menu_logo)
+        self.left_column_sizer.Add(self.label_menu_logo, flag=wx.LEFT, border=5)
+
+        # Create a placeholder image
+        self.placeholder_logo_image = wx.Image(Numbers.logo_image_size, Numbers.logo_image_size)
+        self.placeholder_logo_image.Replace(0, 0, 0, 255, 255, 255)
+        self.menu_logo_image = wx.StaticBitmap(self, -1, wx.Bitmap(self.placeholder_logo_image))
+        # Set border to the image
+        self.left_column_sizer.Add(self.menu_logo_image, flag=wx.LEFT | wx.BOTTOM , border=5)
+
+        # File list
         # Create a list
-        self.page_list = wx.ListBox(self, wx.LB_SINGLE | wx.LB_SORT, name=Strings.label_page_list)
-        # Add the list into the sizer, give it a sizing weight and let it expand
-        self.left_column_sizer.Add(self.page_list, 2, wx.EXPAND)
+        self.page_list = wx.ListBox(self, wx.LB_SINGLE | wx.LB_SORT, name=Strings.label_page_list, size=wx.Size(96, 300))
+        # Add the list into the sizer, give it a sizing weight and let it expand vertically
+        self.left_column_sizer.Add(self.page_list, flag=wx.LEFT, border=5, proportion=1)
+
+        # After all is added, let the window know how big it should be
+        self.main_horizontal_sizer.SetSizeHints(self)
 
         # Bind click handlers
         self.Bind(wx.EVT_MENU, self.quit_button_handler, self.file_menu_item_quit)
@@ -104,6 +136,7 @@ class Gui(wx.Frame):
         selected_name = self.page_list.GetStringSelection()
         output = self.file_parser.create((selected_name, self.page_dictionary[selected_name]))
         print(output)
+
 
 app = wx.App()
 frame = Gui(None, Strings.editor_name)
