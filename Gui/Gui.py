@@ -1,9 +1,9 @@
 import wx
 
+from Constants.Numbers import Numbers
+from Constants.Strings import Strings
 from DirectoryLoader import DirectoryLoader
 from FileParser import FileParser
-from Constants.Strings import Strings
-from Constants.Numbers import Numbers
 
 
 class Gui(wx.Frame):
@@ -46,16 +46,18 @@ class Gui(wx.Frame):
 
         # Sizer configuration
         # Main window - main horizontal sizer
-        #  left vertical sizer = (article logo, title, alt, logo name}, date, (article image, title, alt, name), files
-        #  middle vertical sizer = title, keywords, description, text area
+        #  left vertical sizer = top static box sizer(article menu logo, logo name, alt, title), files
+        #  middle vertical sizer = date, (article image, title, alt, name), article main title, keywords, description, text area
         #  right vertical sizer = aside images
 
         # Create sizers
         self.main_horizontal_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.left_column_sizer = wx.BoxSizer(wx.VERTICAL)
+        self.left_top_static_sizer = wx.StaticBoxSizer(wx.VERTICAL, self, label=Strings.label_menu_logo)
         self.middle_column_sizer = wx.BoxSizer(wx.VERTICAL)
         self.right_column_sizer = wx.BoxSizer(wx.VERTICAL)
 
+        self.left_column_sizer.Add(self.left_top_static_sizer, flag=wx.LEFT, border=5)
         self.main_horizontal_sizer.Add(self.left_column_sizer, 1, wx.EXPAND)
         self.main_horizontal_sizer.Add(self.middle_column_sizer, 1, wx.EXPAND)
         self.main_horizontal_sizer.Add(self.right_column_sizer, 1, wx.EXPAND)
@@ -66,21 +68,40 @@ class Gui(wx.Frame):
         # Resize to fit all components, makes the window as small as possible
         # self.left_column_sizer.Fit(self)
 
-        # Left column gui elements
-        # Menu logo
-        self.label_menu_logo = wx.StaticText(self, -1, Strings.label_menu_logo)
-        self.left_column_sizer.Add(self.label_menu_logo, flag=wx.LEFT, border=5)
+        # Create main font for text fields
+        self.text_field_font: wx.Font = wx.Font(Numbers.text_field_font_size, wx.FONTFAMILY_DEFAULT,
+                                                wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, False)
 
+        # Left column gui elements
         # Create a placeholder image
         self.placeholder_logo_image = wx.Image(Numbers.logo_image_size, Numbers.logo_image_size)
         self.placeholder_logo_image.Replace(0, 0, 0, 255, 255, 255)
         self.menu_logo_image = wx.StaticBitmap(self, -1, wx.Bitmap(self.placeholder_logo_image))
         # Set border to the image
-        self.left_column_sizer.Add(self.menu_logo_image, flag=wx.LEFT | wx.BOTTOM , border=5)
+        self.left_top_static_sizer.Add(self.menu_logo_image, flag=wx.LEFT | wx.BOTTOM | wx.RIGHT, border=1)
+        # Create menu logo name text box
+        self.field_logo_name = wx.TextCtrl(self, -1, value=Strings.label_menu_logo_name_placeholder,
+                                           size=wx.Size(98, 35),
+                                           style=wx.TE_MULTILINE | wx.TE_CENTRE | wx.TE_NO_VSCROLL)
+        self.field_logo_name.SetFont(self.text_field_font)
+
+        self.field_logo_alt = wx.TextCtrl(self, -1, value=Strings.label_menu_logo_alt_placeholder, size=wx.Size(98, 45),
+                                          style=wx.TE_MULTILINE)
+        self.field_logo_name.SetFont(self.text_field_font)
+        self.field_logo_title = wx.TextCtrl(self, -1, value=Strings.label_menu_logo_title_placeholder,
+                                            size=wx.Size(98, 45), style=wx.TE_MULTILINE)
+        self.field_logo_name.SetFont(self.text_field_font)
+        self.field_logo_alt.SetFont(self.text_field_font)
+        self.field_logo_title.SetFont(self.text_field_font)
+
+        self.left_top_static_sizer.Add(self.field_logo_name)
+        self.left_top_static_sizer.Add(self.field_logo_alt)
+        self.left_top_static_sizer.Add(self.field_logo_title)
 
         # File list
         # Create a list
-        self.page_list = wx.ListBox(self, wx.LB_SINGLE | wx.LB_SORT, name=Strings.label_page_list, size=wx.Size(96, 300))
+        self.page_list = wx.ListBox(self, wx.LB_SINGLE | wx.LB_SORT, name=Strings.label_page_list,
+                                    size=wx.Size(98, 300))
         # Add the list into the sizer, give it a sizing weight and let it expand vertically
         self.left_column_sizer.Add(self.page_list, flag=wx.LEFT, border=5, proportion=1)
 
