@@ -47,7 +47,7 @@ class Gui(wx.Frame):
         # Sizer configuration
         # Main window - main horizontal sizer
         #  left vertical sizer = top static box sizer(article menu logo, logo name, alt, title), files
-        #  middle vertical sizer = date, (article image, title, alt, name), article main title, keywords, description, text area
+        #  middle vertical sizer = left static sizer (article image (name, alt, title)) right sizer (date, article main title, keywords, description) text area
         #  right vertical sizer = aside images
 
         # Create sizers
@@ -55,12 +55,21 @@ class Gui(wx.Frame):
         self.left_column_sizer = wx.BoxSizer(wx.VERTICAL)
         self.left_top_static_sizer = wx.StaticBoxSizer(wx.VERTICAL, self, label=Strings.label_menu_logo)
         self.middle_column_sizer = wx.BoxSizer(wx.VERTICAL)
+        self.middle_top_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.middle_top_left_static_sizer = wx.StaticBoxSizer(wx.HORIZONTAL, self, label=Strings.label_article_image)
         self.right_column_sizer = wx.BoxSizer(wx.VERTICAL)
 
-        self.left_column_sizer.Add(self.left_top_static_sizer, flag=wx.LEFT, border=5)
-        self.main_horizontal_sizer.Add(self.left_column_sizer, 1, wx.EXPAND)
-        self.main_horizontal_sizer.Add(self.middle_column_sizer, 1, wx.EXPAND)
-        self.main_horizontal_sizer.Add(self.right_column_sizer, 1, wx.EXPAND)
+        self.left_column_sizer.Add(self.left_top_static_sizer, flag=wx.LEFT, border=Numbers.control_border_size)
+        self.middle_column_sizer.Add(self.middle_top_sizer, 1, flag=wx.RIGHT | wx.ALIGN_LEFT,
+                                     border=Numbers.control_border_size)
+        self.middle_top_sizer.Add(self.middle_top_left_static_sizer, flag=wx.ALIGN_LEFT | wx.RIGHT,
+                                  border=Numbers.control_border_size)
+        self.main_horizontal_sizer.Add(self.left_column_sizer, 0, wx.EXPAND)
+        self.main_horizontal_sizer.Add(self.middle_column_sizer, 0, wx.EXPAND)
+        self.main_horizontal_sizer.Add(self.right_column_sizer, 0, wx.EXPAND)
+
+        # TODO remove
+        # self.right_column_sizer.Add(wx.StaticText(self, label='text'))
 
         # Set layout into the window
         self.SetSizer(self.main_horizontal_sizer)
@@ -89,7 +98,7 @@ class Gui(wx.Frame):
                                           style=wx.TE_MULTILINE)
         self.field_logo_name.SetFont(self.text_field_font)
         self.field_logo_title = wx.TextCtrl(self, -1, value=Strings.label_menu_logo_title_placeholder,
-                                            size=wx.Size(98, 45), style=wx.TE_MULTILINE)
+                                            size=wx.Size(98, 49), style=wx.TE_MULTILINE)
         self.field_logo_name.SetFont(self.text_field_font)
         self.field_logo_alt.SetFont(self.text_field_font)
         self.field_logo_title.SetFont(self.text_field_font)
@@ -103,7 +112,14 @@ class Gui(wx.Frame):
         self.page_list = wx.ListBox(self, wx.LB_SINGLE | wx.LB_SORT, name=Strings.label_page_list,
                                     size=wx.Size(98, 300))
         # Add the list into the sizer, give it a sizing weight and let it expand vertically
-        self.left_column_sizer.Add(self.page_list, flag=wx.LEFT, border=5, proportion=1)
+        self.left_column_sizer.Add(self.page_list, flag=wx.LEFT, border=Numbers.control_border_size, proportion=1)
+
+        # Middle section
+        # Add image placeholder into middle top left static sizer
+        self.placeholder_main_image: wx.Image = wx.Image(Numbers.main_image_width, Numbers.main_image_height)
+        self.placeholder_main_image.Replace(0, 0, 0, 255, 255, 255)
+        self.main_image = wx.StaticBitmap(self, -1, wx.Bitmap(self.placeholder_main_image))
+        self.middle_top_left_static_sizer.Add(self.main_image, flag=wx.LEFT | wx.BOTTOM | wx.RIGHT, border=1)
 
         # After all is added, let the window know how big it should be
         self.main_horizontal_sizer.SetSizeHints(self)

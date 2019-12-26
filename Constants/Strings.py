@@ -29,3 +29,4 @@ class Strings:
     label_menu_logo_name_placeholder: str = 'Logo name'
     label_menu_logo_alt_placeholder: str = 'Alt description'
     label_menu_logo_title_placeholder: str = 'Link title'
+    label_article_image: str = 'Article image'
