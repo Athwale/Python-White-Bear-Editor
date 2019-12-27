@@ -55,25 +55,27 @@ class Gui(wx.Frame):
         self.left_column_sizer = wx.BoxSizer(wx.VERTICAL)
         self.left_top_static_sizer = wx.StaticBoxSizer(wx.VERTICAL, self, label=Strings.label_menu_logo)
 
-        self.right_main_row_sizer = wx.StaticBoxSizer(wx.VERTICAL, self, label='right main row')
-        self.right_top_sizer = wx.StaticBoxSizer(wx.HORIZONTAL, self, label='right top')
-        self.middle_top_left_static_sizer = wx.StaticBoxSizer(wx.HORIZONTAL, self, label=Strings.label_article_image)
-        self.middle_top_right_static_sizer = wx.StaticBoxSizer(wx.VERTICAL, self, label=Strings.label_article_info)
+        self.right_main_row_vertical_sizer = wx.BoxSizer(wx.VERTICAL)
+        self.right_top_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.top_left_static_sizer = wx.StaticBoxSizer(wx.HORIZONTAL, self, label=Strings.label_article_image)
+        self.top_right_static_sizer = wx.StaticBoxSizer(wx.VERTICAL, self, label=Strings.label_article_info)
 
-        self.right_bottom_row_sizer = wx.StaticBoxSizer(wx.HORIZONTAL, self, label='bottom row')
+        self.right_bottom_row_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.right_photo_column_sizer = wx.StaticBoxSizer(wx.VERTICAL, self, label='photo column')
+        self.right_bottom_row_sizer.Add(self.right_photo_column_sizer, flag=wx.ALIGN_RIGHT)
 
         self.left_column_sizer.Add(self.left_top_static_sizer, flag=wx.LEFT, border=Numbers.control_border_size)
 
-        self.right_main_row_sizer.Add(self.right_top_sizer, flag=wx.RIGHT | wx.ALIGN_LEFT,
+        self.right_main_row_vertical_sizer.Add(self.right_top_sizer, flag=wx.RIGHT | wx.ALIGN_LEFT | wx.EXPAND,
                                       border=Numbers.control_border_size, proportion=0)
-        self.right_main_row_sizer.Add(self.right_bottom_row_sizer, flag=wx.RIGHT | wx.ALIGN_LEFT | wx.EXPAND,
+        self.right_main_row_vertical_sizer.Add(self.right_bottom_row_sizer, flag=wx.RIGHT | wx.ALIGN_LEFT | wx.EXPAND,
                                       border=Numbers.control_border_size, proportion=1)
-        self.right_top_sizer.Add(self.middle_top_left_static_sizer, flag=wx.ALIGN_LEFT | wx.RIGHT,
+        self.right_top_sizer.Add(self.top_left_static_sizer, flag=wx.ALIGN_LEFT | wx.RIGHT,
                                  border=0)
 
-        self.right_top_sizer.Add(self.middle_top_right_static_sizer, flag=wx.ALIGN_LEFT)
+        self.right_top_sizer.Add(self.top_right_static_sizer, 1, flag=wx.ALIGN_LEFT | wx.EXPAND)
         self.main_horizontal_sizer.Add(self.left_column_sizer, 0, wx.EXPAND)
-        self.main_horizontal_sizer.Add(self.right_main_row_sizer, 0, wx.EXPAND)
+        self.main_horizontal_sizer.Add(self.right_main_row_vertical_sizer, 1, wx.EXPAND)
 
         # Set layout into the window
         self.SetSizer(self.main_horizontal_sizer)
@@ -123,7 +125,7 @@ class Gui(wx.Frame):
         self.placeholder_main_image: wx.Image = wx.Image(Numbers.main_image_width, Numbers.main_image_height)
         self.placeholder_main_image.Replace(0, 0, 0, 255, 255, 255)
         self.main_image = wx.StaticBitmap(self, -1, wx.Bitmap(self.placeholder_main_image))
-        self.middle_top_left_static_sizer.Add(self.main_image, flag=wx.LEFT | wx.BOTTOM | wx.RIGHT, border=1)
+        self.top_left_static_sizer.Add(self.main_image, flag=wx.LEFT | wx.BOTTOM | wx.RIGHT, border=1)
 
         # Add text controls
         self.field_main_image_alt = wx.TextCtrl(self, -1, value=Strings.label_article_image_alt, size=wx.Size(160, 30))
@@ -138,13 +140,13 @@ class Gui(wx.Frame):
         self.field_article_description = wx.TextCtrl(self, -1, value=Strings.label_article_description,
                                                      size=wx.Size(250, 30))
 
-        self.middle_top_right_static_sizer.Add(self.field_article_date)
-        self.middle_top_right_static_sizer.Add(self.field_main_image_name)
-        self.middle_top_right_static_sizer.Add(self.field_main_image_title)
-        self.middle_top_right_static_sizer.Add(self.field_main_image_alt)
-        self.middle_top_right_static_sizer.Add(self.field_article_title, flag=wx.TOP | wx.EXPAND, border=16)
-        self.middle_top_right_static_sizer.Add(self.field_article_keywords)
-        self.middle_top_right_static_sizer.Add(self.field_article_description)
+        self.top_right_static_sizer.Add(self.field_article_date)
+        self.top_right_static_sizer.Add(self.field_main_image_name, flag=wx.EXPAND)
+        self.top_right_static_sizer.Add(self.field_main_image_title, flag=wx.EXPAND)
+        self.top_right_static_sizer.Add(self.field_main_image_alt, flag=wx.EXPAND)
+        self.top_right_static_sizer.Add(self.field_article_title, flag=wx.TOP | wx.EXPAND, border=16)
+        self.top_right_static_sizer.Add(self.field_article_keywords, flag=wx.EXPAND)
+        self.top_right_static_sizer.Add(self.field_article_description, flag=wx.EXPAND)
 
         # After all is added, let the window know how big it should be
         self.main_horizontal_sizer.SetSizeHints(self)
