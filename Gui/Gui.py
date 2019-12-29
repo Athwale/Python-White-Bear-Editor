@@ -4,6 +4,7 @@ from Constants.Numbers import Numbers
 from Constants.Strings import Strings
 from DirectoryLoader import DirectoryLoader
 from FileParser import FileParser
+import wx.richtext as rt
 
 
 class Gui(wx.Frame):
@@ -61,15 +62,13 @@ class Gui(wx.Frame):
         self.top_right_static_sizer = wx.StaticBoxSizer(wx.VERTICAL, self, label=Strings.label_article_info)
 
         self.right_bottom_row_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.right_photo_column_sizer = wx.StaticBoxSizer(wx.VERTICAL, self, label='photo column')
-        self.right_bottom_row_sizer.Add(self.right_photo_column_sizer, flag=wx.ALIGN_RIGHT)
 
         self.left_column_sizer.Add(self.left_top_static_sizer, flag=wx.LEFT, border=Numbers.control_border_size)
 
         self.right_main_row_vertical_sizer.Add(self.right_top_sizer, flag=wx.RIGHT | wx.ALIGN_LEFT | wx.EXPAND,
-                                      border=Numbers.control_border_size, proportion=0)
+                                               border=Numbers.control_border_size, proportion=0)
         self.right_main_row_vertical_sizer.Add(self.right_bottom_row_sizer, flag=wx.RIGHT | wx.ALIGN_LEFT | wx.EXPAND,
-                                      border=Numbers.control_border_size, proportion=1)
+                                               border=Numbers.control_border_size, proportion=1)
         self.right_top_sizer.Add(self.top_left_static_sizer, flag=wx.ALIGN_LEFT | wx.RIGHT,
                                  border=0)
 
@@ -147,6 +146,17 @@ class Gui(wx.Frame):
         self.top_right_static_sizer.Add(self.field_article_title, flag=wx.TOP | wx.EXPAND, border=16)
         self.top_right_static_sizer.Add(self.field_article_keywords, flag=wx.EXPAND)
         self.top_right_static_sizer.Add(self.field_article_description, flag=wx.EXPAND)
+
+        # Add main text area
+        self.main_text_area = rt.RichTextCtrl(self, style=wx.VSCROLL)
+        # TODO Remove
+        self.right_bottom_row_sizer.Add(self.main_text_area, flag=wx.EXPAND | wx.LEFT | wx.TOP, proportion=1, border=2)
+
+        # Add right aside photo column
+        self.right_photo_column_sizer = wx.StaticBoxSizer(wx.VERTICAL, self, label=Strings.label_photo_column)
+        self.right_photo_column_sizer.SetMinSize((211, -1))
+        self.right_bottom_row_sizer.Add(self.right_photo_column_sizer, flag=wx.EXPAND | wx.LEFT,
+                                        border=Numbers.control_border_size)
 
         # After all is added, let the window know how big it should be
         self.main_horizontal_sizer.SetSizeHints(self)
