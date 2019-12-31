@@ -116,8 +116,7 @@ class Gui(wx.Frame):
         # Create a list
         self.page_list = wx.ListBox(self, wx.LB_SINGLE | wx.LB_SORT, name=Strings.label_page_list,
                                     size=wx.Size(98, 300))
-        # Add the list into the sizer, give it a sizing weight and let it expand vertically
-        self.left_column_sizer.Add(self.page_list, flag=wx.LEFT, border=Numbers.control_border_size, proportion=1)
+        self.page_list.SetFont(self.text_field_font)
 
         # Middle section -----------------------------------------------------------------------------------------------
         # Add image placeholder into middle top left static sizer
@@ -147,9 +146,11 @@ class Gui(wx.Frame):
         self.top_right_static_sizer.Add(self.field_article_keywords, flag=wx.EXPAND)
         self.top_right_static_sizer.Add(self.field_article_description, flag=wx.EXPAND)
 
+        # Add the list into the bottom sizer, give it a sizing weight and let it expand vertically
+        self.left_column_sizer.Add(self.page_list, flag=wx.LEFT, border=Numbers.control_border_size, proportion=1)
+
         # Add main text area
         self.main_text_area = rt.RichTextCtrl(self, style=wx.VSCROLL)
-        # TODO Remove
         self.right_bottom_row_sizer.Add(self.main_text_area, flag=wx.EXPAND | wx.LEFT | wx.TOP, proportion=1, border=2)
 
         # Add right aside photo column
