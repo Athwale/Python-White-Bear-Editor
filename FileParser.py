@@ -10,7 +10,7 @@ class FileParser:
     """
 
     # name_path is a syntax for unpacking a tuple
-    def create(self, name_path: Tuple[str, str]) -> ParsedFile:
+    def parse_file(self, name_path: Tuple[str, str]) -> ParsedFile:
         """Parse a file which is a whitebear html file. Identify the file type and create an object representing the
         file.
         :param name_path: Tuple (filename, file path).
@@ -22,20 +22,12 @@ class FileParser:
         # Open file and pass file handle to beautiful soap.
         with open(file_path, 'r') as html:
             parsed_html: BeautifulSoup = BeautifulSoup(html, 'html5lib')
-        return self.__parse_file(parsed_html, file_name, file_path)
 
-    def __parse_file(self, parsed_html: BeautifulSoup, file_name: str, file_path: str) -> ParsedFile:
-        """
-        :raises WrongFormatException
-        :param parsed_html:
-        :return:
-        """
         file_type: int = self.__find_type(parsed_html)
         if file_type != ParsedFile.TYPE_OTHER:
             # This will be a regular kind of web site
             # TODO
             pass
-
         else:
             # This will be something special, normal text,...
             # TODO
