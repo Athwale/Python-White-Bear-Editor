@@ -1,6 +1,7 @@
 import wx
 import wx.richtext as rt
 
+from ConfigManager import ConfigManager
 from Constants.Numbers import Numbers
 from Constants.Strings import Strings
 from DirectoryLoader import DirectoryLoader
@@ -169,6 +170,7 @@ class Gui(wx.Frame):
         self.Bind(wx.EVT_LISTBOX, self.list_item_click_handler, self.page_list)
 
         # Prepare tools
+        self.config_manager = ConfigManager()
         self.directory_loader = None
         self.file_parser = FileParser()
         self.page_dictionary = None

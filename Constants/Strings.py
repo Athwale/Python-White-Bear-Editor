@@ -4,8 +4,9 @@ import os.path
 class Strings:
     """This class holds string variables which are used in the program. This simplifies changes.
     """
-    editor_name: str = 'Whitebear editor'
     home_directory: str = os.path.expanduser('~')
+    editor_config_file: str = os.path.join(home_directory, '.whitebearEditor.conf')
+    editor_name: str = 'Whitebear editor'
     exception_access: str = 'Main directory not readable'
     exception_access_html: str = 'File can not be accessed'
     exception_index: str = 'index.html is not in directory'
@@ -14,6 +15,7 @@ class Strings:
     exception_only_one_title_allowed: str = 'Wrong file format, title tag found twice'
     exception_meta_description_twice: str = 'Wrong file format, meta description found twice'
     exception_not_bool: str = 'Modified can only be of type bool'
+    exception_conf_inaccessible: str = '.whitebearEditor.conf inaccessible'
     label_file: str = '&File'
     label_quit: str = '&Quit'
     label_quit_hint: str = 'Quit'
