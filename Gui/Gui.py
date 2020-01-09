@@ -1,10 +1,10 @@
 import wx
+import wx.richtext as rt
 
 from Constants.Numbers import Numbers
 from Constants.Strings import Strings
 from DirectoryLoader import DirectoryLoader
 from FileParser import FileParser
-import wx.richtext as rt
 
 
 class Gui(wx.Frame):
@@ -187,8 +187,8 @@ class Gui(wx.Frame):
         :param event:
         :return:
         """
-        dlg = wx.DirDialog(self, Strings.label_choose_dir, "", wx.DD_DIR_MUST_EXIST | wx.DD_CHANGE_DIR)
-        dlg.SetPath(Strings.home_directory)
+        dlg = wx.DirDialog(self, Strings.label_choose_dir, Strings.home_directory,
+                           wx.DD_DIR_MUST_EXIST | wx.DD_CHANGE_DIR)
         # Modal means the user is locked into this dialog an can not use the rest of the application
         if dlg.ShowModal() == wx.ID_OK:
             self.directory_loader = DirectoryLoader()
