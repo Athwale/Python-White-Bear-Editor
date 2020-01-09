@@ -193,7 +193,7 @@ class Gui(wx.Frame):
         if dlg.ShowModal() == wx.ID_OK:
             self.directory_loader = DirectoryLoader()
             self.page_dictionary = self.directory_loader.get_file_dict(dlg.GetPath())
-            self.page_list.InsertItems(list(self.page_dictionary.keys()), 0)
+            self.page_list.InsertItems(sorted(self.page_dictionary.keys()), 0)
         dlg.Destroy()
 
     def about_button_handler(self, event):
