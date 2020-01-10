@@ -25,13 +25,20 @@ class ConfigManager:
         self.__conf_dict: Dict[str, str] = {}
         # If config file does not exist, create a new one
         self.__conf_file_path = Strings.editor_config_file
-        if not os.path.exists(Strings.editor_config_file):
-            os.mknod(self.__conf_file_path)
+        if not os.path.exists(Strings.editor_config_file) or os.stat(self.__conf_file_path).st_size == 0:
+            self.__create_new_config()
         if not os.access(self.__conf_file_path, os.R_OK) or not os.access(self.__conf_file_path, os.W_OK):
             raise AccessException(Strings.exception_conf_inaccessible)
         else:
-            # Read the config file and store options
+            # Read the config file and store options in dictionary
             self.__read_config()
+
+    def __create_new_config(self):
+        """
+
+        :return:
+        """
+        self.store_working_dir(Strings.home_directory)
 
     def __read_config(self):
         """
@@ -58,7 +65,6 @@ class ConfigManager:
                         self.__conf_dict[self.CONF_WORKING_DIR] = Strings.home_directory
                     else:
                         self.__conf_dict[self.CONF_WORKING_DIR] = value
-                    print(self.__conf_dict)
                 elif name == self.CONF_RECENT:
                     # TODO more options
                     pass

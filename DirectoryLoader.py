@@ -38,12 +38,12 @@ class DirectoryLoader:
             raise AccessException(Strings.exception_access)
 
         if not os.path.exists(os.path.join(path, 'index.html')):
-            raise IndexError(Strings.exception_not_white_bear)
+            raise IndexError(Strings.exception_not_white_bear + ' ' + path)
         else:
             with open(os.path.join(path, 'index.html'), 'r') as index:
                 parsed_index: BeautifulSoup = BeautifulSoup(index, 'html5lib')
                 if len(parsed_index.find_all('article', class_='indexPage')) != 1:
-                    raise IndexError(Strings.exception_not_white_bear)
+                    raise IndexError(Strings.exception_not_white_bear + ' ' + path)
                 else:
                     return True
 
@@ -59,20 +59,22 @@ class DirectoryLoader:
         files: Dict[str, str] = {}
         file: str
         for file in os.listdir(path):
-            if os.path.isfile(os.path.join(path, file)):
+            file = os.path.join(path, file)
+            if os.path.isfile(file):
                 if not os.access(file, os.R_OK) or not os.access(file, os.W_OK):
                     raise AccessException(Strings.exception_access_html + " " + file)
                 # Filter out unwanted files (index, google, 404, not html, menu pages)
                 else:
+                    filename: str = os.path.basename(file)
                     # Skip index.html this file is generated and not editable
                     # Skip 404.html page which has to be modified outside of the editor
-                    if file == 'index.html' or file == '404.html':
+                    if filename == 'index.html' or filename == '404.html':
                         continue
-                    if 'google' in file:
+                    if 'google' in filename:
                         continue
                     # Skip all menu pages
                     if os.path.splitext(file)[1] == '.html':
-                        with open(os.path.join(path, file), 'r') as page:
+                        with open(file, 'r') as page:
                             parsed_page: BeautifulSoup = BeautifulSoup(page, 'html5lib')
                             if len(parsed_page.find_all('article', class_='menuPage')) != 0:
                                 continue
@@ -80,5 +82,5 @@ class DirectoryLoader:
                     if os.path.splitext(file)[1] != '.html':
                         continue
 
-                    files[file] = os.path.realpath(file)
+                    files[os.path.basename(file)] = os.path.realpath(file)
         return files

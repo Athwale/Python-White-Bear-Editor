@@ -174,6 +174,20 @@ class Gui(wx.Frame):
         self.directory_loader = None
         self.file_parser = FileParser()
         self.page_dictionary = None
+        # Load last working directory
+        self.__fill_page_list()
+
+    def __fill_page_list(self):
+        """
+
+        :return:
+        """
+        try:
+            self.directory_loader = DirectoryLoader()
+            self.page_dictionary = self.directory_loader.get_file_dict(self.config_manager.get_working_dir())
+            self.page_list.InsertItems(sorted(self.page_dictionary.keys()), 0)
+        except IndexError:
+            print('Select a whitebear directory')
 
     def quit_button_handler(self, event):
         """
@@ -193,10 +207,8 @@ class Gui(wx.Frame):
                            wx.DD_DIR_MUST_EXIST | wx.DD_CHANGE_DIR)
         # Modal means the user is locked into this dialog an can not use the rest of the application
         if dlg.ShowModal() == wx.ID_OK:
-            self.directory_loader = DirectoryLoader()
-            self.page_dictionary = self.directory_loader.get_file_dict(dlg.GetPath())
-            self.page_list.InsertItems(sorted(self.page_dictionary.keys()), 0)
             self.config_manager.store_working_dir(dlg.GetPath())
+            self.__fill_page_list()
         dlg.Destroy()
 
     def about_button_handler(self, event):
