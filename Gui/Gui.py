@@ -196,6 +196,7 @@ class Gui(wx.Frame):
             self.directory_loader = DirectoryLoader()
             self.page_dictionary = self.directory_loader.get_file_dict(dlg.GetPath())
             self.page_list.InsertItems(sorted(self.page_dictionary.keys()), 0)
+            self.config_manager.store_working_dir(dlg.GetPath())
         dlg.Destroy()
 
     def about_button_handler(self, event):
