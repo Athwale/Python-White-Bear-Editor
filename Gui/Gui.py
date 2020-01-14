@@ -33,18 +33,18 @@ class Gui(wx.Frame):
         self.menu_bar.Append(self.file_menu, Strings.label_file)
         self.SetMenuBar(self.menu_bar)
 
-        # Create a menu item for quit
-        self.file_menu_item_quit = wx.MenuItem(self.file_menu, wx.ID_EXIT, Strings.label_quit, Strings.label_quit_hint)
-        self.file_menu.Append(self.file_menu_item_quit)
+        # Create a menu item for open
+        self.file_menu_item_open = wx.MenuItem(self.file_menu, wx.ID_OPEN, Strings.label_open, Strings.label_open_hint)
+        self.file_menu.Append(self.file_menu_item_open)
 
         # Create a menu item for about
         self.file_menu_item_about = wx.MenuItem(self.file_menu, wx.ID_ABOUT, Strings.label_about,
                                                 Strings.label_about_hint)
         self.file_menu.Append(self.file_menu_item_about)
 
-        # Create a menu item for open
-        self.file_menu_item_open = wx.MenuItem(self.file_menu, wx.ID_OPEN, Strings.label_open, Strings.label_open_hint)
-        self.file_menu.Append(self.file_menu_item_open)
+        # Create a menu item for quit
+        self.file_menu_item_quit = wx.MenuItem(self.file_menu, wx.ID_EXIT, Strings.label_quit, Strings.label_quit_hint)
+        self.file_menu.Append(self.file_menu_item_quit)
 
         # Sizer configuration
         # Main window - main horizontal sizer
@@ -165,6 +165,7 @@ class Gui(wx.Frame):
 
         # Bind click handlers
         self.Bind(wx.EVT_MENU, self.quit_button_handler, self.file_menu_item_quit)
+        self.Bind(wx.EVT_CLOSE, self.quit_button_handler)
         self.Bind(wx.EVT_MENU, self.about_button_handler, self.file_menu_item_about)
         self.Bind(wx.EVT_MENU, self.open_button_handler, self.file_menu_item_open)
         self.Bind(wx.EVT_LISTBOX, self.list_item_click_handler, self.page_list)
@@ -195,7 +196,8 @@ class Gui(wx.Frame):
         :param event:
         :return:
         """
-        self.Close(True)
+        print(self.GetClientRect())
+        self.Destroy()
 
     def open_button_handler(self, event):
         """
