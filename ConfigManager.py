@@ -1,5 +1,5 @@
 import os
-from typing import Dict, List
+from typing import Dict, List, Tuple
 
 from Constants.Strings import Strings
 from Exceptions.AccessException import AccessException
@@ -17,12 +17,13 @@ class ConfigManager:
 
     CONF_WORKING_DIR: str = 'wd'
     CONF_RECENT: str = 'last'
+    CONF_POSITION: str = 'pos'
 
     def __init__(self):
         """
 
         """
-        self.__conf_dict: Dict[str, str] = {}
+        self.__conf_dict: Dict[str, object] = {}
         # If config file does not exist, create a new one
         self.__conf_file_path = Strings.editor_config_file
         if not os.path.exists(Strings.editor_config_file) or os.stat(self.__conf_file_path).st_size == 0:
@@ -65,6 +66,13 @@ class ConfigManager:
                         self.__conf_dict[self.CONF_WORKING_DIR] = Strings.home_directory
                     else:
                         self.__conf_dict[self.CONF_WORKING_DIR] = value
+                elif name == self.CONF_POSITION:
+                    try:
+                        x_pos, y_pos = value.split(',', 1)
+                        self.__conf_dict[self.CONF_POSITION] = (int(x_pos), int(y_pos))
+                        # In case the position is damaged and can not be decoded, default to top left corner
+                    except ValueError:
+                        self.__conf_dict[self.CONF_POSITION] = (0, 0)
                 elif name == self.CONF_RECENT:
                     # TODO more options
                     pass
@@ -79,6 +87,13 @@ class ConfigManager:
         """
         return self.__conf_dict[self.CONF_WORKING_DIR]
 
+    def get_window_position(self):
+        """
+        Get the last saved window position on screen.
+        :return: Tuple of (x, y) position last saved when exiting the editor.
+        """
+        return self.__conf_dict[self.CONF_POSITION]
+
     def save_config_file(self):
         """
         Save the configuration stored in __conf_dict on disk drive in user's home.
@@ -88,7 +103,10 @@ class ConfigManager:
         # This clears the file and writes new contents.
         with open(self.__conf_file_path, 'w') as conf_file:
             for name, value in self.__conf_dict.items():
-                conf_file.write(name + ' = ' + value)
+                if name == self.CONF_POSITION:
+                    conf_file.write(name + ' = ' + str(value[0]) + ',' + str(value[1]) + '\n')
+                else:
+                    conf_file.write(name + ' = ' + str(value) + '\n')
 
     def store_working_dir(self, path: str) -> None:
         """
@@ -97,4 +115,14 @@ class ConfigManager:
         :return: None
         """
         self.__conf_dict[self.CONF_WORKING_DIR] = path
+        self.save_config_file()
+
+    def store_window_position(self, pos1_pos2: Tuple[int, int]):
+        """
+        Save the last window position on screen into the dictionary.
+        :param pos1_pos2: Tuple (x, y) of the left top corner of the window.
+        :return: None
+        """
+        x, y = pos1_pos2
+        self.__conf_dict[self.CONF_POSITION] = (x, y)
         self.save_config_file()

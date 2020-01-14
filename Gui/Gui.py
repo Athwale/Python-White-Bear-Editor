@@ -176,6 +176,7 @@ class Gui(wx.Frame):
         self.file_parser = FileParser()
         self.page_dictionary = None
         # Load last working directory
+        self.SetPosition((self.config_manager.get_window_position()))
         self.__fill_page_list()
 
     def __fill_page_list(self):
@@ -196,7 +197,7 @@ class Gui(wx.Frame):
         :param event:
         :return:
         """
-        print(self.GetClientRect())
+        self.config_manager.store_window_position(self.GetScreenPosition())
         self.Destroy()
 
     def open_button_handler(self, event):
