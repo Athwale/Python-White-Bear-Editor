@@ -18,6 +18,7 @@ class ConfigManager:
     CONF_WORKING_DIR: str = 'wd'
     CONF_RECENT: str = 'last'
     CONF_POSITION: str = 'pos'
+    CONF_SIZE: str = 'size'
 
     def __init__(self):
         """
@@ -66,13 +67,13 @@ class ConfigManager:
                         self.__conf_dict[self.CONF_WORKING_DIR] = Strings.home_directory
                     else:
                         self.__conf_dict[self.CONF_WORKING_DIR] = value
-                elif name == self.CONF_POSITION:
+                elif name == self.CONF_POSITION or name == self.CONF_SIZE:
                     try:
                         x_pos, y_pos = value.split(',', 1)
-                        self.__conf_dict[self.CONF_POSITION] = (int(x_pos), int(y_pos))
-                        # In case the position is damaged and can not be decoded, default to top left corner
+                        self.__conf_dict[name] = (int(x_pos), int(y_pos))
+                        # In case the position/size is damaged and can not be decoded, default to top left corner
                     except ValueError:
-                        self.__conf_dict[self.CONF_POSITION] = (0, 0)
+                        self.__conf_dict[name] = (0, 0)
                 elif name == self.CONF_RECENT:
                     # TODO more options
                     pass
@@ -94,6 +95,13 @@ class ConfigManager:
         """
         return self.__conf_dict[self.CONF_POSITION]
 
+    def get_window_size(self):
+        """
+        Get the last saved window size on screen.
+        :return: Tuple of (x, y) size last saved when exiting the editor.
+        """
+        return self.__conf_dict[self.CONF_SIZE]
+
     def save_config_file(self):
         """
         Save the configuration stored in __conf_dict on disk drive in user's home.
@@ -103,7 +111,7 @@ class ConfigManager:
         # This clears the file and writes new contents.
         with open(self.__conf_file_path, 'w') as conf_file:
             for name, value in self.__conf_dict.items():
-                if name == self.CONF_POSITION:
+                if name == self.CONF_POSITION or name == self.CONF_SIZE:
                     conf_file.write(name + ' = ' + str(value[0]) + ',' + str(value[1]) + '\n')
                 else:
                     conf_file.write(name + ' = ' + str(value) + '\n')
@@ -125,4 +133,14 @@ class ConfigManager:
         """
         x, y = pos1_pos2
         self.__conf_dict[self.CONF_POSITION] = (x, y)
+        self.save_config_file()
+
+    def store_window_size(self, size1_size2: Tuple[int, int]):
+        """
+        Save the last window size on screen into the dictionary.
+        :param size1_size2: Tuple (x, y) of the size of the window.
+        :return: None
+        """
+        x, y = size1_size2
+        self.__conf_dict[self.CONF_SIZE] = (x, y)
         self.save_config_file()

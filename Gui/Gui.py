@@ -175,8 +175,14 @@ class Gui(wx.Frame):
         self.directory_loader = None
         self.file_parser = FileParser()
         self.page_dictionary = None
-        # Load last working directory
+        # Load last window position and size
         self.SetPosition((self.config_manager.get_window_position()))
+        size = self.config_manager.get_window_size()
+        if size == (-1, -1):
+            self.Maximize()
+        else:
+            self.SetSize(self.config_manager.get_window_size())
+        # Load last working directory
         self.__fill_page_list()
 
     def __fill_page_list(self):
@@ -198,6 +204,11 @@ class Gui(wx.Frame):
         :return:
         """
         self.config_manager.store_window_position(self.GetScreenPosition())
+        if self.IsMaximized():
+            # Special value to indicate maximized window
+            self.config_manager.store_window_size((-1, -1))
+        else:
+            self.config_manager.store_window_size(self.ClientSize)
         self.Destroy()
 
     def open_button_handler(self, event):
