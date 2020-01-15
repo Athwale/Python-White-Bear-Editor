@@ -184,6 +184,10 @@ class Gui(wx.Frame):
             self.SetSize(self.config_manager.get_window_size())
         # Load last working directory
         self.__fill_page_list()
+        # Select last used document
+        self.page_list.SetStringSelection(self.config_manager.get_last_document())
+        # Call a method from here and from list_item_click_handler to process the selection.
+        # Todo simulate user click on the item
 
     def __fill_page_list(self):
         """
@@ -192,7 +196,7 @@ class Gui(wx.Frame):
         """
         try:
             self.directory_loader = DirectoryLoader()
-            self.page_dictionary = self.directory_loader.get_file_dict(self.config_manager.get_working_dir())
+            self.page_dictionary = self.directory_loader.get_file_dict(str(self.config_manager.get_working_dir()))
             self.page_list.InsertItems(sorted(self.page_dictionary.keys()), 0)
         except IndexError:
             print('Select a whitebear directory')
@@ -209,6 +213,9 @@ class Gui(wx.Frame):
             self.config_manager.store_window_size((-1, -1))
         else:
             self.config_manager.store_window_size(self.ClientSize)
+        # Store last open document
+        if self.page_list.GetSelection() != wx.NOT_FOUND:
+            self.config_manager.store_last_open_document(self.page_list.GetString(self.page_list.GetSelection()))
         self.Destroy()
 
     def open_button_handler(self, event):

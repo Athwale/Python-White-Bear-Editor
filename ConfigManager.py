@@ -16,7 +16,7 @@ class ConfigManager:
     """
 
     CONF_WORKING_DIR: str = 'wd'
-    CONF_RECENT: str = 'last'
+    CONF_LAST: str = 'last'
     CONF_POSITION: str = 'pos'
     CONF_SIZE: str = 'size'
 
@@ -74,33 +74,39 @@ class ConfigManager:
                         # In case the position/size is damaged and can not be decoded, default to top left corner
                     except ValueError:
                         self.__conf_dict[name] = (0, 0)
-                elif name == self.CONF_RECENT:
-                    # TODO more options
-                    pass
+                elif name == self.CONF_LAST:
+                    self.__conf_dict[self.CONF_LAST] = value
                 else:
                     # Ignore unknown options
                     continue
 
-    def get_working_dir(self):
+    def get_working_dir(self) -> object:
         """
         Get the last saved working directory.
         :return: String directory path to the saved last working directory.
         """
         return self.__conf_dict[self.CONF_WORKING_DIR]
 
-    def get_window_position(self):
+    def get_window_position(self) -> object:
         """
         Get the last saved window position on screen.
         :return: Tuple of (x, y) position last saved when exiting the editor.
         """
         return self.__conf_dict[self.CONF_POSITION]
 
-    def get_window_size(self):
+    def get_window_size(self) -> object:
         """
         Get the last saved window size on screen.
         :return: Tuple of (x, y) size last saved when exiting the editor.
         """
         return self.__conf_dict[self.CONF_SIZE]
+
+    def get_last_document(self) -> object:
+        """
+        Get the last opened document.
+        :return: String name of the last opened document when exiting the editor.
+        """
+        return self.__conf_dict[self.CONF_LAST]
 
     def save_config_file(self):
         """
@@ -143,4 +149,13 @@ class ConfigManager:
         """
         x, y = size1_size2
         self.__conf_dict[self.CONF_SIZE] = (x, y)
+        self.save_config_file()
+
+    def store_last_open_document(self, name: str):
+        """
+        Save the last opened document from editor into the dictionary.
+        :param name: Name of the last opened website.
+        :return: None
+        """
+        self.__conf_dict[self.CONF_LAST] = name
         self.save_config_file()
