@@ -19,7 +19,7 @@ class FileParser:
         file_name: str
         file_path: str
         file_name, file_path = name_path
-        # Open file and pass file handle to beautiful soap.
+        # Open file and pass file handle to beautiful soup.
         with open(file_path, 'r') as html:
             parsed_html: BeautifulSoup = BeautifulSoup(html, 'html5lib')
 

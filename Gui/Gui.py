@@ -186,6 +186,7 @@ class Gui(wx.Frame):
         self.__fill_page_list()
         # Select last used document
         self.page_list.SetStringSelection(self.config_manager.get_last_document())
+        self.list_item_clicked()
         # Call a method from here and from list_item_click_handler to process the selection.
         # Todo simulate user click on the item
 
@@ -244,8 +245,16 @@ class Gui(wx.Frame):
         about_frame.Destroy()
 
     def list_item_click_handler(self, event):
+        self.list_item_clicked()
+
+    def list_item_clicked(self):
+        """
+        Since items in the page list can be 'clicked' from two different locations, manually or programmatically,
+        this method is called from both places.
+        :return: None
+        """
         selected_name = self.page_list.GetStringSelection()
-        output = self.file_parser.create((selected_name, self.page_dictionary[selected_name]))
+        output = self.file_parser.parse_file((selected_name, self.page_dictionary[selected_name]))
         print(output)
 
 
