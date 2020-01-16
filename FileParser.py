@@ -1,7 +1,5 @@
 from typing import Tuple, List
-from Exceptions.WrongFormatException import WrongFormatException
 from ParsedFile import ParsedFile
-from Constants.Strings import Strings
 from bs4 import BeautifulSoup
 
 
