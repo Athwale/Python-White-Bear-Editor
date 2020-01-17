@@ -6,6 +6,7 @@ from Constants.Numbers import Numbers
 from Constants.Strings import Strings
 from DirectoryLoader import DirectoryLoader
 from FileParser import FileParser
+from Threads.FileListThread import FileListThread
 
 
 class Gui(wx.Frame):
@@ -14,7 +15,7 @@ class Gui(wx.Frame):
     """
 
     # Create a new unique id for our custom event.
-    EVT_CARRIER_ID: int = wx.NewEventType()
+    EVT_CARRIER_TYPE_ID: int = wx.NewEventType()
 
     def __init__(self, parent, title):
         """
@@ -178,6 +179,10 @@ class Gui(wx.Frame):
         self.directory_loader = None
         self.file_parser = FileParser()
         self.page_dictionary = None
+        # Bind custom event
+        self.Bind(wx.PyEventBinder(self.EVT_CARRIER_TYPE_ID, 1), self.carrier_event_handler)
+
+        # Prepare window contents
         # Load last window position and size
         self.SetPosition((self.config_manager.get_window_position()))
         size = self.config_manager.get_window_size()
@@ -202,6 +207,16 @@ class Gui(wx.Frame):
             self.page_list.InsertItems(sorted(self.page_dictionary.keys()), 0)
         except IndexError:
             print('Select a whitebear directory')
+        file_list_thread = FileListThread(self, self.EVT_CARRIER_TYPE_ID, 'path')
+        file_list_thread.start()
+
+    def carrier_event_handler(self, event):
+        """
+
+        :param event:
+        :return:
+        """
+        print(event)
 
     def quit_button_handler(self, event):
         """
@@ -246,6 +261,11 @@ class Gui(wx.Frame):
         about_frame.Destroy()
 
     def list_item_click_handler(self, event):
+        """
+
+        :param event:
+        :return:
+        """
         self.list_item_clicked()
 
     def list_item_clicked(self):
