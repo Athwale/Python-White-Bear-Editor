@@ -6,28 +6,31 @@ from bs4 import BeautifulSoup
 
 
 class DirectoryLoader:
-    """This class loads and parses white bear web root directory. The output is a dictionary of file names + path full
+    """
+    This class loads and parses white bear web root directory. The output is a dictionary of file names + path full
     to them on the system. If the directory is not readable or writable or the files are not readable or writeable,
     AccessException is raised.
     """
 
     def __init__(self):
-        self.__directory_path: str = ''
-        self.__files: Dict[str, str] = {}
+        self._directory_path: str = ''
+        self._files: Dict[str, str] = {}
 
     def get_file_dict(self, directory_path: str) -> Dict[str, str]:
-        """Return the selected white bear directory as a dictionary of paths to files with file names as keys.
+        """
+        Return the selected white bear directory as a dictionary of paths to files with file names as keys.
         :param directory_path: Path to the whitebear web root directory.
         :return: Dictionary {file name:path to the file}
         """
-        self.__directory_path = directory_path
+        self._directory_path = directory_path
         if self.is_white_bear_directory(directory_path):
-            self.__files = self.prepare_files(self.__directory_path)
-        return self.__files
+            self._files = self.prepare_files(self._directory_path)
+        return self._files
 
     @staticmethod
     def is_white_bear_directory(path: str) -> bool:
-        """Checks whether chosen directory belongs to the whitebear web.
+        """
+        Checks whether chosen directory belongs to the whitebear web.
         :raises FileNotFoundError if index.html is not present
         :raises IndexError if <title>White Bear is noy in index.html
         :raises AccessException if the directory can no be read or written to.
@@ -49,7 +52,8 @@ class DirectoryLoader:
 
     @staticmethod
     def prepare_files(path: str) -> Dict[str, str]:
-        """Opens the path which should lead to a whitebear web root. Goes through all files which have to be readable
+        """
+        Opens the path which should lead to a whitebear web root. Goes through all files which have to be readable
         and writeable and constructs a dictionary {file name:path to the file}.
         :raises AccessException if the files are not readable or not writeable.
         :param path: Path to the whitebear root directory.

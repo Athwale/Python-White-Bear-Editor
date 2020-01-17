@@ -13,6 +13,9 @@ class Gui(wx.Frame):
 
     """
 
+    # Create a new unique id for our custom event.
+    EVT_CARRIER_ID: int = wx.NewEventType()
+
     def __init__(self, parent, title):
         """
 
@@ -183,14 +186,12 @@ class Gui(wx.Frame):
         else:
             self.SetSize(self.config_manager.get_window_size())
         # Load last working directory
-        self.__fill_page_list()
+        self._fill_page_list()
         # Select last used document
         self.page_list.SetStringSelection(self.config_manager.get_last_document())
         self.list_item_clicked()
-        # Call a method from here and from list_item_click_handler to process the selection.
-        # Todo simulate user click on the item
 
-    def __fill_page_list(self):
+    def _fill_page_list(self):
         """
 
         :return:
@@ -230,7 +231,7 @@ class Gui(wx.Frame):
         # Modal means the user is locked into this dialog an can not use the rest of the application
         if dlg.ShowModal() == wx.ID_OK:
             self.config_manager.store_working_dir(dlg.GetPath())
-            self.__fill_page_list()
+            self._fill_page_list()
         dlg.Destroy()
 
     def about_button_handler(self, event):

@@ -2,7 +2,8 @@ import os.path
 
 
 class Strings:
-    """This class holds string variables which are used in the program. This simplifies changes.
+    """
+    This class holds string variables which are used in the program. This simplifies changes.
     """
     home_directory: str = os.path.expanduser('~')
     editor_config_file: str = os.path.join(home_directory, '.whitebearEditor.conf')

@@ -3,7 +3,7 @@ import threading
 
 class FileListThread(threading.Thread):
     """
-    Gui objects must not be called from anywhere else than from the main gui thread. So we use events to communicate with
+    Gui objects must not be called from anywhere else than from the main gui thread. So use events to communicate with
     the main thread and send it results.
     """
 
@@ -13,8 +13,8 @@ class FileListThread(threading.Thread):
         @param path: The path to whitebear web directory on disk.
         """
         threading.Thread.__init__(self)
-        self.__parent = parent
-        self.__path = path
+        self._parent = parent
+        self._path = path
 
     def run(self):
         """

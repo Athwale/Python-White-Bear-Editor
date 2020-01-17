@@ -1,5 +1,5 @@
 import os
-from typing import Dict, List, Tuple
+from typing import List, Tuple
 
 from Constants.Strings import Strings
 from Exceptions.AccessException import AccessException
@@ -24,30 +24,30 @@ class ConfigManager:
         """
 
         """
-        self.__conf_dict: Dict[str, object] = {}
+        self._conf_dict = {}
         # If config file does not exist, create a new one
-        self.__conf_file_path = Strings.editor_config_file
-        if not os.path.exists(Strings.editor_config_file) or os.stat(self.__conf_file_path).st_size == 0:
-            self.__create_new_config()
-        if not os.access(self.__conf_file_path, os.R_OK) or not os.access(self.__conf_file_path, os.W_OK):
+        self._conf_file_path = Strings.editor_config_file
+        if not os.path.exists(Strings.editor_config_file) or os.stat(self._conf_file_path).st_size == 0:
+            self._create_new_config()
+        if not os.access(self._conf_file_path, os.R_OK) or not os.access(self._conf_file_path, os.W_OK):
             raise AccessException(Strings.exception_conf_inaccessible)
         else:
             # Read the config file and store options in dictionary
-            self.__read_config()
+            self._read_config()
 
-    def __create_new_config(self):
+    def _create_new_config(self):
         """
 
         :return:
         """
         self.store_working_dir(Strings.home_directory)
 
-    def __read_config(self):
+    def _read_config(self):
         """
 
         :return:
         """
-        with open(self.__conf_file_path, 'r') as config_file:
+        with open(self._conf_file_path, 'r') as config_file:
             line: str
             for line in enumerate(config_file):
                 if line[1].startswith('#'):
@@ -64,18 +64,18 @@ class ConfigManager:
                     if not os.path.isdir(value) or not os.access(value, os.X_OK) \
                             or not os.access(value, os.R_OK or not os.access(value, os.W_OK)):
                         # Ignore working directory if not accessible, use default user home
-                        self.__conf_dict[self.CONF_WORKING_DIR] = Strings.home_directory
+                        self._conf_dict[self.CONF_WORKING_DIR] = Strings.home_directory
                     else:
-                        self.__conf_dict[self.CONF_WORKING_DIR] = value
+                        self._conf_dict[self.CONF_WORKING_DIR] = value
                 elif name == self.CONF_POSITION or name == self.CONF_SIZE:
                     try:
                         x_pos, y_pos = value.split(',', 1)
-                        self.__conf_dict[name] = (int(x_pos), int(y_pos))
+                        self._conf_dict[name] = (int(x_pos), int(y_pos))
                         # In case the position/size is damaged and can not be decoded, default to top left corner
                     except ValueError:
-                        self.__conf_dict[name] = (0, 0)
+                        self._conf_dict[name] = (0, 0)
                 elif name == self.CONF_LAST:
-                    self.__conf_dict[self.CONF_LAST] = value
+                    self._conf_dict[self.CONF_LAST] = value
                 else:
                     # Ignore unknown options
                     continue
@@ -85,38 +85,38 @@ class ConfigManager:
         Get the last saved working directory.
         :return: String directory path to the saved last working directory.
         """
-        return self.__conf_dict[self.CONF_WORKING_DIR]
+        return self._conf_dict[self.CONF_WORKING_DIR]
 
     def get_window_position(self) -> object:
         """
         Get the last saved window position on screen.
         :return: Tuple of (x, y) position last saved when exiting the editor.
         """
-        return self.__conf_dict[self.CONF_POSITION]
+        return self._conf_dict[self.CONF_POSITION]
 
     def get_window_size(self) -> object:
         """
         Get the last saved window size on screen.
         :return: Tuple of (x, y) size last saved when exiting the editor.
         """
-        return self.__conf_dict[self.CONF_SIZE]
+        return self._conf_dict[self.CONF_SIZE]
 
     def get_last_document(self) -> object:
         """
         Get the last opened document.
         :return: String name of the last opened document when exiting the editor.
         """
-        return self.__conf_dict[self.CONF_LAST]
+        return self._conf_dict[self.CONF_LAST]
 
     def save_config_file(self):
         """
-        Save the configuration stored in __conf_dict on disk drive in user's home.
+        Save the configuration stored in _conf_dict on disk drive in user's home.
         :return: None
         """
         # At this point after constructor, the config file exists and is full or empty but it is writeable.
         # This clears the file and writes new contents.
-        with open(self.__conf_file_path, 'w') as conf_file:
-            for name, value in self.__conf_dict.items():
+        with open(self._conf_file_path, 'w') as conf_file:
+            for name, value in self._conf_dict.items():
                 if name == self.CONF_POSITION or name == self.CONF_SIZE:
                     conf_file.write(name + ' = ' + str(value[0]) + ',' + str(value[1]) + '\n')
                 else:
@@ -128,7 +128,7 @@ class ConfigManager:
         :param path: New working directory path. This path is valid because it was chosen in a dialog window.
         :return: None
         """
-        self.__conf_dict[self.CONF_WORKING_DIR] = path
+        self._conf_dict[self.CONF_WORKING_DIR] = path
         self.save_config_file()
 
     def store_window_position(self, pos1_pos2: Tuple[int, int]):
@@ -138,7 +138,7 @@ class ConfigManager:
         :return: None
         """
         x, y = pos1_pos2
-        self.__conf_dict[self.CONF_POSITION] = (x, y)
+        self._conf_dict[self.CONF_POSITION] = (x, y)
         self.save_config_file()
 
     def store_window_size(self, size1_size2: Tuple[int, int]):
@@ -148,7 +148,7 @@ class ConfigManager:
         :return: None
         """
         x, y = size1_size2
-        self.__conf_dict[self.CONF_SIZE] = (x, y)
+        self._conf_dict[self.CONF_SIZE] = (x, y)
         self.save_config_file()
 
     def store_last_open_document(self, name: str):
@@ -157,5 +157,5 @@ class ConfigManager:
         :param name: Name of the last opened website.
         :return: None
         """
-        self.__conf_dict[self.CONF_LAST] = name
+        self._conf_dict[self.CONF_LAST] = name
         self.save_config_file()
