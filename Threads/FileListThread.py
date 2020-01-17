@@ -1,6 +1,7 @@
 import threading
 import wx
 
+from DirectoryLoader import DirectoryLoader
 from Threads.Events.CarrierEvent import CarrierEvent
 
 
@@ -19,6 +20,7 @@ class FileListThread(threading.Thread):
         self._parent = parent
         self._event_type = event_type
         self._path = path
+        self._directory_loader = DirectoryLoader()
 
     def run(self):
         """
@@ -26,6 +28,8 @@ class FileListThread(threading.Thread):
         when you call Thread.start().
         :return: List of pages to show in the listbox in gui.
         """
-        result = CarrierEvent(self._event_type, -1, self._path)
+        page_dictionary = self._directory_loader.get_file_dict(self._path)
+        file_list = sorted(page_dictionary.keys())
+        result = CarrierEvent(self._event_type, -1, file_list)
         # The parent is the target that will receive the event, it is the gui.
         wx.PostEvent(self._parent, result)

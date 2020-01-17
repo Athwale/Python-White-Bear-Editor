@@ -4,8 +4,8 @@ import wx.richtext as rt
 from ConfigManager import ConfigManager
 from Constants.Numbers import Numbers
 from Constants.Strings import Strings
-from DirectoryLoader import DirectoryLoader
 from FileParser import FileParser
+from Threads.Events.CarrierEvent import CarrierEvent
 from Threads.FileListThread import FileListThread
 
 
@@ -176,9 +176,7 @@ class Gui(wx.Frame):
 
         # Prepare tools
         self.config_manager = ConfigManager()
-        self.directory_loader = None
         self.file_parser = FileParser()
-        self.page_dictionary = None
         # Bind custom event
         self.Bind(wx.PyEventBinder(self.EVT_CARRIER_TYPE_ID, 1), self.carrier_event_handler)
 
@@ -202,21 +200,19 @@ class Gui(wx.Frame):
         :return:
         """
         try:
-            self.directory_loader = DirectoryLoader()
-            self.page_dictionary = self.directory_loader.get_file_dict(str(self.config_manager.get_working_dir()))
-            self.page_list.InsertItems(sorted(self.page_dictionary.keys()), 0)
+            file_list_thread = FileListThread(self, self.EVT_CARRIER_TYPE_ID, str(self.config_manager.get_working_dir()))
+            file_list_thread.start()
+            #self.page_list.InsertItems(sorted(self.page_dictionary.keys()), 0)
         except IndexError:
             print('Select a whitebear directory')
-        file_list_thread = FileListThread(self, self.EVT_CARRIER_TYPE_ID, 'path')
-        file_list_thread.start()
 
-    def carrier_event_handler(self, event):
+    def carrier_event_handler(self, event: CarrierEvent):
         """
 
         :param event:
         :return:
         """
-        print(event)
+        print(event.GetEventType())
 
     def quit_button_handler(self, event):
         """
@@ -275,8 +271,7 @@ class Gui(wx.Frame):
         :return: None
         """
         selected_name = self.page_list.GetStringSelection()
-        output = self.file_parser.parse_file((selected_name, self.page_dictionary[selected_name]))
-        print(output)
+        print(selected_name)
 
 
 app = wx.App()
