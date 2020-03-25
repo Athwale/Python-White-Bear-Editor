@@ -1,5 +1,2 @@
-import wx
-
-
 class Constants:
-    pass
+    file_list_type: int = 1

@@ -3,6 +3,7 @@ import wx
 
 from DirectoryLoader import DirectoryLoader
 from Threads.Events.CarrierEvent import CarrierEvent
+from Constants.Constants import Constants
 
 
 class FileListThread(threading.Thread):
@@ -30,6 +31,6 @@ class FileListThread(threading.Thread):
         """
         page_dictionary = self._directory_loader.get_file_dict(self._path)
         file_list = sorted(page_dictionary.keys())
-        result = CarrierEvent(self._event_type, -1, file_list)
+        result = CarrierEvent(self._event_type, -1, Constants.file_list_type, file_list)
         # The parent is the target that will receive the event, it is the gui.
         wx.PostEvent(self._parent, result)

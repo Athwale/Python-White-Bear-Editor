@@ -212,7 +212,7 @@ class Gui(wx.Frame):
         :param event:
         :return:
         """
-        print(event.GetEventType())
+        print(event.get_payload_type())
 
     def quit_button_handler(self, event):
         """
