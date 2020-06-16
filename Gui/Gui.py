@@ -4,6 +4,7 @@ import wx.richtext as rt
 from ConfigManager import ConfigManager
 from Constants.Numbers import Numbers
 from Constants.Strings import Strings
+from Constants.Constants import Constants
 from FileParser import FileParser
 from Threads.Events.CarrierEvent import CarrierEvent
 from Threads.FileListThread import FileListThread
@@ -189,22 +190,23 @@ class Gui(wx.Frame):
         else:
             self.SetSize(self.config_manager.get_window_size())
         # Load last working directory
-        self._fill_page_list()
+        self.__load_working_directory(None)
         # Select last used document
         self.page_list.SetStringSelection(self.config_manager.get_last_document())
         self.list_item_clicked()
 
-    def _fill_page_list(self):
+    def __load_working_directory(self, path=None):
         """
 
-        :return:
+        :param path: str, path to the working directory
+        :return: None
         """
-        try:
+        if not path:
+            # Load from last saved directory
+        else:
             file_list_thread = FileListThread(self, self.EVT_CARRIER_TYPE_ID, str(self.config_manager.get_working_dir()))
             file_list_thread.start()
-            #self.page_list.InsertItems(sorted(self.page_dictionary.keys()), 0)
-        except IndexError:
-            print('Select a whitebear directory')
+        self.page_list.InsertItems(page_list, 0)
 
     def carrier_event_handler(self, event: CarrierEvent):
         """
@@ -212,7 +214,8 @@ class Gui(wx.Frame):
         :param event:
         :return:
         """
-        print(event.get_payload_type())
+        if event.get_payload_type() == Constants.file_list_type:
+            self.__load_working_directory(event.get_payload())
 
     def quit_button_handler(self, event):
         """
@@ -242,7 +245,7 @@ class Gui(wx.Frame):
         # Modal means the user is locked into this dialog an can not use the rest of the application
         if dlg.ShowModal() == wx.ID_OK:
             self.config_manager.store_working_dir(dlg.GetPath())
-            self._fill_page_list()
+            self.__load_working_directory(path)
         dlg.Destroy()
 
     def about_button_handler(self, event):

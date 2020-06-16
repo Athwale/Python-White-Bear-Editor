@@ -21,7 +21,7 @@ class CarrierEvent(wx.PyCommandEvent):
         self._payload = payload
         self._payload_type = payload_type
 
-    def get_value(self):
+    def get_payload(self):
         """
         Returns the value from the event.
         @return: the value of this event
