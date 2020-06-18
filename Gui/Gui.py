@@ -20,7 +20,7 @@ class Gui(wx.Frame):
 
     def __init__(self, parent, title):
         """
-
+        Constructor for the GUI of the editor.
         :param parent:
         :param title:
         """
@@ -189,24 +189,20 @@ class Gui(wx.Frame):
             self.Maximize()
         else:
             self.SetSize(self.config_manager.get_window_size())
+
         # Load last working directory
-        self.__load_working_directory(None)
-        # Select last used document
-        self.page_list.SetStringSelection(self.config_manager.get_last_document())
-        self.list_item_clicked()
+        self._load_working_directory(self.config_manager.get_working_dir())
 
-    def __load_working_directory(self, path=None):
+    def _load_working_directory(self, path: str) -> None:
         """
-
+        Load a working directory into the editor.
         :param path: str, path to the working directory
         :return: None
         """
-        if not path:
-            # Load from last saved directory
-        else:
-            file_list_thread = FileListThread(self, self.EVT_CARRIER_TYPE_ID, str(self.config_manager.get_working_dir()))
-            file_list_thread.start()
-        self.page_list.InsertItems(page_list, 0)
+        # Disable the gui until load is done
+        self.Disable()
+        file_list_thread = FileListThread(self, self.EVT_CARRIER_TYPE_ID, str(path))
+        file_list_thread.start()
 
     def carrier_event_handler(self, event: CarrierEvent):
         """
@@ -215,7 +211,13 @@ class Gui(wx.Frame):
         :return:
         """
         if event.get_payload_type() == Constants.file_list_type:
-            self.__load_working_directory(event.get_payload())
+            self.page_list.Clear()
+            self.page_list.InsertItems(event.get_payload(), 0)
+            # Select last used document
+            self.page_list.SetStringSelection(self.config_manager.get_last_document())
+            self.list_item_clicked()
+            # Enable GUI when the load is done
+            self.Enable()
 
     def quit_button_handler(self, event):
         """
@@ -245,7 +247,7 @@ class Gui(wx.Frame):
         # Modal means the user is locked into this dialog an can not use the rest of the application
         if dlg.ShowModal() == wx.ID_OK:
             self.config_manager.store_working_dir(dlg.GetPath())
-            self.__load_working_directory(path)
+            self._load_working_directory(self.config_manager.get_working_dir())
         dlg.Destroy()
 
     def about_button_handler(self, event):

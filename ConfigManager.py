@@ -22,7 +22,7 @@ class ConfigManager:
 
     def __init__(self):
         """
-
+        Constructor for config manager.
         """
         self._conf_dict = {}
         # If config file does not exist, create a new one
@@ -35,16 +35,16 @@ class ConfigManager:
             # Read the config file and store options in dictionary
             self._read_config()
 
-    def _create_new_config(self):
+    def _create_new_config(self) -> None:
         """
-
-        :return:
+        Create a new config file with a default working directory.
+        :return: None
         """
         self.store_working_dir(Strings.home_directory)
 
-    def _read_config(self):
+    def _read_config(self) -> None:
         """
-
+        Parse configuration file form disk into a dictionary.
         :return:
         """
         with open(self._conf_file_path, 'r') as config_file:
@@ -80,7 +80,7 @@ class ConfigManager:
                     # Ignore unknown options
                     continue
 
-    def get_working_dir(self) -> object:
+    def get_working_dir(self) -> str:
         """
         Get the last saved working directory.
         :return: String directory path to the saved last working directory.

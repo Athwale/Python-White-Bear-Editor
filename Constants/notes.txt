@@ -3,6 +3,8 @@ Nastavit na default text pokud je prazdny nedovolit presahnout 2 radky
 Automaticky generovat datum
 Zkontrolovat nastaveni spatnyho adresare
 
+TODO:
+
 wx.ID_ANY have wxWidgets pick an id for us
 You almost always want to use wx.ID_ANY or another standard ID (v2.8) provided by wxWidgets.
 
