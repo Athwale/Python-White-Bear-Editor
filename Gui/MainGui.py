@@ -236,9 +236,9 @@ class MainGui(wx.Frame):
 
     def quit_button_handler(self, event):
         """
-
-        :param event:
-        :return:
+        Handle user exit from the editor. Save last known window position, size and last opened document.
+        :param event: not used
+        :return: None
         """
         self.config_manager.store_window_position(self.GetScreenPosition())
         if self.IsMaximized():
@@ -253,9 +253,10 @@ class MainGui(wx.Frame):
 
     def open_button_handler(self, event):
         """
-
-        :param event:
-        :return:
+        Handle opening a new working directory. Show a selection dialog, store the new directory and load it into
+        editor.
+        :param event: Not used.
+        :return: None
         """
         dlg = wx.DirDialog(self, Strings.label_choose_dir, Strings.home_directory,
                            wx.DD_DIR_MUST_EXIST | wx.DD_CHANGE_DIR)
