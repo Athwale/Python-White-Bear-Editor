@@ -12,7 +12,7 @@ from Threads.FileListThread import FileListThread
 
 class Gui(wx.Frame):
     """
-
+    Main GUI controlling class
     """
 
     # Create a new unique id for our custom event.
@@ -27,7 +27,8 @@ class Gui(wx.Frame):
         super(Gui, self).__init__(parent, title=title)
         self.Centre()
         self.Update()
-        self.CreateStatusBar()
+        # Create a status bar with 3 fields
+        self.status_bar = self.CreateStatusBar(3)
 
         # Create menu bar and the menu itself
         # All class instance variables have to be specified in the constructor
@@ -54,7 +55,8 @@ class Gui(wx.Frame):
         # Sizer configuration
         # Main window - main horizontal sizer
         #  left vertical sizer = top static box sizer(article menu logo, logo name, alt, title), files
-        #  middle vertical sizer = left static sizer (article image (name, alt, title)) right sizer (date, article main title, keywords, description) text area
+        #  middle vertical sizer = left static sizer (article image (name, alt, title))
+        #  right sizer (date, article main title, keywords, description) text area
         #  right vertical sizer = aside images
 
         # Create sizers
@@ -85,8 +87,6 @@ class Gui(wx.Frame):
         # Set layout into the window
         self.SetSizer(self.main_horizontal_sizer)
         self.SetAutoLayout(1)
-        # Resize to fit all components, makes the window as small as possible
-        # self.left_column_sizer.Fit(self)
 
         # Create main font for text fields
         self.text_field_font: wx.Font = wx.Font(Numbers.text_field_font_size, wx.FONTFAMILY_DEFAULT,
@@ -119,7 +119,6 @@ class Gui(wx.Frame):
         self.left_top_static_sizer.Add(self.field_logo_title)
 
         # File list
-        # Create a list
         self.page_list = wx.ListBox(self, wx.LB_SINGLE | wx.LB_SORT, name=Strings.label_page_list,
                                     size=wx.Size(98, 300))
         self.page_list.SetFont(self.text_field_font)
@@ -175,13 +174,18 @@ class Gui(wx.Frame):
         self.Bind(wx.EVT_MENU, self.open_button_handler, self.file_menu_item_open)
         self.Bind(wx.EVT_LISTBOX, self.list_item_click_handler, self.page_list)
 
-        # Prepare tools
-        self.config_manager = ConfigManager()
-        self.file_parser = FileParser()
         # Bind custom event
         self.Bind(wx.PyEventBinder(self.EVT_CARRIER_TYPE_ID, 1), self.carrier_event_handler)
 
-        # Prepare window contents
+        # Prepare tools
+        self.config_manager = ConfigManager()
+        self.file_parser = FileParser()
+
+        # Prepare window contents -------------------------------------------------------------------------------------
+        # Initialize status bar
+        self._set_status_text('', 0)
+        self._set_status_text('', 1)
+        self._set_status_text(Strings.status_ready, 2)
         # Load last window position and size
         self.SetPosition((self.config_manager.get_window_position()))
         size = self.config_manager.get_window_size()
@@ -192,6 +196,16 @@ class Gui(wx.Frame):
 
         # Load last working directory
         self._load_working_directory(self.config_manager.get_working_dir())
+
+    def _set_status_text(self, text: str, position=0) -> None:
+        """
+        Set a text into a position in status bar and prepend a separator.
+        :param text: Text to set.
+        :param position: Where to set the text, 0 is default
+        :return: None
+        """
+        to_set = '| ' + text
+        self.status_bar.SetStatusText(to_set, position)
 
     def _load_working_directory(self, path: str) -> None:
         """
@@ -215,7 +229,7 @@ class Gui(wx.Frame):
             self.page_list.InsertItems(event.get_payload(), 0)
             # Select last used document
             self.page_list.SetStringSelection(self.config_manager.get_last_document())
-            self.list_item_clicked()
+            self.list_item_click_handler(wx.CommandEvent())
             # Enable GUI when the load is done
             self.Enable()
 
@@ -263,20 +277,12 @@ class Gui(wx.Frame):
 
     def list_item_click_handler(self, event):
         """
-
-        :param event:
-        :return:
-        """
-        self.list_item_clicked()
-
-    def list_item_clicked(self):
-        """
-        Since items in the page list can be 'clicked' from two different locations, manually or programmatically,
-        this method is called from both places.
+        Handler function for clicking a page name in the web page list.
+        :param event: wx event, not used.
         :return: None
         """
         selected_name = self.page_list.GetStringSelection()
-        print(selected_name)
+        self._set_status_text(selected_name)
 
 
 app = wx.App()

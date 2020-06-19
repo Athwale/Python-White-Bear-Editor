@@ -42,3 +42,4 @@ class Strings:
     label_article_description: str = 'Meta description'
     label_article_info: str = 'Article data'
     label_photo_column: str = 'Photos'
+    status_ready: str = 'Ready'
