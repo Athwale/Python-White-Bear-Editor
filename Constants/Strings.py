@@ -8,6 +8,10 @@ class Strings:
     home_directory: str = os.path.expanduser('~')
     editor_config_file: str = os.path.join(home_directory, '.whitebearEditor.conf')
     editor_name: str = 'Whitebear editor'
+    editor_version: str = '0.1'
+    text_about_contents: str = 'Unfinished whitebear web editor.' \
+                               '\nhttps://github.com/Athwale/Python-White-Bear-Editor\n' \
+                               'version: ' + editor_version
     exception_access: str = 'Main directory not readable'
     exception_access_html: str = 'File can not be accessed'
     exception_index: str = 'index.html is not in directory'
@@ -26,7 +30,6 @@ class Strings:
     label_open_hint: str = 'Open directory'
     label_page_list: str = 'Page list'
     label_choose_dir: str = 'Choose whitebear directory'
-    text_about_contents: str = 'Unfinished whitebear web editor'
     label_about_window_name: str = 'About'
     label_menu_logo: str = 'Menu logo'
     label_menu_logo_name_placeholder: str = 'Logo name'

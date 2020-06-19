@@ -6,11 +6,12 @@ from Constants.Numbers import Numbers
 from Constants.Strings import Strings
 from Constants.Constants import Constants
 from FileParser import FileParser
+from Gui.Dialogs.ModalDialog import ModalDialog
 from Threads.Events.CarrierEvent import CarrierEvent
 from Threads.FileListThread import FileListThread
 
 
-class Gui(wx.Frame):
+class MainGui(wx.Frame):
     """
     Main GUI controlling class
     """
@@ -24,7 +25,7 @@ class Gui(wx.Frame):
         :param parent:
         :param title:
         """
-        super(Gui, self).__init__(parent, title=title)
+        super(MainGui, self).__init__(parent, title=title)
         self.Centre()
         self.Update()
         # Create a status bar with 3 fields
@@ -266,18 +267,16 @@ class Gui(wx.Frame):
 
     def about_button_handler(self, event):
         """
-
-        :param event:
-        :return:
+        Handles clicks onto the About button. Displays a short message in another window.
+        :param event: Not used.
+        :return: None
         """
-        # A message dialog box with an OK button. wx.OK is a standard ID in wxWidgets.
-        about_frame = wx.MessageDialog(self, Strings.text_about_contents, Strings.label_about_window_name, wx.OK)
-        about_frame.ShowModal()
-        about_frame.Destroy()
+        ModalDialog(self, Strings.label_about_window_name, Strings.text_about_contents)
 
     def list_item_click_handler(self, event):
         """
-        Handler function for clicking a page name in the web page list.
+        Handler function for clicking a page name in the web page list. Shows which website is selected in the status
+        bar.
         :param event: wx event, not used.
         :return: None
         """
@@ -286,6 +285,6 @@ class Gui(wx.Frame):
 
 
 app = wx.App()
-frame = Gui(None, Strings.editor_name)
+frame = MainGui(None, Strings.editor_name)
 frame.Show()
 app.MainLoop()
