@@ -55,15 +55,16 @@ class MainGui(wx.Frame):
 
         # Sizer configuration
         # Main window - main horizontal sizer
-        #  left vertical sizer = top static box sizer(article menu logo, logo name, alt, title), files
-        #  middle vertical sizer = left static sizer (article image (name, alt, title))
+        #  left vertical sizer = files
+        #  middle vertical sizer = left static sizer (article image (name, alt, title)),
+        #   right top static box sizer(article logo, logo name, alt, title)
         #  right sizer (date, article main title, keywords, description) text area
         #  right vertical sizer = aside images
 
         # Create sizers
         self.main_horizontal_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.left_column_sizer = wx.BoxSizer(wx.VERTICAL)
-        self.left_top_static_sizer = wx.StaticBoxSizer(wx.VERTICAL, self, label=Strings.label_menu_logo)
+        self.right_top_static_sizer = wx.StaticBoxSizer(wx.VERTICAL, self, label=Strings.label_menu_logo)
 
         self.right_main_row_vertical_sizer = wx.BoxSizer(wx.VERTICAL)
         self.right_top_sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -72,16 +73,14 @@ class MainGui(wx.Frame):
 
         self.right_bottom_row_sizer = wx.BoxSizer(wx.HORIZONTAL)
 
-        self.left_column_sizer.Add(self.left_top_static_sizer, flag=wx.LEFT, border=Numbers.control_border_size)
-
         self.right_main_row_vertical_sizer.Add(self.right_top_sizer, flag=wx.RIGHT | wx.ALIGN_LEFT | wx.EXPAND,
                                                border=Numbers.control_border_size, proportion=0)
         self.right_main_row_vertical_sizer.Add(self.right_bottom_row_sizer, flag=wx.RIGHT | wx.ALIGN_LEFT | wx.EXPAND,
                                                border=Numbers.control_border_size, proportion=1)
         self.right_top_sizer.Add(self.top_left_static_sizer, flag=wx.ALIGN_LEFT | wx.RIGHT,
                                  border=0)
-
         self.right_top_sizer.Add(self.top_right_static_sizer, 1, flag=wx.ALIGN_LEFT | wx.EXPAND)
+        self.right_top_sizer.Add(self.right_top_static_sizer, flag=wx.LEFT, border=Numbers.control_border_size)
         self.main_horizontal_sizer.Add(self.left_column_sizer, 0, wx.EXPAND)
         self.main_horizontal_sizer.Add(self.right_main_row_vertical_sizer, 1, wx.EXPAND)
 
@@ -93,13 +92,13 @@ class MainGui(wx.Frame):
         self.text_field_font: wx.Font = wx.Font(Numbers.text_field_font_size, wx.FONTFAMILY_DEFAULT,
                                                 wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, False)
 
-        # Left column section ------------------------------------------------------------------------------------------
+        # right column section -----------------------------------------------------------------------------------------
         # Create a placeholder image
         self.placeholder_logo_image = wx.Image(Numbers.logo_image_size, Numbers.logo_image_size)
         self.placeholder_logo_image.Replace(0, 0, 0, 255, 255, 255)
         self.menu_logo_image = wx.StaticBitmap(self, -1, wx.Bitmap(self.placeholder_logo_image))
         # Set border to the image
-        self.left_top_static_sizer.Add(self.menu_logo_image, flag=wx.LEFT | wx.BOTTOM | wx.RIGHT, border=1)
+        self.right_top_static_sizer.Add(self.menu_logo_image, flag=wx.LEFT | wx.BOTTOM | wx.RIGHT, border=1)
         # Create menu logo name text box
         self.field_logo_name = wx.TextCtrl(self, -1, value=Strings.label_menu_logo_name_placeholder,
                                            size=wx.Size(98, 35),
@@ -115,13 +114,13 @@ class MainGui(wx.Frame):
         self.field_logo_alt.SetFont(self.text_field_font)
         self.field_logo_title.SetFont(self.text_field_font)
 
-        self.left_top_static_sizer.Add(self.field_logo_name)
-        self.left_top_static_sizer.Add(self.field_logo_alt)
-        self.left_top_static_sizer.Add(self.field_logo_title)
+        self.right_top_static_sizer.Add(self.field_logo_name)
+        self.right_top_static_sizer.Add(self.field_logo_alt)
+        self.right_top_static_sizer.Add(self.field_logo_title)
 
         # File list
         self.page_list = wx.ListBox(self, wx.LB_SINGLE | wx.LB_SORT, name=Strings.label_page_list,
-                                    size=wx.Size(98, 300))
+                                    size=wx.Size(210, 300))
         self.page_list.SetFont(self.text_field_font)
 
         # Middle section -----------------------------------------------------------------------------------------------

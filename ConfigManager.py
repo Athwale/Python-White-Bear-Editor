@@ -99,6 +99,7 @@ class ConfigManager:
         Get the last saved window size on screen.
         :return: Tuple of (x, y) size last saved when exiting the editor.
         """
+        print(self._conf_dict[self.CONF_SIZE])
         return self._conf_dict[self.CONF_SIZE]
 
     def get_last_document(self) -> object:
@@ -148,6 +149,7 @@ class ConfigManager:
         :return: None
         """
         x, y = size1_size2
+        print(x, y)
         self._conf_dict[self.CONF_SIZE] = (x, y)
         self.save_config_file()
 
