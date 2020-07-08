@@ -186,16 +186,17 @@ class MainGui(wx.Frame):
         self._set_status_text('', 0)
         self._set_status_text('', 1)
         self._set_status_text(Strings.status_ready, 2)
+
+        # Load last working directory
+        self._load_working_directory(self.config_manager.get_working_dir())
+
         # Load last window position and size
         self.SetPosition((self.config_manager.get_window_position()))
         size = self.config_manager.get_window_size()
         if size == (-1, -1):
             self.Maximize()
         else:
-            self.SetSize(self.config_manager.get_window_size())
-
-        # Load last working directory
-        self._load_working_directory(self.config_manager.get_working_dir())
+            self.SetSize(size)
 
     def _set_status_text(self, text: str, position=0) -> None:
         """
@@ -244,7 +245,7 @@ class MainGui(wx.Frame):
             # Special value to indicate maximized window
             self.config_manager.store_window_size((-1, -1))
         else:
-            self.config_manager.store_window_size(self.ClientSize)
+            self.config_manager.store_window_size(self.GetSize())
         # Store last open document
         if self.page_list.GetSelection() != wx.NOT_FOUND:
             self.config_manager.store_last_open_document(self.page_list.GetString(self.page_list.GetSelection()))
