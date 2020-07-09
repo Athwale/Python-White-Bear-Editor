@@ -2,6 +2,7 @@ import threading
 import wx
 
 from DirectoryLoader import DirectoryLoader
+from Exceptions.AccessException import AccessException
 from Threads.Events.CarrierEvent import CarrierEvent
 from Constants.Constants import Constants
 
@@ -29,8 +30,12 @@ class FileListThread(threading.Thread):
         when you call Thread.start().
         :return: List of pages to show in the listbox in gui.
         """
-        page_dictionary = self._directory_loader.get_file_dict(self._path)
-        file_list = sorted(page_dictionary.keys())
-        result = CarrierEvent(self._event_type, -1, Constants.file_list_type, file_list)
-        # The parent is the target that will receive the event, it is the gui.
-        wx.PostEvent(self._parent, result)
+        try:
+            page_dictionary = self._directory_loader.get_file_dict(self._path)
+            file_list = sorted(page_dictionary.keys())
+            result = CarrierEvent(self._event_type, -1, Constants.file_list_type, file_list)
+            # The parent is the target that will receive the event, it is the gui.
+            wx.PostEvent(self._parent, result)
+        except (AccessException, IndexError, FileNotFoundError) as e:
+            result = CarrierEvent(self._event_type, -1, Constants.exception_type, e)
+            wx.PostEvent(self._parent, result)

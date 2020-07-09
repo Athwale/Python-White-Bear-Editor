@@ -236,6 +236,9 @@ class MainGui(wx.Frame):
             # Enable GUI when the load is done
             self._set_status_text(Strings.status_ready, 2)
             self.Enable()
+        if event.get_payload_type() == Constants.exception_type:
+            # TODO open dialog and append the error to its log
+            self.Enable()
 
     def quit_button_handler(self, event):
         """
@@ -262,6 +265,7 @@ class MainGui(wx.Frame):
         :param event: Not used.
         :return: None
         """
+        event.Skip()
         dlg = wx.DirDialog(self, Strings.label_choose_dir, Strings.home_directory,
                            wx.DD_DIR_MUST_EXIST | wx.DD_CHANGE_DIR)
         # Modal means the user is locked into this dialog an can not use the rest of the application
@@ -276,16 +280,17 @@ class MainGui(wx.Frame):
         :param event: Not used.
         :return: None
         """
+        event.Skip()
         ModalDialog(self, Strings.label_about_window_name, Strings.text_about_contents)
 
     def list_item_click_handler(self, event):
         """
         Handler function for clicking a page name in the web page list. Shows which website is selected in the status
         bar.
-        :param event: wx event, not used.
+        :param event: wx event, brings the selected string from the menu.
         :return: None
         """
-        selected_name = self.page_list.GetStringSelection()
+        selected_name = event.GetString()
         self._set_status_text(selected_name)
 
 

@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 
 class DirectoryLoader:
     """
-    This class loads and parses white bear web root directory. The output is a dictionary of file names + path full
+    This class loads and parses white bear web root directory. The output is a dictionary of file names + full path
     to them on the system. If the directory is not readable or writable or the files are not readable or writeable,
     AccessException is raised.
     """
@@ -32,7 +32,7 @@ class DirectoryLoader:
         """
         Checks whether chosen directory belongs to the whitebear web.
         :raises FileNotFoundError if index.html is not present
-        :raises IndexError if <title>White Bear is noy in index.html
+        :raises IndexError if <title>White Bear is not in index.html
         :raises AccessException if the directory can no be read or written to.
         :param path: Path to the root of the whitebear web directory.
         :return: True if path is an accessible white bear directory
