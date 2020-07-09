@@ -240,18 +240,19 @@ class MainGui(wx.Frame):
     def quit_button_handler(self, event):
         """
         Handle user exit from the editor. Save last known window position, size and last opened document.
-        :param event: not used
+        :param event: CloseEvent, if CanVeto is False the window must be destroyed the system is forcing it.
         :return: None
         """
-        self.config_manager.store_window_position(self.GetScreenPosition())
-        if self.IsMaximized():
-            # Special value to indicate maximized window
-            self.config_manager.store_window_size((-1, -1))
-        else:
-            self.config_manager.store_window_size(self.GetSize())
-        # Store last open document
-        if self.page_list.GetSelection() != wx.NOT_FOUND:
-            self.config_manager.store_last_open_document(self.page_list.GetString(self.page_list.GetSelection()))
+        if event.CanVeto():
+            self.config_manager.store_window_position(self.GetScreenPosition())
+            if self.IsMaximized():
+                # Special value to indicate maximized window
+                self.config_manager.store_window_size((-1, -1))
+            else:
+                self.config_manager.store_window_size(self.GetSize())
+            # Store last open document
+            if self.page_list.GetSelection() != wx.NOT_FOUND:
+                self.config_manager.store_last_open_document(self.page_list.GetString(self.page_list.GetSelection()))
         self.Destroy()
 
     def open_button_handler(self, event):
