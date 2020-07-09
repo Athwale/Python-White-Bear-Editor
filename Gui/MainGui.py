@@ -26,6 +26,7 @@ class MainGui(wx.Frame):
         :param title:
         """
         super(MainGui, self).__init__(parent, title=title)
+        self.SetMinSize(wx.Size(800, 800))
         self.Centre()
         self.Update()
         # Create a status bar with 3 fields
@@ -83,10 +84,7 @@ class MainGui(wx.Frame):
         self.right_top_sizer.Add(self.right_top_static_sizer, flag=wx.LEFT, border=Numbers.control_border_size)
         self.main_horizontal_sizer.Add(self.left_column_sizer, 0, wx.EXPAND)
         self.main_horizontal_sizer.Add(self.right_main_row_vertical_sizer, 1, wx.EXPAND)
-
-        # Set layout into the window
         self.SetSizer(self.main_horizontal_sizer)
-        self.SetAutoLayout(1)
 
         # Create main font for text fields
         self.text_field_font: wx.Font = wx.Font(Numbers.text_field_font_size, wx.FONTFAMILY_DEFAULT,
@@ -95,7 +93,7 @@ class MainGui(wx.Frame):
         # right column section -----------------------------------------------------------------------------------------
         # Create a placeholder image
         self.placeholder_logo_image = wx.Image(Numbers.logo_image_size, Numbers.logo_image_size)
-        self.placeholder_logo_image.Replace(0, 0, 0, 255, 255, 255)
+        self.placeholder_logo_image.Replace(0, 0, 0, 245, 255, 255)
         self.menu_logo_image = wx.StaticBitmap(self, -1, wx.Bitmap(self.placeholder_logo_image))
         # Set border to the image
         self.right_top_static_sizer.Add(self.menu_logo_image, flag=wx.LEFT | wx.BOTTOM | wx.RIGHT, border=1)
@@ -126,7 +124,7 @@ class MainGui(wx.Frame):
         # Middle section -----------------------------------------------------------------------------------------------
         # Add image placeholder into middle top left static sizer
         self.placeholder_main_image: wx.Image = wx.Image(Numbers.main_image_width, Numbers.main_image_height)
-        self.placeholder_main_image.Replace(0, 0, 0, 255, 255, 255)
+        self.placeholder_main_image.Replace(0, 0, 0, 245, 255, 255)
         self.main_image = wx.StaticBitmap(self, -1, wx.Bitmap(self.placeholder_main_image))
         self.top_left_static_sizer.Add(self.main_image, flag=wx.LEFT | wx.BOTTOM | wx.RIGHT, border=1)
 
@@ -167,6 +165,9 @@ class MainGui(wx.Frame):
         # After all is added, let the window know how big it should be
         self.main_horizontal_sizer.SetSizeHints(self)
 
+        self.SetAutoLayout(1)
+        self.SetMinClientSize(wx.Size(Numbers.minimal_window_size_width, Numbers.minimal_window_size_height))
+
         # Bind click handlers
         self.Bind(wx.EVT_MENU, self.quit_button_handler, self.file_menu_item_quit)
         self.Bind(wx.EVT_CLOSE, self.quit_button_handler)
@@ -185,7 +186,7 @@ class MainGui(wx.Frame):
         # Initialize status bar
         self._set_status_text('', 0)
         self._set_status_text('', 1)
-        self._set_status_text(Strings.status_ready, 2)
+        self._set_status_text(Strings.status_loading, 2)
 
         # Load last working directory
         self._load_working_directory(self.config_manager.get_working_dir())
@@ -216,6 +217,7 @@ class MainGui(wx.Frame):
         """
         # Disable the gui until load is done
         self.Disable()
+        self._set_status_text(Strings.status_loading, 2)
         file_list_thread = FileListThread(self, self.EVT_CARRIER_TYPE_ID, str(path))
         file_list_thread.start()
 
@@ -232,6 +234,7 @@ class MainGui(wx.Frame):
             self.page_list.SetStringSelection(self.config_manager.get_last_document())
             self.list_item_click_handler(wx.CommandEvent())
             # Enable GUI when the load is done
+            self._set_status_text(Strings.status_ready, 2)
             self.Enable()
 
     def quit_button_handler(self, event):
