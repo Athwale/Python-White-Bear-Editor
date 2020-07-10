@@ -226,7 +226,7 @@ class MainFrame(wx.Frame):
 
         :return:
         """
-        pass
+        self._set_status_text(Strings.status_error, 2)
 
     def carrier_event_handler(self, event: CarrierEvent):
         """

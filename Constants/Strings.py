@@ -47,3 +47,4 @@ class Strings:
     label_photo_column: str = 'Photos'
     status_loading: str = 'Loading'
     status_ready: str = 'Ready'
+    status_error: str = 'Error'
