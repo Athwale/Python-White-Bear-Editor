@@ -11,9 +11,9 @@ from Threads.Events.CarrierEvent import CarrierEvent
 from Threads.FileListThread import FileListThread
 
 
-class MainGui(wx.Frame):
+class MainFrame(wx.Frame):
     """
-    Main GUI controlling class
+    Main GUI controlling class. The Frame is actually the on screen window.
     """
 
     # Create a new unique id for our custom event.
@@ -25,7 +25,7 @@ class MainGui(wx.Frame):
         :param parent:
         :param title:
         """
-        super(MainGui, self).__init__(parent, title=title)
+        super(MainFrame, self).__init__(parent, title=title)
         self.SetMinSize(wx.Size(800, 800))
         self.Centre()
         self.Update()
@@ -221,6 +221,13 @@ class MainGui(wx.Frame):
         file_list_thread = FileListThread(self, self.EVT_CARRIER_TYPE_ID, str(path))
         file_list_thread.start()
 
+    def _show_error_log(self):
+        """
+
+        :return:
+        """
+        pass
+
     def carrier_event_handler(self, event: CarrierEvent):
         """
 
@@ -238,6 +245,7 @@ class MainGui(wx.Frame):
             self.Enable()
         if event.get_payload_type() == Constants.exception_type:
             # TODO open dialog and append the error to its log
+            self._show_error_log()
             self.Enable()
 
     def quit_button_handler(self, event):
@@ -292,9 +300,3 @@ class MainGui(wx.Frame):
         """
         selected_name = event.GetString()
         self._set_status_text(selected_name)
-
-
-app = wx.App()
-frame = MainGui(None, Strings.editor_name)
-frame.Show()
-app.MainLoop()

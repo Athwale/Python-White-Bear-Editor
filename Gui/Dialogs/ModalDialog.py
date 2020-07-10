@@ -10,6 +10,7 @@ class ModalDialog(wx.Dialog):
         :param title: Title of the window
         :param contents: Contents of the window.
         """
+        # TODO Add close button
         wx.Dialog.__init__(self, parent, title=title)
         self.main_horizontal_sizer = wx.BoxSizer(wx.HORIZONTAL)
 
