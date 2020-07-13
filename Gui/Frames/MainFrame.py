@@ -19,13 +19,12 @@ class MainFrame(wx.Frame):
     # Create a new unique id for our custom event.
     EVT_CARRIER_TYPE_ID: int = wx.NewEventType()
 
-    def __init__(self, parent, title):
+    def __init__(self):
         """
-        Constructor for the GUI of the editor.
-        :param parent:
-        :param title:
+        Constructor for the GUI of the editor. This is the main frame so we pass None as the parent.
         """
-        super(MainFrame, self).__init__(parent, title=title)
+        # -1 is a special ID which generates a random wx ID
+        super(MainFrame, self).__init__(None, -1, title=Strings.editor_name)
         self.SetMinSize(wx.Size(800, 800))
         self.Centre()
         self.Update()
@@ -74,6 +73,7 @@ class MainFrame(wx.Frame):
 
         self.right_bottom_row_sizer = wx.BoxSizer(wx.HORIZONTAL)
 
+        # The | is a bitwise or and flags is a bit mask of constants
         self.right_main_row_vertical_sizer.Add(self.right_top_sizer, flag=wx.RIGHT | wx.ALIGN_LEFT | wx.EXPAND,
                                                border=Numbers.control_border_size, proportion=0)
         self.right_main_row_vertical_sizer.Add(self.right_bottom_row_sizer, flag=wx.RIGHT | wx.ALIGN_LEFT | wx.EXPAND,
@@ -257,15 +257,18 @@ class MainFrame(wx.Frame):
         :return: None
         """
         if event.CanVeto():
+            # Save window position
             self.config_manager.store_window_position(self.GetScreenPosition())
+            # Save window size
             if self.IsMaximized():
                 # Special value to indicate maximized window
                 self.config_manager.store_window_size((-1, -1))
             else:
                 self.config_manager.store_window_size(self.GetSize())
-            # Store last open document
+            # Store last selected document
             if self.page_list.GetSelection() != wx.NOT_FOUND:
                 self.config_manager.store_last_open_document(self.page_list.GetString(self.page_list.GetSelection()))
+            # TODO Save currently worked on document
         self.Destroy()
 
     def open_button_handler(self, event):

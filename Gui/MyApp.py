@@ -20,7 +20,7 @@ class MyApp(wx.App):
 
     def OnInit(self):
         # Frame with None parent is a top level frame. This frame must be created after the App object is created.
-        self.frame = MainFrame(None, Strings.editor_name)
+        self.frame = MainFrame()
         self.frame.Show()
         # Optional set the frame as the main one, the main window is the default parent for dialogs without parent set.
         self.SetTopWindow(self.frame)
@@ -28,6 +28,7 @@ class MyApp(wx.App):
 
     def OnExit(self):
         print('Done')
+        return True
 
 
 if __name__ == "__main__":
