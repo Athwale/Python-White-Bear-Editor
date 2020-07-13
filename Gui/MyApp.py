@@ -14,7 +14,7 @@ class MyApp(wx.App):
     Main class for running the gui
     """
 
-    def __init__(self, redirect=True, filename=None):
+    def __init__(self, redirect, filename):
         wx.App.__init__(self, redirect, filename)
         self.frame = None
 
@@ -26,8 +26,11 @@ class MyApp(wx.App):
         self.SetTopWindow(self.frame)
         return True
 
+    def OnExit(self):
+        print('Done')
+
 
 if __name__ == "__main__":
-    # Redirect allows the gui to show a window with std and err text output.
-    app = MyApp(redirect=True, filename=None)
+    # Redirect allows the gui to show a window with std and err text output, or if set, send it to a file.
+    app = MyApp(redirect=False, filename=Strings.editor_output_debug_file)
     app.MainLoop()

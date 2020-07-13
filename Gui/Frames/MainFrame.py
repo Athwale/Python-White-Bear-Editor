@@ -171,6 +171,8 @@ class MainFrame(wx.Frame):
         # Bind click handlers
         self.Bind(wx.EVT_MENU, self.quit_button_handler, self.file_menu_item_quit)
         self.Bind(wx.EVT_CLOSE, self.quit_button_handler)
+        # This calls the quit method if the user logs off the computer
+        self.Bind(wx.EVT_QUERY_END_SESSION,self.quit_button_handler)
         self.Bind(wx.EVT_MENU, self.about_button_handler, self.file_menu_item_about)
         self.Bind(wx.EVT_MENU, self.open_button_handler, self.file_menu_item_open)
         self.Bind(wx.EVT_LISTBOX, self.list_item_click_handler, self.page_list)

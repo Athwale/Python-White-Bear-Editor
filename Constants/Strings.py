@@ -7,6 +7,7 @@ class Strings:
     """
     home_directory: str = os.path.expanduser('~')
     editor_config_file: str = os.path.join(home_directory, '.whitebearEditor.conf')
+    editor_output_debug_file: str = os.path.join(home_directory, 'whitebearEditor.log')
     editor_name: str = 'Whitebear editor'
     editor_version: str = '0.1'
     text_about_contents: str = 'Unfinished whitebear web editor.' \
