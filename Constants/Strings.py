@@ -24,6 +24,7 @@ class Strings:
     exception_conf_inaccessible: str = '.whitebearEditor.conf inaccessible'
     label_file: str = '&File'
     label_quit: str = '&Quit'
+    label_help: str = '&Help'
     label_quit_hint: str = 'Quit'
     label_about: str = '&About'
     label_about_hint: str = 'About'
@@ -49,3 +50,4 @@ class Strings:
     status_loading: str = 'Loading'
     status_ready: str = 'Ready'
     status_error: str = 'Error'
+    toolbar_new_file: str = 'New file'

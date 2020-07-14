@@ -1,5 +1,6 @@
 import wx
 import wx.richtext as rt
+from wx.py import images
 
 from ConfigManager import ConfigManager
 from Constants.Numbers import Numbers
@@ -24,34 +25,46 @@ class MainFrame(wx.Frame):
         Constructor for the GUI of the editor. This is the main frame so we pass None as the parent.
         """
         # -1 is a special ID which generates a random wx ID
-        super(MainFrame, self).__init__(None, -1, title=Strings.editor_name)
+        super(MainFrame, self).__init__(None, -1, title=Strings.editor_name, style=wx.DEFAULT_FRAME_STYLE)
         self.SetMinSize(wx.Size(800, 800))
         self.Centre()
         self.Update()
         # Create a status bar with 3 fields
         self.status_bar = self.CreateStatusBar(3)
+        # Create a toolbar
+        self.tool_bar = self.CreateToolBar()
+        # Add toolbar tools
+        self.tool_bar.AddTool(-1, Strings.toolbar_new_file, images.getPyBitmap(), Strings.toolbar_new_file)
+        self.tool_bar.Realize()
 
         # Create menu bar and the menu itself
         # All class instance variables have to be specified in the constructor
         self.menu_bar = wx.MenuBar()
         self.file_menu = wx.Menu()
+        self.help_menu = wx.Menu()
 
         # Add the file menu into the menu bar. & Tells the program to create Ctrl+F shortcut to open menu.
         self.menu_bar.Append(self.file_menu, Strings.label_file)
-        self.SetMenuBar(self.menu_bar)
+        # Add the Help menu into the menu bar. & Tells the program to create Ctrl+F shortcut to open menu.
+        self.menu_bar.Append(self.help_menu, Strings.label_help)
 
         # Create a menu item for open
         self.file_menu_item_open = wx.MenuItem(self.file_menu, wx.ID_OPEN, Strings.label_open, Strings.label_open_hint)
         self.file_menu.Append(self.file_menu_item_open)
 
         # Create a menu item for about
-        self.file_menu_item_about = wx.MenuItem(self.file_menu, wx.ID_ABOUT, Strings.label_about,
+        self.help_menu_item_about = wx.MenuItem(self.help_menu, wx.ID_ABOUT, Strings.label_about,
                                                 Strings.label_about_hint)
-        self.file_menu.Append(self.file_menu_item_about)
+        self.help_menu.Append(self.help_menu_item_about)
 
         # Create a menu item for quit
-        self.file_menu_item_quit = wx.MenuItem(self.file_menu, wx.ID_EXIT, Strings.label_quit, Strings.label_quit_hint)
+        self.file_menu_item_quit = wx.MenuItem(self.file_menu, wx.ID_CLOSE, Strings.label_quit, Strings.label_quit_hint)
+        self.file_menu.AppendSeparator()
         self.file_menu.Append(self.file_menu_item_quit)
+
+        self.SetMenuBar(self.menu_bar)
+        # Create main panel
+        self.main_panel = wx.Panel(self)
 
         # Sizer configuration
         # Main window - main horizontal sizer
@@ -169,12 +182,14 @@ class MainFrame(wx.Frame):
         self.SetMinClientSize(wx.Size(Numbers.minimal_window_size_width, Numbers.minimal_window_size_height))
 
         # Bind click handlers
-        self.Bind(wx.EVT_MENU, self.quit_button_handler, self.file_menu_item_quit)
-        self.Bind(wx.EVT_CLOSE, self.quit_button_handler)
+        # Bind window close events, X button and emergency quit
+        self.Bind(wx.EVT_CLOSE, self.close_button_handler)
         # This calls the quit method if the user logs off the computer
-        self.Bind(wx.EVT_QUERY_END_SESSION,self.quit_button_handler)
-        self.Bind(wx.EVT_MENU, self.about_button_handler, self.file_menu_item_about)
+        self.Bind(wx.EVT_QUERY_END_SESSION,self.close_button_handler)
+
+        self.Bind(wx.EVT_MENU, self.about_button_handler, self.help_menu_item_about)
         self.Bind(wx.EVT_MENU, self.open_button_handler, self.file_menu_item_open)
+        self.Bind(wx.EVT_MENU, self.quit_button_handler, self.file_menu_item_quit)
         self.Bind(wx.EVT_LISTBOX, self.list_item_click_handler, self.page_list)
 
         # Bind custom event
@@ -251,6 +266,16 @@ class MainFrame(wx.Frame):
             self.Enable()
 
     def quit_button_handler(self, event):
+        """
+        Handles clicks to the Quit button in File menu. Calls Close function which sends EVT_CLOSE and triggers
+        close_button_handler() which does all the saving work.
+        :param event: Not used
+        :return: None
+        """
+        event.Skip()
+        self.Close(True)
+
+    def close_button_handler(self, event):
         """
         Handle user exit from the editor. Save last known window position, size and last opened document.
         :param event: CloseEvent, if CanVeto is False the window must be destroyed the system is forcing it.
