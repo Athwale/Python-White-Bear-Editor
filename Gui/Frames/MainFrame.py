@@ -31,6 +31,7 @@ class MainFrame(wx.Frame):
         self.Update()
         # Create a status bar with 3 fields
         self.status_bar = self.CreateStatusBar(3)
+        self.status_bar.SetStatusWidths([-3, -2, -1])
         # Create a toolbar
         self.tool_bar = self.CreateToolBar()
         # Add toolbar tools
@@ -183,9 +184,12 @@ class MainFrame(wx.Frame):
 
         # Bind click handlers
         # Bind window close events, X button and emergency quit
-        self.Bind(wx.EVT_CLOSE, self.close_button_handler)
+        # Binding an event to a handler function, the last parameter is the source of the event. In case of for
+        # example buttons, all buttons will create EVT_BUTTON and we will not know which handler to use unless
+        # the source is set.
+        self.Bind(wx.EVT_CLOSE, self.close_button_handler, self)
         # This calls the quit method if the user logs off the computer
-        self.Bind(wx.EVT_QUERY_END_SESSION,self.close_button_handler)
+        self.Bind(wx.EVT_QUERY_END_SESSION, self.close_button_handler)
 
         self.Bind(wx.EVT_MENU, self.about_button_handler, self.help_menu_item_about)
         self.Bind(wx.EVT_MENU, self.open_button_handler, self.file_menu_item_open)
@@ -272,7 +276,6 @@ class MainFrame(wx.Frame):
         :param event: Not used
         :return: None
         """
-        event.Skip()
         self.Close(True)
 
     def close_button_handler(self, event):
@@ -303,7 +306,6 @@ class MainFrame(wx.Frame):
         :param event: Not used.
         :return: None
         """
-        event.Skip()
         dlg = wx.DirDialog(self, Strings.label_choose_dir, Strings.home_directory,
                            wx.DD_DIR_MUST_EXIST | wx.DD_CHANGE_DIR)
         # Modal means the user is locked into this dialog an can not use the rest of the application
@@ -318,7 +320,6 @@ class MainFrame(wx.Frame):
         :param event: Not used.
         :return: None
         """
-        event.Skip()
         ModalDialog(self, Strings.label_about_window_name, Strings.text_about_contents)
 
     def list_item_click_handler(self, event):
