@@ -26,44 +26,12 @@ class MainFrame(wx.Frame):
         """
         # -1 is a special ID which generates a random wx ID
         super(MainFrame, self).__init__(None, -1, title=Strings.editor_name, style=wx.DEFAULT_FRAME_STYLE)
-        self.SetMinSize(wx.Size(800, 800))
         self.Centre()
         self.Update()
-        # Create a status bar with 3 fields
-        self.status_bar = self.CreateStatusBar(3)
-        self.status_bar.SetStatusWidths([-3, -2, -1])
-        # Create a toolbar
-        self.tool_bar = self.CreateToolBar()
-        # Add toolbar tools
-        self.tool_bar.AddTool(-1, Strings.toolbar_new_file, images.getPyBitmap(), Strings.toolbar_new_file)
-        self.tool_bar.Realize()
+        self._init_status_bar()
+        self._init_top_tool_bar()
+        self._init_menu()
 
-        # Create menu bar and the menu itself
-        # All class instance variables have to be specified in the constructor
-        self.menu_bar = wx.MenuBar()
-        self.file_menu = wx.Menu()
-        self.help_menu = wx.Menu()
-
-        # Add the file menu into the menu bar. & Tells the program to create Ctrl+F shortcut to open menu.
-        self.menu_bar.Append(self.file_menu, Strings.label_file)
-        # Add the Help menu into the menu bar. & Tells the program to create Ctrl+F shortcut to open menu.
-        self.menu_bar.Append(self.help_menu, Strings.label_help)
-
-        # Create a menu item for open
-        self.file_menu_item_open = wx.MenuItem(self.file_menu, wx.ID_OPEN, Strings.label_open, Strings.label_open_hint)
-        self.file_menu.Append(self.file_menu_item_open)
-
-        # Create a menu item for about
-        self.help_menu_item_about = wx.MenuItem(self.help_menu, wx.ID_ABOUT, Strings.label_about,
-                                                Strings.label_about_hint)
-        self.help_menu.Append(self.help_menu_item_about)
-
-        # Create a menu item for quit
-        self.file_menu_item_quit = wx.MenuItem(self.file_menu, wx.ID_CLOSE, Strings.label_quit, Strings.label_quit_hint)
-        self.file_menu.AppendSeparator()
-        self.file_menu.Append(self.file_menu_item_quit)
-
-        self.SetMenuBar(self.menu_bar)
         # Create main panel
         self.main_panel = wx.Panel(self)
 
@@ -204,12 +172,8 @@ class MainFrame(wx.Frame):
         self.file_parser = FileParser()
 
         # Prepare window contents -------------------------------------------------------------------------------------
-        # Initialize status bar
-        self._set_status_text('', 0)
-        self._set_status_text('', 1)
-        self._set_status_text(Strings.status_loading, 2)
-
         # Load last working directory
+        self._set_status_text(Strings.status_loading, 2)
         self._load_working_directory(self.config_manager.get_working_dir())
 
         # Load last window position and size
@@ -219,6 +183,60 @@ class MainFrame(wx.Frame):
             self.Maximize()
         else:
             self.SetSize(size)
+
+    def _init_menu(self):
+        """
+        Set up menu bar for the frame.
+        :return: None
+        """
+        # Create menu bar and the menu itself
+        # All class instance variables have to be specified during the constructor
+        self.menu_bar = wx.MenuBar()
+        self.file_menu = wx.Menu()
+        self.help_menu = wx.Menu()
+
+        # Add the file menu into the menu bar. & Tells the program to create Ctrl+F shortcut to open menu.
+        self.menu_bar.Append(self.file_menu, Strings.label_file)
+        # Add the Help menu into the menu bar. & Tells the program to create Ctrl+F shortcut to open menu.
+        self.menu_bar.Append(self.help_menu, Strings.label_help)
+
+        # Create a menu item for open
+        self.file_menu_item_open = wx.MenuItem(self.file_menu, wx.ID_OPEN, Strings.label_open, Strings.label_open_hint)
+        # Create a menu item for about
+        self.help_menu_item_about = wx.MenuItem(self.help_menu, wx.ID_ABOUT, Strings.label_about,
+                                                Strings.label_about_hint)
+        # Create a menu item for quit
+        self.file_menu_item_quit = wx.MenuItem(self.file_menu, wx.ID_CLOSE, Strings.label_quit, Strings.label_quit_hint)
+
+        # Put menu items into the menu buttons
+        self.file_menu.Append(self.file_menu_item_open)
+        self.file_menu.AppendSeparator()
+        self.file_menu.Append(self.file_menu_item_quit)
+        self.help_menu.Append(self.help_menu_item_about)
+
+        self.SetMenuBar(self.menu_bar)
+
+    def _init_top_tool_bar(self):
+        """
+        Set up top tool bar for the frame.
+        :return: None
+        """
+        self.tool_bar = self.CreateToolBar()
+        # Add toolbar tools
+        self.tool_bar.AddTool(-1, Strings.toolbar_new_file, images.getPyBitmap(), Strings.toolbar_new_file)
+        self.tool_bar.Realize()
+
+    def _init_status_bar(self):
+        """
+        Set up status bar for the frame.
+        :return: None
+        """
+        # Create a status bar with 3 fields
+        self.status_bar = self.CreateStatusBar(3)
+        self.status_bar.SetStatusWidths([-3, -2, -1])
+        # Initialize status bar
+        self._set_status_text('', 0)
+        self._set_status_text('', 1)
 
     def _set_status_text(self, text: str, position=0) -> None:
         """
