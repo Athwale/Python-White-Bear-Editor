@@ -221,7 +221,7 @@ class MainFrame(wx.Frame):
         Set up top tool bar for the frame.
         :return: None
         """
-        self.tool_bar = self.CreateToolBar()
+        self.tool_bar = self.CreateToolBar(style=wx.TB_DEFAULT_STYLE)
         # Add toolbar tools
         self.tool_bar.AddTool(-1, Strings.toolbar_new_file, images.getPyBitmap(), Strings.toolbar_new_file)
         self.tool_bar.Realize()
@@ -257,6 +257,7 @@ class MainFrame(wx.Frame):
         # Disable the gui until load is done
         self.Disable()
         self._set_status_text(Strings.status_loading, 2)
+        self._set_status_text(('Work dir: ' + str(path)), 1)
         file_list_thread = FileListThread(self, self.EVT_CARRIER_TYPE_ID, str(path))
         file_list_thread.start()
 
@@ -278,7 +279,9 @@ class MainFrame(wx.Frame):
             self.page_list.InsertItems(event.get_payload(), 0)
             # Select last used document
             self.page_list.SetStringSelection(self.config_manager.get_last_document())
-            self.list_item_click_handler(wx.CommandEvent())
+            list_event = wx.CommandEvent()
+            list_event.SetString(self.config_manager.get_last_document())
+            self.list_item_click_handler(list_event)
             # Enable GUI when the load is done
             self._set_status_text(Strings.status_ready, 2)
             self.Enable()
@@ -349,3 +352,4 @@ class MainFrame(wx.Frame):
         """
         selected_name = event.GetString()
         self._set_status_text(selected_name)
+        self.SetTitle(selected_name)
