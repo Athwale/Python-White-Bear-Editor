@@ -31,42 +31,7 @@ class MainFrame(wx.Frame):
         self._init_status_bar()
         self._init_top_tool_bar()
         self._init_menu()
-
-        # Create main panel
-        self.main_panel = wx.Panel(self)
-
-        # Sizer configuration
-        # Main window - main horizontal sizer
-        #  left vertical sizer = files
-        #  middle vertical sizer = left static sizer (article image (name, alt, title)),
-        #   right top static box sizer(article logo, logo name, alt, title)
-        #  right sizer (date, article main title, keywords, description) text area
-        #  right vertical sizer = aside images
-
-        # Create sizers
-        self.main_horizontal_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.left_column_sizer = wx.BoxSizer(wx.VERTICAL)
-        self.right_top_static_sizer = wx.StaticBoxSizer(wx.VERTICAL, self, label=Strings.label_menu_logo)
-
-        self.right_main_row_vertical_sizer = wx.BoxSizer(wx.VERTICAL)
-        self.right_top_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.top_left_static_sizer = wx.StaticBoxSizer(wx.HORIZONTAL, self, label=Strings.label_article_image)
-        self.top_right_static_sizer = wx.StaticBoxSizer(wx.VERTICAL, self, label=Strings.label_article_info)
-
-        self.right_bottom_row_sizer = wx.BoxSizer(wx.HORIZONTAL)
-
-        # The | is a bitwise or and flags is a bit mask of constants
-        self.right_main_row_vertical_sizer.Add(self.right_top_sizer, flag=wx.RIGHT | wx.ALIGN_LEFT | wx.EXPAND,
-                                               border=Numbers.control_border_size, proportion=0)
-        self.right_main_row_vertical_sizer.Add(self.right_bottom_row_sizer, flag=wx.RIGHT | wx.ALIGN_LEFT | wx.EXPAND,
-                                               border=Numbers.control_border_size, proportion=1)
-        self.right_top_sizer.Add(self.top_left_static_sizer, flag=wx.ALIGN_LEFT | wx.RIGHT,
-                                 border=0)
-        self.right_top_sizer.Add(self.top_right_static_sizer, 1, flag=wx.ALIGN_LEFT | wx.EXPAND)
-        self.right_top_sizer.Add(self.right_top_static_sizer, flag=wx.LEFT, border=Numbers.control_border_size)
-        self.main_horizontal_sizer.Add(self.left_column_sizer, 0, wx.EXPAND)
-        self.main_horizontal_sizer.Add(self.right_main_row_vertical_sizer, 1, wx.EXPAND)
-        self.SetSizer(self.main_horizontal_sizer)
+        self._init_sizers()
 
         # Create main font for text fields
         self.text_field_font: wx.Font = wx.Font(Numbers.text_field_font_size, wx.FONTFAMILY_DEFAULT,
@@ -78,7 +43,7 @@ class MainFrame(wx.Frame):
         self.placeholder_logo_image.Replace(0, 0, 0, 245, 255, 255)
         self.menu_logo_image = wx.StaticBitmap(self, -1, wx.Bitmap(self.placeholder_logo_image))
         # Set border to the image
-        self.right_top_static_sizer.Add(self.menu_logo_image, flag=wx.LEFT | wx.BOTTOM | wx.RIGHT, border=1)
+        self.menu_logo_static_sizer.Add(self.menu_logo_image, flag=wx.LEFT | wx.BOTTOM | wx.RIGHT, border=1)
         # Create menu logo name text box
         self.field_logo_name = wx.TextCtrl(self, -1, value=Strings.label_menu_logo_name_placeholder,
                                            size=wx.Size(98, 35),
@@ -94,9 +59,9 @@ class MainFrame(wx.Frame):
         self.field_logo_alt.SetFont(self.text_field_font)
         self.field_logo_title.SetFont(self.text_field_font)
 
-        self.right_top_static_sizer.Add(self.field_logo_name)
-        self.right_top_static_sizer.Add(self.field_logo_alt)
-        self.right_top_static_sizer.Add(self.field_logo_title)
+        self.menu_logo_static_sizer.Add(self.field_logo_name)
+        self.menu_logo_static_sizer.Add(self.field_logo_alt)
+        self.menu_logo_static_sizer.Add(self.field_logo_title)
 
         # File list
         self.page_list = wx.ListBox(self, wx.LB_SINGLE | wx.LB_SORT, name=Strings.label_page_list,
@@ -108,7 +73,7 @@ class MainFrame(wx.Frame):
         self.placeholder_main_image: wx.Image = wx.Image(Numbers.main_image_width, Numbers.main_image_height)
         self.placeholder_main_image.Replace(0, 0, 0, 245, 255, 255)
         self.main_image = wx.StaticBitmap(self, -1, wx.Bitmap(self.placeholder_main_image))
-        self.top_left_static_sizer.Add(self.main_image, flag=wx.LEFT | wx.BOTTOM | wx.RIGHT, border=1)
+        self.article_image_static_sizer.Add(self.main_image, flag=wx.LEFT | wx.BOTTOM | wx.RIGHT, border=1)
 
         # Add text controls
         self.field_main_image_alt = wx.TextCtrl(self, -1, value=Strings.label_article_image_alt, size=wx.Size(160, 30))
@@ -123,26 +88,22 @@ class MainFrame(wx.Frame):
         self.field_article_description = wx.TextCtrl(self, -1, value=Strings.label_article_description,
                                                      size=wx.Size(250, 30))
 
-        self.top_right_static_sizer.Add(self.field_article_date)
-        self.top_right_static_sizer.Add(self.field_main_image_name, flag=wx.EXPAND)
-        self.top_right_static_sizer.Add(self.field_main_image_title, flag=wx.EXPAND)
-        self.top_right_static_sizer.Add(self.field_main_image_alt, flag=wx.EXPAND)
-        self.top_right_static_sizer.Add(self.field_article_title, flag=wx.TOP | wx.EXPAND, border=16)
-        self.top_right_static_sizer.Add(self.field_article_keywords, flag=wx.EXPAND)
-        self.top_right_static_sizer.Add(self.field_article_description, flag=wx.EXPAND)
+        self.article_data_static_sizer.Add(self.field_article_date)
+        self.article_data_static_sizer.Add(self.field_main_image_name, flag=wx.EXPAND)
+        self.article_data_static_sizer.Add(self.field_main_image_title, flag=wx.EXPAND)
+        self.article_data_static_sizer.Add(self.field_main_image_alt, flag=wx.EXPAND)
+        self.article_data_static_sizer.Add(self.field_article_title, flag=wx.TOP | wx.EXPAND, border=16)
+        self.article_data_static_sizer.Add(self.field_article_keywords, flag=wx.EXPAND)
+        self.article_data_static_sizer.Add(self.field_article_description, flag=wx.EXPAND)
 
         # Add the list into the bottom sizer, give it a sizing weight and let it expand vertically
-        self.left_column_sizer.Add(self.page_list, flag=wx.LEFT, border=Numbers.control_border_size, proportion=1)
+        self.filelist_column_sizer.Add(self.page_list, flag=wx.LEFT, border=Numbers.control_border_size, proportion=1)
 
         # Add main text area
         self.main_text_area = rt.RichTextCtrl(self, style=wx.VSCROLL)
-        self.right_bottom_row_sizer.Add(self.main_text_area, flag=wx.EXPAND | wx.LEFT | wx.TOP, proportion=1, border=2)
-
-        # Add right aside photo column
-        self.right_photo_column_sizer = wx.StaticBoxSizer(wx.VERTICAL, self, label=Strings.label_photo_column)
-        self.right_photo_column_sizer.SetMinSize((211, -1))
-        self.right_bottom_row_sizer.Add(self.right_photo_column_sizer, flag=wx.EXPAND | wx.LEFT,
-                                        border=Numbers.control_border_size)
+        self.right_bottom_sizer.Add(self.main_text_area, flag=wx.EXPAND | wx.LEFT | wx.TOP, proportion=1, border=2)
+        self.right_bottom_sizer.Add(self.side_photo_column_sizer, flag=wx.EXPAND | wx.LEFT,
+                                    border=Numbers.control_border_size)
 
         # After all is added, let the window know how big it should be
         self.main_horizontal_sizer.SetSizeHints(self)
@@ -167,7 +128,7 @@ class MainFrame(wx.Frame):
         # Bind custom event
         self.Bind(wx.PyEventBinder(self.EVT_CARRIER_TYPE_ID, 1), self.carrier_event_handler)
 
-        # Prepare tools
+        # Prepare data objects
         self.config_manager = ConfigManager()
         self.file_parser = FileParser()
 
@@ -237,6 +198,46 @@ class MainFrame(wx.Frame):
         # Initialize status bar
         self._set_status_text('', 0)
         self._set_status_text('', 1)
+
+    def _init_sizers(self):
+        """
+        Set up sizers for the frame
+        :return: None
+        """
+        # Create sizers
+        # The main sizer that contains everything else.
+        self.main_horizontal_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        # Contains file list of pages
+        self.filelist_column_sizer = wx.BoxSizer(wx.VERTICAL)
+        # Contains right top sizer, right bottom sizer
+        self.right_main_vertical_sizer = wx.BoxSizer(wx.VERTICAL)
+        # Contains article image sizer, article data sizer, menu logo static sizer
+        self.right_top_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        # Contains main article image
+        self.article_image_static_sizer = wx.StaticBoxSizer(wx.HORIZONTAL, self, label=Strings.label_article_image)
+        # Contains article metadata controls
+        self.article_data_static_sizer = wx.StaticBoxSizer(wx.VERTICAL, self, label=Strings.label_article_info)
+        # Contains menu logo controls
+        self.menu_logo_static_sizer = wx.StaticBoxSizer(wx.VERTICAL, self, label=Strings.label_menu_logo)
+        # Contains main text area, photo column sizer
+        self.right_bottom_sizer = wx.BoxSizer(wx.HORIZONTAL)
+
+        # Contains article photos
+        self.side_photo_column_sizer = wx.StaticBoxSizer(wx.VERTICAL, self, label=Strings.label_photo_column)
+        self.side_photo_column_sizer.SetMinSize((211, -1))
+
+        # The | is a bitwise or and flags is a bit mask of constants
+        self.right_main_vertical_sizer.Add(self.right_top_sizer, flag=wx.RIGHT | wx.ALIGN_LEFT | wx.EXPAND,
+                                           border=Numbers.control_border_size, proportion=0)
+        self.right_main_vertical_sizer.Add(self.right_bottom_sizer, flag=wx.RIGHT | wx.ALIGN_LEFT | wx.EXPAND,
+                                           border=Numbers.control_border_size, proportion=1)
+        self.right_top_sizer.Add(self.article_image_static_sizer, flag=wx.ALIGN_LEFT | wx.RIGHT,
+                                 border=0)
+        self.right_top_sizer.Add(self.article_data_static_sizer, 1, flag=wx.ALIGN_LEFT | wx.EXPAND)
+        self.right_top_sizer.Add(self.menu_logo_static_sizer, flag=wx.LEFT, border=Numbers.control_border_size)
+        self.main_horizontal_sizer.Add(self.filelist_column_sizer, 0, wx.EXPAND)
+        self.main_horizontal_sizer.Add(self.right_main_vertical_sizer, 1, wx.EXPAND)
+        self.SetSizer(self.main_horizontal_sizer)
 
     def _set_status_text(self, text: str, position=0) -> None:
         """
