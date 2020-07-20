@@ -1,4 +1,5 @@
 import wx
+import os
 import wx.richtext as rt
 from wx.py import images
 
@@ -283,6 +284,7 @@ class MainFrame(wx.Frame):
             list_event = wx.CommandEvent()
             list_event.SetString(self.config_manager.get_last_document())
             self.list_item_click_handler(list_event)
+            os.chdir(self.config_manager.get_working_dir())
             # Enable GUI when the load is done
             self._set_status_text(Strings.status_ready, 2)
             self.Enable()

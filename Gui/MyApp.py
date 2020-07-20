@@ -4,9 +4,11 @@
 class is necessary and must be in all wx python programs. OnInit must be overridden here"""
 
 import wx
+import wx.adv
 
 from Constants.Strings import Strings
 from Gui.Frames.MainFrame import MainFrame
+from Resources.Fetch import Fetch
 
 
 class MyApp(wx.App):
@@ -19,6 +21,11 @@ class MyApp(wx.App):
         self.frame = None
 
     def OnInit(self):
+        # Set up and display ad splash screen
+        bitmap = wx.Bitmap(Fetch.get_resource_path('splashscreen.png'), wx.BITMAP_TYPE_PNG)
+        wx.adv.SplashScreen(bitmap, wx.adv.SPLASH_CENTER_ON_SCREEN | wx.adv.SPLASH_TIMEOUT, 1000, None, -1,
+                            wx.DefaultPosition, wx.DefaultSize, wx.BORDER_SIMPLE | wx.STAY_ON_TOP)
+        wx.Yield()
         # Frame with None parent is a top level frame. This frame must be created after the App object is created.
         self.frame = MainFrame()
         self.frame.Show()

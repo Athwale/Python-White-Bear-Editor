@@ -22,6 +22,7 @@ class Strings:
     exception_meta_description_twice: str = 'Wrong file format, meta description found twice'
     exception_not_bool: str = 'Modified can only be of type bool'
     exception_conf_inaccessible: str = '.whitebearEditor.conf inaccessible'
+    exception_resource_not_found: str = 'Resource not found'
     label_file: str = '&File'
     label_quit: str = '&Quit'
     label_help: str = '&Help'
