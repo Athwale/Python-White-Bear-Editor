@@ -34,7 +34,7 @@ class MainFrame(wx.Frame):
         self._init_menu()
         self._init_sizers()
 
-        # Create main font for text fields
+        # Create font for text fields
         self.text_field_font: wx.Font = wx.Font(Numbers.text_field_font_size, wx.FONTFAMILY_DEFAULT,
                                                 wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, False)
 
