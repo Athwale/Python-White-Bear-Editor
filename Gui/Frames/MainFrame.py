@@ -32,29 +32,41 @@ class MainFrame(wx.Frame):
         self._init_status_bar()
         self._init_top_tool_bar()
         self._init_menu()
+
+        # Create splitter window
+        self.split_screen = wx.SplitterWindow(self)
+        self.split_screen.SetMinimumPaneSize(Numbers.minimal_panel_size)
+        # Create panels that go into the splitter window
+        self.left_panel = wx.Panel(self.split_screen, style=wx.SUNKEN_BORDER)
+        self.right_panel = wx.Panel(self.split_screen, style=wx.SUNKEN_BORDER)
+        self.right_panel.SetMinSize((600, -1))
         self._init_sizers()
+        self.split_screen.SplitVertically(self.left_panel, self.right_panel, 210)
+        self.split_screen.SetMinimumPaneSize(Numbers.minimal_panel_size)
+        self.main_sizer = wx.BoxSizer(wx.VERTICAL)
+        self.main_sizer.Add(self.split_screen, 1, wx.EXPAND)
 
         # Create font for text fields
         self.text_field_font: wx.Font = wx.Font(Numbers.text_field_font_size, wx.FONTFAMILY_DEFAULT,
                                                 wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, False)
 
-        # right column section -----------------------------------------------------------------------------------------
+        # Logo section -------------------------------------------------------------------------------------------------
         # Create a placeholder image
         self.placeholder_logo_image = wx.Image(Numbers.logo_image_size, Numbers.logo_image_size)
         self.placeholder_logo_image.Replace(0, 0, 0, 245, 255, 255)
-        self.menu_logo_image = wx.StaticBitmap(self, -1, wx.Bitmap(self.placeholder_logo_image))
+        self.menu_logo_image = wx.StaticBitmap(self.right_panel, -1, wx.Bitmap(self.placeholder_logo_image))
         # Set border to the image
         self.menu_logo_static_sizer.Add(self.menu_logo_image, flag=wx.LEFT | wx.BOTTOM | wx.RIGHT, border=1)
         # Create menu logo name text box
-        self.field_logo_name = wx.TextCtrl(self, -1, value=Strings.label_menu_logo_name_placeholder,
+        self.field_logo_name = wx.TextCtrl(self.right_panel, -1, value=Strings.label_menu_logo_name_placeholder,
                                            size=wx.Size(98, 35),
                                            style=wx.TE_MULTILINE | wx.TE_CENTRE | wx.TE_NO_VSCROLL)
         self.field_logo_name.SetFont(self.text_field_font)
 
-        self.field_logo_alt = wx.TextCtrl(self, -1, value=Strings.label_menu_logo_alt_placeholder, size=wx.Size(98, 45),
+        self.field_logo_alt = wx.TextCtrl(self.right_panel, -1, value=Strings.label_menu_logo_alt_placeholder, size=wx.Size(98, 45),
                                           style=wx.TE_MULTILINE)
         self.field_logo_name.SetFont(self.text_field_font)
-        self.field_logo_title = wx.TextCtrl(self, -1, value=Strings.label_menu_logo_title_placeholder,
+        self.field_logo_title = wx.TextCtrl(self.right_panel, -1, value=Strings.label_menu_logo_title_placeholder,
                                             size=wx.Size(98, 49), style=wx.TE_MULTILINE)
         self.field_logo_name.SetFont(self.text_field_font)
         self.field_logo_alt.SetFont(self.text_field_font)
@@ -63,30 +75,33 @@ class MainFrame(wx.Frame):
         self.menu_logo_static_sizer.Add(self.field_logo_name)
         self.menu_logo_static_sizer.Add(self.field_logo_alt)
         self.menu_logo_static_sizer.Add(self.field_logo_title)
+        # --------------------------------------------------------------------------------------------------------------
 
-        # File list
-        self.page_list = wx.ListBox(self, wx.LB_SINGLE | wx.LB_SORT, name=Strings.label_page_list,
-                                    size=wx.Size(210, 300))
+        # File list section --------------------------------------------------------------------------------------------
+        self.page_list = wx.ListBox(self.left_panel, wx.LB_SINGLE | wx.LB_SORT, name=Strings.label_page_list)
         self.page_list.SetFont(self.text_field_font)
+        # Add the list into the bottom sizer, give it a sizing weight and let it expand vertically
+        self.filelist_column_sizer.Add(self.page_list, flag=wx.EXPAND, border=Numbers.control_border_size, proportion=1)
+        # --------------------------------------------------------------------------------------------------------------
 
-        # Middle section -----------------------------------------------------------------------------------------------
+        # Article metadata section -------------------------------------------------------------------------------------
         # Add image placeholder into middle top left static sizer
         self.placeholder_main_image: wx.Image = wx.Image(Numbers.main_image_width, Numbers.main_image_height)
         self.placeholder_main_image.Replace(0, 0, 0, 245, 255, 255)
-        self.main_image = wx.StaticBitmap(self, -1, wx.Bitmap(self.placeholder_main_image))
+        self.main_image = wx.StaticBitmap(self.right_panel, -1, wx.Bitmap(self.placeholder_main_image))
         self.article_image_static_sizer.Add(self.main_image, flag=wx.LEFT | wx.BOTTOM | wx.RIGHT, border=1)
 
-        # Add text controls
-        self.field_main_image_alt = wx.TextCtrl(self, -1, value=Strings.label_article_image_alt, size=wx.Size(160, 30))
-        self.field_main_image_title = wx.TextCtrl(self, -1, value=Strings.label_article_image_title,
+        # Add text boxes
+        self.field_main_image_alt = wx.TextCtrl(self.right_panel, -1, value=Strings.label_article_image_alt, size=wx.Size(160, 30))
+        self.field_main_image_title = wx.TextCtrl(self.right_panel, -1, value=Strings.label_article_image_title,
                                                   size=wx.Size(160, 30))
-        self.field_main_image_name = wx.TextCtrl(self, -1, value=Strings.label_article_image_name,
+        self.field_main_image_name = wx.TextCtrl(self.right_panel, -1, value=Strings.label_article_image_name,
                                                  size=wx.Size(160, 30))
 
-        self.field_article_date = wx.TextCtrl(self, -1, value=Strings.label_article_date, size=wx.Size(160, 30))
-        self.field_article_title = wx.TextCtrl(self, -1, value=Strings.label_article_title, size=wx.Size(250, 30))
-        self.field_article_keywords = wx.TextCtrl(self, -1, value=Strings.label_article_keywords, size=wx.Size(250, 30))
-        self.field_article_description = wx.TextCtrl(self, -1, value=Strings.label_article_description,
+        self.field_article_date = wx.TextCtrl(self.right_panel, -1, value=Strings.label_article_date, size=wx.Size(160, 30))
+        self.field_article_title = wx.TextCtrl(self.right_panel, -1, value=Strings.label_article_title, size=wx.Size(250, 30))
+        self.field_article_keywords = wx.TextCtrl(self.right_panel, -1, value=Strings.label_article_keywords, size=wx.Size(250, 30))
+        self.field_article_description = wx.TextCtrl(self.right_panel, -1, value=Strings.label_article_description,
                                                      size=wx.Size(250, 30))
 
         self.article_data_static_sizer.Add(self.field_article_date)
@@ -96,21 +111,16 @@ class MainFrame(wx.Frame):
         self.article_data_static_sizer.Add(self.field_article_title, flag=wx.TOP | wx.EXPAND, border=16)
         self.article_data_static_sizer.Add(self.field_article_keywords, flag=wx.EXPAND)
         self.article_data_static_sizer.Add(self.field_article_description, flag=wx.EXPAND)
+        # --------------------------------------------------------------------------------------------------------------
 
-        # Add the list into the bottom sizer, give it a sizing weight and let it expand vertically
-        self.filelist_column_sizer.Add(self.page_list, flag=wx.LEFT, border=Numbers.control_border_size, proportion=1)
-
-        # Add main text area
-        self.main_text_area = rt.RichTextCtrl(self, style=wx.VSCROLL)
+        # Main text area section ---------------------------------------------------------------------------------------
+        self.main_text_area = rt.RichTextCtrl(self.right_panel, style=wx.VSCROLL)
         self.right_bottom_sizer.Add(self.main_text_area, flag=wx.EXPAND | wx.LEFT | wx.TOP, proportion=1, border=2)
         self.right_bottom_sizer.Add(self.side_photo_column_sizer, flag=wx.EXPAND | wx.LEFT,
                                     border=Numbers.control_border_size)
-
-        # After all is added, let the window know how big it should be
-        self.main_horizontal_sizer.SetSizeHints(self)
-
-        self.SetAutoLayout(1)
+        # --------------------------------------------------------------------------------------------------------------
         self.SetMinClientSize(wx.Size(Numbers.minimal_window_size_width, Numbers.minimal_window_size_height))
+        self.SetSizer(self.main_sizer)
 
         # Bind click handlers
         # Bind window close events, X button and emergency quit
@@ -205,9 +215,6 @@ class MainFrame(wx.Frame):
         Set up sizers for the frame
         :return: None
         """
-        # Create sizers
-        # The main sizer that contains everything else.
-        self.main_horizontal_sizer = wx.BoxSizer(wx.HORIZONTAL)
         # Contains file list of pages
         self.filelist_column_sizer = wx.BoxSizer(wx.VERTICAL)
         # Contains right top sizer, right bottom sizer
@@ -215,16 +222,16 @@ class MainFrame(wx.Frame):
         # Contains article image sizer, article data sizer, menu logo static sizer
         self.right_top_sizer = wx.BoxSizer(wx.HORIZONTAL)
         # Contains main article image
-        self.article_image_static_sizer = wx.StaticBoxSizer(wx.HORIZONTAL, self, label=Strings.label_article_image)
+        self.article_image_static_sizer = wx.StaticBoxSizer(wx.HORIZONTAL, self.right_panel, label=Strings.label_article_image)
         # Contains article metadata controls
-        self.article_data_static_sizer = wx.StaticBoxSizer(wx.VERTICAL, self, label=Strings.label_article_info)
+        self.article_data_static_sizer = wx.StaticBoxSizer(wx.VERTICAL, self.right_panel, label=Strings.label_article_info)
         # Contains menu logo controls
-        self.menu_logo_static_sizer = wx.StaticBoxSizer(wx.VERTICAL, self, label=Strings.label_menu_logo)
+        self.menu_logo_static_sizer = wx.StaticBoxSizer(wx.VERTICAL, self.right_panel, label=Strings.label_menu_logo)
         # Contains main text area, photo column sizer
         self.right_bottom_sizer = wx.BoxSizer(wx.HORIZONTAL)
 
         # Contains article photos
-        self.side_photo_column_sizer = wx.StaticBoxSizer(wx.VERTICAL, self, label=Strings.label_photo_column)
+        self.side_photo_column_sizer = wx.StaticBoxSizer(wx.VERTICAL, self.right_panel, label=Strings.label_photo_column)
         self.side_photo_column_sizer.SetMinSize((211, -1))
 
         # The | is a bitwise or and flags is a bit mask of constants
@@ -236,9 +243,8 @@ class MainFrame(wx.Frame):
                                  border=0)
         self.right_top_sizer.Add(self.article_data_static_sizer, 1, flag=wx.ALIGN_LEFT | wx.EXPAND)
         self.right_top_sizer.Add(self.menu_logo_static_sizer, flag=wx.LEFT, border=Numbers.control_border_size)
-        self.main_horizontal_sizer.Add(self.filelist_column_sizer, 0, wx.EXPAND)
-        self.main_horizontal_sizer.Add(self.right_main_vertical_sizer, 1, wx.EXPAND)
-        self.SetSizer(self.main_horizontal_sizer)
+        self.left_panel.SetSizer(self.filelist_column_sizer)
+        self.right_panel.SetSizer(self.right_main_vertical_sizer)
 
     def _set_status_text(self, text: str, position=0) -> None:
         """
@@ -321,6 +327,8 @@ class MainFrame(wx.Frame):
             if self.page_list.GetSelection() != wx.NOT_FOUND:
                 self.config_manager.store_last_open_document(self.page_list.GetString(self.page_list.GetSelection()))
             # TODO Save currently worked on document
+        # If the built in close function is not called, destroy must be called explicitly, calling Close runs the close
+        # handler.
         self.Destroy()
 
     def open_button_handler(self, event):
@@ -336,6 +344,7 @@ class MainFrame(wx.Frame):
         if dlg.ShowModal() == wx.ID_OK:
             self.config_manager.store_working_dir(dlg.GetPath())
             self._load_working_directory(self.config_manager.get_working_dir())
+        # This must be called, the dialog stays in memory so you can retrieve data and would not be destroyed.
         dlg.Destroy()
 
     def about_button_handler(self, event):
