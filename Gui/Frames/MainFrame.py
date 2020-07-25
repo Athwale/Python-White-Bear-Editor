@@ -27,8 +27,6 @@ class MainFrame(wx.Frame):
         """
         # -1 is a special ID which generates a random wx ID
         super(MainFrame, self).__init__(None, -1, title=Strings.editor_name, style=wx.DEFAULT_FRAME_STYLE)
-        self.Centre()
-        self.Update()
         self._init_status_bar()
         self._init_top_tool_bar()
         self._init_menu()
@@ -40,11 +38,11 @@ class MainFrame(wx.Frame):
         self.left_panel = wx.Panel(self.split_screen, style=wx.SUNKEN_BORDER)
         self.right_panel = wx.Panel(self.split_screen, style=wx.SUNKEN_BORDER)
         self.right_panel.SetMinSize((600, -1))
-        self._init_sizers()
+        self._init_sizers_panels()
         self.split_screen.SplitVertically(self.left_panel, self.right_panel, 210)
         self.split_screen.SetMinimumPaneSize(Numbers.minimal_panel_size)
-        self.main_sizer = wx.BoxSizer(wx.VERTICAL)
-        self.main_sizer.Add(self.split_screen, 1, wx.EXPAND)
+        self.main_horizontal_sizer = wx.BoxSizer(wx.VERTICAL)
+        self.main_horizontal_sizer.Add(self.split_screen, 1, wx.EXPAND)
 
         # Create font for text fields
         self.text_field_font: wx.Font = wx.Font(Numbers.text_field_font_size, wx.FONTFAMILY_DEFAULT,
@@ -120,7 +118,7 @@ class MainFrame(wx.Frame):
                                     border=Numbers.control_border_size)
         # --------------------------------------------------------------------------------------------------------------
         self.SetMinClientSize(wx.Size(Numbers.minimal_window_size_width, Numbers.minimal_window_size_height))
-        self.SetSizer(self.main_sizer)
+        self.SetSizer(self.main_horizontal_sizer)
 
         # Bind click handlers
         # Bind window close events, X button and emergency quit
@@ -210,7 +208,7 @@ class MainFrame(wx.Frame):
         self._set_status_text('', 0)
         self._set_status_text('', 1)
 
-    def _init_sizers(self):
+    def _init_sizers_panels(self):
         """
         Set up sizers for the frame
         :return: None

@@ -2,6 +2,7 @@ import os
 from typing import List, Tuple
 
 from Constants.Strings import Strings
+from Constants.Numbers import Numbers
 from Exceptions.AccessException import AccessException
 
 
@@ -41,6 +42,8 @@ class ConfigManager:
         :return: None
         """
         self.store_working_dir(Strings.home_directory)
+        self.store_window_position((0, 0))
+        self.store_window_size((Numbers.minimal_window_size_width, Numbers.minimal_window_size_height))
 
     def _read_config(self) -> None:
         """
