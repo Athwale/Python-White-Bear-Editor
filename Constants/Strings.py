@@ -31,7 +31,6 @@ class Strings:
     label_about_hint: str = 'About'
     label_open: str = '&Open directory'
     label_open_hint: str = 'Open directory'
-    label_page_list: str = 'Page list'
     label_choose_dir: str = 'Choose whitebear directory'
     label_about_window_name: str = 'About'
     label_menu_logo: str = 'Menu logo'

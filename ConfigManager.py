@@ -107,8 +107,10 @@ class ConfigManager:
     def get_last_document(self) -> object:
         """
         Get the last opened document.
-        :return: String name of the last opened document when exiting the editor.
+        :return: String name of the last opened document when exiting the editor. If no document was open, returns None.
         """
+        if self.CONF_LAST not in self._conf_dict:
+            return None
         return self._conf_dict[self.CONF_LAST]
 
     def save_config_file(self):
