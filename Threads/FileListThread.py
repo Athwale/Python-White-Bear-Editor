@@ -1,10 +1,11 @@
 import threading
+
 import wx
 
+from Constants.Constants import Constants
 from DirectoryLoader import DirectoryLoader
 from Exceptions.AccessException import AccessException
 from Threads.Events.CarrierEvent import CarrierEvent
-from Constants.Constants import Constants
 
 
 class FileListThread(threading.Thread):

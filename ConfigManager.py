@@ -1,8 +1,8 @@
 import os
 from typing import List, Tuple
 
-from Constants.Strings import Strings
 from Constants.Numbers import Numbers
+from Constants.Strings import Strings
 from Exceptions.AccessException import AccessException
 
 

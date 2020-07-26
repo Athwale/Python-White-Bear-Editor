@@ -5,7 +5,6 @@ class is necessary and must be in all wx python programs. OnInit must be overrid
 
 import wx
 import wx.adv
-import time
 
 from Constants.Strings import Strings
 from Gui.Frames.MainFrame import MainFrame

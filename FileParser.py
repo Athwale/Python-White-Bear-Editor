@@ -1,5 +1,7 @@
 from typing import Tuple
+
 from bs4 import BeautifulSoup
+
 from ParsedFile import ParsedFile
 
 

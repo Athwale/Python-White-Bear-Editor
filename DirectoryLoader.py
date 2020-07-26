@@ -1,8 +1,10 @@
 import os
 from typing import Dict
-from Exceptions.AccessException import AccessException
-from Constants.Strings import Strings
+
 from bs4 import BeautifulSoup
+
+from Constants.Strings import Strings
+from Exceptions.AccessException import AccessException
 
 
 class DirectoryLoader:
