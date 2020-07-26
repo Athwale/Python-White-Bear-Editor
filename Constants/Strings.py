@@ -51,3 +51,4 @@ class Strings:
     status_ready: str = 'Ready'
     status_error: str = 'Error'
     toolbar_new_file: str = 'New file'
+    button_close: str = 'Close'

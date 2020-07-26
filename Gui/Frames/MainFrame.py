@@ -9,7 +9,7 @@ from Constants.Constants import Constants
 from Constants.Numbers import Numbers
 from Constants.Strings import Strings
 from FileParser import FileParser
-from Gui.Dialogs.ModalDialog import ModalDialog
+from Gui.Dialogs.AboutDialog import AboutDialog
 from Threads.Events.CarrierEvent import CarrierEvent
 from Threads.FileListThread import FileListThread
 
@@ -131,7 +131,7 @@ class MainFrame(wx.Frame):
         :return: None
         """
         # Create splitter window, This allows the file list to expand left.
-        self.split_screen = wx.SplitterWindow(self)
+        self.split_screen = wx.SplitterWindow(self, style=wx.SP_LIVE_UPDATE | wx.SP_NOBORDER)
         self.split_screen.SetMinimumPaneSize(Numbers.minimal_panel_size)
         # Create panels that go into the splitter window
         self.left_panel = wx.Panel(self.split_screen, style=wx.SUNKEN_BORDER)
@@ -411,7 +411,7 @@ class MainFrame(wx.Frame):
         :param event: Not used.
         :return: None
         """
-        ModalDialog(self, Strings.label_about_window_name, Strings.text_about_contents)
+        AboutDialog(self)
 
     def list_item_click_handler(self, event):
         """
