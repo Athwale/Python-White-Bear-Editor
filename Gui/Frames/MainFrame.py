@@ -67,21 +67,23 @@ class MainFrame(wx.Frame):
         # Create menu bar and the menu itself
         # All class instance variables have to be specified during the constructor
         self.menu_bar = wx.MenuBar()
-        self.file_menu = wx.Menu()
-        self.help_menu = wx.Menu()
+        self.file_menu = wx.Menu(style=wx.MENU_TEAROFF)
+        self.help_menu = wx.Menu(style=wx.MENU_TEAROFF)
 
         # Add the file menu into the menu bar. & Tells the program to create Ctrl+F shortcut to open menu.
-        self.menu_bar.Append(self.file_menu, Strings.label_file)
+        self.menu_bar.Append(self.file_menu, Strings.label_menu_file)
         # Add the Help menu into the menu bar. & Tells the program to create Ctrl+F shortcut to open menu.
-        self.menu_bar.Append(self.help_menu, Strings.label_help)
+        self.menu_bar.Append(self.help_menu, Strings.label_menu_help)
 
         # Create a menu item for open
-        self.file_menu_item_open = wx.MenuItem(self.file_menu, wx.ID_OPEN, Strings.label_open, Strings.label_open_hint)
+        self.file_menu_item_open = wx.MenuItem(self.file_menu, wx.ID_OPEN, Strings.label_menu_item_open,
+                                               Strings.label_menu_item_open_hint)
         # Create a menu item for about
-        self.help_menu_item_about = wx.MenuItem(self.help_menu, wx.ID_ABOUT, Strings.label_about,
-                                                Strings.label_about_hint)
+        self.help_menu_item_about = wx.MenuItem(self.help_menu, wx.ID_ABOUT, Strings.label_menu_item_about,
+                                                Strings.label_menu_item_about_hint)
         # Create a menu item for quit
-        self.file_menu_item_quit = wx.MenuItem(self.file_menu, wx.ID_CLOSE, Strings.label_quit, Strings.label_quit_hint)
+        self.file_menu_item_quit = wx.MenuItem(self.file_menu, wx.ID_CLOSE, Strings.label_menu_item_quit,
+                                               Strings.label_menu_item_quit_hint)
 
         # Put menu items into the menu buttons
         self.file_menu.Append(self.file_menu_item_open)
@@ -158,24 +160,25 @@ class MainFrame(wx.Frame):
         self.article_data_static_sizer = wx.StaticBoxSizer(wx.VERTICAL, self.right_panel,
                                                            label=Strings.label_article_info)
         # Contains menu logo controls
-        self.menu_logo_static_sizer = wx.StaticBoxSizer(wx.VERTICAL, self.right_panel, label=Strings.label_menu_logo)
+        self.menu_logo_static_sizer = wx.StaticBoxSizer(wx.VERTICAL, self.right_panel,
+                                                        label=Strings.label_article_menu_logo)
         # Contains main text area, photo column sizer
         self.right_bottom_sizer = wx.BoxSizer(wx.HORIZONTAL)
 
         # Contains article photos
         self.side_photo_column_sizer = wx.StaticBoxSizer(wx.VERTICAL, self.right_panel,
-                                                         label=Strings.label_photo_column)
+                                                         label=Strings.label_article_photo_column)
         self.side_photo_column_sizer.SetMinSize((211, -1))
 
         # The | is a bitwise or and flags is a bit mask of constants
         self.right_main_vertical_sizer.Add(self.right_top_sizer, flag=wx.RIGHT | wx.ALIGN_LEFT | wx.EXPAND,
-                                           border=Numbers.control_border_size, proportion=0)
+                                           border=Numbers.widget_border_size, proportion=0)
         self.right_main_vertical_sizer.Add(self.right_bottom_sizer, flag=wx.RIGHT | wx.ALIGN_LEFT | wx.EXPAND,
-                                           border=Numbers.control_border_size, proportion=1)
+                                           border=Numbers.widget_border_size, proportion=1)
         self.right_top_sizer.Add(self.article_image_static_sizer, flag=wx.ALIGN_LEFT | wx.RIGHT,
                                  border=0)
         self.right_top_sizer.Add(self.article_data_static_sizer, 1, flag=wx.ALIGN_LEFT | wx.EXPAND)
-        self.right_top_sizer.Add(self.menu_logo_static_sizer, flag=wx.LEFT, border=Numbers.control_border_size)
+        self.right_top_sizer.Add(self.menu_logo_static_sizer, flag=wx.LEFT, border=Numbers.widget_border_size)
         # Insert sizers with GUI into the respective panels, these are inserted into the splitter windows.s
         self.left_panel.SetSizer(self.filelist_column_sizer)
         self.right_panel.SetSizer(self.right_main_vertical_sizer)
@@ -195,16 +198,17 @@ class MainFrame(wx.Frame):
         # Set border to the image
         self.menu_logo_static_sizer.Add(self.menu_logo_image, flag=wx.LEFT | wx.BOTTOM | wx.RIGHT, border=1)
         # Create menu logo name text box
-        self.field_logo_name = wx.TextCtrl(self.right_panel, -1, value=Strings.label_menu_logo_name_placeholder,
+        self.field_logo_name = wx.TextCtrl(self.right_panel, -1, value=Strings.label_article_menu_logo_name_placeholder,
                                            size=wx.Size(98, 35),
                                            style=wx.TE_MULTILINE | wx.TE_CENTRE | wx.TE_NO_VSCROLL)
         self.field_logo_name.SetFont(self.text_field_font)
 
-        self.field_logo_alt = wx.TextCtrl(self.right_panel, -1, value=Strings.label_menu_logo_alt_placeholder,
+        self.field_logo_alt = wx.TextCtrl(self.right_panel, -1, value=Strings.label_article_menu_logo_alt_placeholder,
                                           size=wx.Size(98, 45),
                                           style=wx.TE_MULTILINE)
         self.field_logo_name.SetFont(self.text_field_font)
-        self.field_logo_title = wx.TextCtrl(self.right_panel, -1, value=Strings.label_menu_logo_title_placeholder,
+        self.field_logo_title = wx.TextCtrl(self.right_panel, -1,
+                                            value=Strings.label_article_menu_logo_title_placeholder,
                                             size=wx.Size(98, 49), style=wx.TE_MULTILINE)
         self.field_logo_name.SetFont(self.text_field_font)
         self.field_logo_alt.SetFont(self.text_field_font)
@@ -219,7 +223,7 @@ class MainFrame(wx.Frame):
         self.page_list = wx.ListBox(self.left_panel, wx.LB_SINGLE | wx.LB_SORT)
         self.page_list.SetFont(self.text_field_font)
         # Add the list into the bottom sizer, give it a sizing weight and let it expand vertically
-        self.filelist_column_sizer.Add(self.page_list, flag=wx.EXPAND, border=Numbers.control_border_size, proportion=1)
+        self.filelist_column_sizer.Add(self.page_list, flag=wx.EXPAND, border=Numbers.widget_border_size, proportion=1)
         # --------------------------------------------------------------------------------------------------------------
 
         # Article metadata section -------------------------------------------------------------------------------------
@@ -259,7 +263,7 @@ class MainFrame(wx.Frame):
         self.main_text_area = rt.RichTextCtrl(self.right_panel, style=wx.VSCROLL)
         self.right_bottom_sizer.Add(self.main_text_area, flag=wx.EXPAND | wx.LEFT | wx.TOP, proportion=1, border=2)
         self.right_bottom_sizer.Add(self.side_photo_column_sizer, flag=wx.EXPAND | wx.LEFT,
-                                    border=Numbers.control_border_size)
+                                    border=Numbers.widget_border_size)
         # --------------------------------------------------------------------------------------------------------------
 
     def _bind_handlers(self) -> None:
@@ -302,6 +306,7 @@ class MainFrame(wx.Frame):
         :param state: True to disable, False to enable all GUI elements.
         :return: None
         """
+        # TODO disable menus except File open directory and quit
         self.Enable()
         if state:
             self.split_screen.Disable()
@@ -396,7 +401,7 @@ class MainFrame(wx.Frame):
         :param event: Not used.
         :return: None
         """
-        dlg = wx.DirDialog(self, Strings.label_choose_dir, Strings.home_directory,
+        dlg = wx.DirDialog(self, Strings.label_dialog_choose_wb_dir, Strings.home_directory,
                            wx.DD_DIR_MUST_EXIST | wx.DD_CHANGE_DIR)
         # Modal means the user is locked into this dialog an can not use the rest of the application
         if dlg.ShowModal() == wx.ID_OK:

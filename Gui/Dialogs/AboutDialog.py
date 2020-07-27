@@ -10,7 +10,7 @@ class AboutDialog(wx.Dialog):
         Display a modal dialog with a message with the text being selectable.
         :param parent: Parent frame.
         """
-        wx.Dialog.__init__(self, parent, title=Strings.label_about_window_name)
+        wx.Dialog.__init__(self, parent, title=Strings.label_dialog_about)
         self.main_vertical_sizer = wx.BoxSizer(wx.VERTICAL)
 
         self.text = wx.TextCtrl(self, style=wx.TE_READONLY | wx.TE_MULTILINE | wx.SUNKEN_BORDER)
