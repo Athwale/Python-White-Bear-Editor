@@ -7,6 +7,7 @@ TODO:
 Add system icon
 Check resource availability. Provide empty image if error.
 Display where the article belongs in the status bar
+Use red color in status bar.
 
 Python je strongly typed, neprovadi implicitni konverzi napriklad v print.
 global jmeno uvnitr funkce pouzije promennou deklarovanou venku z funkce, globalni
