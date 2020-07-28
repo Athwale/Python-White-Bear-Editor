@@ -35,6 +35,7 @@ class MainFrame(wx.Frame):
         self.config_manager = ConfigManager()
         self.file_parser = FileParser()
         self.tool_ids = []
+        self.disableable_menu_items = []
 
         self._init_status_bar()
         self._init_top_tool_bar()
@@ -81,6 +82,8 @@ class MainFrame(wx.Frame):
         # Create a menu item for about
         self.help_menu_item_about = wx.MenuItem(self.help_menu, wx.ID_ABOUT, Strings.label_menu_item_about,
                                                 Strings.label_menu_item_about_hint)
+        self.disableable_menu_items.append(self.help_menu_item_about)
+
         # Create a menu item for quit
         self.file_menu_item_quit = wx.MenuItem(self.file_menu, wx.ID_CLOSE, Strings.label_menu_item_quit,
                                                Strings.label_menu_item_quit_hint)
@@ -300,7 +303,7 @@ class MainFrame(wx.Frame):
         to_set = '| ' + text
         self.status_bar.SetStatusText(to_set, position)
 
-    def _disable_except_menu(self, state) -> None:
+    def _disable_editor(self, state) -> None:
         """
         Disable all window controls except menu a title bar.
         :param state: True to disable, False to enable all GUI elements.
@@ -313,8 +316,12 @@ class MainFrame(wx.Frame):
             self.page_list.Clear()
         else:
             self.split_screen.Enable()
+        # Disable toolbar buttons
         for tool_id in self.tool_ids:
             self.tool_bar.EnableTool(tool_id, (not state))
+        # Disable menu items
+        for menu_item in self.disableable_menu_items:
+            menu_item.Enable(not state)
 
     def _load_working_directory(self, path: str) -> None:
         """
@@ -356,11 +363,11 @@ class MainFrame(wx.Frame):
             os.chdir(self.config_manager.get_working_dir())
             # Enable GUI when the load is done
             self._set_status_text(Strings.status_ready, 2)
-            self._disable_except_menu(False)
+            self._disable_editor(False)
         if event.get_payload_type() == Constants.exception_type:
             # TODO open dialog and append the error to its log
             self._show_error_log()
-            self._disable_except_menu(True)
+            self._disable_editor(True)
 
     def quit_button_handler(self, event):
         """
