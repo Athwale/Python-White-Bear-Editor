@@ -268,6 +268,7 @@ class MainFrame(wx.Frame):
         self.right_bottom_sizer.Add(self.side_photo_column_sizer, flag=wx.EXPAND | wx.LEFT,
                                     border=Numbers.widget_border_size)
         # --------------------------------------------------------------------------------------------------------------
+        self.Fit()
 
     def _bind_handlers(self) -> None:
         """

@@ -27,7 +27,7 @@ class Strings:
     exception_resource_not_found: str = 'Resource not found'
 
     label_menu_file: str = 'File'
-    label_menu_item_open: str = 'Open directory\tctrl+o'
+    label_menu_item_open: str = 'Open directory...\tctrl+o'
     label_menu_item_open_hint: str = 'Open a whitebear web directory'
 
     label_menu_item_quit: str = 'Quit\tctrl+q'
