@@ -11,9 +11,9 @@ class Strings:
     editor_name: str = 'Whitebear editor'
     editor_version: str = '0.1'
 
-    text_about_contents: str = 'Unfinished whitebear web editor.' \
-                               '\nhttps://github.com/Athwale/Python-White-Bear-Editor\n' \
-                               'version: ' + editor_version
+    text_about_contents: str = '<p>Unfinished whitebear web editor.<br>' \
+                               '<i>https://github.com/Athwale/Python-White-Bear-Editor</i><br>' \
+                               'version: <b>' + editor_version + '</b></p>'
 
     exception_access: str = 'Main directory not readable'
     exception_access_html: str = 'File can not be accessed'

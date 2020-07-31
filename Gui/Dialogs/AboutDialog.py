@@ -13,8 +13,9 @@ class AboutDialog(wx.Dialog):
         """
         wx.Dialog.__init__(self, parent, title=Strings.label_dialog_about)
         self.main_vertical_sizer = wx.BoxSizer(wx.VERTICAL)
+        self.SetMinSize((410, 250))
 
-        self.html_window = wx.html.HtmlWindow(self)
+        self.html_window = wx.html.HtmlWindow(self, style=wx.html.HW_SCROLLBAR_NEVER)
         if 'gtk2' in wx.PlatformInfo:
             self.html_window.SetStandardFonts()
 
