@@ -1,4 +1,5 @@
 import wx
+import wx.html
 
 from Constants.Strings import Strings
 
@@ -13,13 +14,15 @@ class AboutDialog(wx.Dialog):
         wx.Dialog.__init__(self, parent, title=Strings.label_dialog_about)
         self.main_vertical_sizer = wx.BoxSizer(wx.VERTICAL)
 
-        self.text = wx.TextCtrl(self, style=wx.TE_READONLY | wx.TE_MULTILINE | wx.SUNKEN_BORDER)
+        self.html_window = wx.html.HtmlWindow(self)
+        if 'gtk2' in wx.PlatformInfo:
+            self.html_window.SetStandardFonts()
+
         self.close_button = wx.Button(self, wx.ID_OK, Strings.button_close)
         self.close_button.SetDefault()
-        self.text.SetValue(Strings.text_about_contents)
-        self.text.SetBackgroundColour(self.GetBackgroundColour())
+        self.html_window.SetPage(Strings.text_about_contents)
 
-        self.main_vertical_sizer.Add(self.text, 1, flag=wx.EXPAND)
+        self.main_vertical_sizer.Add(self.html_window, 1, flag=wx.EXPAND)
         self.main_vertical_sizer.Add(self.close_button, flag=wx.EXPAND)
         self.SetSizer(self.main_vertical_sizer)
 
