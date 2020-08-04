@@ -4,7 +4,6 @@ Automaticky generovat datum
 Zkontrolovat nastaveni spatnyho adresare
 
 TODO:
-use wx.CallAfter for threads.
 Add system icon
 Check resource availability. Provide empty image if error.
 Display where the article belongs in the status bar

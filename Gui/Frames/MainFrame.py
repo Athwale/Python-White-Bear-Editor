@@ -1,16 +1,15 @@
 import os
+from typing import List
 
 import wx
 import wx.richtext as rt
 from wx.py import images
 
 from ConfigManager import ConfigManager
-from Constants.Constants import Constants
 from Constants.Numbers import Numbers
 from Constants.Strings import Strings
 from FileParser import FileParser
 from Gui.Dialogs.AboutDialog import AboutDialog
-from Threads.Events.CarrierEvent import CarrierEvent
 from Threads.FileListThread import FileListThread
 
 
@@ -291,9 +290,6 @@ class MainFrame(wx.Frame):
         # Bind other controls clicks
         self.Bind(wx.EVT_LISTBOX, self.list_item_click_handler, self.page_list)
 
-        # Bind custom event
-        self.Bind(wx.PyEventBinder(self.EVT_CARRIER_TYPE_ID, 1), self.carrier_event_handler)
-
     def _set_status_text(self, text: str, position=0) -> None:
         """
         Set a text into a position in status bar and prepend a separator.
@@ -337,38 +333,44 @@ class MainFrame(wx.Frame):
         file_list_thread = FileListThread(self, self.EVT_CARRIER_TYPE_ID, str(path))
         file_list_thread.start()
 
-    def _show_error_log(self):
+    def _show_error_log(self, error: str):
         """
 
         :return:
         """
         self._set_status_text(Strings.status_error, 2)
 
-    def carrier_event_handler(self, event: CarrierEvent):
+    def on_filelist_load_fail(self, e: Exception) -> None:
         """
-
-        :param event:
-        :return:
+        If the loading of a supposed whitebear directory fails, this method is called, it shows the error and disables
+        all editor functionality except the load new directory button.
+        :param e: Exception that caused the call of this method.
+        :return: None
         """
-        if event.get_payload_type() == Constants.file_list_type:
-            self.page_list.Clear()
-            self.page_list.InsertItems(event.get_payload(), 0)
-            # Select last used document
-            last_document = self.config_manager.get_last_document()
-            if last_document:
-                self.page_list.SetStringSelection(last_document)
-                list_event = wx.CommandEvent()
-                list_event.SetString(last_document)
-                self.list_item_click_handler(list_event)
+        # TODO open dialog and append the error to its log
+        self._show_error_log(str(e))
+        self._disable_editor(True)
 
-            os.chdir(self.config_manager.get_working_dir())
-            # Enable GUI when the load is done
-            self._set_status_text(Strings.status_ready, 2)
-            self._disable_editor(False)
-        if event.get_payload_type() == Constants.exception_type:
-            # TODO open dialog and append the error to its log
-            self._show_error_log()
-            self._disable_editor(True)
+    def on_filelist_loaded(self, data: List[str]) -> None:
+        """
+        This method fills up the left side page file list and is called when the FileListThread finishes.
+        :param data: a list of strings: ['aluminotermie.html', 'bramborove-delo.html', 'core.html'...]
+        :return: None
+        """
+        self.page_list.Clear()
+        self.page_list.InsertItems(data, 0)
+        # Select last used document
+        last_document = self.config_manager.get_last_document()
+        if last_document:
+            self.page_list.SetStringSelection(last_document)
+            list_event = wx.CommandEvent()
+            list_event.SetString(last_document)
+            self.list_item_click_handler(list_event)
+
+        os.chdir(self.config_manager.get_working_dir())
+        # Enable GUI when the load is done
+        self._set_status_text(Strings.status_ready, 2)
+        self._disable_editor(False)
 
     def quit_button_handler(self, event):
         """
