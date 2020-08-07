@@ -1,12 +1,119 @@
 <?xml version="1.0"?>
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+    <xs:complexType name="headType">
+        <xs:sequence>
+            <xs:element name="title" type="xs:string"/>
+            <xs:element name="meta" minOccurs="7" maxOccurs="unbounded">
+                <xs:complexType>
+                    <xs:attribute name="charset" type="xs:string" fixed="utf-8"/>
+                    <xs:attribute name="name">
+                        <xs:simpleType>
+                            <xs:restriction base="xs:string">
+                                <xs:enumeration value="author"/>
+                                <xs:enumeration value="description"/>
+                                <xs:enumeration value="keywords"/>
+                                <xs:enumeration value="robots"/>
+                                <xs:enumeration value="viewport"/>
+                            </xs:restriction>
+                        </xs:simpleType>
+                    </xs:attribute>
+                    <xs:attribute name="content" type="xs:string"/>
+                    <xs:attribute name="http-equiv" type="xs:string" fixed="X-UA-Compatible"/>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="link" minOccurs="2" maxOccurs="2">
+                <xs:complexType>
+                    <xs:attribute name="rel">
+                        <xs:simpleType>
+                            <xs:restriction base="xs:string">
+                                <xs:enumeration value="icon"/>
+                                <xs:enumeration value="stylesheet"/>
+                            </xs:restriction>
+                        </xs:simpleType>
+                    </xs:attribute>
+                    <xs:attribute name="type" type="xs:string" fixed="image/x-icon"/>
+                    <xs:attribute name="href">
+                        <xs:simpleType>
+                            <xs:restriction base="xs:string">
+                                <xs:enumeration value="favicon.ico"/>
+                                <xs:enumeration value="styles.css"/>
+                            </xs:restriction>
+                        </xs:simpleType>
+                    </xs:attribute>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="script" type="xs:string"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="accessibilityLinkType" mixed="true">
+        <xs:attribute name="class" type="xs:string" use="required" fixed="skip"/>
+        <xs:attribute name="href" type="xs:string" use="required" fixed="#top"/>
+        <xs:attribute name="title" type="xs:string" use="required"/>
+    </xs:complexType>
+
+    <xs:complexType name="headerType">
+        <xs:sequence>
+            <xs:element name="figure">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="figcaption" type="xs:string"/>
+                        <xs:element name="a">
+                            <xs:complexType>
+                                <xs:sequence>
+                                    <xs:element name="img">
+                                        <xs:complexType>
+                                            <xs:attribute name="width" type="xs:integer" use="required" fixed="152"/>
+                                            <xs:attribute name="height" type="xs:integer" use="required" fixed="42"/>
+                                            <xs:attribute name="src" type="xs:string" use="required"/>
+                                            <xs:attribute name="alt" type="xs:string" use="required"/>
+                                        </xs:complexType>
+                                    </xs:element>
+                                </xs:sequence>
+                                <xs:attribute name="href" type="xs:string" use="required" fixed="index.html"/>
+                                <xs:attribute name="title" type="xs:string" use="required"/>
+                            </xs:complexType>
+                        </xs:element>
+                        <xs:element name="h1">
+                            <xs:complexType mixed="true">
+                                <xs:attribute name="id" type="xs:string" use="required" fixed="heading"/>
+                            </xs:complexType>
+                        </xs:element>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="navType">
+        <xs:sequence>
+            <xs:element name="a" maxOccurs="unbounded">
+                <xs:complexType mixed="true">
+                    <xs:attribute name="id" type="xs:string" fixed="active" use="optional"/>
+                    <xs:attribute name="class" type="xs:string" fixed="menu" use="required"/>
+                    <xs:attribute name="href" type="xs:string" use="required"/>
+                    <xs:attribute name="title" type="xs:string" use="required"/>
+                </xs:complexType>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="bodyType">
+        <xs:sequence>
+            <xs:element name="a" type="accessibilityLinkType"/>
+            <xs:element name="header" type="headerType"/>
+            <xs:element name="nav" type="navType"/>
+        </xs:sequence>
+    </xs:complexType>
 
     <xs:element name="html">
         <xs:complexType>
             <xs:sequence>
-                <xs:element name="head"/>
+                <xs:element name="head" type="headType"/>
+                <xs:element name="body" type="bodyType"/>
             </xs:sequence>
-            <xs:attribute name="lang" type="xs:string"/>
+            <xs:attribute name="lang" type="xs:string" fixed="cs" use="required"/>
         </xs:complexType>
     </xs:element>
 
