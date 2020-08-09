@@ -1,8 +1,9 @@
 import os
 
-from lxml import html
 from lxml import etree
+from lxml import html
 from lxml.etree import XMLSyntaxError
+
 
 class SchemaValidator:
     """
@@ -35,5 +36,5 @@ class SchemaValidator:
 
 if __name__ == '__main__':
     validator = SchemaValidator()
-    document = os.path.join('/home/other/test_web_xml', 'index.html')
+    document = os.path.join('/home/other/test_web_xml', 'regulovatelny-zdroj.html')
     print(validator.validate(document))

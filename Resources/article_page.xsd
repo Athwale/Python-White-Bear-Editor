@@ -3,7 +3,7 @@
 
     <xs:include schemaLocation="common_definitions.xsd"/>
 
-    <xs:complexType name="indexArticleType">
+    <xs:complexType name="ArticleType">
         <xs:choice maxOccurs="unbounded">
             <xs:element name="h2" type="xs:string"/>
             <xs:element name="h3" type="xs:string"/>
@@ -33,20 +33,20 @@
         <xs:attribute name="class" type="xs:string" fixed="indexPage" use="required"/>
     </xs:complexType>
 
-    <xs:complexType name="indexMainType">
+    <xs:complexType name="indexType">
         <xs:sequence>
-            <xs:element name="article" type="indexArticleType"/>
+            <xs:element name="article" type="ArticleType"/>
             <xs:element name="aside" type="asideType"/>
         </xs:sequence>
         <xs:attribute name="id" type="xs:string" fixed="top" use="required"/>
     </xs:complexType>
 
-    <xs:complexType name="indexBodyType">
+    <xs:complexType name="BodyType">
         <xs:sequence>
             <xs:element name="a" type="accessibilityLinkType"/>
             <xs:element name="header" type="headerType"/>
             <xs:element name="nav" type="navType"/>
-            <xs:element name="main" type="indexMainType"/>
+            <xs:element name="main" type="indexType"/>
         </xs:sequence>
     </xs:complexType>
 
@@ -54,7 +54,7 @@
         <xs:complexType>
             <xs:sequence>
                 <xs:element name="head" type="headType"/>
-                <xs:element name="body" type="indexBodyType"/>
+                <xs:element name="body" type="BodyType"/>
             </xs:sequence>
             <xs:attribute name="lang" type="xs:string" fixed="cs" use="required"/>
         </xs:complexType>
