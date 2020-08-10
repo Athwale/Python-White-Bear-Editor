@@ -15,7 +15,7 @@ class SchemaValidator:
         XML schema validator constructor
         """
         xmlschema_parsed = etree.parse(
-            '/home/omejzlik/PycharmProjects/Python-White-Bear-Editor/Resources/main_page.xsd')
+            '/home/omejzlik/PycharmProjects/Python-White-Bear-Editor/Resources/article_page.xsd')
         self.xmlschema = etree.XMLSchema(xmlschema_parsed)
 
     def validate(self, html_file: str) -> bool:
@@ -36,5 +36,5 @@ class SchemaValidator:
 
 if __name__ == '__main__':
     validator = SchemaValidator()
-    document = os.path.join('/home/other/test_web_xml', 'regulovatelny-zdroj.html')
+    document = os.path.join('/home/other/test_web_xml', 'bramborove-delo.html')
     print(validator.validate(document))

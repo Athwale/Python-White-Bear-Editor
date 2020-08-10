@@ -99,7 +99,17 @@
         </xs:sequence>
     </xs:complexType>
 
+    <xs:complexType name="spanType" mixed="true">
+        <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element name="br"/>
+        </xs:sequence>
+        <xs:attribute name="class" type="xs:string" use="required"/>
+    </xs:complexType>
+
     <xs:complexType name="strongType" mixed="true">
+        <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element name="span" type="spanType"/>
+        </xs:sequence>
         <xs:attribute name="class" type="xs:string"/>
     </xs:complexType>
 
