@@ -27,8 +27,31 @@
 
     <xs:complexType name="menuItemType">
         <xs:sequence>
-
+            <xs:element name="a">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="img">
+                            <xs:complexType>
+                                <xs:attribute name="width" type="xs:integer" use="required" fixed="96"/>
+                                <xs:attribute name="height" type="xs:integer" use="required" fixed="96"/>
+                                <xs:attribute name="src" type="xs:anyURI" use="required"/>
+                                <xs:attribute name="alt" type="xs:string" use="required"/>
+                            </xs:complexType>
+                        </xs:element>
+                    </xs:sequence>
+                    <xs:attribute name="href" type="xs:anyURI" use="required"/>
+                    <xs:attribute name="title" type="xs:string" use="required"/>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="p">
+                <xs:complexType mixed="true">
+                    <xs:choice minOccurs="0" maxOccurs="unbounded">
+                        <xs:element name="br"/>
+                    </xs:choice>
+                </xs:complexType>
+            </xs:element>
         </xs:sequence>
+        <xs:attribute name="class" type="xs:string" fixed="link" use="required"/>
     </xs:complexType>
 
     <xs:complexType name="menuBodyType">
