@@ -15,7 +15,7 @@ class SchemaValidator:
         XML schema validator constructor
         """
         xmlschema_parsed = etree.parse(
-            '/home/omejzlik/PycharmProjects/Python-White-Bear-Editor/Resources/article_schema.xsd')
+            '/home/omejzlik/PycharmProjects/Python-White-Bear-Editor/Resources/menu_schema.xsd')
         self.xmlschema = etree.XMLSchema(xmlschema_parsed)
 
     def validate(self, html_file: str) -> bool:
@@ -36,7 +36,7 @@ class SchemaValidator:
 
 if __name__ == '__main__':
     validator = SchemaValidator()
-    files = ['satelit-pro-wifi.html', 'dymovnice.html', 'htc-desire-hd-root.html', 'vakuova-pumpa.html',
+    files_articles = ['satelit-pro-wifi.html', 'dymovnice.html', 'htc-desire-hd-root.html', 'vakuova-pumpa.html',
              'plasma-v-zavarovacce.html', 'joule-thief.html', 'desire-hd-mikrofon.html', 'usb-led-svitilna.html',
              'optimalizace-2.html', 'zdroj-vysokeho-napeti.html', 'zdroj-vysokeho-napeti-jedna.html',
              'oprava-notebooku.html', 'eten-flash-rom.html',
@@ -46,6 +46,7 @@ if __name__ == '__main__':
              'point-clientcommand.html', 'zdroj-vysokeho-napeti-civka.html', 'pen-epl6-kabelova-spoust.html',
              'optimalizace-0.html', 'rpi-ochrana-gpio.html', 'medvedi-led-svitilna.html', 'optimalizace-1.html',
              'optimalizace.html']
-    for file in files:
+    files_menu = ['elektro.html', 'chemie.html', 'hammer.html', 'lockpicking.html']
+    for file in files_menu:
         document = os.path.join('/home/other/test_web_xml', file)
         print(validator.validate(document))
