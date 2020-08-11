@@ -15,7 +15,7 @@ class SchemaValidator:
         XML schema validator constructor
         """
         xmlschema_parsed = etree.parse(
-            '/home/omejzlik/PycharmProjects/Python-White-Bear-Editor/Resources/menu_schema.xsd')
+            '/home/omejzlik/PycharmProjects/Python-White-Bear-Editor/Resources/schema_menu.xsd')
         self.xmlschema = etree.XMLSchema(xmlschema_parsed)
 
     def validate(self, html_file: str) -> bool:
