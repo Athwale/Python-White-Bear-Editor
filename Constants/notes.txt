@@ -4,6 +4,7 @@ Automaticky generovat datum
 Zkontrolovat nastaveni spatnyho adresare
 
 TODO:
+restrict what can be inside li
 Add system icon
 Check resource availability. Provide empty image if error.
 Display where the article belongs in the status bar

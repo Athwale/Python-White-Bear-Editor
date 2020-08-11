@@ -1,0 +1,63 @@
+<?xml version="1.0"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+    <xs:include schemaLocation="common_definitions.xsd"/>
+
+    <xs:complexType name="indexArticleType">
+        <xs:choice maxOccurs="unbounded">
+            <xs:element name="h2" type="xs:string"/>
+            <xs:element name="h3" type="xs:string"/>
+            <xs:element name="img">
+                <xs:complexType>
+                    <xs:attribute name="width" type="xs:integer" use="required"/>
+                    <xs:attribute name="height" type="xs:integer" use="required"/>
+                    <xs:attribute name="src" type="xs:anyURI" use="required"/>
+                    <xs:attribute name="alt" type="xs:string" use="required"/>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="p">
+                <xs:complexType mixed="true">
+                    <xs:choice maxOccurs="unbounded">
+                        <xs:element name="strong" type="strongType" minOccurs="0" maxOccurs="unbounded"/>
+                        <xs:element name="br"/>
+                        <xs:element name="a" maxOccurs="unbounded">
+                            <xs:complexType mixed="true">
+                                <xs:attribute name="href" type="xs:anyURI" use="required"/>
+                                <xs:attribute name="title" type="xs:string" use="required"/>
+                            </xs:complexType>
+                        </xs:element>
+                    </xs:choice>
+                </xs:complexType>
+            </xs:element>
+        </xs:choice>
+        <xs:attribute name="class" type="xs:string" fixed="indexPage" use="required"/>
+    </xs:complexType>
+
+    <xs:complexType name="indexMainType">
+        <xs:sequence>
+            <xs:element name="article" type="indexArticleType"/>
+            <xs:element name="aside" type="asideType"/>
+        </xs:sequence>
+        <xs:attribute name="id" type="xs:string" fixed="top" use="required"/>
+    </xs:complexType>
+
+    <xs:complexType name="indexBodyType">
+        <xs:sequence>
+            <xs:element name="a" type="accessibilityLinkType"/>
+            <xs:element name="header" type="headerType"/>
+            <xs:element name="nav" type="navType"/>
+            <xs:element name="main" type="indexMainType"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:element name="html">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="head" type="headType"/>
+                <xs:element name="body" type="indexBodyType"/>
+            </xs:sequence>
+            <xs:attribute name="lang" type="xs:string" fixed="cs" use="required"/>
+        </xs:complexType>
+    </xs:element>
+
+</xs:schema>
