@@ -4,9 +4,8 @@ Automaticky generovat datum
 Zkontrolovat nastaveni spatnyho adresare
 
 TODO:
-restrict what can be inside li
+test syntax error in hmls
 Add system icon
-Check resource availability. Provide empty image if error.
 Display where the article belongs in the status bar
 Use red color in status bar.
 

@@ -2,7 +2,7 @@ import threading
 
 import wx
 
-from DirectoryLoader import DirectoryLoader
+from Tools.DirectoryLoader import DirectoryLoader
 from Exceptions.AccessException import AccessException
 
 

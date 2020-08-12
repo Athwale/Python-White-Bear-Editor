@@ -1,7 +1,10 @@
 import os
 from typing import Dict
 
-from bs4 import BeautifulSoup
+from lxml import etree
+from lxml import html
+from lxml.etree import XMLSyntaxError
+from Resources.Fetch import Fetch
 
 from Constants.Strings import Strings
 from Exceptions.AccessException import AccessException
@@ -17,6 +20,10 @@ class DirectoryLoader:
     def __init__(self):
         self._directory_path: str = ''
         self._files: Dict[str, str] = {}
+        # Prepare xml schemas
+        self.xmlschema_index = etree.XMLSchema(etree.parse(Fetch.get_resource_path('schema_index.xsd')))
+        self.xmlschema_article = etree.XMLSchema(etree.parse(Fetch.get_resource_path('schema_article.xsd')))
+        self.xmlschema_menu = etree.XMLSchema(etree.parse(Fetch.get_resource_path('schema_menu.xsd')))
 
     def get_file_dict(self, directory_path: str) -> Dict[str, str]:
         """
@@ -29,12 +36,11 @@ class DirectoryLoader:
             self._files = self.prepare_files(self._directory_path)
         return self._files
 
-    @staticmethod
-    def is_white_bear_directory(path: str) -> bool:
+    def is_white_bear_directory(self, path: str) -> bool:
         """
         Checks whether chosen directory belongs to the whitebear web.
         :raises FileNotFoundError if index.html is not present
-        :raises IndexError if <title>White Bear is not in index.html
+        :raises IndexError if the index.html is not a whitebear index page according to xml schema.
         :raises AccessException if the directory can no be read or written to.
         :param path: Path to the root of the whitebear web directory.
         :return: True if path is an accessible white bear directory
@@ -43,22 +49,22 @@ class DirectoryLoader:
             raise AccessException(Strings.exception_access)
 
         if not os.path.exists(os.path.join(path, 'index.html')):
-            raise IndexError(Strings.exception_not_white_bear + ' ' + path)
+            raise FileNotFoundError(Strings.exception_index + ' ' + path)
         else:
-            with open(os.path.join(path, 'index.html'), 'r') as index:
-                parsed_index: BeautifulSoup = BeautifulSoup(index, 'html5lib')
-                if len(parsed_index.find_all('article', class_='indexPage')) != 1:
-                    raise IndexError(Strings.exception_not_white_bear + ' ' + path)
-                else:
-                    return True
+            try:
+                xml_doc = html.parse(os.path.join(path, 'index.html'))
+                if not self.xmlschema_index.validate(xml_doc):
+                    raise IndexError(Strings.exception_not_white_bear + '\n' + str(self.xmlschema_index.error_log))
+            except XMLSyntaxError as e:
+                raise IndexError(Strings.exception_html_syntax_error + '\n' + str(e))
+        return True
 
-    @staticmethod
-    def prepare_files(path: str) -> Dict[str, str]:
+    def prepare_files(self, path: str) -> Dict[str, str]:
         """
-        Opens the path which should lead to a whitebear web root. Goes through all files which have to be readable
-        and writeable and constructs a dictionary {file name:path to the file}.
-        :raises AccessException if the files are not readable or not writeable.
-        :param path: Path to the whitebear root directory.
+        Goes through all supposed whitebear files in a directory. Files have to be readable and writeable. Constructs a
+        dictionary {file name:path to the file}.
+        :raises AccessException if a file are not readable or not writeable.
+        :param path: Path to the supposed whitebear root directory.
         :return: Dictionary {file name:path to the file}
         """
         # Check all html files in directory are readable and writable

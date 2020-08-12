@@ -5,10 +5,10 @@ import wx
 import wx.richtext as rt
 from wx.py import images
 
-from ConfigManager import ConfigManager
+from Tools.ConfigManager import ConfigManager
 from Constants.Numbers import Numbers
 from Constants.Strings import Strings
-from FileParser import FileParser
+from Tools.FileParser import FileParser
 from Gui.Dialogs.AboutDialog import AboutDialog
 from Threads.FileListThread import FileListThread
 
@@ -338,6 +338,7 @@ class MainFrame(wx.Frame):
 
         :return:
         """
+        print(error)
         self._set_status_text(Strings.status_error, 2)
 
     def on_filelist_load_fail(self, e: Exception) -> None:

@@ -2,7 +2,7 @@ from typing import Tuple
 
 from bs4 import BeautifulSoup
 
-from ParsedFile import ParsedFile
+from Tools.ParsedFile import ParsedFile
 
 
 class FileParser:
