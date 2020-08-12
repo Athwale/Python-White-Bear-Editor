@@ -2,7 +2,7 @@ from typing import Tuple
 
 from bs4 import BeautifulSoup
 
-from Tools.ParsedFile import ParsedFile
+from Tools.WhitebearDocument import WhitebearDocument
 
 
 class FileParser:
@@ -11,7 +11,7 @@ class FileParser:
     """
 
     # name_path is a syntax for unpacking a tuple
-    def parse_file(self, name_path: Tuple[str, str]) -> ParsedFile:
+    def parse_file(self, name_path: Tuple[str, str]) -> WhitebearDocument:
         """
         Parse a file which is a whitebear html file. Identify the file type and create an object representing the
         file.
@@ -26,7 +26,7 @@ class FileParser:
             parsed_html: BeautifulSoup = BeautifulSoup(html, 'html5lib')
 
         file_type: int = self._find_type(parsed_html)
-        if file_type != ParsedFile.TYPE_OTHER:
+        if file_type != WhitebearDocument.TYPE_OTHER:
             # This will be a regular kind of web site
             # TODO
             pass
@@ -42,13 +42,13 @@ class FileParser:
         :return: Int constant representing the file type.
         """
         if self._is_article(parsed_html):
-            return ParsedFile.TYPE_ARTICLE
+            return WhitebearDocument.TYPE_ARTICLE
         elif self._is_menu(parsed_html):
-            return ParsedFile.TYPE_MENU
+            return WhitebearDocument.TYPE_MENU
         elif self._is_index(parsed_html):
-            return ParsedFile.TYPE_INDEX
+            return WhitebearDocument.TYPE_INDEX
         else:
-            return ParsedFile.TYPE_OTHER
+            return WhitebearDocument.TYPE_OTHER
 
     @staticmethod
     def _is_article(parsed_html):

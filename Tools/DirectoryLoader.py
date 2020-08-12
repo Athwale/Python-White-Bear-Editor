@@ -8,6 +8,7 @@ from Resources.Fetch import Fetch
 
 from Constants.Strings import Strings
 from Exceptions.AccessException import AccessException
+from Tools.WhitebearDocument import WhitebearDocument
 
 
 class DirectoryLoader:
@@ -19,29 +20,60 @@ class DirectoryLoader:
 
     def __init__(self):
         self._directory_path: str = ''
-        self._files: Dict[str, str] = {}
+        self._article_documents: Dict[str, WhitebearDocument] = {}
+        self._menu_documents: Dict[str, WhitebearDocument] = {}
+        self._index_document = None
         # Prepare xml schemas
         self.xmlschema_index = etree.XMLSchema(etree.parse(Fetch.get_resource_path('schema_index.xsd')))
         self.xmlschema_article = etree.XMLSchema(etree.parse(Fetch.get_resource_path('schema_article.xsd')))
         self.xmlschema_menu = etree.XMLSchema(etree.parse(Fetch.get_resource_path('schema_menu.xsd')))
 
-    def get_file_dict(self, directory_path: str) -> Dict[str, str]:
+    def get_directory(self) -> str:
+        """
+        Returns the directory that is set as the website directory.
+        :return: Supposed whitebear directory set in this instance.
+        """
+        return self._directory_path
+
+    def get_articles(self) -> Dict[str, WhitebearDocument]:
+        """
+        Returns a dictionary of file names and corresponding WhitebearDocument instances of article pages.
+        :return: {file name, WhitebearDocument, ...}
+        """
+        return self._article_documents
+
+    def get_menus(self) -> Dict[str, WhitebearDocument]:
+        """
+        Returns a dictionary of file names and corresponding WhitebearDocument instances of menu pages.
+        :return: {file name, WhitebearDocument, ...}
+        """
+        return self._menu_documents
+
+    def get_index_page(self) -> WhitebearDocument:
+        """
+        Returns a WhitebearDocument instance of the index page.
+        :return: a WhitebearDocument instance of the index page.
+        """
+        return self._index_document
+
+    def load_directory(self, directory_path: str) -> None:
         """
         Return the selected white bear directory as a dictionary of paths to files with file names as keys.
         :param directory_path: Path to the whitebear web root directory.
-        :return: Dictionary {file name:path to the file}
+        :return: None
         """
         self._directory_path = directory_path
-        if self.is_white_bear_directory(directory_path):
-            self._files = self.prepare_files(self._directory_path)
-        return self._files
+        if self._is_white_bear_directory(self._directory_path):
+            self._prepare_documents(self._directory_path)
 
-    def is_white_bear_directory(self, path: str) -> bool:
+    def _is_white_bear_directory(self, path: str) -> bool:
         """
-        Checks whether chosen directory belongs to the whitebear web.
+        Checks whether chosen directory belongs to the whitebear web. The directory must be readable and writable.
+        The directory must contain index.html file and this file must be a valid whitebear index file according to
+        schema_index.xsd xml schema.
+        :raises AccessException if the directory can not be read or written to.
         :raises FileNotFoundError if index.html is not present
         :raises IndexError if the index.html is not a whitebear index page according to xml schema.
-        :raises AccessException if the directory can no be read or written to.
         :param path: Path to the root of the whitebear web directory.
         :return: True if path is an accessible white bear directory
         """
@@ -59,7 +91,7 @@ class DirectoryLoader:
                 raise IndexError(Strings.exception_html_syntax_error + '\n' + str(e))
         return True
 
-    def prepare_files(self, path: str) -> Dict[str, str]:
+    def _prepare_documents(self, path: str) -> Dict[str, str]:
         """
         Goes through all supposed whitebear files in a directory. Files have to be readable and writeable. Constructs a
         dictionary {file name:path to the file}.

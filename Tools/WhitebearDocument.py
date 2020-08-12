@@ -1,7 +1,7 @@
 from Constants.Strings import Strings
 
 
-class ParsedFile:
+class WhitebearDocument:
     """
     This class represents a parsed file belonging to the whitebear website. It contains all information associated
     with the file along with getters and setters for easy access and methods for working with the file.
