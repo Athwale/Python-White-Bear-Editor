@@ -1,13 +1,15 @@
+import glob
 import os
 from typing import Dict
 
 from lxml import etree
 from lxml import html
 from lxml.etree import XMLSyntaxError
-from Resources.Fetch import Fetch
 
 from Constants.Strings import Strings
 from Exceptions.AccessException import AccessException
+from Exceptions.UnrecognizedFileException import UnrecognizedFileException
+from Resources.Fetch import Fetch
 from Tools.WhitebearDocument import WhitebearDocument
 
 
@@ -16,6 +18,7 @@ class DirectoryLoader:
     This class loads and parses white bear web root directory. The output is a dictionary of file names + full path
     to them on the system. If the directory is not readable or writable or the files are not readable or writeable,
     AccessException is raised.
+    # TODO parse css
     """
 
     def __init__(self):
@@ -91,40 +94,41 @@ class DirectoryLoader:
                 raise IndexError(Strings.exception_html_syntax_error + '\n' + str(e))
         return True
 
-    def _prepare_documents(self, path: str) -> Dict[str, str]:
+    def _prepare_documents(self, path: str) -> None:
         """
         Goes through all supposed whitebear files in a directory. Files have to be readable and writeable. Constructs a
         dictionary {file name:path to the file}.
-        :raises AccessException if a file are not readable or not writeable.
         :param path: Path to the supposed whitebear root directory.
-        :return: Dictionary {file name:path to the file}
+        :return: None
+        :raises AccessException if a file are not readable or not writeable.
+        :raises UnrecognizedFileException if the file can not be validated
         """
         # Check all html files in directory are readable and writable
-        files: Dict[str, str] = {}
         file: str
-        for file in os.listdir(path):
+        for file in glob.glob(path + '/*.html'):
             file = os.path.join(path, file)
             if os.path.isfile(file):
                 if not os.access(file, os.R_OK) or not os.access(file, os.W_OK):
                     raise AccessException(Strings.exception_access_html + " " + file)
-                # Filter out unwanted files (index, google, 404, not html, menu pages)
                 else:
                     filename: str = os.path.basename(file)
-                    # Skip index.html this file is generated and not editable
-                    # Skip 404.html page which has to be modified outside of the editor
-                    if filename == 'index.html' or filename == '404.html':
-                        continue
-                    if 'google' in filename:
-                        continue
-                    # Skip all menu pages
-                    if os.path.splitext(file)[1] == '.html':
-                        with open(file, 'r') as page:
-                            parsed_page: BeautifulSoup = BeautifulSoup(page, 'html5lib')
-                            if len(parsed_page.find_all('article', class_='menuPage')) != 0:
+                    file_path: str = os.path.realpath(file)
+                    try:
+                        xml_doc = html.parse(os.path.join(path, file))
+                        if self.xmlschema_article.validate(xml_doc):
+                            self._article_documents[filename] = WhitebearDocument(filename, file_path,
+                                                                                  WhitebearDocument.TYPE_ARTICLE)
+                        elif self.xmlschema_menu.validate(xml_doc):
+                            self._menu_documents[filename] = WhitebearDocument(filename, file_path,
+                                                                               WhitebearDocument.TYPE_MENU)
+                        elif self.xmlschema_index.validate(xml_doc):
+                            self._index_document = WhitebearDocument(filename, file_path,
+                                                                     WhitebearDocument.TYPE_INDEX)
+                        else:
+                            # Skip known non editable files
+                            if 'google' in filename or '404' in filename:
                                 continue
-                    # Skip non-html files
-                    if os.path.splitext(file)[1] != '.html':
-                        continue
-
-                    files[os.path.basename(file)] = os.path.realpath(file)
-        return files
+                            else:
+                                raise UnrecognizedFileException(Strings.exception_file_unrecognized + ' ' + filename)
+                    except XMLSyntaxError as e:
+                        raise UnrecognizedFileException(Strings.exception_html_syntax_error + '\n' + str(e))

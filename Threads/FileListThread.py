@@ -4,7 +4,7 @@ import wx
 
 from Tools.DirectoryLoader import DirectoryLoader
 from Exceptions.AccessException import AccessException
-
+from Exceptions.UnrecognizedFileException import UnrecognizedFileException
 
 class FileListThread(threading.Thread):
     """
@@ -31,11 +31,11 @@ class FileListThread(threading.Thread):
         :return: None, this method calls the wx.CallAfter to pass a list of website names back into GUI.s
         """
         try:
-            page_dictionary = self._directory_loader.get_file_dict(self._path)
-            file_list = sorted(page_dictionary.keys())
+            self._directory_loader.load_directory(self._path)
+            file_list = sorted(self._directory_loader.get_articles().keys())
             # The CallAfter method functions as a carrier between threads, the callable function passed into the method
             # will be called in the main GUI thread. This passes an event into the main thread in background which is
             # processed normally in the wx main thread queue.
             wx.CallAfter(self._parent.on_filelist_loaded, file_list)
-        except (AccessException, IndexError, FileNotFoundError) as e:
+        except (AccessException, IndexError, FileNotFoundError, UnrecognizedFileException) as e:
             wx.CallAfter(self._parent.on_filelist_load_fail, e)

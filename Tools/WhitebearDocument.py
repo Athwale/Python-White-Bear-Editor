@@ -10,22 +10,21 @@ class WhitebearDocument:
 
     TYPE_INDEX = 0
     TYPE_ARTICLE = 1
-    TYPE_MENU = 2
-    TYPE_CSS = 6
-    TYPE_OTHER = 7
+    TYPE_MENU = 3
+    TYPE_CSS = 4
+    TYPE_OTHER = 5
 
-    def __init__(self, name, path, file_type, parsed_html):
+    def __init__(self, name, path, file_type):
         """
         Create a new ParsedFile object.
         :param name: Name of the parsed file.
         :param path: Full path on disk to the parsed file
         :param file_type: Type of the parsed file. Can be one of ParsedFile.TYPE_... types
-        :param parsed_html: BeautifulSoup parsed html contents of the file.
         """
         self._name = name
         self._path = path
         self._file_type = file_type
-        self._parsed_html = parsed_html
+        self._parsed_html = None
         self._modified = False
         self._title = None
         self._description = None

@@ -8,7 +8,6 @@ from wx.py import images
 from Tools.ConfigManager import ConfigManager
 from Constants.Numbers import Numbers
 from Constants.Strings import Strings
-from Tools.FileParser import FileParser
 from Gui.Dialogs.AboutDialog import AboutDialog
 from Threads.FileListThread import FileListThread
 
@@ -32,7 +31,6 @@ class MainFrame(wx.Frame):
                                                 wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, False)
         # Prepare data objects
         self.config_manager = ConfigManager()
-        self.file_parser = FileParser()
         self.tool_ids = []
         self.disableable_menu_items = []
 

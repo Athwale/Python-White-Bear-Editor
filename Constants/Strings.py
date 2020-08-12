@@ -19,7 +19,7 @@ class Strings:
     exception_access_html: str = 'File can not be accessed'
     exception_index: str = 'index.html is not in directory'
     exception_not_white_bear: str = 'Not a white Bear web directory'
-    exception_file_unrecognized: str = 'This is not a white-bear html file'
+    exception_file_unrecognized: str = 'Unrecognized or malformed white-bear html file:'
     exception_only_one_title_allowed: str = 'Wrong file format, title tag found twice'
     exception_meta_description_twice: str = 'Wrong file format, meta description found twice'
     exception_not_bool: str = 'Modified can only be of type bool'
