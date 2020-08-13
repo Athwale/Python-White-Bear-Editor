@@ -333,10 +333,10 @@ class MainFrame(wx.Frame):
 
     def _show_error_log(self, error: str):
         """
-
-        :return:
+        Display an error dialog with the error text. Set error state into the status bar.
+        :return: None
         """
-        print(error)
+        wx.MessageBox(error, Strings.status_error, wx.OK | wx.ICON_ERROR)
         self._set_status_text(Strings.status_error, 2)
 
     def on_filelist_load_fail(self, e: Exception) -> None:
