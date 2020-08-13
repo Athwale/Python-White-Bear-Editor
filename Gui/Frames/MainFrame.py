@@ -5,11 +5,11 @@ import wx
 import wx.richtext as rt
 from wx.py import images
 
-from Tools.ConfigManager import ConfigManager
 from Constants.Numbers import Numbers
 from Constants.Strings import Strings
 from Gui.Dialogs.AboutDialog import AboutDialog
 from Threads.FileListThread import FileListThread
+from Tools.ConfigManager import ConfigManager
 
 
 class MainFrame(wx.Frame):

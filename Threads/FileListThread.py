@@ -2,9 +2,10 @@ import threading
 
 import wx
 
-from Tools.DirectoryLoader import DirectoryLoader
 from Exceptions.AccessException import AccessException
 from Exceptions.UnrecognizedFileException import UnrecognizedFileException
+from Tools.DirectoryLoader import DirectoryLoader
+
 
 class FileListThread(threading.Thread):
     """

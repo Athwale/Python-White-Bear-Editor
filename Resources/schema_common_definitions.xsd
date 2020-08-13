@@ -124,7 +124,8 @@
                                 <xs:sequence>
                                     <xs:element name="img">
                                         <xs:complexType>
-                                            <xs:attribute name="class" type="xs:string" use="required" fixed="imgAside"/>
+                                            <xs:attribute name="class" type="xs:string" use="required"
+                                                          fixed="imgAside"/>
                                             <xs:attribute name="width" type="xs:integer" use="required" fixed="211"/>
                                             <xs:attribute name="height" type="xs:integer" use="required" fixed="158"/>
                                             <xs:attribute name="src" type="xs:anyURI" use="required"/>
