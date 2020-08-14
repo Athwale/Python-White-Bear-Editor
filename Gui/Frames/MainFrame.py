@@ -1,5 +1,5 @@
 import os
-from typing import List
+from typing import Dict
 
 import wx
 import wx.richtext as rt
@@ -7,9 +7,11 @@ from wx.py import images
 
 from Constants.Numbers import Numbers
 from Constants.Strings import Strings
+from Exceptions.UnrecognizedFileException import UnrecognizedFileException
 from Gui.Dialogs.AboutDialog import AboutDialog
 from Threads.FileListThread import FileListThread
 from Tools.ConfigManager import ConfigManager
+from Tools.WhitebearDocument import WhitebearDocument
 
 
 class MainFrame(wx.Frame):
@@ -33,6 +35,7 @@ class MainFrame(wx.Frame):
         self.config_manager = ConfigManager()
         self.tool_ids = []
         self.disableable_menu_items = []
+        self.document_dictionary = {}
 
         self._init_status_bar()
         self._init_top_tool_bar()
@@ -331,7 +334,7 @@ class MainFrame(wx.Frame):
         file_list_thread = FileListThread(self, self.EVT_CARRIER_TYPE_ID, str(path))
         file_list_thread.start()
 
-    def _show_error_log(self, error: str):
+    def _show_error_dialog(self, error: str):
         """
         Display an error dialog with the error text. Set error state into the status bar.
         :return: None
@@ -347,17 +350,18 @@ class MainFrame(wx.Frame):
         :return: None
         """
         # TODO open dialog and append the error to its log
-        self._show_error_log(str(e))
+        self._show_error_dialog(str(e))
         self._disable_editor(True)
 
-    def on_filelist_loaded(self, data: List[str]) -> None:
+    def on_filelist_loaded(self, documents: Dict[str, WhitebearDocument]) -> None:
         """
         This method fills up the left side page file list and is called when the FileListThread finishes.
-        :param data: a list of strings: ['aluminotermie.html', 'bramborove-delo.html', 'core.html'...]
+        :param documents: Dictionary of file names and documents of article pages {file name, WhitebearDocument, ...}
         :return: None
         """
+        self.document_dictionary = documents
         self.page_list.Clear()
-        self.page_list.InsertItems(data, 0)
+        self.page_list.InsertItems(list(self.document_dictionary.keys()), 0)
         # Select last used document
         last_document = self.config_manager.get_last_document()
         if last_document:
@@ -435,5 +439,16 @@ class MainFrame(wx.Frame):
         :return: None
         """
         selected_name = event.GetString()
-        self._set_status_text(selected_name)
+        # Validate the selected document
+        try:
+            result = self.document_dictionary[selected_name].validate_self()
+            if result[0]:
+                self._set_status_text(Strings.status_valid + ' ' + selected_name)
+            else:
+                self._set_status_text(Strings.status_invalid + ' ' + selected_name)
+                self._show_error_dialog(result[1])
+                self._disable_editor(True)
+        except UnrecognizedFileException as e:
+            self._show_error_dialog(str(e))
+            self._disable_editor(True)
         self.SetTitle(selected_name)

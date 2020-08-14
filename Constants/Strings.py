@@ -59,6 +59,8 @@ class Strings:
     status_loading: str = 'Loading'
     status_ready: str = 'Ready'
     status_error: str = 'Error'
+    status_valid: str = 'Valid:'
+    status_invalid: str = 'Invalid:'
 
     toolbar_new_file: str = 'New file'
 

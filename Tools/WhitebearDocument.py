@@ -1,9 +1,15 @@
+from lxml import etree
+from lxml import html
+from lxml.etree import XMLSyntaxError
+
 from Constants.Strings import Strings
+from Exceptions.UnrecognizedFileException import UnrecognizedFileException
+from Resources.Fetch import Fetch
 
 
 class WhitebearDocument:
     """
-    This class represents a parsed file belonging to the whitebear website. It contains all information associated
+    This class represents a file belonging to the whitebear website. It contains all information associated
     with the file along with getters and setters for easy access and methods for working with the file.
     This is just a container for easy manipulation.
     """
@@ -12,7 +18,6 @@ class WhitebearDocument:
     TYPE_ARTICLE = 1
     TYPE_MENU = 3
     TYPE_CSS = 4
-    TYPE_OTHER = 5
 
     def __init__(self, name, path, file_type):
         """
@@ -29,6 +34,29 @@ class WhitebearDocument:
         self._title = None
         self._description = None
         self._keywords = None
+
+    def validate_self(self) -> (bool, str):
+        """
+        Validate this document against the correct xml schema.
+        :return: Boolean validation result and if false the discovered error.
+        :raise UnrecognizedFileException if html parse fails
+        """
+        xmlschema = None
+        try:
+            if self.is_article():
+                xmlschema = etree.XMLSchema(etree.parse(Fetch.get_resource_path('schema_article.xsd')))
+            elif self.is_menu():
+                xmlschema = etree.XMLSchema(etree.parse(Fetch.get_resource_path('schema_menu.xsd')))
+            elif self.is_index():
+                xmlschema = etree.XMLSchema(etree.parse(Fetch.get_resource_path('schema_index.xsd')))
+            else:
+                # TODO validate css
+                pass
+            xml_doc = html.parse(self.get_path())
+            result = xmlschema.validate(xml_doc)
+        except XMLSyntaxError as e:
+            raise UnrecognizedFileException(Strings.exception_html_syntax_error + '\n' + str(e))
+        return result, str(xmlschema.error_log)
 
     def is_modified(self):
         """
@@ -70,15 +98,6 @@ class WhitebearDocument:
         :return: True if this file is of type ParsedFile.TYPE_INDEX.
         """
         if self._file_type == self.TYPE_INDEX:
-            return True
-        return False
-
-    def is_other(self):
-        """
-        Return True if this file is of type ParsedFile.TYPE_OTHER.
-        :return: True if this file is of type ParsedFile.TYPE_OTHER.
-        """
-        if self._file_type == self.TYPE_OTHER:
             return True
         return False
 
