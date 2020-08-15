@@ -334,9 +334,10 @@ class MainFrame(wx.Frame):
         file_list_thread = FileListThread(self, self.EVT_CARRIER_TYPE_ID, str(path))
         file_list_thread.start()
 
-    def _show_error_dialog(self, error: str):
+    def _show_error_dialog(self, error: str) -> None:
         """
         Display an error dialog with the error text. Set error state into the status bar.
+        :param error: The error to display in the dialog.
         :return: None
         """
         wx.MessageBox(error, Strings.status_error, wx.OK | wx.ICON_ERROR)
@@ -446,9 +447,17 @@ class MainFrame(wx.Frame):
                 self._set_status_text(Strings.status_valid + ' ' + selected_name)
             else:
                 self._set_status_text(Strings.status_invalid + ' ' + selected_name)
-                self._show_error_dialog(result[1])
+                # Prepare error string from all validation errors
+                error_string = Strings.exception_html_syntax_error + ': ' + selected_name + '\n'
+                for message in result[1]:
+                    error_string = error_string + message + '\n'
+                self._show_error_dialog(error_string)
                 self._disable_editor(True)
         except UnrecognizedFileException as e:
             self._show_error_dialog(str(e))
             self._disable_editor(True)
+
+        # Parse the document, this must be done after self validation.
+        self.document_dictionary[selected_name].parse_self()
+
         self.SetTitle(selected_name)
