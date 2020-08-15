@@ -28,16 +28,31 @@ class WhitebearDocument:
         :param path: Full path on disk to the parsed file
         :param file_type: Type of the parsed file. Can be one of ParsedFile.TYPE_... types
         """
-        self._name = name
+        # File properties
+        self._file_name = name
         self._path = path
         self._file_type = file_type
-        self._parsed_html = None
         self._modified = False
-        self._title = None
-        self._description = None
-        self._keywords = None
-        self._date = None
         self._valid = False
+
+        # Article data
+        self._parsed_html = None
+        self._date = None
+        self._article_name = None
+        self._keywords = None
+        self._description = None
+        # Article image data
+        self._article_image_path = None
+        self._article_image = None
+        self._article_image_caption = None
+        self._article_image_link_title = None
+        self._article_image_alt = None
+        # Menu item data
+        self._menu_image_path = None
+        self._menu_image = None
+        self._menu_item_name = None
+        self._menu_image_alt = None
+        self._menu_image_link_title = None
 
     def parse_self(self) -> None:
         """
@@ -47,8 +62,8 @@ class WhitebearDocument:
         """
         # Only parse if not parsed already and only if the document is valid.
         if not self._parsed_html and self.is_valid():
-
-            pass
+            if self.get_type() == WhitebearDocument.TYPE_ARTICLE:
+                pass
 
     def validate_self(self) -> (bool, List[str]):
         """
@@ -126,12 +141,12 @@ class WhitebearDocument:
             return True
         return False
 
-    def get_name(self) -> str:
+    def get_filename(self) -> str:
         """
         Return the file name.
         :return: Return the file name.
         """
-        return self._name
+        return self._file_name
 
     def get_date(self) -> str:
         """
@@ -161,12 +176,12 @@ class WhitebearDocument:
         """
         return self._file_type
 
-    def get_title(self) -> str:
+    def get_article_name(self) -> str:
         """
-        Return the title of the web page.
-        :return: Return the title of the web page.
+        Return the name of the article.
+        :return: Return the name of the article.
         """
-        return self._title
+        return self._article_name
 
     def get_description(self) -> str:
         """
@@ -182,14 +197,14 @@ class WhitebearDocument:
         """
         return self._keywords
 
-    def set_title(self, title: str) -> None:
+    def set_article_name(self, name: str) -> None:
         """
-        Set the new title of the web page.
+        Set the new article name on the web page.
         Change modified attribute to True.
-        :param title: New title for the web page.
+        :param name: New article name for the web page.
         :return: None
         """
-        self._title = title
+        self._article_name = name
         self.set_modified(True)
 
     def set_description(self, description: str) -> None:
@@ -231,14 +246,14 @@ class WhitebearDocument:
         """
         self._modified = modified
 
-    def set_name(self, name: str) -> None:
+    def set_filename(self, name: str) -> None:
         """
         Set the new name for the file.
         Change modified attribute to True.
         :param name: New name for the file.
         :return: None
         """
-        self._name = name
+        self._file_name = name
         self.set_modified(True)
 
     def set_date(self, date: str) -> None:
@@ -253,7 +268,7 @@ class WhitebearDocument:
 
     def __str__(self) -> str:
         return "White bear file {}, Type {}, Modified {}, Path {}, Title {}, Keywords {}, Description {}". \
-            format(self.get_name(), self._string_type(), self.is_modified(), self.get_path(), self.get_title(),
+            format(self.get_filename(), self._string_type(), self.is_modified(), self.get_path(), self.get_title(),
                    self.get_keywords(), self.get_description())
 
     def _string_type(self):
