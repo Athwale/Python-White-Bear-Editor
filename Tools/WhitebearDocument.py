@@ -1,4 +1,5 @@
 from typing import List
+import wx
 
 from lxml import etree
 from lxml import html
@@ -91,6 +92,17 @@ class WhitebearDocument:
             errors.append(error.message)
         return self._valid, errors
 
+    def seo_test_self(self):
+        """
+
+        :return:
+        """
+        # TODO seo test should return what to display in the gui about text lengths etc and document completeness.
+        # TODO the file list can change color based on the result of this method. Files have to be valid before this
+        # TODO test. Do a second pass over all loaded and now valid documents and color the list based on this method.
+        pass
+
+    # Boolean functions ------------------------------------------------------------------------------------------------
     def is_valid(self) -> bool:
         """
         Return True if this document is valid according to xml schema.
@@ -141,6 +153,7 @@ class WhitebearDocument:
             return True
         return False
 
+    # Getters ----------------------------------------------------------------------------------------------------------
     def get_filename(self) -> str:
         """
         Return the file name.
@@ -197,6 +210,77 @@ class WhitebearDocument:
         """
         return self._keywords
 
+    def get_article_image_path(self) -> str:
+        """
+        Return the path to the article image full version.
+        :return: Return the path to the article image full version.
+        """
+        return self._article_image_path
+
+    def get_article_image(self) -> wx.Image:
+        """
+        Return the article image wx image instance.
+        :return: Return the article image wx image instance.
+        """
+        return self._article_image
+
+    def get_article_image_caption(self) -> str:
+        """
+        Return the caption of the main article image.
+        :return: Return the caption of the main article image.
+        """
+        return self._article_image_caption
+
+    def get_article_image_link_title(self) -> str:
+        """
+        Return the link title of the main article image.
+        :return: Return the link title of the main article image.
+        """
+        return self._article_image_link_title
+
+    def get_article_image_alt(self) -> str:
+        """
+        Return the alt description of the main article image.
+        :return: Return the alt description of the main article image.
+        """
+        return self._article_image_alt
+
+    def get_menu_image_path(self) -> str:
+        """
+        Return the path to the menu image.
+        :return: Return the path to the menu image.
+        """
+        return self._menu_image_path
+
+    def get_menu_image(self) -> wx.Image:
+        """
+        Return the menu image wx image instance.
+        :return: Return the menu image wx image instance.
+        """
+        return self._menu_image
+
+    def get_menu_item_name(self) -> str:
+        """
+        Return the name of the menu item associate with this article.
+        :return: Return the name of the menu item associate with this article.
+        """
+        return self._menu_item_name
+
+    def get_menu_image_link_title(self) -> str:
+        """
+        Return the link title of the menu image.
+        :return: Return the link title of the menu image.
+        """
+        return self._menu_image_link_title
+
+    def get_menu_image_alt(self) -> str:
+        """
+        Return the alt description of the menu image.
+        :return: Return the alt description of the menu image.
+        """
+        return self._menu_image_alt
+
+    # Setters ----------------------------------------------------------------------------------------------------------
     def set_article_name(self, name: str) -> None:
         """
         Set the new article name on the web page.
@@ -266,10 +350,110 @@ class WhitebearDocument:
         self._date = date
         self.set_modified(True)
 
+    def set_article_image_path(self, path: str) -> None:
+        """
+        Set the new main article image file path for the full version.
+        Change modified attribute to True.
+        :param path: New image path in disk.
+        :return: None
+        """
+        self._article_image_path = path
+        self.set_modified(True)
+
+    def set_article_image(self, image: wx.Image) -> None:
+        """
+        Set the new main article image.
+        Change modified attribute to True.
+        :param image: New wx.Image.
+        :return: None
+        """
+        self._article_image = image
+        self.set_modified(True)
+
+    def set_article_image_caption(self, text: str) -> None:
+        """
+        Set the new main article image caption.
+        Change modified attribute to True.
+        :param text: New image caption.
+        :return: None
+        """
+        self._article_image_caption = text
+        self.set_modified(True)
+
+    def set_article_image_link_title(self, text: str) -> None:
+        """
+        Set the new main article image link title.
+        Change modified attribute to True.
+        :param text: New image link title.
+        :return: None
+        """
+        self._article_image_link_title = text
+        self.set_modified(True)
+
+    def set_article_image_alt(self, text: str) -> None:
+        """
+        Set the new main article image alt description.
+        Change modified attribute to True.
+        :param text: New image alt description.
+        :return: None
+        """
+        self._article_image_alt = text
+        self.set_modified(True)
+
+    def set_menu_image_path(self, path: str) -> None:
+        """
+        Set the new menu image path for this article.
+        Change modified attribute to True.
+        :param path: New image path in disk.
+        :return: None
+        """
+        self._menu_image_path = path
+        self.set_modified(True)
+
+    def set_menu_image(self, image: wx.Image) -> None:
+        """
+        Set the new menu image.
+        Change modified attribute to True.
+        :param image: New wx.Image.
+        :return: None
+        """
+        self._menu_image = image
+        self.set_modified(True)
+
+    def set_menu_item_name(self, text: str) -> None:
+        """
+        Set the new menu item name for this article.
+        Change modified attribute to True.
+        :param text: New manu item name.
+        :return: None
+        """
+        self._menu_item_name = text
+        self.set_modified(True)
+
+    def set_menu_image_link_title(self, text: str) -> None:
+        """
+        Set the new menu image image link title.
+        Change modified attribute to True.
+        :param text: New image link title.
+        :return: None
+        """
+        self._menu_image_link_title = text
+        self.set_modified(True)
+
+    def set_menu_image_alt(self, text: str) -> None:
+        """
+        Set the new menu image alt description.
+        Change modified attribute to True.
+        :param text: New image alt description.
+        :return: None
+        """
+        self._menu_image_alt = text
+        self.set_modified(True)
+
     def __str__(self) -> str:
         return "White bear file {}, Type {}, Modified {}, Path {}, Title {}, Keywords {}, Description {}". \
-            format(self.get_filename(), self._string_type(), self.is_modified(), self.get_path(), self.get_title(),
-                   self.get_keywords(), self.get_description())
+            format(self.get_filename(), self._string_type(), self.is_modified(), self.get_path(),
+                   self.get_article_name(), self.get_keywords(), self.get_description())
 
     def _string_type(self):
         """
