@@ -23,6 +23,9 @@ class Strings:
     exception_conf_inaccessible: str = '.whitebearEditor.conf inaccessible'
     exception_resource_not_found: str = 'Resource not found'
     exception_html_syntax_error: str = 'Syntax error in html file'
+    exception_parse_multiple_descriptions: str = 'Only one meta description tag is allowed'
+    exception_parse_multiple_keywords: str = 'Only one meta keywords tag is allowed'
+
 
     label_menu_file: str = 'File'
     label_menu_item_open: str = 'Open directory...\tctrl+o'

@@ -4,7 +4,7 @@ Automaticky generovat datum
 Zkontrolovat nastaveni spatnyho adresare
 
 TODO:
-test syntax error in hmls
+seo check date format
 Add system icon
 Display where the article belongs in the status bar
 Use red color in status bar.

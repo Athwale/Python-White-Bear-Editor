@@ -441,6 +441,7 @@ class MainFrame(wx.Frame):
         """
         selected_name = event.GetString()
         # Validate the selected document
+        # TODO do this in a separate thread
         try:
             result = self.document_dictionary[selected_name].validate_self()
             if result[0]:

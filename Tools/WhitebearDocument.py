@@ -1,12 +1,14 @@
 from typing import List
 
 import wx
+from bs4 import BeautifulSoup
 from lxml import etree
 from lxml import html
 from lxml.etree import XMLSyntaxError
 
 from Constants.Strings import Strings
 from Exceptions.UnrecognizedFileException import UnrecognizedFileException
+from Exceptions.WrongFormatException import WrongFormatException
 from Resources.Fetch import Fetch
 
 
@@ -40,8 +42,8 @@ class WhitebearDocument:
         self._parsed_html = None
         self._date = None
         self._article_name = None
-        self._keywords = None
-        self._description = None
+        self._meta_keywords = None
+        self._meta_description = None
         # Article image data
         self._article_image_path = None
         self._article_image = None
@@ -60,11 +62,65 @@ class WhitebearDocument:
         Parse this document and fill internal variables with content.
         Call validate_self before parsing.
         :return: None
+        :raises WrongFormatException: if there is a problem with parsing the document.
         """
         # Only parse if not parsed already and only if the document is valid.
         if not self._parsed_html and self.is_valid():
+            self._get_parsed_html()
             if self.get_type() == WhitebearDocument.TYPE_ARTICLE:
-                pass
+                self._parse_meta_description()
+                self._parse_meta_keywords()
+                self._parse_date()
+
+    def _parse_meta_description(self):
+        """
+        Parse the meta description of this document and save it into an instance variable.
+        :return: None
+        :raises WrongFormatException: if there are more than one description tags.
+        """
+        description = self._parsed_html.find_all(name='meta', attrs={'name': 'description', 'content': True})
+        if len(description) == 1:
+            self._meta_description = description[0]['content']
+        else:
+            raise WrongFormatException(Strings.exception_parse_multiple_descriptions)
+
+    def _parse_meta_keywords(self):
+        """
+        Parse the meta keywords of this document and save it into an instance variable.
+        :return: None
+        :raises WrongFormatException: if there are more than one keywords tags.
+        """
+        keywords = self._parsed_html.find_all(name='meta', attrs={'name': 'keywords', 'content': True})
+        if len(keywords) == 1:
+            self._meta_keywords = keywords[0]['content']
+        else:
+            raise WrongFormatException(Strings.exception_parse_multiple_keywords)
+
+    def _parse_date(self):
+        """
+        Parse the date stamp of this document and save it into an instance variable.
+        :return: None
+        """
+        date = self._parsed_html.find_all(name='p', attrs={'id': 'date'})[0].string
+        self._date = date if date else ''
+
+    def _parse_article_name(self):
+        """
+        Parse the name of this article and save it into an instance variable.
+        :return: None
+        """
+        # TODO this
+        date = self._parsed_html.find_all(name='p', attrs={'id': 'date'})[0].string
+        self._date = date if date else ''
+
+    def _get_parsed_html(self):
+        """
+        Parse this document's html with bs4 and save it to an instance variable.
+        :return: None
+        """
+        with open(self._path, 'r') as document:
+            contents = document.read()
+            self._parsed_html = BeautifulSoup(contents, 'html5lib')
 
     def validate_self(self) -> (bool, List[str]):
         """
@@ -202,14 +258,14 @@ class WhitebearDocument:
         Return the description of the web page.
         :return: Return the description of the web page.
         """
-        return self._description
+        return self._meta_description
 
     def get_keywords(self) -> str:
         """
         Return the keywords of the web page.
         :return: Return the keywords of the web page.
         """
-        return self._keywords
+        return self._meta_keywords
 
     def get_article_image_path(self) -> str:
         """
@@ -299,7 +355,7 @@ class WhitebearDocument:
         :param description: New description for the web page.
         :return: None
         """
-        self._description = description
+        self._meta_description = description
         self.set_modified(True)
 
     def set_keywords(self, keywords: str) -> None:
@@ -309,7 +365,7 @@ class WhitebearDocument:
         :param keywords: New keywords for the web page.
         :return: None
         """
-        self._keywords = keywords
+        self._meta_keywords = keywords
         self.set_modified(True)
 
     def set_parsed_html(self, parsed_html) -> None:
