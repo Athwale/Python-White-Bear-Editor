@@ -445,6 +445,10 @@ class MainFrame(wx.Frame):
             result = self.document_dictionary[selected_name].validate_self()
             if result[0]:
                 self._set_status_text(Strings.status_valid + ' ' + selected_name)
+                # Parse the document, this must be done after self validation.
+                self.document_dictionary[selected_name].parse_self()
+
+                self.SetTitle(selected_name)
             else:
                 self._set_status_text(Strings.status_invalid + ' ' + selected_name)
                 # Prepare error string from all validation errors
@@ -453,11 +457,7 @@ class MainFrame(wx.Frame):
                     error_string = error_string + message + '\n'
                 self._show_error_dialog(error_string)
                 self._disable_editor(True)
+                return
         except UnrecognizedFileException as e:
             self._show_error_dialog(str(e))
             self._disable_editor(True)
-
-        # Parse the document, this must be done after self validation.
-        self.document_dictionary[selected_name].parse_self()
-
-        self.SetTitle(selected_name)

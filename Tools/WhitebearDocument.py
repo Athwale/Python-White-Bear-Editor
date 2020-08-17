@@ -1,6 +1,6 @@
 from typing import List
-import wx
 
+import wx
 from lxml import etree
 from lxml import html
 from lxml.etree import XMLSyntaxError
@@ -100,6 +100,7 @@ class WhitebearDocument:
         # TODO seo test should return what to display in the gui about text lengths etc and document completeness.
         # TODO the file list can change color based on the result of this method. Files have to be valid before this
         # TODO test. Do a second pass over all loaded and now valid documents and color the list based on this method.
+        # TODO save the filelist color in this instance, run self test on every setter method.
         pass
 
     # Boolean functions ------------------------------------------------------------------------------------------------
