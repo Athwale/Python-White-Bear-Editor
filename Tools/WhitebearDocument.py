@@ -1,3 +1,4 @@
+import os
 from typing import List
 
 import wx
@@ -34,6 +35,7 @@ class WhitebearDocument:
         # File properties
         self._file_name = name
         self._path = path
+        self._working_directory = os.path.dirname(path)
         self._file_type = file_type
         self._modified = False
         self._valid = False
@@ -71,6 +73,8 @@ class WhitebearDocument:
                 self._parse_meta_description()
                 self._parse_meta_keywords()
                 self._parse_date()
+                self._parse_article_name()
+                self._parse_article_image_path()
 
     def _parse_meta_description(self):
         """
@@ -101,17 +105,28 @@ class WhitebearDocument:
         Parse the date stamp of this document and save it into an instance variable.
         :return: None
         """
-        date = self._parsed_html.find_all(name='p', attrs={'id': 'date'})[0].string
-        self._date = date if date else ''
+        self._date = self._parsed_html.find(name='p', attrs={'id': 'date'}).string
 
     def _parse_article_name(self):
         """
         Parse the name of this article and save it into an instance variable.
         :return: None
         """
-        # TODO this
-        date = self._parsed_html.find_all(name='p', attrs={'id': 'date'})[0].string
-        self._date = date if date else ''
+        article = self._parsed_html.find(name='article', attrs={'class': 'textPage'})
+        self._article_name = article.h2.string
+
+    def _parse_article_image_path(self):
+        """
+        Parse the absolute path to the main article image and save it into an instance variable.
+        If the image is not accessible on disk, the variable is set to None.
+        :return: None
+        """
+        main_image_figure = self._parsed_html.find(name='figure', attrs={'id': 'articleImg'})
+        disk_path = os.path.join(self._working_directory, main_image_figure.a['href'])
+        if os.path.exists(disk_path) and os.access(disk_path, os.R_OK) and os.access(disk_path, os.W_OK):
+            self._article_image_path = disk_path
+        else:
+            self._article_image_path = None
 
     def _get_parsed_html(self):
         """
