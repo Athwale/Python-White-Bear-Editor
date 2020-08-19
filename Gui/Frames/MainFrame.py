@@ -362,7 +362,7 @@ class MainFrame(wx.Frame):
         """
         self.document_dictionary = documents
         self.page_list.Clear()
-        self.page_list.InsertItems(list(self.document_dictionary.keys()), 0)
+        self.page_list.InsertItems(sorted(list(self.document_dictionary.keys())), 0)
         # Select last used document
         last_document = self.config_manager.get_last_document()
         if last_document:
