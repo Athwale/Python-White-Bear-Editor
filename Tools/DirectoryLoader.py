@@ -10,7 +10,7 @@ from Constants.Strings import Strings
 from Exceptions.AccessException import AccessException
 from Exceptions.UnrecognizedFileException import UnrecognizedFileException
 from Resources.Fetch import Fetch
-from Tools.WhitebearDocument import WhitebearDocument
+from Tools.Document.WhitebearDocumentArticle import WhitebearDocument
 
 
 class DirectoryLoader:
@@ -117,13 +117,14 @@ class DirectoryLoader:
                         xml_doc = html.parse(os.path.join(path, file))
                         if self.xmlschema_article.validate(xml_doc):
                             self._article_documents[filename] = WhitebearDocument(filename, file_path,
-                                                                                  WhitebearDocument.TYPE_ARTICLE)
+                                                                                  WhitebearDocument.TYPE_ARTICLE,
+                                                                                  self._menu_documents)
                         elif self.xmlschema_menu.validate(xml_doc):
                             self._menu_documents[filename] = WhitebearDocument(filename, file_path,
-                                                                               WhitebearDocument.TYPE_MENU)
+                                                                               WhitebearDocument.TYPE_MENU, None)
                         elif self.xmlschema_index.validate(xml_doc):
                             self._index_document = WhitebearDocument(filename, file_path,
-                                                                     WhitebearDocument.TYPE_INDEX)
+                                                                     WhitebearDocument.TYPE_INDEX, None)
                         else:
                             # Skip known non editable files
                             if 'google' in filename or '404' in filename:

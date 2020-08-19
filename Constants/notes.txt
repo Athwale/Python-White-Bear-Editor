@@ -4,6 +4,7 @@ Automaticky generovat datum
 Zkontrolovat nastaveni spatnyho adresare
 
 TODO:
+Check number of articles in status bar after adding a new one
 seo check date format
 Add system icon
 Display where the article belongs in the status bar

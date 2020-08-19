@@ -25,16 +25,18 @@ class WhitebearDocument:
     TYPE_MENU = 3
     TYPE_CSS = 4
 
-    def __init__(self, name, path, file_type):
+    def __init__(self, name, path, file_type, menus):
         """
         Create a new ParsedFile object.
         :param name: Name of the parsed file.
         :param path: Full path on disk to the parsed file
         :param file_type: Type of the parsed file. Can be one of ParsedFile.TYPE_... types
+        :param menus: A list of WhitebearDocuments representing menus
         """
         # File properties
         self._file_name = name
         self._path = path
+        self._menus = menus
         self._working_directory = os.path.dirname(path)
         self._file_type = file_type
         self._modified = False
@@ -49,16 +51,16 @@ class WhitebearDocument:
         # Article image data
         self._article_full_image_path = None
         self._article_thumbnail_image_path = None
-        self._article_image = None
         self._article_image_caption = ''
         self._article_image_link_title = None
         self._article_image_alt = None
+        self._article_image = None
         # Menu item data
         self._menu_image_path = None
-        self._menu_image = None
         self._menu_item_name = None
         self._menu_image_alt = None
         self._menu_image_link_title = None
+        self._menu_image = None
 
     def parse_self(self) -> None:
         """
@@ -68,6 +70,7 @@ class WhitebearDocument:
         :raises WrongFormatException: if there is a problem with parsing the document.
         """
         # Only parse if not parsed already and only if the document is valid.
+        # TODO create the wx image instances after seo check passed and the images have correct size
         if not self._parsed_html and self.is_valid():
             self._get_parsed_html()
             if self.get_type() == WhitebearDocument.TYPE_ARTICLE:
@@ -79,6 +82,17 @@ class WhitebearDocument:
                 self._parse_article_image_caption()
                 self._parse_article_image_link_title()
                 self._parse_article_image_alt()
+                self._determine_menu_section()
+            elif self.get_type() == WhitebearDocument.TYPE_MENU:
+                pass
+
+    def _determine_menu_section(self):
+        """
+        Find out to which menu this article belongs.
+        :return: None
+        :raises WrongFormatException: If the article is not found in any menu.
+        """
+        print(self._menus)
 
     def _parse_meta_description(self):
         """

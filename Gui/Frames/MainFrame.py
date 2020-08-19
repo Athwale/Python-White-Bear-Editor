@@ -11,7 +11,7 @@ from Exceptions.UnrecognizedFileException import UnrecognizedFileException
 from Gui.Dialogs.AboutDialog import AboutDialog
 from Threads.FileListThread import FileListThread
 from Tools.ConfigManager import ConfigManager
-from Tools.WhitebearDocument import WhitebearDocument
+from Tools.Document.WhitebearDocumentArticle import WhitebearDocument
 
 
 class MainFrame(wx.Frame):
