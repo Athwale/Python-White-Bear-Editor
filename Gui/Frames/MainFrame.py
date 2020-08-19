@@ -49,7 +49,7 @@ class MainFrame(wx.Frame):
 
         # Prepare frame contents
         # Load last working directory
-        self._set_status_text(Strings.status_loading, 2)
+        self._set_status_text(Strings.status_loading, 3)
         self._load_working_directory(self.config_manager.get_working_dir())
 
         # Load last window position and size
@@ -124,8 +124,8 @@ class MainFrame(wx.Frame):
         :return: None
         """
         # Create a status bar with 3 fields
-        self.status_bar = self.CreateStatusBar(3)
-        self.status_bar.SetStatusWidths([-3, -2, -1])
+        self.status_bar = self.CreateStatusBar(4)
+        self.status_bar.SetStatusWidths([-6, -7, -2, -2])
         # Initialize status bar
         self._set_status_text('', 0)
         self._set_status_text('', 1)
@@ -329,7 +329,7 @@ class MainFrame(wx.Frame):
         """
         # Disable the gui until load is done
         self.Disable()
-        self._set_status_text(Strings.status_loading, 2)
+        self._set_status_text(Strings.status_loading, 3)
         self._set_status_text(('Work dir: ' + str(path)), 1)
         file_list_thread = FileListThread(self, self.EVT_CARRIER_TYPE_ID, str(path))
         file_list_thread.start()
@@ -373,7 +373,8 @@ class MainFrame(wx.Frame):
 
         os.chdir(self.config_manager.get_working_dir())
         # Enable GUI when the load is done
-        self._set_status_text(Strings.status_ready, 2)
+        self._set_status_text(Strings.status_ready, 3)
+        self._set_status_text(Strings.status_articles + ' ' + str(len(self.document_dictionary)), 2)
         self._disable_editor(False)
 
     def quit_button_handler(self, event):

@@ -61,6 +61,7 @@ class Strings:
     status_error: str = 'Error'
     status_valid: str = 'Valid:'
     status_invalid: str = 'Invalid:'
+    status_articles: str = 'Articles:'
 
     toolbar_new_file: str = 'New file'
 
