@@ -33,7 +33,7 @@ class MyApp(wx.App):
         return True
 
     def OnExit(self):
-        print('Done')
+        print('_Done_')
         return True
 
 

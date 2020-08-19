@@ -31,7 +31,13 @@
                                 <xs:attribute name="target" type="xs:string" fixed="_blank" use="required"/>
                             </xs:complexType>
                         </xs:element>
-                        <xs:element name="figcaption"/>
+                        <xs:element name="figcaption">
+                            <xs:complexType mixed="true">
+                                <xs:choice minOccurs="0" maxOccurs="unbounded">
+                                    <xs:element name="br"/>
+                                </xs:choice>
+                            </xs:complexType>
+                        </xs:element>
                     </xs:sequence>
                     <xs:attribute name="id" type="xs:string" fixed="articleImg" use="required"/>
                 </xs:complexType>

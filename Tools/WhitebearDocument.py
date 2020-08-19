@@ -47,9 +47,10 @@ class WhitebearDocument:
         self._meta_keywords = None
         self._meta_description = None
         # Article image data
-        self._article_image_path = None
+        self._article_full_image_path = None
+        self._article_thumbnail_image_path = None
         self._article_image = None
-        self._article_image_caption = None
+        self._article_image_caption = ''
         self._article_image_link_title = None
         self._article_image_alt = None
         # Menu item data
@@ -75,6 +76,9 @@ class WhitebearDocument:
                 self._parse_date()
                 self._parse_article_name()
                 self._parse_article_image_path()
+                self._parse_article_image_caption()
+                self._parse_article_image_link_title()
+                self._parse_article_image_alt()
 
     def _parse_meta_description(self):
         """
@@ -122,11 +126,41 @@ class WhitebearDocument:
         :return: None
         """
         main_image_figure = self._parsed_html.find(name='figure', attrs={'id': 'articleImg'})
-        disk_path = os.path.join(self._working_directory, main_image_figure.a['href'])
-        if os.path.exists(disk_path) and os.access(disk_path, os.R_OK) and os.access(disk_path, os.W_OK):
-            self._article_image_path = disk_path
-        else:
-            self._article_image_path = None
+        self._article_full_image_path = os.path.join(self._working_directory, main_image_figure.a['href'])
+        self._article_thumbnail_image_path = os.path.join(self._working_directory, main_image_figure.img['src'])
+        if not os.path.exists(self._article_full_image_path) or \
+                not os.access(self._article_full_image_path, os.R_OK) or \
+                not os.access(self._article_full_image_path, os.W_OK):
+            self._article_full_image_path = None
+
+        if not os.path.exists(self._article_thumbnail_image_path) or \
+                not os.access(self._article_thumbnail_image_path, os.R_OK) or \
+                not os.access(self._article_thumbnail_image_path, os.W_OK):
+            self._article_thumbnail_image_path = None
+
+    def _parse_article_image_caption(self):
+        """
+        Parse the main article image caption text and save it into an instance variable.
+        :return: None
+        """
+        main_image_figure = self._parsed_html.find(name='figure', attrs={'id': 'articleImg'})
+        # The figcaption tag is allowed to contain <br> which we have to skip
+        string_content = main_image_figure.figcaption.strings
+        self._article_image_caption = ''.join(string_content)
+
+    def _parse_article_image_link_title(self):
+        """
+        Parse the main article image link title text and save it into an instance variable.
+        :return: None
+        """
+        self._article_image_link_title = self._parsed_html.find(name='figure', attrs={'id': 'articleImg'}).a['title']
+
+    def _parse_article_image_alt(self):
+        """
+        Parse the main article image alt description text and save it into an instance variable.
+        :return: None
+        """
+        self._article_image_alt = self._parsed_html.find(name='figure', attrs={'id': 'articleImg'}).img['alt']
 
     def _get_parsed_html(self):
         """
@@ -287,7 +321,7 @@ class WhitebearDocument:
         Return the path to the article image full version.
         :return: Return the path to the article image full version.
         """
-        return self._article_image_path
+        return self._article_full_image_path
 
     def get_article_image(self) -> wx.Image:
         """
@@ -429,17 +463,7 @@ class WhitebearDocument:
         :param path: New image path in disk.
         :return: None
         """
-        self._article_image_path = path
-        self.set_modified(True)
-
-    def set_article_image(self, image: wx.Image) -> None:
-        """
-        Set the new main article image.
-        Change modified attribute to True.
-        :param image: New wx.Image.
-        :return: None
-        """
-        self._article_image = image
+        self._article_full_image_path = path
         self.set_modified(True)
 
     def set_article_image_caption(self, text: str) -> None:
@@ -480,16 +504,6 @@ class WhitebearDocument:
         :return: None
         """
         self._menu_image_path = path
-        self.set_modified(True)
-
-    def set_menu_image(self, image: wx.Image) -> None:
-        """
-        Set the new menu image.
-        Change modified attribute to True.
-        :param image: New wx.Image.
-        :return: None
-        """
-        self._menu_image = image
         self.set_modified(True)
 
     def set_menu_item_name(self, text: str) -> None:
