@@ -10,7 +10,9 @@ from Constants.Strings import Strings
 from Exceptions.AccessException import AccessException
 from Exceptions.UnrecognizedFileException import UnrecognizedFileException
 from Resources.Fetch import Fetch
-from Tools.Document.WhitebearDocumentArticle import WhitebearDocument
+from Tools.Document.WhitebearDocumentArticle import WhitebearDocumentArticle
+from Tools.Document.WhitebearDocumentIndex import WhitebearDocumentIndex
+from Tools.Document.WhitebearDocumentMenu import WhitebearDocumentMenu
 
 
 class DirectoryLoader:
@@ -23,8 +25,8 @@ class DirectoryLoader:
 
     def __init__(self):
         self._directory_path: str = ''
-        self._article_documents: Dict[str, WhitebearDocument] = {}
-        self._menu_documents: Dict[str, WhitebearDocument] = {}
+        self._article_documents: Dict[str, WhitebearDocumentArticle] = {}
+        self._menu_documents: Dict[str, WhitebearDocumentMenu] = {}
         self._index_document = None
         # Prepare xml schemas
         self.xmlschema_index = etree.XMLSchema(etree.parse(Fetch.get_resource_path('schema_index.xsd')))
@@ -38,21 +40,21 @@ class DirectoryLoader:
         """
         return self._directory_path
 
-    def get_articles(self) -> Dict[str, WhitebearDocument]:
+    def get_articles(self) -> Dict[str, WhitebearDocumentArticle]:
         """
         Returns a dictionary of file names and corresponding WhitebearDocument instances of article pages.
         :return: {file name, WhitebearDocument, ...}
         """
         return self._article_documents
 
-    def get_menus(self) -> Dict[str, WhitebearDocument]:
+    def get_menus(self) -> Dict[str, WhitebearDocumentMenu]:
         """
         Returns a dictionary of file names and corresponding WhitebearDocument instances of menu pages.
         :return: {file name, WhitebearDocument, ...}
         """
         return self._menu_documents
 
-    def get_index_page(self) -> WhitebearDocument:
+    def get_index_page(self) -> WhitebearDocumentArticle:
         """
         Returns a WhitebearDocument instance of the index page.
         :return: a WhitebearDocument instance of the index page.
@@ -116,15 +118,12 @@ class DirectoryLoader:
                     try:
                         xml_doc = html.parse(os.path.join(path, file))
                         if self.xmlschema_article.validate(xml_doc):
-                            self._article_documents[filename] = WhitebearDocument(filename, file_path,
-                                                                                  WhitebearDocument.TYPE_ARTICLE,
-                                                                                  self._menu_documents)
+                            self._article_documents[filename] = WhitebearDocumentArticle(filename, file_path,
+                                                                                         self._menu_documents)
                         elif self.xmlschema_menu.validate(xml_doc):
-                            self._menu_documents[filename] = WhitebearDocument(filename, file_path,
-                                                                               WhitebearDocument.TYPE_MENU, None)
+                            self._menu_documents[filename] = WhitebearDocumentMenu(filename, file_path)
                         elif self.xmlschema_index.validate(xml_doc):
-                            self._index_document = WhitebearDocument(filename, file_path,
-                                                                     WhitebearDocument.TYPE_INDEX, None)
+                            self._index_document = WhitebearDocumentIndex(filename, file_path, None)
                         else:
                             # Skip known non editable files
                             if 'google' in filename or '404' in filename:

@@ -11,7 +11,7 @@ from Exceptions.UnrecognizedFileException import UnrecognizedFileException
 from Gui.Dialogs.AboutDialog import AboutDialog
 from Threads.FileListThread import FileListThread
 from Tools.ConfigManager import ConfigManager
-from Tools.Document.WhitebearDocumentArticle import WhitebearDocument
+from Tools.Document.WhitebearDocumentArticle import WhitebearDocumentArticle
 
 
 class MainFrame(wx.Frame):
@@ -354,7 +354,7 @@ class MainFrame(wx.Frame):
         self._show_error_dialog(str(e))
         self._disable_editor(True)
 
-    def on_filelist_loaded(self, documents: Dict[str, WhitebearDocument]) -> None:
+    def on_filelist_loaded(self, documents: Dict[str, WhitebearDocumentArticle]) -> None:
         """
         This method fills up the left side page file list and is called when the FileListThread finishes.
         :param documents: Dictionary of file names and documents of article pages {file name, WhitebearDocument, ...}

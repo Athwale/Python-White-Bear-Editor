@@ -26,7 +26,6 @@ class Strings:
     exception_parse_multiple_descriptions: str = 'Only one meta description tag is allowed'
     exception_parse_multiple_keywords: str = 'Only one meta keywords tag is allowed'
 
-
     label_menu_file: str = 'File'
     label_menu_item_open: str = 'Open directory...\tctrl+o'
     label_menu_item_open_hint: str = 'Open a whitebear web directory'

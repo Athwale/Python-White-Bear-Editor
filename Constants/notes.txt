@@ -4,6 +4,7 @@ Automaticky generovat datum
 Zkontrolovat nastaveni spatnyho adresare
 
 TODO:
+parse page name different for each, copy from article.
 Check number of articles in status bar after adding a new one
 seo check date format
 Add system icon
