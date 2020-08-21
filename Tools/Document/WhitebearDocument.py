@@ -13,7 +13,7 @@ class WhitebearDocument:
     This is just a container for easy manipulation. This is a base class with only the common information for all pages.
     """
 
-    def __init__(self, name, path, menus):
+    def __init__(self, name: str, path: str, menus):
         """
         Create a new WhitebearDocument object.
         :param name: Name of the file.
@@ -26,11 +26,11 @@ class WhitebearDocument:
         self._menus = menus
         self._working_directory = os.path.dirname(path)
         self._modified = False
-        self._valid = False
+        # We create instances of documents after validation so we already know they are valid.
+        self._valid = True
 
         # Article data
         self._parsed_html = None
-        self._date = None
         self._page_name = None
         self._meta_keywords = None
         self._meta_description = None
@@ -47,7 +47,6 @@ class WhitebearDocument:
             self._get_parsed_html()
             self._parse_meta_description()
             self._parse_meta_keywords()
-            self._parse_date()
 
     def _parse_meta_description(self):
         """
@@ -72,13 +71,6 @@ class WhitebearDocument:
             self._meta_keywords = keywords[0]['content']
         else:
             raise WrongFormatException(Strings.exception_parse_multiple_keywords)
-
-    def _parse_date(self):
-        """
-        Parse the date stamp of this document and save it into an instance variable.
-        :return: None
-        """
-        self._date = self._parsed_html.find(name='p', attrs={'id': 'date'}).string
 
     def _get_parsed_html(self):
         """
@@ -122,13 +114,6 @@ class WhitebearDocument:
         :return: Return the file name.
         """
         return self._file_name
-
-    def get_date(self) -> str:
-        """
-        Return the article creation date.
-        :return: Return article creation date.
-        """
-        return self._date
 
     def get_path(self) -> str:
         """
@@ -223,16 +208,6 @@ class WhitebearDocument:
         :return: None
         """
         self._file_name = name
-        self.set_modified(True)
-
-    def set_date(self, date: str) -> None:
-        """
-        Set the new article date.
-        Change modified attribute to True.
-        :param date: New article creation date.
-        :return: None
-        """
-        self._date = date
         self.set_modified(True)
 
     def __str__(self) -> str:

@@ -17,15 +17,14 @@ class WhitebearDocumentIndex(WhitebearDocument):
     This is just a container for easy manipulation.
     """
 
-    def __init__(self, name, path, menus):
+    def __init__(self, name: str, path: str):
         """
         Create a new WhitebearDocument object.
         :param name: Name of the file.
         :param path: Full path on disk to the file
-        :param menus: A list of WhitebearDocuments representing menus
         """
         # File properties are in base class
-        super().__init__(name, path, menus)
+        super().__init__(name, path, None)
 
     def parse_self(self) -> None:
         """

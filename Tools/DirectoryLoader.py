@@ -123,13 +123,12 @@ class DirectoryLoader:
                         elif self.xmlschema_menu.validate(xml_doc):
                             self._menu_documents[filename] = WhitebearDocumentMenu(filename, file_path)
                         elif self.xmlschema_index.validate(xml_doc):
-                            self._index_document = WhitebearDocumentIndex(filename, file_path, None)
+                            self._index_document = WhitebearDocumentIndex(filename, file_path)
                         else:
                             # Skip known non editable files
                             if 'google' in filename or '404' in filename:
                                 continue
                             else:
-                                print(self.xmlschema_article.error_log)
                                 raise UnrecognizedFileException(Strings.exception_file_unrecognized + ' ' + filename)
                     except XMLSyntaxError as e:
                         raise UnrecognizedFileException(Strings.exception_html_syntax_error + '\n' + str(e))

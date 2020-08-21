@@ -1,5 +1,5 @@
 import os
-from typing import List
+from typing import List, Dict
 
 import wx
 from lxml import etree
@@ -10,6 +10,7 @@ from Constants.Strings import Strings
 from Exceptions.UnrecognizedFileException import UnrecognizedFileException
 from Resources.Fetch import Fetch
 from Tools.Document.WhitebearDocument import WhitebearDocument
+from Tools.Document.WhitebearDocumentMenu import WhitebearDocumentMenu
 
 
 class WhitebearDocumentArticle(WhitebearDocument):
@@ -19,7 +20,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
     This is just a container for easy manipulation.
     """
 
-    def __init__(self, name, path, menus):
+    def __init__(self, name: str, path: str, menus: Dict[str, WhitebearDocumentMenu]):
         """
         Create a new WhitebearDocumentArticle object.
         :param name: Name of the file.
@@ -29,7 +30,8 @@ class WhitebearDocumentArticle(WhitebearDocument):
         # File properties are in base class
         super().__init__(name, path, menus)
 
-        # Article image data
+        # Article data
+        self._date = None
         self._article_full_image_path = None
         self._article_thumbnail_image_path = None
         self._article_image_caption = ''
@@ -67,7 +69,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
         :return: None
         :raises WrongFormatException: If the article is not found in any menu.
         """
-        print(self._menus)
+        pass
 
     def _parse_page_name(self):
         """
@@ -76,6 +78,13 @@ class WhitebearDocumentArticle(WhitebearDocument):
         """
         article = self._parsed_html.find(name='article', attrs={'class': 'textPage'})
         self._page_name = article.h2.string
+
+    def _parse_date(self):
+        """
+        Parse the date stamp of this document and save it into an instance variable.
+        :return: None
+        """
+        self._date = self._parsed_html.find(name='p', attrs={'id': 'date'}).string
 
     def _parse_article_image_path(self):
         """
@@ -149,6 +158,13 @@ class WhitebearDocumentArticle(WhitebearDocument):
         pass
 
     # Getters ----------------------------------------------------------------------------------------------------------
+    def get_date(self) -> str:
+        """
+        Return the article creation date.
+        :return: Return article creation date.
+        """
+        return self._date
+
     def get_article_image_path(self) -> str:
         """
         Return the path to the article image full version.
@@ -220,6 +236,16 @@ class WhitebearDocumentArticle(WhitebearDocument):
         return self._menu_image_alt
 
     # Setters ----------------------------------------------------------------------------------------------------------
+    def set_date(self, date: str) -> None:
+        """
+        Set the new article date.
+        Change modified attribute to True.
+        :param date: New article creation date.
+        :return: None
+        """
+        self._date = date
+        self.set_modified(True)
+
     def set_article_image_path(self, path: str) -> None:
         """
         Set the new main article image file path for the full version.

@@ -1,3 +1,4 @@
+import os
 from typing import List
 
 from lxml import etree
@@ -7,6 +8,7 @@ from lxml.etree import XMLSyntaxError
 from Constants.Strings import Strings
 from Exceptions.UnrecognizedFileException import UnrecognizedFileException
 from Resources.Fetch import Fetch
+from Tools.Document.MenuItem import MenuItem
 from Tools.Document.WhitebearDocument import WhitebearDocument
 
 
@@ -17,7 +19,7 @@ class WhitebearDocumentMenu(WhitebearDocument):
     This is just a container for easy manipulation.
     """
 
-    def __init__(self, name, path):
+    def __init__(self, name: str, path: str):
         """
         Create a new WhitebearDocumentMenuIndex object.
         :param name: Name of the file.
@@ -25,17 +27,49 @@ class WhitebearDocumentMenu(WhitebearDocument):
         """
         # File properties are in base class
         super().__init__(name, path, None)
+        self._menu_items = []
+        self.parse_self()
 
     def parse_self(self) -> None:
         """
         Parse this document and fill internal variables with content.
-        Call validate_self before parsing.
         :return: None
         :raises WrongFormatException: if there is a problem with parsing the document.
         """
-        # Only parse if not parsed already and only if the document is valid.
-        if not self._parsed_html and self.is_valid():
-            pass
+        # In case of menu, we create the instances only if the source file is valid and we only parse them once.
+        super(WhitebearDocumentMenu, self).parse_self()
+        self._parse_page_name()
+        self._parse_menu_items()
+
+    def _parse_menu_items(self):
+        """
+        Parse the menu items of this menu and save them into an instance variable. Image path is none if the file
+        is not on hard drive.
+        :return: None
+        """
+        menu_container = self._parsed_html.find(name='nav', attrs={'class': 'sixItems'})
+        divs = menu_container.find_all(name='div', attrs={'class': 'link'})
+        for div in divs:
+            href = div.a['href']
+            title = div.a['title']
+            full_image_path = os.path.join(self._working_directory, div.img['src'])
+            image_alt = div.img['alt']
+            string_content = div.p.strings
+            name = ''.join(string_content)
+
+            if not os.path.exists(full_image_path) or not os.access(full_image_path, os.R_OK) or not os.access(
+                    full_image_path, os.W_OK):
+                full_image_path = None
+
+            self._menu_items.append(MenuItem(name, title, image_alt, href, full_image_path))
+
+    def _parse_page_name(self):
+        """
+        Parse the name of this menu and save it into an instance variable.
+        :return: None
+        """
+        article = self._parsed_html.find(name='article', attrs={'class': 'menuPage'})
+        self._page_name = article.h2.string
 
     def validate_self(self) -> (bool, List[str]):
         """
@@ -55,5 +89,19 @@ class WhitebearDocumentMenu(WhitebearDocument):
         return self._valid, errors
 
     # Getters ----------------------------------------------------------------------------------------------------------
+    def get_menu_items(self) -> List[MenuItem]:
+        """
+        Return a list of MenuItem of all menu items of this menu.
+        :return: A list of [MenuItem,...]
+        """
+        return self._menu_items
+
+    def find_item_by_file_name(self, file_name: str) -> MenuItem:
+        """
+        Return a MenuItem that contains a link to the file_name, only one must exist. None if not found.
+        :param file_name: Name of the website to find in this menu.
+        :return: Return a MenuItem that contains a link to the file_name, only one must exist. None if not found.
+        """
+        pass
 
     # Setters ----------------------------------------------------------------------------------------------------------
