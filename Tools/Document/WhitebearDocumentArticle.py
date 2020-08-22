@@ -9,6 +9,7 @@ from lxml.etree import XMLSyntaxError
 from Constants.Strings import Strings
 from Exceptions.UnrecognizedFileException import UnrecognizedFileException
 from Resources.Fetch import Fetch
+from Tools.Document.MenuItem import MenuItem
 from Tools.Document.WhitebearDocument import WhitebearDocument
 from Tools.Document.WhitebearDocumentMenu import WhitebearDocumentMenu
 
@@ -31,6 +32,8 @@ class WhitebearDocumentArticle(WhitebearDocument):
         super().__init__(name, path, menus)
 
         # Article data
+        self._menu_section = None
+        self._menu_item = None
         self._date = None
         self._article_full_image_path = None
         self._article_thumbnail_image_path = None
@@ -61,15 +64,24 @@ class WhitebearDocumentArticle(WhitebearDocument):
             self._parse_article_image_caption()
             self._parse_article_image_link_title()
             self._parse_article_image_alt()
-            self._determine_menu_section()
+            self._determine_menu_section_and_menu_item()
 
-    def _determine_menu_section(self):
+    def _determine_menu_section_and_menu_item(self):
         """
         Find out which menu this article belongs in.
         :return: None
         :raises WrongFormatException: If the article is not found in any menu.
         """
-        pass
+        for menu in self._menus.values():
+            self._menu_item = menu.find_item_by_file_name(self.get_filename())
+            if self._menu_item:
+                self._menu_section = menu.get_page_name()
+                break
+
+        print('section')
+        print(self._menu_section)
+        print('item')
+        print(self._menu_item)
 
     def _parse_page_name(self):
         """
@@ -200,13 +212,6 @@ class WhitebearDocumentArticle(WhitebearDocument):
         """
         return self._article_image_alt
 
-    def get_menu_image_path(self) -> str:
-        """
-        Return the path to the menu image.
-        :return: Return the path to the menu image.
-        """
-        return self._menu_image_path
-
     def get_menu_image(self) -> wx.Image:
         """
         Return the menu image wx image instance.
@@ -214,26 +219,12 @@ class WhitebearDocumentArticle(WhitebearDocument):
         """
         return self._menu_image
 
-    def get_menu_item_name(self) -> str:
+    def get_menu_item(self) -> MenuItem:
         """
-        Return the name of the menu item associate with this article.
-        :return: Return the name of the menu item associate with this article.
+        Return the menu item associated with this article.
+        :return: The menu item associated with this article.
         """
-        return self._menu_item_name
-
-    def get_menu_image_link_title(self) -> str:
-        """
-        Return the link title of the menu image.
-        :return: Return the link title of the menu image.
-        """
-        return self._menu_image_link_title
-
-    def get_menu_image_alt(self) -> str:
-        """
-        Return the alt description of the menu image.
-        :return: Return the alt description of the menu image.
-        """
-        return self._menu_image_alt
+        return self._menu_item
 
     # Setters ----------------------------------------------------------------------------------------------------------
     def set_date(self, date: str) -> None:
@@ -284,44 +275,4 @@ class WhitebearDocumentArticle(WhitebearDocument):
         :return: None
         """
         self._article_image_alt = text
-        self.set_modified(True)
-
-    def set_menu_image_path(self, path: str) -> None:
-        """
-        Set the new menu image path for this article.
-        Change modified attribute to True.
-        :param path: New image path in disk.
-        :return: None
-        """
-        self._menu_image_path = path
-        self.set_modified(True)
-
-    def set_menu_item_name(self, text: str) -> None:
-        """
-        Set the new menu item name for this article.
-        Change modified attribute to True.
-        :param text: New manu item name.
-        :return: None
-        """
-        self._menu_item_name = text
-        self.set_modified(True)
-
-    def set_menu_image_link_title(self, text: str) -> None:
-        """
-        Set the new menu image image link title.
-        Change modified attribute to True.
-        :param text: New image link title.
-        :return: None
-        """
-        self._menu_image_link_title = text
-        self.set_modified(True)
-
-    def set_menu_image_alt(self, text: str) -> None:
-        """
-        Set the new menu image alt description.
-        Change modified attribute to True.
-        :param text: New image alt description.
-        :return: None
-        """
-        self._menu_image_alt = text
         self.set_modified(True)

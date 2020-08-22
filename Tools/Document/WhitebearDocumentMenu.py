@@ -96,12 +96,15 @@ class WhitebearDocumentMenu(WhitebearDocument):
         """
         return self._menu_items
 
-    def find_item_by_file_name(self, file_name: str) -> MenuItem:
+    def find_item_by_file_name(self, file_name: str):
         """
         Return a MenuItem that contains a link to the file_name, only one must exist. None if not found.
         :param file_name: Name of the website to find in this menu.
         :return: Return a MenuItem that contains a link to the file_name, only one must exist. None if not found.
         """
-        pass
+        for item in self._menu_items:
+            if file_name == item.get_menu_link_href():
+                return item
+        return None
 
     # Setters ----------------------------------------------------------------------------------------------------------

@@ -463,3 +463,5 @@ class MainFrame(wx.Frame):
         except UnrecognizedFileException as e:
             self._show_error_dialog(str(e))
             self._disable_editor(True)
+        except KeyError as e:
+            self._show_error_dialog(Strings.editor_last_document_missing)

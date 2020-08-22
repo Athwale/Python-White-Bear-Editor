@@ -55,3 +55,6 @@ class MenuItem:
 
         """
         return self._menu_image_path
+
+    def __str__(self) -> str:
+        return "Menu item {}, Link {}, Image {}".format(self._article_name, self._href, self._menu_image_path)
