@@ -143,7 +143,7 @@ class MainFrame(wx.Frame):
         self.right_panel = wx.Panel(self.split_screen, style=wx.SUNKEN_BORDER)
         # Limit how far the file list can expand to prevent GUI from being squished too much.
         self.right_panel.SetMinSize((600, -1))
-        self.split_screen.SplitVertically(self.left_panel, self.right_panel, 210)
+        self.split_screen.SplitVertically(self.left_panel, self.right_panel, Numbers.initial_panel_size)
 
         # Create a global sizer that contains the splitter window which contains the rest.
         self.main_horizontal_sizer = wx.BoxSizer(wx.VERTICAL)
@@ -367,6 +367,7 @@ class MainFrame(wx.Frame):
         for document_name in sorted(list(self.document_dictionary.keys()), reverse=True):
             status_color = self.document_dictionary[document_name].get_status_color()
             self.page_list.InsertItem(0, document_name)
+            self.page_list.SetItemBackgroundColour(0, status_color)
 
         # Select last used document
         last_document = self.config_manager.get_last_document()
@@ -453,16 +454,11 @@ class MainFrame(wx.Frame):
         :return: None
         """
         selected_name = event.GetText()
-        print(selected_name)
-        # Validate the selected document
-        # TODO do this in a separate thread
+        # TODO create a backup copy on click.
         try:
             result = self.document_dictionary[selected_name].validate_self()
             if result[0]:
                 self._set_status_text(Strings.status_valid + ' ' + selected_name)
-                # Parse the document, this must be done after self validation.
-                self.document_dictionary[selected_name].parse_self()
-
                 self.SetTitle(selected_name)
             else:
                 self._set_status_text(Strings.status_invalid + ' ' + selected_name)

@@ -33,7 +33,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
         super().__init__(name, path, menus)
 
         # Article data
-        self._status_color = wx.RED
+        self._status_color = wx.WHITE
         self._menu_section = None
         self._menu_item = None
         self._date = None
@@ -59,7 +59,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
         """
         # Only parse if not parsed already and only if the document is valid.
         # TODO create the wx image instances after seo check passed and the images have correct size
-        if not self._parsed_html and self.is_valid():
+        if not self._parsed_html:
             super(WhitebearDocumentArticle, self).parse_self()
             self._parse_page_name()
             self._parse_article_image_path()
@@ -67,6 +67,17 @@ class WhitebearDocumentArticle(WhitebearDocument):
             self._parse_article_image_link_title()
             self._parse_article_image_alt()
             self._determine_menu_section_and_menu_item()
+
+    def seo_test_self(self):
+        """
+
+        :return:
+        """
+        # TODO seo test should return what to display in the gui about text lengths etc and document completeness.
+        # TODO the file list can change color based on the result of this method. Files have to be valid before this
+        # TODO test. Do a second pass over all loaded and now valid documents and color the list based on this method.
+        # TODO save the filelist color in this instance, run self test on every setter method.
+        pass
 
     def _determine_menu_section_and_menu_item(self):
         """
@@ -77,7 +88,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
         for menu in self._menus.values():
             self._menu_item = menu.find_item_by_file_name(self.get_filename())
             if self._menu_item:
-                self._menu_section = menu.get_page_name()
+                self._menu_section = menu
                 break
         if not self._menu_item:
             raise WrongFormatException(Strings.exception_menu_item_missing + ' for: ' + self.get_filename())
@@ -156,17 +167,6 @@ class WhitebearDocumentArticle(WhitebearDocument):
         for error in xmlschema.error_log:
             errors.append(error.message)
         return self._valid, errors
-
-    def seo_test_self(self):
-        """
-
-        :return:
-        """
-        # TODO seo test should return what to display in the gui about text lengths etc and document completeness.
-        # TODO the file list can change color based on the result of this method. Files have to be valid before this
-        # TODO test. Do a second pass over all loaded and now valid documents and color the list based on this method.
-        # TODO save the filelist color in this instance, run self test on every setter method.
-        pass
 
     # Getters ----------------------------------------------------------------------------------------------------------
     def get_date(self) -> str:

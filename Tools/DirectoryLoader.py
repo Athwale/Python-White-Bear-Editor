@@ -132,3 +132,7 @@ class DirectoryLoader:
                                 raise UnrecognizedFileException(Strings.exception_file_unrecognized + ' ' + filename)
                     except XMLSyntaxError as e:
                         raise UnrecognizedFileException(Strings.exception_html_syntax_error + '\n' + str(e))
+
+        # Parse all articles after we have recognized and parsed all menu pages.
+        for article in self._article_documents.values():
+            article.parse_self()

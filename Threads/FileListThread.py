@@ -4,6 +4,7 @@ import wx
 
 from Exceptions.AccessException import AccessException
 from Exceptions.UnrecognizedFileException import UnrecognizedFileException
+from Exceptions.WrongFormatException import WrongFormatException
 from Tools.DirectoryLoader import DirectoryLoader
 
 
@@ -37,5 +38,5 @@ class FileListThread(threading.Thread):
             # will be called in the main GUI thread. This passes an event into the main thread in background which is
             # processed normally in the wx main thread queue.
             wx.CallAfter(self._parent.on_filelist_loaded, self._directory_loader.get_articles())
-        except (AccessException, IndexError, FileNotFoundError, UnrecognizedFileException) as e:
+        except (AccessException, IndexError, FileNotFoundError, UnrecognizedFileException, WrongFormatException) as e:
             wx.CallAfter(self._parent.on_filelist_load_fail, e)
