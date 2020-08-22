@@ -223,7 +223,7 @@ class MainFrame(wx.Frame):
         # --------------------------------------------------------------------------------------------------------------
 
         # File list section --------------------------------------------------------------------------------------------
-        self.page_list = wx.ListBox(self.left_panel, wx.LB_SINGLE | wx.LB_SORT)
+        self.page_list = wx.ListCtrl(self.left_panel, -1, style=wx.LC_REPORT | wx.LC_SINGLE_SEL)
         self.page_list.SetFont(self.text_field_font)
         # Add the list into the bottom sizer, give it a sizing weight and let it expand vertically
         self.filelist_column_sizer.Add(self.page_list, flag=wx.EXPAND, border=Numbers.widget_border_size, proportion=1)
@@ -289,7 +289,8 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.quit_button_handler, self.file_menu_item_quit)
 
         # Bind other controls clicks
-        self.Bind(wx.EVT_LISTBOX, self.list_item_click_handler, self.page_list)
+        self.Bind(wx.EVT_LIST_ITEM_SELECTED, self.list_item_click_handler, self.page_list)
+        self.Bind(wx.EVT_SPLITTER_SASH_POS_CHANGING, self.splitter_size_change_handler, self.split_screen)
 
     def _set_status_text(self, text: str, position=0) -> None:
         """
@@ -311,7 +312,7 @@ class MainFrame(wx.Frame):
         self.Enable()
         if state:
             self.split_screen.Disable()
-            self.page_list.Clear()
+            self.page_list.ClearAll()
         else:
             self.split_screen.Enable()
         # Disable toolbar buttons
@@ -350,7 +351,6 @@ class MainFrame(wx.Frame):
         :param e: Exception that caused the call of this method.
         :return: None
         """
-        # TODO open dialog and append the error to its log
         self._show_error_dialog(str(e))
         self._disable_editor(True)
 
@@ -361,15 +361,17 @@ class MainFrame(wx.Frame):
         :return: None
         """
         self.document_dictionary = documents
-        self.page_list.Clear()
-        self.page_list.InsertItems(sorted(list(self.document_dictionary.keys())), 0)
+        self.page_list.ClearAll()
+        self.page_list.InsertColumn(0, Strings.column_pages, format=wx.LIST_FORMAT_LEFT)
+        self.page_list.SetColumnWidth(0, self.left_panel.GetSize()[0])
+        for document_name in sorted(list(self.document_dictionary.keys()), reverse=True):
+            status_color = self.document_dictionary[document_name].get_status_color()
+            self.page_list.InsertItem(0, document_name)
+
         # Select last used document
         last_document = self.config_manager.get_last_document()
         if last_document:
-            self.page_list.SetStringSelection(last_document)
-            list_event = wx.CommandEvent()
-            list_event.SetString(last_document)
-            self.list_item_click_handler(list_event)
+            self.page_list.Select(self.page_list.FindItem(0, last_document))
 
         os.chdir(self.config_manager.get_working_dir())
         # Enable GUI when the load is done
@@ -402,9 +404,10 @@ class MainFrame(wx.Frame):
             else:
                 self.config_manager.store_window_size(self.GetSize())
             # Store last selected document
-            if self.page_list.GetSelection() != wx.NOT_FOUND:
-                self.config_manager.store_last_open_document(self.page_list.GetString(self.page_list.GetSelection()))
-            # TODO Save currently worked on document
+            selected_page = self.page_list.GetFirstSelected()
+            if selected_page != wx.NOT_FOUND:
+                self.config_manager.store_last_open_document(self.page_list.GetItemText(selected_page, 0))
+            # TODO Save currently worked on document on disk
         # If the built in close function is not called, destroy must be called explicitly, calling Close runs the close
         # handler.
         self.Destroy()
@@ -433,6 +436,15 @@ class MainFrame(wx.Frame):
         """
         AboutDialog(self)
 
+    def splitter_size_change_handler(self, event):
+        """
+        Triggered when the splitter window is being resized. This is used to change column size of the page list.
+        :param event: Not used
+        :return: None
+        """
+        new_size = self.left_panel.GetSize()[0]
+        self.page_list.SetColumnWidth(0, new_size)
+
     def list_item_click_handler(self, event):
         """
         Handler function for clicking a page name in the web page list. Shows which website is selected in the status
@@ -440,7 +452,8 @@ class MainFrame(wx.Frame):
         :param event: wx event, brings the selected string from the menu.
         :return: None
         """
-        selected_name = event.GetString()
+        selected_name = event.GetText()
+        print(selected_name)
         # Validate the selected document
         # TODO do this in a separate thread
         try:
@@ -464,4 +477,4 @@ class MainFrame(wx.Frame):
             self._show_error_dialog(str(e))
             self._disable_editor(True)
         except KeyError as e:
-            self._show_error_dialog(Strings.editor_last_document_missing)
+            self._show_error_dialog(Strings.exception_last_document_missing)

@@ -11,6 +11,8 @@ class Strings:
     editor_name: str = 'Whitebear editor'
     editor_version: str = '0.1'
 
+    column_pages = 'Name'
+
     text_about_contents: str = '<p>Unfinished whitebear web editor.<br>' \
                                '<i>https://github.com/Athwale/Python-White-Bear-Editor</i><br>' \
                                'version: <b>' + editor_version + '</b></p>'
@@ -25,7 +27,8 @@ class Strings:
     exception_html_syntax_error: str = 'Syntax error in html file'
     exception_parse_multiple_descriptions: str = 'Only one meta description tag is allowed'
     exception_parse_multiple_keywords: str = 'Only one meta keywords tag is allowed'
-    editor_last_document_missing: str = 'Last open document not found'
+    exception_last_document_missing: str = 'Last open document not found'
+    exception_menu_item_missing: str = 'Menu item missing'
 
     label_menu_file: str = 'File'
     label_menu_item_open: str = 'Open directory...\tctrl+o'

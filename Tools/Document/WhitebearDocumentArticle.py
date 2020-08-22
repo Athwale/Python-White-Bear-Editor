@@ -8,6 +8,7 @@ from lxml.etree import XMLSyntaxError
 
 from Constants.Strings import Strings
 from Exceptions.UnrecognizedFileException import UnrecognizedFileException
+from Exceptions.WrongFormatException import WrongFormatException
 from Resources.Fetch import Fetch
 from Tools.Document.MenuItem import MenuItem
 from Tools.Document.WhitebearDocument import WhitebearDocument
@@ -32,6 +33,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
         super().__init__(name, path, menus)
 
         # Article data
+        self._status_color = wx.RED
         self._menu_section = None
         self._menu_item = None
         self._date = None
@@ -77,11 +79,8 @@ class WhitebearDocumentArticle(WhitebearDocument):
             if self._menu_item:
                 self._menu_section = menu.get_page_name()
                 break
-
-        print('section')
-        print(self._menu_section)
-        print('item')
-        print(self._menu_item)
+        if not self._menu_item:
+            raise WrongFormatException(Strings.exception_menu_item_missing + ' for: ' + self.get_filename())
 
     def _parse_page_name(self):
         """
@@ -226,6 +225,13 @@ class WhitebearDocumentArticle(WhitebearDocument):
         """
         return self._menu_item
 
+    def get_status_color(self) -> wx.Colour:
+        """
+        Return the status color of this document. White if ok, Red if SEO check failed, Blue if modified.
+        :return: Return the status color of this document. White if ok, Red if SEO check failed, Blue if modified.
+        """
+        return self._status_color
+
     # Setters ----------------------------------------------------------------------------------------------------------
     def set_date(self, date: str) -> None:
         """
@@ -275,4 +281,13 @@ class WhitebearDocumentArticle(WhitebearDocument):
         :return: None
         """
         self._article_image_alt = text
+        self.set_modified(True)
+
+    def set_status_color(self, new_color: wx.Colour) -> None:
+        """
+        Set new status color.
+        :param new_color: New wx.Colour color.
+        :return: None
+        """
+        self._status_color = new_color
         self.set_modified(True)
