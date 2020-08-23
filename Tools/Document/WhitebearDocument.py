@@ -68,7 +68,7 @@ class WhitebearDocument:
         """
         keywords = self._parsed_html.find_all(name='meta', attrs={'name': 'keywords', 'content': True})
         if len(keywords) == 1:
-            self._meta_keywords = keywords[0]['content']
+            self._meta_keywords = [word.strip() for word in keywords[0]['content'].split(',')]
         else:
             raise WrongFormatException(Strings.exception_parse_multiple_keywords)
 

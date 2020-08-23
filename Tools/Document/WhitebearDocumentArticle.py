@@ -6,6 +6,7 @@ from lxml import etree
 from lxml import html
 from lxml.etree import XMLSyntaxError
 
+from Constants.Numbers import Numbers
 from Constants.Strings import Strings
 from Exceptions.UnrecognizedFileException import UnrecognizedFileException
 from Exceptions.WrongFormatException import WrongFormatException
@@ -57,7 +58,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
         :return: None
         :raises WrongFormatException: if there is a problem with parsing the document.
         """
-        # Only parse if not parsed already and only if the document is valid.
+        # Only parse if not parsed already.
         # TODO create the wx image instances after seo check passed and the images have correct size
         if not self._parsed_html:
             super(WhitebearDocumentArticle, self).parse_self()
@@ -67,6 +68,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
             self._parse_article_image_link_title()
             self._parse_article_image_alt()
             self._determine_menu_section_and_menu_item()
+            self.seo_test_self()
 
     def seo_test_self(self):
         """
@@ -74,10 +76,21 @@ class WhitebearDocumentArticle(WhitebearDocument):
         :return:
         """
         # TODO seo test should return what to display in the gui about text lengths etc and document completeness.
-        # TODO the file list can change color based on the result of this method. Files have to be valid before this
-        # TODO test. Do a second pass over all loaded and now valid documents and color the list based on this method.
-        # TODO save the filelist color in this instance, run self test on every setter method.
-        pass
+        # TODO Run self test on every setter method.
+        # Check page name length must be at least 3 and must not be default
+        if len(self._page_name) < Numbers.article_name_min_length or len(
+                self._page_name) > Numbers.article_name_max_length:
+            self.set_status_color(wx.RED)
+
+        if self._page_name == Strings.label_article_title:
+            self.set_status_color(wx.RED)
+
+        # Check meta keywords
+        keywords_length = 0
+        for word in self._meta_keywords:
+            keywords_length += len(word)
+        if keywords_length < Numbers.keywords_min_length or keywords_length > Numbers.keywords_max_length:
+            self.set_status_color(wx.RED)
 
     def _determine_menu_section_and_menu_item(self):
         """

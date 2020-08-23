@@ -10,11 +10,50 @@ seo check date format
 Add system icon
 Display where the article belongs in the status bar
 Use red color in status bar.
+test default page red color
 
-Python je strongly typed, neprovadi implicitni konverzi napriklad v print.
-global jmeno uvnitr funkce pouzije promennou deklarovanou venku z funkce, globalni
-del jmeno vymaze deklarovanou promennou, ne obsah, celou promennou.
-*args, promenny pocet argumentu, predava se ve funkci jako seznam. Vzdy musi byt posledni.
+Obrázky zmensit na 50%
+Obrazky zmensovat do thumbnails na 300x225 vsechny thumbnails vcetne main article image
+Nahled thumbnailu v aside = 211 x 158
+Obrazky v textu max sirka 534 vyska 534
+
+flash 534x405
+
+format 4/3
+pripona malymi pismeny
+
+keywords 100 - 255 chars
+
+title stranky generovat automaticky:
+Primary Keyword - Secondary Keyword | Brand Name
+8-foot Green Widgets - Widgets & Tools | Widget World
+Dělo na brambory - elektronika | white-bear
+50 - 71 chars
+unique
+
+description 50 - 160 chars
+alphanumeric only, no ""
+unique
+
+Prepared - alt attribut: 125 chars
+obrazky
+
+Prepared - title atribut:
+linky <a>
+iframe
+
+Dat na vyber jestli pouzit target blank
+linky v menu nemaji blank ani na menu pages
+obrazky a externi linky maji blank
+interni linky nemaji blank
+
+Total text in body 250+ slov
+
+autodoplňovat nbsp
+
+Validovat na konci vsechny stranky
+mozna pouzit i online w3s validator
+
 
 Prace s datumem https://www.linkedin.com/learning/learning-python-2/using-timedelta-objects?u=2056732
 if file.mode == 'r'
