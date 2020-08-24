@@ -454,11 +454,14 @@ class MainFrame(wx.Frame):
         :return: None
         """
         selected_name = event.GetText()
+        selected_document = self.document_dictionary[selected_name]
         # TODO create a backup copy on click.
         try:
-            result = self.document_dictionary[selected_name].validate_self()
+            result = selected_document.validate_self()
             if result[0]:
-                self._set_status_text(Strings.status_valid + ' ' + selected_name)
+                self._set_status_text(
+                    Strings.status_valid + ' ' + selected_name + ' - ' + selected_document.get_menu_section().
+                    get_page_name())
                 self.SetTitle(selected_name)
             else:
                 self._set_status_text(Strings.status_invalid + ' ' + selected_name)

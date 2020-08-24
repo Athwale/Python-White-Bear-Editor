@@ -1,8 +1,8 @@
 import os
+import re
 from typing import List, Dict
 
 import wx
-import re
 from lxml import etree
 from lxml import html
 from lxml.etree import XMLSyntaxError
@@ -39,6 +39,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
         self._status_color = wx.WHITE
         self._menu_section = None
         self._menu_item = None
+
         self._date = None
         self._article_full_image_path = None
         self._article_thumbnail_image_path = None
@@ -46,12 +47,11 @@ class WhitebearDocumentArticle(WhitebearDocument):
         self._article_image_link_title = None
         self._article_image_alt = None
         self._article_image = None
-        # Menu item data
-        self._menu_image_path = None
-        self._menu_item_name = None
-        self._menu_image_alt = None
-        self._menu_image_link_title = None
-        self._menu_image = None
+
+        # TODO parse and validate main text
+        self._main_text = None
+        # TODO parse and validate aside images. Store them in a separate carrier class and implement a panel subclass
+        # TODO for the gui to display with rearrangement possible.
 
     def parse_self(self) -> None:
         """
@@ -112,6 +112,33 @@ class WhitebearDocumentArticle(WhitebearDocument):
             # Check year range
             if int(year) < Numbers.year_min or int(year) > Numbers.year_max:
                 self.set_status_color(wx.RED)
+
+        # Check article image disk path
+        # TODO check that image and menu image files have correct size, if something wrong set a special warning image
+        if not self._article_full_image_path:
+            self.set_status_color(wx.RED)
+
+        # Check article image thumbnail disk path
+        if not self._article_thumbnail_image_path:
+            self.set_status_color(wx.RED)
+
+        # Check article image caption
+        if len(self._article_image_caption) < Numbers.article_image_caption_min or len(
+                self._article_image_caption) > Numbers.article_image_caption_max:
+            self.set_status_color(wx.RED)
+
+        # Check article image link title
+        if len(self._article_image_link_title) < Numbers.article_image_title_min or len(
+                self._article_image_link_title) > Numbers.article_image_title_max:
+            self.set_status_color(wx.RED)
+
+        # Check article image alt
+        if len(self._article_image_alt) < Numbers.article_image_alt_min or len(
+                self._article_image_alt) > Numbers.article_image_alt_max:
+            self.set_status_color(wx.RED)
+
+        # Test menu item
+        print(self._menu_item)
 
     def _determine_menu_section_and_menu_item(self):
         """
@@ -245,13 +272,6 @@ class WhitebearDocumentArticle(WhitebearDocument):
         """
         return self._article_image_alt
 
-    def get_menu_image(self) -> wx.Image:
-        """
-        Return the menu image wx image instance.
-        :return: Return the menu image wx image instance.
-        """
-        return self._menu_image
-
     def get_menu_item(self) -> MenuItem:
         """
         Return the menu item associated with this article.
@@ -265,6 +285,13 @@ class WhitebearDocumentArticle(WhitebearDocument):
         :return: Return the status color of this document. White if ok, Red if SEO check failed, Blue if modified.
         """
         return self._status_color
+
+    def get_menu_section(self) -> WhitebearDocumentMenu:
+        """
+        Return to which menu section this article belongs.
+        :return: Return to which menu section this article belongs.
+        """
+        return self._menu_section
 
     # Setters ----------------------------------------------------------------------------------------------------------
     def set_date(self, date: str) -> None:
@@ -319,9 +346,10 @@ class WhitebearDocumentArticle(WhitebearDocument):
 
     def set_status_color(self, new_color: wx.Colour) -> None:
         """
-        Set new status color.
+        Set new status color. If the color is red, set valid to False.
         :param new_color: New wx.Colour color.
         :return: None
         """
         self._status_color = new_color
-        self.set_modified(True)
+        if new_color == wx.RED:
+            self._valid = False

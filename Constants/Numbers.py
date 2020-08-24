@@ -23,3 +23,9 @@ class Numbers:
     min_body_word_length: int = 250
     article_name_min_length: int = 3
     article_name_max_length: int = 255
+    article_image_caption_min: int = 5
+    article_image_caption_max: int = 255
+    article_image_title_min: int = 5
+    article_image_title_max: int = 512
+    article_image_alt_min: int = 5
+    article_image_alt_max: int = 125
