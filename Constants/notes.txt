@@ -22,7 +22,7 @@ flash 534x405
 format 4/3
 pripona malymi pismeny
 
-keywords 100 - 255 chars
+keywords 50 - 255 chars
 
 title stranky generovat automaticky:
 Primary Keyword - Secondary Keyword | Brand Name

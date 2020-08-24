@@ -5,6 +5,9 @@ class Strings:
     """
     This class holds string variables which are used in the program. This simplifies changes.
     """
+    cz_months = '|'.join(
+        ['Ledna', 'Února', 'Března', 'Dubna', 'Května', 'Června', 'Července', 'Srpna', 'Září', 'Října', 'Listopadu',
+         'Prosince'])
     home_directory: str = os.path.expanduser('~')
     editor_config_file: str = os.path.join(home_directory, '.whitebearEditor.conf')
     editor_output_debug_file: str = os.path.join(home_directory, 'whitebearEditor.log')

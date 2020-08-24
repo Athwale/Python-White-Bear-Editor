@@ -2,6 +2,7 @@ import os
 from typing import List, Dict
 
 import wx
+import re
 from lxml import etree
 from lxml import html
 from lxml.etree import XMLSyntaxError
@@ -32,6 +33,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
         """
         # File properties are in base class
         super().__init__(name, path, menus)
+        self._date_regex = '^[1-9][0-9]{0,1}[.][ ](' + Strings.cz_months + ')[ ][1-9][0-9][0-9][0-9]$'
 
         # Article data
         self._status_color = wx.WHITE
@@ -63,6 +65,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
         if not self._parsed_html:
             super(WhitebearDocumentArticle, self).parse_self()
             self._parse_page_name()
+            self._parse_date()
             self._parse_article_image_path()
             self._parse_article_image_caption()
             self._parse_article_image_link_title()
@@ -77,6 +80,18 @@ class WhitebearDocumentArticle(WhitebearDocument):
         """
         # TODO seo test should return what to display in the gui about text lengths etc and document completeness.
         # TODO Run self test on every setter method.
+        # Check meta keywords
+        keywords_length = 0
+        for word in self._meta_keywords:
+            keywords_length += len(word)
+        if keywords_length < Numbers.keywords_min_length or keywords_length > Numbers.keywords_max_length:
+            self.set_status_color(wx.RED)
+
+        # Check meta description
+        if len(self._meta_description) < Numbers.description_min_length or len(
+                self._meta_description) > Numbers.description_max_length:
+            self.set_status_color(wx.RED)
+
         # Check page name length must be at least 3 and must not be default
         if len(self._page_name) < Numbers.article_name_min_length or len(
                 self._page_name) > Numbers.article_name_max_length:
@@ -85,12 +100,18 @@ class WhitebearDocumentArticle(WhitebearDocument):
         if self._page_name == Strings.label_article_title:
             self.set_status_color(wx.RED)
 
-        # Check meta keywords
-        keywords_length = 0
-        for word in self._meta_keywords:
-            keywords_length += len(word)
-        if keywords_length < Numbers.keywords_min_length or keywords_length > Numbers.keywords_max_length:
+        # Check date format
+        if not re.search(self._date_regex, self._date):
             self.set_status_color(wx.RED)
+        else:
+            day, _, year = self._date.split(' ', 3)
+            # Check day range
+            if int(day.replace('.', '')) < 1 or int(day.replace('.', '')) > 31:
+                self.set_status_color(wx.RED)
+
+            # Check year range
+            if int(year) < Numbers.year_min or int(year) > Numbers.year_max:
+                self.set_status_color(wx.RED)
 
     def _determine_menu_section_and_menu_item(self):
         """

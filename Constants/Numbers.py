@@ -9,11 +9,13 @@ class Numbers:
     photo_column_width: int = 211
 
     # SEO values
+    year_min: int = 2000
+    year_max: int = 3000
     logo_image_size: int = 96
     main_image_width: int = 300
     main_image_height: int = 225
     text_image_max_size: int = 534
-    keywords_min_length: int = 100
+    keywords_min_length: int = 50
     keywords_max_length: int = 255
     description_min_length: int = 50
     description_max_length: int = 160
@@ -21,4 +23,3 @@ class Numbers:
     min_body_word_length: int = 250
     article_name_min_length: int = 3
     article_name_max_length: int = 255
-
