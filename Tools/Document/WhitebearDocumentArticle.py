@@ -36,16 +36,19 @@ class WhitebearDocumentArticle(WhitebearDocument):
         self._date_regex = '^[1-9][0-9]{0,1}[.][ ](' + Strings.cz_months + ')[ ][1-9][0-9][0-9][0-9]$'
 
         # Article data
-        self._status_color = wx.WHITE
         self._menu_section = None
         self._menu_item = None
 
         self._date = None
+        self._date_error_message: str = ''
         self._article_full_image_path = None
         self._article_thumbnail_image_path = None
         self._article_image_caption = ''
+        self._caption_error_message: str = ''
         self._article_image_link_title = None
+        self._link_title_error_message: str = ''
         self._article_image_alt = None
+        self._image_alt_error_message: str = ''
         self._article_image = None
 
         # TODO parse and validate main text
@@ -81,25 +84,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
         # TODO seo test should return what to display in the gui about text lengths etc and document completeness.
         # TODO Run self test on every setter method.
         # Check meta keywords
-        keywords_length = 0
-        for word in self._meta_keywords:
-            keywords_length += len(word)
-        if keywords_length < Numbers.keywords_min_length or keywords_length > Numbers.keywords_max_length:
-            self.set_status_color(wx.RED)
-
-        # Check meta description
-        if len(self._meta_description) < Numbers.description_min_length or len(
-                self._meta_description) > Numbers.description_max_length:
-            self.set_status_color(wx.RED)
-
-        # Check page name length must be at least 3 and must not be default
-        if len(self._page_name) < Numbers.article_name_min_length or len(
-                self._page_name) > Numbers.article_name_max_length:
-            self.set_status_color(wx.RED)
-
-        if self._page_name == Strings.label_article_title:
-            self.set_status_color(wx.RED)
-
+        super(WhitebearDocumentArticle, self).seo_test_self_basic()
         # Check date format
         if not re.search(self._date_regex, self._date):
             self.set_status_color(wx.RED)
@@ -230,12 +215,12 @@ class WhitebearDocumentArticle(WhitebearDocument):
         return self._valid, errors
 
     # Getters ----------------------------------------------------------------------------------------------------------
-    def get_date(self) -> str:
+    def get_date(self) -> (str, str):
         """
-        Return the article creation date.
-        :return: Return article creation date.
+        Return the article creation date and error to display in gui if there is one.
+        :return: Return article creation date and error to display in gui if there is one.
         """
-        return self._date
+        return self._date, self._date_error_message
 
     def get_article_image_path(self) -> str:
         """
@@ -251,26 +236,26 @@ class WhitebearDocumentArticle(WhitebearDocument):
         """
         return self._article_image
 
-    def get_article_image_caption(self) -> str:
+    def get_article_image_caption(self) -> (str, str):
         """
-        Return the caption of the main article image.
-        :return: Return the caption of the main article image.
+        Return the caption of the main article image and error to display in gui if there is one.
+        :return: Return the caption of the main article image and error to display in gui if there is one.
         """
-        return self._article_image_caption
+        return self._article_image_caption, self._caption_error_message
 
-    def get_article_image_link_title(self) -> str:
+    def get_article_image_link_title(self) -> (str, str):
         """
-        Return the link title of the main article image.
-        :return: Return the link title of the main article image.
+        Return the link title of the main article image and error to display in gui if there is one.
+        :return: Return the link title of the main article image and error to display in gui if there is one.
         """
-        return self._article_image_link_title
+        return self._article_image_link_title, self._link_title_error_message
 
-    def get_article_image_alt(self) -> str:
+    def get_article_image_alt(self) -> (str, str):
         """
-        Return the alt description of the main article image.
-        :return: Return the alt description of the main article image.
+        Return the alt description of the main article image and error to display in gui if there is one.
+        :return: Return the alt description of the main article image and error to display in gui if there is one.
         """
-        return self._article_image_alt
+        return self._article_image_alt, self._image_alt_error_message
 
     def get_menu_item(self) -> MenuItem:
         """
@@ -343,13 +328,3 @@ class WhitebearDocumentArticle(WhitebearDocument):
         """
         self._article_image_alt = text
         self.set_modified(True)
-
-    def set_status_color(self, new_color: wx.Colour) -> None:
-        """
-        Set new status color. If the color is red, set valid to False.
-        :param new_color: New wx.Colour color.
-        :return: None
-        """
-        self._status_color = new_color
-        if new_color == wx.RED:
-            self._valid = False

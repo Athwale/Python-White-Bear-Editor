@@ -1,5 +1,7 @@
 import os.path
 
+from Constants.Numbers import Numbers
+
 
 class Strings:
     """
@@ -32,6 +34,9 @@ class Strings:
     exception_parse_multiple_keywords: str = 'Only one meta keywords tag is allowed'
     exception_last_document_missing: str = 'Last open document not found'
     exception_menu_item_missing: str = 'Menu item missing'
+
+    seo_error_keywords_length: str = 'Meta keywords must be: ' + str(Numbers.keywords_min_length) + ' - ' + str(
+        Numbers.keywords_max_length) + ' characters long'
 
     label_menu_file: str = 'File'
     label_menu_item_open: str = 'Open directory...\tctrl+o'

@@ -1,7 +1,9 @@
 import os
+import wx
 
 from bs4 import BeautifulSoup
 
+from Constants.Numbers import Numbers
 from Constants.Strings import Strings
 from Exceptions.WrongFormatException import WrongFormatException
 
@@ -28,12 +30,16 @@ class WhitebearDocument:
         self._modified = False
         # We create instances of documents after validation so we already know they are valid.
         self._valid = True
+        self._status_color = wx.WHITE
 
-        # Article data
+        # Page data
         self._parsed_html = None
         self._page_name = None
+        self._page_name_error_message: str = ''
         self._meta_keywords = None
+        self._keywords_error_message: str = ''
         self._meta_description = None
+        self._description_error_message: str = ''
 
     def parse_self(self) -> None:
         """
@@ -81,16 +87,33 @@ class WhitebearDocument:
             contents = document.read()
             self._parsed_html = BeautifulSoup(contents, 'html5lib')
 
-    def seo_test_self_basic(self):
+    def seo_test_self_basic(self) -> None:
         """
+        Perform basic SEO self test and change internal instance state accordingly. If page name, description or
+        keywords are incorrect, change valid to False and the color of the file list item to red.
+        Errors found in the validation are saved are then returned along with the data by getter methods.
+        :return: None
+        """
+        # TODO finish error setting here
+        keywords_length = 0
+        for word in self._meta_keywords:
+            keywords_length += len(word)
+        if keywords_length < Numbers.keywords_min_length or keywords_length > Numbers.keywords_max_length:
+            self._keywords_error_message = Strings.seo_error_keywords_length
+            self.set_status_color(wx.RED)
 
-        :return:
-        """
-        # TODO seo test should return what to display in the gui about text lengths etc and document completeness.
-        # TODO the file list can change color based on the result of this method. Files have to be valid before this
-        # TODO test. Do a second pass over all loaded and now valid documents and color the list based on this method.
-        # TODO save the filelist color in this instance, run self test on every setter method.
-        pass
+        # Check meta description
+        if len(self._meta_description) < Numbers.description_min_length or len(
+                self._meta_description) > Numbers.description_max_length:
+            self.set_status_color(wx.RED)
+
+        # Check page name length must be at least 3 and must not be default
+        if len(self._page_name) < Numbers.article_name_min_length or len(
+                self._page_name) > Numbers.article_name_max_length:
+            self.set_status_color(wx.RED)
+
+        if self._page_name == Strings.label_article_title:
+            self.set_status_color(wx.RED)
 
     # Boolean functions ------------------------------------------------------------------------------------------------
     def is_valid(self) -> bool:
@@ -129,26 +152,26 @@ class WhitebearDocument:
         """
         return self._parsed_html
 
-    def get_page_name(self) -> str:
+    def get_page_name(self) -> (str, str):
         """
-        Return the name of the article.
-        :return: Return the name of the article.
+        Return the name of the article and error to display in gui if there is one.
+        :return: Return the name of the article and error to display in gui if there is one.
         """
-        return self._page_name
+        return self._page_name, self._page_name_error_message
 
-    def get_description(self) -> str:
+    def get_description(self) -> (str, str):
         """
-        Return the description of the web page.
-        :return: Return the description of the web page.
+        Return the description of the web page and error to display in gui if there is one.
+        :return: Return the description of the web page and error to display in gui if there is one.
         """
-        return self._meta_description
+        return self._meta_description, self._description_error_message
 
-    def get_keywords(self) -> str:
+    def get_keywords(self) -> (str, str):
         """
-        Return the keywords of the web page.
-        :return: Return the keywords of the web page.
+        Return the keywords of the web page and error to display in gui if there is one.
+        :return: Return the keywords of the web page and error to display in gui if there is one.
         """
-        return self._meta_keywords
+        return self._meta_keywords, self._keywords_error_message
 
     # Setters ----------------------------------------------------------------------------------------------------------
     def set_page_name(self, name: str) -> None:
@@ -209,6 +232,16 @@ class WhitebearDocument:
         """
         self._file_name = name
         self.set_modified(True)
+
+    def set_status_color(self, new_color: wx.Colour) -> None:
+        """
+        Set new status color. If the color is red, set valid to False.
+        :param new_color: New wx.Colour color.
+        :return: None
+        """
+        self._status_color = new_color
+        if new_color == wx.RED:
+            self._valid = False
 
     def __str__(self) -> str:
         return "White bear file {}, Modified {}, Path {}, Title {}, Keywords {}, Description {}". \
