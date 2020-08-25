@@ -81,45 +81,74 @@ class WhitebearDocumentArticle(WhitebearDocument):
 
         :return:
         """
-        # TODO seo test should return what to display in the gui about text lengths etc and document completeness.
         # TODO Run self test on every setter method.
-        # Check meta keywords
+        # Check meta keywords and description
         super(WhitebearDocumentArticle, self).seo_test_self_basic()
+        # Check page name length must be at least 3 and must not be default
+        if len(self._page_name) < Numbers.article_name_min_length or len(
+                self._page_name) > Numbers.article_name_max_length:
+            self._page_name_error_message = Strings.seo_error_name_length
+            self.set_status_color(wx.RED)
+
+        if self._page_name == Strings.label_article_title:
+            self._page_name_error_message = Strings.seo_error_default_value
+            self.set_status_color(wx.RED)
+
         # Check date format
         if not re.search(self._date_regex, self._date):
+            self._date_error_message = Strings.seo_error_date_format
             self.set_status_color(wx.RED)
         else:
             day, _, year = self._date.split(' ', 3)
             # Check day range
             if int(day.replace('.', '')) < 1 or int(day.replace('.', '')) > 31:
+                self._date_error_message = Strings.seo_error_date_format_day
                 self.set_status_color(wx.RED)
 
             # Check year range
             if int(year) < Numbers.year_min or int(year) > Numbers.year_max:
+                self._date_error_message = Strings.seo_error_date_format_year
                 self.set_status_color(wx.RED)
 
         # Check article image disk path
         # TODO check that image and menu image files have correct size, if something wrong set a special warning image
         if not self._article_full_image_path:
+            # TODO set missing image
             self.set_status_color(wx.RED)
 
         # Check article image thumbnail disk path
         if not self._article_thumbnail_image_path:
+            # TODO set missing image
             self.set_status_color(wx.RED)
 
         # Check article image caption
         if len(self._article_image_caption) < Numbers.article_image_caption_min or len(
                 self._article_image_caption) > Numbers.article_image_caption_max:
+            self._caption_error_message = Strings.seo_error_image_caption_length
+            self.set_status_color(wx.RED)
+
+        if self._article_image_caption == Strings.label_article_image_caption:
+            self._date_error_message = Strings.seo_error_date_format
             self.set_status_color(wx.RED)
 
         # Check article image link title
         if len(self._article_image_link_title) < Numbers.article_image_title_min or len(
                 self._article_image_link_title) > Numbers.article_image_title_max:
+            self._link_title_error_message = Strings.seo_error_link_title_length
+            self.set_status_color(wx.RED)
+
+        if self._article_image_link_title == Strings.label_article_image_link_title:
+            self._link_title_error_message = Strings.seo_error_default_value
             self.set_status_color(wx.RED)
 
         # Check article image alt
         if len(self._article_image_alt) < Numbers.article_image_alt_min or len(
                 self._article_image_alt) > Numbers.article_image_alt_max:
+            self._image_alt_error_message = Strings.seo_error_image_alt_length
+            self.set_status_color(wx.RED)
+
+        if self._article_image_alt == Strings.label_article_image_alt:
+            self._image_alt_error_message = Strings.seo_error_default_value
             self.set_status_color(wx.RED)
 
         # Test menu item

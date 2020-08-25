@@ -195,9 +195,9 @@ class MainFrame(wx.Frame):
         # Insert GUI widgets into the sizers created above.
         # Logo section -------------------------------------------------------------------------------------------------
         # Create a placeholder image
-        self.placeholder_logo_image = wx.Image(Numbers.logo_image_size, Numbers.logo_image_size)
-        self.placeholder_logo_image.Replace(0, 0, 0, 245, 255, 255)
-        self.menu_logo_image = wx.StaticBitmap(self.right_panel, -1, wx.Bitmap(self.placeholder_logo_image))
+        placeholder_logo_image = wx.Image(Numbers.logo_image_size, Numbers.logo_image_size)
+        placeholder_logo_image.Replace(0, 0, 0, 245, 255, 255)
+        self.menu_logo_image = wx.StaticBitmap(self.right_panel, -1, wx.Bitmap(placeholder_logo_image))
         # Set border to the image
         self.menu_logo_static_sizer.Add(self.menu_logo_image, flag=wx.LEFT | wx.BOTTOM | wx.RIGHT, border=1)
         # Create menu logo name text box
@@ -205,17 +205,19 @@ class MainFrame(wx.Frame):
                                            size=wx.Size(98, 35),
                                            style=wx.TE_MULTILINE | wx.TE_CENTRE | wx.TE_NO_VSCROLL)
         self.field_logo_name.SetFont(self.text_field_font)
+        self.field_logo_name.SetToolTip(Strings.label_article_menu_logo_name_placeholder)
 
         self.field_logo_alt = wx.TextCtrl(self.right_panel, -1, value=Strings.label_article_menu_logo_alt_placeholder,
                                           size=wx.Size(98, 45),
                                           style=wx.TE_MULTILINE)
-        self.field_logo_name.SetFont(self.text_field_font)
+        self.field_logo_alt.SetFont(self.text_field_font)
+        self.field_logo_alt.SetToolTip(Strings.label_article_menu_logo_alt_placeholder)
+
         self.field_logo_title = wx.TextCtrl(self.right_panel, -1,
                                             value=Strings.label_article_menu_logo_title_placeholder,
                                             size=wx.Size(98, 49), style=wx.TE_MULTILINE)
-        self.field_logo_name.SetFont(self.text_field_font)
-        self.field_logo_alt.SetFont(self.text_field_font)
         self.field_logo_title.SetFont(self.text_field_font)
+        self.field_logo_title.SetToolTip(Strings.label_article_menu_logo_title_placeholder)
 
         self.menu_logo_static_sizer.Add(self.field_logo_name)
         self.menu_logo_static_sizer.Add(self.field_logo_alt)
@@ -231,27 +233,39 @@ class MainFrame(wx.Frame):
 
         # Article metadata section -------------------------------------------------------------------------------------
         # Add image placeholder into middle top left static sizer
-        self.placeholder_main_image: wx.Image = wx.Image(Numbers.main_image_width, Numbers.main_image_height)
-        self.placeholder_main_image.Replace(0, 0, 0, 245, 255, 255)
-        self.main_image = wx.StaticBitmap(self.right_panel, -1, wx.Bitmap(self.placeholder_main_image))
+        placeholder_main_image: wx.Image = wx.Image(Numbers.main_image_width, Numbers.main_image_height)
+        placeholder_main_image.Replace(0, 0, 0, 245, 255, 255)
+        self.main_image = wx.StaticBitmap(self.right_panel, -1, wx.Bitmap(placeholder_main_image))
         self.article_image_static_sizer.Add(self.main_image, flag=wx.LEFT | wx.BOTTOM | wx.RIGHT, border=1)
 
         # Add text boxes
         self.field_main_image_alt = wx.TextCtrl(self.right_panel, -1, value=Strings.label_article_image_alt,
                                                 size=wx.Size(160, 30))
-        self.field_main_image_title = wx.TextCtrl(self.right_panel, -1, value=Strings.label_article_image_title,
+        self.field_main_image_alt.SetToolTip(Strings.label_article_image_alt)
+
+        self.field_main_image_title = wx.TextCtrl(self.right_panel, -1, value=Strings.label_article_image_link_title,
                                                   size=wx.Size(160, 30))
-        self.field_main_image_name = wx.TextCtrl(self.right_panel, -1, value=Strings.label_article_image_name,
+        self.field_main_image_title.SetToolTip(Strings.label_article_image_link_title)
+
+        self.field_main_image_name = wx.TextCtrl(self.right_panel, -1, value=Strings.label_article_image_caption,
                                                  size=wx.Size(160, 30))
+        self.field_main_image_name.SetToolTip(Strings.label_article_image_caption)
 
         self.field_article_date = wx.TextCtrl(self.right_panel, -1, value=Strings.label_article_date,
                                               size=wx.Size(160, 30))
+        self.field_article_date.SetToolTip(Strings.label_article_date)
+
         self.field_article_title = wx.TextCtrl(self.right_panel, -1, value=Strings.label_article_title,
                                                size=wx.Size(250, 30))
+        self.field_article_title.SetToolTip(Strings.label_article_title)
+
         self.field_article_keywords = wx.TextCtrl(self.right_panel, -1, value=Strings.label_article_keywords,
                                                   size=wx.Size(250, 30))
+        self.field_article_keywords.SetToolTip(Strings.label_article_keywords)
+
         self.field_article_description = wx.TextCtrl(self.right_panel, -1, value=Strings.label_article_description,
                                                      size=wx.Size(250, 30))
+        self.field_article_description.SetToolTip(Strings.label_article_description)
 
         self.article_data_static_sizer.Add(self.field_article_date)
         self.article_data_static_sizer.Add(self.field_main_image_name, flag=wx.EXPAND)
@@ -461,7 +475,7 @@ class MainFrame(wx.Frame):
             if result[0]:
                 self._set_status_text(
                     Strings.status_valid + ' ' + selected_name + ' - ' + selected_document.get_menu_section().
-                    get_page_name())
+                    get_page_name()[0])
                 self.SetTitle(selected_name)
             else:
                 self._set_status_text(Strings.status_invalid + ' ' + selected_name)

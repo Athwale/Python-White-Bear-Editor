@@ -11,6 +11,7 @@ Add system icon
 Display where the article belongs in the status bar
 Use red color in status bar.
 test default page red color
+test all article, menu and aside errors
 automatically break article image caption if too long
 
 Obrázky zmensit na 50%

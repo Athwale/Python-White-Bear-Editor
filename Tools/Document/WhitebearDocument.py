@@ -89,12 +89,11 @@ class WhitebearDocument:
 
     def seo_test_self_basic(self) -> None:
         """
-        Perform basic SEO self test and change internal instance state accordingly. If page name, description or
+        Perform basic SEO self test and change internal instance state accordingly. If description or
         keywords are incorrect, change valid to False and the color of the file list item to red.
         Errors found in the validation are saved are then returned along with the data by getter methods.
         :return: None
         """
-        # TODO finish error setting here
         keywords_length = 0
         for word in self._meta_keywords:
             keywords_length += len(word)
@@ -105,14 +104,11 @@ class WhitebearDocument:
         # Check meta description
         if len(self._meta_description) < Numbers.description_min_length or len(
                 self._meta_description) > Numbers.description_max_length:
+            self._description_error_message = Strings.seo_error_description_length
             self.set_status_color(wx.RED)
 
-        # Check page name length must be at least 3 and must not be default
-        if len(self._page_name) < Numbers.article_name_min_length or len(
-                self._page_name) > Numbers.article_name_max_length:
-            self.set_status_color(wx.RED)
-
-        if self._page_name == Strings.label_article_title:
+        if self._meta_description == Strings.label_article_description:
+            self._description_error_message = Strings.seo_error_default_value
             self.set_status_color(wx.RED)
 
     # Boolean functions ------------------------------------------------------------------------------------------------

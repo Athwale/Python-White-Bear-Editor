@@ -35,8 +35,23 @@ class Strings:
     exception_last_document_missing: str = 'Last open document not found'
     exception_menu_item_missing: str = 'Menu item missing'
 
-    seo_error_keywords_length: str = 'Meta keywords must be: ' + str(Numbers.keywords_min_length) + ' - ' + str(
+    seo_error_keywords_length: str = 'Length must be: ' + str(Numbers.keywords_min_length) + ' - ' + str(
         Numbers.keywords_max_length) + ' characters long'
+    seo_error_description_length: str = 'Length must be: ' + str(
+        Numbers.description_min_length) + ' - ' + str(Numbers.description_max_length) + ' characters long'
+    seo_error_name_length: str = 'Length must be: ' + str(Numbers.article_name_min_length) + ' - ' + str(
+        Numbers.article_name_max_length) + ' characters long'
+    seo_error_default_value: str = 'Default value can not be used'
+    seo_error_date_format: str = 'Date format incorrect (31. Ledna 2020)'
+    seo_error_date_format_day: str = 'Date format incorrect, day must be: 1-31'
+    seo_error_date_format_year: str = 'Date format incorrect, year must be: ' + str(Numbers.year_min) + ' - ' + str(
+        Numbers.year_max)
+    seo_error_image_caption_length: str = 'Length must be: ' + str(Numbers.article_image_caption_min) + ' - ' + str(
+        Numbers.article_image_caption_max) + ' characters long'
+    seo_error_link_title_length: str = 'Length must be: ' + str(Numbers.article_image_title_min) + ' - ' + str(
+        Numbers.article_image_title_max) + ' characters long'
+    seo_error_image_alt_length: str = 'Length must be: ' + str(Numbers.article_image_alt_min) + ' - ' + str(
+        Numbers.article_image_alt_max) + ' characters long'
 
     label_menu_file: str = 'File'
     label_menu_item_open: str = 'Open directory...\tctrl+o'
@@ -58,8 +73,8 @@ class Strings:
     label_article_menu_logo_title_placeholder: str = ' Link title'
     label_article_image: str = 'Article image'
     label_article_image_alt: str = 'Image alt description'
-    label_article_image_title: str = 'Image link title'
-    label_article_image_name: str = 'Image caption'
+    label_article_image_link_title: str = 'Image link title'
+    label_article_image_caption: str = 'Image caption'
     label_article_date: str = 'Date'
     label_article_title: str = 'Article name'
     label_article_keywords: str = 'Meta keywords'
