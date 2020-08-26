@@ -64,7 +64,6 @@ class WhitebearDocumentArticle(WhitebearDocument):
         :raises WrongFormatException: if there is a problem with parsing the document.
         """
         # Only parse if not parsed already.
-        # TODO create the wx image instances after seo check passed and the images have correct size
         if not self._parsed_html:
             super(WhitebearDocumentArticle, self).parse_self()
             self._parse_page_name()
@@ -111,16 +110,24 @@ class WhitebearDocumentArticle(WhitebearDocument):
                 self._date_error_message = Strings.seo_error_date_format_year
                 self.set_status_color(wx.RED)
 
-        # Check article image disk path
-        # TODO check that image and menu image files have correct size, if something wrong set a special warning image
+        # Check article image disk path, original image may have whatever size
         if not self._article_full_image_path:
-            # TODO set missing image
+            self._article_image = wx.Image(Fetch.get_resource_path('main_image_missing.png'), wx.BITMAP_TYPE_PNG)
             self.set_status_color(wx.RED)
 
         # Check article image thumbnail disk path
         if not self._article_thumbnail_image_path:
-            # TODO set missing image
+            self._article_image = wx.Image(Fetch.get_resource_path('main_image_thumbnail_missing.png'),
+                                           wx.BITMAP_TYPE_PNG)
             self.set_status_color(wx.RED)
+        else:
+            image = wx.Image(Fetch.get_resource_path(self._article_thumbnail_image_path), wx.BITMAP_TYPE_ANY)
+            if image.GetSize() == (Numbers.main_image_width, Numbers.main_image_height):
+                self._article_image = image
+            else:
+                self._article_image = wx.Image(Fetch.get_resource_path('main_image_thumbnail_wrong.png'),
+                                               wx.BITMAP_TYPE_ANY)
+                self.set_status_color(wx.RED)
 
         # Check article image caption
         if len(self._article_image_caption) < Numbers.article_image_caption_min or len(

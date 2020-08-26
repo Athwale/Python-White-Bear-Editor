@@ -1,5 +1,8 @@
+import wx
+
 from Constants.Numbers import Numbers
 from Constants.Strings import Strings
+from Resources.Fetch import Fetch
 
 
 class MenuItem:
@@ -24,6 +27,7 @@ class MenuItem:
         self._image_alt_error_message: str = ''
         self._href = href
         self._menu_image_path = disk_path
+        self._menu_image = None
 
     def seo_test_self(self) -> bool:
         """
@@ -43,10 +47,16 @@ class MenuItem:
             result = False
 
         # Check article image disk path
-        # TODO check that image and menu image files have correct size, if something wrong set a special warning image
         if not self._menu_image_path:
-            # TODO set missing image
+            self._menu_image = wx.Image(Fetch.get_resource_path('menu_image_missing.png'), wx.BITMAP_TYPE_PNG)
             result = False
+        else:
+            image = wx.Image(Fetch.get_resource_path(self._menu_image_path), wx.BITMAP_TYPE_ANY)
+            if image.GetSize() == (Numbers.logo_image_size, Numbers.logo_image_size):
+                self._menu_image = image
+            else:
+                self._menu_image = wx.Image(Fetch.get_resource_path('menu_image_wrong.png'), wx.BITMAP_TYPE_ANY)
+                result = False
 
         # Check article image link title
         if len(self._link_title) < Numbers.article_image_title_min or len(
@@ -105,6 +115,13 @@ class MenuItem:
         :return: Return the image disk path of the menu item. None if the file is inaccessible on hard drive.
         """
         return self._menu_image_path
+
+    def get_menu_image(self) -> wx.Image:
+        """
+        Return the menu image wx image instance.
+        :return: Return the menu image wx image instance.
+        """
+        return self._menu_image
 
     def __str__(self) -> str:
         return "Menu item {}, Link {}, Image {}".format(self._article_name, self._href, self._menu_image_path)
