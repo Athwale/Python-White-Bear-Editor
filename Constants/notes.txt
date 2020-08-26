@@ -4,11 +4,14 @@ Automaticky generovat datum
 Zkontrolovat nastaveni spatnyho adresare
 
 TODO:
-parse page name different for each, copy from article.
+show errors in gui
+parse and check aside images
+parse and check main text
+ability to reparse from disk with warning dialog
+add methods for reruning seo check on field edits
+
 Check number of articles in status bar after adding a new one
-seo check date format
 Add system icon
-Display where the article belongs in the status bar
 Use red color in status bar.
 test default page red color
 test all article, menu and aside errors including wrong image size

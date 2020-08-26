@@ -3,6 +3,7 @@ from typing import Dict
 
 import wx
 import wx.richtext as rt
+from wx.adv import RichToolTip
 from wx.py import images
 
 from Constants.Numbers import Numbers
@@ -322,11 +323,11 @@ class MainFrame(wx.Frame):
         :param state: True to disable, False to enable all GUI elements.
         :return: None
         """
-        # TODO disable menus except File open directory and quit
         self.Enable()
         if state:
             self.split_screen.Disable()
-            self.page_list.ClearAll()
+            self.page_list.SetBackgroundColour(wx.LIGHT_GREY)
+            self.page_list.SetForegroundColour(wx.LIGHT_GREY)
         else:
             self.split_screen.Enable()
         # Disable toolbar buttons
@@ -462,22 +463,17 @@ class MainFrame(wx.Frame):
 
     def list_item_click_handler(self, event):
         """
-        Handler function for clicking a page name in the web page list. Shows which website is selected in the status
-        bar.
+        Handler function for clicking a page name in the web page list. Revalidates the document against schema. If
+        errors are discovered, disables editor and shows a message.
         :param event: wx event, brings the selected string from the menu.
         :return: None
         """
+        self._disable_editor(True)
         selected_name = event.GetText()
         selected_document = self.document_dictionary[selected_name]
-        # TODO create a backup copy on click.
         try:
             result = selected_document.validate_self()
-            if result[0]:
-                self._set_status_text(
-                    Strings.status_valid + ' ' + selected_name + ' - ' + selected_document.get_menu_section().
-                    get_page_name()[0])
-                self.SetTitle(selected_name)
-            else:
+            if not result[0]:
                 self._set_status_text(Strings.status_invalid + ' ' + selected_name)
                 # Prepare error string from all validation errors
                 error_string = Strings.exception_html_syntax_error + ': ' + selected_name + '\n'
@@ -489,5 +485,31 @@ class MainFrame(wx.Frame):
         except UnrecognizedFileException as e:
             self._show_error_dialog(str(e))
             self._disable_editor(True)
-        except KeyError as e:
+            return
+        except KeyError as _:
             self._show_error_dialog(Strings.exception_last_document_missing)
+            return
+        # If the document is correct, now we can show it.
+        self._fill_editor(selected_document)
+
+    def _fill_editor(self, doc: WhitebearDocumentArticle) -> None:
+        """
+
+        :param doc:
+        :return: None
+        """
+        self._disable_editor(True)
+        self._set_status_text(
+            Strings.status_valid + ' ' + doc.get_filename() + ' - ' + doc.get_menu_section().get_page_name()[0])
+        self.SetTitle(doc.get_filename())
+
+
+        # TODO tooltip test
+        tip = wx.adv.RichToolTip("Warning", "tooltip test")
+        tip.SetIcon(wx.ICON_WARNING)
+        tip.SetBackgroundColour(wx.RED)
+        tip.SetTimeout(0)
+        tip.ShowFor(self.field_article_date)
+
+        self._disable_editor(False)
+
