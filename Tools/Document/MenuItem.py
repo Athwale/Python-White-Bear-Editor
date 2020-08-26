@@ -1,3 +1,7 @@
+from Constants.Numbers import Numbers
+from Constants.Strings import Strings
+
+
 class MenuItem:
     """
     Carrier class for a parsed menu item.
@@ -13,38 +17,85 @@ class MenuItem:
         :param disk_path: path to the menu image.
         """
         self._article_name = name
+        self._article_name_error_message: str = ''
         self._link_title = title
+        self._link_title_error_message: str = ''
         self._image_alt = image_alt
+        self._image_alt_error_message: str = ''
         self._href = href
         self._menu_image_path = disk_path
 
-    def get_menu_article_name(self) -> str:
+    def seo_test_self(self) -> bool:
         """
-        Return the article name as it is in the menu item. May be different from the title on the actual article page.
-        :return: Return the article name as it is in the menu item.
+        SEO test self for page name, alt and link title. If the menu image is not accessible on disk, set a special
+        warning image.
+        :return: True if test is ok, False otherwise
         """
-        return self._article_name
+        result = True
+        # Check page name length must be at least 3 and must not be default
+        if len(self._article_name) < Numbers.article_name_min_length or len(
+                self._article_name) > Numbers.article_name_max_length:
+            self._article_name_error_message = Strings.seo_error_name_length
+            result = False
 
-    def get_menu_link_title(self) -> str:
+        if self._article_name == Strings.label_article_menu_logo_name_placeholder:
+            self._article_name_error_message = Strings.seo_error_default_value
+            result = False
+
+        # Check article image disk path
+        # TODO check that image and menu image files have correct size, if something wrong set a special warning image
+        if not self._menu_image_path:
+            # TODO set missing image
+            result = False
+
+        # Check article image link title
+        if len(self._link_title) < Numbers.article_image_title_min or len(
+                self._link_title) > Numbers.article_image_title_max:
+            self._link_title_error_message = Strings.seo_error_link_title_length
+            result = False
+
+        if self._link_title == Strings.label_article_menu_logo_link_title_placeholder:
+            self._link_title_error_message = Strings.seo_error_default_value
+            result = False
+
+        # Check article image alt
+        if len(self._image_alt) < Numbers.article_image_alt_min or len(
+                self._image_alt) > Numbers.article_image_alt_max:
+            self._image_alt_error_message = Strings.seo_error_image_alt_length
+            result = False
+
+        if self._image_alt == Strings.label_article_image_alt:
+            self._image_alt_error_message = Strings.seo_error_default_value
+            result = False
+
+        return result
+
+    def get_menu_article_name(self) -> (str, str):
         """
-        Return the link title of the menu item.
-        :return: Return the link title of the menu item.
+        Return the article name as it is in the menu item. May be different from the title on the actual article page
+        and error to display in gui if there is one.
+        :return: Return the article name as it is in the menu item and error to display in gui if there is one.
+        """
+        return self._article_name, self._article_name_error_message
+
+    def get_menu_link_title(self) -> (str, str):
+        """
+        Return the link title of the menu item and error to display in gui if there is one.
+        :return: Return the link title of the menu item and error to display in gui if there is one.
         """
         return self._link_title
 
-    def get_menu_image_alt(self) -> str:
+    def get_menu_image_alt(self) -> (str, str):
         """
-        Return the image alt description of the menu item.
-        :return: Return the image alt description of the menu item.
-
+        Return the image alt description of the menu item and error to display in gui if there is one.
+        :return: Return the image alt description of the menu item and error to display in gui if there is one.
         """
-        return self._image_alt
+        return self._image_alt, self._image_alt_error_message
 
     def get_menu_link_href(self) -> str:
         """
         Return the link href of the menu item.
         :return: Return the link href of the menu item.
-
         """
         return self._href
 
@@ -52,7 +103,6 @@ class MenuItem:
         """
         Return the image disk path of the menu item.
         :return: Return the image disk path of the menu item. None if the file is inaccessible on hard drive.
-
         """
         return self._menu_image_path
 

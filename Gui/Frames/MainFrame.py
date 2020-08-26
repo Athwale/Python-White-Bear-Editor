@@ -214,10 +214,10 @@ class MainFrame(wx.Frame):
         self.field_logo_alt.SetToolTip(Strings.label_article_menu_logo_alt_placeholder)
 
         self.field_logo_title = wx.TextCtrl(self.right_panel, -1,
-                                            value=Strings.label_article_menu_logo_title_placeholder,
+                                            value=Strings.label_article_menu_logo_link_title_placeholder,
                                             size=wx.Size(98, 49), style=wx.TE_MULTILINE)
         self.field_logo_title.SetFont(self.text_field_font)
-        self.field_logo_title.SetToolTip(Strings.label_article_menu_logo_title_placeholder)
+        self.field_logo_title.SetToolTip(Strings.label_article_menu_logo_link_title_placeholder)
 
         self.menu_logo_static_sizer.Add(self.field_logo_name)
         self.menu_logo_static_sizer.Add(self.field_logo_alt)

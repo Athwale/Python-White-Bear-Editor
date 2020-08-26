@@ -75,6 +75,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
             self._parse_article_image_alt()
             self._determine_menu_section_and_menu_item()
             self.seo_test_self()
+            # TODO self._parse_aside_images()
 
     def seo_test_self(self):
         """
@@ -152,7 +153,8 @@ class WhitebearDocumentArticle(WhitebearDocument):
             self.set_status_color(wx.RED)
 
         # Test menu item
-        print(self._menu_item)
+        if not self._menu_item.seo_test_self():
+            self.set_status_color(wx.RED)
 
     def _determine_menu_section_and_menu_item(self):
         """
