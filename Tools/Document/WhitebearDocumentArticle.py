@@ -136,7 +136,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
             self.set_status_color(wx.RED)
 
         if self._article_image_caption == Strings.label_article_image_caption:
-            self._date_error_message = Strings.seo_error_date_format
+            self._image_alt_error_message = Strings.seo_error_default_value
             self.set_status_color(wx.RED)
 
         # Check article image link title

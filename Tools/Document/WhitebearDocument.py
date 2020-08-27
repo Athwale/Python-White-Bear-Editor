@@ -162,10 +162,17 @@ class WhitebearDocument:
         """
         return self._meta_description, self._description_error_message
 
-    def get_keywords(self) -> (str, str):
+    def get_keywords_string(self) -> (str, str):
         """
         Return the keywords of the web page and error to display in gui if there is one.
         :return: Return the keywords of the web page and error to display in gui if there is one.
+        """
+        return ', '.join(self._meta_keywords), self._keywords_error_message
+
+    def get_keywords(self) -> (str, str):
+        """
+        Return the keywords of the web page as list and error to display in gui if there is one.
+        :return: Return the keywords of the web page as list and error to display in gui if there is one.
         """
         return self._meta_keywords, self._keywords_error_message
 

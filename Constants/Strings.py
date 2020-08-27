@@ -42,7 +42,7 @@ class Strings:
     seo_error_name_length: str = 'Length must be: ' + str(Numbers.article_name_min_length) + ' - ' + str(
         Numbers.article_name_max_length) + ' characters long'
     seo_error_default_value: str = 'Default value can not be used'
-    seo_error_date_format: str = 'Date format incorrect (31. Ledna 2020)'
+    seo_error_date_format: str = 'Date format incorrect (example: 31. Ledna 2020)'
     seo_error_date_format_day: str = 'Date format incorrect, day must be: 1-31'
     seo_error_date_format_year: str = 'Date format incorrect, year must be: ' + str(Numbers.year_min) + ' - ' + str(
         Numbers.year_max)
@@ -85,6 +85,7 @@ class Strings:
     status_loading: str = 'Loading'
     status_ready: str = 'Ready'
     status_error: str = 'Error'
+    status_warning: str = 'Warning'
     status_valid: str = 'Valid:'
     status_invalid: str = 'Invalid:'
     status_articles: str = 'Articles:'

@@ -93,7 +93,7 @@ class MenuItem:
         Return the link title of the menu item and error to display in gui if there is one.
         :return: Return the link title of the menu item and error to display in gui if there is one.
         """
-        return self._link_title
+        return self._link_title, self._link_title_error_message
 
     def get_menu_image_alt(self) -> (str, str):
         """
