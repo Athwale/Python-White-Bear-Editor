@@ -4,6 +4,7 @@ from wx import Colour
 class Numbers:
     RED_COLOR = Colour(242, 207, 206)
     GREEN_COLOR = Colour(201, 255, 199)
+    YELLOW_COLOR = Colour(250, 255, 196)
 
     minimal_window_size_width: int = 900
     minimal_window_size_height: int = 700

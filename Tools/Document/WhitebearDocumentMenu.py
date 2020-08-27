@@ -47,6 +47,7 @@ class WhitebearDocumentMenu(WhitebearDocument):
         is not on hard drive.
         :return: None
         """
+        self._menu_items.clear()
         menu_container = self._parsed_html.find(name='nav', attrs={'class': 'sixItems'})
         divs = menu_container.find_all(name='div', attrs={'class': 'link'})
         for div in divs:

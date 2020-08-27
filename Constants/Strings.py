@@ -53,6 +53,7 @@ class Strings:
         Numbers.article_image_title_max) + ' characters long'
     seo_error_image_alt_length: str = 'Length must be: ' + str(Numbers.article_image_alt_min) + ' - ' + str(
         Numbers.article_image_alt_max) + ' characters long'
+    seo_check: str = 'SEO Check:'
 
     label_menu_file: str = 'File'
     label_menu_item_open: str = 'Open directory...\tctrl+o'
@@ -92,6 +93,7 @@ class Strings:
     status_valid: str = 'Valid:'
     status_invalid: str = 'Invalid:'
     status_articles: str = 'Articles:'
+    status_ok: str = 'Ok'
 
     toolbar_new_file: str = 'New file'
 
