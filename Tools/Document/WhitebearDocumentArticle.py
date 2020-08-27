@@ -63,18 +63,16 @@ class WhitebearDocumentArticle(WhitebearDocument):
         :return: None
         :raises WrongFormatException: if there is a problem with parsing the document.
         """
-        # Only parse if not parsed already.
-        if not self._parsed_html:
-            super(WhitebearDocumentArticle, self).parse_self()
-            self._parse_page_name()
-            self._parse_date()
-            self._parse_article_image_path()
-            self._parse_article_image_caption()
-            self._parse_article_image_link_title()
-            self._parse_article_image_alt()
-            self._determine_menu_section_and_menu_item()
-            self.seo_test_self()
-            # TODO self._parse_aside_images()
+        super(WhitebearDocumentArticle, self).parse_self()
+        self._parse_page_name()
+        self._parse_date()
+        self._parse_article_image_path()
+        self._parse_article_image_caption()
+        self._parse_article_image_link_title()
+        self._parse_article_image_alt()
+        self._determine_menu_section_and_menu_item()
+        self.seo_test_self()
+        # TODO self._parse_aside_images()
 
     def seo_test_self(self):
         """
@@ -85,83 +83,89 @@ class WhitebearDocumentArticle(WhitebearDocument):
         # Check meta keywords and description
         super(WhitebearDocumentArticle, self).seo_test_self_basic()
         # Check page name length must be at least 3 and must not be default
+        # Clear all errors on every new test
+        self._date_error_message: str = ''
+        self._caption_error_message: str = ''
+        self._link_title_error_message: str = ''
+        self._image_alt_error_message: str = ''
+
         if len(self._page_name) < Numbers.article_name_min_length or len(
                 self._page_name) > Numbers.article_name_max_length:
             self._page_name_error_message = Strings.seo_error_name_length
-            self.set_status_color(wx.RED)
+            self.set_status_color(Numbers.RED_COLOR)
 
         if self._page_name == Strings.label_article_title:
             self._page_name_error_message = Strings.seo_error_default_value
-            self.set_status_color(wx.RED)
+            self.set_status_color(Numbers.RED_COLOR)
 
         # Check date format
         if not re.search(self._date_regex, self._date):
             self._date_error_message = Strings.seo_error_date_format
-            self.set_status_color(wx.RED)
+            self.set_status_color(Numbers.RED_COLOR)
         else:
             day, _, year = self._date.split(' ', 3)
             # Check day range
             if int(day.replace('.', '')) < 1 or int(day.replace('.', '')) > 31:
                 self._date_error_message = Strings.seo_error_date_format_day
-                self.set_status_color(wx.RED)
+                self.set_status_color(Numbers.RED_COLOR)
 
             # Check year range
             if int(year) < Numbers.year_min or int(year) > Numbers.year_max:
                 self._date_error_message = Strings.seo_error_date_format_year
-                self.set_status_color(wx.RED)
+                self.set_status_color(Numbers.RED_COLOR)
 
         # Check article image disk path, original image may have whatever size
         if not self._article_full_image_path:
             self._article_image = wx.Image(Fetch.get_resource_path('main_image_missing.png'), wx.BITMAP_TYPE_PNG)
-            self.set_status_color(wx.RED)
-
-        # Check article image thumbnail disk path
-        if not self._article_thumbnail_image_path:
-            self._article_image = wx.Image(Fetch.get_resource_path('main_image_thumbnail_missing.png'),
-                                           wx.BITMAP_TYPE_PNG)
-            self.set_status_color(wx.RED)
+            self.set_status_color(Numbers.RED_COLOR)
         else:
-            image = wx.Image(Fetch.get_resource_path(self._article_thumbnail_image_path), wx.BITMAP_TYPE_ANY)
-            if image.GetSize() == (Numbers.main_image_width, Numbers.main_image_height):
-                self._article_image = image
+            # Check article image thumbnail disk path
+            if not self._article_thumbnail_image_path:
+                self._article_image = wx.Image(Fetch.get_resource_path('main_image_thumbnail_missing.png'),
+                                               wx.BITMAP_TYPE_PNG)
+                self.set_status_color(Numbers.RED_COLOR)
             else:
-                self._article_image = wx.Image(Fetch.get_resource_path('main_image_thumbnail_wrong.png'),
-                                               wx.BITMAP_TYPE_ANY)
-                self.set_status_color(wx.RED)
+                image = wx.Image(Fetch.get_resource_path(self._article_thumbnail_image_path), wx.BITMAP_TYPE_ANY)
+                if image.GetSize() == (Numbers.main_image_width, Numbers.main_image_height):
+                    self._article_image = image
+                else:
+                    self._article_image = wx.Image(Fetch.get_resource_path('main_image_thumbnail_wrong.png'),
+                                                   wx.BITMAP_TYPE_ANY)
+                    self.set_status_color(Numbers.RED_COLOR)
 
         # Check article image caption
         if len(self._article_image_caption) < Numbers.article_image_caption_min or len(
                 self._article_image_caption) > Numbers.article_image_caption_max:
             self._caption_error_message = Strings.seo_error_image_caption_length
-            self.set_status_color(wx.RED)
+            self.set_status_color(Numbers.RED_COLOR)
 
         if self._article_image_caption == Strings.label_article_image_caption:
             self._image_alt_error_message = Strings.seo_error_default_value
-            self.set_status_color(wx.RED)
+            self.set_status_color(Numbers.RED_COLOR)
 
         # Check article image link title
         if len(self._article_image_link_title) < Numbers.article_image_title_min or len(
                 self._article_image_link_title) > Numbers.article_image_title_max:
             self._link_title_error_message = Strings.seo_error_link_title_length
-            self.set_status_color(wx.RED)
+            self.set_status_color(Numbers.RED_COLOR)
 
         if self._article_image_link_title == Strings.label_article_image_link_title:
             self._link_title_error_message = Strings.seo_error_default_value
-            self.set_status_color(wx.RED)
+            self.set_status_color(Numbers.RED_COLOR)
 
         # Check article image alt
         if len(self._article_image_alt) < Numbers.article_image_alt_min or len(
                 self._article_image_alt) > Numbers.article_image_alt_max:
             self._image_alt_error_message = Strings.seo_error_image_alt_length
-            self.set_status_color(wx.RED)
+            self.set_status_color(Numbers.RED_COLOR)
 
         if self._article_image_alt == Strings.label_article_image_alt:
             self._image_alt_error_message = Strings.seo_error_default_value
-            self.set_status_color(wx.RED)
+            self.set_status_color(Numbers.RED_COLOR)
 
         # Test menu item
         if not self._menu_item.seo_test_self():
-            self.set_status_color(wx.RED)
+            self.set_status_color(Numbers.RED_COLOR)
 
     def _determine_menu_section_and_menu_item(self):
         """

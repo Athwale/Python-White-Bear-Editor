@@ -2,8 +2,8 @@ import os
 from typing import Dict
 
 import wx
+import wx.lib.agw.supertooltip as SuperTip
 import wx.richtext as rt
-from wx.adv import RichToolTip
 from wx.py import images
 
 from Constants.Numbers import Numbers
@@ -80,6 +80,12 @@ class MainFrame(wx.Frame):
         # Create a menu item for open
         self.file_menu_item_open = wx.MenuItem(self.file_menu, wx.ID_OPEN, Strings.label_menu_item_open,
                                                Strings.label_menu_item_open_hint)
+
+        # Create a menu item for reload file
+        self.file_menu_item_reload = wx.MenuItem(self.file_menu, wx.ID_REFRESH, Strings.label_menu_item_reload,
+                                                 Strings.label_menu_item_reload_hint)
+        self.disableable_menu_items.append(self.file_menu_item_reload)
+
         # Create a menu item for about
         self.help_menu_item_about = wx.MenuItem(self.help_menu, wx.ID_ABOUT, Strings.label_menu_item_about,
                                                 Strings.label_menu_item_about_hint)
@@ -92,6 +98,7 @@ class MainFrame(wx.Frame):
         # Put menu items into the menu buttons
         self.file_menu.Append(self.file_menu_item_open)
         self.file_menu.AppendSeparator()
+        self.file_menu.Append(self.file_menu_item_reload)
         self.file_menu.Append(self.file_menu_item_quit)
         self.help_menu.Append(self.help_menu_item_about)
 
@@ -188,6 +195,21 @@ class MainFrame(wx.Frame):
         self.right_panel.SetSizer(self.right_main_vertical_sizer)
         self.SetSizer(self.main_horizontal_sizer)
 
+    @staticmethod
+    def _get_warning_tip(field: wx.TextCtrl):
+        """
+        Create and return an instance of SuperToolTip targeted for a specific TextCtrl and set up to show SEO warnings.
+        :param field: The text field for the new tip.
+        :return: Set up SuperToolTip
+        """
+        tip = SuperTip.SuperToolTip(None, footer='   ')
+        tip.SetHeader(Strings.status_warning)
+        tip.SetTarget(field)
+        tip.SetTopGradientColor(wx.RED)
+        tip.SetMiddleGradientColor(wx.RED)
+        tip.SetBottomGradientColor(wx.RED)
+        return tip
+
     def _inflate_sizers(self) -> None:
         """
         Insert GUI elements (wx windows) into prepared sizers.
@@ -202,23 +224,27 @@ class MainFrame(wx.Frame):
         # Set border to the image
         self.menu_logo_static_sizer.Add(self.menu_logo_image, flag=wx.LEFT | wx.BOTTOM | wx.RIGHT, border=1)
         # Create menu logo name text box
-        self.field_menu_item_name = wx.TextCtrl(self.right_panel, -1, value=Strings.label_article_menu_logo_name_placeholder,
+        self.field_menu_item_name = wx.TextCtrl(self.right_panel, -1,
+                                                value=Strings.label_article_menu_logo_name_placeholder,
                                                 size=wx.Size(98, 35),
                                                 style=wx.TE_MULTILINE | wx.TE_CENTRE | wx.TE_NO_VSCROLL)
         self.field_menu_item_name.SetFont(self.text_field_font)
         self.field_menu_item_name.SetToolTip(Strings.label_article_menu_logo_name_placeholder)
+        self.field_menu_item_name_tip = self._get_warning_tip(self.field_menu_item_name)
 
-        self.field_menu_item_alt = wx.TextCtrl(self.right_panel, -1, value=Strings.label_article_menu_logo_alt_placeholder,
-                                               size=wx.Size(98, 45),
-                                               style=wx.TE_MULTILINE)
+        self.field_menu_item_alt = wx.TextCtrl(self.right_panel, -1,
+                                               value=Strings.label_article_menu_logo_alt_placeholder,
+                                               size=wx.Size(98, 45), style=wx.TE_MULTILINE)
         self.field_menu_item_alt.SetFont(self.text_field_font)
         self.field_menu_item_alt.SetToolTip(Strings.label_article_menu_logo_alt_placeholder)
+        self.field_menu_item_alt_tip = self._get_warning_tip(self.field_menu_item_alt)
 
         self.field_menu_item_link_title = wx.TextCtrl(self.right_panel, -1,
                                                       value=Strings.label_article_menu_logo_link_title_placeholder,
                                                       size=wx.Size(98, 49), style=wx.TE_MULTILINE)
         self.field_menu_item_link_title.SetFont(self.text_field_font)
         self.field_menu_item_link_title.SetToolTip(Strings.label_article_menu_logo_link_title_placeholder)
+        self.field_menu_item_link_title_tip = self._get_warning_tip(self.field_menu_item_link_title)
 
         self.menu_logo_static_sizer.Add(self.field_menu_item_name)
         self.menu_logo_static_sizer.Add(self.field_menu_item_alt)
@@ -243,30 +269,37 @@ class MainFrame(wx.Frame):
         self.field_main_image_alt = wx.TextCtrl(self.right_panel, -1, value=Strings.label_article_image_alt,
                                                 size=wx.Size(160, 30))
         self.field_main_image_alt.SetToolTip(Strings.label_article_image_alt)
+        self.field_main_image_alt_tip = self._get_warning_tip(self.field_main_image_alt)
 
         self.field_main_image_title = wx.TextCtrl(self.right_panel, -1, value=Strings.label_article_image_link_title,
                                                   size=wx.Size(160, 30))
         self.field_main_image_title.SetToolTip(Strings.label_article_image_link_title)
+        self.field_main_image_title_tip = self._get_warning_tip(self.field_main_image_title)
 
         self.field_main_image_caption = wx.TextCtrl(self.right_panel, -1, value=Strings.label_article_image_caption,
                                                     size=wx.Size(160, 30))
         self.field_main_image_caption.SetToolTip(Strings.label_article_image_caption)
+        self.field_main_image_caption_tip = self._get_warning_tip(self.field_main_image_caption)
 
         self.field_article_date = wx.TextCtrl(self.right_panel, -1, value=Strings.label_article_date,
                                               size=wx.Size(160, 30))
         self.field_article_date.SetToolTip(Strings.label_article_date)
+        self.field_article_date_tip = self._get_warning_tip(self.field_article_date)
 
         self.field_article_name = wx.TextCtrl(self.right_panel, -1, value=Strings.label_article_title,
                                               size=wx.Size(250, 30))
         self.field_article_name.SetToolTip(Strings.label_article_title)
+        self.field_article_name_tip = self._get_warning_tip(self.field_article_name)
 
         self.field_article_keywords = wx.TextCtrl(self.right_panel, -1, value=Strings.label_article_keywords,
                                                   size=wx.Size(250, 30))
         self.field_article_keywords.SetToolTip(Strings.label_article_keywords)
+        self.field_article_keywords_tip = self._get_warning_tip(self.field_article_keywords)
 
         self.field_article_description = wx.TextCtrl(self.right_panel, -1, value=Strings.label_article_description,
                                                      size=wx.Size(250, 30))
         self.field_article_description.SetToolTip(Strings.label_article_description)
+        self.field_article_description_tip = self._get_warning_tip(self.field_article_description)
 
         self.article_data_static_sizer.Add(self.field_article_date)
         self.article_data_static_sizer.Add(self.field_main_image_caption, flag=wx.EXPAND)
@@ -302,6 +335,7 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.about_button_handler, self.help_menu_item_about)
         self.Bind(wx.EVT_MENU, self.open_button_handler, self.file_menu_item_open)
         self.Bind(wx.EVT_MENU, self.quit_button_handler, self.file_menu_item_quit)
+        self.Bind(wx.EVT_MENU, self.reload_button_handler, self.file_menu_item_reload)
 
         # Bind other controls clicks
         self.Bind(wx.EVT_LIST_ITEM_SELECTED, self.list_item_click_handler, self.page_list)
@@ -494,6 +528,20 @@ class MainFrame(wx.Frame):
         # If the document is correct, now we can show it.
         self._fill_editor(selected_document)
 
+    def reload_button_handler(self, event):
+        """
+        Reparse the selected file from disk. Used in case the user has to fix something in html or images.
+        :param event: wx event, not used.
+        :return: None
+        """
+        result = wx.MessageBox(Strings.text_reload_from_disk, Strings.status_warning, wx.YES_NO | wx.ICON_WARNING)
+        if result == wx.YES:
+            selected_item = self.page_list.GetItem(self.page_list.GetFirstSelected())
+            self.document_dictionary[selected_item.GetText()].parse_self()
+            event = wx.ListEvent()
+            event.SetItem(selected_item)
+            self.list_item_click_handler(event)
+
     def _fill_editor(self, doc: WhitebearDocumentArticle) -> None:
         """
         Display document contents in the GUI along with error messages.
@@ -501,32 +549,46 @@ class MainFrame(wx.Frame):
         :return: None
         """
         self._disable_editor(True)
-        self._set_status_text(
-            Strings.status_valid + ' ' + doc.get_filename() + ' - ' + doc.get_menu_section().get_page_name()[0])
+
+        selected_item = self.page_list.GetFirstSelected()
+        self.page_list.SetItemBackgroundColour(selected_item, doc.get_status_color())
+        if doc.get_status_color() == Numbers.RED_COLOR:
+            self._set_status_text(
+                Strings.status_invalid + ' ' + doc.get_filename() + ' - ' + doc.get_menu_section().get_page_name()[0])
+        else:
+            self._set_status_text(
+                Strings.status_valid + ' ' + doc.get_filename() + ' - ' + doc.get_menu_section().get_page_name()[0])
+
         self.SetTitle(doc.get_filename())
-
         # Set article data
-        field_to_value = {self.field_article_date: doc.get_date(),
-                          self.field_main_image_caption: doc.get_article_image_caption(),
-                          self.field_main_image_title: doc.get_article_image_link_title(),
-                          self.field_main_image_alt: doc.get_article_image_alt(),
-                          self.field_article_name: doc.get_page_name(),
-                          self.field_article_keywords: doc.get_keywords_string(),
-                          self.field_article_description: doc.get_description(),
-                          self.field_menu_item_name: doc.get_menu_item().get_menu_article_name(),
-                          self.field_menu_item_alt: doc.get_menu_item().get_menu_image_alt(),
-                          self.field_menu_item_link_title: doc.get_menu_item().get_menu_link_title()}
+        field_to_value = {self.field_article_date: (doc.get_date(), self.field_article_date_tip),
+                          self.field_main_image_caption: (doc.get_article_image_caption(),
+                                                          self.field_main_image_caption_tip),
+                          self.field_main_image_title: (doc.get_article_image_link_title(),
+                                                        self.field_menu_item_link_title_tip),
+                          self.field_main_image_alt: (doc.get_article_image_alt(), self.field_main_image_alt_tip),
+                          self.field_article_name: (doc.get_page_name(), self.field_article_name_tip),
+                          self.field_article_keywords: (doc.get_keywords_string(), self.field_article_keywords_tip),
+                          self.field_article_description: (doc.get_description(), self.field_article_description_tip),
+                          self.field_menu_item_name: (doc.get_menu_item().get_menu_article_name(),
+                                                      self.field_menu_item_name_tip),
+                          self.field_menu_item_alt: (doc.get_menu_item().get_menu_image_alt(),
+                                                     self.field_menu_item_alt_tip),
+                          self.field_menu_item_link_title: (doc.get_menu_item().get_menu_link_title(),
+                                                            self.field_menu_item_link_title_tip)}
         for field, value in field_to_value.items():
-            field.SetValue(value[0])
-            if value[1]:
-                tip = wx.adv.RichToolTip(Strings.status_warning, value[1])
-                tip.SetIcon(wx.ICON_WARNING)
-                tip.SetBackgroundColour(wx.RED)
-                tip.SetTimeout(0)
-                tip.ShowFor(self.field_article_date)
-
+            field.SetValue(value[0][0])
+            tip = value[1]
+            if value[0][1]:
+                tip.SetMessage(value[0][1])
+                tip.EnableTip(True)
+                tip.DoShowNow()
+                field.SetBackgroundColour(Numbers.RED_COLOR)
+            else:
+                tip.DoHideNow()
+                tip.EnableTip(False)
+                field.SetBackgroundColour(Numbers.GREEN_COLOR)
         # Set images
         self.main_image.SetBitmap(wx.Bitmap(doc.get_article_image()))
         self.menu_logo_image.SetBitmap(wx.Bitmap(doc.get_menu_item().get_menu_image()))
         self._disable_editor(False)
-

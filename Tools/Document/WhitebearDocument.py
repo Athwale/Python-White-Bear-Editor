@@ -30,7 +30,7 @@ class WhitebearDocument:
         self._modified = False
         # We create instances of documents after validation so we already know they are valid.
         self._valid = True
-        self._status_color = wx.WHITE
+        self._status_color = None
 
         # Page data
         self._parsed_html = None
@@ -48,11 +48,9 @@ class WhitebearDocument:
         :return: None
         :raises WrongFormatException: if there is a problem with parsing the document.
         """
-        # Only parse if not parsed already and only if the document is valid.
-        if not self._parsed_html:
-            self._get_parsed_html()
-            self._parse_meta_description()
-            self._parse_meta_keywords()
+        self._get_parsed_html()
+        self._parse_meta_description()
+        self._parse_meta_keywords()
 
     def _parse_meta_description(self):
         """
@@ -94,22 +92,28 @@ class WhitebearDocument:
         Errors found in the validation are saved are then returned along with the data by getter methods.
         :return: None
         """
+        # Clear all error on each retest
+        self._page_name_error_message: str = ''
+        self._keywords_error_message: str = ''
+        self._description_error_message: str = ''
+        self._status_color = wx.WHITE
+
         keywords_length = 0
         for word in self._meta_keywords:
             keywords_length += len(word)
         if keywords_length < Numbers.keywords_min_length or keywords_length > Numbers.keywords_max_length:
             self._keywords_error_message = Strings.seo_error_keywords_length
-            self.set_status_color(wx.RED)
+            self.set_status_color(Numbers.RED_COLOR)
 
         # Check meta description
         if len(self._meta_description) < Numbers.description_min_length or len(
                 self._meta_description) > Numbers.description_max_length:
             self._description_error_message = Strings.seo_error_description_length
-            self.set_status_color(wx.RED)
+            self.set_status_color(Numbers.RED_COLOR)
 
         if self._meta_description == Strings.label_article_description:
             self._description_error_message = Strings.seo_error_default_value
-            self.set_status_color(wx.RED)
+            self.set_status_color(Numbers.RED_COLOR)
 
     # Boolean functions ------------------------------------------------------------------------------------------------
     def is_valid(self) -> bool:
@@ -243,7 +247,7 @@ class WhitebearDocument:
         :return: None
         """
         self._status_color = new_color
-        if new_color == wx.RED:
+        if new_color == Numbers.RED_COLOR:
             self._valid = False
 
     def __str__(self) -> str:

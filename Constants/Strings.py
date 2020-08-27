@@ -21,6 +21,7 @@ class Strings:
     text_about_contents: str = '<p>Unfinished whitebear web editor.<br>' \
                                '<i>https://github.com/Athwale/Python-White-Bear-Editor</i><br>' \
                                'version: <b>' + editor_version + '</b></p>'
+    text_reload_from_disk: str = 'Reload file from disk?\nThis will discard all unsaved changes.'
 
     exception_access: str = 'Main directory not readable'
     exception_access_html: str = 'File can not be accessed'
@@ -56,6 +57,8 @@ class Strings:
     label_menu_file: str = 'File'
     label_menu_item_open: str = 'Open directory...\tctrl+o'
     label_menu_item_open_hint: str = 'Open a whitebear web directory'
+    label_menu_item_reload: str = 'Reload file from disk\tctrl+r'
+    label_menu_item_reload_hint: str = 'Parse file again from disk'
 
     label_menu_item_quit: str = 'Quit\tctrl+q'
     label_menu_item_quit_hint: str = 'Quit editor'

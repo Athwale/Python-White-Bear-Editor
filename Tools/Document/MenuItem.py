@@ -35,6 +35,11 @@ class MenuItem:
         warning image.
         :return: True if test is ok, False otherwise
         """
+        # Clear all error before each retest
+        self._article_name_error_message: str = ''
+        self._link_title_error_message: str = ''
+        self._image_alt_error_message: str = ''
+
         result = True
         # Check page name length must be at least 3 and must not be default
         if len(self._article_name) < Numbers.article_name_min_length or len(
@@ -46,7 +51,7 @@ class MenuItem:
             self._article_name_error_message = Strings.seo_error_default_value
             result = False
 
-        # Check article image disk path
+        # Check menu image disk path
         if not self._menu_image_path:
             self._menu_image = wx.Image(Fetch.get_resource_path('menu_image_missing.png'), wx.BITMAP_TYPE_PNG)
             result = False
