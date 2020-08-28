@@ -60,7 +60,7 @@ class MenuItem:
             if image.GetSize() == (Numbers.logo_image_size, Numbers.logo_image_size):
                 self._menu_image = image
             else:
-                self._menu_image = wx.Image(Fetch.get_resource_path('menu_image_wrong.png'), wx.BITMAP_TYPE_ANY)
+                self._menu_image = wx.Image(Fetch.get_resource_path('menu_image_wrong.png'), wx.BITMAP_TYPE_PNG)
                 result = False
 
         # Check article image link title

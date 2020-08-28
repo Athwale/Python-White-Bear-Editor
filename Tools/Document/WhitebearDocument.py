@@ -1,6 +1,6 @@
 import os
-import wx
 
+import wx
 from bs4 import BeautifulSoup
 
 from Constants.Numbers import Numbers
@@ -52,7 +52,7 @@ class WhitebearDocument:
         self._parse_meta_description()
         self._parse_meta_keywords()
 
-    def _parse_meta_description(self):
+    def _parse_meta_description(self) -> None:
         """
         Parse the meta description of this document and save it into an instance variable.
         :return: None
@@ -64,7 +64,7 @@ class WhitebearDocument:
         else:
             raise WrongFormatException(Strings.exception_parse_multiple_descriptions)
 
-    def _parse_meta_keywords(self):
+    def _parse_meta_keywords(self) -> None:
         """
         Parse the meta keywords of this document and save it into an instance variable.
         :return: None
@@ -76,7 +76,7 @@ class WhitebearDocument:
         else:
             raise WrongFormatException(Strings.exception_parse_multiple_keywords)
 
-    def _get_parsed_html(self):
+    def _get_parsed_html(self) -> None:
         """
         Parse this document's html with bs4 and save it to an instance variable.
         :return: None
@@ -145,7 +145,7 @@ class WhitebearDocument:
         """
         return self._path
 
-    def get_parsed_html(self):
+    def get_parsed_html(self) -> None:
         """
         Return the parsed html contents.
         :return: Return the parsed html contents.

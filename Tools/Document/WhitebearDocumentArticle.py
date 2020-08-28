@@ -12,6 +12,7 @@ from Constants.Strings import Strings
 from Exceptions.UnrecognizedFileException import UnrecognizedFileException
 from Exceptions.WrongFormatException import WrongFormatException
 from Resources.Fetch import Fetch
+from Tools.Document.AsideImage import AsideImage
 from Tools.Document.MenuItem import MenuItem
 from Tools.Document.WhitebearDocument import WhitebearDocument
 from Tools.Document.WhitebearDocumentMenu import WhitebearDocumentMenu
@@ -38,6 +39,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
         # Article data
         self._menu_section = None
         self._menu_item = None
+        self._aside_images = []
 
         self._date = None
         self._date_error_message: str = ''
@@ -71,13 +73,13 @@ class WhitebearDocumentArticle(WhitebearDocument):
         self._parse_article_image_link_title()
         self._parse_article_image_alt()
         self._determine_menu_section_and_menu_item()
+        self._parse_aside_images()
         self.seo_test_self()
-        # TODO self._parse_aside_images()
 
-    def seo_test_self(self):
+    def seo_test_self(self) -> None:
         """
 
-        :return:
+        :return: None
         """
         # TODO Run self test on every setter method.
         # Check meta keywords and description
@@ -167,7 +169,12 @@ class WhitebearDocumentArticle(WhitebearDocument):
         if not self._menu_item.seo_test_self():
             self.set_status_color(Numbers.RED_COLOR)
 
-    def _determine_menu_section_and_menu_item(self):
+        # Test aside images
+        for aside_image in self._aside_images:
+            if not aside_image.seo_test_self():
+                self.set_status_color(Numbers.RED_COLOR)
+
+    def _determine_menu_section_and_menu_item(self) -> None:
         """
         Find out which menu this article belongs in.
         :return: None
@@ -181,7 +188,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
         if not self._menu_item:
             raise WrongFormatException(Strings.exception_menu_item_missing + ' for: ' + self.get_filename())
 
-    def _parse_page_name(self):
+    def _parse_page_name(self) -> None:
         """
         Parse the name of this article and save it into an instance variable.
         :return: None
@@ -189,14 +196,14 @@ class WhitebearDocumentArticle(WhitebearDocument):
         article = self._parsed_html.find(name='article', attrs={'class': 'textPage'})
         self._page_name = article.h2.string
 
-    def _parse_date(self):
+    def _parse_date(self) -> None:
         """
         Parse the date stamp of this document and save it into an instance variable.
         :return: None
         """
         self._date = self._parsed_html.find(name='p', attrs={'id': 'date'}).string
 
-    def _parse_article_image_path(self):
+    def _parse_article_image_path(self) -> None:
         """
         Parse the absolute path to the main article image and save it into an instance variable.
         If the image is not accessible on disk, the variable is set to None.
@@ -215,7 +222,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
                 not os.access(self._article_thumbnail_image_path, os.W_OK):
             self._article_thumbnail_image_path = None
 
-    def _parse_article_image_caption(self):
+    def _parse_article_image_caption(self) -> None:
         """
         Parse the main article image caption text and save it into an instance variable.
         :return: None
@@ -225,19 +232,46 @@ class WhitebearDocumentArticle(WhitebearDocument):
         string_content = main_image_figure.figcaption.strings
         self._article_image_caption = ''.join(string_content)
 
-    def _parse_article_image_link_title(self):
+    def _parse_article_image_link_title(self) -> None:
         """
         Parse the main article image link title text and save it into an instance variable.
         :return: None
         """
         self._article_image_link_title = self._parsed_html.find(name='figure', attrs={'id': 'articleImg'}).a['title']
 
-    def _parse_article_image_alt(self):
+    def _parse_article_image_alt(self) -> None:
         """
         Parse the main article image alt description text and save it into an instance variable.
         :return: None
         """
         self._article_image_alt = self._parsed_html.find(name='figure', attrs={'id': 'articleImg'}).img['alt']
+
+    def _parse_aside_images(self) -> None:
+        """
+        Parse aside images into a list of special container classes.
+        :return: None
+        """
+        self._aside_images.clear()
+        aside = self._parsed_html.find(name='aside')
+        figures = aside.find_all(name='figure')
+        if figures:
+            for figure in figures:
+                full_original_image_path = os.path.join(self._working_directory, figure.a['href'])
+                title = figure.a['title']
+                alt = figure.img['alt']
+                full_thumbnail_path = os.path.join(self._working_directory, figure.img['src'])
+                figcaption = figure.figcaption.string
+
+                if not os.path.exists(full_original_image_path) or not os.access(full_original_image_path, os.R_OK) \
+                        or not os.access(full_original_image_path, os.W_OK):
+                    full_original_image_path = None
+
+                if not os.path.exists(full_thumbnail_path) or not os.access(full_thumbnail_path, os.R_OK) \
+                        or not os.access(full_thumbnail_path, os.W_OK):
+                    full_thumbnail_path = None
+
+                self._aside_images.append(
+                    AsideImage(figcaption, title, alt, full_original_image_path, full_thumbnail_path))
 
     def validate_self(self) -> (bool, List[str]):
         """

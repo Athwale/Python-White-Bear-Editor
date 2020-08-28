@@ -41,7 +41,7 @@ class WhitebearDocumentMenu(WhitebearDocument):
         self._parse_page_name()
         self._parse_menu_items()
 
-    def _parse_menu_items(self):
+    def _parse_menu_items(self) -> None:
         """
         Parse the menu items of this menu and save them into an instance variable. Image path is None if the file
         is not on hard drive.
@@ -64,7 +64,7 @@ class WhitebearDocumentMenu(WhitebearDocument):
 
             self._menu_items.append(MenuItem(name, title, image_alt, href, full_image_path))
 
-    def _parse_page_name(self):
+    def _parse_page_name(self) -> None:
         """
         Parse the name of this menu and save it into an instance variable.
         :return: None

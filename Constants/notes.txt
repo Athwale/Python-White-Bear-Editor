@@ -9,6 +9,7 @@ parse and check aside images
 parse and check main text
 ability to reparse from disk with warning dialog
 add methods for reruning seo check on field edits
+use right click in side images to edit and move up/down
 
 Check number of articles in status bar after adding a new one
 Add system icon
