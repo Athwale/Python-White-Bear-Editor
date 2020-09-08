@@ -55,8 +55,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
 
         # TODO parse and validate main text
         self._main_text = None
-        # TODO parse and validate aside images. Store them in a separate carrier class and implement a panel subclass
-        # TODO for the gui to display with rearrangement possible.
+        # TODO Implement some sort of aside image panel container with right click ability.
 
     def parse_self(self) -> None:
         """
