@@ -6,7 +6,7 @@ class is necessary and must be in all wx python programs. OnInit must be overrid
 import wx
 import wx.adv
 
-from Constants.Strings import Strings
+from Constants.Constants import Strings
 from Gui.Frames.MainFrame import MainFrame
 from Resources.Fetch import Fetch
 

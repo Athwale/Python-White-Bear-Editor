@@ -5,7 +5,7 @@ from lxml import etree
 from lxml import html
 from lxml.etree import XMLSyntaxError
 
-from Constants.Strings import Strings
+from Constants.Constants import Strings
 from Exceptions.UnrecognizedFileException import UnrecognizedFileException
 from Resources.Fetch import Fetch
 from Tools.Document.MenuItem import MenuItem

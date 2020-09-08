@@ -7,8 +7,8 @@ from lxml import etree
 from lxml import html
 from lxml.etree import XMLSyntaxError
 
-from Constants.Numbers import Numbers
-from Constants.Strings import Strings
+from Constants.Constants import Numbers
+from Constants.Constants import Strings
 from Exceptions.UnrecognizedFileException import UnrecognizedFileException
 from Exceptions.WrongFormatException import WrongFormatException
 from Resources.Fetch import Fetch

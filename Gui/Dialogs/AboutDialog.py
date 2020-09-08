@@ -1,7 +1,7 @@
 import wx
 import wx.html
 
-from Constants.Strings import Strings
+from Constants.Constants import Strings
 
 
 class AboutDialog(wx.Dialog):

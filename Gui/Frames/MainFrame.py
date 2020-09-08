@@ -6,8 +6,8 @@ import wx.lib.agw.supertooltip as SuperTip
 import wx.richtext as rt
 from wx.py import images
 
-from Constants.Numbers import Numbers
-from Constants.Strings import Strings
+from Constants.Constants import Numbers
+from Constants.Constants import Strings
 from Exceptions.UnrecognizedFileException import UnrecognizedFileException
 from Gui.Dialogs.AboutDialog import AboutDialog
 from Threads.FileListThread import FileListThread

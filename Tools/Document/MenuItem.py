@@ -1,7 +1,7 @@
 import wx
 
-from Constants.Numbers import Numbers
-from Constants.Strings import Strings
+from Constants.Constants import Numbers
+from Constants.Constants import Strings
 from Resources.Fetch import Fetch
 
 
