@@ -2,7 +2,7 @@ import os
 import sys
 from pathlib import Path
 
-from Constants.Strings import Strings
+from Constants.Constants import Strings
 
 
 class Fetch:

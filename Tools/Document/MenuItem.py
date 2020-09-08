@@ -69,7 +69,7 @@ class MenuItem:
             self._link_title_error_message = Strings.seo_error_link_title_length
             result = False
 
-        if self._link_title == Strings.label_article_menu_logo_link_title_placeholder:
+        if self._link_title == Strings.label_menu_logo_link_title_placeholder:
             self._link_title_error_message = Strings.seo_error_default_value
             result = False
 

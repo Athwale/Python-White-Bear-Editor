@@ -4,10 +4,7 @@ Automaticky generovat datum
 Zkontrolovat nastaveni spatnyho adresare
 
 TODO:
-show errors in gui
-parse and check aside images
 parse and check main text
-ability to reparse from disk with warning dialog
 add methods for reruning seo check on field edits
 use right click in side images to edit and move up/down
 

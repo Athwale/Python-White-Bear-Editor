@@ -2,14 +2,15 @@ import os
 from typing import Dict
 
 import wx
-import wx.lib.agw.supertooltip as SuperTip
 import wx.richtext as rt
+from wx.lib.agw.supertooltip import SuperToolTip
 from wx.py import images
 
 from Constants.Constants import Numbers
 from Constants.Constants import Strings
 from Exceptions.UnrecognizedFileException import UnrecognizedFileException
 from Gui.Dialogs.AboutDialog import AboutDialog
+from Resources.Fetch import Fetch
 from Threads.FileListThread import FileListThread
 from Tools.ConfigManager import ConfigManager
 from Tools.Document.WhitebearDocumentArticle import WhitebearDocumentArticle
@@ -202,7 +203,7 @@ class MainFrame(wx.Frame):
         :param field: The text field for the new tip.
         :return: Set up SuperToolTip
         """
-        tip = SuperTip.SuperToolTip(None, footer='   ')
+        tip = SuperToolTip(None, footer='   ')
         tip.SetHeader(title)
         tip.SetTarget(field)
         tip.SetTopGradientColor(Numbers.YELLOW_COLOR)
@@ -241,11 +242,11 @@ class MainFrame(wx.Frame):
                                                              Strings.label_article_menu_logo_alt_placeholder)
 
         self.field_menu_item_link_title = wx.TextCtrl(self.right_panel, -1,
-                                                      value=Strings.label_article_menu_logo_link_title_placeholder,
+                                                      value=Strings.label_menu_logo_link_title_placeholder,
                                                       size=wx.Size(98, 49), style=wx.TE_MULTILINE)
         self.field_menu_item_link_title.SetFont(self.text_field_font)
         self.field_menu_item_link_title_tip = self._get_warning_tip(self.field_menu_item_link_title,
-                                                                    Strings.label_article_menu_logo_link_title_placeholder)
+                                                                    Strings.label_menu_logo_link_title_placeholder)
 
         self.menu_logo_static_sizer.Add(self.field_menu_item_name)
         self.menu_logo_static_sizer.Add(self.field_menu_item_alt)
@@ -315,6 +316,17 @@ class MainFrame(wx.Frame):
         self.right_bottom_sizer.Add(self.side_photo_column_sizer, flag=wx.EXPAND | wx.LEFT,
                                     border=Numbers.widget_border_size)
         # --------------------------------------------------------------------------------------------------------------
+
+        # Aside images section -----------------------------------------------------------------------------------------
+        # TODO implement this
+        side_panel = wx.Panel(self.right_panel, -1)
+        side_panel_sizer = wx.BoxSizer(wx.VERTICAL)
+        side_image = wx.Image(Fetch.get_resource_path('aside_image_thumbnail_missing.png'), wx.BITMAP_TYPE_PNG)
+        bitmap = wx.StaticBitmap(side_panel, -1, wx.Bitmap(side_image))
+        side_panel_sizer.Add(bitmap)
+        side_panel.SetSizer(side_panel_sizer)
+        self.side_photo_column_sizer.Add(side_panel, flag=wx.LEFT | wx.BOTTOM | wx.RIGHT, border=1)
+
         self.Fit()
 
     def _bind_handlers(self) -> None:

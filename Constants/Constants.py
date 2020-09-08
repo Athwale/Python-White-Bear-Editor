@@ -110,7 +110,7 @@ class Strings:
     label_article_menu_logo: str = 'Menu logo'
     label_article_menu_logo_name_placeholder: str = 'Menu item name'
     label_article_menu_logo_alt_placeholder: str = ' Alt description'
-    label_article_menu_logo_link_title_placeholder: str = ' Link title'
+    label_menu_logo_link_title_placeholder: str = ' Link title'
     label_article_image: str = 'Article image'
     label_article_image_alt: str = 'Image alt description'
     label_article_image_link_title: str = 'Image link title'
