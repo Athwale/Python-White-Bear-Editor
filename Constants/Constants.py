@@ -104,6 +104,12 @@ class Strings:
     label_menu_item_about: str = 'About'
     label_menu_item_about_hint: str = 'About whitebear editor'
 
+    # Pop up menu items
+    label_menu_up: str = 'Move up'
+    label_menu_down: str = 'Move Down'
+    label_menu_edit_image: str = 'Edit image'
+    label_menu_remove: str = 'Remove'
+
     label_dialog_choose_wb_dir: str = 'Choose whitebear directory'
     label_dialog_about: str = 'About'
 
