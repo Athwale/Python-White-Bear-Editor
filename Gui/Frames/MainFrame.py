@@ -10,7 +10,7 @@ from Constants.Constants import Numbers
 from Constants.Constants import Strings
 from Exceptions.UnrecognizedFileException import UnrecognizedFileException
 from Gui.Dialogs.AboutDialog import AboutDialog
-from Resources.Fetch import Fetch
+from Gui.Panels.AsideImagePanel import AsideImagePanel
 from Threads.FileListThread import FileListThread
 from Tools.ConfigManager import ConfigManager
 from Tools.Document.WhitebearDocumentArticle import WhitebearDocumentArticle
@@ -180,7 +180,7 @@ class MainFrame(wx.Frame):
         # Contains article photos
         self.side_photo_column_sizer = wx.StaticBoxSizer(wx.VERTICAL, self.right_panel,
                                                          label=Strings.label_article_photo_column)
-        self.side_photo_column_sizer.SetMinSize((211, -1))
+        self.side_photo_column_sizer.SetMinSize((Numbers.photo_column_width, -1))
 
         # The | is a bitwise or and flags is a bit mask of constants
         self.right_main_vertical_sizer.Add(self.right_top_sizer, flag=wx.RIGHT | wx.ALIGN_LEFT | wx.EXPAND,
@@ -318,15 +318,8 @@ class MainFrame(wx.Frame):
         # --------------------------------------------------------------------------------------------------------------
 
         # Aside images section -----------------------------------------------------------------------------------------
-        # TODO implement this
-        side_panel = wx.Panel(self.right_panel, -1)
-        side_panel_sizer = wx.BoxSizer(wx.VERTICAL)
-        side_image = wx.Image(Fetch.get_resource_path('aside_image_thumbnail_missing.png'), wx.BITMAP_TYPE_PNG)
-        bitmap = wx.StaticBitmap(side_panel, -1, wx.Bitmap(side_image))
-        side_panel_sizer.Add(bitmap)
-        side_panel.SetSizer(side_panel_sizer)
-        self.side_photo_column_sizer.Add(side_panel, flag=wx.LEFT | wx.BOTTOM | wx.RIGHT, border=1)
-
+        self.side_photo_panel = AsideImagePanel(self.right_panel)
+        self.side_photo_column_sizer.Add(self.side_photo_panel, 1, flag=wx.EXPAND)
         self.Fit()
 
     def _bind_handlers(self) -> None:
@@ -604,4 +597,10 @@ class MainFrame(wx.Frame):
         # Set images
         self.main_image.SetBitmap(wx.Bitmap(doc.get_article_image()))
         self.menu_logo_image.SetBitmap(wx.Bitmap(doc.get_menu_item().get_menu_image()))
+        # Set aside images
+        self.side_photo_panel.clear_images()
+        for img in doc.get_aside_images():
+            self.side_photo_panel.add_image(img)
+
+        self.side_photo_panel.show_images()
         self._disable_editor(False)

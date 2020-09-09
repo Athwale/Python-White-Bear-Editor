@@ -353,6 +353,13 @@ class WhitebearDocumentArticle(WhitebearDocument):
         """
         return self._menu_section
 
+    def get_aside_images(self) -> List[AsideImage]:
+        """
+        Return the aside images of this article.
+        :return: the aside images of this article
+        """
+        return self._aside_images
+
     # Setters ----------------------------------------------------------------------------------------------------------
     def set_date(self, date: str) -> None:
         """

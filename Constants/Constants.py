@@ -7,14 +7,14 @@ class Numbers:
     GREEN_COLOR = Colour(201, 255, 199)
     YELLOW_COLOR = Colour(250, 255, 196)
 
-    minimal_window_size_width: int = 900
+    minimal_window_size_width: int = 1200
     minimal_window_size_height: int = 700
     initial_panel_size: int = 220
     minimal_panel_size: int = 150
     maximal_panel_size: int = 300
     text_field_font_size: int = 9
     widget_border_size: int = 5
-    photo_column_width: int = 211
+    photo_column_width: int = 300
 
     # SEO values
     year_min: int = 2000
