@@ -3,7 +3,7 @@ from typing import List
 import wx
 import wx.lib.scrolledpanel
 
-from Constants.Constants import Numbers
+from Gui.Panels.ImagePanel import ImagePanel
 from Tools.Document.AsideImage import AsideImage
 
 
@@ -17,10 +17,9 @@ class AsideImagePanel(wx.lib.scrolledpanel.ScrolledPanel):
         Constructor for the AsideImagePanel which has special functionality
         """
         wx.lib.scrolledpanel.ScrolledPanel.__init__(self, parent, -1)
-        self.images: List[AsideImage] = []
-        self.bitmaps = []
-        self.sizer = wx.BoxSizer(wx.VERTICAL)
-        self.SetSizer(self.sizer)
+        self._images: List[AsideImage] = []
+        self._sizer = wx.BoxSizer(wx.VERTICAL)
+        self.SetSizer(self._sizer)
 
     def add_image(self, image: AsideImage) -> None:
         """
@@ -28,7 +27,7 @@ class AsideImagePanel(wx.lib.scrolledpanel.ScrolledPanel):
         :param image: The wx.Image to add.
         :return: None
         """
-        self.images.append(image)
+        self._images.append(image)
 
     def clear_images(self) -> None:
         """
@@ -36,7 +35,7 @@ class AsideImagePanel(wx.lib.scrolledpanel.ScrolledPanel):
         :return: None
         """
         self._clear_panel()
-        self.images.clear()
+        self._images.clear()
 
     def _clear_panel(self) -> None:
         """
@@ -45,7 +44,6 @@ class AsideImagePanel(wx.lib.scrolledpanel.ScrolledPanel):
         """
         for child in self.GetChildren():
             child.Destroy()
-        self.bitmaps.clear()
 
     def show_images(self) -> None:
         """
@@ -57,11 +55,10 @@ class AsideImagePanel(wx.lib.scrolledpanel.ScrolledPanel):
         self._clear_panel()
 
         # Create and show new images
-        for img in self.images:
-            bitmap = wx.StaticBitmap(self, -1, wx.Bitmap(img.get_image()))
-            self.bitmaps.append(bitmap)
-            self.sizer.Add(bitmap)
-            self.sizer.Add((Numbers.widget_border_size, Numbers.widget_border_size))
+        for img in self._images:
+            image_panel = ImagePanel(self)
+            image_panel.set_image(img)
+            self._sizer.Add(image_panel)
 
         self.SetupScrolling(scroll_x=False, scrollIntoView=True)
         self.Layout()

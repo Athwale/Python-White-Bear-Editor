@@ -121,6 +121,7 @@ class Strings:
     label_article_description: str = 'Meta description'
     label_article_info: str = 'Article data'
     label_article_photo_column: str = 'Photos'
+    lable_image: str = 'Image'
 
     status_loading: str = 'Loading'
     status_ready: str = 'Ready'
