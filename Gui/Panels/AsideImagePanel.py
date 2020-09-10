@@ -29,12 +29,18 @@ class AsideImagePanel(wx.lib.scrolledpanel.ScrolledPanel):
         moved.
         :return: None
         """
+        img_index = self._images.index(event.GetClientData())
         if event.GetId() == wx.ID_UP:
             # Rearrange the images in the list
-            print('up')
+            if img_index == 0:
+                return
+            self._images[img_index], self._images[img_index - 1] = self._images[img_index - 1], self._images[img_index]
         else:
             # It can only be move down
-            print('down')
+            if img_index + 1 == len(self._images):
+                return
+            self._images[img_index], self._images[img_index + 1] = self._images[img_index + 1], self._images[img_index]
+        self.show_images()
 
     def add_image(self, image: AsideImage) -> None:
         """
