@@ -1,3 +1,5 @@
+from functools import total_ordering
+
 import wx
 
 from Constants.Constants import Numbers
@@ -5,10 +7,12 @@ from Constants.Constants import Strings
 from Resources.Fetch import Fetch
 
 
+@total_ordering
 class AsideImage:
     """
     Carrier class for a parsed aside image.
     """
+    index: int = 1
 
     def __init__(self, caption: str, title: str, image_alt: str, original_image_path: str, thumbnail_path: str):
         """
@@ -19,6 +23,9 @@ class AsideImage:
         :param original_image_path: full disk path to the original size image.
         :param thumbnail_path: full path to the thumbnail image.
         """
+        # This is used to arrange images in the side panel
+        AsideImage.index += 1
+        self._index = AsideImage.index
         self._caption = caption
         self._caption_error_message: str = ''
         self._link_title = title
@@ -132,9 +139,30 @@ class AsideImage:
         """
         return self._image
 
+    def get_index(self) -> int:
+        """
+        Return this image's index in the side panel.
+        :return: Index of the image
+        """
+        return self._index
+
+    def set_index(self, index: int) -> None:
+        """
+        Set a new index for this image.
+        :param index: New index.
+        :return: None
+        """
+        self._index = index
+
     def __str__(self) -> str:
         return "Aside image: {}, original: {}, thumbnail: {}, title: {}, alt: {}".format(self._caption,
                                                                                          self._original_image_path,
                                                                                          self._thumbnail_path,
                                                                                          self._link_title,
                                                                                          self._image_alt)
+
+    def __eq__(self, other):
+        return self._index == other.get_index()
+
+    def __lt__(self, other):
+        return self._index < other.get_index()

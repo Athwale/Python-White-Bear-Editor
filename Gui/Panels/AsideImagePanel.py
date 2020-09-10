@@ -55,7 +55,7 @@ class AsideImagePanel(wx.lib.scrolledpanel.ScrolledPanel):
         self._clear_panel()
 
         # Create and show new images
-        for img in self._images:
+        for img in sorted(self._images):
             image_panel = ImagePanel(self)
             image_panel.set_image(img)
             self._sizer.Add(image_panel)
