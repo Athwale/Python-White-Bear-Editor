@@ -9,7 +9,7 @@ from Tools.Document.AsideImage import AsideImage
 
 class AsideImagePanel(wx.lib.scrolledpanel.ScrolledPanel):
     """
-
+    This class displays a scrollable panel which contains aside images of a loaded whitebear article.
     """
 
     def __init__(self, parent):
@@ -20,6 +20,21 @@ class AsideImagePanel(wx.lib.scrolledpanel.ScrolledPanel):
         self._images: List[AsideImage] = []
         self._sizer = wx.BoxSizer(wx.VERTICAL)
         self.SetSizer(self._sizer)
+        self.Bind(wx.EVT_MENU, self.on_move_image)
+
+    def on_move_image(self, event: wx.CommandEvent):
+        """
+        Move image up one position.
+        :param event: Used to distinguish between up/down buttons. And contains reference to the image that is being
+        moved.
+        :return: None
+        """
+        if event.GetId() == wx.ID_UP:
+            # Rearrange the images in the list
+            print('up')
+        else:
+            # It can only be move down
+            print('down')
 
     def add_image(self, image: AsideImage) -> None:
         """
@@ -55,7 +70,7 @@ class AsideImagePanel(wx.lib.scrolledpanel.ScrolledPanel):
         self._clear_panel()
 
         # Create and show new images
-        for img in sorted(self._images):
+        for img in self._images:
             image_panel = ImagePanel(self)
             image_panel.set_image(img)
             self._sizer.Add(image_panel)

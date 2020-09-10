@@ -14,8 +14,7 @@ class ImagePanel(wx.Panel):
         """
         Constructor for the image panel.
         """
-        # TODO respond to left and right clicks
-        # TODO allow move up, down, edit, delete on right click
+        # TODO respond to left click
         super().__init__(*args, **kw)
         self._image = None
 
@@ -31,8 +30,8 @@ class ImagePanel(wx.Panel):
 
         # Create popup context menu
         self._menu = wx.Menu()
-        self._menu_item_up = wx.MenuItem(self._menu, -1, Strings.label_menu_up)
-        self._menu_item_down = wx.MenuItem(self._menu, -1, Strings.label_menu_down)
+        self._menu_item_up = wx.MenuItem(self._menu, wx.ID_UP, Strings.label_menu_up)
+        self._menu_item_down = wx.MenuItem(self._menu, wx.ID_DOWN, Strings.label_menu_down)
         self._menu_item_edit = wx.MenuItem(self._menu, -1, Strings.label_menu_edit_image)
         self._menu_item_remove = wx.MenuItem(self._menu, -1, Strings.label_menu_remove)
         self._menu.Append(self._menu_item_up)
@@ -41,9 +40,19 @@ class ImagePanel(wx.Panel):
         self._menu.Append(self._menu_item_remove)
 
         self.Bind(wx.EVT_CONTEXT_MENU, self.on_show_popup)
-
+        self.Bind(wx.EVT_MENU, self.on_move_image)
         self.SetSizer(self._sizer)
         self.Layout()
+
+    def on_move_image(self, event: wx.CommandEvent):
+        """
+        When the image is moved, we add the AsideImage instance into the event so that the containing panel knows
+        which image is being moved.
+        :param event: The CommandEvent from the button.
+        :return: None
+        """
+        event.SetClientData(self._image)
+        event.Skip()
 
     def on_show_popup(self, event):
         """

@@ -8,6 +8,7 @@ parse and check main text
 add methods for reruning seo check on field edits
 use right click in side images to edit and move up/down
 
+Check aside images are in correct order
 Check number of articles in status bar after adding a new one
 Add system icon
 Use red color in status bar.

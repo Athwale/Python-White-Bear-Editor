@@ -55,7 +55,6 @@ class WhitebearDocumentArticle(WhitebearDocument):
 
         # TODO parse and validate main text
         self._main_text = None
-        # TODO Implement some sort of aside image panel container with right click ability.
 
     def parse_self(self) -> None:
         """
@@ -250,6 +249,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
         Parse aside images into a list of special container classes.
         :return: None
         """
+        index = 1
         self._aside_images.clear()
         aside = self._parsed_html.find(name='aside')
         figures = aside.find_all(name='figure')
@@ -271,6 +271,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
 
                 self._aside_images.append(
                     AsideImage(figcaption, title, alt, full_original_image_path, full_thumbnail_path))
+                index = index + 1
 
     def validate_self(self) -> (bool, List[str]):
         """
