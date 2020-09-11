@@ -96,7 +96,8 @@ class WhitebearDocument:
         self._page_name_error_message: str = ''
         self._keywords_error_message: str = ''
         self._description_error_message: str = ''
-        self._status_color = wx.WHITE
+        if not self._status_color:
+            self._status_color = wx.WHITE
 
         keywords_length = 0
         for word in self._meta_keywords:
@@ -229,6 +230,8 @@ class WhitebearDocument:
         :return: None
         """
         self._modified = modified
+        if modified and not self._status_color == Numbers.RED_COLOR:
+            self.set_status_color(Numbers.BLUE_COLOR)
 
     def set_filename(self, name: str) -> None:
         """

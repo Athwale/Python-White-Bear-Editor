@@ -598,9 +598,5 @@ class MainFrame(wx.Frame):
         self.main_image.SetBitmap(wx.Bitmap(doc.get_article_image()))
         self.menu_logo_image.SetBitmap(wx.Bitmap(doc.get_menu_item().get_menu_image()))
         # Set aside images
-        self.side_photo_panel.clear_images()
-        for img in doc.get_aside_images():
-            self.side_photo_panel.add_image(img)
-
-        self.side_photo_panel.show_images()
+        self.side_photo_panel.load_document_images(doc)
         self._disable_editor(False)

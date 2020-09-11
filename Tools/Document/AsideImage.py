@@ -10,8 +10,7 @@ class AsideImage:
     Carrier class for a parsed aside image.
     """
 
-    def __init__(self, caption: str, title: str, image_alt: str,
-                 original_image_path: str, thumbnail_path: str):
+    def __init__(self, caption: str, title: str, image_alt: str, original_image_path: str, thumbnail_path: str):
         """
         Constructor for an aside image.
         :param caption: Figcaption of the aside image.
@@ -29,6 +28,7 @@ class AsideImage:
         self._original_image_path = original_image_path
         self._thumbnail_path = thumbnail_path
         self._image = None
+        self._status_color = None
 
     def seo_test_self(self) -> bool:
         """
@@ -40,6 +40,7 @@ class AsideImage:
         self._caption_error_message: str = ''
         self._link_title_error_message: str = ''
         self._image_alt_error_message: str = ''
+        self._status_color = wx.NullColour
 
         result = True
         # Check caption length must be at least 3 and must not be default
@@ -74,21 +75,24 @@ class AsideImage:
 
         # Check thumbnail image disk path
         if not self._thumbnail_path:
-            self._image = wx.Image(Fetch.get_resource_path('aside_image_thumbnail_missing.png'), wx.BITMAP_TYPE_PNG)
+            # The image has the same dimensions as the main image
+            self._image = wx.Image(Fetch.get_resource_path('main_image_thumbnail_missing.png'), wx.BITMAP_TYPE_PNG)
             result = False
         else:
             image = wx.Image(Fetch.get_resource_path(self._thumbnail_path), wx.BITMAP_TYPE_ANY)
             if image.GetSize() == (Numbers.main_image_width, Numbers.main_image_height):
                 self._image = image
             else:
-                self._image = wx.Image(Fetch.get_resource_path('aside_image_thumbnail_wrong.png'), wx.BITMAP_TYPE_PNG)
+                self._image = wx.Image(Fetch.get_resource_path('main_image_thumbnail_wrong.png'), wx.BITMAP_TYPE_PNG)
                 result = False
 
             # Check full image disk path, size can be whatever the user likes
             if not self._original_image_path:
-                self._image = wx.Image(Fetch.get_resource_path('aside_image_missing.png'), wx.BITMAP_TYPE_PNG)
+                self._image = wx.Image(Fetch.get_resource_path('main_image_missing.png'), wx.BITMAP_TYPE_PNG)
                 result = False
 
+        if not result:
+            self._status_color = wx.RED
         return result
 
     def get_image_caption(self) -> (str, str):
@@ -132,6 +136,13 @@ class AsideImage:
         :return: Return the image as wx image instance.
         """
         return self._image
+
+    def get_status_color(self) -> wx.Colour:
+        """
+        Return the status color of this image. White if ok, Red if SEO check failed.
+        :return: Return the status color of this image. White if ok, Red if SEO check failed.
+        """
+        return self._status_color
 
     def __str__(self) -> str:
         return "Aside image: {}, original: {}, thumbnail: {}, title: {}, alt: {}".format(self._caption,

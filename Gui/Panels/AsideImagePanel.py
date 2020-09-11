@@ -5,6 +5,7 @@ import wx.lib.scrolledpanel
 
 from Gui.Panels.ImagePanel import ImagePanel
 from Tools.Document.AsideImage import AsideImage
+from Tools.Document.WhitebearDocumentArticle import WhitebearDocumentArticle
 
 
 class AsideImagePanel(wx.lib.scrolledpanel.ScrolledPanel):
@@ -17,12 +18,13 @@ class AsideImagePanel(wx.lib.scrolledpanel.ScrolledPanel):
         Constructor for the AsideImagePanel which has special functionality
         """
         wx.lib.scrolledpanel.ScrolledPanel.__init__(self, parent, -1)
+        self._document = None
         self._images: List[AsideImage] = []
         self._sizer = wx.BoxSizer(wx.VERTICAL)
         self.SetSizer(self._sizer)
-        self.Bind(wx.EVT_MENU, self.on_move_image)
+        self.Bind(wx.EVT_MENU, self.on_image_modify)
 
-    def on_move_image(self, event: wx.CommandEvent):
+    def on_image_modify(self, event: wx.CommandEvent):
         """
         Move image up one position.
         :param event: Used to distinguish between up/down buttons. And contains reference to the image that is being
@@ -35,28 +37,31 @@ class AsideImagePanel(wx.lib.scrolledpanel.ScrolledPanel):
             if img_index == 0:
                 return
             self._images[img_index], self._images[img_index - 1] = self._images[img_index - 1], self._images[img_index]
-        else:
-            # It can only be move down
+            self._document.set_modified(True)
+        elif event.GetId() == wx.ID_DOWN:
             if img_index + 1 == len(self._images):
                 return
             self._images[img_index], self._images[img_index + 1] = self._images[img_index + 1], self._images[img_index]
-        self.show_images()
+            self._document.set_modified(True)
+        elif event.GetId() == wx.ID_DELETE:
+            del self._images[img_index]
+            self._document.set_modified(True)
+        else:
+            # This can only be edit
+            # TODO this, throw an event signaling that the document is modified to color it blue in the main thread.
+            print('edit')
+        self._show_images()
 
-    def add_image(self, image: AsideImage) -> None:
+    def load_document_images(self, doc: WhitebearDocumentArticle) -> None:
         """
-        Add another image into this container panel.
-        :param image: The wx.Image to add.
+        Load images from an article into the panel.
+        :param doc: The document to show images from.
         :return: None
         """
-        self._images.append(image)
-
-    def clear_images(self) -> None:
-        """
-        Clear the list of images. This has to be done when switching to a different article.
-        :return: None
-        """
+        self._document = doc
         self._clear_panel()
-        self._images.clear()
+        self._images = self._document.get_aside_images()
+        self._show_images()
 
     def _clear_panel(self) -> None:
         """
@@ -66,7 +71,7 @@ class AsideImagePanel(wx.lib.scrolledpanel.ScrolledPanel):
         for child in self.GetChildren():
             child.Destroy()
 
-    def show_images(self) -> None:
+    def _show_images(self) -> None:
         """
         Show the list of images on the panel.
         :return: None
@@ -84,5 +89,3 @@ class AsideImagePanel(wx.lib.scrolledpanel.ScrolledPanel):
         self.SetupScrolling(scroll_x=False, scrollIntoView=True)
         self.Layout()
         self.Show()
-
-
