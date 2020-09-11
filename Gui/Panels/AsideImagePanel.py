@@ -3,6 +3,7 @@ from typing import List
 import wx
 import wx.lib.scrolledpanel
 
+from Constants.Constants import Strings
 from Gui.Panels.ImagePanel import ImagePanel
 from Tools.Document.AsideImage import AsideImage
 from Tools.Document.WhitebearDocumentArticle import WhitebearDocumentArticle
@@ -16,6 +17,7 @@ class AsideImagePanel(wx.lib.scrolledpanel.ScrolledPanel):
     def __init__(self, parent):
         """
         Constructor for the AsideImagePanel which has special functionality
+        :param parent: The main window of the editor.
         """
         wx.lib.scrolledpanel.ScrolledPanel.__init__(self, parent, -1)
         self._document = None
@@ -44,13 +46,17 @@ class AsideImagePanel(wx.lib.scrolledpanel.ScrolledPanel):
             self._images[img_index], self._images[img_index + 1] = self._images[img_index + 1], self._images[img_index]
             self._document.set_modified(True)
         elif event.GetId() == wx.ID_DELETE:
-            del self._images[img_index]
+            result = wx.MessageBox(Strings.text_remove_image, Strings.status_warning, wx.YES_NO | wx.ICON_WARNING)
+            if result == wx.YES:
+                del self._images[img_index]
             self._document.set_modified(True)
         else:
             # This can only be edit
-            # TODO this, throw an event signaling that the document is modified to color it blue in the main thread.
-            print('edit')
+            pass
         self._show_images()
+        # Pass the event into the main frame to change document color in the file list to blue.
+        if self._document.is_modified():
+            event.Skip()
 
     def load_document_images(self, doc: WhitebearDocumentArticle) -> None:
         """

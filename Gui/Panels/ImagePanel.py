@@ -23,7 +23,7 @@ class ImagePanel(wx.Panel):
         placeholder_image: wx.Image = wx.Image(Numbers.main_image_width, Numbers.main_image_height)
         placeholder_image.Replace(0, 0, 0, 245, 255, 255)
         self._bitmap = wx.StaticBitmap(self, -1, wx.Bitmap(placeholder_image))
-        self._label = wx.StaticText(self, -1, Strings.lable_image)
+        self._label = wx.StaticText(self, -1, Strings.label_image)
         self._sizer.Add(self._bitmap)
         self._sizer.Add(self._label)
         self._sizer.Add((Numbers.widget_border_size, Numbers.widget_border_size))

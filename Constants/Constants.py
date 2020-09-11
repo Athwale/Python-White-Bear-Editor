@@ -60,6 +60,7 @@ class Strings:
                                '<i>https://github.com/Athwale/Python-White-Bear-Editor</i><br>' \
                                'version: <b>' + editor_version + '</b></p>'
     text_reload_from_disk: str = 'Reload file from disk?\nThis will discard all unsaved changes.'
+    text_remove_image: str = 'Remove image from side panel?'
 
     exception_access: str = 'Main directory not readable'
     exception_access_html: str = 'File can not be accessed'
@@ -129,7 +130,7 @@ class Strings:
     label_article_description: str = 'Meta description'
     label_article_info: str = 'Article data'
     label_article_photo_column: str = 'Photos'
-    lable_image: str = 'Image'
+    label_image: str = 'Image'
 
     status_loading: str = 'Loading'
     status_ready: str = 'Ready'

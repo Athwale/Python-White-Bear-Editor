@@ -38,6 +38,7 @@ class MainFrame(wx.Frame):
         self.tool_ids = []
         self.disableable_menu_items = []
         self.document_dictionary = {}
+        self.current_document = None
 
         self._init_status_bar()
         self._init_top_tool_bar()
@@ -336,6 +337,11 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_QUERY_END_SESSION, self.close_button_handler)
 
         # Bind menu item clicks
+        # We did not assign a source for this event so this catches all menu events that do not have a source
+        # This is used to catch Skipped event from aside panel. It has to be first otherwise it overwrites the
+        # specific binds.
+        self.Bind(wx.EVT_MENU, self.file_color_change_handler)
+
         self.Bind(wx.EVT_MENU, self.about_button_handler, self.help_menu_item_about)
         self.Bind(wx.EVT_MENU, self.open_button_handler, self.file_menu_item_open)
         self.Bind(wx.EVT_MENU, self.quit_button_handler, self.file_menu_item_quit)
@@ -509,14 +515,14 @@ class MainFrame(wx.Frame):
         :return: None
         """
         self._disable_editor(True)
-        selected_name = event.GetText()
-        selected_document = self.document_dictionary[selected_name]
+        self.current_document = event.GetText()
+        selected_document = self.document_dictionary[self.current_document]
         try:
             result = selected_document.validate_self()
             if not result[0]:
-                self._set_status_text(Strings.status_invalid + ' ' + selected_name)
+                self._set_status_text(Strings.status_invalid + ' ' + self.current_document)
                 # Prepare error string from all validation errors
-                error_string = Strings.exception_html_syntax_error + ': ' + selected_name + '\n'
+                error_string = Strings.exception_html_syntax_error + ': ' + self.current_document + '\n'
                 for message in result[1]:
                     error_string = error_string + message + '\n'
                 self._show_error_dialog(error_string)
@@ -600,3 +606,15 @@ class MainFrame(wx.Frame):
         # Set aside images
         self.side_photo_panel.load_document_images(doc)
         self._disable_editor(False)
+
+    def file_color_change_handler(self, event) -> None:
+        """
+        Change the filelist document color based on the status of the document.
+        :param event: Used to tell whether the event comes from side panel.
+        :return: None
+        """
+        event_id = event.GetId()
+        if event_id == wx.ID_EDIT or event_id == wx.ID_UP or event_id == wx.ID_DOWN or event_id == wx.ID_DELETE:
+            selected_document_color = self.document_dictionary[self.current_document].get_status_color()
+            selected_item = self.page_list.GetFirstSelected()
+            self.page_list.SetItemBackgroundColour(selected_item, selected_document_color)
