@@ -337,7 +337,7 @@ class MainFrame(wx.Frame):
         # We did not assign a source for this event so this catches all menu events that do not have a source
         # This is used to catch Skipped event from aside panel. It has to be first otherwise it overwrites the
         # specific binds.
-        self.Bind(wx.EVT_MENU, self.file_color_change_handler)
+        self.Bind(wx.EVT_MENU, self.aside_panel_edit_handler)
 
         self.Bind(wx.EVT_MENU, self.about_button_handler, self.help_menu_item_about)
         self.Bind(wx.EVT_MENU, self.open_button_handler, self.file_menu_item_open)
@@ -558,8 +558,7 @@ class MainFrame(wx.Frame):
         """
         self._disable_editor(True)
 
-        selected_item = self.page_list.GetFirstSelected()
-        self.page_list.SetItemBackgroundColour(selected_item, doc.get_status_color())
+        self.update_file_color()
         if doc.get_status_color() == Numbers.RED_COLOR:
             self._set_status_text(
                 Strings.status_invalid + ' ' + doc.get_filename() + ' - ' + doc.get_menu_section().get_page_name()[0])
@@ -604,16 +603,22 @@ class MainFrame(wx.Frame):
         self.side_photo_panel.load_document_images(doc)
         self._disable_editor(False)
 
-    def file_color_change_handler(self, event) -> None:
+    def update_file_color(self) -> None:
         """
-        Change the filelist document color based on the status of the document.
+        Change the color of the currently selected file in the filelist according to the document's state.
+        :return: None
+        """
+        selected_document_color = self.document_dictionary[self.current_document].get_status_color()
+        selected_item = self.page_list.GetFirstSelected()
+        self.page_list.SetItemBackgroundColour(selected_item, selected_document_color)
+
+    def aside_panel_edit_handler(self, event) -> None:
+        """
+        Catch events coming form aside panel which are invoked when the images are changed or moved or deleted.
+        This must trigger and update of the color of the file in the file list.
         :param event: Used to tell whether the event comes from side panel.
         :return: None
         """
-        # TODO move change color in separate method and make this a panel specific handler
-        # TODO get rid of this and check the modified state on each interaction with the window.
         event_id = event.GetId()
         if event_id == wx.ID_EDIT or event_id == wx.ID_UP or event_id == wx.ID_DOWN or event_id == wx.ID_DELETE:
-            selected_document_color = self.document_dictionary[self.current_document].get_status_color()
-            selected_item = self.page_list.GetFirstSelected()
-            self.page_list.SetItemBackgroundColour(selected_item, selected_document_color)
+            self.update_file_color()

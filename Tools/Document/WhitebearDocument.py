@@ -48,6 +48,8 @@ class WhitebearDocument:
         :return: None
         :raises WrongFormatException: if there is a problem with parsing the document.
         """
+        # Reset color when we reparse from disk.
+        self._status_color = None
         self._get_parsed_html()
         self._parse_meta_description()
         self._parse_meta_keywords()
