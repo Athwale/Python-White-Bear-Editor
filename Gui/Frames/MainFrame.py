@@ -613,6 +613,7 @@ class MainFrame(wx.Frame):
         :param event: Used to tell whether the event comes from side panel.
         :return: None
         """
+        # TODO move change color in separate method and make this a panel specific handler
         event_id = event.GetId()
         if event_id == wx.ID_EDIT or event_id == wx.ID_UP or event_id == wx.ID_DOWN or event_id == wx.ID_DELETE:
             selected_document_color = self.document_dictionary[self.current_document].get_status_color()
