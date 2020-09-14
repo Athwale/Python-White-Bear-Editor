@@ -14,7 +14,7 @@ class FileListThread(threading.Thread):
     the main thread and send it results.
     """
 
-    def __init__(self, parent, event_type: int, path: str):
+    def __init__(self, parent, path: str):
         """
         Filelist thread constructor. This thread parses a supposed WhiteBear web directory and passes a list of
         websites back into the GUI.
@@ -23,7 +23,6 @@ class FileListThread(threading.Thread):
         """
         threading.Thread.__init__(self)
         self._parent = parent
-        self._event_type = event_type
         self._path = path
         self._directory_loader = DirectoryLoader()
 

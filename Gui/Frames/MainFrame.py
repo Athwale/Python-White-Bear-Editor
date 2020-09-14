@@ -21,9 +21,6 @@ class MainFrame(wx.Frame):
     Main GUI controlling class. The Frame is actually the on screen window.
     """
 
-    # Create a new unique id for our custom event.
-    EVT_CARRIER_TYPE_ID: int = wx.NewEventType()
-
     def __init__(self):
         """
         Constructor for the GUI of the editor. This is the main frame so we pass None as the parent.
@@ -393,7 +390,7 @@ class MainFrame(wx.Frame):
         self.Disable()
         self._set_status_text(Strings.status_loading, 3)
         self._set_status_text(('Work dir: ' + str(path)), 1)
-        file_list_thread = FileListThread(self, self.EVT_CARRIER_TYPE_ID, str(path))
+        file_list_thread = FileListThread(self, str(path))
         file_list_thread.start()
 
     def _show_error_dialog(self, error: str) -> None:
@@ -614,6 +611,7 @@ class MainFrame(wx.Frame):
         :return: None
         """
         # TODO move change color in separate method and make this a panel specific handler
+        # TODO get rid of this and check the modified state on each interaction with the window.
         event_id = event.GetId()
         if event_id == wx.ID_EDIT or event_id == wx.ID_UP or event_id == wx.ID_DOWN or event_id == wx.ID_DELETE:
             selected_document_color = self.document_dictionary[self.current_document].get_status_color()
