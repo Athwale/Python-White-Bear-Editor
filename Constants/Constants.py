@@ -115,6 +115,7 @@ class Strings:
 
     label_dialog_choose_wb_dir: str = 'Choose whitebear directory'
     label_dialog_about: str = 'About'
+    label_dialog_edit_image: str = 'Edit image'
 
     label_article_menu_logo: str = 'Menu logo'
     label_article_menu_logo_name_placeholder: str = 'Menu item name'
@@ -144,3 +145,5 @@ class Strings:
     toolbar_new_file: str = 'New file'
 
     button_close: str = 'Close'
+    button_cancel: str = 'Cancel'
+    button_ok: str = 'Ok'

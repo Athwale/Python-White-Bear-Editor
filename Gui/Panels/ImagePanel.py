@@ -14,7 +14,7 @@ class ImagePanel(wx.Panel):
         """
         Constructor for the image panel.
         """
-        # TODO respond to left click
+        # TODO respond to left click and open edit dialog.
         super().__init__(*args, **kw)
         self._image = None
 
@@ -68,7 +68,6 @@ class ImagePanel(wx.Panel):
         :param image: The image to set.
         :return: None
         """
-        # TODO implement background color change if image has errors
         self._image = image
         self._label.SetLabelText(self._image.get_image_caption()[0])
         self._bitmap.SetBitmap(wx.Bitmap(self._image.get_image()))

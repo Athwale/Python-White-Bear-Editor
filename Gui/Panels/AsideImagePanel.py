@@ -4,6 +4,7 @@ import wx
 import wx.lib.scrolledpanel
 
 from Constants.Constants import Strings
+from Gui.Dialogs.EditImageDialog import EditImageDialog
 from Gui.Panels.ImagePanel import ImagePanel
 from Tools.Document.AsideImage import AsideImage
 from Tools.Document.WhitebearDocumentArticle import WhitebearDocumentArticle
@@ -51,8 +52,13 @@ class AsideImagePanel(wx.lib.scrolledpanel.ScrolledPanel):
                 del self._images[img_index]
             self._document.set_modified(True)
         else:
-            # This can only be edit
-            pass
+            edit_dialog = EditImageDialog(self, self._images[img_index])
+            result = edit_dialog.ShowModal()
+            if result == wx.ID_OK:
+                print('Ok')
+            else:
+                print('Cancel')
+            edit_dialog.Destroy()
         self._show_images()
         # Pass the event into the main frame to change document color in the file list to blue.
         if self._document.is_modified():
