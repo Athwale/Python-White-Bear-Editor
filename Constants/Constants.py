@@ -132,6 +132,11 @@ class Strings:
     label_article_info: str = 'Article data'
     label_article_photo_column: str = 'Photos'
     label_image: str = 'Image'
+    label_image_path: str = 'Full image'
+    label_image_thumbnail_path: str = 'Thumbnail'
+    label_caption: str = 'Caption'
+    label_link_title: str = 'Link title'
+    label_alt_description: str = 'Alt description'
 
     status_loading: str = 'Loading'
     status_ready: str = 'Ready'
