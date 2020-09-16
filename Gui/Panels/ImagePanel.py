@@ -14,7 +14,6 @@ class ImagePanel(wx.Panel):
         """
         Constructor for the image panel.
         """
-        # TODO respond to left click and open edit dialog.
         super().__init__(*args, **kw)
         self._image = None
 
@@ -44,7 +43,7 @@ class ImagePanel(wx.Panel):
         self.SetSizer(self._sizer)
         self.Layout()
 
-    def on_menu_click(self, event: wx.CommandEvent):
+    def on_menu_click(self, event: wx.CommandEvent) -> None:
         """
         When the image is moved, we add the AsideImage instance into the event so that the containing panel knows
         which image is being moved.
@@ -54,7 +53,7 @@ class ImagePanel(wx.Panel):
         event.SetClientData(self._image)
         event.Skip()
 
-    def on_show_popup(self, event):
+    def on_show_popup(self, event) -> None:
         """
         Display the context pop up menu.
         :param event: Used to get menu coordinates.

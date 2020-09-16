@@ -55,9 +55,8 @@ class AsideImagePanel(wx.lib.scrolledpanel.ScrolledPanel):
             edit_dialog = EditImageDialog(self, self._images[img_index])
             result = edit_dialog.ShowModal()
             if result == wx.ID_OK:
+                # TODO set document modified if an edit has been made in the dialog
                 print('Ok')
-            else:
-                print('Cancel')
             edit_dialog.Destroy()
         self._show_images()
         # Pass the event into the main frame to change document color in the file list to blue.
