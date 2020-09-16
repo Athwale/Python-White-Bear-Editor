@@ -17,6 +17,8 @@ class Numbers:
     text_field_font_size: int = 9
     widget_border_size: int = 5
     photo_column_width: int = 300
+    edit_image_dialog_width: int = 900
+    edit_image_dialog_height: int = 300
 
     # SEO values
     year_min: int = 2000
@@ -137,6 +139,8 @@ class Strings:
     label_caption: str = 'Caption'
     label_link_title: str = 'Link title'
     label_alt_description: str = 'Alt description'
+    label_none: str = 'None'
+    label_open_in_new_page: str = 'Open in new page'
 
     status_loading: str = 'Loading'
     status_ready: str = 'Ready'

@@ -12,19 +12,35 @@ class EditImageDialog(wx.Dialog):
         :param parent: Parent frame.
         :param image: AsideImage instance being edited by tis dialog.
         """
-        wx.Dialog.__init__(self, parent, title=Strings.label_dialog_edit_image, size=(600, 400),
+        wx.Dialog.__init__(self, parent, title=Strings.label_dialog_edit_image,
+                           size=(Numbers.edit_image_dialog_width, Numbers.edit_image_dialog_height),
                            style=wx.DEFAULT_DIALOG_STYLE)
         self.image = image
 
         self.main_vertical_sizer = wx.BoxSizer(wx.VERTICAL)
+        self.horizontal_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.vertical_sizer = wx.BoxSizer(wx.VERTICAL)
 
         self.information_sizer = wx.BoxSizer(wx.VERTICAL)
         # Disk locations
-        # TODO do the same sizer thing as below here
+        self.full_disk_location_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.label_image_full_path = wx.StaticText(self, -1, Strings.label_image_path + ': ')
+        self.content_image_full_path = wx.StaticText(self, -1, Strings.label_none)
+        self.full_disk_location_sub_sizer.Add(self.label_image_full_path, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
+        self.full_disk_location_sub_sizer.Add(self.content_image_full_path,
+                                              flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
+        self.information_sizer.Add(self.full_disk_location_sub_sizer, flag=wx.EXPAND | wx.TOP,
+                                   border=Numbers.widget_border_size)
+
+        self.thumb_disk_location_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.label_image_thumbnail_path = wx.StaticText(self, -1, Strings.label_image_thumbnail_path + ': ')
-        self.information_sizer.Add(self.label_image_full_path, flag=wx.TOP, border=Numbers.widget_border_size)
-        self.information_sizer.Add(self.label_image_thumbnail_path, flag=wx.TOP, border=Numbers.widget_border_size)
+        self.content_image_thumbnail_path = wx.StaticText(self, -1, Strings.label_none)
+        self.thumb_disk_location_sub_sizer.Add(self.label_image_thumbnail_path,
+                                               flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
+        self.thumb_disk_location_sub_sizer.Add(self.content_image_thumbnail_path,
+                                               flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
+        self.information_sizer.Add(self.thumb_disk_location_sub_sizer, flag=wx.EXPAND | wx.TOP,
+                                   border=Numbers.widget_border_size)
 
         # Image caption sub sizer
         self.caption_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -53,17 +69,34 @@ class EditImageDialog(wx.Dialog):
         self.alt_sub_sizer.Add(self.field_image_alt, proportion=1)
         self.information_sizer.Add(self.alt_sub_sizer, flag=wx.EXPAND | wx.TOP, border=Numbers.widget_border_size)
 
+        # Target blank checkbox
+        self.checkbox_target_blank = wx.CheckBox(self, -1, label=Strings.label_open_in_new_page)
+        self.information_sizer.Add(self.checkbox_target_blank, flag=wx.TOP, border=Numbers.widget_border_size)
+
+        # Image preview
+        self.image_sizer = wx.StaticBoxSizer(wx.VERTICAL, self, Strings.label_image)
+        placeholder_image: wx.Image = wx.Image(Numbers.main_image_width, Numbers.main_image_height)
+        placeholder_image.Replace(0, 0, 0, 245, 255, 255)
+        self._bitmap = wx.StaticBitmap(self, -1, wx.Bitmap(placeholder_image))
+        self.image_sizer.Add(self._bitmap, flag=wx.ALL, border=1)
+
         # Buttons
-        self.button_sizer = wx.StaticBoxSizer(wx.HORIZONTAL, self, 'buttons')
+        self.button_sizer = wx.BoxSizer(wx.VERTICAL)
+        gouping_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.cancel_button = wx.Button(self, wx.ID_CANCEL, Strings.button_cancel)
         self.ok_button = wx.Button(self, wx.ID_OK, Strings.button_ok)
         self.cancel_button.SetDefault()
-        self.button_sizer.Add(self.ok_button, flag=wx.ALIGN_LEFT)
-        self.button_sizer.Add(self.cancel_button, flag=wx.ALIGN_RIGHT)
+        gouping_sizer.Add(self.ok_button)
+        gouping_sizer.Add((Numbers.widget_border_size, Numbers.widget_border_size))
+        gouping_sizer.Add(self.cancel_button)
+        self.button_sizer.Add(gouping_sizer, flag=wx.ALIGN_CENTER_HORIZONTAL)
 
         # Putting the sizers together
-        self.main_vertical_sizer.Add(self.information_sizer, 0, flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP,
-                                     border=Numbers.widget_border_size)
-        self.main_vertical_sizer.Add(self.button_sizer, 0, flag=wx.EXPAND | wx.LEFT | wx.RIGHT,
+        self.vertical_sizer.Add(self.information_sizer, 0, flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP,
+                                border=Numbers.widget_border_size)
+        self.horizontal_sizer.Add(self.vertical_sizer, 1)
+        self.horizontal_sizer.Add(self.image_sizer, flag=wx.TOP, border=Numbers.widget_border_size)
+        self.main_vertical_sizer.Add(self.horizontal_sizer, 1, flag=wx.EXPAND)
+        self.main_vertical_sizer.Add(self.button_sizer, 0, flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM,
                                      border=Numbers.widget_border_size)
         self.SetSizer(self.main_vertical_sizer)
