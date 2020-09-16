@@ -270,7 +270,8 @@ class WhitebearDocumentArticle(WhitebearDocument):
                     full_thumbnail_path = None
 
                 self._aside_images.append(
-                    AsideImage(figcaption, title, alt, full_original_image_path, full_thumbnail_path))
+                    AsideImage(figcaption, title, alt, full_original_image_path, full_thumbnail_path, figure.a['href'],
+                               figure.img['src']))
                 index = index + 1
 
     def validate_self(self) -> (bool, List[str]):

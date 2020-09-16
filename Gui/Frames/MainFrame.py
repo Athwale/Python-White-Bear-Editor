@@ -3,7 +3,6 @@ from typing import Dict
 
 import wx
 import wx.richtext as rt
-from wx.lib.agw.supertooltip import SuperToolTip
 from wx.py import images
 
 from Constants.Constants import Numbers
@@ -14,6 +13,7 @@ from Gui.Panels.AsideImagePanel import AsideImagePanel
 from Threads.FileListThread import FileListThread
 from Tools.ConfigManager import ConfigManager
 from Tools.Document.WhitebearDocumentArticle import WhitebearDocumentArticle
+from Tools.Tools import Tools
 
 
 class MainFrame(wx.Frame):
@@ -194,22 +194,6 @@ class MainFrame(wx.Frame):
         self.right_panel.SetSizer(self.right_main_vertical_sizer)
         self.SetSizer(self.main_horizontal_sizer)
 
-    @staticmethod
-    def _get_warning_tip(field: wx.TextCtrl, title: str):
-        """
-        Create and return an instance of SuperToolTip targeted for a specific TextCtrl and set up to show SEO warnings.
-        :param field: The text field for the new tip.
-        :return: Set up SuperToolTip
-        """
-        tip = SuperToolTip(None, footer='   ')
-        tip.SetHeader(title)
-        tip.SetTarget(field)
-        tip.SetTopGradientColor(Numbers.YELLOW_COLOR)
-        tip.SetMiddleGradientColor(Numbers.YELLOW_COLOR)
-        tip.SetBottomGradientColor(Numbers.YELLOW_COLOR)
-        tip.SetTextColor(wx.BLACK)
-        return tip
-
     def _inflate_sizers(self) -> None:
         """
         Insert GUI elements (wx windows) into prepared sizers.
@@ -229,21 +213,21 @@ class MainFrame(wx.Frame):
                                                 size=wx.Size(98, 35),
                                                 style=wx.TE_MULTILINE | wx.TE_CENTRE | wx.TE_NO_VSCROLL)
         self.field_menu_item_name.SetFont(self.text_field_font)
-        self.field_menu_item_name_tip = self._get_warning_tip(self.field_menu_item_name,
+        self.field_menu_item_name_tip = Tools.get_warning_tip(self.field_menu_item_name,
                                                               Strings.label_article_menu_logo_name_placeholder)
 
         self.field_menu_item_alt = wx.TextCtrl(self.right_panel, -1,
                                                value=Strings.label_article_menu_logo_alt_placeholder,
                                                size=wx.Size(98, 45), style=wx.TE_MULTILINE)
         self.field_menu_item_alt.SetFont(self.text_field_font)
-        self.field_menu_item_alt_tip = self._get_warning_tip(self.field_menu_item_alt,
+        self.field_menu_item_alt_tip = Tools.get_warning_tip(self.field_menu_item_alt,
                                                              Strings.label_article_menu_logo_alt_placeholder)
 
         self.field_menu_item_link_title = wx.TextCtrl(self.right_panel, -1,
                                                       value=Strings.label_menu_logo_link_title_placeholder,
                                                       size=wx.Size(98, 49), style=wx.TE_MULTILINE)
         self.field_menu_item_link_title.SetFont(self.text_field_font)
-        self.field_menu_item_link_title_tip = self._get_warning_tip(self.field_menu_item_link_title,
+        self.field_menu_item_link_title_tip = Tools.get_warning_tip(self.field_menu_item_link_title,
                                                                     Strings.label_menu_logo_link_title_placeholder)
 
         self.menu_logo_static_sizer.Add(self.field_menu_item_name)
@@ -268,35 +252,35 @@ class MainFrame(wx.Frame):
         # Add text boxes
         self.field_main_image_alt = wx.TextCtrl(self.right_panel, -1, value=Strings.label_article_image_alt,
                                                 size=wx.Size(160, 30))
-        self.field_main_image_alt_tip = self._get_warning_tip(self.field_main_image_alt,
+        self.field_main_image_alt_tip = Tools.get_warning_tip(self.field_main_image_alt,
                                                               Strings.label_article_image_alt)
 
         self.field_main_image_title = wx.TextCtrl(self.right_panel, -1, value=Strings.label_article_image_link_title,
                                                   size=wx.Size(160, 30))
-        self.field_main_image_title_tip = self._get_warning_tip(self.field_main_image_title,
+        self.field_main_image_title_tip = Tools.get_warning_tip(self.field_main_image_title,
                                                                 Strings.label_article_image_link_title)
 
         self.field_main_image_caption = wx.TextCtrl(self.right_panel, -1, value=Strings.label_article_image_caption,
                                                     size=wx.Size(160, 30))
-        self.field_main_image_caption_tip = self._get_warning_tip(self.field_main_image_caption,
+        self.field_main_image_caption_tip = Tools.get_warning_tip(self.field_main_image_caption,
                                                                   Strings.label_article_image_caption)
 
         self.field_article_date = wx.TextCtrl(self.right_panel, -1, value=Strings.label_article_date,
                                               size=wx.Size(160, 30))
-        self.field_article_date_tip = self._get_warning_tip(self.field_article_date, Strings.label_article_date)
+        self.field_article_date_tip = Tools.get_warning_tip(self.field_article_date, Strings.label_article_date)
 
         self.field_article_name = wx.TextCtrl(self.right_panel, -1, value=Strings.label_article_title,
                                               size=wx.Size(250, 30))
-        self.field_article_name_tip = self._get_warning_tip(self.field_article_name, Strings.label_article_title)
+        self.field_article_name_tip = Tools.get_warning_tip(self.field_article_name, Strings.label_article_title)
 
         self.field_article_keywords = wx.TextCtrl(self.right_panel, -1, value=Strings.label_article_keywords,
                                                   size=wx.Size(250, 30))
-        self.field_article_keywords_tip = self._get_warning_tip(self.field_article_keywords,
+        self.field_article_keywords_tip = Tools.get_warning_tip(self.field_article_keywords,
                                                                 Strings.label_article_keywords)
 
         self.field_article_description = wx.TextCtrl(self.right_panel, -1, value=Strings.label_article_description,
                                                      size=wx.Size(250, 30))
-        self.field_article_description_tip = self._get_warning_tip(self.field_article_description,
+        self.field_article_description_tip = Tools.get_warning_tip(self.field_article_description,
                                                                    Strings.label_article_description)
 
         self.article_data_static_sizer.Add(self.field_article_date)

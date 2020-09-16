@@ -10,7 +10,8 @@ class AsideImage:
     Carrier class for a parsed aside image.
     """
 
-    def __init__(self, caption: str, title: str, image_alt: str, original_image_path: str, thumbnail_path: str):
+    def __init__(self, caption: str, title: str, image_alt: str, original_image_path: str, thumbnail_path: str,
+                 full_filename: str, thumbnail_filename: str):
         """
         Constructor for an aside image.
         :param caption: Figcaption of the aside image.
@@ -18,6 +19,8 @@ class AsideImage:
         :param image_alt: html alt description of the img element.
         :param original_image_path: full disk path to the original size image.
         :param thumbnail_path: full path to the thumbnail image.
+        :param full_filename: file name of the full image
+        :param thumbnail_filename: file name of the thumbnail image
         """
         self._caption = caption
         self._caption_error_message: str = ''
@@ -27,6 +30,8 @@ class AsideImage:
         self._image_alt_error_message: str = ''
         self._original_image_path = original_image_path
         self._thumbnail_path = thumbnail_path
+        self._full_filename = full_filename
+        self._thumbnail_filename = thumbnail_filename
         self._image = None
         self._status_color = None
 
@@ -128,7 +133,21 @@ class AsideImage:
         Return the thumbnail image full disk path.
         :return: Return the thumbnail image full disk path, None if inaccessible.
         """
-        return self._original_image_path
+        return self._thumbnail_path
+
+    def get_thumbnail_filename(self) -> str:
+        """
+        Return the thumbnail image file name.
+        :return: Return the thumbnail image filename.
+        """
+        return self._thumbnail_filename
+
+    def get_full_filename(self) -> str:
+        """
+        Return the full image file name.
+        :return: Return the full image filename.
+        """
+        return self._full_filename
 
     def get_image(self) -> wx.Image:
         """

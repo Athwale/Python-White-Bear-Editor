@@ -140,7 +140,7 @@ class Strings:
     label_link_title: str = 'Link title'
     label_alt_description: str = 'Alt description'
     label_none: str = 'None'
-    label_open_in_new_page: str = 'Open in new page'
+    label_open_in_new_page: str = 'Open image in new page'
 
     status_loading: str = 'Loading'
     status_ready: str = 'Ready'
