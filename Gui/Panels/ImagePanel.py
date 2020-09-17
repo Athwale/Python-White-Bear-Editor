@@ -7,7 +7,8 @@ from Tools.Document.AsideImage import AsideImage
 
 class ImagePanel(wx.Panel):
     """
-
+    This panel is designed to display an aside image of an article. Several of these are typically inserted into
+    AsideImagePanel instance.
     """
 
     def __init__(self, *args, **kw):
