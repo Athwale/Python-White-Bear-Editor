@@ -72,6 +72,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
         self._parse_article_image_alt()
         self._determine_menu_section_and_menu_item()
         self._parse_aside_images()
+        self._parse_main_text()
         self.seo_test_self()
 
     def seo_test_self(self) -> None:
@@ -185,6 +186,14 @@ class WhitebearDocumentArticle(WhitebearDocument):
                 break
         if not self._menu_item:
             raise WrongFormatException(Strings.exception_menu_item_missing + ' for: ' + self.get_filename())
+
+    def _parse_main_text(self) -> None:
+        """
+        Parse the main text of the article.
+        :return: None
+        """
+        text_section = self._parsed_html.find(name='section', attrs={'class': 'mainText'})
+        print(text_section)
 
     def _parse_page_name(self) -> None:
         """

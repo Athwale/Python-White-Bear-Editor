@@ -585,6 +585,10 @@ class MainFrame(wx.Frame):
         self.menu_logo_image.SetBitmap(wx.Bitmap(doc.get_menu_item().get_menu_image()))
         # Set aside images
         self.side_photo_panel.load_document_images(doc)
+
+        # Set main text
+        self.main_text_area.SetValue('ahoj')
+
         self._disable_editor(False)
 
     def update_file_color(self) -> None:
