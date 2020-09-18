@@ -1,6 +1,7 @@
-import images
 import wx
 import wx.richtext as rt
+from Tools.RichTextTest.Images import Images
+from Resources.Fetch import Fetch
 
 
 class RichTextFrame(wx.Frame):
@@ -13,7 +14,6 @@ class RichTextFrame(wx.Frame):
         self.make_tool_bar()
 
         self.rtc = rt.RichTextCtrl(self, style=wx.VSCROLL | wx.HSCROLL | wx.NO_BORDER)
-        self.rtc.WriteImage(images.rt_smiley.GetImage())
         self.add_rtc_handlers()
 
     @staticmethod
@@ -90,30 +90,35 @@ class RichTextFrame(wx.Frame):
                 self.Bind(wx.EVT_UPDATE_UI, update_ui, item)
 
         tbar = self.CreateToolBar()
-        do_bind(tbar.AddTool(-1, '', images.rt_open.GetBitmap(),
+        do_bind(tbar.AddTool(-1, '', Images.rt_open.GetBitmap(),
                              shortHelp="Open"), self.on_file_open)
-        do_bind(tbar.AddTool(-1, '', images.rt_save.GetBitmap(),
+        do_bind(tbar.AddTool(-1, '', Images.rt_save.GetBitmap(),
                              shortHelp="Save"), self.on_file_save)
         tbar.AddSeparator()
-        do_bind(tbar.AddTool(wx.ID_CUT, '', images.rt_cut.GetBitmap(),
+        do_bind(tbar.AddTool(wx.ID_CUT, '', Images.rt_cut.GetBitmap(),
                              shortHelp="Cut"), self.forward_event, self.forward_event)
-        do_bind(tbar.AddTool(wx.ID_COPY, '', images.rt_copy.GetBitmap(),
+        do_bind(tbar.AddTool(wx.ID_COPY, '', Images.rt_copy.GetBitmap(),
                              shortHelp="Copy"), self.forward_event, self.forward_event)
-        do_bind(tbar.AddTool(wx.ID_PASTE, '', images.rt_paste.GetBitmap(),
+        do_bind(tbar.AddTool(wx.ID_PASTE, '', Images.rt_paste.GetBitmap(),
                              shortHelp="Paste"), self.forward_event, self.forward_event)
         tbar.AddSeparator()
-        do_bind(tbar.AddTool(wx.ID_UNDO, '', images.rt_undo.GetBitmap(),
+        do_bind(tbar.AddTool(wx.ID_UNDO, '', Images.rt_undo.GetBitmap(),
                              shortHelp="Undo"), self.forward_event, self.forward_event)
-        do_bind(tbar.AddTool(wx.ID_REDO, '', images.rt_redo.GetBitmap(),
+        do_bind(tbar.AddTool(wx.ID_REDO, '', Images.rt_redo.GetBitmap(),
                              shortHelp="Redo"), self.forward_event, self.forward_event)
         tbar.AddSeparator()
-        do_bind(tbar.AddCheckTool(-1, '', images.rt_bold.GetBitmap(),
+        do_bind(tbar.AddCheckTool(-1, '', Images.rt_bold.GetBitmap(),
                                   shortHelp="Bold"), self.on_bold, self.on_update_bold)
         tbar.AddSeparator()
-        do_bind(tbar.AddTool(-1, '', images.rt_colour.GetBitmap(),
+        do_bind(tbar.AddTool(-1, '', Images.rt_colour.GetBitmap(),
                              shortHelp="Font Colour"), self.on_colour)
+        do_bind(tbar.AddTool(-1, '', Images.rt_sample.GetBitmap(),
+                             shortHelp="Insert Image"), self.on_insert_image)
 
         tbar.Realize()
+
+    def on_insert_image(self, evt):
+        self.rtc.WriteImage(wx.Image('/home/omejzlik/PycharmProjects/Python-White-Bear-Editor/Resources/main_image_missing.png', wx.BITMAP_TYPE_PNG))
 
     def on_file_save_as(self, evt):
         wildcard, types = rt.RichTextBuffer.GetExtWildcard(save=True)
