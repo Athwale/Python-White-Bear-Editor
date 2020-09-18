@@ -24,7 +24,7 @@ class RichTextFrame(wx.Frame):
 
         # This would normally go in your app's OnInit method.  I'm
         # not sure why these file handlers are not loaded by
-        # default by the C++ richtext code, I guess it's so you
+        # default by the C++ rich text code, I guess it's so you
         # can change the name or extension if you wanted like this
         rt.RichTextBuffer.AddHandler(rt.RichTextXMLHandler(name="XML", ext="xml", type=99))
         rt.RichTextBuffer.AddHandler(rt.RichTextHTMLHandler(name="HTML", ext="html", type=98))
@@ -109,25 +109,7 @@ class RichTextFrame(wx.Frame):
         tbar.AddSeparator()
         do_bind(tbar.AddCheckTool(-1, '', images.rt_bold.GetBitmap(),
                                   shortHelp="Bold"), self.on_bold, self.on_update_bold)
-        do_bind(tbar.AddCheckTool(-1, '', images.rt_italic.GetBitmap(),
-                                  shortHelp="Italic"), self.on_italic, self.on_update_italic)
-        do_bind(tbar.AddCheckTool(-1, '', images.rt_underline.GetBitmap(),
-                                  shortHelp="Underline"), self.on_underline, self.on_update_underline)
         tbar.AddSeparator()
-        do_bind(tbar.AddCheckTool(-1, '', images.rt_alignleft.GetBitmap(),
-                                  shortHelp="Align Left"), self.on_align_left, self.on_update_align_left)
-        do_bind(tbar.AddCheckTool(-1, '', images.rt_centre.GetBitmap(),
-                                  shortHelp="Center"), self.on_align_center, self.on_update_align_center)
-        do_bind(tbar.AddCheckTool(-1, '', images.rt_alignright.GetBitmap(),
-                                  shortHelp="Align Right"), self.on_align_right, self.on_update_align_right)
-        tbar.AddSeparator()
-        do_bind(tbar.AddTool(-1, '', images.rt_indentless.GetBitmap(),
-                             shortHelp="Indent Less"), self.on_indent_less)
-        do_bind(tbar.AddTool(-1, '', images.rt_indentmore.GetBitmap(),
-                             shortHelp="Indent More"), self.on_indent_more)
-        tbar.AddSeparator()
-        do_bind(tbar.AddTool(-1, '', images.rt_font.GetBitmap(),
-                             shortHelp="Font"), self.on_font)
         do_bind(tbar.AddTool(-1, '', images.rt_colour.GetBitmap(),
                              shortHelp="Font Colour"), self.on_colour)
 
@@ -155,137 +137,6 @@ class RichTextFrame(wx.Frame):
     def on_bold(self, evt):
         self.rtc.ApplyBoldToSelection()
 
-    def on_italic(self, evt):
-        self.rtc.ApplyItalicToSelection()
-
-    def on_underline(self, evt):
-        self.rtc.ApplyUnderlineToSelection()
-
-    def on_align_left(self, evt):
-        self.rtc.ApplyAlignmentToSelection(wx.TEXT_ALIGNMENT_LEFT)
-
-    def on_align_right(self, evt):
-        self.rtc.ApplyAlignmentToSelection(wx.TEXT_ALIGNMENT_RIGHT)
-
-    def on_align_center(self, evt):
-        self.rtc.ApplyAlignmentToSelection(wx.TEXT_ALIGNMENT_CENTRE)
-
-    def on_indent_more(self, evt):
-        attr = wx.TextAttr()
-        attr.SetFlags(wx.TEXT_ATTR_LEFT_INDENT)
-        ip = self.rtc.GetInsertionPoint()
-        if self.rtc.GetStyle(ip, attr):
-            r = rt.RichTextRange(ip, ip)
-            if self.rtc.HasSelection():
-                r = self.rtc.GetSelectionRange()
-
-            attr.SetLeftIndent(attr.GetLeftIndent() + 100)
-            attr.SetFlags(wx.TEXT_ATTR_LEFT_INDENT)
-            self.rtc.SetStyle(r, attr)
-
-    def on_indent_less(self, evt):
-        r = None
-        attr = wx.TextAttr()
-        attr.SetFlags(wx.TEXT_ATTR_LEFT_INDENT)
-        ip = self.rtc.GetInsertionPoint()
-        if self.rtc.GetStyle(ip, attr):
-            r = rt.RichTextRange(ip, ip)
-            if self.rtc.HasSelection():
-                r = self.rtc.GetSelectionRange()
-
-        if attr.GetLeftIndent() >= 100:
-            attr.SetLeftIndent(attr.GetLeftIndent() - 100)
-            attr.SetFlags(wx.TEXT_ATTR_LEFT_INDENT)
-            self.rtc.SetStyle(r, attr)
-
-    def on_paragraph_spacing_more(self, evt):
-        attr = wx.TextAttr()
-        attr.SetFlags(wx.TEXT_ATTR_PARA_SPACING_AFTER)
-        ip = self.rtc.GetInsertionPoint()
-        if self.rtc.GetStyle(ip, attr):
-            r = rt.RichTextRange(ip, ip)
-            if self.rtc.HasSelection():
-                r = self.rtc.GetSelectionRange()
-
-            attr.SetParagraphSpacingAfter(attr.GetParagraphSpacingAfter() + 20)
-            attr.SetFlags(wx.TEXT_ATTR_PARA_SPACING_AFTER)
-            self.rtc.SetStyle(r, attr)
-
-    def on_paragraph_spacing_less(self, evt):
-        attr = wx.TextAttr()
-        attr.SetFlags(wx.TEXT_ATTR_PARA_SPACING_AFTER)
-        ip = self.rtc.GetInsertionPoint()
-        if self.rtc.GetStyle(ip, attr):
-            r = rt.RichTextRange(ip, ip)
-            if self.rtc.HasSelection():
-                r = self.rtc.GetSelectionRange()
-
-            if attr.GetParagraphSpacingAfter() >= 20:
-                attr.SetParagraphSpacingAfter(attr.GetParagraphSpacingAfter() - 20)
-                attr.SetFlags(wx.TEXT_ATTR_PARA_SPACING_AFTER)
-                self.rtc.SetStyle(r, attr)
-
-    def on_line_spacing_single(self, evt):
-        attr = wx.TextAttr()
-        attr.SetFlags(wx.TEXT_ATTR_LINE_SPACING)
-        ip = self.rtc.GetInsertionPoint()
-        if self.rtc.GetStyle(ip, attr):
-            r = rt.RichTextRange(ip, ip)
-            if self.rtc.HasSelection():
-                r = self.rtc.GetSelectionRange()
-
-            attr.SetFlags(wx.TEXT_ATTR_LINE_SPACING)
-            attr.SetLineSpacing(10)
-            self.rtc.SetStyle(r, attr)
-
-    def on_line_spacing_half(self, evt):
-        attr = wx.TextAttr()
-        attr.SetFlags(wx.TEXT_ATTR_LINE_SPACING)
-        ip = self.rtc.GetInsertionPoint()
-        if self.rtc.GetStyle(ip, attr):
-            r = rt.RichTextRange(ip, ip)
-            if self.rtc.HasSelection():
-                r = self.rtc.GetSelectionRange()
-
-            attr.SetFlags(wx.TEXT_ATTR_LINE_SPACING)
-            attr.SetLineSpacing(15)
-            self.rtc.SetStyle(r, attr)
-
-    def on_line_spacing_double(self, evt):
-        attr = wx.TextAttr()
-        attr.SetFlags(wx.TEXT_ATTR_LINE_SPACING)
-        ip = self.rtc.GetInsertionPoint()
-        if self.rtc.GetStyle(ip, attr):
-            r = rt.RichTextRange(ip, ip)
-            if self.rtc.HasSelection():
-                r = self.rtc.GetSelectionRange()
-
-            attr.SetFlags(wx.TEXT_ATTR_LINE_SPACING)
-            attr.SetLineSpacing(20)
-            self.rtc.SetStyle(r, attr)
-
-    def on_font(self, evt):
-        if not self.rtc.HasSelection():
-            return
-
-        r = self.rtc.GetSelectionRange()
-        font_data = wx.FontData()
-        font_data.EnableEffects(False)
-        attr = wx.TextAttr()
-        attr.SetFlags(wx.TEXT_ATTR_FONT)
-        if self.rtc.GetStyle(self.rtc.GetInsertionPoint(), attr):
-            font_data.SetInitialFont(attr.GetFont())
-
-        dlg = wx.FontDialog(self, font_data)
-        if dlg.ShowModal() == wx.ID_OK:
-            font_data = dlg.GetFontData()
-            font = font_data.GetChosenFont()
-            if font:
-                attr.SetFlags(wx.TEXT_ATTR_FONT)
-                attr.SetFont(font)
-                self.rtc.SetStyle(r, attr)
-        dlg.Destroy()
-
     def on_colour(self, evt):
         colour_data = wx.ColourData()
         attr = wx.TextAttr()
@@ -293,37 +144,17 @@ class RichTextFrame(wx.Frame):
         if self.rtc.GetStyle(self.rtc.GetInsertionPoint(), attr):
             colour_data.SetColour(attr.GetTextColour())
 
-        dlg = wx.ColourDialog(self, colour_data)
-        if dlg.ShowModal() == wx.ID_OK:
-            colour_data = dlg.GetColourData()
-            colour = colour_data.GetColour()
-            if colour:
-                if not self.rtc.HasSelection():
-                    self.rtc.BeginTextColour(colour)
-                else:
-                    r = self.rtc.GetSelectionRange()
-                    attr.SetFlags(wx.TEXT_ATTR_TEXT_COLOUR)
-                    attr.SetTextColour(colour)
-                    self.rtc.SetStyle(r, attr)
-        dlg.Destroy()
+        colour = wx.RED
+        if not self.rtc.HasSelection():
+            self.rtc.BeginTextColour(colour)
+        else:
+            r = self.rtc.GetSelectionRange()
+            attr.SetFlags(wx.TEXT_ATTR_TEXT_COLOUR)
+            attr.SetTextColour(colour)
+            self.rtc.SetStyle(r, attr)
 
     def on_update_bold(self, evt):
         evt.Check(self.rtc.IsSelectionBold())
-
-    def on_update_italic(self, evt):
-        evt.Check(self.rtc.IsSelectionItalics())
-
-    def on_update_underline(self, evt):
-        evt.Check(self.rtc.IsSelectionUnderlined())
-
-    def on_update_align_left(self, evt):
-        evt.Check(self.rtc.IsSelectionAligned(wx.TEXT_ALIGNMENT_LEFT))
-
-    def on_update_align_center(self, evt):
-        evt.Check(self.rtc.IsSelectionAligned(wx.TEXT_ALIGNMENT_CENTRE))
-
-    def on_update_align_right(self, evt):
-        evt.Check(self.rtc.IsSelectionAligned(wx.TEXT_ALIGNMENT_RIGHT))
 
     def forward_event(self, evt):
         # The RichTextCtrl can handle menu and update events for undo,
@@ -344,7 +175,6 @@ class RichTextFrame(wx.Frame):
                 self.on_file_save)
         do_bind(file_menu.Append(-1, "&Save As...\tF12", "Save to a new file"),
                 self.on_file_save_as)
-        file_menu.AppendSeparator()
         file_menu.AppendSeparator()
         do_bind(file_menu.Append(-1, "E&xit\tCtrl+Q", "Quit this program"),
                 self.on_file_exit)
@@ -374,29 +204,7 @@ class RichTextFrame(wx.Frame):
         format_menu = wx.Menu()
         do_bind(format_menu.AppendCheckItem(-1, "&Bold\tCtrl+B"),
                 self.on_bold, self.on_update_bold)
-        do_bind(format_menu.AppendCheckItem(-1, "&Italic\tCtrl+I"),
-                self.on_italic, self.on_update_italic)
-        do_bind(format_menu.AppendCheckItem(-1, "&Underline\tCtrl+U"),
-                self.on_underline, self.on_update_underline)
         format_menu.AppendSeparator()
-        do_bind(format_menu.AppendCheckItem(-1, "L&eft Align"),
-                self.on_align_left, self.on_update_align_left)
-        do_bind(format_menu.AppendCheckItem(-1, "&Centre"),
-                self.on_align_center, self.on_update_align_center)
-        do_bind(format_menu.AppendCheckItem(-1, "&Right Align"),
-                self.on_align_right, self.on_update_align_right)
-        format_menu.AppendSeparator()
-        do_bind(format_menu.Append(-1, "Indent &More"), self.on_indent_more)
-        do_bind(format_menu.Append(-1, "Indent &Less"), self.on_indent_less)
-        format_menu.AppendSeparator()
-        do_bind(format_menu.Append(-1, "Increase Paragraph &Spacing"), self.on_paragraph_spacing_more)
-        do_bind(format_menu.Append(-1, "Decrease &Paragraph Spacing"), self.on_paragraph_spacing_less)
-        format_menu.AppendSeparator()
-        do_bind(format_menu.Append(-1, "Normal Line Spacing"), self.on_line_spacing_single)
-        do_bind(format_menu.Append(-1, "1.5 Line Spacing"), self.on_line_spacing_half)
-        do_bind(format_menu.Append(-1, "Double Line Spacing"), self.on_line_spacing_double)
-        format_menu.AppendSeparator()
-        do_bind(format_menu.Append(-1, "&Font..."), self.on_font)
 
         mb = wx.MenuBar()
         mb.Append(file_menu, "&File")
@@ -415,9 +223,7 @@ class MyApp(wx.App):
         self.frame = None
 
     def OnInit(self):
-        self.frame = RichTextFrame(None, -1, "wx.richtext.RichTextCtrl",
-                                   size=(700, 500),
-                                   style=wx.DEFAULT_FRAME_STYLE)
+        self.frame = RichTextFrame(None, -1, "RichTextCtrl", size=(900, 500), style=wx.DEFAULT_FRAME_STYLE)
         self.SetTopWindow(self.frame)
         self.frame.Show()
         return True
