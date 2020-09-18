@@ -1,7 +1,7 @@
 import wx
 import wx.richtext as rt
+
 from Tools.RichTextTest.Images import Images
-from Resources.Fetch import Fetch
 
 
 class RichTextFrame(wx.Frame):
@@ -15,6 +15,8 @@ class RichTextFrame(wx.Frame):
 
         self.rtc = rt.RichTextCtrl(self, style=wx.VSCROLL | wx.HSCROLL | wx.NO_BORDER)
         self.add_rtc_handlers()
+
+        self.Bind(wx.EVT_TEXT_URL, self.on_url)
 
     @staticmethod
     def add_rtc_handlers():
@@ -76,6 +78,8 @@ class RichTextFrame(wx.Frame):
 
     def on_url(self, evt):
         wx.MessageBox(evt.GetString(), "URL Clicked")
+        print(evt.GetURLStart())
+        print(evt.GetURLEnd())
 
     def on_file_save(self, evt):
         if not self.rtc.GetFilename():
@@ -83,42 +87,21 @@ class RichTextFrame(wx.Frame):
             return
         self.rtc.SaveFile()
 
-    def make_tool_bar(self):
-        def do_bind(item, handler, update_ui=None):
-            self.Bind(wx.EVT_TOOL, handler, item)
-            if update_ui is not None:
-                self.Bind(wx.EVT_UPDATE_UI, update_ui, item)
-
-        tbar = self.CreateToolBar()
-        do_bind(tbar.AddTool(-1, '', Images.rt_open.GetBitmap(),
-                             shortHelp="Open"), self.on_file_open)
-        do_bind(tbar.AddTool(-1, '', Images.rt_save.GetBitmap(),
-                             shortHelp="Save"), self.on_file_save)
-        tbar.AddSeparator()
-        do_bind(tbar.AddTool(wx.ID_CUT, '', Images.rt_cut.GetBitmap(),
-                             shortHelp="Cut"), self.forward_event, self.forward_event)
-        do_bind(tbar.AddTool(wx.ID_COPY, '', Images.rt_copy.GetBitmap(),
-                             shortHelp="Copy"), self.forward_event, self.forward_event)
-        do_bind(tbar.AddTool(wx.ID_PASTE, '', Images.rt_paste.GetBitmap(),
-                             shortHelp="Paste"), self.forward_event, self.forward_event)
-        tbar.AddSeparator()
-        do_bind(tbar.AddTool(wx.ID_UNDO, '', Images.rt_undo.GetBitmap(),
-                             shortHelp="Undo"), self.forward_event, self.forward_event)
-        do_bind(tbar.AddTool(wx.ID_REDO, '', Images.rt_redo.GetBitmap(),
-                             shortHelp="Redo"), self.forward_event, self.forward_event)
-        tbar.AddSeparator()
-        do_bind(tbar.AddCheckTool(-1, '', Images.rt_bold.GetBitmap(),
-                                  shortHelp="Bold"), self.on_bold, self.on_update_bold)
-        tbar.AddSeparator()
-        do_bind(tbar.AddTool(-1, '', Images.rt_colour.GetBitmap(),
-                             shortHelp="Font Colour"), self.on_colour)
-        do_bind(tbar.AddTool(-1, '', Images.rt_sample.GetBitmap(),
-                             shortHelp="Insert Image"), self.on_insert_image)
-
-        tbar.Realize()
-
     def on_insert_image(self, evt):
-        self.rtc.WriteImage(wx.Image('/home/omejzlik/PycharmProjects/Python-White-Bear-Editor/Resources/main_image_missing.png', wx.BITMAP_TYPE_PNG))
+        self.rtc.WriteImage(
+            wx.Image('/home/omejzlik/PycharmProjects/Python-White-Bear-Editor/Resources/main_image_missing.png',
+                     wx.BITMAP_TYPE_PNG))
+
+    def on_insert_link(self, evt):
+        url_style = rt.RichTextAttr()
+        url_style.SetTextColour(wx.BLUE)
+        url_style.SetFontUnderlined(True)
+
+        self.rtc.BeginStyle(url_style)
+        self.rtc.BeginURL('www.google.com')
+        self.rtc.WriteText('google')
+        self.rtc.EndURL()
+        self.rtc.EndStyle()
 
     def on_file_save_as(self, evt):
         wildcard, types = rt.RichTextBuffer.GetExtWildcard(save=True)
@@ -185,20 +168,6 @@ class RichTextFrame(wx.Frame):
                 self.on_file_exit)
 
         edit_menu = wx.Menu()
-        do_bind(edit_menu.Append(wx.ID_UNDO, "&Undo\tCtrl+Z"),
-                self.forward_event, self.forward_event)
-        do_bind(edit_menu.Append(wx.ID_REDO, "&Redo\tCtrl+Y"),
-                self.forward_event, self.forward_event)
-        edit_menu.AppendSeparator()
-        do_bind(edit_menu.Append(wx.ID_CUT, "Cu&t\tCtrl+X"),
-                self.forward_event, self.forward_event)
-        do_bind(edit_menu.Append(wx.ID_COPY, "&Copy\tCtrl+C"),
-                self.forward_event, self.forward_event)
-        do_bind(edit_menu.Append(wx.ID_PASTE, "&Paste\tCtrl+V"),
-                self.forward_event, self.forward_event)
-        do_bind(edit_menu.Append(wx.ID_CLEAR, "&Delete\tDel"),
-                self.forward_event, self.forward_event)
-        edit_menu.AppendSeparator()
         do_bind(edit_menu.Append(wx.ID_SELECTALL, "Select A&ll\tCtrl+A"),
                 self.forward_event, self.forward_event)
 
@@ -216,6 +185,41 @@ class RichTextFrame(wx.Frame):
         mb.Append(edit_menu, "&Edit")
         mb.Append(format_menu, "F&ormat")
         self.SetMenuBar(mb)
+
+    def make_tool_bar(self):
+        def do_bind(item, handler, update_ui=None):
+            self.Bind(wx.EVT_TOOL, handler, item)
+            if update_ui is not None:
+                self.Bind(wx.EVT_UPDATE_UI, update_ui, item)
+
+        tool_bar = self.CreateToolBar()
+        do_bind(tool_bar.AddTool(-1, '', Images.rt_open.GetBitmap(),
+                                 shortHelp="Open"), self.on_file_open)
+        do_bind(tool_bar.AddTool(-1, '', Images.rt_save.GetBitmap(),
+                                 shortHelp="Save"), self.on_file_save)
+        tool_bar.AddSeparator()
+        do_bind(tool_bar.AddTool(wx.ID_CUT, '', Images.rt_cut.GetBitmap(),
+                                 shortHelp="Cut"), self.forward_event, self.forward_event)
+        do_bind(tool_bar.AddTool(wx.ID_COPY, '', Images.rt_copy.GetBitmap(),
+                                 shortHelp="Copy"), self.forward_event, self.forward_event)
+        do_bind(tool_bar.AddTool(wx.ID_PASTE, '', Images.rt_paste.GetBitmap(),
+                                 shortHelp="Paste"), self.forward_event, self.forward_event)
+        tool_bar.AddSeparator()
+        do_bind(tool_bar.AddTool(wx.ID_UNDO, '', Images.rt_undo.GetBitmap(),
+                                 shortHelp="Undo"), self.forward_event, self.forward_event)
+        do_bind(tool_bar.AddTool(wx.ID_REDO, '', Images.rt_redo.GetBitmap(),
+                                 shortHelp="Redo"), self.forward_event, self.forward_event)
+        tool_bar.AddSeparator()
+        do_bind(tool_bar.AddCheckTool(-1, '', Images.rt_bold.GetBitmap(),
+                                      shortHelp="Bold"), self.on_bold, self.on_update_bold)
+        tool_bar.AddSeparator()
+        do_bind(tool_bar.AddTool(-1, '', Images.rt_colour.GetBitmap(),
+                                 shortHelp="Font Colour"), self.on_colour)
+        do_bind(tool_bar.AddTool(-1, '', Images.rt_sample.GetBitmap(),
+                                 shortHelp="Insert Image"), self.on_insert_image)
+        do_bind(tool_bar.AddTool(-1, '', Images.NoIcon.GetBitmap(),
+                                 shortHelp="Insert Link"), self.on_insert_link)
+        tool_bar.Realize()
 
 
 class MyApp(wx.App):

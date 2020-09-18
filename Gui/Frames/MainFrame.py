@@ -28,7 +28,7 @@ class MainFrame(wx.Frame):
         # -1 is a special ID which generates a random wx ID
         super(MainFrame, self).__init__(None, -1, title=Strings.editor_name, style=wx.DEFAULT_FRAME_STYLE)
         # Create font for text fields
-        self.text_field_font: wx.Font = wx.Font(Numbers.text_field_font_size, wx.FONTFAMILY_DEFAULT,
+        self.text_field_font = wx.Font(Numbers.text_field_font_size, wx.FONTFAMILY_DEFAULT,
                                                 wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, False)
         # Prepare data objects
         self.config_manager = ConfigManager()
@@ -244,7 +244,7 @@ class MainFrame(wx.Frame):
 
         # Article metadata section -------------------------------------------------------------------------------------
         # Add image placeholder into middle top left static sizer
-        placeholder_main_image: wx.Image = wx.Image(Numbers.main_image_width, Numbers.main_image_height)
+        placeholder_main_image = wx.Image(Numbers.main_image_width, Numbers.main_image_height)
         placeholder_main_image.Replace(0, 0, 0, 245, 255, 255)
         self.main_image = wx.StaticBitmap(self.right_panel, -1, wx.Bitmap(placeholder_main_image))
         self.article_image_static_sizer.Add(self.main_image, flag=wx.LEFT | wx.BOTTOM | wx.RIGHT, border=1)
