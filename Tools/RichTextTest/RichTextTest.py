@@ -13,9 +13,17 @@ class RichTextFrame(wx.Frame):
         self.CreateStatusBar()
         self.make_tool_bar()
 
+        self.sizer = wx.BoxSizer(wx.VERTICAL)
         self.rtc = rt.RichTextCtrl(self, style=wx.VSCROLL | wx.HSCROLL | wx.NO_BORDER)
-        self.add_rtc_handlers()
+        self.style_control = rt.RichTextStyleComboCtrl(self, -1)
+        self.style_control.SetRichTextCtrl(self.rtc)
+        self.style_control.SetStyleSheet(self.rtc.GetStyleSheet())
 
+        self.sizer.Add(self.style_control)
+        self.sizer.Add(self.rtc, 1, flag=wx.EXPAND)
+        self.SetSizer(self.sizer)
+
+        self.add_rtc_handlers()
         self.Bind(wx.EVT_TEXT_URL, self.on_url)
 
     @staticmethod
