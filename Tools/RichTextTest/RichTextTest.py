@@ -1,8 +1,6 @@
 import wx
 import wx.richtext as rt
 
-from Tools.RichTextTest.Images import Images
-
 
 class RichTextFrame(wx.Frame):
     def __init__(self, *args, **kw):
@@ -11,7 +9,6 @@ class RichTextFrame(wx.Frame):
 
         self.make_menu_bar()
         self.CreateStatusBar()
-        self.make_tool_bar()
 
         self.sizer = wx.BoxSizer(wx.VERTICAL)
         self.rtc = rt.RichTextCtrl(self, style=wx.VSCROLL | wx.HSCROLL | wx.NO_BORDER)
@@ -29,7 +26,7 @@ class RichTextFrame(wx.Frame):
 
     def on_right_click(self, evt):
         # This disables right click
-        print('right click')
+        print(type(evt.GetCharacter()))
 
     def add_rtc_handlers(self):
         # This would normally go in your app's OnInit method.  I'm
@@ -170,63 +167,30 @@ class RichTextFrame(wx.Frame):
                 self.on_file_save)
         do_bind(file_menu.Append(-1, "&Save As...\tF12", "Save to a new file"),
                 self.on_file_save_as)
-        file_menu.AppendSeparator()
         do_bind(file_menu.Append(-1, "E&xit\tCtrl+Q", "Quit this program"),
                 self.on_file_exit)
 
         edit_menu = wx.Menu()
         do_bind(edit_menu.Append(wx.ID_SELECTALL, "Select A&ll\tCtrl+A"),
                 self.forward_event, self.forward_event)
-
-        # do_bind( edit_menu.AppendSeparator(),  )
-        # do_bind( edit_menu.Append(-1, "&Find...\tCtrl+F"),  )
-        # do_bind( edit_menu.Append(-1, "&Replace...\tCtrl+R"),  )
+        do_bind(edit_menu.Append(wx.ID_CUT, "Cut"), self.forward_event, self.forward_event)
+        do_bind(edit_menu.Append(wx.ID_COPY, 'Copy',), self.forward_event, self.forward_event)
+        do_bind(edit_menu.Append(wx.ID_PASTE, 'Paste'), self.forward_event, self.forward_event)
+        do_bind(edit_menu.Append(wx.ID_UNDO, 'Undo'), self.forward_event, self.forward_event)
+        do_bind(edit_menu.Append(wx.ID_REDO, 'Redo'), self.forward_event, self.forward_event)
+        do_bind(edit_menu.Append(-1, 'Color'), self.on_colour)
+        do_bind(edit_menu.Append(-1, 'Insert image'), self.on_insert_image)
+        do_bind(edit_menu.Append(-1, 'Insert link'), self.on_insert_link)
 
         format_menu = wx.Menu()
         do_bind(format_menu.AppendCheckItem(-1, "&Bold\tCtrl+B"),
                 self.on_bold, self.on_update_bold)
-        format_menu.AppendSeparator()
 
         mb = wx.MenuBar()
         mb.Append(file_menu, "&File")
         mb.Append(edit_menu, "&Edit")
         mb.Append(format_menu, "F&ormat")
         self.SetMenuBar(mb)
-
-    def make_tool_bar(self):
-        def do_bind(item, handler, update_ui=None):
-            self.Bind(wx.EVT_TOOL, handler, item)
-            if update_ui is not None:
-                self.Bind(wx.EVT_UPDATE_UI, update_ui, item)
-
-        tool_bar = self.CreateToolBar()
-        do_bind(tool_bar.AddTool(-1, '', Images.rt_open.GetBitmap(),
-                                 shortHelp="Open"), self.on_file_open)
-        do_bind(tool_bar.AddTool(-1, '', Images.rt_save.GetBitmap(),
-                                 shortHelp="Save"), self.on_file_save)
-        tool_bar.AddSeparator()
-        do_bind(tool_bar.AddTool(wx.ID_CUT, '', Images.rt_cut.GetBitmap(),
-                                 shortHelp="Cut"), self.forward_event, self.forward_event)
-        do_bind(tool_bar.AddTool(wx.ID_COPY, '', Images.rt_copy.GetBitmap(),
-                                 shortHelp="Copy"), self.forward_event, self.forward_event)
-        do_bind(tool_bar.AddTool(wx.ID_PASTE, '', Images.rt_paste.GetBitmap(),
-                                 shortHelp="Paste"), self.forward_event, self.forward_event)
-        tool_bar.AddSeparator()
-        do_bind(tool_bar.AddTool(wx.ID_UNDO, '', Images.rt_undo.GetBitmap(),
-                                 shortHelp="Undo"), self.forward_event, self.forward_event)
-        do_bind(tool_bar.AddTool(wx.ID_REDO, '', Images.rt_redo.GetBitmap(),
-                                 shortHelp="Redo"), self.forward_event, self.forward_event)
-        tool_bar.AddSeparator()
-        do_bind(tool_bar.AddCheckTool(-1, '', Images.rt_bold.GetBitmap(),
-                                      shortHelp="Bold"), self.on_bold, self.on_update_bold)
-        tool_bar.AddSeparator()
-        do_bind(tool_bar.AddTool(-1, '', Images.rt_colour.GetBitmap(),
-                                 shortHelp="Font Colour"), self.on_colour)
-        do_bind(tool_bar.AddTool(-1, '', Images.rt_sample.GetBitmap(),
-                                 shortHelp="Insert Image"), self.on_insert_image)
-        do_bind(tool_bar.AddTool(-1, '', Images.NoIcon.GetBitmap(),
-                                 shortHelp="Insert Link"), self.on_insert_link)
-        tool_bar.Realize()
 
 
 class MyApp(wx.App):
