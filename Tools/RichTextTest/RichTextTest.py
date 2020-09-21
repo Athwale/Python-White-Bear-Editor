@@ -27,6 +27,7 @@ class RichTextFrame(wx.Frame):
     def on_right_click(self, evt):
         # This disables right click
         print(type(evt.GetCharacter()))
+        evt.Skip()
 
     def add_rtc_handlers(self):
         # This would normally go in your app's OnInit method.  I'm
@@ -179,7 +180,7 @@ class RichTextFrame(wx.Frame):
         do_bind(edit_menu.Append(wx.ID_UNDO, 'Undo'), self.forward_event, self.forward_event)
         do_bind(edit_menu.Append(wx.ID_REDO, 'Redo'), self.forward_event, self.forward_event)
         do_bind(edit_menu.Append(-1, 'Color'), self.on_colour)
-        do_bind(edit_menu.Append(-1, 'Insert image'), self.on_insert_image)
+        do_bind(edit_menu.Append(-1, 'Insert image\tCtrl+i'), self.on_insert_image)
         do_bind(edit_menu.Append(-1, 'Insert link'), self.on_insert_link)
 
         format_menu = wx.Menu()
