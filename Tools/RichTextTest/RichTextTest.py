@@ -25,21 +25,20 @@ class RichTextFrame(wx.Frame):
 
         self.add_rtc_handlers()
         self.Bind(wx.EVT_TEXT_URL, self.on_url)
+        self.Bind(rt.EVT_RICHTEXT_RIGHT_CLICK, self.on_right_click)
 
-    @staticmethod
-    def add_rtc_handlers():
-        # make sure we haven't already added them.
-        if rt.RichTextBuffer.FindHandlerByType(rt.RICHTEXT_TYPE_HTML) is not None:
-            return
+    def on_right_click(self, evt):
+        # This disables right click
+        print('right click')
 
+    def add_rtc_handlers(self):
         # This would normally go in your app's OnInit method.  I'm
         # not sure why these file handlers are not loaded by
         # default by the C++ rich text code, I guess it's so you
         # can change the name or extension if you wanted like this
         rt.RichTextBuffer.AddHandler(rt.RichTextXMLHandler(name="XML", ext="xml", type=99))
-        rt.RichTextBuffer.AddHandler(rt.RichTextHTMLHandler(name="HTML", ext="html", type=98))
-        # handler = rt.RichTextHTMLHandler(name="HTML", ext="html", type=98)
-        # print(handler.CanLoad())
+        # TODO explore this
+        self.rtc.GetEventHandler()
 
     def on_file_open(self, evt):
         # This gives us a string suitable for the file dialog based on
@@ -85,9 +84,9 @@ class RichTextFrame(wx.Frame):
         self.rtc.SetDefaultStyle(self.text_attr)
 
     def on_url(self, evt):
-        wx.MessageBox(evt.GetString(), "URL Clicked")
-        print(evt.GetURLStart())
-        print(evt.GetURLEnd())
+        print(self.rtc.GetNumberOfLines())
+        link = self.rtc.GetRange(evt.GetURLStart(), evt.GetURLEnd()+1)
+        wx.MessageBox(evt.GetString() + ' ' + link, "URL Clicked")
 
     def on_file_save(self, evt):
         if not self.rtc.GetFilename():
