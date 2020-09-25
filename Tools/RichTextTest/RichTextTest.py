@@ -22,11 +22,21 @@ class RichTextFrame(wx.Frame):
 
         self.add_rtc_handlers()
         self.Bind(wx.EVT_TEXT_URL, self.on_url)
+        self.Bind(rt.EVT_RICHTEXT_LEFT_CLICK, self.on_left_click)
         self.Bind(rt.EVT_RICHTEXT_RIGHT_CLICK, self.on_right_click)
 
+        # Register field type
+        self.field_type = rt.RichTextFieldTypeStandard('imageFieldType', bitmap=wx.Bitmap(
+            wx.Image('/home/omejzlik/PycharmProjects/Python-White-Bear-Editor/Resources/main_image_missing.png',
+                     wx.BITMAP_TYPE_PNG)), displayStyle=rt.RichTextFieldTypeStandard.RICHTEXT_FIELD_STYLE_RECTANGLE)
+        rt.RichTextBuffer.AddFieldType(self.field_type)
+
+    def on_left_click(self, evt: wx.richtext.RichTextEvent):
+        print(evt.GetContainer().GetName())
+        evt.Skip()
+
     def on_right_click(self, evt):
-        # This disables right click
-        print(type(evt.GetCharacter()))
+        print(evt.GetContainer().GetName())
         evt.Skip()
 
     def add_rtc_handlers(self):
@@ -35,8 +45,6 @@ class RichTextFrame(wx.Frame):
         # default by the C++ rich text code, I guess it's so you
         # can change the name or extension if you wanted like this
         rt.RichTextBuffer.AddHandler(rt.RichTextXMLHandler(name="XML", ext="xml", type=99))
-        # TODO explore this
-        self.rtc.GetEventHandler()
 
     def on_file_open(self, evt):
         # This gives us a string suitable for the file dialog based on
@@ -83,7 +91,7 @@ class RichTextFrame(wx.Frame):
 
     def on_url(self, evt):
         print(self.rtc.GetNumberOfLines())
-        link = self.rtc.GetRange(evt.GetURLStart(), evt.GetURLEnd()+1)
+        link = self.rtc.GetRange(evt.GetURLStart(), evt.GetURLEnd() + 1)
         wx.MessageBox(evt.GetString() + ' ' + link, "URL Clicked")
 
     def on_file_save(self, evt):
@@ -93,9 +101,9 @@ class RichTextFrame(wx.Frame):
         self.rtc.SaveFile()
 
     def on_insert_image(self, evt):
-        self.rtc.WriteImage(
-            wx.Image('/home/omejzlik/PycharmProjects/Python-White-Bear-Editor/Resources/main_image_missing.png',
-                     wx.BITMAP_TYPE_PNG))
+        field = self.rtc.WriteField('imageFieldType', rt.RichTextProperties())
+        field.SetName('image1')
+        #print(field.GetName())
 
     def on_insert_link(self, evt):
         url_style = rt.RichTextAttr()
@@ -175,7 +183,7 @@ class RichTextFrame(wx.Frame):
         do_bind(edit_menu.Append(wx.ID_SELECTALL, "Select A&ll\tCtrl+A"),
                 self.forward_event, self.forward_event)
         do_bind(edit_menu.Append(wx.ID_CUT, "Cut"), self.forward_event, self.forward_event)
-        do_bind(edit_menu.Append(wx.ID_COPY, 'Copy',), self.forward_event, self.forward_event)
+        do_bind(edit_menu.Append(wx.ID_COPY, 'Copy', ), self.forward_event, self.forward_event)
         do_bind(edit_menu.Append(wx.ID_PASTE, 'Paste'), self.forward_event, self.forward_event)
         do_bind(edit_menu.Append(wx.ID_UNDO, 'Undo'), self.forward_event, self.forward_event)
         do_bind(edit_menu.Append(wx.ID_REDO, 'Redo'), self.forward_event, self.forward_event)
