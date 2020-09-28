@@ -1,5 +1,6 @@
 import wx
 import wx.richtext as rt
+from Tools.RichTextTest.FieldCustom import FieldCustom
 
 
 class RichTextFrame(wx.Frame):
@@ -26,17 +27,15 @@ class RichTextFrame(wx.Frame):
         self.Bind(rt.EVT_RICHTEXT_RIGHT_CLICK, self.on_right_click)
 
         # Register field type
-        self.field_type = rt.RichTextFieldTypeStandard('imageFieldType', bitmap=wx.Bitmap(
+        self.field_type = FieldCustom('imageFieldType', bitmap=wx.Bitmap(
             wx.Image('/home/omejzlik/PycharmProjects/Python-White-Bear-Editor/Resources/main_image_missing.png',
-                     wx.BITMAP_TYPE_PNG)), displayStyle=rt.RichTextFieldTypeStandard.RICHTEXT_FIELD_STYLE_RECTANGLE)
+                     wx.BITMAP_TYPE_PNG)), display_style=rt.RichTextFieldTypeStandard.RICHTEXT_FIELD_STYLE_RECTANGLE)
         rt.RichTextBuffer.AddFieldType(self.field_type)
 
     def on_left_click(self, evt: wx.richtext.RichTextEvent):
-        print(evt.GetContainer().GetName())
         evt.Skip()
 
     def on_right_click(self, evt):
-        print(evt.GetContainer().GetName())
         evt.Skip()
 
     def add_rtc_handlers(self):
@@ -50,8 +49,6 @@ class RichTextFrame(wx.Frame):
         # This gives us a string suitable for the file dialog based on
         # the file handlers that are loaded
         wildcard, types = rt.RichTextBuffer.GetExtWildcard(save=False)
-        print(wildcard)
-        print(types)
         dlg = wx.FileDialog(self, "Choose a filename",
                             wildcard=wildcard,
                             style=wx.FD_OPEN)
@@ -103,7 +100,6 @@ class RichTextFrame(wx.Frame):
     def on_insert_image(self, evt):
         field = self.rtc.WriteField('imageFieldType', rt.RichTextProperties())
         field.SetName('image1')
-        #print(field.GetName())
 
     def on_insert_link(self, evt):
         url_style = rt.RichTextAttr()
