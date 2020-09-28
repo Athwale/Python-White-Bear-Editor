@@ -30,7 +30,11 @@ class RichTextFrame(wx.Frame):
         self.field_type = FieldCustom('imageFieldType', bitmap=wx.Bitmap(
             wx.Image('/home/omejzlik/PycharmProjects/Python-White-Bear-Editor/Resources/main_image_missing.png',
                      wx.BITMAP_TYPE_PNG)), display_style=rt.RichTextFieldTypeStandard.RICHTEXT_FIELD_STYLE_RECTANGLE)
+        self.field_type_1 = FieldCustom('imageFieldType1', bitmap=wx.Bitmap(
+            wx.Image('/home/omejzlik/PycharmProjects/Python-White-Bear-Editor/Resources/main_image_thumbnail_missing.png',
+                     wx.BITMAP_TYPE_PNG)), display_style=rt.RichTextFieldTypeStandard.RICHTEXT_FIELD_STYLE_RECTANGLE)
         rt.RichTextBuffer.AddFieldType(self.field_type)
+        rt.RichTextBuffer.AddFieldType(self.field_type_1)
 
     def on_left_click(self, evt: wx.richtext.RichTextEvent):
         evt.Skip()
@@ -100,6 +104,8 @@ class RichTextFrame(wx.Frame):
     def on_insert_image(self, evt):
         field = self.rtc.WriteField('imageFieldType', rt.RichTextProperties())
         field.SetName('image1')
+        field1 = self.rtc.WriteField('imageFieldType1', rt.RichTextProperties())
+        field1.SetName('image2')
 
     def on_insert_link(self, evt):
         url_style = rt.RichTextAttr()
@@ -111,6 +117,13 @@ class RichTextFrame(wx.Frame):
         self.rtc.WriteText('google')
         self.rtc.EndURL()
         self.rtc.EndStyle()
+
+    def on_insert_list(self, evt):
+        # TODO Listify a selection
+        self.rtc.BeginSymbolBullet('*', 40, 25)
+        self.rtc.WriteText('List item')
+        self.rtc.Newline()
+        self.rtc.EndSymbolBullet()
 
     def on_file_save_as(self, evt):
         wildcard, types = rt.RichTextBuffer.GetExtWildcard(save=True)
@@ -186,6 +199,7 @@ class RichTextFrame(wx.Frame):
         do_bind(edit_menu.Append(-1, 'Color'), self.on_colour)
         do_bind(edit_menu.Append(-1, 'Insert image\tCtrl+i'), self.on_insert_image)
         do_bind(edit_menu.Append(-1, 'Insert link'), self.on_insert_link)
+        do_bind(edit_menu.Append(-1, 'Insert list'), self.on_insert_list)
 
         format_menu = wx.Menu()
         do_bind(format_menu.AppendCheckItem(-1, "&Bold\tCtrl+B"),
