@@ -23,8 +23,6 @@ class RichTextFrame(wx.Frame):
 
         self.add_rtc_handlers()
         self.Bind(wx.EVT_TEXT_URL, self.on_url)
-        self.Bind(rt.EVT_RICHTEXT_LEFT_CLICK, self.on_left_click)
-        self.Bind(rt.EVT_RICHTEXT_RIGHT_CLICK, self.on_right_click)
 
         # Register field type
         self.register_fields()
@@ -35,7 +33,7 @@ class RichTextFrame(wx.Frame):
         stl_n: rt.RichTextAttr = self.rtc.GetDefaultStyleEx()
         style_normal: rt.RichTextParagraphStyleDefinition = rt.RichTextParagraphStyleDefinition('Normal')
         style_normal.SetStyle(stl_n)
-        style_normal.SetNextStyle('Mormal')
+        style_normal.SetNextStyle('Normal')
         self.stylesheet.AddParagraphStyle(style_normal)
         self.rtc.ApplyStyle(style_normal)
 
@@ -65,6 +63,16 @@ class RichTextFrame(wx.Frame):
         style_list.SetNextStyle('Normal')
         self.stylesheet.AddParagraphStyle(style_list)
 
+        # Image style
+        stl_i: rt.RichTextAttr = self.rtc.GetDefaultStyleEx()
+        stl_i.SetAlignment(wx.TEXT_ALIGNMENT_CENTER)
+        stl_i.SetParagraphSpacingAfter(20)
+        stl_i.SetParagraphSpacingBefore(20)
+        style_image: rt.RichTextParagraphStyleDefinition = rt.RichTextParagraphStyleDefinition('Image')
+        style_image.SetStyle(stl_i)
+        style_image.SetNextStyle('Normal')
+        self.stylesheet.AddParagraphStyle(style_image)
+
         self.rtc.SetStyleSheet(self.stylesheet)
         self.style_control.SetRichTextCtrl(self.rtc)
         self.style_control.SetStyleSheet(self.stylesheet)
@@ -74,25 +82,16 @@ class RichTextFrame(wx.Frame):
         self.field_type = FieldCustom('imageFieldType', bitmap=wx.Bitmap(
             wx.Image('/home/omejzlik/PycharmProjects/Python-White-Bear-Editor/Resources/main_image_missing.png',
                      wx.BITMAP_TYPE_PNG)), display_style=rt.RichTextFieldTypeStandard.RICHTEXT_FIELD_STYLE_RECTANGLE)
-        self.field_type_1 = FieldCustom('imageFieldType1', bitmap=wx.Bitmap(
-            wx.Image(
-                '/home/omejzlik/PycharmProjects/Python-White-Bear-Editor/Resources/main_image_thumbnail_missing.png',
-                wx.BITMAP_TYPE_PNG)), display_style=rt.RichTextFieldTypeStandard.RICHTEXT_FIELD_STYLE_RECTANGLE)
         rt.RichTextBuffer.AddFieldType(self.field_type)
-        rt.RichTextBuffer.AddFieldType(self.field_type_1)
 
-    def on_left_click(self, evt: wx.richtext.RichTextEvent):
-        evt.Skip()
-
-    def on_right_click(self, evt):
-        evt.Skip()
-
-    def add_rtc_handlers(self):
+    @staticmethod
+    def add_rtc_handlers():
         # This would normally go in your app's OnInit method.  I'm
         # not sure why these file handlers are not loaded by
         # default by the C++ rich text code, I guess it's so you
         # can change the name or extension if you wanted like this
         rt.RichTextBuffer.AddHandler(rt.RichTextXMLHandler(name="XML", ext="xml", type=99))
+        rt.RichTextBuffer.RemoveHandler('Text')
 
     def on_file_open(self, evt):
         # This gives us a string suitable for the file dialog based on
@@ -149,8 +148,6 @@ class RichTextFrame(wx.Frame):
     def on_insert_image(self, evt):
         field = self.rtc.WriteField('imageFieldType', rt.RichTextProperties())
         field.SetName('image1')
-        field1 = self.rtc.WriteField('imageFieldType1', rt.RichTextProperties())
-        field1.SetName('image2')
 
     def on_insert_link(self, evt):
         url_style = rt.RichTextAttr()
@@ -164,7 +161,6 @@ class RichTextFrame(wx.Frame):
         self.rtc.EndStyle()
 
     def on_insert_list(self, evt):
-        # TODO Listify a selection
         self.rtc.BeginSymbolBullet('*', 40, 25)
         self.rtc.WriteText('List item')
         self.rtc.Newline()
