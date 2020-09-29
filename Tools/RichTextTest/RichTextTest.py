@@ -8,6 +8,7 @@ class RichTextFrame(wx.Frame):
         wx.Frame.__init__(self, *args, **kw)
         self.text_attr = None
         self.stylesheet = rt.RichTextStyleSheet()
+        self.stylesheet.SetName('Stylesheet')
 
         self.make_menu_bar()
         self.CreateStatusBar()
@@ -34,7 +35,9 @@ class RichTextFrame(wx.Frame):
         stl_n: rt.RichTextAttr = self.rtc.GetDefaultStyleEx()
         style_normal: rt.RichTextParagraphStyleDefinition = rt.RichTextParagraphStyleDefinition('Normal')
         style_normal.SetStyle(stl_n)
+        style_normal.SetNextStyle('Mormal')
         self.stylesheet.AddParagraphStyle(style_normal)
+        self.rtc.ApplyStyle(style_normal)
 
         # Title style
         stl_h: rt.RichTextAttr = self.rtc.GetDefaultStyleEx()
@@ -44,6 +47,7 @@ class RichTextFrame(wx.Frame):
         stl_h.SetParagraphSpacingAfter(20)
         style_title: rt.RichTextParagraphStyleDefinition = rt.RichTextParagraphStyleDefinition('Title')
         style_title.SetStyle(stl_h)
+        style_title.SetNextStyle('Normal')
         self.stylesheet.AddParagraphStyle(style_title)
 
         # List style
@@ -58,6 +62,7 @@ class RichTextFrame(wx.Frame):
         style_list: rt.RichTextListStyleDefinition = rt.RichTextListStyleDefinition('List')
         style_list.SetLevelAttributes(0, stl_l_1)
         style_list.SetStyle(stl_l)
+        style_list.SetNextStyle('Normal')
         self.stylesheet.AddParagraphStyle(style_list)
 
         self.rtc.SetStyleSheet(self.stylesheet)
