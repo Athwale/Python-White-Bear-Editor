@@ -7,6 +7,7 @@ class RichTextFrame(wx.Frame):
     def __init__(self, *args, **kw):
         wx.Frame.__init__(self, *args, **kw)
         self.text_attr = None
+        self.stylesheet = rt.RichTextStyleSheet()
 
         self.make_menu_bar()
         self.CreateStatusBar()
@@ -14,8 +15,6 @@ class RichTextFrame(wx.Frame):
         self.sizer = wx.BoxSizer(wx.VERTICAL)
         self.rtc = rt.RichTextCtrl(self, style=wx.VSCROLL | wx.HSCROLL | wx.NO_BORDER)
         self.style_control = rt.RichTextStyleComboCtrl(self, -1)
-        self.style_control.SetRichTextCtrl(self.rtc)
-        self.style_control.SetStyleSheet(self.rtc.GetStyleSheet())
 
         self.sizer.Add(self.style_control)
         self.sizer.Add(self.rtc, 1, flag=wx.EXPAND)
@@ -27,12 +26,31 @@ class RichTextFrame(wx.Frame):
         self.Bind(rt.EVT_RICHTEXT_RIGHT_CLICK, self.on_right_click)
 
         # Register field type
+        self.register_fields()
+        self.add_styles()
+
+    def add_styles(self) -> None:
+        stl: rt.RichTextAttr = self.rtc.GetDefaultStyleEx()
+        stl.SetAlignment(wx.TEXT_ALIGNMENT_LEFT)
+        stl.SetFontWeight(wx.BOLD)
+        stl.SetParagraphSpacingAfter(20)
+        style_title: rt.RichTextParagraphStyleDefinition = rt.RichTextParagraphStyleDefinition('TitleStyle')
+        style_title.SetStyle(stl)
+
+        self.stylesheet.AddParagraphStyle(style_title)
+        self.rtc.SetStyleSheet(self.stylesheet)
+        self.style_control.SetRichTextCtrl(self.rtc)
+        self.style_control.SetStyleSheet(self.stylesheet)
+        self.style_control.UpdateStyles()
+
+    def register_fields(self) -> None:
         self.field_type = FieldCustom('imageFieldType', bitmap=wx.Bitmap(
             wx.Image('/home/omejzlik/PycharmProjects/Python-White-Bear-Editor/Resources/main_image_missing.png',
                      wx.BITMAP_TYPE_PNG)), display_style=rt.RichTextFieldTypeStandard.RICHTEXT_FIELD_STYLE_RECTANGLE)
         self.field_type_1 = FieldCustom('imageFieldType1', bitmap=wx.Bitmap(
-            wx.Image('/home/omejzlik/PycharmProjects/Python-White-Bear-Editor/Resources/main_image_thumbnail_missing.png',
-                     wx.BITMAP_TYPE_PNG)), display_style=rt.RichTextFieldTypeStandard.RICHTEXT_FIELD_STYLE_RECTANGLE)
+            wx.Image(
+                '/home/omejzlik/PycharmProjects/Python-White-Bear-Editor/Resources/main_image_thumbnail_missing.png',
+                wx.BITMAP_TYPE_PNG)), display_style=rt.RichTextFieldTypeStandard.RICHTEXT_FIELD_STYLE_RECTANGLE)
         rt.RichTextBuffer.AddFieldType(self.field_type)
         rt.RichTextBuffer.AddFieldType(self.field_type_1)
 
