@@ -30,14 +30,36 @@ class RichTextFrame(wx.Frame):
         self.add_styles()
 
     def add_styles(self) -> None:
-        stl: rt.RichTextAttr = self.rtc.GetDefaultStyleEx()
-        stl.SetAlignment(wx.TEXT_ALIGNMENT_LEFT)
-        stl.SetFontWeight(wx.BOLD)
-        stl.SetParagraphSpacingAfter(20)
-        style_title: rt.RichTextParagraphStyleDefinition = rt.RichTextParagraphStyleDefinition('TitleStyle')
-        style_title.SetStyle(stl)
+        # Normal style
+        stl_n: rt.RichTextAttr = self.rtc.GetDefaultStyleEx()
+        style_normal: rt.RichTextParagraphStyleDefinition = rt.RichTextParagraphStyleDefinition('Normal')
+        style_normal.SetStyle(stl_n)
+        self.stylesheet.AddParagraphStyle(style_normal)
 
+        # Title style
+        stl_h: rt.RichTextAttr = self.rtc.GetDefaultStyleEx()
+        stl_h.SetAlignment(wx.TEXT_ALIGNMENT_LEFT)
+        stl_h.SetFontWeight(wx.BOLD)
+        stl_h.SetFontSize(16)
+        stl_h.SetParagraphSpacingAfter(20)
+        style_title: rt.RichTextParagraphStyleDefinition = rt.RichTextParagraphStyleDefinition('Title')
+        style_title.SetStyle(stl_h)
         self.stylesheet.AddParagraphStyle(style_title)
+
+        # List style
+        stl_l: rt.RichTextAttr = self.rtc.GetDefaultStyleEx()
+        stl_l.SetAlignment(wx.TEXT_ALIGNMENT_LEFT)
+        stl_l.SetParagraphSpacingAfter(20)
+        stl_l.SetParagraphSpacingBefore(20)
+        stl_l_1: rt.RichTextAttr = self.rtc.GetDefaultStyleEx()
+        stl_l_1.SetBulletStyle(wx.TEXT_ATTR_BULLET_STYLE_STANDARD)
+        stl_l_1.SetLeftIndent(20, 25)
+
+        style_list: rt.RichTextListStyleDefinition = rt.RichTextListStyleDefinition('List')
+        style_list.SetLevelAttributes(0, stl_l_1)
+        style_list.SetStyle(stl_l)
+        self.stylesheet.AddParagraphStyle(style_list)
+
         self.rtc.SetStyleSheet(self.stylesheet)
         self.style_control.SetRichTextCtrl(self.rtc)
         self.style_control.SetStyleSheet(self.stylesheet)
