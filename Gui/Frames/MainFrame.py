@@ -30,7 +30,7 @@ class MainFrame(wx.Frame):
         super(MainFrame, self).__init__(None, -1, title=Strings.editor_name, style=wx.DEFAULT_FRAME_STYLE)
         # Create font for text fields
         self.text_field_font = wx.Font(Numbers.text_field_font_size, wx.FONTFAMILY_DEFAULT,
-                                                wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, False)
+                                       wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, False)
         # Prepare data objects
         self.config_manager = ConfigManager()
         self.tool_ids = []
@@ -138,62 +138,69 @@ class MainFrame(wx.Frame):
         self.menu_bar = wx.MenuBar()
         self.file_menu = wx.Menu(style=wx.MENU_TEAROFF)
         self.help_menu = wx.Menu(style=wx.MENU_TEAROFF)
+        self.edit_menu = wx.Menu(style=wx.MENU_TEAROFF)
 
-        # Add the file menu into the menu bar. & Tells the program to create Ctrl+F shortcut to open menu.
+        # Add the file menu into the menu bar.
         self.menu_bar.Append(self.file_menu, Strings.label_menu_file)
-        # Add the Help menu into the menu bar. & Tells the program to create Ctrl+F shortcut to open menu.
+        self.menu_bar.Append(self.edit_menu, Strings.label_menu_edit)
         self.menu_bar.Append(self.help_menu, Strings.label_menu_help)
 
+        # File menu ----------------------------------------------------------------------------------------------------
         # Create a menu item for open
         self.file_menu_item_open = wx.MenuItem(self.file_menu, wx.ID_OPEN, Strings.label_menu_item_open,
                                                Strings.label_menu_item_open_hint)
 
-        # Create a menu item for reload file
         self.file_menu_item_reload = wx.MenuItem(self.file_menu, wx.ID_REFRESH, Strings.label_menu_item_reload,
                                                  Strings.label_menu_item_reload_hint)
         self.disableable_menu_items.append(self.file_menu_item_reload)
 
-        # Create a menu item for about
-        self.help_menu_item_about = wx.MenuItem(self.help_menu, wx.ID_ABOUT, Strings.label_menu_item_about,
-                                                Strings.label_menu_item_about_hint)
-        self.disableable_menu_items.append(self.help_menu_item_about)
-
-        # Create a menu item for quit
         self.file_menu_item_quit = wx.MenuItem(self.file_menu, wx.ID_CLOSE, Strings.label_menu_item_quit,
                                                Strings.label_menu_item_quit_hint)
-
         # Put menu items into the menu buttons
         self.file_menu.Append(self.file_menu_item_open)
         self.file_menu.AppendSeparator()
         self.file_menu.Append(self.file_menu_item_reload)
         self.file_menu.Append(self.file_menu_item_quit)
+
+        # Edit menu ----------------------------------------------------------------------------------------------------
+        self.edit_menu_item_undo = wx.MenuItem(self.edit_menu, wx.ID_UNDO, Strings.label_menu_item_undo,
+                                               Strings.label_menu_item_undo_hint)
+        self.disableable_menu_items.append(self.edit_menu_item_undo)
+        self.edit_menu_item_redo = wx.MenuItem(self.edit_menu, wx.ID_REDO, Strings.label_menu_item_redo,
+                                               Strings.label_menu_item_redo_hint)
+        self.disableable_menu_items.append(self.edit_menu_item_redo)
+        self.edit_menu_item_paste = wx.MenuItem(self.edit_menu, wx.ID_PASTE, Strings.label_menu_item_paste,
+                                                Strings.label_menu_item_paste_hint)
+        self.disableable_menu_items.append(self.edit_menu_item_paste)
+        self.edit_menu_item_copy = wx.MenuItem(self.edit_menu, wx.ID_COPY, Strings.label_menu_item_copy,
+                                               Strings.label_menu_item_copy_hint)
+        self.disableable_menu_items.append(self.edit_menu_item_copy)
+        self.edit_menu_item_cut = wx.MenuItem(self.edit_menu, wx.ID_CUT, Strings.label_menu_item_cut,
+                                              Strings.label_menu_item_cut_hint)
+        self.disableable_menu_items.append(self.edit_menu_item_cut)
+        self.edit_menu_item_select_all = wx.MenuItem(self.edit_menu, wx.ID_SELECTALL,
+                                                     Strings.label_menu_item_select_all,
+                                                     Strings.label_menu_item_select_all_hint)
+        self.disableable_menu_items.append(self.edit_menu_item_select_all)
+        self.edit_menu_item_insert_img = wx.MenuItem(self.edit_menu, wx.ID_ANY, Strings.label_menu_item_insert_img,
+                                                     Strings.label_menu_item_insert_img_hint)
+        self.disableable_menu_items.append(self.edit_menu_item_insert_img)
+        self.edit_menu_item_insert_link = wx.MenuItem(self.edit_menu, wx.ID_ANY, Strings.label_menu_item_insert_link,
+                                                      Strings.label_menu_item_insert_link_hint)
+        self.disableable_menu_items.append(self.edit_menu_item_insert_link)
+
+        # About menu ---------------------------------------------------------------------------------------------------
+        self.help_menu_item_about = wx.MenuItem(self.help_menu, wx.ID_ABOUT, Strings.label_menu_item_about,
+                                                Strings.label_menu_item_about_hint)
+        self.disableable_menu_items.append(self.help_menu_item_about)
         self.help_menu.Append(self.help_menu_item_about)
 
         self.SetMenuBar(self.menu_bar)
 
     def make_menu_bar(self):
-        # TODO incorporate this into our menu system
-        def do_bind(item, handler, update_ui=None):
-            self.Bind(wx.EVT_MENU, handler, item)
-            if update_ui is not None:
-                self.Bind(wx.EVT_UPDATE_UI, update_ui, item)
-
-        edit_menu = wx.Menu()
-        do_bind(edit_menu.Append(wx.ID_SELECTALL, "Select A&ll\tCtrl+A"),
-                self.forward_event, self.forward_event)
-        do_bind(edit_menu.Append(wx.ID_CUT, "Cut"), self.forward_event, self.forward_event)
-        do_bind(edit_menu.Append(wx.ID_COPY, 'Copy', ), self.forward_event, self.forward_event)
-        do_bind(edit_menu.Append(wx.ID_PASTE, 'Paste'), self.forward_event, self.forward_event)
-        do_bind(edit_menu.Append(wx.ID_UNDO, 'Undo'), self.forward_event, self.forward_event)
-        do_bind(edit_menu.Append(wx.ID_REDO, 'Redo'), self.forward_event, self.forward_event)
-        do_bind(edit_menu.Append(-1, 'Color'), self.on_colour)
-        do_bind(edit_menu.Append(-1, 'Insert image\tCtrl+i'), self.on_insert_image)
-        do_bind(edit_menu.Append(-1, 'Insert link'), self.on_insert_link)
-        do_bind(edit_menu.Append(-1, 'Insert list'), self.on_insert_list)
-
-        mb = wx.MenuBar()
-        mb.Append(edit_menu, "&Edit")
-        self.SetMenuBar(mb)
+        # TODO generate color changing toolbar buttons
+        #do_bind(edit_menu.Append(-1, 'Color'), self.on_colour)
+        pass
 
     def _add_tool_id(self) -> wx.NewId():
         """
