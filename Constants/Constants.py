@@ -19,6 +19,10 @@ class Numbers:
     photo_column_width: int = 300
     edit_image_dialog_width: int = 900
     edit_image_dialog_height: int = 300
+    paragraph_spacing: int = 20
+    heading_1_size: int = 16
+    list_left_indent: int = 20
+    list_left_subindent: int = 25
 
     # SEO values
     year_min: int = 2000
@@ -150,6 +154,11 @@ class Strings:
     status_invalid: str = 'Invalid:'
     status_articles: str = 'Articles:'
     status_ok: str = 'Ok'
+
+    style_paragraph: str = 'Paragraph'
+    style_heading: str = 'Title'
+    style_list: str = 'List'
+    style_image: str = 'Image'
 
     toolbar_new_file: str = 'New file'
 

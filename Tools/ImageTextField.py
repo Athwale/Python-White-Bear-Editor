@@ -3,7 +3,7 @@ from wx.richtext import RichTextFieldTypeStandard, RichTextField, RichTextCtrl, 
 from Constants.Constants import Strings
 
 
-class FieldCustom(RichTextFieldTypeStandard):
+class ImageTextField(RichTextFieldTypeStandard):
     """
     Custom RichTextFieldType class with image edit dialog.
     """

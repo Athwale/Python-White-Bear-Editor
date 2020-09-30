@@ -13,6 +13,7 @@ from Gui.Panels.AsideImagePanel import AsideImagePanel
 from Threads.FileListThread import FileListThread
 from Tools.ConfigManager import ConfigManager
 from Tools.Document.WhitebearDocumentArticle import WhitebearDocumentArticle
+from Tools.ImageTextField import ImageTextField
 from Tools.Tools import Tools
 
 
@@ -36,12 +37,16 @@ class MainFrame(wx.Frame):
         self.disableable_menu_items = []
         self.document_dictionary = {}
         self.current_document = None
+        self.stylesheet = rt.RichTextStyleSheet()
+        self.stylesheet.SetName('Stylesheet')
 
         self._init_status_bar()
         self._init_top_tool_bar()
         self._init_menu()
         self._init_sizers_panels()
         self._inflate_sizers()
+        self._create_styles()
+        self._add_text_handlers()
         self._bind_handlers()
 
         # Set minimal size of the frame on screen, smaller frame would squish GUI too much.
@@ -59,6 +64,69 @@ class MainFrame(wx.Frame):
             self.Maximize()
         else:
             self.SetSize(size)
+
+    @staticmethod
+    def _add_text_handlers() -> None:
+        """
+        Add handler to the main text area rich text control to be able to save in xml and remove plain text handler.
+        :return: None
+        """
+        rt.RichTextBuffer.AddHandler(rt.RichTextXMLHandler(name="XML", ext="xml", type=99))
+        rt.RichTextBuffer.RemoveHandler('Text')
+
+    def _create_styles(self) -> None:
+        """
+        Create styles for rich text control.
+        :return: None
+        """
+        # Normal style
+        stl_n: rt.RichTextAttr = self.main_text_area.GetDefaultStyleEx()
+        style_normal: rt.RichTextParagraphStyleDefinition = rt.RichTextParagraphStyleDefinition(Strings.style_paragraph)
+        style_normal.SetStyle(stl_n)
+        style_normal.SetNextStyle(Strings.style_paragraph)
+        self.stylesheet.AddParagraphStyle(style_normal)
+        self.main_text_area.ApplyStyle(style_normal)
+
+        # Heading style
+        stl_h: rt.RichTextAttr = self.main_text_area.GetDefaultStyleEx()
+        stl_h.SetAlignment(wx.TEXT_ALIGNMENT_LEFT)
+        stl_h.SetFontWeight(wx.BOLD)
+        stl_h.SetFontSize(Numbers.heading_1_size)
+        stl_h.SetParagraphSpacingAfter(Numbers.paragraph_spacing)
+        style_title: rt.RichTextParagraphStyleDefinition = rt.RichTextParagraphStyleDefinition(Strings.style_heading)
+        style_title.SetStyle(stl_h)
+        style_title.SetNextStyle(Strings.style_paragraph)
+        self.stylesheet.AddParagraphStyle(style_title)
+
+        # List style
+        stl_l: rt.RichTextAttr = self.main_text_area.GetDefaultStyleEx()
+        stl_l.SetAlignment(wx.TEXT_ALIGNMENT_LEFT)
+        stl_l.SetParagraphSpacingAfter(Numbers.paragraph_spacing)
+        stl_l.SetParagraphSpacingBefore(Numbers.paragraph_spacing)
+        stl_l_1: rt.RichTextAttr = self.main_text_area.GetDefaultStyleEx()
+        stl_l_1.SetBulletStyle(wx.TEXT_ATTR_BULLET_STYLE_STANDARD)
+        stl_l_1.SetLeftIndent(Numbers.list_left_indent, Numbers.list_left_subindent)
+
+        style_list: rt.RichTextListStyleDefinition = rt.RichTextListStyleDefinition(Strings.style_list)
+        style_list.SetLevelAttributes(0, stl_l_1)
+        style_list.SetStyle(stl_l)
+        style_list.SetNextStyle(Strings.style_paragraph)
+        self.stylesheet.AddParagraphStyle(style_list)
+
+        # Image style
+        stl_i: rt.RichTextAttr = self.main_text_area.GetDefaultStyleEx()
+        stl_i.SetAlignment(wx.TEXT_ALIGNMENT_CENTER)
+        stl_i.SetParagraphSpacingAfter(Numbers.paragraph_spacing)
+        stl_i.SetParagraphSpacingBefore(Numbers.paragraph_spacing)
+        style_image: rt.RichTextParagraphStyleDefinition = rt.RichTextParagraphStyleDefinition(Strings.style_image)
+        style_image.SetStyle(stl_i)
+        style_image.SetNextStyle(Strings.style_paragraph)
+        self.stylesheet.AddParagraphStyle(style_image)
+
+        self.main_text_area.SetStyleSheet(self.stylesheet)
+        self.style_control.SetRichTextCtrl(self.main_text_area)
+        self.style_control.SetStyleSheet(self.stylesheet)
+        self.style_control.UpdateStyles()
 
     def _init_menu(self) -> None:
         """
@@ -103,6 +171,30 @@ class MainFrame(wx.Frame):
 
         self.SetMenuBar(self.menu_bar)
 
+    def make_menu_bar(self):
+        # TODO incorporate this into our menu system
+        def do_bind(item, handler, update_ui=None):
+            self.Bind(wx.EVT_MENU, handler, item)
+            if update_ui is not None:
+                self.Bind(wx.EVT_UPDATE_UI, update_ui, item)
+
+        edit_menu = wx.Menu()
+        do_bind(edit_menu.Append(wx.ID_SELECTALL, "Select A&ll\tCtrl+A"),
+                self.forward_event, self.forward_event)
+        do_bind(edit_menu.Append(wx.ID_CUT, "Cut"), self.forward_event, self.forward_event)
+        do_bind(edit_menu.Append(wx.ID_COPY, 'Copy', ), self.forward_event, self.forward_event)
+        do_bind(edit_menu.Append(wx.ID_PASTE, 'Paste'), self.forward_event, self.forward_event)
+        do_bind(edit_menu.Append(wx.ID_UNDO, 'Undo'), self.forward_event, self.forward_event)
+        do_bind(edit_menu.Append(wx.ID_REDO, 'Redo'), self.forward_event, self.forward_event)
+        do_bind(edit_menu.Append(-1, 'Color'), self.on_colour)
+        do_bind(edit_menu.Append(-1, 'Insert image\tCtrl+i'), self.on_insert_image)
+        do_bind(edit_menu.Append(-1, 'Insert link'), self.on_insert_link)
+        do_bind(edit_menu.Append(-1, 'Insert list'), self.on_insert_list)
+
+        mb = wx.MenuBar()
+        mb.Append(edit_menu, "&Edit")
+        self.SetMenuBar(mb)
+
     def _add_tool_id(self) -> wx.NewId():
         """
         Create and return a new wx ID for a tool in the toolbar, at the same time save the id in a list that is used
@@ -123,6 +215,8 @@ class MainFrame(wx.Frame):
         self._add_tool_id()
         self.tool_bar.AddTool(self._add_tool_id(), Strings.toolbar_new_file, images.getPyBitmap(),
                               Strings.toolbar_new_file)
+        self.style_control = rt.RichTextStyleComboCtrl(self.tool_bar, -1)
+        self.tool_bar.AddControl(self.style_control)
         self.tool_bar.Realize()
 
     def _init_status_bar(self) -> None:
@@ -332,6 +426,9 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_LIST_ITEM_SELECTED, self.list_item_click_handler, self.page_list)
         self.Bind(wx.EVT_SPLITTER_SASH_POS_CHANGING, self.splitter_size_change_handler, self.split_screen)
 
+        # Bind main text area handlers
+        self.Bind(wx.EVT_TEXT_URL, self.url_in_text_click_handler, self.main_text_area)
+
     def _set_status_text(self, text: str, position=0) -> None:
         """
         Set a text into a position in status bar and prepend a separator.
@@ -421,6 +518,65 @@ class MainFrame(wx.Frame):
         self._set_status_text(Strings.status_ready, 3)
         self._set_status_text(Strings.status_articles + ' ' + str(len(self.document_dictionary)), 2)
         self._disable_editor(False)
+
+    def url_in_text_click_handler(self, evt) -> None:
+        """
+        Handles click on url links inside text.
+        :param evt: Not used
+        :return: None
+        """
+        print(self.main_text_area.GetNumberOfLines())
+        link = self.main_text_area.GetRange(evt.GetURLStart(), evt.GetURLEnd() + 1)
+        wx.MessageBox(evt.GetString() + ' ' + link, "URL Clicked")
+
+    def on_insert_image(self, evt):
+        field = self.main_text_area.WriteField('imageFieldType', rt.RichTextProperties())
+        field.SetName('image1')
+
+    def on_insert_link(self, evt):
+        url_style = rt.RichTextAttr()
+        url_style.SetTextColour(wx.BLUE)
+        url_style.SetFontUnderlined(True)
+
+        self.main_text_area.BeginStyle(url_style)
+        self.main_text_area.BeginURL('www.google.com')
+        self.main_text_area.WriteText('google')
+        self.main_text_area.EndURL()
+        self.main_text_area.EndStyle()
+
+    def on_insert_list(self, evt):
+        self.main_text_area.BeginSymbolBullet('*', 40, 25)
+        self.main_text_area.WriteText('List item')
+        self.main_text_area.Newline()
+        self.main_text_area.EndSymbolBullet()
+
+    def on_bold(self, evt):
+        self.main_text_area.ApplyBoldToSelection()
+
+    def on_colour(self, evt):
+        colour_data = wx.ColourData()
+        attr = wx.TextAttr()
+        attr.SetFlags(wx.TEXT_ATTR_TEXT_COLOUR)
+        if self.main_text_area.GetStyle(self.main_text_area.GetInsertionPoint(), attr):
+            colour_data.SetColour(attr.GetTextColour())
+
+        colour = wx.RED
+        if not self.main_text_area.HasSelection():
+            self.main_text_area.BeginTextColour(colour)
+        else:
+            r = self.main_text_area.GetSelectionRange()
+            attr.SetFlags(wx.TEXT_ATTR_TEXT_COLOUR)
+            attr.SetTextColour(colour)
+            self.main_text_area.SetStyle(r, attr)
+
+    def forward_event(self, evt) -> None:
+        """
+        The RichTextCtrl can handle menu and update events for undo, redo, cut, copy, paste, delete, and select all,
+        so just forward the event to it.
+        :param evt: Event to forward
+        :return: None
+        """
+        self.main_text_area.ProcessEvent(evt)
 
     def quit_button_handler(self, event):
         """
@@ -599,6 +755,13 @@ class MainFrame(wx.Frame):
         selected_document_color = self.document_dictionary[self.current_document].get_status_color()
         selected_item = self.page_list.GetFirstSelected()
         self.page_list.SetItemBackgroundColour(selected_item, selected_document_color)
+
+    def register_fields(self) -> None:
+        # TODO use this to make images in text
+        self.field_type = ImageTextField('imageFieldType', bitmap=wx.Bitmap(
+            wx.Image('/home/omejzlik/PycharmProjects/Python-White-Bear-Editor/Resources/main_image_missing.png',
+                     wx.BITMAP_TYPE_PNG)), display_style=rt.RichTextFieldTypeStandard.RICHTEXT_FIELD_STYLE_RECTANGLE)
+        rt.RichTextBuffer.AddFieldType(self.field_type)
 
     def aside_panel_edit_handler(self, event) -> None:
         """
