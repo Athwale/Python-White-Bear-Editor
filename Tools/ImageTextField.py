@@ -1,5 +1,6 @@
 import wx
 from wx.richtext import RichTextFieldTypeStandard, RichTextField, RichTextCtrl, RichTextBuffer
+
 from Constants.Constants import Strings
 
 

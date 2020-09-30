@@ -188,6 +188,14 @@ class MainFrame(wx.Frame):
         self.edit_menu_item_insert_link = wx.MenuItem(self.edit_menu, wx.ID_ANY, Strings.label_menu_item_insert_link,
                                                       Strings.label_menu_item_insert_link_hint)
         self.disableable_menu_items.append(self.edit_menu_item_insert_link)
+        self.edit_menu.Append(self.edit_menu_item_undo)
+        self.edit_menu.Append(self.edit_menu_item_redo)
+        self.edit_menu.Append(self.edit_menu_item_copy)
+        self.edit_menu.Append(self.edit_menu_item_cut)
+        self.edit_menu.Append(self.edit_menu_item_paste)
+        self.edit_menu.Append(self.edit_menu_item_select_all)
+        self.edit_menu.Append(self.edit_menu_item_insert_img)
+        self.edit_menu.Append(self.edit_menu_item_insert_link)
 
         # About menu ---------------------------------------------------------------------------------------------------
         self.help_menu_item_about = wx.MenuItem(self.help_menu, wx.ID_ABOUT, Strings.label_menu_item_about,
@@ -199,7 +207,7 @@ class MainFrame(wx.Frame):
 
     def make_menu_bar(self):
         # TODO generate color changing toolbar buttons
-        #do_bind(edit_menu.Append(-1, 'Color'), self.on_colour)
+        # do_bind(edit_menu.Append(-1, 'Color'), self.on_colour)
         pass
 
     def _add_tool_id(self) -> wx.NewId():
@@ -428,6 +436,14 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.open_button_handler, self.file_menu_item_open)
         self.Bind(wx.EVT_MENU, self.quit_button_handler, self.file_menu_item_quit)
         self.Bind(wx.EVT_MENU, self.reload_button_handler, self.file_menu_item_reload)
+        self.Bind(wx.EVT_MENU, self.forward_event, self.edit_menu_item_cut)
+        self.Bind(wx.EVT_MENU, self.forward_event, self.edit_menu_item_copy)
+        self.Bind(wx.EVT_MENU, self.forward_event, self.edit_menu_item_paste)
+        self.Bind(wx.EVT_MENU, self.forward_event, self.edit_menu_item_undo)
+        self.Bind(wx.EVT_MENU, self.forward_event, self.edit_menu_item_redo)
+        self.Bind(wx.EVT_MENU, self.forward_event, self.edit_menu_item_select_all)
+        self.Bind(wx.EVT_MENU, self.on_insert_image, self.edit_menu_item_insert_img)
+        self.Bind(wx.EVT_MENU, self.on_insert_link, self.edit_menu_item_insert_link)
 
         # Bind other controls clicks
         self.Bind(wx.EVT_LIST_ITEM_SELECTED, self.list_item_click_handler, self.page_list)
@@ -550,12 +566,6 @@ class MainFrame(wx.Frame):
         self.main_text_area.WriteText('google')
         self.main_text_area.EndURL()
         self.main_text_area.EndStyle()
-
-    def on_insert_list(self, evt):
-        self.main_text_area.BeginSymbolBullet('*', 40, 25)
-        self.main_text_area.WriteText('List item')
-        self.main_text_area.Newline()
-        self.main_text_area.EndSymbolBullet()
 
     def on_bold(self, evt):
         self.main_text_area.ApplyBoldToSelection()

@@ -103,7 +103,7 @@ class Strings:
     label_menu_file: str = 'File'
     label_menu_item_open: str = 'Open directory...\tctrl+o'
     label_menu_item_open_hint: str = 'Open a whitebear web directory'
-    label_menu_item_reload: str = 'Reload file from disk\tctrl+r'
+    label_menu_item_reload: str = 'Reload file from disk'
     label_menu_item_reload_hint: str = 'Parse file again from disk'
 
     label_menu_item_quit: str = 'Quit\tctrl+q'
@@ -122,7 +122,7 @@ class Strings:
     label_menu_item_cut_hint: str = 'Cut'
     label_menu_item_copy: str = 'Copy\tctrl+c'
     label_menu_item_copy_hint: str = 'Copy'
-    label_menu_item_paste: str = 'Paste\tctrl+u'
+    label_menu_item_paste: str = 'Paste\tctrl+v'
     label_menu_item_paste_hint: str = 'Paste'
     label_menu_item_select_all: str = 'Select all\tctrl+a'
     label_menu_item_select_all_hint: str = 'Select all'
