@@ -3,13 +3,13 @@ from typing import Dict
 
 import wx
 import wx.richtext as rt
-from wx.py import images
 
 from Constants.Constants import Numbers
 from Constants.Constants import Strings
 from Exceptions.UnrecognizedFileException import UnrecognizedFileException
 from Gui.Dialogs.AboutDialog import AboutDialog
 from Gui.Panels.AsideImagePanel import AsideImagePanel
+from Resources.Fetch import Fetch
 from Threads.FileListThread import FileListThread
 from Tools.ConfigManager import ConfigManager
 from Tools.Document.WhitebearDocumentArticle import WhitebearDocumentArticle
@@ -207,6 +207,7 @@ class MainFrame(wx.Frame):
 
     def make_menu_bar(self):
         # TODO generate color changing toolbar buttons
+        # TODO disable text functions when in certain styles
         # do_bind(edit_menu.Append(-1, 'Color'), self.on_colour)
         pass
 
@@ -225,13 +226,31 @@ class MainFrame(wx.Frame):
         Set up top tool bar for the frame.
         :return: None
         """
+        def scale_icon(name: str) -> wx.Bitmap:
+            path = Fetch.get_resource_path(name)
+            image = wx.Image(path, wx.BITMAP_TYPE_ANY)
+            image = image.Scale(Numbers.icon_width, Numbers.icon_height, wx.IMAGE_QUALITY_HIGH)
+            return wx.Bitmap(image)
+
         self.tool_bar = self.CreateToolBar(style=wx.TB_DEFAULT_STYLE)
         # Add toolbar tools
-        self._add_tool_id()
-        self.tool_bar.AddTool(self._add_tool_id(), Strings.toolbar_new_file, images.getPyBitmap(),
-                              Strings.toolbar_new_file)
         self.style_control = rt.RichTextStyleComboCtrl(self.tool_bar, -1)
         self.tool_bar.AddControl(self.style_control)
+        self.tool_bar.AddTool(self._add_tool_id(), Strings.toolbar_new_file,
+                              scale_icon('new-file.png'),
+                              Strings.toolbar_new_file)
+        self.tool_bar.AddTool(self._add_tool_id(), Strings.toolbar_save,
+                              scale_icon('save.png'),
+                              Strings.toolbar_save)
+        self.tool_bar.AddTool(self._add_tool_id(), Strings.toolbar_insert_img,
+                              scale_icon('insert-image.png'),
+                              Strings.toolbar_insert_img)
+        self.tool_bar.AddTool(self._add_tool_id(), Strings.toolbar_insert_link,
+                              scale_icon('insert-link.png'),
+                              Strings.toolbar_insert_link)
+        self.tool_bar.AddTool(self._add_tool_id(), Strings.toolbar_bold,
+                              scale_icon('bold.png'),
+                              Strings.toolbar_bold)
         self.tool_bar.Realize()
 
     def _init_status_bar(self) -> None:

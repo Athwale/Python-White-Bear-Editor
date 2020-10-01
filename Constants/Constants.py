@@ -23,6 +23,8 @@ class Numbers:
     heading_1_size: int = 16
     list_left_indent: int = 20
     list_left_subindent: int = 25
+    icon_width: int = 30
+    icon_height: int = 30
 
     # SEO values
     year_min: int = 2000
@@ -179,6 +181,10 @@ class Strings:
     style_image: str = 'Image'
 
     toolbar_new_file: str = 'New file'
+    toolbar_bold: str = 'Bold'
+    toolbar_insert_img: str = 'Insert image'
+    toolbar_insert_link: str = 'Insert link'
+    toolbar_save: str = 'Save'
 
     button_close: str = 'Close'
     button_cancel: str = 'Cancel'
