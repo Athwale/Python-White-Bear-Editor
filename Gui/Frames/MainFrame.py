@@ -247,7 +247,7 @@ class MainFrame(wx.Frame):
                                                scale_icon('bold.png'),
                                                Strings.toolbar_bold)
         # TODO create tools according to css colors
-        # TODO create remove color tool
+        # TODO create remove color (black) tool
         self._create_color_tool(self.tool_bar, wx.RED)
         self.Bind(wx.EVT_MENU, self.on_insert_image, self.insert_img_tool)
         self.Bind(wx.EVT_MENU, self.on_insert_link, self.insert_link_tool)

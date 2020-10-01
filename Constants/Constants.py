@@ -72,6 +72,7 @@ class Strings:
 
     exception_access: str = 'Main directory not readable'
     exception_access_html: str = 'File can not be accessed'
+    exception_access_css: str = 'File styles.css missing'
     exception_index: str = 'index.html is not in directory'
     exception_not_white_bear: str = 'Not a white Bear web directory'
     exception_file_unrecognized: str = 'Unrecognized or malformed white-bear html file:'

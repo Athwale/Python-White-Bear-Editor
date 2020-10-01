@@ -193,7 +193,8 @@ class WhitebearDocumentArticle(WhitebearDocument):
         :return: None
         """
         text_section = self._parsed_html.find(name='section', attrs={'class': 'mainText'})
-        print(text_section)
+        # TODO this
+        # print(text_section)
 
     def _parse_page_name(self) -> None:
         """
