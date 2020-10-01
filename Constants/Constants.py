@@ -185,6 +185,7 @@ class Strings:
     toolbar_insert_img: str = 'Insert image'
     toolbar_insert_link: str = 'Insert link'
     toolbar_save: str = 'Save'
+    toolbar_color: str = 'Color text'
 
     button_close: str = 'Close'
     button_cancel: str = 'Cancel'

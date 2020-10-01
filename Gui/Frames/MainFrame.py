@@ -41,13 +41,13 @@ class MainFrame(wx.Frame):
         self.stylesheet.SetName('Stylesheet')
 
         self._init_status_bar()
-        self._init_top_tool_bar()
         self._init_menu()
         self._init_sizers_panels()
         self._inflate_sizers()
-        self._create_styles()
         self._add_text_handlers()
         self._bind_handlers()
+        self._init_top_tool_bar()
+        self._create_styles()
 
         # Set minimal size of the frame on screen, smaller frame would squish GUI too much.
         self.SetMinClientSize(wx.Size(Numbers.minimal_window_size_width, Numbers.minimal_window_size_height))
@@ -205,12 +205,6 @@ class MainFrame(wx.Frame):
 
         self.SetMenuBar(self.menu_bar)
 
-    def make_menu_bar(self):
-        # TODO generate color changing toolbar buttons
-        # TODO disable text functions when in certain styles
-        # do_bind(edit_menu.Append(-1, 'Color'), self.on_colour)
-        pass
-
     def _add_tool_id(self) -> wx.NewId():
         """
         Create and return a new wx ID for a tool in the toolbar, at the same time save the id in a list that is used
@@ -226,6 +220,7 @@ class MainFrame(wx.Frame):
         Set up top tool bar for the frame.
         :return: None
         """
+
         def scale_icon(name: str) -> wx.Bitmap:
             path = Fetch.get_resource_path(name)
             image = wx.Image(path, wx.BITMAP_TYPE_ANY)
@@ -236,22 +231,54 @@ class MainFrame(wx.Frame):
         # Add toolbar tools
         self.style_control = rt.RichTextStyleComboCtrl(self.tool_bar, -1)
         self.tool_bar.AddControl(self.style_control)
-        self.tool_bar.AddTool(self._add_tool_id(), Strings.toolbar_new_file,
-                              scale_icon('new-file.png'),
-                              Strings.toolbar_new_file)
-        self.tool_bar.AddTool(self._add_tool_id(), Strings.toolbar_save,
-                              scale_icon('save.png'),
-                              Strings.toolbar_save)
-        self.tool_bar.AddTool(self._add_tool_id(), Strings.toolbar_insert_img,
-                              scale_icon('insert-image.png'),
-                              Strings.toolbar_insert_img)
-        self.tool_bar.AddTool(self._add_tool_id(), Strings.toolbar_insert_link,
-                              scale_icon('insert-link.png'),
-                              Strings.toolbar_insert_link)
-        self.tool_bar.AddTool(self._add_tool_id(), Strings.toolbar_bold,
-                              scale_icon('bold.png'),
-                              Strings.toolbar_bold)
+        self.new_file_tool = self.tool_bar.AddTool(self._add_tool_id(), Strings.toolbar_new_file,
+                                                   scale_icon('new-file.png'),
+                                                   Strings.toolbar_new_file)
+        self.save_tool = self.tool_bar.AddTool(self._add_tool_id(), Strings.toolbar_save,
+                                               scale_icon('save.png'),
+                                               Strings.toolbar_save)
+        self.insert_img_tool = self.tool_bar.AddTool(self._add_tool_id(), Strings.toolbar_insert_img,
+                                                     scale_icon('insert-image.png'),
+                                                     Strings.toolbar_insert_img)
+        self.insert_link_tool = self.tool_bar.AddTool(self._add_tool_id(), Strings.toolbar_insert_link,
+                                                      scale_icon('insert-link.png'),
+                                                      Strings.toolbar_insert_link)
+        self.bold_tool = self.tool_bar.AddTool(self._add_tool_id(), Strings.toolbar_bold,
+                                               scale_icon('bold.png'),
+                                               Strings.toolbar_bold)
+        # TODO create tools according to css colors
+        # TODO create remove color tool
+        self._create_color_tool(self.tool_bar, wx.RED)
+        self.Bind(wx.EVT_MENU, self.on_insert_image, self.insert_img_tool)
+        self.Bind(wx.EVT_MENU, self.on_insert_link, self.insert_link_tool)
+        self.Bind(wx.EVT_MENU, self.on_bold, self.bold_tool)
         self.tool_bar.Realize()
+
+    def _create_color_tool(self, toolbar: wx.ToolBar, color: wx.Colour) -> None:
+        """
+        Create a tool for the toolbar with  a colored square button.
+        :param toolbar: Application's toolbar
+        :param color: The color to use.
+        :return: None
+        """
+        bmp = self._make_bitmap(color)
+        tool = toolbar.AddTool(self._add_tool_id(), Strings.toolbar_color, bmp, Strings.toolbar_color)
+        self.Bind(wx.EVT_MENU, self.on_color, tool)
+
+    @staticmethod
+    def _make_bitmap(color: wx.Colour) -> wx.Bitmap:
+        """
+        Create a colored bitmap for a toolbar button
+        :param color: The color to use.
+        :return: wx.Bitmap
+        """
+        bmp = wx.Bitmap(Numbers.icon_width, Numbers.icon_height)
+        dc = wx.MemoryDC()
+        dc.SelectObject(bmp)
+        dc.SetBackground(wx.Brush(color))
+        dc.Clear()
+        dc.SelectObject(wx.NullBitmap)
+        return bmp
 
     def _init_status_bar(self) -> None:
         """
@@ -496,6 +523,7 @@ class MainFrame(wx.Frame):
             self.split_screen.Enable()
             self.page_list.SetBackgroundColour(wx.WHITE)
             self.page_list.SetForegroundColour(wx.BLACK)
+            self.style_control.UpdateStyles()
         # Disable toolbar buttons
         for tool_id in self.tool_ids:
             self.tool_bar.EnableTool(tool_id, (not state))
@@ -589,7 +617,7 @@ class MainFrame(wx.Frame):
     def on_bold(self, evt):
         self.main_text_area.ApplyBoldToSelection()
 
-    def on_colour(self, evt):
+    def on_color(self, evt):
         colour_data = wx.ColourData()
         attr = wx.TextAttr()
         attr.SetFlags(wx.TEXT_ATTR_TEXT_COLOUR)
