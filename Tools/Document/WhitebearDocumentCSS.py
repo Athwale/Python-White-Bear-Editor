@@ -20,7 +20,8 @@ class WhitebearDocumentCSS:
         """
         self._filename = name
         self._file_path = path
-        self._color_dict = {}
+        # Prepare the color dictionary with a black color which is always the default text color.
+        self._color_dict = {'black': Colour(0, 0, 0)}
         self._parse_self()
 
     def _parse_self(self) -> None:
@@ -30,7 +31,6 @@ class WhitebearDocumentCSS:
         """
         parser = tinycss.make_parser('page3')
         stylesheet = parser.parse_stylesheet_file(self._file_path)
-        print(stylesheet.errors)
 
         for rule in stylesheet.rules:
             if rule.selector.as_css().startswith('.'):
@@ -45,8 +45,6 @@ class WhitebearDocumentCSS:
                     if dec_names == ['color', 'display']:
                         color = Colour(dec_color.red, dec_color.green, dec_color.blue)
                         self._color_dict[rule.selector.as_css().lstrip('.')] = color
-
-        print(self._color_dict)
 
     def get_colors(self) -> Dict[str, Colour]:
         """

@@ -13,6 +13,7 @@ from Resources.Fetch import Fetch
 from Threads.FileListThread import FileListThread
 from Tools.ConfigManager import ConfigManager
 from Tools.Document.WhitebearDocumentArticle import WhitebearDocumentArticle
+from Tools.Document.WhitebearDocumentCSS import WhitebearDocumentCSS
 from Tools.ImageTextField import ImageTextField
 from Tools.Tools import Tools
 
@@ -37,6 +38,7 @@ class MainFrame(wx.Frame):
         self.disableable_menu_items = []
         self.document_dictionary = {}
         self.current_document = None
+        self.css_colors = None
         self.stylesheet = rt.RichTextStyleSheet()
         self.stylesheet.SetName('Stylesheet')
 
@@ -246,23 +248,21 @@ class MainFrame(wx.Frame):
         self.bold_tool = self.tool_bar.AddTool(self._add_tool_id(), Strings.toolbar_bold,
                                                scale_icon('bold.png'),
                                                Strings.toolbar_bold)
-        # TODO create tools according to css colors
-        # TODO create remove color (black) tool
-        self._create_color_tool(self.tool_bar, wx.RED)
         self.Bind(wx.EVT_MENU, self.on_insert_image, self.insert_img_tool)
         self.Bind(wx.EVT_MENU, self.on_insert_link, self.insert_link_tool)
         self.Bind(wx.EVT_MENU, self.on_bold, self.bold_tool)
         self.tool_bar.Realize()
 
-    def _create_color_tool(self, toolbar: wx.ToolBar, color: wx.Colour) -> None:
+    def _create_color_tool(self, name: str, toolbar: wx.ToolBar, color: wx.Colour) -> None:
         """
         Create a tool for the toolbar with  a colored square button.
+        :param name: Name of the color
         :param toolbar: Application's toolbar
         :param color: The color to use.
         :return: None
         """
         bmp = self._make_bitmap(color)
-        tool = toolbar.AddTool(self._add_tool_id(), Strings.toolbar_color, bmp, Strings.toolbar_color)
+        tool = toolbar.AddTool(self._add_tool_id(), Strings.toolbar_color, bmp, name)
         self.Bind(wx.EVT_MENU, self.on_color, tool)
 
     @staticmethod
@@ -272,7 +272,7 @@ class MainFrame(wx.Frame):
         :param color: The color to use.
         :return: wx.Bitmap
         """
-        bmp = wx.Bitmap(Numbers.icon_width, Numbers.icon_height)
+        bmp = wx.Bitmap(Numbers.color_icon_height, Numbers.color_icon_width)
         dc = wx.MemoryDC()
         dc.SelectObject(bmp)
         dc.SetBackground(wx.Brush(color))
@@ -563,6 +563,16 @@ class MainFrame(wx.Frame):
         self._show_error_dialog(str(e))
         self._disable_editor(True)
 
+    def on_css_parsed(self, css: WhitebearDocumentCSS) -> None:
+        """
+        Generates text color tools in tool bar once css is parsed.
+        :param css: The parsed css file.
+        :return: None
+        """
+        self.css_colors = css.get_colors()
+        for name, color in self.css_colors.items():
+            self._create_color_tool(name, self.tool_bar, color)
+
     def on_filelist_loaded(self, documents: Dict[str, WhitebearDocumentArticle]) -> None:
         """
         This method fills up the left side page file list and is called when the FileListThread finishes.
@@ -617,20 +627,21 @@ class MainFrame(wx.Frame):
     def on_bold(self, evt):
         self.main_text_area.ApplyBoldToSelection()
 
-    def on_color(self, evt):
+    def on_color(self, evt: wx.CommandEvent):
         colour_data = wx.ColourData()
         attr = wx.TextAttr()
         attr.SetFlags(wx.TEXT_ATTR_TEXT_COLOUR)
         if self.main_text_area.GetStyle(self.main_text_area.GetInsertionPoint(), attr):
             colour_data.SetColour(attr.GetTextColour())
 
-        colour = wx.RED
+        tool: wx.ToolBarToolBase = self.tool_bar.FindById(evt.GetId())
+        color = self.css_colors[tool.GetShortHelp()]
         if not self.main_text_area.HasSelection():
-            self.main_text_area.BeginTextColour(colour)
+            self.main_text_area.BeginTextColour(color)
         else:
             r = self.main_text_area.GetSelectionRange()
             attr.SetFlags(wx.TEXT_ATTR_TEXT_COLOUR)
-            attr.SetTextColour(colour)
+            attr.SetTextColour(color)
             self.main_text_area.SetStyle(r, attr)
 
     def forward_event(self, evt) -> None:

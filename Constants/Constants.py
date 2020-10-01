@@ -25,6 +25,8 @@ class Numbers:
     list_left_subindent: int = 25
     icon_width: int = 30
     icon_height: int = 30
+    color_icon_width: int = 15
+    color_icon_height: int = 15
 
     # SEO values
     year_min: int = 2000
