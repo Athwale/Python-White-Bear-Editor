@@ -1,5 +1,5 @@
-import wx.richtext as rt
 import wx
+import wx.richtext as rt
 
 from Constants.Constants import Strings, Numbers
 from Tools.Document.WhitebearDocumentArticle import WhitebearDocumentArticle
@@ -51,13 +51,15 @@ class CustomRichText(rt.RichTextCtrl):
         :return: None
         """
         # Normal style
-        stl_normal: rt.RichTextAttr = self.GetDefaultStyleEx()
-        stl_normal.SetParagraphSpacingAfter(20)
-        style_normal: rt.RichTextParagraphStyleDefinition = rt.RichTextParagraphStyleDefinition(Strings.style_paragraph)
-        style_normal.SetStyle(stl_normal)
-        style_normal.SetNextStyle(Strings.style_paragraph)
-        self.stylesheet.AddParagraphStyle(style_normal)
-        self.ApplyStyle(style_normal)
+        stl_paragraph: rt.RichTextAttr = self.GetDefaultStyleEx()
+        stl_paragraph.SetParagraphSpacingAfter(20)
+        style_paragraph: rt.RichTextParagraphStyleDefinition = rt.RichTextParagraphStyleDefinition(
+            Strings.style_paragraph)
+        style_paragraph.SetStyle(stl_paragraph)
+        style_paragraph.SetNextStyle(Strings.style_paragraph)
+        self.stylesheet.AddParagraphStyle(style_paragraph)
+        self.ApplyStyle(style_paragraph)
+        self.SetDefaultStyle(stl_paragraph)
 
         # Heading style
         stl_heading_3: rt.RichTextAttr = self.GetDefaultStyleEx()
@@ -99,6 +101,19 @@ class CustomRichText(rt.RichTextCtrl):
         self.style_control.SetRichTextCtrl(self)
         self.style_control.SetStyleSheet(self.stylesheet)
         self.style_control.UpdateStyles()
+
+        # Set main text
+        self.BeginStyle(stl_paragraph)
+        self.WriteText(
+            'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam id velit sed libero accumsan tincidunt. '
+            'Praesent porta molestie lobortis. Integer erat lorem, ultricies in venenatis sit amet, tempus in sem. Ut '
+            'iaculis est mattis felis ullamcorper imperdiet id sed est. In hac habitasse platea dictumst. Praesent in')
+        self.LineBreak()
+        self.WriteText(
+            'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam id velit sed libero accumsan tincidunt. '
+            'Praesent porta molestie lobortis. Integer erat lorem, ultricies in venenatis sit amet, tempus in sem. Ut '
+            'iaculis est mattis felis ullamcorper imperdiet id sed est.')
+        self.EndStyle()
 
     def set_document(self, doc: WhitebearDocumentArticle) -> None:
         """
@@ -145,8 +160,8 @@ class CustomRichText(rt.RichTextCtrl):
         self.ApplyBoldToSelection()
 
     def on_keypress(self, event):
-        style_carrier = wx.TextAttr()
-        style_carrier.SetFlags(wx.TEXT_ATTR_PARAGRAPH)
-        self.GetUncombinedStyle(self.GetAdjustedCaretPosition(self.GetCaretPosition()), style_carrier)
-        print(style_carrier == self.stylesheet.FindParagraphStyle(Strings.style_list).GetStyle())
+        current_style = self.stylesheet.FindParagraphStyle(Strings.style_paragraph).GetStyle()
+        style_carrier = rt.RichTextAttr()
+        self.GetStyle(self.GetAdjustedCaretPosition(self.GetCaretPosition()), style_carrier)
+        print(style_carrier.GetParagraphStyleName() == current_style.GetParagraphStyleName())
         event.Skip()

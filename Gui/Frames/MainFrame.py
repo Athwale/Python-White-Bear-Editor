@@ -729,24 +729,7 @@ class MainFrame(wx.Frame):
         self.menu_logo_image.SetBitmap(wx.Bitmap(doc.get_menu_item().get_menu_image()))
         # Set aside images
         self.side_photo_panel.load_document_images(doc)
-
-        # Set main text
-        self.main_text_area.WriteText(
-            'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam id velit sed libero accumsan tincidunt. '
-            'Praesent porta molestie lobortis. Integer erat lorem, ultricies in venenatis sit amet, tempus in sem. Ut '
-            'iaculis est mattis felis ullamcorper imperdiet id sed est. In hac habitasse platea dictumst. Praesent in '
-            'massa eu purus pellentesque consequat sit amet id sapien. Vivamus ut ligula semper erat rutrum lacinia '
-            'vitae sed quam. Pellentesque erat leo, sagittis non leo sit amet, faucibus luctus turpis. Fusce metus'
-            'purus, imperdiet eget leo quis, consectetur rutrum nisi. Lorem ipsum dolor sit amet, consectetur '
-            'adipiscing elit. Etiam maximus tempor velit, in sollicitudin nisi lacinia vel. Vivamus lorem augue, '
-            'varius ut posuere eget, eleifend vitae augue. Nullam vel ullamcorper lacus. Curabitur in augue sed augue '
-            'sagittis tristique at sed tellus. Nullam et venenatis nisl. Phasellus turpis turpis, maximus id '
-            'consectetur eget, efficitur non purus.')
-        self.main_text_area.LineBreak()
-        self.main_text_area.WriteText(
-            'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam id velit sed libero accumsan tincidunt. '
-            'Praesent porta molestie lobortis. Integer erat lorem, ultricies in venenatis sit amet, tempus in sem. Ut '
-            'iaculis est mattis felis ullamcorper imperdiet id sed est.')
+        # TODO fill main text by passing the dccument into the custom control
 
         self._disable_editor(False)
 
