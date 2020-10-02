@@ -193,7 +193,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
         :return: None
         """
         text_section = self._parsed_html.find(name='section', attrs={'class': 'mainText'})
-        # TODO this
+        # TODO this make link dict and image list
         print(text_section)
 
     def _parse_page_name(self) -> None:

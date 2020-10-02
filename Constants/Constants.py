@@ -182,6 +182,7 @@ class Strings:
     style_heading: str = 'Title'
     style_list: str = 'List'
     style_image: str = 'Image'
+    style_url: str = 'Url'
 
     toolbar_new_file: str = 'New file'
     toolbar_bold: str = 'Bold'

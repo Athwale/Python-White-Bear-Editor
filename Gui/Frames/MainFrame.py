@@ -9,6 +9,7 @@ from Constants.Constants import Strings
 from Exceptions.UnrecognizedFileException import UnrecognizedFileException
 from Gui.Dialogs.AboutDialog import AboutDialog
 from Gui.Panels.AsideImagePanel import AsideImagePanel
+from Gui.Panels.CustomRichText import CustomRichText
 from Resources.Fetch import Fetch
 from Threads.FileListThread import FileListThread
 from Tools.ConfigManager import ConfigManager
@@ -82,47 +83,47 @@ class MainFrame(wx.Frame):
         :return: None
         """
         # Normal style
-        stl_n: rt.RichTextAttr = self.main_text_area.GetDefaultStyleEx()
-        stl_n.SetParagraphSpacingAfter(20)
+        stl_normal: rt.RichTextAttr = self.main_text_area.GetDefaultStyleEx()
+        stl_normal.SetParagraphSpacingAfter(20)
         style_normal: rt.RichTextParagraphStyleDefinition = rt.RichTextParagraphStyleDefinition(Strings.style_paragraph)
-        style_normal.SetStyle(stl_n)
+        style_normal.SetStyle(stl_normal)
         style_normal.SetNextStyle(Strings.style_paragraph)
         self.stylesheet.AddParagraphStyle(style_normal)
         self.main_text_area.ApplyStyle(style_normal)
 
         # Heading style
-        stl_h: rt.RichTextAttr = self.main_text_area.GetDefaultStyleEx()
-        stl_h.SetAlignment(wx.TEXT_ALIGNMENT_LEFT)
-        stl_h.SetFontWeight(wx.BOLD)
-        stl_h.SetFontSize(Numbers.heading_1_size)
-        stl_h.SetParagraphSpacingAfter(Numbers.paragraph_spacing)
+        stl_heading_3: rt.RichTextAttr = self.main_text_area.GetDefaultStyleEx()
+        stl_heading_3.SetAlignment(wx.TEXT_ALIGNMENT_LEFT)
+        stl_heading_3.SetFontWeight(wx.BOLD)
+        stl_heading_3.SetFontSize(Numbers.heading_1_size)
+        stl_heading_3.SetParagraphSpacingAfter(Numbers.paragraph_spacing)
         style_title: rt.RichTextParagraphStyleDefinition = rt.RichTextParagraphStyleDefinition(Strings.style_heading)
-        style_title.SetStyle(stl_h)
+        style_title.SetStyle(stl_heading_3)
         style_title.SetNextStyle(Strings.style_paragraph)
         self.stylesheet.AddParagraphStyle(style_title)
 
         # List style
-        stl_l: rt.RichTextAttr = self.main_text_area.GetDefaultStyleEx()
-        stl_l.SetAlignment(wx.TEXT_ALIGNMENT_LEFT)
-        stl_l.SetParagraphSpacingAfter(Numbers.paragraph_spacing)
-        stl_l.SetParagraphSpacingBefore(Numbers.paragraph_spacing)
-        stl_l_1: rt.RichTextAttr = self.main_text_area.GetDefaultStyleEx()
-        stl_l_1.SetBulletStyle(wx.TEXT_ATTR_BULLET_STYLE_STANDARD)
-        stl_l_1.SetLeftIndent(Numbers.list_left_indent, Numbers.list_left_subindent)
+        stl_list: rt.RichTextAttr = self.main_text_area.GetDefaultStyleEx()
+        stl_list.SetAlignment(wx.TEXT_ALIGNMENT_LEFT)
+        stl_list.SetParagraphSpacingAfter(Numbers.paragraph_spacing)
+        stl_list.SetParagraphSpacingBefore(Numbers.paragraph_spacing)
+        stl_list_1: rt.RichTextAttr = self.main_text_area.GetDefaultStyleEx()
+        stl_list_1.SetBulletStyle(wx.TEXT_ATTR_BULLET_STYLE_STANDARD)
+        stl_list_1.SetLeftIndent(Numbers.list_left_indent, Numbers.list_left_subindent)
 
         style_list: rt.RichTextListStyleDefinition = rt.RichTextListStyleDefinition(Strings.style_list)
-        style_list.SetLevelAttributes(0, stl_l_1)
-        style_list.SetStyle(stl_l)
+        style_list.SetLevelAttributes(0, stl_list_1)
+        style_list.SetStyle(stl_list)
         style_list.SetNextStyle(Strings.style_paragraph)
         self.stylesheet.AddParagraphStyle(style_list)
 
         # Image style
-        stl_i: rt.RichTextAttr = self.main_text_area.GetDefaultStyleEx()
-        stl_i.SetAlignment(wx.TEXT_ALIGNMENT_CENTER)
-        stl_i.SetParagraphSpacingAfter(Numbers.paragraph_spacing)
-        stl_i.SetParagraphSpacingBefore(Numbers.paragraph_spacing)
+        stl_image: rt.RichTextAttr = self.main_text_area.GetDefaultStyleEx()
+        stl_image.SetAlignment(wx.TEXT_ALIGNMENT_CENTER)
+        stl_image.SetParagraphSpacingAfter(Numbers.paragraph_spacing)
+        stl_image.SetParagraphSpacingBefore(Numbers.paragraph_spacing)
         style_image: rt.RichTextParagraphStyleDefinition = rt.RichTextParagraphStyleDefinition(Strings.style_image)
-        style_image.SetStyle(stl_i)
+        style_image.SetStyle(stl_image)
         style_image.SetNextStyle(Strings.style_paragraph)
         self.stylesheet.AddParagraphStyle(style_image)
 
@@ -449,7 +450,7 @@ class MainFrame(wx.Frame):
         # --------------------------------------------------------------------------------------------------------------
 
         # Main text area section ---------------------------------------------------------------------------------------
-        self.main_text_area = rt.RichTextCtrl(self.right_panel, style=wx.VSCROLL)
+        self.main_text_area = CustomRichText(self.right_panel, style=wx.VSCROLL)
         self.right_bottom_sizer.Add(self.main_text_area, flag=wx.EXPAND | wx.LEFT | wx.TOP, proportion=1, border=2)
         self.right_bottom_sizer.Add(self.side_photo_column_sizer, flag=wx.EXPAND | wx.LEFT,
                                     border=Numbers.widget_border_size)
@@ -615,11 +616,14 @@ class MainFrame(wx.Frame):
         field.SetName('image1')
 
     def on_insert_link(self, evt):
-        url_style = rt.RichTextAttr()
-        url_style.SetTextColour(wx.BLUE)
-        url_style.SetFontUnderlined(True)
+        # TODO do something with this
+        # TODO Try catching keypresses earlier and check style then replace this with a style
+        # Url Style
+        stl_url = self.main_text_area.GetDefaultStyleEx()
+        stl_url.SetTextColour(wx.BLUE)
+        stl_url.SetFontUnderlined(True)
 
-        self.main_text_area.BeginStyle(url_style)
+        self.main_text_area.BeginStyle(stl_url)
         self.main_text_area.BeginURL('www.google.com')
         self.main_text_area.WriteText('google')
         self.main_text_area.EndURL()
