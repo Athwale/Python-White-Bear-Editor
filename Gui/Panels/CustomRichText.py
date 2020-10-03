@@ -28,7 +28,6 @@ class CustomRichText(rt.RichTextCtrl):
         self._add_text_handlers()
 
         main_frame = wx.GetTopLevelParent(self)
-        # TODO pick correct event, key down gets handled too early
         self.Bind(wx.EVT_KEY_UP, self.on_keypress)
         self.Bind(wx.EVT_TEXT_URL, self.url_in_text_click_handler, self)
         self.Bind(wx.EVT_MENU, self.on_insert_image, main_frame.edit_menu_item_insert_img)
@@ -36,6 +35,8 @@ class CustomRichText(rt.RichTextCtrl):
         self.Bind(wx.EVT_MENU, self.on_insert_image, main_frame.insert_img_tool)
         self.Bind(wx.EVT_MENU, self.on_insert_link, main_frame.insert_link_tool)
         self.Bind(wx.EVT_MENU, self.on_bold, main_frame.bold_tool)
+
+        self.insert_sample_text()
 
     @staticmethod
     def _add_text_handlers() -> None:
@@ -159,14 +160,32 @@ class CustomRichText(rt.RichTextCtrl):
         return style_carrier.GetParagraphStyleName()
 
     def on_keypress(self, event):
-        # TODO how to tell we are at the end of a paragraph?
-        # TODO bacha na to co znamnea predemnou, to je primo ta pozice kde stojim.
+        """
+
+        :param event:
+        :return:
+        """
         current_style = self.stylesheet.FindParagraphStyle(Strings.style_paragraph).GetStyle().GetParagraphStyleName()
-        current_positon = self.GetCaretPosition()
-        print('pos: ' + str(current_positon))
-        print('previous: ' + str(self._get_style_at_pos(current_positon - 1) + ' ' + self.GetRange(current_positon - 1, current_positon)))
-        print('current: ' + str(self._get_style_at_pos(current_positon + 1) + ' ' + self.GetRange(current_positon, current_positon + 1)))
-        print('next: ' + str(self._get_style_at_pos(current_positon + 2) + ' ' + self.GetRange(current_positon + 1, current_positon + 2)))
+        current_position = self.GetCaretPosition()
+        print('pos: ' + str(current_position))
+        print('previous: ' + str(self._get_style_at_pos(current_position - 1) + ' ' + self.GetRange(current_position - 1, current_position)))
+        print('current: ' + str(self._get_style_at_pos(current_position + 1) + ' ' + self.GetRange(current_position, current_position + 1)))
+        print('next: ' + str(self._get_style_at_pos(current_position + 2) + ' ' + self.GetRange(current_position + 1, current_position + 2)))
 
         print(self._get_style_at_pos(0) == current_style)
         event.Skip()
+
+    def insert_sample_text(self) -> None:
+        if True:
+            self.BeginParagraphStyle(Strings.style_paragraph)
+            self.WriteText('paragraph1')
+            self.EndParagraphStyle()
+
+            self.Newline()
+
+            self.ApplyStyle(self.stylesheet.FindParagraphStyle(Strings.style_heading))
+            self.BeginParagraphStyle(Strings.style_heading)
+            self.WriteText('paragraph1')
+            self.EndParagraphStyle()
+
+
