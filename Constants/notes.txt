@@ -4,7 +4,6 @@ Automaticky generovat datum
 Zkontrolovat nastaveni spatnyho adresare
 
 TODO:
-parse and check main text
 add methods for reruning seo check on field edits
 Sanity check the richtext output for errors like image inside a heading
 use right click in side images to edit and move up/down
