@@ -28,7 +28,8 @@ class CustomRichText(rt.RichTextCtrl):
         self._add_text_handlers()
 
         main_frame = wx.GetTopLevelParent(self)
-        self.Bind(wx.EVT_KEY_DOWN, self.on_keypress)
+        # TODO pick correct event, key down gets handled too early
+        self.Bind(wx.EVT_KEY_UP, self.on_keypress)
         self.Bind(wx.EVT_TEXT_URL, self.url_in_text_click_handler, self)
         self.Bind(wx.EVT_MENU, self.on_insert_image, main_frame.edit_menu_item_insert_img)
         self.Bind(wx.EVT_MENU, self.on_insert_link, main_frame.edit_menu_item_insert_link)
@@ -67,10 +68,10 @@ class CustomRichText(rt.RichTextCtrl):
         stl_heading_3.SetFontWeight(wx.BOLD)
         stl_heading_3.SetFontSize(Numbers.heading_1_size)
         stl_heading_3.SetParagraphSpacingAfter(Numbers.paragraph_spacing)
-        style_title: rt.RichTextParagraphStyleDefinition = rt.RichTextParagraphStyleDefinition(Strings.style_heading)
-        style_title.SetStyle(stl_heading_3)
-        style_title.SetNextStyle(Strings.style_paragraph)
-        self.stylesheet.AddParagraphStyle(style_title)
+        style_h3: rt.RichTextParagraphStyleDefinition = rt.RichTextParagraphStyleDefinition(Strings.style_heading)
+        style_h3.SetStyle(stl_heading_3)
+        style_h3.SetNextStyle(Strings.style_paragraph)
+        self.stylesheet.AddParagraphStyle(style_h3)
 
         # List style
         stl_list: rt.RichTextAttr = self.GetDefaultStyleEx()
@@ -101,19 +102,6 @@ class CustomRichText(rt.RichTextCtrl):
         self.style_control.SetRichTextCtrl(self)
         self.style_control.SetStyleSheet(self.stylesheet)
         self.style_control.UpdateStyles()
-
-        # Set main text
-        self.BeginStyle(stl_paragraph)
-        self.WriteText(
-            'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam id velit sed libero accumsan tincidunt. '
-            'Praesent porta molestie lobortis. Integer erat lorem, ultricies in venenatis sit amet, tempus in sem. Ut '
-            'iaculis est mattis felis ullamcorper imperdiet id sed est. In hac habitasse platea dictumst. Praesent in')
-        self.LineBreak()
-        self.WriteText(
-            'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam id velit sed libero accumsan tincidunt. '
-            'Praesent porta molestie lobortis. Integer erat lorem, ultricies in venenatis sit amet, tempus in sem. Ut '
-            'iaculis est mattis felis ullamcorper imperdiet id sed est.')
-        self.EndStyle()
 
     def set_document(self, doc: WhitebearDocumentArticle) -> None:
         """
@@ -159,9 +147,26 @@ class CustomRichText(rt.RichTextCtrl):
         """
         self.ApplyBoldToSelection()
 
-    def on_keypress(self, event):
-        current_style = self.stylesheet.FindParagraphStyle(Strings.style_paragraph).GetStyle()
+    def _get_style_at_pos(self, position: int = 0) -> str:
+        """
+        Get the style name at given position in the text. 0 - current position, -1 - before current position
+        1 - after current position.
+        :param position: The position.
+        :return: Style name.
+        """
         style_carrier = rt.RichTextAttr()
-        self.GetStyle(self.GetAdjustedCaretPosition(self.GetCaretPosition()), style_carrier)
-        print(style_carrier.GetParagraphStyleName() == current_style.GetParagraphStyleName())
+        self.GetStyle(position, style_carrier)
+        return style_carrier.GetParagraphStyleName()
+
+    def on_keypress(self, event):
+        # TODO how to tell we are at the end of a paragraph?
+        # TODO bacha na to co znamnea predemnou, to je primo ta pozice kde stojim.
+        current_style = self.stylesheet.FindParagraphStyle(Strings.style_paragraph).GetStyle().GetParagraphStyleName()
+        current_positon = self.GetCaretPosition()
+        print('pos: ' + str(current_positon))
+        print('previous: ' + str(self._get_style_at_pos(current_positon - 1) + ' ' + self.GetRange(current_positon - 1, current_positon)))
+        print('current: ' + str(self._get_style_at_pos(current_positon + 1) + ' ' + self.GetRange(current_positon, current_positon + 1)))
+        print('next: ' + str(self._get_style_at_pos(current_positon + 2) + ' ' + self.GetRange(current_positon + 1, current_positon + 2)))
+
+        print(self._get_style_at_pos(0) == current_style)
         event.Skip()
