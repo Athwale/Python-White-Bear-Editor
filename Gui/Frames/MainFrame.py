@@ -15,7 +15,6 @@ from Threads.FileListThread import FileListThread
 from Tools.ConfigManager import ConfigManager
 from Tools.Document.WhitebearDocumentArticle import WhitebearDocumentArticle
 from Tools.Document.WhitebearDocumentCSS import WhitebearDocumentCSS
-from Tools.ImageTextField import ImageTextField
 from Tools.Tools import Tools
 
 
@@ -741,13 +740,6 @@ class MainFrame(wx.Frame):
         selected_document_color = self.document_dictionary[self.current_document].get_status_color()
         selected_item = self.page_list.GetFirstSelected()
         self.page_list.SetItemBackgroundColour(selected_item, selected_document_color)
-
-    def register_fields(self) -> None:
-        # TODO use this to make images in text
-        self.field_type = ImageTextField('imageFieldType', bitmap=wx.Bitmap(
-            wx.Image('/home/omejzlik/PycharmProjects/Python-White-Bear-Editor/Resources/main_image_missing.png',
-                     wx.BITMAP_TYPE_PNG)), display_style=rt.RichTextFieldTypeStandard.RICHTEXT_FIELD_STYLE_RECTANGLE)
-        rt.RichTextBuffer.AddFieldType(self.field_type)
 
     def aside_panel_edit_handler(self, event) -> None:
         """

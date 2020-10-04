@@ -3,6 +3,7 @@ import wx.richtext as rt
 
 from Constants.Constants import Strings, Numbers
 from Tools.Document.WhitebearDocumentArticle import WhitebearDocumentArticle
+from Tools.ImageTextField import ImageTextField
 
 
 class CustomRichText(rt.RichTextCtrl):
@@ -36,6 +37,7 @@ class CustomRichText(rt.RichTextCtrl):
         self.Bind(wx.EVT_MENU, self.on_insert_link, main_frame.insert_link_tool)
         self.Bind(wx.EVT_MENU, self.on_bold, main_frame.bold_tool)
 
+        self.register_field()
         self.insert_sample_text()
 
     @staticmethod
@@ -175,8 +177,16 @@ class CustomRichText(rt.RichTextCtrl):
         print(self._get_style_at_pos(0) == current_style)
         event.Skip()
 
+    def register_field(self) -> None:
+        # TODO use this to make images in text
+        self.field_type = ImageTextField('imageFieldType', bitmap=wx.Bitmap(
+            wx.Image('/home/omejzlik/PycharmProjects/Python-White-Bear-Editor/Resources/main_image_missing.png',
+                     wx.BITMAP_TYPE_PNG)), display_style=rt.RichTextFieldTypeStandard.RICHTEXT_FIELD_STYLE_RECTANGLE)
+        rt.RichTextBuffer.AddFieldType(self.field_type)
+
     def insert_sample_text(self) -> None:
         if True:
+            self.ApplyStyle(self.stylesheet.FindParagraphStyle(Strings.style_paragraph))
             self.BeginParagraphStyle(Strings.style_paragraph)
             self.WriteText('paragraph1')
             self.EndParagraphStyle()
@@ -185,7 +195,47 @@ class CustomRichText(rt.RichTextCtrl):
 
             self.ApplyStyle(self.stylesheet.FindParagraphStyle(Strings.style_heading))
             self.BeginParagraphStyle(Strings.style_heading)
-            self.WriteText('paragraph1')
+            self.WriteText('Heading3')
             self.EndParagraphStyle()
+
+            self.Newline()
+
+            self.ApplyStyle(self.stylesheet.FindParagraphStyle(Strings.style_paragraph))
+            self.BeginParagraphStyle(Strings.style_paragraph)
+            self.WriteText('paragraph2')
+            self.EndParagraphStyle()
+
+            self.Newline()
+
+            self.ApplyStyle(self.stylesheet.FindParagraphStyle(Strings.style_list))
+            self.BeginParagraphStyle(Strings.style_list)
+            self.WriteText('List item 1\n')
+            self.WriteText('List item 2\n')
+            self.WriteText('List item 3\n')
+            self.EndParagraphStyle()
+
+            self.ApplyStyle(self.stylesheet.FindParagraphStyle(Strings.style_paragraph))
+            self.BeginParagraphStyle(Strings.style_paragraph)
+            self.WriteText('paragraph4')
+            self.EndParagraphStyle()
+
+            self.Newline()
+
+            self.ApplyStyle(self.stylesheet.FindParagraphStyle(Strings.style_image))
+            self.BeginParagraphStyle(Strings.style_image)
+            field = self.WriteField('imageFieldType', rt.RichTextProperties())
+            field.SetName('image1')
+            self.WriteText('\n')
+            self.EndParagraphStyle()
+
+            self.ApplyStyle(self.stylesheet.FindParagraphStyle(Strings.style_paragraph))
+            self.BeginParagraphStyle(Strings.style_paragraph)
+            self.WriteText('paragraph5')
+            self.EndParagraphStyle()
+
+            # TODO get rid of style control, use buttons instead
+
+
+            # TODO make link style and clickability
 
 
