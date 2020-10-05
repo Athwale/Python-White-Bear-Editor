@@ -106,13 +106,14 @@ class EditImageDialog(wx.Dialog):
         self.main_vertical_sizer.Add(self.button_sizer, 0, flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM,
                                      border=Numbers.widget_border_size)
         self.SetSizer(self.main_vertical_sizer)
-        self._display_image()
+        self._display_dialog_contents()
 
-    def _display_image(self) -> None:
+    def _display_dialog_contents(self) -> None:
         """
-        Display the image that this dialog edits in the gui.
+        Display the image that this dialog edits in the gui along with field values and errors.
         :return: None
         """
+        # TODO make interactive when the user edits it.s
         self.Disable()
         # Set image data
         field_to_value = {self.field_image_caption: (self._image.get_image_caption(), self.field_image_caption_tip),
@@ -147,6 +148,7 @@ class EditImageDialog(wx.Dialog):
             self.content_image_thumbnail_path.SetLabelText(self._image.get_thumbnail_filename())
 
         # Set target blank checkbox state
+        # TODO check this, maybe it has to be disabled always.
         if isinstance(self._image, AsideImage):
             self.checkbox_target_blank.Disable()
             self.checkbox_target_blank.SetValue(True)

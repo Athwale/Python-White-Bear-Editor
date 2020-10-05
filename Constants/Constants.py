@@ -19,6 +19,7 @@ class Numbers:
     photo_column_width: int = 300
     edit_image_dialog_width: int = 900
     edit_image_dialog_height: int = 300
+    edit_link_dialog_height: int = 240
     paragraph_spacing: int = 20
     heading_1_size: int = 16
     list_left_indent: int = 20
@@ -145,6 +146,7 @@ class Strings:
     label_dialog_choose_wb_dir: str = 'Choose whitebear directory'
     label_dialog_about: str = 'About'
     label_dialog_edit_image: str = 'Edit image'
+    label_dialog_edit_link: str = 'Edit link'
 
     label_article_menu_logo: str = 'Menu logo'
     label_article_menu_logo_name_placeholder: str = 'Menu item name'
@@ -168,6 +170,8 @@ class Strings:
     label_alt_description: str = 'Alt description'
     label_none: str = 'None'
     label_open_in_new_page: str = 'Open image in new page'
+    label_url: str = 'URL'
+    lable_text: str = 'Text'
 
     status_loading: str = 'Loading'
     status_ready: str = 'Ready'

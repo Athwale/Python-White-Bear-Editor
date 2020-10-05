@@ -387,7 +387,7 @@ class MainFrame(wx.Frame):
 
     def _setup_main_text_area(self) -> None:
         """
-        This is in separame method because it has to be run once other object are created.
+        This is in separate method because it has to be run once other object are created.
         :return: None
         """
         # Main text area section ---------------------------------------------------------------------------------------
@@ -728,7 +728,8 @@ class MainFrame(wx.Frame):
         self.menu_logo_image.SetBitmap(wx.Bitmap(doc.get_menu_item().get_menu_image()))
         # Set aside images
         self.side_photo_panel.load_document_images(doc)
-        # TODO fill main text by passing the dccument into the custom control
+        # TODO fill main text by passing the document into the custom control
+        self.main_text_area.set_content(self.current_document, list(self.document_dictionary.keys()))
 
         self._disable_editor(False)
 

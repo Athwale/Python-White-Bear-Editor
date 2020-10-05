@@ -1,7 +1,10 @@
+from typing import List
+
 import wx
 import wx.richtext as rt
 
 from Constants.Constants import Strings, Numbers
+from Gui.Dialogs.EditLinkDialog import EditLinkDialog
 from Tools.Document.WhitebearDocumentArticle import WhitebearDocumentArticle
 from Tools.ImageTextField import ImageTextField
 
@@ -18,12 +21,14 @@ class CustomRichText(rt.RichTextCtrl):
         :param parent: Parent of this control.
         :param style: wx style attributes.
         """
+        # TODO pass the buttons in in a dictionary and also get the loaded document list
         super().__init__(parent, -1, style=style)
         self._parent = parent
-        self.stylesheet = rt.RichTextStyleSheet()
-        self.stylesheet.SetName('Stylesheet')
-        self.style_control = style_control
-        self.document = None
+        self._stylesheet = rt.RichTextStyleSheet()
+        self._stylesheet.SetName('Stylesheet')
+        self._style_control = style_control
+        self._document = None
+        self._loaded_pages = None
 
         self._create_styles()
         self._add_text_handlers()
@@ -61,7 +66,7 @@ class CustomRichText(rt.RichTextCtrl):
             Strings.style_paragraph)
         style_paragraph.SetStyle(stl_paragraph)
         style_paragraph.SetNextStyle(Strings.style_paragraph)
-        self.stylesheet.AddParagraphStyle(style_paragraph)
+        self._stylesheet.AddParagraphStyle(style_paragraph)
         self.ApplyStyle(style_paragraph)
         self.SetDefaultStyle(stl_paragraph)
 
@@ -74,7 +79,7 @@ class CustomRichText(rt.RichTextCtrl):
         style_h3: rt.RichTextParagraphStyleDefinition = rt.RichTextParagraphStyleDefinition(Strings.style_heading)
         style_h3.SetStyle(stl_heading_3)
         style_h3.SetNextStyle(Strings.style_paragraph)
-        self.stylesheet.AddParagraphStyle(style_h3)
+        self._stylesheet.AddParagraphStyle(style_h3)
 
         # List style
         stl_list: rt.RichTextAttr = self.GetDefaultStyleEx()
@@ -89,7 +94,7 @@ class CustomRichText(rt.RichTextCtrl):
         style_list.SetLevelAttributes(0, stl_list_1)
         style_list.SetStyle(stl_list)
         style_list.SetNextStyle(Strings.style_paragraph)
-        self.stylesheet.AddParagraphStyle(style_list)
+        self._stylesheet.AddParagraphStyle(style_list)
 
         # Image style
         stl_image: rt.RichTextAttr = self.GetDefaultStyleEx()
@@ -99,7 +104,7 @@ class CustomRichText(rt.RichTextCtrl):
         style_image: rt.RichTextParagraphStyleDefinition = rt.RichTextParagraphStyleDefinition(Strings.style_image)
         style_image.SetStyle(stl_image)
         style_image.SetNextStyle(Strings.style_paragraph)
-        self.stylesheet.AddParagraphStyle(style_image)
+        self._stylesheet.AddParagraphStyle(style_image)
 
         # Link style
         stl_link = rt.RichTextAttr()
@@ -108,20 +113,22 @@ class CustomRichText(rt.RichTextCtrl):
         stl_link.SetTextColour(wx.BLUE)
         style_link: rt.RichTextCharacterStyleDefinition = rt.RichTextCharacterStyleDefinition(Strings.style_url)
         style_link.SetStyle(stl_link)
-        self.stylesheet.AddCharacterStyle(style_link)
+        self._stylesheet.AddCharacterStyle(style_link)
 
-        self.SetStyleSheet(self.stylesheet)
-        self.style_control.SetRichTextCtrl(self)
-        self.style_control.SetStyleSheet(self.stylesheet)
-        self.style_control.UpdateStyles()
+        self.SetStyleSheet(self._stylesheet)
+        self._style_control.SetRichTextCtrl(self)
+        self._style_control.SetStyleSheet(self._stylesheet)
+        self._style_control.UpdateStyles()
 
-    def set_document(self, doc: WhitebearDocumentArticle) -> None:
+    def set_content(self, doc: WhitebearDocumentArticle, pages: List[str]) -> None:
         """
-        Set which document this text area is displaying.
+        Set which document this text area is displaying and which pages are loaded.
         :param doc: The white bear article.
+        :param pages: A list of all loaded documents
         :return: None
         """
-        self.document = doc
+        self._document = doc
+        self._loaded_pages = pages
 
     def url_in_text_click_handler(self, evt) -> None:
         """
@@ -139,12 +146,17 @@ class CustomRichText(rt.RichTextCtrl):
 
     def on_insert_link(self, evt: wx.CommandEvent) -> None:
         """
-        Make text into an url.
+        Insert a url link in the current position.
         :param evt: Unused,
         :return: None
         """
-        # TODO show a dialog
-        # TODO if style is link make the insert link button pressed and stop the style on unpress
+        edit_dialog = EditLinkDialog(self, self._loaded_pages)
+        result = edit_dialog.ShowModal()
+        if result == wx.ID_OK:
+            # TODO set document modified if an edit has been made in the dialog
+            # TODO change the link in the editor
+            print('Ok')
+        edit_dialog.Destroy()
         self.insert_link('www.google.com', 'google')
 
     def insert_link(self, url: str, text: str) -> None:
@@ -154,11 +166,12 @@ class CustomRichText(rt.RichTextCtrl):
         :param text: The visible text.
         :return: None
         """
-        self.BeginStyle(self.stylesheet.FindCharacterStyle(Strings.style_url).GetStyle())
+        self.BeginStyle(self._stylesheet.FindCharacterStyle(Strings.style_url).GetStyle())
         self.BeginURL(url)
         self.WriteText(text)
         self.EndURL()
         self.EndStyle()
+        # TODO edit link in place (create a link edit dialog)
 
     def on_bold(self, evt) -> None:
         """
@@ -185,7 +198,7 @@ class CustomRichText(rt.RichTextCtrl):
         :param event:
         :return:
         """
-        current_style = self.stylesheet.FindParagraphStyle(Strings.style_paragraph).GetStyle().GetParagraphStyleName()
+        current_style = self._stylesheet.FindParagraphStyle(Strings.style_paragraph).GetStyle().GetParagraphStyleName()
         current_position = self.GetCaretPosition()
         print('pos: ' + str(current_position))
         print('previous: ' + str(str(self._get_style_at_pos(current_position - 1)) + ' ' + self.GetRange(current_position - 1, current_position)))
@@ -204,49 +217,49 @@ class CustomRichText(rt.RichTextCtrl):
 
     def insert_sample_text(self) -> None:
         if True:
-            self.ApplyStyle(self.stylesheet.FindParagraphStyle(Strings.style_paragraph))
+            self.ApplyStyle(self._stylesheet.FindParagraphStyle(Strings.style_paragraph))
             self.BeginParagraphStyle(Strings.style_paragraph)
             self.WriteText('paragraph1')
             self.EndParagraphStyle()
 
             self.Newline()
 
-            self.ApplyStyle(self.stylesheet.FindParagraphStyle(Strings.style_heading))
+            self.ApplyStyle(self._stylesheet.FindParagraphStyle(Strings.style_heading))
             self.BeginParagraphStyle(Strings.style_heading)
             self.WriteText('Heading3')
             self.EndParagraphStyle()
 
             self.Newline()
 
-            self.ApplyStyle(self.stylesheet.FindParagraphStyle(Strings.style_paragraph))
+            self.ApplyStyle(self._stylesheet.FindParagraphStyle(Strings.style_paragraph))
             self.BeginParagraphStyle(Strings.style_paragraph)
             self.WriteText('paragraph2')
             self.EndParagraphStyle()
 
             self.Newline()
 
-            self.ApplyStyle(self.stylesheet.FindParagraphStyle(Strings.style_list))
+            self.ApplyStyle(self._stylesheet.FindParagraphStyle(Strings.style_list))
             self.BeginParagraphStyle(Strings.style_list)
             self.WriteText('List item 1\n')
             self.WriteText('List item 2\n')
             self.WriteText('List item 3\n')
             self.EndParagraphStyle()
 
-            self.ApplyStyle(self.stylesheet.FindParagraphStyle(Strings.style_paragraph))
+            self.ApplyStyle(self._stylesheet.FindParagraphStyle(Strings.style_paragraph))
             self.BeginParagraphStyle(Strings.style_paragraph)
             self.WriteText('paragraph4')
             self.EndParagraphStyle()
 
             self.Newline()
 
-            self.ApplyStyle(self.stylesheet.FindParagraphStyle(Strings.style_image))
+            self.ApplyStyle(self._stylesheet.FindParagraphStyle(Strings.style_image))
             self.BeginParagraphStyle(Strings.style_image)
             field = self.WriteField('imageFieldType', rt.RichTextProperties())
             field.SetName('image1')
             self.WriteText('\n')
             self.EndParagraphStyle()
 
-            self.ApplyStyle(self.stylesheet.FindParagraphStyle(Strings.style_paragraph))
+            self.ApplyStyle(self._stylesheet.FindParagraphStyle(Strings.style_paragraph))
             self.BeginParagraphStyle(Strings.style_paragraph)
             self.WriteText('paragraph5 sample of a longer text for testing url creation ')
             self.insert_link('www.seznam.cz', 'link from code')
@@ -254,13 +267,9 @@ class CustomRichText(rt.RichTextCtrl):
 
             self.Newline()
 
-            self.ApplyStyle(self.stylesheet.FindParagraphStyle(Strings.style_paragraph))
+            self.ApplyStyle(self._stylesheet.FindParagraphStyle(Strings.style_paragraph))
             self.BeginParagraphStyle(Strings.style_paragraph)
             self.insert_link('www.seznam.cz', 'link from code')
             self.EndParagraphStyle()
-
-            # TODO make link style and clickability
-
-            # TODO get rid of style control, use buttons instead
 
 
