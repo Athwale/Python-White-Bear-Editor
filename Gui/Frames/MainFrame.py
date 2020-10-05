@@ -543,7 +543,7 @@ class MainFrame(wx.Frame):
         """
         self.main_text_area.ProcessEvent(evt)
 
-    def on_color(self, evt: wx.CommandEvent):
+    def on_color(self, evt: wx.CommandEvent) -> None:
         """
         Color text based on which button was clicked.
         :param evt: Used to get which color to use.
@@ -565,7 +565,7 @@ class MainFrame(wx.Frame):
             attr.SetTextColour(color)
             self.main_text_area.SetStyle(r, attr)
 
-    def quit_button_handler(self, event):
+    def quit_button_handler(self, event) -> None:
         """
         Handles clicks to the Quit button in File menu. Calls Close function which sends EVT_CLOSE and triggers
         close_button_handler() which does all the saving work.

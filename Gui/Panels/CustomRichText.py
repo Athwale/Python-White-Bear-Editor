@@ -101,6 +101,15 @@ class CustomRichText(rt.RichTextCtrl):
         style_image.SetNextStyle(Strings.style_paragraph)
         self.stylesheet.AddParagraphStyle(style_image)
 
+        # Link style
+        stl_link = rt.RichTextAttr()
+        stl_link.SetFlags(wx.TEXT_ATTR_URL)
+        stl_link.SetFontUnderlined(True)
+        stl_link.SetTextColour(wx.BLUE)
+        style_link: rt.RichTextCharacterStyleDefinition = rt.RichTextCharacterStyleDefinition(Strings.style_url)
+        style_link.SetStyle(stl_link)
+        self.stylesheet.AddCharacterStyle(style_link)
+
         self.SetStyleSheet(self.stylesheet)
         self.style_control.SetRichTextCtrl(self)
         self.style_control.SetStyleSheet(self.stylesheet)
@@ -128,15 +137,14 @@ class CustomRichText(rt.RichTextCtrl):
         field = self.WriteField('imageFieldType', rt.RichTextProperties())
         field.SetName('image1')
 
-    def on_insert_link(self, evt):
-        # TODO do something with this
-        # TODO Try catching keypresses earlier and check style then replace this with a style
-        # Url Style
-        stl_url = self.GetDefaultStyleEx()
-        stl_url.SetTextColour(wx.BLUE)
-        stl_url.SetFontUnderlined(True)
-
-        self.BeginStyle(stl_url)
+    def on_insert_link(self, evt: wx.CommandEvent) -> None:
+        """
+        Make text into an url.
+        :param evt: Unused,
+        :return: None
+        """
+        # TODO if style is link make the insert link button pressed and stop the style on unpress
+        self.BeginStyle(self.stylesheet.FindCharacterStyle(Strings.style_url).GetStyle())
         self.BeginURL('www.google.com')
         self.WriteText('google')
         self.EndURL()
@@ -150,7 +158,7 @@ class CustomRichText(rt.RichTextCtrl):
         """
         self.ApplyBoldToSelection()
 
-    def _get_style_at_pos(self, position: int = 0) -> str:
+    def _get_style_at_pos(self, position: int = 0) -> (str, bool):
         """
         Get the style name at given position in the text. 0 - current position, -1 - before current position
         1 - after current position.
@@ -159,7 +167,7 @@ class CustomRichText(rt.RichTextCtrl):
         """
         style_carrier = rt.RichTextAttr()
         self.GetStyle(position, style_carrier)
-        return style_carrier.GetParagraphStyleName()
+        return style_carrier.GetParagraphStyleName(), style_carrier.HasURL()
 
     def on_keypress(self, event):
         """
@@ -170,9 +178,9 @@ class CustomRichText(rt.RichTextCtrl):
         current_style = self.stylesheet.FindParagraphStyle(Strings.style_paragraph).GetStyle().GetParagraphStyleName()
         current_position = self.GetCaretPosition()
         print('pos: ' + str(current_position))
-        print('previous: ' + str(self._get_style_at_pos(current_position - 1) + ' ' + self.GetRange(current_position - 1, current_position)))
-        print('current: ' + str(self._get_style_at_pos(current_position + 1) + ' ' + self.GetRange(current_position, current_position + 1)))
-        print('next: ' + str(self._get_style_at_pos(current_position + 2) + ' ' + self.GetRange(current_position + 1, current_position + 2)))
+        print('previous: ' + str(str(self._get_style_at_pos(current_position - 1)) + ' ' + self.GetRange(current_position - 1, current_position)))
+        print('current: ' + str(str(self._get_style_at_pos(current_position + 1)) + ' ' + self.GetRange(current_position, current_position + 1)))
+        print('next: ' + str(str(self._get_style_at_pos(current_position + 2)) + ' ' + self.GetRange(current_position + 1, current_position + 2)))
 
         print(self._get_style_at_pos(0) == current_style)
         event.Skip()
@@ -230,12 +238,15 @@ class CustomRichText(rt.RichTextCtrl):
 
             self.ApplyStyle(self.stylesheet.FindParagraphStyle(Strings.style_paragraph))
             self.BeginParagraphStyle(Strings.style_paragraph)
-            self.WriteText('paragraph5')
+            self.WriteText('paragraph5 sample of a longer text for testing url creation')
             self.EndParagraphStyle()
 
-            # TODO get rid of style control, use buttons instead
+            self.Newline()
+
 
 
             # TODO make link style and clickability
+
+            # TODO get rid of style control, use buttons instead
 
 
