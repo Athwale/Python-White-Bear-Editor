@@ -143,10 +143,20 @@ class CustomRichText(rt.RichTextCtrl):
         :param evt: Unused,
         :return: None
         """
+        # TODO show a dialog
         # TODO if style is link make the insert link button pressed and stop the style on unpress
+        self.insert_link('www.google.com', 'google')
+
+    def insert_link(self, url: str, text: str) -> None:
+        """
+        Insert a link into text at current position.
+        :param url: The url behind the link
+        :param text: The visible text.
+        :return: None
+        """
         self.BeginStyle(self.stylesheet.FindCharacterStyle(Strings.style_url).GetStyle())
-        self.BeginURL('www.google.com')
-        self.WriteText('google')
+        self.BeginURL(url)
+        self.WriteText(text)
         self.EndURL()
         self.EndStyle()
 
@@ -238,12 +248,16 @@ class CustomRichText(rt.RichTextCtrl):
 
             self.ApplyStyle(self.stylesheet.FindParagraphStyle(Strings.style_paragraph))
             self.BeginParagraphStyle(Strings.style_paragraph)
-            self.WriteText('paragraph5 sample of a longer text for testing url creation')
+            self.WriteText('paragraph5 sample of a longer text for testing url creation ')
+            self.insert_link('www.seznam.cz', 'link from code')
             self.EndParagraphStyle()
 
             self.Newline()
 
-
+            self.ApplyStyle(self.stylesheet.FindParagraphStyle(Strings.style_paragraph))
+            self.BeginParagraphStyle(Strings.style_paragraph)
+            self.insert_link('www.seznam.cz', 'link from code')
+            self.EndParagraphStyle()
 
             # TODO make link style and clickability
 
