@@ -16,7 +16,7 @@ class Text:
 
     def get_text(self) -> str:
         """
-        Get the text.
+        Get the text of this Text.
         :return: The text of this Text
         """
         return self._text
