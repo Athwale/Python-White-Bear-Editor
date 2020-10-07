@@ -3,9 +3,10 @@ import wx
 from Constants.Constants import Numbers
 from Constants.Constants import Strings
 from Resources.Fetch import Fetch
+from Tools.Document.BaseImage import BaseImage
 
 
-class AsideImage:
+class AsideImage(BaseImage):
     """
     Carrier class for a parsed aside image.
     """
@@ -22,18 +23,9 @@ class AsideImage:
         :param full_filename: file name of the full image
         :param thumbnail_filename: file name of the thumbnail image
         """
+        super().__init__(title, image_alt, original_image_path, thumbnail_path, full_filename, thumbnail_filename)
         self._caption = caption
         self._caption_error_message: str = ''
-        self._link_title = title
-        self._link_title_error_message: str = ''
-        self._image_alt = image_alt
-        self._image_alt_error_message: str = ''
-        self._original_image_path = original_image_path
-        self._thumbnail_path = thumbnail_path
-        self._full_filename = full_filename
-        self._thumbnail_filename = thumbnail_filename
-        self._image = None
-        self._status_color = None
 
     def seo_test_self(self) -> bool:
         """
@@ -43,11 +35,9 @@ class AsideImage:
         """
         # Clear all error before each retest
         self._caption_error_message: str = ''
-        self._link_title_error_message: str = ''
-        self._image_alt_error_message: str = ''
-        self._status_color = wx.NullColour
 
-        result = True
+        # First test the base class seo attributes
+        result = super(AsideImage, self).seo_test_self()
         # Check caption length must be at least 3 and must not be default
         if len(self._caption) < Numbers.article_name_min_length or len(
                 self._caption) > Numbers.article_name_max_length:
@@ -56,26 +46,6 @@ class AsideImage:
 
         if self._caption == Strings.label_article_image_caption:
             self._caption_error_message = Strings.seo_error_default_value
-            result = False
-
-        # Check article image link title
-        if len(self._link_title) < Numbers.article_image_title_min or len(
-                self._link_title) > Numbers.article_image_title_max:
-            self._link_title_error_message = Strings.seo_error_link_title_length
-            result = False
-
-        if self._link_title == Strings.label_article_image_link_title:
-            self._link_title_error_message = Strings.seo_error_default_value
-            result = False
-
-        # Check article image alt
-        if len(self._image_alt) < Numbers.article_image_alt_min or len(
-                self._image_alt) > Numbers.article_image_alt_max:
-            self._image_alt_error_message = Strings.seo_error_image_alt_length
-            result = False
-
-        if self._image_alt == Strings.label_article_image_alt:
-            self._image_alt_error_message = Strings.seo_error_default_value
             result = False
 
         # Check thumbnail image disk path
@@ -106,62 +76,6 @@ class AsideImage:
         :return: Return the article name as it is in the menu item and error to display in gui if there is one.
         """
         return self._caption, self._caption_error_message
-
-    def get_link_title(self) -> (str, str):
-        """
-        Return the link title of the image and error to display in gui if there is one.
-        :return: Return the link title of the image item and error to display in gui if there is one.
-        """
-        return self._link_title, self._link_title_error_message
-
-    def get_image_alt(self) -> (str, str):
-        """
-        Return the image alt description and error to display in gui if there is one.
-        :return: Return the image alt description and error to display in gui if there is one.
-        """
-        return self._image_alt, self._image_alt_error_message
-
-    def get_original_image_path(self) -> str:
-        """
-        Return the original image full disk path.
-        :return: Return the original image full disk path, None if inaccessible.
-        """
-        return self._original_image_path
-
-    def get_thumbnail_image_path(self) -> str:
-        """
-        Return the thumbnail image full disk path.
-        :return: Return the thumbnail image full disk path, None if inaccessible.
-        """
-        return self._thumbnail_path
-
-    def get_thumbnail_filename(self) -> str:
-        """
-        Return the thumbnail image file name.
-        :return: Return the thumbnail image filename.
-        """
-        return self._thumbnail_filename
-
-    def get_full_filename(self) -> str:
-        """
-        Return the full image file name.
-        :return: Return the full image filename.
-        """
-        return self._full_filename
-
-    def get_image(self) -> wx.Image:
-        """
-        Return the image as wx image instance.
-        :return: Return the image as wx image instance.
-        """
-        return self._image
-
-    def get_status_color(self) -> wx.Colour:
-        """
-        Return the status color of this image. White if ok, Red if SEO check failed.
-        :return: Return the status color of this image. White if ok, Red if SEO check failed.
-        """
-        return self._status_color
 
     def __str__(self) -> str:
         return "Aside image: {}, original: {}, thumbnail: {}, title: {}, alt: {}".format(self._caption,

@@ -148,8 +148,6 @@ class EditImageDialog(wx.Dialog):
             self.content_image_thumbnail_path.SetLabelText(self._image.get_thumbnail_filename())
 
         # Set target blank checkbox state
-        # TODO check this, maybe it has to be disabled always.
-        if isinstance(self._image, AsideImage):
-            self.checkbox_target_blank.Disable()
-            self.checkbox_target_blank.SetValue(True)
+        self.checkbox_target_blank.Disable()
+        self.checkbox_target_blank.SetValue(True)
         self.Enable()

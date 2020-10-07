@@ -77,7 +77,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
 
     def seo_test_self(self) -> None:
         """
-
+        Perform a SEO test on this document.
         :return: None
         """
         # TODO Run self test on every setter method.
