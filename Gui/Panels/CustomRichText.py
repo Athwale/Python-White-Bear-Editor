@@ -201,9 +201,15 @@ class CustomRichText(rt.RichTextCtrl):
         current_style = self._stylesheet.FindParagraphStyle(Strings.style_paragraph).GetStyle().GetParagraphStyleName()
         current_position = self.GetCaretPosition()
         print('pos: ' + str(current_position))
-        print('previous: ' + str(str(self._get_style_at_pos(current_position - 1)) + ' ' + self.GetRange(current_position - 1, current_position)))
-        print('current: ' + str(str(self._get_style_at_pos(current_position + 1)) + ' ' + self.GetRange(current_position, current_position + 1)))
-        print('next: ' + str(str(self._get_style_at_pos(current_position + 2)) + ' ' + self.GetRange(current_position + 1, current_position + 2)))
+        print('previous: ' + str(
+            str(self._get_style_at_pos(current_position - 1)) + ' ' + self.GetRange(current_position - 1,
+                                                                                    current_position)))
+        print('current: ' + str(
+            str(self._get_style_at_pos(current_position + 1)) + ' ' + self.GetRange(current_position,
+                                                                                    current_position + 1)))
+        print('next: ' + str(
+            str(self._get_style_at_pos(current_position + 2)) + ' ' + self.GetRange(current_position + 1,
+                                                                                    current_position + 2)))
 
         print(self._get_style_at_pos(0) == current_style)
         event.Skip()
@@ -271,5 +277,3 @@ class CustomRichText(rt.RichTextCtrl):
             self.BeginParagraphStyle(Strings.style_paragraph)
             self.insert_link('www.seznam.cz', 'link from code')
             self.EndParagraphStyle()
-
-

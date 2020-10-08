@@ -156,6 +156,7 @@ class MainFrame(wx.Frame):
         Set up top tool bar for the frame.
         :return: None
         """
+
         def scale_icon(name: str) -> wx.Bitmap:
             path = Fetch.get_resource_path(name)
             image = wx.Image(path, wx.BITMAP_TYPE_ANY)
