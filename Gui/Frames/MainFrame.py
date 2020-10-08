@@ -1,5 +1,5 @@
 import os
-from typing import Dict
+from typing import Dict, List
 
 import wx
 import wx.richtext as rt
@@ -516,6 +516,7 @@ class MainFrame(wx.Frame):
         :return: None
         """
         self.document_dictionary = documents
+        MainFrame.LOADED_PAGES = list(documents.keys())
         self.page_list.ClearAll()
         self.page_list.InsertColumn(0, Strings.column_pages, format=wx.LIST_FORMAT_LEFT)
         self.page_list.SetColumnWidth(0, self.left_panel.GetSize()[0])
@@ -730,7 +731,7 @@ class MainFrame(wx.Frame):
         # Set aside images
         self.side_photo_panel.load_document_images(doc)
         # TODO fill main text by passing the document into the custom control
-        self.main_text_area.set_content(self.current_document, list(self.document_dictionary.keys()))
+        self.main_text_area.set_content(self.current_document)
 
         self._disable_editor(False)
 

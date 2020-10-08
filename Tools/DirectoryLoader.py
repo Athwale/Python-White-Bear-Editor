@@ -128,7 +128,8 @@ class DirectoryLoader:
                         xml_doc = html.parse(os.path.join(path, file))
                         if self.xmlschema_article.validate(xml_doc):
                             self._article_documents[filename] = WhitebearDocumentArticle(filename, file_path,
-                                                                                         self._menu_documents)
+                                                                                         self._menu_documents,
+                                                                                         self._article_documents)
                         elif self.xmlschema_menu.validate(xml_doc):
                             self._menu_documents[filename] = WhitebearDocumentMenu(filename, file_path)
                         elif self.xmlschema_index.validate(xml_doc):

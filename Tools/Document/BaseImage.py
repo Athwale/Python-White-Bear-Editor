@@ -39,8 +39,8 @@ class BaseImage:
         """
         # Disk paths have to be checked by the sub classes.
         # Clear all error before each retest
-        self._link_title_error_message: str = ''
-        self._image_alt_error_message: str = ''
+        self._link_title_error_message = ''
+        self._image_alt_error_message = ''
         self._status_color = wx.NullColour
 
         result = True

@@ -50,6 +50,8 @@ class Numbers:
     article_image_title_max: int = 512
     article_image_alt_min: int = 5
     article_image_alt_max: int = 125
+    video_width: int = 534
+    video_height: int = 405
 
 
 class Strings:
@@ -104,6 +106,9 @@ class Strings:
         Numbers.article_image_title_max) + ' characters long'
     seo_error_image_alt_length: str = 'Length must be: ' + str(Numbers.article_image_alt_min) + ' - ' + str(
         Numbers.article_image_alt_max) + ' characters long'
+    seo_error_url_incorrect: str = 'URL format incorrect'
+    seo_error_url_nonexistent: str = 'Target page does not exist'
+    seo_error_video_size_wrong: str = ''
     seo_check: str = 'SEO Check:'
 
     label_menu_file: str = 'File'
@@ -171,7 +176,7 @@ class Strings:
     label_none: str = 'None'
     label_open_in_new_page: str = 'Open image in new page'
     label_url: str = 'URL'
-    lable_text: str = 'Text'
+    label_text: str = 'Text'
 
     status_loading: str = 'Loading'
     status_ready: str = 'Ready'

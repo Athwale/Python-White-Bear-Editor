@@ -25,16 +25,19 @@ class WhitebearDocumentArticle(WhitebearDocument):
     This is just a container for easy manipulation.
     """
 
-    def __init__(self, name: str, path: str, menus: Dict[str, WhitebearDocumentMenu]):
+    def __init__(self, name: str, path: str, menus: Dict[str, WhitebearDocumentMenu], articles):
         """
         Create a new WhitebearDocumentArticle object.
         :param name: Name of the file.
         :param path: Full path on disk to the file
-        :param menus: A list of WhitebearDocuments representing menus
+        :param menus: A dictionary of WhitebearDocuments representing menus
+        :param articles: A dictionary of WhitebearDocuments representing other loaded articles
         """
         # File properties are in base class
-        super().__init__(name, path, menus)
+        super().__init__(name, path)
         self._date_regex = '^[1-9][0-9]{0,1}[.][ ](' + Strings.cz_months + ')[ ][1-9][0-9][0-9][0-9]$'
+        self._menus = menus
+        self._articles = articles
 
         # Article data
         self._menu_section = None

@@ -21,7 +21,7 @@ class Link:
         Do a SEO check of this link.
         :return:
         """
-        # TODO this
+        # TODO this, check that the url is correct
 
     def get_text(self) -> str:
         """

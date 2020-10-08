@@ -21,14 +21,12 @@ class CustomRichText(rt.RichTextCtrl):
         :param parent: Parent of this control.
         :param style: wx style attributes.
         """
-        # TODO pass the buttons in in a dictionary and also get the loaded document list
         super().__init__(parent, -1, style=style)
         self._parent = parent
         self._stylesheet = rt.RichTextStyleSheet()
         self._stylesheet.SetName('Stylesheet')
         self._style_control = style_control
         self._document = None
-        self._loaded_pages = None
 
         self._create_styles()
         self._add_text_handlers()
@@ -120,15 +118,13 @@ class CustomRichText(rt.RichTextCtrl):
         self._style_control.SetStyleSheet(self._stylesheet)
         self._style_control.UpdateStyles()
 
-    def set_content(self, doc: WhitebearDocumentArticle, pages: List[str]) -> None:
+    def set_content(self, doc: WhitebearDocumentArticle) -> None:
         """
         Set which document this text area is displaying and which pages are loaded.
         :param doc: The white bear article.
-        :param pages: A list of all loaded documents
         :return: None
         """
         self._document = doc
-        self._loaded_pages = pages
 
     def url_in_text_click_handler(self, evt) -> None:
         """
@@ -150,7 +146,7 @@ class CustomRichText(rt.RichTextCtrl):
         :param evt: Unused,
         :return: None
         """
-        edit_dialog = EditLinkDialog(self, self._loaded_pages)
+        edit_dialog = EditLinkDialog(self)
         result = edit_dialog.ShowModal()
         if result == wx.ID_OK:
             # TODO set document modified if an edit has been made in the dialog

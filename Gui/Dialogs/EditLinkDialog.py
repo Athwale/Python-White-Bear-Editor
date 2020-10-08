@@ -1,5 +1,3 @@
-from typing import List
-
 import wx
 
 from Constants.Constants import Strings, Numbers
@@ -9,17 +7,15 @@ from Tools.Tools import Tools
 
 class EditLinkDialog(wx.Dialog):
 
-    def __init__(self, parent, page_list: List[str]):
+    def __init__(self, parent):
         """
         Display a modal dialog with a message with the text being selectable.
         :param parent: Parent frame.
-        :param page_list: List of pages currently loaded in the editor
         """
-        # TODO pass im an instance of seo checkable parsed link from the article to display or a blank link if new
+        # TODO pass in an instance of seo checkable parsed link from the article to display or a blank link if new
         wx.Dialog.__init__(self, parent, title=Strings.label_dialog_edit_link,
                            size=(Numbers.edit_image_dialog_width, Numbers.edit_link_dialog_height),
                            style=wx.DEFAULT_DIALOG_STYLE)
-        self._page_list = page_list
 
         self.main_vertical_sizer = wx.BoxSizer(wx.VERTICAL)
         self.horizontal_sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -48,13 +44,13 @@ class EditLinkDialog(wx.Dialog):
 
         # Link text sub sizer
         self.text_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.label_link_text = wx.StaticText(self, -1, Strings.lable_text + ': ')
+        self.label_link_text = wx.StaticText(self, -1, Strings.label_text + ': ')
         self.field_link_text = wx.TextCtrl(self, -1)
         self.text_sub_sizer.Add(self.label_link_text, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
         self.text_sub_sizer.Add((35, -1))
         self.text_sub_sizer.Add(self.field_link_text, proportion=1)
         self.information_sizer.Add(self.text_sub_sizer, flag=wx.EXPAND | wx.TOP, border=Numbers.widget_border_size)
-        self.field_link_text_tip = Tools.get_warning_tip(self.field_link_text, Strings.lable_text)
+        self.field_link_text_tip = Tools.get_warning_tip(self.field_link_text, Strings.label_text)
 
         # Target blank checkbox
         self.checkbox_target_blank = wx.CheckBox(self, -1, label=Strings.label_open_in_new_page)

@@ -26,7 +26,7 @@ class WhitebearDocumentMenu(WhitebearDocument):
         :param path: Full path on disk to the file
         """
         # File properties are in base class
-        super().__init__(name, path, None)
+        super().__init__(name, path)
         self._menu_items = []
         self.parse_self()
 
