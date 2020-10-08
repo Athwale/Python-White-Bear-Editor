@@ -1,4 +1,5 @@
 import wx
+import requests
 
 from Constants.Constants import Numbers, Strings
 
@@ -47,9 +48,14 @@ class Video:
         # Check dimensions
         if self._width != Numbers.video_width or self._width != Numbers.video_height:
             self.size_error_message = Strings.seo_error_video_size_wrong
+            result = False
 
         # Check url
-
+        try:
+            requests.get(self._url)
+        except requests.ConnectionError as _:
+            self._url_error_message = Strings.seo_error_url_nonexistent
+            result = False
 
         if not result:
             self._status_color = wx.RED
@@ -60,7 +66,7 @@ class Video:
         Return the title of this video.
         :return: The title of this video.
         """
-        return self._title
+        return self._link_title
 
     def get_url(self) -> str:
         """
@@ -75,7 +81,7 @@ class Video:
         :param title: The new title.
         :return: None
         """
-        self._title = title
+        self._link_title = title
 
     def set_url(self, url) -> None:
         """
@@ -87,9 +93,7 @@ class Video:
 
     def get_size_error(self):
         """
-        Return the element size error if there is any, None otherwise.
-        :return: Return the element size error if there is any, None otherwise.
+        Return the element size error if there is any, empty string otherwise.
+        :return: Return the element size error if there is any, empty string otherwise.
         """
-        if not self.size_error_message:
-            return None
         return self.size_error_message

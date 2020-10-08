@@ -196,6 +196,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
         :return: None
         """
         text_section = self._parsed_html.find(name='section', attrs={'class': 'mainText'})
+        # TODO run seo check on link, video and in text image and do something with any errors.
         # TODO this make link dict and image list
 
     def _parse_page_name(self) -> None:

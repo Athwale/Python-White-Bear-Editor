@@ -106,9 +106,8 @@ class Strings:
         Numbers.article_image_title_max) + ' characters long'
     seo_error_image_alt_length: str = 'Length must be: ' + str(Numbers.article_image_alt_min) + ' - ' + str(
         Numbers.article_image_alt_max) + ' characters long'
-    seo_error_url_incorrect: str = 'URL format incorrect'
     seo_error_url_nonexistent: str = 'Target page does not exist'
-    seo_error_video_size_wrong: str = ''
+    seo_error_video_size_wrong: str = 'The size of the video element is incorrect'
     seo_check: str = 'SEO Check:'
 
     label_menu_file: str = 'File'
