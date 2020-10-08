@@ -1,27 +1,76 @@
+from typing import Dict
+
+import requests
+import wx
+
+from Constants.Constants import Numbers, Strings
+from Tools.Document.WhitebearDocumentArticle import WhitebearDocumentArticle
+
+
 class Link:
     """
     Represents a link inside text.
     """
 
-    def __init__(self, text: str, url: str, title: str, target_blank: bool):
+    def __init__(self, text: str, url: str, title: str, loaded_pages: Dict[str, WhitebearDocumentArticle]):
         """
         Constructor for a Link.
         :param text: The visible text of the link.
         :param url: The URL of the link.
         :param title: The html title of the link.
-        :param target_blank: True if the link has target blank set.
+        :param loaded_pages: A dictionary of all other loaded pages.
         """
+        # All link target blank page except links in menus which we do not parse here.
         self._text = text
+        self._text_error_message = ''
         self._url = url
-        self._title = title
-        self._target = target_blank
+        self._url_error_message: str = ''
+        self._link_title = title
+        self._link_title_error_message: str = ''
+
+        self._loaded_pages = loaded_pages
+        self._is_local = False
+        self._status_color = None
 
     def seo_check_self(self):
         """
-        Do a SEO check of this link.
-        :return:
+        SEO check self for correct title, url and text.
+        :return: True if no error is found.
         """
-        # TODO this, check that the url is correct
+        # Disk paths have to be checked by the sub classes.
+        # Clear all error before each retest
+        self._link_title_error_message = ''
+        self._url_error_message = ''
+        self._text_error_message = ''
+        self._status_color = wx.NullColour
+
+        result = True
+        # Check link title
+        if len(self._link_title) < Numbers.article_image_title_min or len(
+                self._link_title) > Numbers.article_image_title_max:
+            self._link_title_error_message = Strings.seo_error_link_title_length
+            result = False
+
+        # Check link text
+        if len(self._text) < Numbers.article_name_min_length or len(
+                self._link_title) > Numbers.article_name_max_length:
+            self._link_title_error_message = Strings.seo_error_link_title_length
+            result = False
+
+        # Check url, if it is one of whitebear pages set local to True and do not try to download it.
+        if self._url in list(self._loaded_pages.keys()):
+            self._is_local = True
+        else:
+            self._is_local = False
+            try:
+                requests.get(self._url)
+            except requests.ConnectionError as _:
+                self._url_error_message = Strings.seo_error_url_nonexistent
+                result = False
+
+        if not result:
+            self._status_color = wx.RED
+        return result
 
     def get_text(self) -> str:
         """
@@ -42,14 +91,14 @@ class Link:
         Return the title of the link.
         :return: the title of the link.
         """
-        return self._title
+        return self._link_title
 
-    def target_blank(self) -> bool:
+    def is_local(self) -> bool:
         """
-        Return True if the link is set to open in a new page.
-        :return: True if the link is set to open in a new page.
+        Returns True if this link aims back at one of the whitebear pages.
+        :return: Returns True if this link aims back at one of the whitebear pages.
         """
-        return self._target
+        return self._is_local
 
     def set_text(self, text: str) -> None:
         """
@@ -73,12 +122,12 @@ class Link:
         :param title: The new title.
         :return: None
         """
-        self._title = title
+        self._link_title = title
 
-    def set_target(self, blank: bool) -> None:
+    def set_local(self, is_local: bool) -> None:
         """
-        Set whether the link opens a page in a new window.
-        :param blank: True if the link opens in a new window.
+        Set whether this link aims back to one of the whitebear web pages.
+        :param is_local: True if yes.
         :return: None
         """
-        self._target = blank
+        self._is_local = is_local

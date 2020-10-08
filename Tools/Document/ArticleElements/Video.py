@@ -39,7 +39,7 @@ class Video:
         self._status_color = wx.NullColour
 
         result = True
-        # Check article image link title
+        # Check video link title
         if len(self._link_title) < Numbers.article_image_title_min or len(
                 self._link_title) > Numbers.article_image_title_max:
             self._link_title_error_message = Strings.seo_error_link_title_length
