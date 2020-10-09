@@ -1,7 +1,6 @@
 import wx
 
 from Constants.Constants import Strings, Numbers
-from Tools.Document.AsideImage import AsideImage
 from Tools.Tools import Tools
 
 
@@ -75,6 +74,7 @@ class EditLinkDialog(wx.Dialog):
         self.main_vertical_sizer.Add(self.button_sizer, 0, flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM,
                                      border=Numbers.widget_border_size)
         self.SetSizer(self.main_vertical_sizer)
+        # TODO modify this to show a combo box wit editability showing all currently loaded pages to pick from.
 
     def _display_dialog_contents(self) -> None:
         """
@@ -115,7 +115,6 @@ class EditLinkDialog(wx.Dialog):
             self.content_image_thumbnail_path.SetLabelText(self._image.get_thumbnail_filename())
 
         # Set target blank checkbox state
-        if isinstance(self._image, AsideImage):
-            self.checkbox_target_blank.Disable()
-            self.checkbox_target_blank.SetValue(True)
+        self.checkbox_target_blank.Disable()
+        self.checkbox_target_blank.SetValue(True)
         self.Enable()

@@ -73,7 +73,7 @@
                                         <xs:complexType mixed="true">
                                             <xs:attribute name="href" type="xs:anyURI" use="required"/>
                                             <xs:attribute name="title" type="xs:string" use="required"/>
-                                            <xs:attribute name="target" type="xs:string" fixed="_blank"/>
+                                            <xs:attribute name="target" type="xs:string" fixed="_blank" use="required"/>
                                         </xs:complexType>
                                     </xs:element>
                                     <xs:element name="span" type="spanType"/>
@@ -93,7 +93,7 @@
                                                     <xs:complexType mixed="true">
                                                         <xs:attribute name="href" type="xs:anyURI" use="required"/>
                                                         <xs:attribute name="title" type="xs:string" use="required"/>
-                                                        <xs:attribute name="target" type="xs:string" fixed="_blank"/>
+                                                        <xs:attribute name="target" type="xs:string" fixed="_blank" use="required"/>
                                                     </xs:complexType>
                                                 </xs:element>
                                             </xs:choice>

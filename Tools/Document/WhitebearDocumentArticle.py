@@ -2,6 +2,7 @@ import os
 import re
 from typing import List, Dict
 
+from bs4.element import NavigableString
 import wx
 from lxml import etree
 from lxml import html
@@ -43,6 +44,10 @@ class WhitebearDocumentArticle(WhitebearDocument):
         self._menu_section = None
         self._menu_item = None
         self._aside_images = []
+        self._main_text_elements = []
+        self._links = []
+        self._images = []
+        self._videos = []
 
         self._date = None
         self._date_error_message: str = ''
@@ -55,8 +60,6 @@ class WhitebearDocumentArticle(WhitebearDocument):
         self._article_image_alt = None
         self._image_alt_error_message: str = ''
         self._article_image = None
-
-        # TODO parse and validate main text
         self._main_text = None
 
     def parse_self(self) -> None:
@@ -197,7 +200,41 @@ class WhitebearDocumentArticle(WhitebearDocument):
         """
         text_section = self._parsed_html.find(name='section', attrs={'class': 'mainText'})
         # TODO run seo check on link, video and in text image and do something with any errors.
-        # TODO this make link dict and image list
+        for child in text_section.children:
+            # These can be p, ul, h3, h4, div
+            if child.name == 'p':
+                self._process_p(child)
+
+    def _process_p(self, p) -> None:
+        """
+        Process a 'p' tag in the text.
+        :param p: The beautiful soup p element.
+        :return: None
+        """
+        for child in p.children:
+            # These can be text, span, strong, a, br
+            if isinstance(child, NavigableString):
+                #print(str(child))
+                pass
+            elif child.name == 'span':
+                color = child.attrs['class'][0]
+                #print(str(child.string))
+                pass
+            elif child.name == 'br':
+                #print(child.name)
+                pass
+            elif child.name == 'strong':
+                # These can also contain colored spans
+                # TODO send this to the span handling method
+                #print(child)
+                pass
+            elif child.name == 'a':
+                #print(child.attrs['title'])
+                #print(child.attrs['href'])
+                #print(str(child.string))
+                pass
+            else:
+                raise WrongFormatException(Strings.exception_html_syntax_error)
 
     def _parse_page_name(self) -> None:
         """
