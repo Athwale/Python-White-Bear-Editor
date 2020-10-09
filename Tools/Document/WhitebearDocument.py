@@ -1,6 +1,7 @@
 import os
 
 import wx
+import htmlmin
 from bs4 import BeautifulSoup
 
 from Constants.Constants import Numbers
@@ -83,7 +84,8 @@ class WhitebearDocument:
         """
         with open(self._path, 'r') as document:
             contents = document.read()
-            self._parsed_html = BeautifulSoup(contents, 'html5lib')
+            minimized = htmlmin.minify(contents, remove_empty_space=True)
+            self._parsed_html = BeautifulSoup(minimized, 'html5lib')
 
     def seo_test_self_basic(self) -> None:
         """

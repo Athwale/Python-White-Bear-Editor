@@ -13,6 +13,7 @@ from Constants.Constants import Strings
 from Exceptions.UnrecognizedFileException import UnrecognizedFileException
 from Exceptions.WrongFormatException import WrongFormatException
 from Resources.Fetch import Fetch
+from Tools.Document.ArticleElements.Text import Text
 from Tools.Document.AsideImage import AsideImage
 from Tools.Document.MenuItem import MenuItem
 from Tools.Document.WhitebearDocument import WhitebearDocument
@@ -214,7 +215,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
         for child in p.children:
             # These can be text, span, strong, a, br
             if isinstance(child, NavigableString):
-                #print(str(child))
+                self._process_text(child)
                 pass
             elif child.name == 'span':
                 color = child.attrs['class'][0]
@@ -235,6 +236,14 @@ class WhitebearDocumentArticle(WhitebearDocument):
                 pass
             else:
                 raise WrongFormatException(Strings.exception_html_syntax_error)
+
+    def _process_text(self, text_node) -> Text:
+        """
+        Process a plain text part of a html element.
+        :param text_node: The bs4.NavigableString text.
+        :return: A Text instance
+        """
+        print(str(text_node))
 
     def _parse_page_name(self) -> None:
         """
