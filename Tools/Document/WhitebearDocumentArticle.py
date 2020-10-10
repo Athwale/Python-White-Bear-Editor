@@ -186,6 +186,9 @@ class WhitebearDocumentArticle(WhitebearDocument):
             if not aside_image.seo_test_self():
                 self.set_status_color(Numbers.RED_COLOR)
 
+        # TODO run seo check on link, video and in text image and do something with any errors.
+        # Show an error dialog in the gui when you open the document and color the element red.
+
     def _determine_menu_section_and_menu_item(self) -> None:
         """
         Find out which menu this article belongs in.
@@ -206,7 +209,6 @@ class WhitebearDocumentArticle(WhitebearDocument):
         :return: None
         """
         text_section = self._parsed_html.find(name='section', attrs={'class': 'mainText'})
-        # TODO run seo check on link, video and in text image and do something with any errors.
         child: Tag
         for child in text_section.children:
             # These can be p, ul, h3, h4, div

@@ -2,6 +2,7 @@ import wx
 import requests
 
 from Constants.Constants import Numbers, Strings
+from Resources.Fetch import Fetch
 
 
 class Video:
@@ -25,6 +26,7 @@ class Video:
         self._url = url
         self._url_error_message: str = ''
         self._status_color = None
+        self._image = None
 
     def seo_check_self(self) -> bool:
         """
@@ -39,15 +41,18 @@ class Video:
         self._status_color = wx.NullColour
 
         result = True
+        self._image = wx.Image(Fetch.get_resource_path('video_placeholder.png'), wx.BITMAP_TYPE_PNG)
         # Check video link title
         if len(self._link_title) < Numbers.article_image_title_min or len(
                 self._link_title) > Numbers.article_image_title_max:
             self._link_title_error_message = Strings.seo_error_link_title_length
+            self._image = wx.Image(Fetch.get_resource_path('video_seo_error.png'), wx.BITMAP_TYPE_PNG)
             result = False
 
         # Check dimensions
         if self._width != Numbers.video_width or self._width != Numbers.video_height:
             self.size_error_message = Strings.seo_error_video_size_wrong
+            self._image = wx.Image(Fetch.get_resource_path('video_size_incorrect.png'), wx.BITMAP_TYPE_PNG)
             result = False
 
         # Check url
@@ -55,11 +60,19 @@ class Video:
             requests.get(self._url)
         except requests.ConnectionError as _:
             self._url_error_message = Strings.seo_error_url_nonexistent
+            self._image = wx.Image(Fetch.get_resource_path('video_seo_error.png'), wx.BITMAP_TYPE_PNG)
             result = False
 
         if not result:
             self._status_color = wx.RED
         return result
+
+    def get_image(self) -> wx.Image:
+        """
+        Return the placeholder image. Either correct video placeholder or error image.
+        :return: Return the placeholder image. Either correct video placeholder or error image.
+        """
+        return self._image
 
     def get_title(self) -> str:
         """
