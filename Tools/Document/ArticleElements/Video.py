@@ -50,7 +50,7 @@ class Video:
             result = False
 
         # Check dimensions
-        if self._width != Numbers.video_width or self._width != Numbers.video_height:
+        if self._width != Numbers.video_width or self._height != Numbers.video_height:
             self.size_error_message = Strings.seo_error_video_size_wrong
             self._image = wx.Image(Fetch.get_resource_path('video_size_incorrect.png'), wx.BITMAP_TYPE_PNG)
             result = False

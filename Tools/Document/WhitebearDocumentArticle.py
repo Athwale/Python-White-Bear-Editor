@@ -253,8 +253,8 @@ class WhitebearDocumentArticle(WhitebearDocument):
         :param div: The beautiful soup div element containing a video.
         :return: Video instance.
         """
-        height = div.iframe['height']
-        width = div.iframe['width']
+        height = int(div.iframe['height'])
+        width = int(div.iframe['width'])
         src = div.iframe['src']
         title = div.iframe['title']
         return Video(title, width, height, src)

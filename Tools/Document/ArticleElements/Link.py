@@ -55,7 +55,7 @@ class Link:
         # Check link text
         if len(self._text) < Numbers.article_name_min_length or len(
                 self._link_title) > Numbers.article_name_max_length:
-            self._link_title_error_message = Strings.seo_error_link_title_length
+            self._link_title_error_message = Strings.seo_error_name_length
             result = False
 
         # Check url, if it is one of whitebear pages set local to True and do not try to download it.
@@ -68,7 +68,7 @@ class Link:
         else:
             self._is_local = False
             try:
-                requests.get(self._url)
+                requests.get(self._url, headers={"User-Agent": "Mozilla/5.0"})
             except requests.ConnectionError as _:
                 self._url_error_message = Strings.seo_error_url_nonexistent
                 result = False
