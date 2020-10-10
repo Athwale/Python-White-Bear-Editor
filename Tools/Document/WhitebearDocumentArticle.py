@@ -186,6 +186,21 @@ class WhitebearDocumentArticle(WhitebearDocument):
             if not aside_image.seo_test_self():
                 self.set_status_color(Numbers.RED_COLOR)
 
+        # Test videos
+        for video in self._videos:
+            if not video.seo_test_self():
+                self.set_status_color(Numbers.RED_COLOR)
+
+        # Test in text images
+        for image in self._images:
+            if not image.seo_test_self():
+                self.set_status_color(Numbers.RED_COLOR)
+
+        # Test links
+        for link in self._links:
+            if not link.seo_test_self():
+                self.set_status_color(Numbers.RED_COLOR)
+
         # TODO run seo check on link, video and in text image and do something with any errors.
         # Show an error dialog in the gui when you open the document and color the element red.
 
@@ -309,7 +324,8 @@ class WhitebearDocumentArticle(WhitebearDocument):
             # These can be text, span, strong, a, br
             if not self._process_visual_tags(child, paragraph):
                 if child.name == 'a':
-                    link = Link(str(child.string), child.attrs['href'], child.attrs['title'], self._articles)
+                    link = Link(str(child.string), child.attrs['href'], child.attrs['title'], self._articles,
+                                self._working_directory)
                     paragraph.add_element(link)
                     self._links.append(link)
                 else:

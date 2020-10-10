@@ -1,4 +1,4 @@
-from typing import Dict
+import os
 
 import requests
 import wx
@@ -11,13 +11,14 @@ class Link:
     Represents a link inside text.
     """
 
-    def __init__(self, text: str, url: str, title: str, loaded_pages):
+    def __init__(self, text: str, url: str, title: str, loaded_pages, working_directory: str):
         """
         Constructor for a Link.
         :param text: The visible text of the link.
         :param url: The URL of the link.
         :param title: The html title of the link.
         :param loaded_pages: A dictionary of all other loaded pages.
+        :param working_directory: The working directory of the editor.
         """
         # All link target blank page except links in menus which we do not parse here.
         self._text = text
@@ -26,12 +27,13 @@ class Link:
         self._url_error_message: str = ''
         self._link_title = title
         self._link_title_error_message: str = ''
+        self._working_directory = working_directory
 
         self._loaded_pages = loaded_pages
         self._is_local = False
         self._status_color = None
 
-    def seo_check_self(self):
+    def seo_test_self(self):
         """
         SEO check self for correct title, url and text.
         :return: True if no error is found.
@@ -59,6 +61,10 @@ class Link:
         # Check url, if it is one of whitebear pages set local to True and do not try to download it.
         if self._url in list(self._loaded_pages.keys()):
             self._is_local = True
+        elif self._url.startswith('files'):
+            full_path = os.path.join(self._working_directory, self._url)
+            if not os.path.exists(full_path) or not os.access(full_path, os.R_OK) or not os.access(full_path, os.W_OK):
+                result = False
         else:
             self._is_local = False
             try:

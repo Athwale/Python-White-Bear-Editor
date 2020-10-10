@@ -28,7 +28,7 @@ class Video:
         self._status_color = None
         self._image = None
 
-    def seo_check_self(self) -> bool:
+    def seo_test_self(self) -> bool:
         """
         SEO check self for correct title, url and dimensions.
         :return: True if no error is found.
