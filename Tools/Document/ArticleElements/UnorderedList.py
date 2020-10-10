@@ -14,7 +14,7 @@ class UnorderedList:
         """
         self._items = []
 
-    def append_item(self, item: Paragraph) -> None:
+    def append_paragraph(self, item: Paragraph) -> None:
         """
         Append a new Paragraph item to the list.
         :param item: The new Paragraph instance to append.
@@ -22,7 +22,7 @@ class UnorderedList:
         """
         self._items.append(item)
 
-    def get_items(self) -> List[Paragraph]:
+    def get_paragraphs(self) -> List[Paragraph]:
         """
         Return the list of Paragraphs that this UnorderedList holds.
         :return: the list of Paragraphs that this UnorderedList holds.

@@ -3,12 +3,12 @@ class Text:
     This class represents a piece of text which can be colored and bold.
     """
 
-    def __init__(self, text: str, bold: bool, color: str):
+    def __init__(self, text: str, bold: bool = False, color: str = 'black'):
         """
         Constructor for a new text piece.
         :param text: The text of this Text.
         :param bold: True if the text is bold.
-        :param color: The string color defined in css of this text or black.
+        :param color: The string color defined in css of this text default 'black'.
         """
         self._text = text
         self._bold = bold

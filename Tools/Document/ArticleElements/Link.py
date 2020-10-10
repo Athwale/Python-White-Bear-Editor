@@ -4,7 +4,6 @@ import requests
 import wx
 
 from Constants.Constants import Numbers, Strings
-from Tools.Document.WhitebearDocumentArticle import WhitebearDocumentArticle
 
 
 class Link:
@@ -12,7 +11,7 @@ class Link:
     Represents a link inside text.
     """
 
-    def __init__(self, text: str, url: str, title: str, loaded_pages: Dict[str, WhitebearDocumentArticle]):
+    def __init__(self, text: str, url: str, title: str, loaded_pages):
         """
         Constructor for a Link.
         :param text: The visible text of the link.
