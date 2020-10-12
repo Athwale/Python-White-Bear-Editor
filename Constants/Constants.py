@@ -9,6 +9,8 @@ class Numbers:
     YELLOW_COLOR = Colour(250, 255, 196)
     BLUE_COLOR = Colour(145, 207, 255)
 
+    splashscreen_timeout = 18000
+
     minimal_window_size_width: int = 1200
     minimal_window_size_height: int = 700
     initial_panel_size: int = 220
@@ -177,7 +179,7 @@ class Strings:
     label_url: str = 'URL'
     label_text: str = 'Text'
 
-    status_loading: str = 'Loading'
+    status_loading: str = 'Loading and testing'
     status_ready: str = 'Ready'
     status_error: str = 'Error'
     status_warning: str = 'Warning'
