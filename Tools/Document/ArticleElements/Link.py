@@ -67,11 +67,12 @@ class Link:
                 result = False
         else:
             self._is_local = False
-            try:
-                requests.get(self._url, headers={"User-Agent": "Mozilla/5.0"})
-            except requests.ConnectionError as _:
-                self._url_error_message = Strings.seo_error_url_nonexistent
-                result = False
+            if Numbers.do_download_test:
+                try:
+                    requests.get(self._url, headers={"User-Agent": "Mozilla/5.0"})
+                except requests.ConnectionError as _:
+                    self._url_error_message = Strings.seo_error_url_nonexistent
+                    result = False
 
         if not result:
             self._status_color = wx.RED

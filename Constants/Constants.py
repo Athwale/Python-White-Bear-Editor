@@ -4,6 +4,8 @@ from wx import Colour
 
 
 class Numbers:
+    do_download_test = True
+
     RED_COLOR = Colour(242, 207, 206)
     GREEN_COLOR = Colour(201, 255, 199)
     YELLOW_COLOR = Colour(250, 255, 196)
