@@ -4,6 +4,9 @@ import tinycss
 import webcolors
 from wx import Colour
 
+from Constants.Constants import Strings
+from Exceptions.WrongFormatException import WrongFormatException
+
 
 class WhitebearDocumentCSS:
     """
@@ -52,3 +55,14 @@ class WhitebearDocumentCSS:
         :return: a dictionary of color defined in this css document.
         """
         return self._color_dict
+
+    def translate_color(self, name: str) -> Colour:
+        """
+        Translate a CSS color name into a wx.Colour
+        :param name: the name of the color.
+        :return: an instance of wx.Colour
+        """
+        try:
+            return self._color_dict[name]
+        except KeyError as _:
+            raise WrongFormatException(Strings.exception_unrecognized_color + ': ' + name)

@@ -1,5 +1,5 @@
 import os
-from typing import Dict, List
+from typing import Dict
 
 import wx
 import wx.richtext as rt
@@ -554,6 +554,7 @@ class MainFrame(wx.Frame):
         colour_data = wx.ColourData()
         attr = wx.TextAttr()
         attr.SetFlags(wx.TEXT_ATTR_TEXT_COLOUR)
+        # TODO what is this colour data??
         if self.main_text_area.GetStyle(self.main_text_area.GetInsertionPoint(), attr):
             colour_data.SetColour(attr.GetTextColour())
 
@@ -730,8 +731,7 @@ class MainFrame(wx.Frame):
         self.menu_logo_image.SetBitmap(wx.Bitmap(doc.get_menu_item().get_menu_image()))
         # Set aside images
         self.side_photo_panel.load_document_images(doc)
-        # TODO fill main text by passing the document into the custom control
-        self.main_text_area.set_content(self.current_document)
+        self.main_text_area.set_content(self.document_dictionary[self.current_document])
 
         self._disable_editor(False)
 

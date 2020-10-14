@@ -23,6 +23,7 @@ from Tools.Document.ArticleElements.Video import Video
 from Tools.Document.AsideImage import AsideImage
 from Tools.Document.MenuItem import MenuItem
 from Tools.Document.WhitebearDocument import WhitebearDocument
+from Tools.Document.WhitebearDocumentCSS import WhitebearDocumentCSS
 from Tools.Document.WhitebearDocumentMenu import WhitebearDocumentMenu
 
 
@@ -33,19 +34,22 @@ class WhitebearDocumentArticle(WhitebearDocument):
     This is just a container for easy manipulation.
     """
 
-    def __init__(self, name: str, path: str, menus: Dict[str, WhitebearDocumentMenu], articles):
+    def __init__(self, name: str, path: str, menus: Dict[str, WhitebearDocumentMenu], articles,
+                 css: WhitebearDocumentCSS):
         """
         Create a new WhitebearDocumentArticle object.
         :param name: Name of the file.
         :param path: Full path on disk to the file
         :param menus: A dictionary of WhitebearDocuments representing menus
         :param articles: A dictionary of WhitebearDocuments representing other loaded articles
+        :param css: The parsed CSS stylesheet
         """
         # File properties are in base class
         super().__init__(name, path)
         self._date_regex = '^[1-9][0-9]{0,1}[.][ ](' + Strings.cz_months + ')[ ][1-9][0-9][0-9][0-9]$'
         self._menus = menus
         self._articles = articles
+        self._css_document = css
 
         # Article data
         self._menu_section = None
@@ -345,7 +349,8 @@ class WhitebearDocumentArticle(WhitebearDocument):
             paragraph.add_element(Text(str(parent_element)))
         elif parent_element.name == 'span':
             return_value = True
-            paragraph.add_element(Text(str(parent_element.string), color=parent_element.attrs['class'][0]))
+            color = self._css_document.translate_color(parent_element.attrs['class'][0])
+            paragraph.add_element(Text(str(parent_element.string), color=color))
         elif parent_element.name == 'br':
             return_value = True
             paragraph.add_element(Break())
@@ -529,6 +534,13 @@ class WhitebearDocumentArticle(WhitebearDocument):
         :return: the aside images of this article
         """
         return self._aside_images
+
+    def get_main_text_elements(self) -> List:
+        """
+        Return a list of main text elements which are Heading, ImageInText, Paragraph, Video, UnorderedList
+        :return: a list of main text elements which are Heading, ImageInText, Paragraph, Video, UnorderedList
+        """
+        return self._main_text_elements
 
     # Setters ----------------------------------------------------------------------------------------------------------
     def set_date(self, date: str) -> None:

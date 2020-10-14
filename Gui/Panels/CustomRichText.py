@@ -1,10 +1,17 @@
-from typing import List
+from typing import List, Dict
 
 import wx
 import wx.richtext as rt
 
 from Constants.Constants import Strings, Numbers
 from Gui.Dialogs.EditLinkDialog import EditLinkDialog
+from Tools.Document.ArticleElements.Heading import Heading
+from Tools.Document.ArticleElements.ImageInText import ImageInText
+from Tools.Document.ArticleElements.Link import Link
+from Tools.Document.ArticleElements.Paragraph import Paragraph
+from Tools.Document.ArticleElements.Text import Text, Break
+from Tools.Document.ArticleElements.UnorderedList import UnorderedList
+from Tools.Document.ArticleElements.Video import Video
 from Tools.Document.WhitebearDocumentArticle import WhitebearDocumentArticle
 from Tools.ImageTextField import ImageTextField
 
@@ -41,7 +48,7 @@ class CustomRichText(rt.RichTextCtrl):
         self.Bind(wx.EVT_MENU, self.on_bold, main_frame.bold_tool)
 
         self.register_field()
-        self.insert_sample_text()
+        # self.insert_sample_text()
 
     @staticmethod
     def _add_text_handlers() -> None:
@@ -120,11 +127,49 @@ class CustomRichText(rt.RichTextCtrl):
 
     def set_content(self, doc: WhitebearDocumentArticle) -> None:
         """
-        Set which document this text area is displaying and which pages are loaded.
+        Set the document this text area is displaying.
         :param doc: The white bear article.
+        :param colors: The parses css colors.
         :return: None
         """
+        self.Clear()
         self._document = doc
+        for element in doc.get_main_text_elements():
+            if isinstance(element, Paragraph):
+                self._write_paragraph(element)
+            elif isinstance(element, Heading):
+                print('heading')
+            elif isinstance(element, ImageInText):
+                print('image')
+            elif isinstance(element, UnorderedList):
+                print('list')
+            elif isinstance(element, Video):
+                print('video')
+
+    def _write_paragraph(self, p: Paragraph) -> None:
+        """
+        Write a Paragraph into the text area.
+        :param p: A Paragraph instance.
+        :return: None
+        """
+        self.ApplyStyle(self._stylesheet.FindParagraphStyle(Strings.style_paragraph))
+        self.BeginParagraphStyle(Strings.style_paragraph)
+        attr = wx.TextAttr()
+        attr.SetFlags(wx.TEXT_ATTR_TEXT_COLOUR)
+
+        for element in p.get_elements():
+            if isinstance(element, Text):
+                self.BeginTextColour(element.get_color())
+                self.WriteText(element.get_text())
+                self.EndTextColour()
+            elif isinstance(element, Break):
+                self.LineBreak()
+            elif isinstance(element, Link):
+                print('link')
+
+        self.EndParagraphStyle()
+        self.Newline()
+
 
     def url_in_text_click_handler(self, evt) -> None:
         """

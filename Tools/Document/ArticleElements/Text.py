@@ -1,9 +1,12 @@
+from wx import Colour
+
+
 class Text:
     """
     This class represents a piece of text which can be colored and bold.
     """
 
-    def __init__(self, text: str, bold: bool = False, color: str = 'black'):
+    def __init__(self, text: str, bold: bool = False, color: Colour = 'black'):
         """
         Constructor for a new text piece.
         :param text: The text of this Text.
@@ -21,7 +24,7 @@ class Text:
         """
         return self._text
 
-    def get_color(self) -> str:
+    def get_color(self) -> Colour:
         """
         Get the text color.
         :return: The text color of this Text

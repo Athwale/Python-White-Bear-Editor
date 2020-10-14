@@ -6,9 +6,6 @@ class Paragraph:
     This class represents one paragraph in a article. A paragraph consists of a list of instances of text, break and
     link.
     """
-
-    # TODO find link
-
     def __init__(self):
         """
         Constructor for paragraph.

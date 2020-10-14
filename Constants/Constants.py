@@ -4,7 +4,7 @@ from wx import Colour
 
 
 class Numbers:
-    do_download_test = True
+    do_download_test = False
 
     RED_COLOR = Colour(242, 207, 206)
     GREEN_COLOR = Colour(201, 255, 199)
@@ -92,6 +92,7 @@ class Strings:
     exception_parse_multiple_keywords: str = 'Only one meta keywords tag is allowed'
     exception_last_document_missing: str = 'Last open document not found'
     exception_menu_item_missing: str = 'Menu item missing'
+    exception_unrecognized_color: str = 'Unrecognized CSS color'
 
     seo_error_keywords_length: str = 'Length must be: ' + str(Numbers.keywords_min_length) + ' - ' + str(
         Numbers.keywords_max_length) + ' characters long'

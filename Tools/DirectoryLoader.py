@@ -114,8 +114,20 @@ class DirectoryLoader:
         :return: None
         :raises UnrecognizedFileException if the file can not be validated
         """
-        # Check all html files in directory are readable and writable
         file: str
+        # Parse CSS so we can send the instance into articles for color translation.
+        file = os.path.join(path, 'styles.css')
+        if os.path.isfile(file):
+            if not os.access(file, os.R_OK) or not os.access(file, os.W_OK):
+                raise AccessException(Strings.exception_access_html + " " + file)
+            else:
+                filename: str = os.path.basename(file)
+                file_path: str = os.path.realpath(file)
+                self._css_document = WhitebearDocumentCSS(filename, file_path)
+        else:
+            raise AccessException(Strings.exception_access_css)
+
+        # Check all html files in directory are readable and writable
         for file in glob.glob(path + '/*.html'):
             file = os.path.join(path, file)
             if os.path.isfile(file):
@@ -129,7 +141,8 @@ class DirectoryLoader:
                         if self.xmlschema_article.validate(xml_doc):
                             self._article_documents[filename] = WhitebearDocumentArticle(filename, file_path,
                                                                                          self._menu_documents,
-                                                                                         self._article_documents)
+                                                                                         self._article_documents,
+                                                                                         self._css_document)
                         elif self.xmlschema_menu.validate(xml_doc):
                             self._menu_documents[filename] = WhitebearDocumentMenu(filename, file_path)
                         elif self.xmlschema_index.validate(xml_doc):
@@ -146,15 +159,3 @@ class DirectoryLoader:
         # Parse all articles after we have recognized and parsed all menu pages.
         for article in self._article_documents.values():
             article.parse_self()
-
-        # TODO css parse
-        file = os.path.join(path, 'styles.css')
-        if os.path.isfile(file):
-            if not os.access(file, os.R_OK) or not os.access(file, os.W_OK):
-                raise AccessException(Strings.exception_access_html + " " + file)
-            else:
-                filename: str = os.path.basename(file)
-                file_path: str = os.path.realpath(file)
-                self._css_document = WhitebearDocumentCSS(filename, file_path)
-        else:
-            raise AccessException(Strings.exception_access_css)
