@@ -1,5 +1,3 @@
-from typing import List, Dict
-
 import wx
 import wx.richtext as rt
 
@@ -129,7 +127,6 @@ class CustomRichText(rt.RichTextCtrl):
         """
         Set the document this text area is displaying.
         :param doc: The white bear article.
-        :param colors: The parses css colors.
         :return: None
         """
         self.Clear()
@@ -157,8 +154,6 @@ class CustomRichText(rt.RichTextCtrl):
         attr = wx.TextAttr()
         attr.SetFlags(wx.TEXT_ATTR_TEXT_COLOUR)
 
-        # TODO bold
-
         for element in p.get_elements():
             if isinstance(element, Text):
                 if element.is_bold():
@@ -171,25 +166,23 @@ class CustomRichText(rt.RichTextCtrl):
             elif isinstance(element, Break):
                 self.LineBreak()
             elif isinstance(element, Link):
-                print('link')
+                self._insert_link(element.get_text(), element.get_url())
 
         self.EndParagraphStyle()
         self.Newline()
 
-
-    def url_in_text_click_handler(self, evt) -> None:
+    def _insert_link(self, text: str, url: str) -> None:
         """
-        Handles click on url links inside text.
-        :param evt: Not used
+        Insert a link into text at current position.
+        :param text: The visible text.
+        :param url: The url behind the link
         :return: None
         """
-        link = self.GetRange(evt.GetURLStart(), evt.GetURLEnd() + 1)
-        wx.MessageBox(evt.GetString() + ' ' + link, "URL Clicked")
-
-    def on_insert_image(self, evt):
-        # TODO this.
-        field = self.WriteField('imageFieldType', rt.RichTextProperties())
-        field.SetName('image1')
+        self.BeginStyle(self._stylesheet.FindCharacterStyle(Strings.style_url).GetStyle())
+        self.BeginURL(url)
+        self.WriteText(text)
+        self.EndURL()
+        self.EndStyle()
 
     def on_insert_link(self, evt: wx.CommandEvent) -> None:
         """
@@ -204,21 +197,21 @@ class CustomRichText(rt.RichTextCtrl):
             # TODO change the link in the editor
             print('Ok')
         edit_dialog.Destroy()
-        self.insert_link('www.google.com', 'google')
+        self._insert_link('google', 'www.google.com')
 
-    def insert_link(self, url: str, text: str) -> None:
+    def url_in_text_click_handler(self, evt) -> None:
         """
-        Insert a link into text at current position.
-        :param url: The url behind the link
-        :param text: The visible text.
+        Handles click on url links inside text.
+        :param evt: Not used
         :return: None
         """
-        self.BeginStyle(self._stylesheet.FindCharacterStyle(Strings.style_url).GetStyle())
-        self.BeginURL(url)
-        self.WriteText(text)
-        self.EndURL()
-        self.EndStyle()
-        # TODO edit link in place (create a link edit dialog)
+        link = self.GetRange(evt.GetURLStart(), evt.GetURLEnd() + 1)
+        wx.MessageBox(evt.GetString() + ' ' + link, "URL Clicked")
+
+    def on_insert_image(self, evt):
+        # TODO this.
+        field = self.WriteField('imageFieldType', rt.RichTextProperties())
+        field.SetName('image1')
 
     def on_bold(self, evt) -> None:
         """
