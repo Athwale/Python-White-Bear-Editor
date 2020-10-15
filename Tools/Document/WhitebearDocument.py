@@ -186,6 +186,13 @@ class WhitebearDocument:
         """
         return self._meta_keywords, self._keywords_error_message
 
+    def get_working_directory(self) -> str:
+        """
+        Return the working directory where this document is stored.
+        :return: Return the working directory where this document is stored.
+        """
+        return self._working_directory
+
     # Setters ----------------------------------------------------------------------------------------------------------
     def set_page_name(self, name: str) -> None:
         """

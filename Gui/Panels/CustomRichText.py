@@ -191,15 +191,19 @@ class CustomRichText(rt.RichTextCtrl):
         :param evt: Unused,
         :return: None
         """
-        edit_dialog = EditLinkDialog(self)
+        new_link = Link("", "", "", self._document.get_other_articles(), self._document.get_working_directory())
+        edit_dialog = EditLinkDialog(self, new_link)
         result = edit_dialog.ShowModal()
         if result == wx.ID_OK:
             # TODO set document modified if an edit has been made in the dialog
-            # TODO change the link in the editor
-            print('Ok')
+            self._document.set_modified(True)
+            self._document.add_link(new_link)
+            self._insert_link(new_link.get_text(), new_link.get_id())
+            # Send an event to the main gui to signal document color change
+            color_evt = wx.CommandEvent(wx.wxEVT_COLOUR_CHANGED, self.GetId())
+            color_evt.SetEventObject(self)
+            wx.PostEvent(self.GetEventHandler(), color_evt)
         edit_dialog.Destroy()
-        # TODO Call article add link and insert the id
-        self._insert_link('google', 'www.google.com')
 
     def url_in_text_click_handler(self, evt) -> None:
         """
@@ -207,6 +211,7 @@ class CustomRichText(rt.RichTextCtrl):
         :param evt: Not used
         :return: None
         """
+        # TODO change the link in the editor
         link_text = self.GetRange(evt.GetURLStart(), evt.GetURLEnd() + 1)
         print(self._document.find_link(evt.GetString()))
 

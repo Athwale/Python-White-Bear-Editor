@@ -396,6 +396,7 @@ class MainFrame(wx.Frame):
         self.right_bottom_sizer.Add(self.main_text_area, flag=wx.EXPAND | wx.LEFT | wx.TOP, proportion=1, border=2)
         self.right_bottom_sizer.Add(self.side_photo_column_sizer, flag=wx.EXPAND | wx.LEFT,
                                     border=Numbers.widget_border_size)
+        self.Bind(wx.EVT_COLOUR_CHANGED, self.text_area_edit_handler, self.main_text_area)
         # --------------------------------------------------------------------------------------------------------------
 
     def _bind_handlers(self) -> None:
@@ -754,3 +755,7 @@ class MainFrame(wx.Frame):
         event_id = event.GetId()
         if event_id == wx.ID_EDIT or event_id == wx.ID_UP or event_id == wx.ID_DOWN or event_id == wx.ID_DELETE:
             self.update_file_color()
+
+    def text_area_edit_handler(self, event):
+        # TODO this
+        self.update_file_color()

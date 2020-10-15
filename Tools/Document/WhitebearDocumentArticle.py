@@ -543,7 +543,12 @@ class WhitebearDocumentArticle(WhitebearDocument):
         """
         return self._main_text_elements
 
-    # TODO implement add link and use the list of link when regenerating elements list
+    def get_other_articles(self) -> Dict:
+        """
+        Return a dictionary of WhitebearDocuments representing other loaded articles
+        :return: A dictionary of WhitebearDocuments representing other loaded articles
+        """
+        return self._articles
 
     def find_link(self, link_id: str) -> Link:
         """
@@ -554,6 +559,15 @@ class WhitebearDocumentArticle(WhitebearDocument):
         for link in self._links:
             if link.get_id() == link_id:
                 return link
+
+    def add_link(self, link: Link) -> None:
+        """
+        Append a new link into the link list.
+        :param link: The new link
+        :return: None
+        """
+        # TODO use the link list when regenerating elements list
+        self._links.append(link)
 
     # Setters ----------------------------------------------------------------------------------------------------------
     def set_date(self, date: str) -> None:

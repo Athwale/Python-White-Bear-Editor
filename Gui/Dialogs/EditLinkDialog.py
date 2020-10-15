@@ -1,20 +1,23 @@
 import wx
 
 from Constants.Constants import Strings, Numbers
+from Tools.Document.ArticleElements.Link import Link
 from Tools.Tools import Tools
 
 
 class EditLinkDialog(wx.Dialog):
 
-    def __init__(self, parent):
+    def __init__(self, parent, link: Link):
         """
         Display a modal dialog with a message with the text being selectable.
         :param parent: Parent frame.
+        :param link: the Link instance to display.
         """
         # TODO pass in an instance of seo checkable parsed link from the article to display or a blank link if new
         wx.Dialog.__init__(self, parent, title=Strings.label_dialog_edit_link,
                            size=(Numbers.edit_image_dialog_width, Numbers.edit_link_dialog_height),
                            style=wx.DEFAULT_DIALOG_STYLE)
+        self._link = link
 
         self.main_vertical_sizer = wx.BoxSizer(wx.VERTICAL)
         self.horizontal_sizer = wx.BoxSizer(wx.HORIZONTAL)
