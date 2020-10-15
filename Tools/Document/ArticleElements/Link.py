@@ -11,6 +11,8 @@ class Link:
     Represents a link inside text.
     """
 
+    count = 10
+
     def __init__(self, text: str, url: str, title: str, loaded_pages, working_directory: str):
         """
         Constructor for a Link.
@@ -21,6 +23,7 @@ class Link:
         :param working_directory: The working directory of the editor.
         """
         # All link target blank page except links in menus which we do not parse here.
+        self._link_id: str = ''
         self._text = text
         self._text_error_message = ''
         self._url = url
@@ -32,6 +35,10 @@ class Link:
         self._loaded_pages = loaded_pages
         self._is_local = False
         self._status_color = None
+
+        # Create a unique ID from text, url and title
+        self._link_id = str(Link.count)
+        Link.count = Link.count + 1
 
     def seo_test_self(self):
         """
@@ -77,6 +84,13 @@ class Link:
         if not result:
             self._status_color = wx.RED
         return result
+
+    def get_id(self) -> str:
+        """
+        Return the ID of this link.
+        :return: Return the ID of this link.
+        """
+        return self._link_id
 
     def get_text(self) -> str:
         """

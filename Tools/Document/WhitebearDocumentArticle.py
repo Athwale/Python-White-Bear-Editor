@@ -543,6 +543,18 @@ class WhitebearDocumentArticle(WhitebearDocument):
         """
         return self._main_text_elements
 
+    # TODO implement add link and use the list of link when regenerating elements list
+
+    def find_link(self, link_id: str) -> Link:
+        """
+        Find the link instance identified by the text and url parameters.
+        :param link_id: Unique identifier of a Link
+        :return: a Link instance
+        """
+        for link in self._links:
+            if link.get_id() == link_id:
+                return link
+
     # Setters ----------------------------------------------------------------------------------------------------------
     def set_date(self, date: str) -> None:
         """

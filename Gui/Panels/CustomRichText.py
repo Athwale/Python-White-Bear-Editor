@@ -130,6 +130,7 @@ class CustomRichText(rt.RichTextCtrl):
         :return: None
         """
         self.Clear()
+        self.SetDefaultStyle(self._stylesheet.FindParagraphStyle(Strings.style_paragraph).GetStyle())
         self._document = doc
         for element in doc.get_main_text_elements():
             if isinstance(element, Paragraph):
@@ -166,20 +167,20 @@ class CustomRichText(rt.RichTextCtrl):
             elif isinstance(element, Break):
                 self.LineBreak()
             elif isinstance(element, Link):
-                self._insert_link(element.get_text(), element.get_url())
+                self._insert_link(element.get_text(), element.get_id())
 
         self.EndParagraphStyle()
         self.Newline()
 
-    def _insert_link(self, text: str, url: str) -> None:
+    def _insert_link(self, text: str, link_id: str) -> None:
         """
         Insert a link into text at current position.
         :param text: The visible text.
-        :param url: The url behind the link
+        :param link_id: The ID of the link
         :return: None
         """
         self.BeginStyle(self._stylesheet.FindCharacterStyle(Strings.style_url).GetStyle())
-        self.BeginURL(url)
+        self.BeginURL(link_id)
         self.WriteText(text)
         self.EndURL()
         self.EndStyle()
@@ -197,6 +198,7 @@ class CustomRichText(rt.RichTextCtrl):
             # TODO change the link in the editor
             print('Ok')
         edit_dialog.Destroy()
+        # TODO Call article add link and insert the id
         self._insert_link('google', 'www.google.com')
 
     def url_in_text_click_handler(self, evt) -> None:
@@ -205,8 +207,8 @@ class CustomRichText(rt.RichTextCtrl):
         :param evt: Not used
         :return: None
         """
-        link = self.GetRange(evt.GetURLStart(), evt.GetURLEnd() + 1)
-        wx.MessageBox(evt.GetString() + ' ' + link, "URL Clicked")
+        link_text = self.GetRange(evt.GetURLStart(), evt.GetURLEnd() + 1)
+        print(self._document.find_link(evt.GetString()))
 
     def on_insert_image(self, evt):
         # TODO this.
@@ -308,12 +310,12 @@ class CustomRichText(rt.RichTextCtrl):
             self.ApplyStyle(self._stylesheet.FindParagraphStyle(Strings.style_paragraph))
             self.BeginParagraphStyle(Strings.style_paragraph)
             self.WriteText('paragraph5 sample of a longer text for testing url creation ')
-            self.insert_link('www.seznam.cz', 'link from code')
+            self._insert_link('www.seznam.cz', 'link from code')
             self.EndParagraphStyle()
 
             self.Newline()
 
             self.ApplyStyle(self._stylesheet.FindParagraphStyle(Strings.style_paragraph))
             self.BeginParagraphStyle(Strings.style_paragraph)
-            self.insert_link('www.seznam.cz', 'link from code')
+            self._insert_link('www.seznam.cz', 'link from code')
             self.EndParagraphStyle()
