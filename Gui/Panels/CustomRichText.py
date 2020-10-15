@@ -157,11 +157,17 @@ class CustomRichText(rt.RichTextCtrl):
         attr = wx.TextAttr()
         attr.SetFlags(wx.TEXT_ATTR_TEXT_COLOUR)
 
+        # TODO bold
+
         for element in p.get_elements():
             if isinstance(element, Text):
+                if element.is_bold():
+                    self.BeginBold()
                 self.BeginTextColour(element.get_color())
                 self.WriteText(element.get_text())
                 self.EndTextColour()
+                if element.is_bold():
+                    self.EndBold()
             elif isinstance(element, Break):
                 self.LineBreak()
             elif isinstance(element, Link):

@@ -326,7 +326,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
         paragraph = Paragraph()
         for child in p.children:
             # These can be text, span, strong, a, br
-            if not self._process_visual_tags(child, paragraph):
+            if not self._process_visual_tags(child, paragraph, False):
                 if child.name == 'a':
                     link = Link(str(child.string), child.attrs['href'], child.attrs['title'], self._articles,
                                 self._working_directory)
@@ -336,21 +336,22 @@ class WhitebearDocumentArticle(WhitebearDocument):
                     raise WrongFormatException(Strings.exception_html_syntax_error)
         return paragraph
 
-    def _process_visual_tags(self, parent_element: Tag, paragraph: Paragraph) -> bool:
+    def _process_visual_tags(self, parent_element: Tag, paragraph: Paragraph, bold: bool) -> bool:
         """
         Process span, br and strong
         :param parent_element: the element containing the tags to process.
         :param paragraph: The Paragraph instance to put the processed elements in.
+        :param bold: If True, apply bold True to any Text.
         :return: True if something was processed
         """
         return_value = False
         if isinstance(parent_element, NavigableString):
             return_value = True
-            paragraph.add_element(Text(str(parent_element)))
+            paragraph.add_element(Text(str(parent_element), bold=bold))
         elif parent_element.name == 'span':
             return_value = True
             color = self._css_document.translate_color(parent_element.attrs['class'][0])
-            paragraph.add_element(Text(str(parent_element.string), color=color))
+            paragraph.add_element(Text(str(parent_element.string), bold=bold, color=color))
         elif parent_element.name == 'br':
             return_value = True
             paragraph.add_element(Break())
@@ -358,7 +359,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
             return_value = True
             # These can also contain colored spans and br, recursively call self
             for child in parent_element.children:
-                self._process_visual_tags(child, paragraph)
+                self._process_visual_tags(child, paragraph, True)
         return return_value
 
     def _parse_page_name(self) -> None:
