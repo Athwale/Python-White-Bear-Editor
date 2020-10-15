@@ -1,7 +1,7 @@
 import os
 
-import wx
 import htmlmin
+import wx
 from bs4 import BeautifulSoup
 
 from Constants.Constants import Numbers

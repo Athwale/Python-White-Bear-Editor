@@ -1,5 +1,5 @@
-import wx
 import requests
+import wx
 
 from Constants.Constants import Numbers, Strings
 from Resources.Fetch import Fetch

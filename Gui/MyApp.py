@@ -3,8 +3,9 @@
 """Starting class for the whitebear editor GUI. This
 class is necessary and must be in all wx python programs. OnInit must be overridden here"""
 
-import wx
 import time
+
+import wx
 import wx.adv
 
 from Constants.Constants import Strings, Numbers
@@ -45,5 +46,5 @@ if __name__ == "__main__":
     app = MyApp(redirect=False, filename=Strings.editor_output_debug_file)
     wx.Yield()
     if Numbers.do_download_test:
-        time.sleep((Numbers.splashscreen_timeout/1000) - 1)
+        time.sleep((Numbers.splashscreen_timeout / 1000) - 1)
     app.MainLoop()
