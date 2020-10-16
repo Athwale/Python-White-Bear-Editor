@@ -167,7 +167,7 @@ class CustomRichText(rt.RichTextCtrl):
             elif isinstance(element, Break):
                 self.LineBreak()
             elif isinstance(element, Link):
-                self._insert_link(element.get_text(), element.get_id())
+                self._insert_link(element.get_text()[0], element.get_id())
 
         self.EndParagraphStyle()
         self.Newline()
@@ -197,25 +197,43 @@ class CustomRichText(rt.RichTextCtrl):
         edit_dialog = EditLinkDialog(self, new_link)
         result = edit_dialog.ShowModal()
         if result == wx.ID_OK:
-            # TODO set document modified only if an edit has been made in the dialog
-            self._document.set_modified(True)
-            self._document.add_link(new_link)
-            self._insert_link(new_link.get_text(), new_link.get_id())
-            # Send an event to the main gui to signal document color change
-            color_evt = wx.CommandEvent(wx.wxEVT_COLOUR_CHANGED, self.GetId())
-            color_evt.SetEventObject(self)
-            wx.PostEvent(self.GetEventHandler(), color_evt)
+            self._handle_link_edit(new_link)
         edit_dialog.Destroy()
 
-    def url_in_text_click_handler(self, evt) -> None:
+    def url_in_text_click_handler(self, evt: wx.TextUrlEvent) -> None:
         """
         Handles click on url links inside text.
         :param evt: Not used
         :return: None
         """
-        # TODO change the link in the editor
+        link = self._document.find_link(evt.GetString())
         link_text = self.GetRange(evt.GetURLStart(), evt.GetURLEnd() + 1)
-        print(self._document.find_link(evt.GetString()))
+        link.set_text(link_text)
+        edit_dialog = EditLinkDialog(self, link)
+        result = edit_dialog.ShowModal()
+        if result == wx.ID_OK:
+            self._handle_link_edit(link, evt)
+        edit_dialog.Destroy()
+
+    def _handle_link_edit(self, link: Link, evt: wx.TextUrlEvent = None) -> None:
+        """
+        Handle actions needed after a link has been edited in the link edit dialog.
+        :param link: The modified Link instance
+        :param evt: If an event is passed in it is used to find where to replace the link, otherwise the link is
+        inserted into the current position.
+        :return: None
+        """
+        # TODO set document modified only if an edit has been made in the dialog
+        self._document.set_modified(True)
+        self._document.add_link(link)
+        if evt:
+            # Replace an existing link
+            self.Remove(evt.GetURLStart(), evt.GetURLEnd() + 1)
+        self._insert_link(link.get_text()[0], link.get_id())
+        # Send an event to the main gui to signal document color change
+        color_evt = wx.CommandEvent(wx.wxEVT_COLOUR_CHANGED, self.GetId())
+        color_evt.SetEventObject(self)
+        wx.PostEvent(self.GetEventHandler(), color_evt)
 
     def on_insert_image(self, evt):
         # TODO this.

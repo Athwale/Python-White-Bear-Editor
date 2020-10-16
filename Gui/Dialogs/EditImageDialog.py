@@ -13,6 +13,7 @@ class EditImageDialog(wx.Dialog):
         :param parent: Parent frame.
         :param image: AsideImage instance being edited by tis dialog.
         """
+        # TODO make interactive when the user edits it.s
         wx.Dialog.__init__(self, parent, title=Strings.label_dialog_edit_image,
                            size=(Numbers.edit_image_dialog_width, Numbers.edit_image_dialog_height),
                            style=wx.DEFAULT_DIALOG_STYLE)
@@ -115,7 +116,6 @@ class EditImageDialog(wx.Dialog):
         Display the image that this dialog edits in the gui along with field values and errors.
         :return: None
         """
-        # TODO make interactive when the user edits it.s
         self.Disable()
         # Set image data
         field_to_value = {self.field_image_caption: (self._image.get_image_caption(), self.field_image_caption_tip),

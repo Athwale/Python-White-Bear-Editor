@@ -13,6 +13,8 @@ class EditLinkDialog(wx.Dialog):
         :param parent: Parent frame.
         :param link: the Link instance to display.
         """
+        # TODO add interactivity
+        # TODO if you press ok the link must be set with the new values
         wx.Dialog.__init__(self, parent, title=Strings.label_dialog_edit_link,
                            size=(Numbers.edit_image_dialog_width, Numbers.edit_link_dialog_height),
                            style=wx.DEFAULT_DIALOG_STYLE)
@@ -26,7 +28,6 @@ class EditLinkDialog(wx.Dialog):
         # Link URL sub sizer
         self.url_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.label_url = wx.StaticText(self, -1, Strings.label_url + ': ')
-        # TODO set local link true if you pick one from the list
         self.field_url = wx.ComboBox(self, -1, choices=self._link.get_loaded_pages(), style=wx.CB_DROPDOWN | wx.CB_SORT)
         # Fires when you type in the box
         self.Bind(wx.EVT_TEXT, self._combobox_handler, self.field_url)
