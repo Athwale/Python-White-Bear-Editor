@@ -396,7 +396,6 @@ class MainFrame(wx.Frame):
         self.right_bottom_sizer.Add(self.main_text_area, flag=wx.EXPAND | wx.LEFT | wx.TOP, proportion=1, border=2)
         self.right_bottom_sizer.Add(self.side_photo_column_sizer, flag=wx.EXPAND | wx.LEFT,
                                     border=Numbers.widget_border_size)
-        self.Bind(wx.EVT_COLOUR_CHANGED, self.text_area_edit_handler, self.main_text_area)
         # --------------------------------------------------------------------------------------------------------------
 
     def _bind_handlers(self) -> None:
@@ -412,12 +411,10 @@ class MainFrame(wx.Frame):
         # This calls the quit method if the user logs off the computer
         self.Bind(wx.EVT_QUERY_END_SESSION, self.close_button_handler)
 
-        # Bind menu item clicks
-        # We did not assign a source for this event so this catches all menu events that do not have a source
-        # This is used to catch Skipped event from aside panel. It has to be first otherwise it overwrites the
-        # specific binds.
-        self.Bind(wx.EVT_MENU, self.aside_panel_edit_handler)
+        # Bind a handler that changes selected document color if an edit happens in other controls.
+        self.Bind(wx.EVT_COLOUR_CHANGED, self.text_area_edit_handler)
 
+        # Bind menu item clicks
         self.Bind(wx.EVT_MENU, self.about_button_handler, self.help_menu_item_about)
         self.Bind(wx.EVT_MENU, self.open_button_handler, self.file_menu_item_open)
         self.Bind(wx.EVT_MENU, self.quit_button_handler, self.file_menu_item_quit)
@@ -745,17 +742,11 @@ class MainFrame(wx.Frame):
         selected_item = self.page_list.GetFirstSelected()
         self.page_list.SetItemBackgroundColour(selected_item, selected_document_color)
 
-    def aside_panel_edit_handler(self, event) -> None:
+    def text_area_edit_handler(self, event: wx.CommandEvent) -> None:
         """
-        Catch events coming form aside panel which are invoked when the images are changed or moved or deleted.
-        This must trigger and update of the color of the file in the file list.
-        :param event: Used to tell whether the event comes from side panel.
+        Handle special events that signal that the color of the selected item in the filelis should be updated.
+        This happens when an edit has been made to the document.
+        :param event: Not used.
         :return: None
         """
-        event_id = event.GetId()
-        if event_id == wx.ID_EDIT or event_id == wx.ID_UP or event_id == wx.ID_DOWN or event_id == wx.ID_DELETE:
-            self.update_file_color()
-
-    def text_area_edit_handler(self, event):
-        # TODO this
         self.update_file_color()

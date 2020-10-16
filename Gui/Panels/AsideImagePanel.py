@@ -61,7 +61,10 @@ class AsideImagePanel(wx.lib.scrolledpanel.ScrolledPanel):
         self._show_images()
         # Pass the event into the main frame to change document color in the file list to blue.
         if self._document.is_modified():
-            event.Skip()
+            # Send an event to the main gui to signal document color change
+            color_evt = wx.CommandEvent(wx.wxEVT_COLOUR_CHANGED, self.GetId())
+            color_evt.SetEventObject(self)
+            wx.PostEvent(self.GetEventHandler(), color_evt)
 
     def load_document_images(self, doc: WhitebearDocumentArticle) -> None:
         """

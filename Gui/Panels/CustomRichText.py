@@ -195,7 +195,7 @@ class CustomRichText(rt.RichTextCtrl):
         edit_dialog = EditLinkDialog(self, new_link)
         result = edit_dialog.ShowModal()
         if result == wx.ID_OK:
-            # TODO set document modified if an edit has been made in the dialog
+            # TODO set document modified only if an edit has been made in the dialog
             self._document.set_modified(True)
             self._document.add_link(new_link)
             self._insert_link(new_link.get_text(), new_link.get_id())
