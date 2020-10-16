@@ -227,6 +227,10 @@ class WhitebearDocumentArticle(WhitebearDocument):
         Parse the main text of the article.
         :return: None
         """
+        self._main_text_elements.clear()
+        self._images.clear()
+        self._links.clear()
+        self._videos.clear()
         text_section = self._parsed_html.find(name='section', attrs={'class': 'mainText'})
         child: Tag
         for child in text_section.children:

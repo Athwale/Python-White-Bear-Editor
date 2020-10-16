@@ -179,6 +179,7 @@ class CustomRichText(rt.RichTextCtrl):
         :param link_id: The ID of the link
         :return: None
         """
+        # TODO insert colored link if seo wrong
         self.BeginStyle(self._stylesheet.FindCharacterStyle(Strings.style_url).GetStyle())
         self.BeginURL(link_id)
         self.WriteText(text)
