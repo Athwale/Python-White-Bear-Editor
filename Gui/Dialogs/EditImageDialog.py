@@ -75,8 +75,10 @@ class EditImageDialog(wx.Dialog):
         self.information_sizer.Add(self.alt_sub_sizer, flag=wx.EXPAND | wx.TOP, border=Numbers.widget_border_size)
         self.field_image_alt_tip = Tools.get_warning_tip(self.field_image_alt, Strings.label_article_image_alt)
 
-        # Target blank checkbox
+        # Target blank checkbox all link always open in new page
         self.checkbox_target_blank = wx.CheckBox(self, -1, label=Strings.label_open_in_new_page)
+        self.checkbox_target_blank.SetValue(True)
+        self.checkbox_target_blank.Disable()
         self.information_sizer.Add(self.checkbox_target_blank, flag=wx.TOP, border=Numbers.widget_border_size)
 
         # Image preview
@@ -146,8 +148,4 @@ class EditImageDialog(wx.Dialog):
             self.content_image_thumbnail_path.SetLabelText(thumb_path)
         else:
             self.content_image_thumbnail_path.SetLabelText(self._image.get_thumbnail_filename())
-
-        # Set target blank checkbox state
-        self.checkbox_target_blank.Disable()
-        self.checkbox_target_blank.SetValue(True)
         self.Enable()

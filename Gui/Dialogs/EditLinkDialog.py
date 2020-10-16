@@ -13,7 +13,6 @@ class EditLinkDialog(wx.Dialog):
         :param parent: Parent frame.
         :param link: the Link instance to display.
         """
-        # TODO pass in an instance of seo checkable parsed link from the article to display or a blank link if new
         wx.Dialog.__init__(self, parent, title=Strings.label_dialog_edit_link,
                            size=(Numbers.edit_image_dialog_width, Numbers.edit_link_dialog_height),
                            style=wx.DEFAULT_DIALOG_STYLE)
@@ -27,7 +26,11 @@ class EditLinkDialog(wx.Dialog):
         # Link URL sub sizer
         self.url_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.label_url = wx.StaticText(self, -1, Strings.label_url + ': ')
-        self.field_url = wx.TextCtrl(self, -1)
+        # TODO set local link true if you pick one from the list
+        self.field_url = wx.ComboBox(self, -1, choices=self._link.get_loaded_pages(), style=wx.CB_DROPDOWN | wx.CB_SORT)
+        # Fires when you type in the box
+        self.Bind(wx.EVT_TEXT, self._combobox_handler, self.field_url)
+
         self.url_sub_sizer.Add(self.label_url, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
         self.url_sub_sizer.Add((35, -1))
         self.url_sub_sizer.Add(self.field_url, proportion=1)
@@ -56,7 +59,13 @@ class EditLinkDialog(wx.Dialog):
 
         # Target blank checkbox
         self.checkbox_target_blank = wx.CheckBox(self, -1, label=Strings.label_open_in_new_page)
+        self.checkbox_target_blank.SetValue(True)
+        self.checkbox_target_blank.Disable()
+        # Local link checkbox
+        self.checkbox_local = wx.CheckBox(self, -1, label=Strings.label_link_local)
+        self.checkbox_local.Disable()
         self.information_sizer.Add(self.checkbox_target_blank, flag=wx.TOP, border=Numbers.widget_border_size)
+        self.information_sizer.Add(self.checkbox_local, flag=wx.TOP, border=Numbers.widget_border_size)
 
         # Buttons
         self.button_sizer = wx.BoxSizer(wx.VERTICAL)
@@ -77,7 +86,20 @@ class EditLinkDialog(wx.Dialog):
         self.main_vertical_sizer.Add(self.button_sizer, 0, flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM,
                                      border=Numbers.widget_border_size)
         self.SetSizer(self.main_vertical_sizer)
-        # TODO modify this to show a combo box wit editability showing all currently loaded pages to pick from.
+        self._display_dialog_contents()
+
+    def _combobox_handler(self, event: wx.CommandEvent) -> None:
+        """
+        Handle actions made in the combobox control.
+        :param event:
+        :return: None
+        """
+        if self.field_url.GetValue() in self._link.get_loaded_pages():
+            self._link.set_local(True)
+            self.checkbox_local.SetValue(True)
+        else:
+            self._link.set_local(False)
+            self.checkbox_local.SetValue(False)
 
     def _display_dialog_contents(self) -> None:
         """
@@ -86,9 +108,9 @@ class EditLinkDialog(wx.Dialog):
         """
         self.Disable()
         # Set image data
-        field_to_value = {self.field_url: (self._image.get_image_caption(), self.field_url_tip),
-                          self.field_link_title: (self._image.get_link_title(), self.field_link_title_tip),
-                          self.field_link_text: (self._image.get_image_alt(), self.field_link_text_tip)}
+        field_to_value = {self.field_url: (self._link.get_url(), self.field_url_tip),
+                          self.field_link_title: (self._link.get_title(), self.field_link_title_tip),
+                          self.field_link_text: (self._link.get_text(), self.field_link_text_tip)}
         for field, value in field_to_value.items():
             tip = value[1]
             if value[0][1]:
@@ -101,23 +123,6 @@ class EditLinkDialog(wx.Dialog):
                 field.SetBackgroundColour(Numbers.GREEN_COLOR)
             field.SetValue(value[0][0])
 
-        # Set images
-        self._bitmap.SetBitmap(wx.Bitmap(self._image.get_image()))
-        # Set disk paths
-        full_path = self._image.get_original_image_path()
-        self.SetTitle(Strings.label_dialog_edit_image + ': ' + self._image.get_full_filename())
-        if full_path:
-            self.content_image_full_path.SetLabelText(full_path)
-        else:
-            self.content_image_full_path.SetLabelText(self._image.get_full_filename())
-
-        thumb_path = self._image.get_thumbnail_image_path()
-        if thumb_path:
-            self.content_image_thumbnail_path.SetLabelText(thumb_path)
-        else:
-            self.content_image_thumbnail_path.SetLabelText(self._image.get_thumbnail_filename())
-
-        # Set target blank checkbox state
-        self.checkbox_target_blank.Disable()
-        self.checkbox_target_blank.SetValue(True)
+        # Set checkbox local state
+        self.checkbox_local.SetValue(self._link.is_local())
         self.Enable()

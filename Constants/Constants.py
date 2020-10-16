@@ -4,7 +4,7 @@ from wx import Colour
 
 
 class Numbers:
-    do_download_test = False
+    do_download_test = True
 
     RED_COLOR = Colour(242, 207, 206)
     GREEN_COLOR = Colour(201, 255, 199)
@@ -23,7 +23,7 @@ class Numbers:
     photo_column_width: int = 300
     edit_image_dialog_width: int = 900
     edit_image_dialog_height: int = 300
-    edit_link_dialog_height: int = 240
+    edit_link_dialog_height: int = 255
     paragraph_spacing: int = 20
     heading_1_size: int = 16
     list_left_indent: int = 20
@@ -70,6 +70,7 @@ class Strings:
     editor_output_debug_file: str = os.path.join(home_directory, 'whitebearEditor.log')
     editor_name: str = 'Whitebear editor'
     editor_version: str = '0.1'
+    link_stub: str = 'https://www.'
 
     column_pages = 'Name'
 
@@ -178,9 +179,10 @@ class Strings:
     label_link_title: str = 'Link title'
     label_alt_description: str = 'Alt description'
     label_none: str = 'None'
-    label_open_in_new_page: str = 'Open image in new page'
+    label_open_in_new_page: str = 'Opens in new page'
     label_url: str = 'URL'
     label_text: str = 'Text'
+    label_link_local: str = 'WhiteBear page'
 
     status_loading: str = 'Loading and testing'
     status_ready: str = 'Ready'

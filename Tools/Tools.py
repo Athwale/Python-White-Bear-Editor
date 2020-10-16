@@ -7,7 +7,7 @@ from Constants.Constants import Numbers
 class Tools:
 
     @staticmethod
-    def get_warning_tip(field: wx.TextCtrl, title: str) -> SuperToolTip:
+    def get_warning_tip(field, title: str) -> SuperToolTip:
         """
         Create and return an instance of SuperToolTip targeted for a specific TextCtrl and set up to show SEO warnings.
         :param field: The text field for the new tip.

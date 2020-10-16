@@ -1,4 +1,5 @@
 import os
+from typing import List
 
 import requests
 import wx
@@ -62,7 +63,7 @@ class Link:
         # Check link text
         if len(self._text) < Numbers.article_name_min_length or len(
                 self._link_title) > Numbers.article_name_max_length:
-            self._link_title_error_message = Strings.seo_error_name_length
+            self._text_error_message = Strings.seo_error_name_length
             result = False
 
         # Check url, if it is one of whitebear pages set local to True and do not try to download it.
@@ -71,13 +72,14 @@ class Link:
         elif self._url.startswith('files'):
             full_path = os.path.join(self._working_directory, self._url)
             if not os.path.exists(full_path) or not os.access(full_path, os.R_OK) or not os.access(full_path, os.W_OK):
+                self._url_error_message = Strings.seo_error_url_nonexistent
                 result = False
         else:
             self._is_local = False
             if Numbers.do_download_test:
                 try:
                     requests.get(self._url, headers={"User-Agent": "Mozilla/5.0"})
-                except requests.ConnectionError as _:
+                except (requests.ConnectionError, requests.exceptions.MissingSchema) as ex:
                     self._url_error_message = Strings.seo_error_url_nonexistent
                     result = False
 
@@ -92,26 +94,33 @@ class Link:
         """
         return self._link_id
 
-    def get_text(self) -> str:
+    def get_text(self) -> (str, str):
         """
-        Return the visible text of the link.
-        :return: the visible text of the link.
+        Return the visible text of the link and any text error.
+        :return: the visible text of the link and any text error.
         """
-        return self._text
+        return self._text, self._text_error_message
 
-    def get_url(self) -> str:
+    def get_url(self) -> (str, str):
         """
-        Return the url of the link.
-        :return: the url of the link.
+        Return the url of the link and any error.
+        :return: the url of the link and any error.
         """
-        return self._url
+        return self._url, self._url_error_message
 
-    def get_title(self) -> str:
+    def get_title(self) -> (str, str):
         """
-        Return the title of the link.
-        :return: the title of the link.
+        Return the title of the link and any error.
+        :return: the title of the link and any error.
         """
-        return self._link_title
+        return self._link_title, self._link_title_error_message
+
+    def get_loaded_pages(self) -> List[str]:
+        """
+        Return a list of all other loaded whitebear page names.
+        :return: a list of all other loaded whitebear page names.
+        """
+        return list(self._loaded_pages.keys())
 
     def is_local(self) -> bool:
         """

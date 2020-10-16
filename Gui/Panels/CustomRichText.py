@@ -191,7 +191,9 @@ class CustomRichText(rt.RichTextCtrl):
         :param evt: Unused,
         :return: None
         """
-        new_link = Link("", "", "", self._document.get_other_articles(), self._document.get_working_directory())
+        new_link = Link("", Strings.link_stub, "", self._document.get_other_articles(),
+                        self._document.get_working_directory())
+        new_link.seo_test_self()
         edit_dialog = EditLinkDialog(self, new_link)
         result = edit_dialog.ShowModal()
         if result == wx.ID_OK:
