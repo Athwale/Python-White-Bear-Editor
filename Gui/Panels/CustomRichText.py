@@ -73,16 +73,27 @@ class CustomRichText(rt.RichTextCtrl):
         self.ApplyStyle(style_paragraph)
         self.SetDefaultStyle(stl_paragraph)
 
-        # Heading style
+        # Heading 3 style
         stl_heading_3: rt.RichTextAttr = self.GetDefaultStyleEx()
         stl_heading_3.SetAlignment(wx.TEXT_ALIGNMENT_LEFT)
         stl_heading_3.SetFontWeight(wx.BOLD)
-        stl_heading_3.SetFontSize(Numbers.heading_1_size)
+        stl_heading_3.SetFontSize(Numbers.heading_3_size)
         stl_heading_3.SetParagraphSpacingAfter(Numbers.paragraph_spacing)
-        style_h3: rt.RichTextParagraphStyleDefinition = rt.RichTextParagraphStyleDefinition(Strings.style_heading)
+        style_h3: rt.RichTextParagraphStyleDefinition = rt.RichTextParagraphStyleDefinition(Strings.style_heading_3)
         style_h3.SetStyle(stl_heading_3)
         style_h3.SetNextStyle(Strings.style_paragraph)
         self._stylesheet.AddParagraphStyle(style_h3)
+
+        # Heading 4 style
+        stl_heading_4: rt.RichTextAttr = self.GetDefaultStyleEx()
+        stl_heading_4.SetAlignment(wx.TEXT_ALIGNMENT_LEFT)
+        stl_heading_4.SetFontWeight(wx.BOLD)
+        stl_heading_4.SetFontSize(Numbers.heading_4_size)
+        stl_heading_4.SetParagraphSpacingAfter(Numbers.paragraph_spacing)
+        style_h4: rt.RichTextParagraphStyleDefinition = rt.RichTextParagraphStyleDefinition(Strings.style_heading_4)
+        style_h4.SetStyle(stl_heading_4)
+        style_h4.SetNextStyle(Strings.style_paragraph)
+        self._stylesheet.AddParagraphStyle(style_h4)
 
         # List style
         stl_list: rt.RichTextAttr = self.GetDefaultStyleEx()
@@ -146,13 +157,33 @@ class CustomRichText(rt.RichTextCtrl):
             if isinstance(element, Paragraph):
                 self._write_paragraph(element)
             elif isinstance(element, Heading):
-                print('heading')
+                self._write_heading(element)
             elif isinstance(element, ImageInText):
-                print('image')
+                print('')
             elif isinstance(element, UnorderedList):
-                print('list')
+                print('')
             elif isinstance(element, Video):
-                print('video')
+                print('')
+
+    def _write_heading(self, h: Heading) -> None:
+        """
+        Write a Heading into the text area.
+        :param h: A Heading instance.
+        :return: None
+        """
+        attr = wx.TextAttr()
+        attr.SetFlags(wx.TEXT_ATTR_TEXT_COLOUR)
+        if h.get_size() == Heading.SIZE_H3:
+            style = Strings.style_heading_3
+        else:
+            style = Strings.style_heading_4
+        self.ApplyStyle(self._stylesheet.FindParagraphStyle(style))
+        self.BeginParagraphStyle(style)
+        self.BeginTextColour(h.get_text().get_color())
+        self.WriteText(h.get_text().get_text())
+        self.EndTextColour()
+        self.EndParagraphStyle()
+        self.Newline()
 
     def _write_paragraph(self, p: Paragraph) -> None:
         """
@@ -164,7 +195,6 @@ class CustomRichText(rt.RichTextCtrl):
         self.BeginParagraphStyle(Strings.style_paragraph)
         attr = wx.TextAttr()
         attr.SetFlags(wx.TEXT_ATTR_TEXT_COLOUR)
-
         for element in p.get_elements():
             if isinstance(element, Text):
                 if element.is_bold():
@@ -178,7 +208,6 @@ class CustomRichText(rt.RichTextCtrl):
                 self.LineBreak()
             elif isinstance(element, Link):
                 self._insert_link(element.get_text()[0], element.get_id(), element.get_status_color())
-
         self.EndParagraphStyle()
         self.Newline()
 
@@ -198,7 +227,6 @@ class CustomRichText(rt.RichTextCtrl):
         self.WriteText(text)
         self.EndURL()
         self.EndStyle()
-        # todo reload is unresponsive
 
     def on_insert_link(self, evt: wx.CommandEvent) -> None:
         """

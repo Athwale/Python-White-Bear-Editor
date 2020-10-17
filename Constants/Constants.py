@@ -25,7 +25,8 @@ class Numbers:
     edit_image_dialog_height: int = 300
     edit_link_dialog_height: int = 255
     paragraph_spacing: int = 20
-    heading_1_size: int = 16
+    heading_3_size: int = 16
+    heading_4_size: int = 14
     list_left_indent: int = 20
     list_left_subindent: int = 25
     icon_width: int = 30
@@ -194,7 +195,8 @@ class Strings:
     status_ok: str = 'Ok'
 
     style_paragraph: str = 'Paragraph'
-    style_heading: str = 'Title'
+    style_heading_3: str = 'Title 3'
+    style_heading_4: str = 'Title 4'
     style_list: str = 'List'
     style_image: str = 'Image'
     style_url: str = 'Url'

@@ -669,14 +669,17 @@ class MainFrame(wx.Frame):
         :param event: wx event, not used.
         :return: None
         """
-        result = wx.MessageBox(Strings.text_reload_from_disk, Strings.status_warning, wx.YES_NO | wx.ICON_WARNING)
-        if result == wx.YES:
+        reload_dialog = wx.MessageDialog(self, Strings.text_reload_from_disk, Strings.status_warning,
+                                         wx.YES_NO | wx.ICON_WARNING)
+        result = reload_dialog.ShowModal()
+        if result == wx.ID_YES:
             selected_item = self.page_list.GetItem(self.page_list.GetFirstSelected())
             self.document_dictionary[selected_item.GetText()].get_menu_section().parse_self()
             self.document_dictionary[selected_item.GetText()].parse_self()
             event = wx.ListEvent()
             event.SetItem(selected_item)
             self.list_item_click_handler(event)
+        reload_dialog.Destroy()
 
     def _fill_editor(self, doc: WhitebearDocumentArticle) -> None:
         """
