@@ -118,6 +118,16 @@ class CustomRichText(rt.RichTextCtrl):
         style_link.SetStyle(stl_link)
         self._stylesheet.AddCharacterStyle(style_link)
 
+        # Error Link style
+        stl_error_link = rt.RichTextAttr()
+        stl_error_link.SetFlags(wx.TEXT_ATTR_URL)
+        stl_error_link.SetFontUnderlined(True)
+        stl_error_link.SetBackgroundColour(wx.RED)
+        style_error_link: rt.RichTextCharacterStyleDefinition = rt.RichTextCharacterStyleDefinition(
+            Strings.style_error_url)
+        style_error_link.SetStyle(stl_error_link)
+        self._stylesheet.AddCharacterStyle(style_error_link)
+
         self.SetStyleSheet(self._stylesheet)
         self._style_control.SetRichTextCtrl(self)
         self._style_control.SetStyleSheet(self._stylesheet)
@@ -167,24 +177,28 @@ class CustomRichText(rt.RichTextCtrl):
             elif isinstance(element, Break):
                 self.LineBreak()
             elif isinstance(element, Link):
-                self._insert_link(element.get_text()[0], element.get_id())
+                self._insert_link(element.get_text()[0], element.get_id(), element.get_status_color())
 
         self.EndParagraphStyle()
         self.Newline()
 
-    def _insert_link(self, text: str, link_id: str) -> None:
+    def _insert_link(self, text: str, link_id: str, color: wx.Colour) -> None:
         """
         Insert a link into text at current position.
         :param text: The visible text.
         :param link_id: The ID of the link
+        :param color: The color of the background of the link.
         :return: None
         """
-        # TODO insert colored link if seo wrong
-        self.BeginStyle(self._stylesheet.FindCharacterStyle(Strings.style_url).GetStyle())
+        if color == wx.RED:
+            self.BeginStyle(self._stylesheet.FindCharacterStyle(Strings.style_error_url).GetStyle())
+        else:
+            self.BeginStyle(self._stylesheet.FindCharacterStyle(Strings.style_url).GetStyle())
         self.BeginURL(link_id)
         self.WriteText(text)
         self.EndURL()
         self.EndStyle()
+        # todo reload is unresponsive
 
     def on_insert_link(self, evt: wx.CommandEvent) -> None:
         """
@@ -230,7 +244,7 @@ class CustomRichText(rt.RichTextCtrl):
         if evt:
             # Replace an existing link
             self.Remove(evt.GetURLStart(), evt.GetURLEnd() + 1)
-        self._insert_link(link.get_text()[0], link.get_id())
+        self._insert_link(link.get_text()[0], link.get_id(), link.get_status_color())
         # Send an event to the main gui to signal document color change
         color_evt = wx.CommandEvent(wx.wxEVT_COLOUR_CHANGED, self.GetId())
         color_evt.SetEventObject(self)

@@ -122,6 +122,13 @@ class Link:
         """
         return list(self._loaded_pages.keys())
 
+    def get_status_color(self) -> wx.Colour:
+        """
+        Return the status color of this link. RED if SEO failed.
+        :return: Return the status color of this link. RED if SEO failed.
+        """
+        return self._status_color
+
     def is_local(self) -> bool:
         """
         Returns True if this link aims back at one of the whitebear pages.
