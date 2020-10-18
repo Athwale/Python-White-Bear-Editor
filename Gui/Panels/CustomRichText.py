@@ -157,35 +157,38 @@ class CustomRichText(rt.RichTextCtrl):
             elif isinstance(element, Heading):
                 self._write_heading(element)
             elif isinstance(element, ImageInText):
-                self._write_image(element)
+                self._write_field(element.get_thumbnail_image_path(), element.get_image())
             elif isinstance(element, UnorderedList):
                 print('')
             elif isinstance(element, Video):
-                print('')
+                self._write_field(element.get_url(), element.get_image())
 
-    def _write_image(self, img: ImageInText):
+    def _write_field(self, path: str, image: wx.Image):
         """
-        Write an ImageInText into the text area.
-        :param img: An ImageInText instance.
+        Write an ImageInText or Video into the text area.
+        :param path: An identifying string either disk path or url.
+        :param image: The image that will be on the field.
         :return: None
         """
-        self._register_field(img.get_thumbnail_image_path())
+        self._register_field(path, image)
         self.ApplyStyle(self._stylesheet.FindParagraphStyle(Strings.style_image))
         self.BeginParagraphStyle(Strings.style_image)
-        field = self.WriteField(img.get_thumbnail_image_path(), rt.RichTextProperties())
-        field.SetName(img.get_thumbnail_image_path())
+        field = self.WriteField(path, rt.RichTextProperties())
+        field.SetName(path)
         self.WriteText('\n')
         self.EndParagraphStyle()
         self.ApplyStyle(self._stylesheet.FindParagraphStyle(Strings.style_paragraph))
+        # TODO edit image on right click
+        # TODo edit video on right click
 
-    def _register_field(self, path: str) -> None:
+    def _register_field(self, path: str, image: wx.Image) -> None:
         """
         Register a new custom field that represent an image.
         :param path: The full disk path of the image.
+        :param image: The image to display.
         :return: None
         """
-        self.field_type = ImageTextField(path, bitmap=wx.Bitmap(
-            wx.Image(path, wx.BITMAP_TYPE_ANY)),
+        self.field_type = ImageTextField(path, bitmap=wx.Bitmap(image),
                                          display_style=rt.RichTextFieldTypeStandard.RICHTEXT_FIELD_STYLE_RECTANGLE)
         rt.RichTextBuffer.AddFieldType(self.field_type)
 
