@@ -61,7 +61,8 @@ class CustomRichText(rt.RichTextCtrl):
         """
         # Normal style
         stl_paragraph: rt.RichTextAttr = self.GetDefaultStyleEx()
-        stl_paragraph.SetParagraphSpacingAfter(20)
+        stl_paragraph.SetParagraphSpacingBefore(Numbers.paragraph_spacing/2)
+        stl_paragraph.SetParagraphSpacingAfter(Numbers.paragraph_spacing/2)
         style_paragraph: rt.RichTextParagraphStyleDefinition = rt.RichTextParagraphStyleDefinition(
             Strings.style_paragraph)
         style_paragraph.SetStyle(stl_paragraph)
@@ -95,8 +96,8 @@ class CustomRichText(rt.RichTextCtrl):
         # List style
         stl_list: rt.RichTextAttr = self.GetDefaultStyleEx()
         stl_list.SetAlignment(wx.TEXT_ALIGNMENT_LEFT)
-        stl_list.SetParagraphSpacingAfter(Numbers.paragraph_spacing)
-        stl_list.SetParagraphSpacingBefore(Numbers.paragraph_spacing)
+        stl_list.SetParagraphSpacingAfter(Numbers.list_spacing)
+        stl_list.SetParagraphSpacingBefore(Numbers.list_spacing)
         stl_list_1: rt.RichTextAttr = self.GetDefaultStyleEx()
         stl_list_1.SetBulletStyle(wx.TEXT_ATTR_BULLET_STYLE_STANDARD)
         stl_list_1.SetLeftIndent(Numbers.list_left_indent, Numbers.list_left_subindent)
@@ -159,11 +160,26 @@ class CustomRichText(rt.RichTextCtrl):
             elif isinstance(element, ImageInText):
                 self._write_field(element.get_thumbnail_image_path(), element.get_image())
             elif isinstance(element, UnorderedList):
-                print('')
+                self._write_list(element)
             elif isinstance(element, Video):
                 self._write_field(element.get_url(), element.get_image())
 
-    def _write_field(self, path: str, image: wx.Image):
+    def _write_list(self, ul: UnorderedList) -> None:
+        """
+        Write an UnorderedList into the text area.
+        :param ul: The list that will be on the field.
+        :return: None
+        """
+        self.ApplyStyle(self._stylesheet.FindParagraphStyle(Strings.style_list))
+        self.BeginParagraphStyle(Strings.style_list)
+        for li in ul.get_paragraphs():
+            for element in li.get_elements():
+                self._write_text(element)
+            self.WriteText('\n')
+        self.EndParagraphStyle()
+        self.ApplyStyle(self._stylesheet.FindParagraphStyle(Strings.style_paragraph))
+
+    def _write_field(self, path: str, image: wx.Image) -> None:
         """
         Write an ImageInText or Video into the text area.
         :param path: An identifying string either disk path or url.
@@ -206,10 +222,9 @@ class CustomRichText(rt.RichTextCtrl):
             style = Strings.style_heading_4
         self.ApplyStyle(self._stylesheet.FindParagraphStyle(style))
         self.BeginParagraphStyle(style)
-        self.BeginTextColour(h.get_text().get_color())
-        self.WriteText(h.get_text().get_text())
-        self.EndTextColour()
+        self._write_text(h.get_text())
         self.EndParagraphStyle()
+        self.ApplyStyle(self._stylesheet.FindParagraphStyle(Strings.style_paragraph))
         self.Newline()
 
     def _write_paragraph(self, p: Paragraph) -> None:
@@ -223,20 +238,28 @@ class CustomRichText(rt.RichTextCtrl):
         attr = wx.TextAttr()
         attr.SetFlags(wx.TEXT_ATTR_TEXT_COLOUR)
         for element in p.get_elements():
-            if isinstance(element, Text):
-                if element.is_bold():
-                    self.BeginBold()
-                self.BeginTextColour(element.get_color())
-                self.WriteText(element.get_text())
-                self.EndTextColour()
-                if element.is_bold():
-                    self.EndBold()
-            elif isinstance(element, Break):
-                self.LineBreak()
-            elif isinstance(element, Link):
-                self._insert_link(element.get_text()[0], element.get_id(), element.get_status_color())
+            self._write_text(element)
         self.EndParagraphStyle()
         self.Newline()
+
+    def _write_text(self, element) -> None:
+        """
+        Write a textual element into the text area under the currently applied style.
+        :param element: The text element instance to write.
+        :return: None
+        """
+        if isinstance(element, Text):
+            if element.is_bold():
+                self.BeginBold()
+            self.BeginTextColour(element.get_color())
+            self.WriteText(element.get_text())
+            self.EndTextColour()
+            if element.is_bold():
+                self.EndBold()
+        elif isinstance(element, Break):
+            self.LineBreak()
+        elif isinstance(element, Link):
+            self._insert_link(element.get_text()[0], element.get_id(), element.get_status_color())
 
     def _insert_link(self, text: str, link_id: str, color: wx.Colour) -> None:
         """
@@ -350,60 +373,3 @@ class CustomRichText(rt.RichTextCtrl):
 
         print(self._get_style_at_pos(0) == current_style)
         event.Skip()
-
-    def insert_sample_text(self) -> None:
-        if True:
-            self.ApplyStyle(self._stylesheet.FindParagraphStyle(Strings.style_paragraph))
-            self.BeginParagraphStyle(Strings.style_paragraph)
-            self.WriteText('paragraph1')
-            self.EndParagraphStyle()
-
-            self.Newline()
-
-            self.ApplyStyle(self._stylesheet.FindParagraphStyle(Strings.style_heading))
-            self.BeginParagraphStyle(Strings.style_heading)
-            self.WriteText('Heading3')
-            self.EndParagraphStyle()
-
-            self.Newline()
-
-            self.ApplyStyle(self._stylesheet.FindParagraphStyle(Strings.style_paragraph))
-            self.BeginParagraphStyle(Strings.style_paragraph)
-            self.WriteText('paragraph2')
-            self.EndParagraphStyle()
-
-            self.Newline()
-
-            self.ApplyStyle(self._stylesheet.FindParagraphStyle(Strings.style_list))
-            self.BeginParagraphStyle(Strings.style_list)
-            self.WriteText('List item 1\n')
-            self.WriteText('List item 2\n')
-            self.WriteText('List item 3\n')
-            self.EndParagraphStyle()
-
-            self.ApplyStyle(self._stylesheet.FindParagraphStyle(Strings.style_paragraph))
-            self.BeginParagraphStyle(Strings.style_paragraph)
-            self.WriteText('paragraph4')
-            self.EndParagraphStyle()
-
-            self.Newline()
-
-            self.ApplyStyle(self._stylesheet.FindParagraphStyle(Strings.style_image))
-            self.BeginParagraphStyle(Strings.style_image)
-            field = self.WriteField('imageFieldType', rt.RichTextProperties())
-            field.SetName('image1')
-            self.WriteText('\n')
-            self.EndParagraphStyle()
-
-            self.ApplyStyle(self._stylesheet.FindParagraphStyle(Strings.style_paragraph))
-            self.BeginParagraphStyle(Strings.style_paragraph)
-            self.WriteText('paragraph5 sample of a longer text for testing url creation ')
-            self._insert_link('www.seznam.cz', 'link from code')
-            self.EndParagraphStyle()
-
-            self.Newline()
-
-            self.ApplyStyle(self._stylesheet.FindParagraphStyle(Strings.style_paragraph))
-            self.BeginParagraphStyle(Strings.style_paragraph)
-            self._insert_link('www.seznam.cz', 'link from code')
-            self.EndParagraphStyle()

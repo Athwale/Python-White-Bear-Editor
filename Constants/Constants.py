@@ -25,6 +25,7 @@ class Numbers:
     edit_image_dialog_height: int = 300
     edit_link_dialog_height: int = 255
     paragraph_spacing: int = 20
+    list_spacing: int = 3
     heading_3_size: int = 16
     heading_4_size: int = 14
     list_left_indent: int = 20
