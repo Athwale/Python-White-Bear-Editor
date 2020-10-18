@@ -57,8 +57,8 @@ class WhitebearDocumentArticle(WhitebearDocument):
         self._aside_images = []
         self._main_text_elements = []
         self._links = []
-        self._images = []
-        self._videos = []
+        self._images = set()
+        self._videos = set()
 
         self._date = None
         self._date_error_message: str = ''
@@ -245,11 +245,11 @@ class WhitebearDocumentArticle(WhitebearDocument):
             elif child.name == 'div':
                 if child.next.name == 'a':
                     image = self._process_img(child)
-                    self._images.append(image)
+                    self._images.add(image)
                     self._main_text_elements.append(image)
                 elif child.next.name == 'iframe':
                     video = self._process_iframe(child)
-                    self._videos.append(video)
+                    self._videos.add(video)
                     self._main_text_elements.append(video)
             else:
                 raise WrongFormatException(Strings.exception_html_syntax_error)

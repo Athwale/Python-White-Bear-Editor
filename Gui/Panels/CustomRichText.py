@@ -45,9 +45,6 @@ class CustomRichText(rt.RichTextCtrl):
         self.Bind(wx.EVT_MENU, self.on_insert_link, main_frame.insert_link_tool)
         self.Bind(wx.EVT_MENU, self.on_bold, main_frame.bold_tool)
 
-        self.register_field()
-        # self.insert_sample_text()
-
     @staticmethod
     def _add_text_handlers() -> None:
         """
@@ -153,17 +150,44 @@ class CustomRichText(rt.RichTextCtrl):
         self.Clear()
         self.SetDefaultStyle(self._stylesheet.FindParagraphStyle(Strings.style_paragraph).GetStyle())
         self._document = doc
+        self.GetBuffer().CleanUpFieldTypes()
         for element in doc.get_main_text_elements():
             if isinstance(element, Paragraph):
                 self._write_paragraph(element)
             elif isinstance(element, Heading):
                 self._write_heading(element)
             elif isinstance(element, ImageInText):
-                print('')
+                self._write_image(element)
             elif isinstance(element, UnorderedList):
                 print('')
             elif isinstance(element, Video):
                 print('')
+
+    def _write_image(self, img: ImageInText):
+        """
+        Write an ImageInText into the text area.
+        :param img: An ImageInText instance.
+        :return: None
+        """
+        self._register_field(img.get_thumbnail_image_path())
+        self.ApplyStyle(self._stylesheet.FindParagraphStyle(Strings.style_image))
+        self.BeginParagraphStyle(Strings.style_image)
+        field = self.WriteField(img.get_thumbnail_image_path(), rt.RichTextProperties())
+        field.SetName(img.get_thumbnail_image_path())
+        self.WriteText('\n')
+        self.EndParagraphStyle()
+        self.ApplyStyle(self._stylesheet.FindParagraphStyle(Strings.style_paragraph))
+
+    def _register_field(self, path: str) -> None:
+        """
+        Register a new custom field that represent an image.
+        :param path: The full disk path of the image.
+        :return: None
+        """
+        self.field_type = ImageTextField(path, bitmap=wx.Bitmap(
+            wx.Image(path, wx.BITMAP_TYPE_ANY)),
+                                         display_style=rt.RichTextFieldTypeStandard.RICHTEXT_FIELD_STYLE_RECTANGLE)
+        rt.RichTextBuffer.AddFieldType(self.field_type)
 
     def _write_heading(self, h: Heading) -> None:
         """
@@ -323,13 +347,6 @@ class CustomRichText(rt.RichTextCtrl):
 
         print(self._get_style_at_pos(0) == current_style)
         event.Skip()
-
-    def register_field(self) -> None:
-        # TODO use this to make images in text
-        self.field_type = ImageTextField('imageFieldType', bitmap=wx.Bitmap(
-            wx.Image('/home/omejzlik/PycharmProjects/Python-White-Bear-Editor/Resources/main_image_missing.png',
-                     wx.BITMAP_TYPE_PNG)), display_style=rt.RichTextFieldTypeStandard.RICHTEXT_FIELD_STYLE_RECTANGLE)
-        rt.RichTextBuffer.AddFieldType(self.field_type)
 
     def insert_sample_text(self) -> None:
         if True:
