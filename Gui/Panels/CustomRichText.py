@@ -277,6 +277,7 @@ class CustomRichText(rt.RichTextCtrl):
         self.WriteText(text)
         self.EndURL()
         self.EndStyle()
+        self.ApplyStyle(self._stylesheet.FindParagraphStyle(Strings.style_paragraph))
 
     def on_insert_link(self, evt: wx.CommandEvent) -> None:
         """

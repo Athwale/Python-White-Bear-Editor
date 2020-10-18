@@ -85,9 +85,10 @@ class WhitebearDocument:
         with open(self._path, 'r') as document:
             contents = document.read()
             minimized = htmlmin.minify(contents, remove_empty_space=True, remove_comments=True)
-            # Fix spaces around paragraphs.
+            # Fix spaces around tags.
             minimized = minimized.replace('<p> ', '<p>')
             minimized = minimized.replace(' <p/>', '<p/>')
+            minimized = minimized.replace('<br> ', '<br>')
             self._parsed_html = BeautifulSoup(minimized, 'html5lib')
 
     def seo_test_self_basic(self) -> None:
