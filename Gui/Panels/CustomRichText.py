@@ -61,8 +61,8 @@ class CustomRichText(rt.RichTextCtrl):
         """
         # Normal style
         stl_paragraph: rt.RichTextAttr = self.GetDefaultStyleEx()
-        stl_paragraph.SetParagraphSpacingBefore(Numbers.paragraph_spacing/2)
-        stl_paragraph.SetParagraphSpacingAfter(Numbers.paragraph_spacing/2)
+        stl_paragraph.SetParagraphSpacingBefore(Numbers.paragraph_spacing / 2)
+        stl_paragraph.SetParagraphSpacingAfter(Numbers.paragraph_spacing / 2)
         style_paragraph: rt.RichTextParagraphStyleDefinition = rt.RichTextParagraphStyleDefinition(
             Strings.style_paragraph)
         style_paragraph.SetStyle(stl_paragraph)
@@ -195,7 +195,7 @@ class CustomRichText(rt.RichTextCtrl):
         self.EndParagraphStyle()
         self.ApplyStyle(self._stylesheet.FindParagraphStyle(Strings.style_paragraph))
         # TODO edit image on right click
-        # TODo edit video on right click
+        # TODO edit video on right click
 
     def _register_field(self, path: str, image: wx.Image) -> None:
         """
@@ -374,3 +374,4 @@ class CustomRichText(rt.RichTextCtrl):
 
         print(self._get_style_at_pos(0) == current_style)
         event.Skip()
+

@@ -30,40 +30,49 @@ class RichTextFrame(wx.Frame):
         self.rtc.ApplyStyle(style_paragraph)
         self.rtc.SetDefaultStyle(stl_paragraph)
 
-        # Heading 3 style
-        stl_heading_3: rt.RichTextAttr = self.rtc.GetDefaultStyleEx()
-        stl_heading_3.SetAlignment(wx.TEXT_ALIGNMENT_LEFT)
-        stl_heading_3.SetFontWeight(wx.BOLD)
-        stl_heading_3.SetFontSize(16)
-        stl_heading_3.SetParagraphSpacingAfter(10)
-        style_h3: rt.RichTextParagraphStyleDefinition = rt.RichTextParagraphStyleDefinition('title')
-        style_h3.SetStyle(stl_heading_3)
-        style_h3.SetNextStyle('par')
-        self._stylesheet.AddParagraphStyle(style_h3)
-        self.rtc.SetStyleSheet(self._stylesheet)
+        # Link style
+        stl_link = rt.RichTextAttr()
+        stl_link.SetFlags(wx.TEXT_ATTR_URL)
+        stl_link.SetFontUnderlined(True)
+        stl_link.SetTextColour(wx.BLUE)
+        style_link: rt.RichTextCharacterStyleDefinition = rt.RichTextCharacterStyleDefinition('url')
+        style_link.SetStyle(stl_link)
+        self._stylesheet.AddCharacterStyle(style_link)
+
+    def _insert_link(self, text: str, link_id: str) -> None:
+        """
+        Insert a link into text at current position.
+        :param text: The visible text.
+        :param link_id: The ID of the link
+        :return: None
+        """
+        self.rtc.BeginStyle(self._stylesheet.FindCharacterStyle('url').GetStyle())
+        self.rtc.BeginURL(link_id)
+        self.rtc.WriteText(text)
+        self.rtc.EndURL()
+        self.rtc.EndStyle()
 
     def _insert_sample_text(self) -> None:
         """
         Insert sample text.
         :return: None
         """
-        self.rtc.ApplyStyle(self._stylesheet.FindParagraphStyle('title'))
-        self.rtc.BeginParagraphStyle('title')
-        self.rtc.WriteText('Start title')
+        self.rtc.ApplyStyle(self._stylesheet.FindParagraphStyle('par'))
+        self.rtc.BeginParagraphStyle('par')
+        self.rtc.WriteText('paragraph 1, sample of a longer text for testing url creation ')
+        self.rtc.LineBreak()
+        self.rtc.WriteText('paragraph 1, more sample of a longer text for testing url creation ')
+        self._insert_link('www.google.com', 'link from code')
         self.rtc.EndParagraphStyle()
 
         self.rtc.Newline()
 
         self.rtc.ApplyStyle(self._stylesheet.FindParagraphStyle('par'))
         self.rtc.BeginParagraphStyle('par')
-        self.rtc.WriteText('Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam sodales nibh non ipsum ultrices venenatis. Cras est erat, volutpat nec tellus et, tempus dignissim mauris. Mauris nec ullamcorper mi. Nulla ornare, ante at eleifend egestas, nisl urna eleifend odio, et lacinia metus lectus non lacus. Vestibulum vel egestas dolor. Ut dolor augue, tempus nec tristique eget, ornare vel lectus. In convallis, lorem ac mollis tempus, tellus magna posuere urna, id ullamcorper nisi dolor non diam. ')
-        self.rtc.EndParagraphStyle()
-
-        self.rtc.Newline()
-
-        self.rtc.ApplyStyle(self._stylesheet.FindParagraphStyle('title'))
-        self.rtc.BeginParagraphStyle('title')
-        self.rtc.WriteText('Long long title')
+        self._insert_link('www.google.com', '42')
+        self.rtc.WriteText(' paragraph 2 adding some text after a link')
+        self.rtc.LineBreak()
+        self.rtc.WriteText(' some more text after a line break in code')
         self.rtc.EndParagraphStyle()
 
         self.rtc.Newline()
@@ -82,10 +91,6 @@ class MyApp(wx.App):
         self.frame = RichTextFrame(None, -1, "RichTextCtrl", size=(900, 500), style=wx.DEFAULT_FRAME_STYLE)
         self.SetTopWindow(self.frame)
         self.frame.Show()
-        return True
-
-    def OnExit(self):
-        print('_Done_')
         return True
 
 
