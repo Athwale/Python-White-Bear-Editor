@@ -1,4 +1,5 @@
 import wx
+import os
 import wx.richtext as rt
 
 
@@ -59,7 +60,8 @@ class RichTextFrame(wx.Frame):
         """
         self.rtc.ApplyStyle(self._stylesheet.FindParagraphStyle('par'))
         self.rtc.BeginParagraphStyle('par')
-        self.rtc.WriteText('paragraph 1, sample of a longer text for testing url creation ')
+        self._insert_link('www.google.com', '42')
+        self.rtc.WriteText(' paragraph 1, sample of a longer text for testing url creation ')
         self.rtc.LineBreak()
         self.rtc.WriteText('paragraph 1, more sample of a longer text for testing url creation ')
         self._insert_link('www.google.com', 'link from code')

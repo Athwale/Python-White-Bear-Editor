@@ -257,7 +257,8 @@ class CustomRichText(rt.RichTextCtrl):
             if element.is_bold():
                 self.EndBold()
         elif isinstance(element, Break):
-            self.LineBreak()
+            # Special unicode unbreakable space character.
+            self.WriteText(u'\u00A0')
         elif isinstance(element, Link):
             self._insert_link(element.get_text()[0], element.get_id(), element.get_status_color())
 
