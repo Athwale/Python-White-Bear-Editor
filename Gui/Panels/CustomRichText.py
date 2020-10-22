@@ -59,14 +59,23 @@ class CustomRichText(rt.RichTextCtrl):
         Create styles for rich text control.
         :return: None
         """
-        # Normal style
+        # Text style
+        stl_text: rt.RichTextAttr = self.GetDefaultStyleEx()
+        stl_text.SetParagraphSpacingBefore(0)
+        stl_text.SetParagraphSpacingAfter(0)
+        style_text: rt.RichTextParagraphStyleDefinition = rt.RichTextParagraphStyleDefinition(Strings.style_text)
+        style_text.SetStyle(stl_text)
+        style_text.SetNextStyle(Strings.style_text)
+        self._stylesheet.AddParagraphStyle(style_text)
+
+        # Paragraph style
         stl_paragraph: rt.RichTextAttr = self.GetDefaultStyleEx()
         stl_paragraph.SetParagraphSpacingBefore(Numbers.paragraph_spacing / 2)
         stl_paragraph.SetParagraphSpacingAfter(Numbers.paragraph_spacing / 2)
         style_paragraph: rt.RichTextParagraphStyleDefinition = rt.RichTextParagraphStyleDefinition(
             Strings.style_paragraph)
         style_paragraph.SetStyle(stl_paragraph)
-        style_paragraph.SetNextStyle(Strings.style_paragraph)
+        style_paragraph.SetNextStyle(Strings.style_text)
         self._stylesheet.AddParagraphStyle(style_paragraph)
         self.ApplyStyle(style_paragraph)
         self.SetDefaultStyle(stl_paragraph)
@@ -152,17 +161,17 @@ class CustomRichText(rt.RichTextCtrl):
         self.SetDefaultStyle(self._stylesheet.FindParagraphStyle(Strings.style_paragraph).GetStyle())
         self._document = doc
         self.GetBuffer().CleanUpFieldTypes()
-        for element in doc.get_main_text_elements():
-            if isinstance(element, Paragraph):
-                self._write_paragraph(element)
-            elif isinstance(element, Heading):
-                self._write_heading(element)
-            elif isinstance(element, ImageInText):
-                self._write_field(element.get_thumbnail_image_path(), element.get_image())
-            elif isinstance(element, UnorderedList):
-                self._write_list(element)
-            elif isinstance(element, Video):
-                self._write_field(element.get_url(), element.get_image())
+        # for element in doc.get_main_text_elements():
+        #     if isinstance(element, Paragraph):
+        #         self._write_paragraph(element)
+        #     elif isinstance(element, Heading):
+        #         self._write_heading(element)
+        #     elif isinstance(element, ImageInText):
+        #         self._write_field(element.get_thumbnail_image_path(), element.get_image())
+        #     elif isinstance(element, UnorderedList):
+        #         self._write_list(element)
+        #     elif isinstance(element, Video):
+        #         self._write_field(element.get_url(), element.get_image())
 
     def _write_list(self, ul: UnorderedList) -> None:
         """
@@ -257,8 +266,7 @@ class CustomRichText(rt.RichTextCtrl):
             if element.is_bold():
                 self.EndBold()
         elif isinstance(element, Break):
-            # Special unicode unbreakable space character.
-            self.WriteText(u'\u00A0')
+            self.LineBreak()
         elif isinstance(element, Link):
             self._insert_link(element.get_text()[0], element.get_id(), element.get_status_color())
 

@@ -196,6 +196,7 @@ class Strings:
     status_ok: str = 'Ok'
 
     style_paragraph: str = 'Paragraph'
+    style_text: str = 'Text'
     style_heading_3: str = 'Title 3'
     style_heading_4: str = 'Title 4'
     style_list: str = 'List'
