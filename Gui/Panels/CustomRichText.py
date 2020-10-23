@@ -60,7 +60,6 @@ class CustomRichText(rt.RichTextCtrl):
         Create styles for rich text control.
         :return: None
         """
-        # TODO use blank line a paragraph separator and normal new line for br
         # Paragraph style
         stl_paragraph: rt.RichTextAttr = self.GetDefaultStyleEx()
         stl_paragraph.SetParagraphSpacingBefore(0)
@@ -78,6 +77,7 @@ class CustomRichText(rt.RichTextCtrl):
         stl_heading_3.SetAlignment(wx.TEXT_ALIGNMENT_LEFT)
         stl_heading_3.SetFontWeight(wx.BOLD)
         stl_heading_3.SetFontSize(Numbers.heading_3_size)
+        stl_heading_3.SetParagraphSpacingBefore(Numbers.paragraph_spacing)
         stl_heading_3.SetParagraphSpacingAfter(Numbers.paragraph_spacing)
         style_h3: rt.RichTextParagraphStyleDefinition = rt.RichTextParagraphStyleDefinition(Strings.style_heading_3)
         style_h3.SetStyle(stl_heading_3)
@@ -89,7 +89,8 @@ class CustomRichText(rt.RichTextCtrl):
         stl_heading_4.SetAlignment(wx.TEXT_ALIGNMENT_LEFT)
         stl_heading_4.SetFontWeight(wx.BOLD)
         stl_heading_4.SetFontSize(Numbers.heading_4_size)
-        stl_heading_4.SetParagraphSpacingAfter(Numbers.paragraph_spacing)
+        stl_heading_4.SetParagraphSpacingBefore(Numbers.paragraph_spacing / 2)
+        stl_heading_4.SetParagraphSpacingAfter(Numbers.paragraph_spacing / 2)
         style_h4: rt.RichTextParagraphStyleDefinition = rt.RichTextParagraphStyleDefinition(Strings.style_heading_4)
         style_h4.SetStyle(stl_heading_4)
         style_h4.SetNextStyle(Strings.style_paragraph)
@@ -108,8 +109,8 @@ class CustomRichText(rt.RichTextCtrl):
         # List style
         stl_list: rt.RichTextAttr = self.GetDefaultStyleEx()
         stl_list.SetAlignment(wx.TEXT_ALIGNMENT_LEFT)
-        stl_list.SetParagraphSpacingAfter(Numbers.list_spacing)
         stl_list.SetParagraphSpacingBefore(Numbers.list_spacing)
+        stl_list.SetParagraphSpacingAfter(Numbers.list_spacing)
         stl_list_1: rt.RichTextAttr = self.GetDefaultStyleEx()
         stl_list_1.SetBulletStyle(wx.TEXT_ATTR_BULLET_STYLE_STANDARD)
         stl_list_1.SetLeftIndent(Numbers.list_left_indent, Numbers.list_left_subindent)
@@ -156,6 +157,7 @@ class CustomRichText(rt.RichTextCtrl):
         for element in doc.get_main_text_elements():
             if isinstance(element, Paragraph):
                 self._write_paragraph(element)
+                # TODO use blank line a paragraph separator only if the next thing is a paragraph
             elif isinstance(element, Heading):
                 self._write_heading(element)
             elif isinstance(element, ImageInText):
@@ -256,7 +258,7 @@ class CustomRichText(rt.RichTextCtrl):
             if element.is_bold():
                 self.EndBold()
         elif isinstance(element, Break):
-            self.LineBreak()
+            self.Newline()
         elif isinstance(element, Link):
             self._insert_link(element.get_text()[0], element.get_id(), element.get_status_color())
 
