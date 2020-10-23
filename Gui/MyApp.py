@@ -45,6 +45,5 @@ if __name__ == "__main__":
     # Redirect allows the gui to show a window with std and err text output, or if set, send it to a file.
     app = MyApp(redirect=False, filename=Strings.editor_output_debug_file)
     wx.Yield()
-    if Numbers.do_download_test:
-        time.sleep((Numbers.splashscreen_timeout / 1000) - 1)
+    time.sleep(Numbers.splashscreen_timeout)
     app.MainLoop()

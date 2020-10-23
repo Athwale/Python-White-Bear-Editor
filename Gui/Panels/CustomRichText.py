@@ -45,6 +45,7 @@ class CustomRichText(rt.RichTextCtrl):
         self.Bind(wx.EVT_MENU, self.on_insert_link, main_frame.insert_link_tool)
         self.Bind(wx.EVT_MENU, self.on_bold, main_frame.bold_tool)
 
+
     @staticmethod
     def _add_text_handlers() -> None:
         """
@@ -75,7 +76,7 @@ class CustomRichText(rt.RichTextCtrl):
         style_paragraph: rt.RichTextParagraphStyleDefinition = rt.RichTextParagraphStyleDefinition(
             Strings.style_paragraph)
         style_paragraph.SetStyle(stl_paragraph)
-        style_paragraph.SetNextStyle(Strings.style_text)
+        style_paragraph.SetNextStyle(Strings.style_paragraph)
         self._stylesheet.AddParagraphStyle(style_paragraph)
         self.ApplyStyle(style_paragraph)
         self.SetDefaultStyle(stl_paragraph)
@@ -102,21 +103,6 @@ class CustomRichText(rt.RichTextCtrl):
         style_h4.SetNextStyle(Strings.style_paragraph)
         self._stylesheet.AddParagraphStyle(style_h4)
 
-        # List style
-        stl_list: rt.RichTextAttr = self.GetDefaultStyleEx()
-        stl_list.SetAlignment(wx.TEXT_ALIGNMENT_LEFT)
-        stl_list.SetParagraphSpacingAfter(Numbers.list_spacing)
-        stl_list.SetParagraphSpacingBefore(Numbers.list_spacing)
-        stl_list_1: rt.RichTextAttr = self.GetDefaultStyleEx()
-        stl_list_1.SetBulletStyle(wx.TEXT_ATTR_BULLET_STYLE_STANDARD)
-        stl_list_1.SetLeftIndent(Numbers.list_left_indent, Numbers.list_left_subindent)
-
-        style_list: rt.RichTextListStyleDefinition = rt.RichTextListStyleDefinition(Strings.style_list)
-        style_list.SetLevelAttributes(0, stl_list_1)
-        style_list.SetStyle(stl_list)
-        style_list.SetNextStyle(Strings.style_paragraph)
-        self._stylesheet.AddParagraphStyle(style_list)
-
         # Image style
         stl_image: rt.RichTextAttr = self.GetDefaultStyleEx()
         stl_image.SetAlignment(wx.TEXT_ALIGNMENT_CENTER)
@@ -126,6 +112,20 @@ class CustomRichText(rt.RichTextCtrl):
         style_image.SetStyle(stl_image)
         style_image.SetNextStyle(Strings.style_paragraph)
         self._stylesheet.AddParagraphStyle(style_image)
+
+        # List style
+        stl_list: rt.RichTextAttr = self.GetDefaultStyleEx()
+        stl_list.SetAlignment(wx.TEXT_ALIGNMENT_LEFT)
+        stl_list.SetParagraphSpacingAfter(Numbers.list_spacing)
+        stl_list.SetParagraphSpacingBefore(Numbers.list_spacing)
+        stl_list_1: rt.RichTextAttr = self.GetDefaultStyleEx()
+        stl_list_1.SetBulletStyle(wx.TEXT_ATTR_BULLET_STYLE_STANDARD)
+        stl_list_1.SetLeftIndent(Numbers.list_left_indent, Numbers.list_left_subindent)
+        style_list: rt.RichTextListStyleDefinition = rt.RichTextListStyleDefinition(Strings.style_list)
+        style_list.SetLevelAttributes(0, stl_list_1)
+        style_list.SetStyle(stl_list)
+        style_list.SetNextStyle(Strings.style_paragraph)
+        self._stylesheet.AddParagraphStyle(style_list)
 
         # Link style
         stl_link = rt.RichTextAttr()
@@ -161,17 +161,17 @@ class CustomRichText(rt.RichTextCtrl):
         self.SetDefaultStyle(self._stylesheet.FindParagraphStyle(Strings.style_paragraph).GetStyle())
         self._document = doc
         self.GetBuffer().CleanUpFieldTypes()
-        # for element in doc.get_main_text_elements():
-        #     if isinstance(element, Paragraph):
-        #         self._write_paragraph(element)
-        #     elif isinstance(element, Heading):
-        #         self._write_heading(element)
-        #     elif isinstance(element, ImageInText):
-        #         self._write_field(element.get_thumbnail_image_path(), element.get_image())
-        #     elif isinstance(element, UnorderedList):
-        #         self._write_list(element)
-        #     elif isinstance(element, Video):
-        #         self._write_field(element.get_url(), element.get_image())
+        for element in doc.get_main_text_elements():
+            if isinstance(element, Paragraph):
+                self._write_paragraph(element)
+            elif isinstance(element, Heading):
+                self._write_heading(element)
+            elif isinstance(element, ImageInText):
+                self._write_field(element.get_thumbnail_image_path(), element.get_image())
+            elif isinstance(element, UnorderedList):
+                self._write_list(element)
+            elif isinstance(element, Video):
+                self._write_field(element.get_url(), element.get_image())
 
     def _write_list(self, ul: UnorderedList) -> None:
         """
@@ -223,8 +223,6 @@ class CustomRichText(rt.RichTextCtrl):
         :param h: A Heading instance.
         :return: None
         """
-        attr = wx.TextAttr()
-        attr.SetFlags(wx.TEXT_ATTR_TEXT_COLOUR)
         if h.get_size() == Heading.SIZE_H3:
             style = Strings.style_heading_3
         else:
@@ -232,9 +230,9 @@ class CustomRichText(rt.RichTextCtrl):
         self.ApplyStyle(self._stylesheet.FindParagraphStyle(style))
         self.BeginParagraphStyle(style)
         self._write_text(h.get_text())
+        self.WriteText('\n')
         self.EndParagraphStyle()
         self.ApplyStyle(self._stylesheet.FindParagraphStyle(Strings.style_paragraph))
-        self.Newline()
 
     def _write_paragraph(self, p: Paragraph) -> None:
         """
@@ -364,7 +362,6 @@ class CustomRichText(rt.RichTextCtrl):
 
     def on_keypress(self, event):
         """
-
         :param event:
         :return:
         """
@@ -384,3 +381,52 @@ class CustomRichText(rt.RichTextCtrl):
         print(self._get_style_at_pos(0) == current_style)
         event.Skip()
 
+    def insert_sample_text(self) -> None:
+        if True:
+            self.ApplyStyle(self._stylesheet.FindParagraphStyle(Strings.style_paragraph))
+            self.BeginParagraphStyle(Strings.style_paragraph)
+            self.WriteText('paragraph1')
+            self.EndParagraphStyle()
+
+            self.Newline()
+
+            self.ApplyStyle(self._stylesheet.FindParagraphStyle(Strings.style_heading_3))
+            self.BeginParagraphStyle(Strings.style_heading_3)
+            self.WriteText('Heading3')
+            self.WriteText('\n')
+            self.EndParagraphStyle()
+
+            self.ApplyStyle(self._stylesheet.FindParagraphStyle(Strings.style_paragraph))
+            self.BeginParagraphStyle(Strings.style_paragraph)
+            self.WriteText('paragraph2')
+            self.EndParagraphStyle()
+
+            self.Newline()
+
+            self.ApplyStyle(self._stylesheet.FindParagraphStyle(Strings.style_list))
+            self.BeginParagraphStyle(Strings.style_list)
+            self.WriteText('List item 1\n')
+            self.WriteText('List item 2\n')
+            self.WriteText('List item 3\n')
+            self.EndParagraphStyle()
+
+            self.ApplyStyle(self._stylesheet.FindParagraphStyle(Strings.style_paragraph))
+            self.BeginParagraphStyle(Strings.style_paragraph)
+            self.WriteText('paragraph4')
+            self.EndParagraphStyle()
+
+            self.Newline()
+
+            self.ApplyStyle(self._stylesheet.FindParagraphStyle(Strings.style_image))
+            self.BeginParagraphStyle(Strings.style_image)
+            field = self.WriteField('imageFieldType', rt.RichTextProperties())
+            field.SetName('image1')
+            self.WriteText('\n')
+            self.EndParagraphStyle()
+
+            self.ApplyStyle(self._stylesheet.FindParagraphStyle(Strings.style_paragraph))
+            self.BeginParagraphStyle(Strings.style_paragraph)
+            self.WriteText('paragraph5 sample of a longer text for testing url creation')
+            self.EndParagraphStyle()
+
+            self.Newline()
