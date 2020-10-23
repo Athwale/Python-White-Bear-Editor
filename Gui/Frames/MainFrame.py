@@ -30,8 +30,8 @@ class MainFrame(wx.Frame):
         # -1 is a special ID which generates a random wx ID
         super(MainFrame, self).__init__(None, -1, title=Strings.editor_name, style=wx.DEFAULT_FRAME_STYLE)
         # Create font for text fields
-        self.text_field_font = wx.Font(Numbers.text_field_font_size, wx.FONTFAMILY_DEFAULT,
-                                       wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, False)
+        self.menu_text_field_font = wx.Font(Numbers.text_field_font_size, wx.FONTFAMILY_DEFAULT,
+                                            wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, False)
         # Prepare data objects
         self.config_manager = ConfigManager()
         self.tool_ids = []
@@ -301,21 +301,21 @@ class MainFrame(wx.Frame):
                                                 value=Strings.label_article_menu_logo_name_placeholder,
                                                 size=wx.Size(98, 35),
                                                 style=wx.TE_MULTILINE | wx.TE_CENTRE | wx.TE_NO_VSCROLL)
-        self.field_menu_item_name.SetFont(self.text_field_font)
+        self.field_menu_item_name.SetFont(self.menu_text_field_font)
         self.field_menu_item_name_tip = Tools.get_warning_tip(self.field_menu_item_name,
                                                               Strings.label_article_menu_logo_name_placeholder)
 
         self.field_menu_item_alt = wx.TextCtrl(self.right_panel, -1,
                                                value=Strings.label_article_menu_logo_alt_placeholder,
                                                size=wx.Size(98, 45), style=wx.TE_MULTILINE)
-        self.field_menu_item_alt.SetFont(self.text_field_font)
+        self.field_menu_item_alt.SetFont(self.menu_text_field_font)
         self.field_menu_item_alt_tip = Tools.get_warning_tip(self.field_menu_item_alt,
                                                              Strings.label_article_menu_logo_alt_placeholder)
 
         self.field_menu_item_link_title = wx.TextCtrl(self.right_panel, -1,
                                                       value=Strings.label_menu_logo_link_title_placeholder,
                                                       size=wx.Size(98, 49), style=wx.TE_MULTILINE)
-        self.field_menu_item_link_title.SetFont(self.text_field_font)
+        self.field_menu_item_link_title.SetFont(self.menu_text_field_font)
         self.field_menu_item_link_title_tip = Tools.get_warning_tip(self.field_menu_item_link_title,
                                                                     Strings.label_menu_logo_link_title_placeholder)
 
@@ -326,7 +326,7 @@ class MainFrame(wx.Frame):
 
         # File list section --------------------------------------------------------------------------------------------
         self.page_list = wx.ListCtrl(self.left_panel, -1, style=wx.LC_REPORT | wx.LC_SINGLE_SEL)
-        self.page_list.SetFont(self.text_field_font)
+        self.page_list.SetFont(self.menu_text_field_font)
         # Add the list into the bottom sizer, give it a sizing weight and let it expand vertically
         self.filelist_column_sizer.Add(self.page_list, flag=wx.EXPAND, border=Numbers.widget_border_size, proportion=1)
         # --------------------------------------------------------------------------------------------------------------
@@ -360,6 +360,9 @@ class MainFrame(wx.Frame):
 
         self.field_article_name = wx.TextCtrl(self.right_panel, -1, value=Strings.label_article_title,
                                               size=wx.Size(250, 30))
+        font: wx.Font = self.field_article_name.GetFont()
+        font.SetWeight(wx.BOLD)
+        self.field_article_name.SetFont(font)
         self.field_article_name_tip = Tools.get_warning_tip(self.field_article_name, Strings.label_article_title)
 
         self.field_article_keywords = wx.TextCtrl(self.right_panel, -1, value=Strings.label_article_keywords,

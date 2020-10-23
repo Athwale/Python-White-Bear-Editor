@@ -60,19 +60,11 @@ class CustomRichText(rt.RichTextCtrl):
         Create styles for rich text control.
         :return: None
         """
-        # Text style
-        stl_text: rt.RichTextAttr = self.GetDefaultStyleEx()
-        stl_text.SetParagraphSpacingBefore(0)
-        stl_text.SetParagraphSpacingAfter(0)
-        style_text: rt.RichTextParagraphStyleDefinition = rt.RichTextParagraphStyleDefinition(Strings.style_text)
-        style_text.SetStyle(stl_text)
-        style_text.SetNextStyle(Strings.style_text)
-        self._stylesheet.AddParagraphStyle(style_text)
-
+        # TODO use blank line a paragraph separator and normal new line for br
         # Paragraph style
         stl_paragraph: rt.RichTextAttr = self.GetDefaultStyleEx()
-        stl_paragraph.SetParagraphSpacingBefore(Numbers.paragraph_spacing / 2)
-        stl_paragraph.SetParagraphSpacingAfter(Numbers.paragraph_spacing / 2)
+        stl_paragraph.SetParagraphSpacingBefore(0)
+        stl_paragraph.SetParagraphSpacingAfter(0)
         style_paragraph: rt.RichTextParagraphStyleDefinition = rt.RichTextParagraphStyleDefinition(
             Strings.style_paragraph)
         style_paragraph.SetStyle(stl_paragraph)
@@ -358,6 +350,8 @@ class CustomRichText(rt.RichTextCtrl):
         """
         style_carrier = rt.RichTextAttr()
         self.GetStyle(position, style_carrier)
+        if style_carrier.GetCharacterStyleName():
+            return style_carrier.GetCharacterStyleName(), style_carrier.HasURL()
         return style_carrier.GetParagraphStyleName(), style_carrier.HasURL()
 
     def on_keypress(self, event):
@@ -365,6 +359,7 @@ class CustomRichText(rt.RichTextCtrl):
         :param event:
         :return:
         """
+        print(self._style_control.GetValue())
         current_style = self._stylesheet.FindParagraphStyle(Strings.style_paragraph).GetStyle().GetParagraphStyleName()
         current_position = self.GetCaretPosition()
         print('pos: ' + str(current_position))
@@ -378,7 +373,6 @@ class CustomRichText(rt.RichTextCtrl):
             str(self._get_style_at_pos(current_position + 2)) + ' ' + self.GetRange(current_position + 1,
                                                                                     current_position + 2)))
 
-        print(self._get_style_at_pos(0) == current_style)
         event.Skip()
 
     def insert_sample_text(self) -> None:
