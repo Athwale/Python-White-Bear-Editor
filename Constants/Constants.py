@@ -22,16 +22,19 @@ class Numbers:
     edit_image_dialog_width: int = 900
     edit_image_dialog_height: int = 300
     edit_link_dialog_height: int = 255
-    paragraph_spacing: int = 20
-    list_spacing: int = 10
-    heading_3_size: int = 16
-    heading_4_size: int = 14
-    list_left_indent: int = 20
-    list_left_subindent: int = 25
     icon_width: int = 30
     icon_height: int = 30
     color_icon_width: int = 15
     color_icon_height: int = 15
+
+    # Styling
+    heading_3_size: int = 16
+    heading_4_size: int = 14
+    paragraph_spacing: int = 20
+    image_spacing: int = 5
+    list_spacing: int = 10
+    list_left_indent: int = 20
+    list_left_sub_indent: int = 25
 
     # SEO values
     year_min: int = 2000

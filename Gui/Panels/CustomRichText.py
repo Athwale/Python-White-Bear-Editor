@@ -99,8 +99,8 @@ class CustomRichText(rt.RichTextCtrl):
         # Image style
         stl_image: rt.RichTextAttr = self.GetDefaultStyleEx()
         stl_image.SetAlignment(wx.TEXT_ALIGNMENT_CENTER)
-        stl_image.SetParagraphSpacingAfter(Numbers.paragraph_spacing)
-        stl_image.SetParagraphSpacingBefore(Numbers.paragraph_spacing)
+        stl_image.SetParagraphSpacingAfter(Numbers.image_spacing)
+        stl_image.SetParagraphSpacingBefore(Numbers.image_spacing)
         style_image: rt.RichTextParagraphStyleDefinition = rt.RichTextParagraphStyleDefinition(Strings.style_image)
         style_image.SetStyle(stl_image)
         style_image.SetNextStyle(Strings.style_paragraph)
@@ -113,7 +113,7 @@ class CustomRichText(rt.RichTextCtrl):
         stl_list.SetParagraphSpacingAfter(Numbers.list_spacing)
         stl_list_1: rt.RichTextAttr = self.GetDefaultStyleEx()
         stl_list_1.SetBulletStyle(wx.TEXT_ATTR_BULLET_STYLE_STANDARD)
-        stl_list_1.SetLeftIndent(Numbers.list_left_indent, Numbers.list_left_subindent)
+        stl_list_1.SetLeftIndent(Numbers.list_left_indent, Numbers.list_left_sub_indent)
         style_list: rt.RichTextListStyleDefinition = rt.RichTextListStyleDefinition(Strings.style_list)
         style_list.SetLevelAttributes(0, stl_list_1)
         style_list.SetStyle(stl_list)
@@ -154,17 +154,25 @@ class CustomRichText(rt.RichTextCtrl):
         self.SetDefaultStyle(self._stylesheet.FindParagraphStyle(Strings.style_paragraph).GetStyle())
         self._document = doc
         self.GetBuffer().CleanUpFieldTypes()
+        last_was_paragraph = False
         for element in doc.get_main_text_elements():
             if isinstance(element, Paragraph):
+                if last_was_paragraph:
+                    self.Newline()
                 self._write_paragraph(element)
+                last_was_paragraph = True
                 # TODO use blank line a paragraph separator only if the next thing is a paragraph
             elif isinstance(element, Heading):
+                last_was_paragraph = False
                 self._write_heading(element)
             elif isinstance(element, ImageInText):
+                last_was_paragraph = False
                 self._write_field(element.get_thumbnail_image_path(), element.get_image())
             elif isinstance(element, UnorderedList):
+                last_was_paragraph = False
                 self._write_list(element)
             elif isinstance(element, Video):
+                last_was_paragraph = False
                 self._write_field(element.get_url(), element.get_image())
 
     def _write_list(self, ul: UnorderedList) -> None:
