@@ -110,3 +110,6 @@ class Video:
         :return: Return the element size error if there is any, empty string otherwise.
         """
         return self.size_error_message
+
+    def __str__(self) -> str:
+        return "Video: url: {}, title: {}, size: {} x {} px".format(self._url, self._link_title, self._width, self._height)

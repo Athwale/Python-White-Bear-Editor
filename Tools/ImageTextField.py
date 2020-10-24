@@ -1,7 +1,8 @@
 import wx
-from wx.richtext import RichTextFieldTypeStandard, RichTextField, RichTextCtrl, RichTextBuffer
+from wx.richtext import RichTextField, RichTextCtrl, RichTextBuffer, RichTextFieldTypeStandard
 
 from Constants.Constants import Strings
+from Tools.Document.ArticleElements.ImageInText import ImageInText
 
 
 class ImageTextField(RichTextFieldTypeStandard):
@@ -9,15 +10,22 @@ class ImageTextField(RichTextFieldTypeStandard):
     Custom RichTextFieldType class with image edit dialog.
     """
 
-    def __init__(self, name, bitmap, display_style):
+    def __init__(self, element):
         """
         Constructor for a custom label for displaying images with ability to edit.
+        :param element: The Video or ImageInText instance to display.
         """
-        super().__init__(name, bitmap, display_style)
+        if isinstance(element, ImageInText):
+            path = element.get_thumbnail_image_path()
+        else:
+            path = element.get_url()
+        super().__init__(path, bitmap=wx.Bitmap(element.get_image()),
+                         displayStyle=RichTextFieldTypeStandard.RICHTEXT_FIELD_STYLE_RECTANGLE)
+        self._element = element
 
     def CanEditProperties(self, obj: RichTextField) -> bool:
         """
-        Rerurn True if the user can edit the label's properties.
+        Rerun True if the user can edit the label's properties.
         :param obj: Unused
         :return: True
         """
@@ -39,5 +47,6 @@ class ImageTextField(RichTextFieldTypeStandard):
         :param buffer: The buffer of the control.
         :return: The result of the GUI dialog.
         """
-        wx.MessageBox(obj.GetName() + ' ' + " Clicked")
+        # TODO open image edit dialog
+        wx.MessageBox(str(self._element))
         return False

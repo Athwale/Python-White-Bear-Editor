@@ -166,13 +166,13 @@ class CustomRichText(rt.RichTextCtrl):
                 self._write_heading(element)
             elif isinstance(element, ImageInText):
                 last_was_paragraph = False
-                self._write_field(element.get_thumbnail_image_path(), element.get_image())
+                self._write_field(element)
             elif isinstance(element, UnorderedList):
                 last_was_paragraph = False
                 self._write_list(element)
             elif isinstance(element, Video):
                 last_was_paragraph = False
-                self._write_field(element.get_url(), element.get_image())
+                self._write_field(element)
 
     def _write_list(self, ul: UnorderedList) -> None:
         """
@@ -189,34 +189,32 @@ class CustomRichText(rt.RichTextCtrl):
         self.EndParagraphStyle()
         self.ApplyStyle(self._stylesheet.FindParagraphStyle(Strings.style_paragraph))
 
-    def _write_field(self, path: str, image: wx.Image) -> None:
+    def _write_field(self, element) -> None:
         """
         Write an ImageInText or Video into the text area.
-        :param path: An identifying string either disk path or url.
-        :param image: The image that will be on the field.
+        :param element: The element (video, image in text) that will be on the field.
         :return: None
         """
-        self._register_field(path, image)
+        new_field = self._register_field( element)
         self.ApplyStyle(self._stylesheet.FindParagraphStyle(Strings.style_image))
         self.BeginParagraphStyle(Strings.style_image)
-        field = self.WriteField(path, rt.RichTextProperties())
-        field.SetName(path)
+        self.WriteField(new_field.GetName(), rt.RichTextProperties())
         self.WriteText('\n')
         self.EndParagraphStyle()
         self.ApplyStyle(self._stylesheet.FindParagraphStyle(Strings.style_paragraph))
         # TODO edit image on right click
         # TODO edit video on right click
 
-    def _register_field(self, path: str, image: wx.Image) -> None:
+    @staticmethod
+    def _register_field(element) -> ImageTextField:
         """
         Register a new custom field that represent an image.
-        :param path: The full disk path of the image.
-        :param image: The image to display.
+        :param element: The Video or ImageInText to display.
         :return: None
         """
-        self.field_type = ImageTextField(path, bitmap=wx.Bitmap(image),
-                                         display_style=rt.RichTextFieldTypeStandard.RICHTEXT_FIELD_STYLE_RECTANGLE)
-        rt.RichTextBuffer.AddFieldType(self.field_type)
+        field_type = ImageTextField(element)
+        rt.RichTextBuffer.AddFieldType(field_type)
+        return field_type
 
     def _write_heading(self, h: Heading) -> None:
         """
