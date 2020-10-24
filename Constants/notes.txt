@@ -5,7 +5,8 @@ Zkontrolovat nastaveni spatnyho adresare
 
 TODO:
 add methods for reruning seo check on field edits
-Sanity check the richtext output for errors like image inside a heading
+Sanity check the richtext output for errors like image inside a heading and ignore blank lines if they are not followed
+by a paragraph.
 use right click in side images to edit and move up/down
 
 Check aside images are in correct order

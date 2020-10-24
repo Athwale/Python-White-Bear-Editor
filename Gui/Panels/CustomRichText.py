@@ -161,7 +161,6 @@ class CustomRichText(rt.RichTextCtrl):
                     self.Newline()
                 self._write_paragraph(element)
                 last_was_paragraph = True
-                # TODO use blank line a paragraph separator only if the next thing is a paragraph
             elif isinstance(element, Heading):
                 last_was_paragraph = False
                 self._write_heading(element)
