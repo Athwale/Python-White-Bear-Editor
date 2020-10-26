@@ -1,19 +1,19 @@
 import wx
 
 from Constants.Constants import Strings, Numbers
-from Tools.Document.AsideImage import AsideImage
+from Tools.Document.ArticleElements.ImageInText import ImageInText
 from Tools.Tools import Tools
 
 
-class EditImageDialog(wx.Dialog):
+class EditTextImageDialog(wx.Dialog):
 
-    def __init__(self, parent, image: AsideImage):
+    def __init__(self, parent, image: ImageInText):
         """
-        Display a modal dialog with a message with the text being selectable.
+        Display a dialog with information about the image where the user can edit it.
         :param parent: Parent frame.
         :param image: AsideImage instance being edited by tis dialog.
         """
-        # TODO make interactive when the user edits it.s
+        # TODO make interactive when the user edits it.
         wx.Dialog.__init__(self, parent, title=Strings.label_dialog_edit_image,
                            size=(Numbers.edit_image_dialog_width, Numbers.edit_image_dialog_height),
                            style=wx.DEFAULT_DIALOG_STYLE)
@@ -22,8 +22,8 @@ class EditImageDialog(wx.Dialog):
         self.main_vertical_sizer = wx.BoxSizer(wx.VERTICAL)
         self.horizontal_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.vertical_sizer = wx.BoxSizer(wx.VERTICAL)
-
         self.information_sizer = wx.BoxSizer(wx.VERTICAL)
+
         # Disk locations
         self.full_disk_location_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.label_image_full_path = wx.StaticText(self, -1, Strings.label_image_path + ': ')
@@ -43,17 +43,14 @@ class EditImageDialog(wx.Dialog):
                                                flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
         self.information_sizer.Add(self.thumb_disk_location_sub_sizer, flag=wx.EXPAND | wx.TOP,
                                    border=Numbers.widget_border_size)
-
-        # Image caption sub sizer
-        self.caption_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.label_image_caption = wx.StaticText(self, -1, Strings.label_article_image_caption + ': ')
-        self.field_image_caption = wx.TextCtrl(self, -1)
-        self.caption_sub_sizer.Add(self.label_image_caption, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
-        self.caption_sub_sizer.Add((8, -1))
-        self.caption_sub_sizer.Add(self.field_image_caption, proportion=1)
-        self.information_sizer.Add(self.caption_sub_sizer, flag=wx.EXPAND | wx.TOP, border=Numbers.widget_border_size)
-        self.field_image_caption_tip = Tools.get_warning_tip(self.field_image_caption,
-                                                             Strings.label_article_image_caption)
+        # Size
+        self.image_size_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.label_image_size = wx.StaticText(self, -1, Strings.label_image_size + ': ')
+        self.content_image_size = wx.StaticText(self, -1, Strings.label_none)
+        self.image_size_sub_sizer.Add(self.label_image_size, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
+        self.image_size_sub_sizer.Add(self.content_image_size, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
+        self.information_sizer.Add(self.image_size_sub_sizer, flag=wx.EXPAND | wx.TOP,
+                                   border=Numbers.widget_border_size)
 
         # Image link title sub sizer
         self.title_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -118,8 +115,7 @@ class EditImageDialog(wx.Dialog):
         """
         self.Disable()
         # Set image data
-        field_to_value = {self.field_image_caption: (self._image.get_image_caption(), self.field_image_caption_tip),
-                          self.field_image_link_title: (self._image.get_link_title(), self.field_image_link_title_tip),
+        field_to_value = {self.field_image_link_title: (self._image.get_link_title(), self.field_image_link_title_tip),
                           self.field_image_alt: (self._image.get_image_alt(), self.field_image_alt_tip)}
         for field, value in field_to_value.items():
             tip = value[1]
@@ -142,6 +138,12 @@ class EditImageDialog(wx.Dialog):
             self.content_image_full_path.SetLabelText(full_path)
         else:
             self.content_image_full_path.SetLabelText(self._image.get_full_filename())
+        # Set size
+        size = self._image.get_size()
+        if size:
+            self.content_image_size.SetLabelText(str(size[0]) + ' / ' + str(size[1]) + 'px')
+        else:
+            self.content_image_size.SetLabelText(Strings.status_error)
 
         thumb_path = self._image.get_thumbnail_image_path()
         if thumb_path:

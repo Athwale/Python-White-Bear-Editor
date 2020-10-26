@@ -9,7 +9,7 @@ class EditLinkDialog(wx.Dialog):
 
     def __init__(self, parent, link: Link):
         """
-        Display a modal dialog with a message with the text being selectable.
+        Display a dialog with information about the link where the user can edit it.
         :param parent: Parent frame.
         :param link: the Link instance to display.
         """

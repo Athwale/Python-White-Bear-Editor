@@ -2,7 +2,10 @@ import wx
 from wx.richtext import RichTextField, RichTextCtrl, RichTextBuffer, RichTextFieldTypeStandard
 
 from Constants.Constants import Strings
+from Gui.Dialogs.EditAsideImageDialog import EditAsideImageDialog
+from Gui.Dialogs.EditTextImageDialog import EditTextImageDialog
 from Tools.Document.ArticleElements.ImageInText import ImageInText
+from Tools.Document.ArticleElements.Video import Video
 
 
 class ImageTextField(RichTextFieldTypeStandard):
@@ -17,11 +20,14 @@ class ImageTextField(RichTextFieldTypeStandard):
         """
         if isinstance(element, ImageInText):
             path = element.get_thumbnail_image_path()
+            self._image: ImageInText = element
+            self._video = None
         else:
             path = element.get_url()
+            self._video: Video = element
+            self._image = None
         super().__init__(path, bitmap=wx.Bitmap(element.get_image()),
                          displayStyle=RichTextFieldTypeStandard.RICHTEXT_FIELD_STYLE_RECTANGLE)
-        self._element = element
 
     def CanEditProperties(self, obj: RichTextField) -> bool:
         """
@@ -47,6 +53,16 @@ class ImageTextField(RichTextFieldTypeStandard):
         :param buffer: The buffer of the control.
         :return: The result of the GUI dialog.
         """
-        # TODO open image edit dialog
-        wx.MessageBox(str(self._element))
+        if self._image:
+            edit_dialog = EditTextImageDialog(parent, self._image)
+        else:
+            # TODO show video edit dialog
+            edit_dialog = None
+            pass
+
+        result = edit_dialog.ShowModal()
+        if result == wx.ID_OK:
+            # TODO set document modified if an edit has been made in the dialog
+            print('Ok')
+        edit_dialog.Destroy()
         return False

@@ -30,6 +30,7 @@ class BaseImage:
         self._thumbnail_filename = thumbnail_filename
         self._image = None
         self._status_color = None
+        self._size = (0, 0)
 
     def seo_test_self(self) -> bool:
         """
@@ -123,6 +124,13 @@ class BaseImage:
         :return: Return the status color of this image. White if ok, Red if SEO check failed.
         """
         return self._status_color
+
+    def get_size(self) -> (int, int):
+        """
+        Return a tuple of this image's size (width, height).
+        :return: Return a tuple of this image's size (width, height).
+        """
+        return self._size
 
     def __str__(self) -> str:
         return "Base image: original: {}, thumbnail: {}, title: {}, alt: {}".format(self._original_image_path,

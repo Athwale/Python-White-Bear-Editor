@@ -4,7 +4,7 @@ import wx
 import wx.lib.scrolledpanel
 
 from Constants.Constants import Strings
-from Gui.Dialogs.EditImageDialog import EditImageDialog
+from Gui.Dialogs.EditAsideImageDialog import EditAsideImageDialog
 from Gui.Panels.ImagePanel import ImagePanel
 from Tools.Document.AsideImage import AsideImage
 from Tools.Document.WhitebearDocumentArticle import WhitebearDocumentArticle
@@ -52,7 +52,7 @@ class AsideImagePanel(wx.lib.scrolledpanel.ScrolledPanel):
                 del self._images[img_index]
             self._document.set_modified(True)
         else:
-            edit_dialog = EditImageDialog(self, self._images[img_index])
+            edit_dialog = EditAsideImageDialog(self, self._images[img_index])
             result = edit_dialog.ShowModal()
             if result == wx.ID_OK:
                 # TODO set document modified if an edit has been made in the dialog

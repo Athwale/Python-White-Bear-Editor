@@ -55,7 +55,8 @@ class AsideImage(BaseImage):
             result = False
         else:
             image = wx.Image(Fetch.get_resource_path(self._thumbnail_path), wx.BITMAP_TYPE_ANY)
-            if image.GetSize() == (Numbers.main_image_width, Numbers.main_image_height):
+            self._size = image.GetSize()
+            if self._size == (Numbers.main_image_width, Numbers.main_image_height):
                 self._image = image
             else:
                 self._image = wx.Image(Fetch.get_resource_path('main_image_thumbnail_wrong.png'), wx.BITMAP_TYPE_PNG)

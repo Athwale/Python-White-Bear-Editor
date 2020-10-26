@@ -186,6 +186,7 @@ class Strings:
     label_url: str = 'URL'
     label_text: str = 'Text'
     label_link_local: str = 'WhiteBear page'
+    label_image_size: str = 'Width/height'
 
     status_loading: str = 'Loading and testing'
     status_ready: str = 'Ready'
