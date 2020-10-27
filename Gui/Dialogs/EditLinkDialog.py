@@ -16,7 +16,7 @@ class EditLinkDialog(wx.Dialog):
         # TODO add interactivity
         # TODO if you press ok the link must be set with the new values
         wx.Dialog.__init__(self, parent, title=Strings.label_dialog_edit_link,
-                           size=(Numbers.edit_image_dialog_width, Numbers.edit_link_dialog_height),
+                           size=(Numbers.edit_aside_image_dialog_width, Numbers.edit_link_dialog_height),
                            style=wx.DEFAULT_DIALOG_STYLE)
         self._link = link
 

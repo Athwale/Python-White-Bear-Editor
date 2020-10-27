@@ -15,9 +15,12 @@ class EditTextImageDialog(wx.Dialog):
         """
         # TODO make interactive when the user edits it.
         wx.Dialog.__init__(self, parent, title=Strings.label_dialog_edit_image,
-                           size=(Numbers.edit_image_dialog_width, Numbers.edit_image_dialog_height),
+                           size=(Numbers.edit_text_image_dialog_width, Numbers.edit_text_image_dialog_height),
                            style=wx.DEFAULT_DIALOG_STYLE)
         self._image = image
+        # Adjust dialog width to fit entire image.
+        if self._image.get_size()[1] > Numbers.edit_text_image_dialog_height:
+            self.SetSize(Numbers.edit_text_image_dialog_width, self._image.get_size()[1])
 
         self.main_vertical_sizer = wx.BoxSizer(wx.VERTICAL)
         self.horizontal_sizer = wx.BoxSizer(wx.HORIZONTAL)

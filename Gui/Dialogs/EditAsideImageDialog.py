@@ -15,7 +15,7 @@ class EditAsideImageDialog(wx.Dialog):
         """
         # TODO make interactive when the user edits it.
         wx.Dialog.__init__(self, parent, title=Strings.label_dialog_edit_image,
-                           size=(Numbers.edit_image_dialog_width, Numbers.edit_image_dialog_height),
+                           size=(Numbers.edit_aside_image_dialog_width, Numbers.edit_aside_image_dialog_height),
                            style=wx.DEFAULT_DIALOG_STYLE)
         self._image = image
 

@@ -19,8 +19,10 @@ class Numbers:
     text_field_font_size: int = 9
     widget_border_size: int = 5
     photo_column_width: int = 300
-    edit_image_dialog_width: int = 900
-    edit_image_dialog_height: int = 300
+    edit_aside_image_dialog_width: int = 900
+    edit_aside_image_dialog_height: int = 300
+    edit_text_image_dialog_width: int = 1200
+    edit_text_image_dialog_height: int = 300
     edit_link_dialog_height: int = 255
     icon_width: int = 30
     icon_height: int = 30
