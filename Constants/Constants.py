@@ -9,7 +9,7 @@ class Numbers:
     YELLOW_COLOR = Colour(250, 255, 196)
     BLUE_COLOR = Colour(145, 207, 255)
 
-    splashscreen_timeout = 5
+    splashscreen_timeout = 15000
 
     minimal_window_size_width: int = 1200
     minimal_window_size_height: int = 700
@@ -173,6 +173,7 @@ class Strings:
     label_article_image: str = 'Article image'
     label_article_image_alt: str = 'Image alt description'
     label_article_image_link_title: str = 'Image link title'
+    label_video_link_title: str = 'Video link title'
     label_article_image_caption: str = 'Image caption'
     label_article_date: str = 'Date'
     label_article_title: str = 'Article name'

@@ -77,10 +77,8 @@ class Link:
         else:
             self._is_local = False
             try:
-                # todo uncomment this
-                pass
-                # requests.get(self._url, headers={"User-Agent": "Mozilla/5.0"})
-            except (requests.ConnectionError, requests.exceptions.MissingSchema) as ex:
+                requests.get(self._url, headers={"User-Agent": "Mozilla/5.0"})
+            except (requests.ConnectionError, requests.exceptions.MissingSchema) as _:
                 self._url_error_message = Strings.seo_error_url_nonexistent
                 result = False
 

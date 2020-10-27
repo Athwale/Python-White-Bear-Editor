@@ -28,21 +28,21 @@ class EditVideoDialog(wx.Dialog):
         self.label_video_title = wx.StaticText(self, -1, Strings.label_link_title + ': ')
         self.field_video_link_title = wx.TextCtrl(self, -1)
         self.title_sub_sizer.Add(self.label_video_title, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
-        self.title_sub_sizer.Add((44, -1))
+        self.title_sub_sizer.Add((5, -1))
         self.title_sub_sizer.Add(self.field_video_link_title, proportion=1)
         self.information_sizer.Add(self.title_sub_sizer, flag=wx.EXPAND | wx.TOP, border=Numbers.widget_border_size)
         self.field_video_link_title_tip = Tools.get_warning_tip(self.field_video_link_title,
-                                                                Strings.label_article_image_link_title)
+                                                                Strings.label_video_link_title)
 
         # Url sub sizer
         self.url_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.label_video_url = wx.StaticText(self, -1, Strings.label_url + ': ')
         self.field_video_url = wx.TextCtrl(self, -1)
         self.url_sub_sizer.Add(self.label_video_url, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
-        self.url_sub_sizer.Add((44, -1))
+        self.url_sub_sizer.Add((34, -1))
         self.url_sub_sizer.Add(self.field_video_url, proportion=1)
         self.information_sizer.Add(self.url_sub_sizer, flag=wx.EXPAND | wx.TOP, border=Numbers.widget_border_size)
-        self.field_video_url_tip = Tools.get_warning_tip(self.field_video_url, Strings.label_article_image_link_title)
+        self.field_video_url_tip = Tools.get_warning_tip(self.field_video_url, Strings.label_url)
 
         # Size
         self.video_size_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -52,10 +52,6 @@ class EditVideoDialog(wx.Dialog):
         self.video_size_sub_sizer.Add(self.content_video_size, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
         self.information_sizer.Add(self.video_size_sub_sizer, flag=wx.EXPAND | wx.TOP,
                                    border=Numbers.widget_border_size)
-
-        # TODO correct line names
-        # TODO add thumbnail width height to intextimage field name
-        # TODO show original size in aside image edit
 
         # Buttons
         self.button_sizer = wx.BoxSizer(wx.VERTICAL)
