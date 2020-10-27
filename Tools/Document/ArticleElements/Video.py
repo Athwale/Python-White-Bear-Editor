@@ -74,19 +74,33 @@ class Video:
         """
         return self._image
 
-    def get_title(self) -> str:
+    def get_title(self) -> (str, str):
         """
-        Return the title of this video.
-        :return: The title of this video.
+        Return the title of this video and any error string.
+        :return: The title of this video and any error string.
         """
-        return self._link_title
+        return self._link_title, self._link_title_error_message
 
-    def get_url(self) -> str:
+    def get_url(self) -> (str, str):
         """
-        Return the url of this video.
-        :return: The url of this video.
+        Return the url of this video and any error string.
+        :return: The url of this video and any error string.
         """
-        return self._url
+        return self._url, self._url_error_message
+
+    def get_size_error(self):
+        """
+        Return the element size error if there is any, empty string otherwise.
+        :return: Return the element size error if there is any, empty string otherwise.
+        """
+        return self.size_error_message
+
+    def get_size(self) -> (int, int):
+        """
+        Return the video size (width, height).
+        :return: Return the video size (width, height).
+        """
+        return self._width, self._height
 
     def set_title(self, title) -> None:
         """
@@ -104,12 +118,6 @@ class Video:
         """
         self._url = url
 
-    def get_size_error(self):
-        """
-        Return the element size error if there is any, empty string otherwise.
-        :return: Return the element size error if there is any, empty string otherwise.
-        """
-        return self.size_error_message
-
     def __str__(self) -> str:
-        return "Video: url: {}, title: {}, size: {} x {} px".format(self._url, self._link_title, self._width, self._height)
+        return "Video: url: {}, title: {}, size: {} x {} px".format(self._url, self._link_title, self._width,
+                                                                    self._height)

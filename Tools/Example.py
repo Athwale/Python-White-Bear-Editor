@@ -1,5 +1,4 @@
 import wx
-import os
 import wx.richtext as rt
 
 

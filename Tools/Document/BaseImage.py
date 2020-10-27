@@ -2,6 +2,7 @@ import wx
 
 from Constants.Constants import Numbers
 from Constants.Constants import Strings
+from Resources.Fetch import Fetch
 
 
 class BaseImage:
@@ -30,7 +31,8 @@ class BaseImage:
         self._thumbnail_filename = thumbnail_filename
         self._image = None
         self._status_color = None
-        self._size = (0, 0)
+        self._thumbnail_size = (0, 0)
+        self._original_size = (0, 0)
 
     def seo_test_self(self) -> bool:
         """
@@ -125,12 +127,21 @@ class BaseImage:
         """
         return self._status_color
 
-    def get_size(self) -> (int, int):
+    def get_thumbnail_size(self) -> (int, int):
         """
-        Return a tuple of this image's size (width, height).
-        :return: Return a tuple of this image's size (width, height).
+        Return a tuple of this image's thumbnail size (width, height).
+        :return: Return a tuple of this image's thumbnail size (width, height).
         """
-        return self._size
+        return self._thumbnail_size
+
+    def get_original_size(self) -> (int, int):
+        """
+        Return a tuple of this image's original size (width, height).
+        :return: Return a tuple of this image's original size (width, height).
+        """
+        image = wx.Image(Fetch.get_resource_path(self._original_image_path), wx.BITMAP_TYPE_ANY)
+        self._original_size = image.GetSize()
+        return self._original_size
 
     def __str__(self) -> str:
         return "Base image: original: {}, thumbnail: {}, title: {}, alt: {}".format(self._original_image_path,

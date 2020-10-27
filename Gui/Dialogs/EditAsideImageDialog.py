@@ -22,8 +22,8 @@ class EditAsideImageDialog(wx.Dialog):
         self.main_vertical_sizer = wx.BoxSizer(wx.VERTICAL)
         self.horizontal_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.vertical_sizer = wx.BoxSizer(wx.VERTICAL)
-
         self.information_sizer = wx.BoxSizer(wx.VERTICAL)
+
         # Disk locations
         self.full_disk_location_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.label_image_full_path = wx.StaticText(self, -1, Strings.label_image_path + ': ')
@@ -42,6 +42,29 @@ class EditAsideImageDialog(wx.Dialog):
         self.thumb_disk_location_sub_sizer.Add(self.content_image_thumbnail_path,
                                                flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
         self.information_sizer.Add(self.thumb_disk_location_sub_sizer, flag=wx.EXPAND | wx.TOP,
+                                   border=Numbers.widget_border_size)
+
+        # Original size
+        self.image_original_size_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.label_image_original_size = wx.StaticText(self, -1, Strings.label_original_size + ': ')
+        self.content_image_original_size = wx.StaticText(self, -1, Strings.label_none)
+        self.image_original_size_sub_sizer.Add(self.label_image_original_size,
+                                               flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
+        self.image_original_size_sub_sizer.Add((16, -1))
+        self.image_original_size_sub_sizer.Add(self.content_image_original_size,
+                                               flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
+        self.information_sizer.Add(self.image_original_size_sub_sizer, flag=wx.EXPAND | wx.TOP,
+                                   border=Numbers.widget_border_size)
+
+        # Thumbnail size
+        self.image_thumbnail_size_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.label_image_thumbnail_size = wx.StaticText(self, -1, Strings.label_thumbnail_size + ': ')
+        self.content_image_thumbnail_size = wx.StaticText(self, -1, Strings.label_none)
+        self.image_thumbnail_size_sub_sizer.Add(self.label_image_thumbnail_size,
+                                                flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
+        self.image_thumbnail_size_sub_sizer.Add(self.content_image_thumbnail_size,
+                                                flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
+        self.information_sizer.Add(self.image_thumbnail_size_sub_sizer, flag=wx.EXPAND | wx.TOP,
                                    border=Numbers.widget_border_size)
 
         # Image caption sub sizer
@@ -135,6 +158,23 @@ class EditAsideImageDialog(wx.Dialog):
 
         # Set images
         self._bitmap.SetBitmap(wx.Bitmap(self._image.get_image()))
+
+        # Set thumbnail size
+        thumbnail_size = self._image.get_thumbnail_size()
+        if thumbnail_size:
+            self.content_image_thumbnail_size.SetLabelText(
+                str(thumbnail_size[0]) + ' x ' + str(thumbnail_size[1]) + ' px')
+        else:
+            self.content_image_thumbnail_size.SetLabelText(Strings.status_error)
+
+        # Set original size
+        original_size = self._image.get_original_size()
+        if original_size:
+            self.content_image_original_size.SetLabelText(
+                str(original_size[0]) + ' x ' + str(original_size[1]) + ' px')
+        else:
+            self.content_image_original_size.SetLabelText(Strings.status_error)
+
         # Set disk paths
         full_path = self._image.get_original_image_path()
         self.SetTitle(Strings.label_dialog_edit_image + ': ' + self._image.get_full_filename())

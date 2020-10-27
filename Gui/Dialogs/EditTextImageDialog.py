@@ -11,7 +11,7 @@ class EditTextImageDialog(wx.Dialog):
         """
         Display a dialog with information about the image where the user can edit it.
         :param parent: Parent frame.
-        :param image: AsideImage instance being edited by tis dialog.
+        :param image: ImageInText instance being edited by tis dialog.
         """
         # TODO make interactive when the user edits it.
         wx.Dialog.__init__(self, parent, title=Strings.label_dialog_edit_image,
@@ -19,8 +19,8 @@ class EditTextImageDialog(wx.Dialog):
                            style=wx.DEFAULT_DIALOG_STYLE)
         self._image = image
         # Adjust dialog width to fit entire image.
-        if self._image.get_size()[1] > Numbers.edit_text_image_dialog_height:
-            self.SetSize(Numbers.edit_text_image_dialog_width, self._image.get_size()[1])
+        if self._image.get_thumbnail_size()[1] > Numbers.edit_text_image_dialog_height:
+            self.SetSize(Numbers.edit_text_image_dialog_width, self._image.get_thumbnail_size()[1])
 
         self.main_vertical_sizer = wx.BoxSizer(wx.VERTICAL)
         self.horizontal_sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -46,13 +46,28 @@ class EditTextImageDialog(wx.Dialog):
                                                flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
         self.information_sizer.Add(self.thumb_disk_location_sub_sizer, flag=wx.EXPAND | wx.TOP,
                                    border=Numbers.widget_border_size)
-        # Size
-        self.image_size_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.label_image_size = wx.StaticText(self, -1, Strings.label_image_size + ': ')
-        self.content_image_size = wx.StaticText(self, -1, Strings.label_none)
-        self.image_size_sub_sizer.Add(self.label_image_size, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
-        self.image_size_sub_sizer.Add(self.content_image_size, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
-        self.information_sizer.Add(self.image_size_sub_sizer, flag=wx.EXPAND | wx.TOP,
+
+        # Original size
+        self.image_original_size_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.label_image_original_size = wx.StaticText(self, -1, Strings.label_original_size + ': ')
+        self.content_image_original_size = wx.StaticText(self, -1, Strings.label_none)
+        self.image_original_size_sub_sizer.Add(self.label_image_original_size,
+                                               flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
+        self.image_original_size_sub_sizer.Add((16, -1))
+        self.image_original_size_sub_sizer.Add(self.content_image_original_size,
+                                               flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
+        self.information_sizer.Add(self.image_original_size_sub_sizer, flag=wx.EXPAND | wx.TOP,
+                                   border=Numbers.widget_border_size)
+
+        # Thumbnail size
+        self.image_thumbnail_size_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.label_image_thumbnail_size = wx.StaticText(self, -1, Strings.label_thumbnail_size + ': ')
+        self.content_image_thumbnail_size = wx.StaticText(self, -1, Strings.label_none)
+        self.image_thumbnail_size_sub_sizer.Add(self.label_image_thumbnail_size,
+                                                flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
+        self.image_thumbnail_size_sub_sizer.Add(self.content_image_thumbnail_size,
+                                                flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
+        self.information_sizer.Add(self.image_thumbnail_size_sub_sizer, flag=wx.EXPAND | wx.TOP,
                                    border=Numbers.widget_border_size)
 
         # Image link title sub sizer
@@ -141,12 +156,22 @@ class EditTextImageDialog(wx.Dialog):
             self.content_image_full_path.SetLabelText(full_path)
         else:
             self.content_image_full_path.SetLabelText(self._image.get_full_filename())
-        # Set size
-        size = self._image.get_size()
-        if size:
-            self.content_image_size.SetLabelText(str(size[0]) + ' / ' + str(size[1]) + 'px')
+
+        # Set thumbnail size
+        thumbnail_size = self._image.get_thumbnail_size()
+        if thumbnail_size:
+            self.content_image_thumbnail_size.SetLabelText(
+                str(thumbnail_size[0]) + ' x ' + str(thumbnail_size[1]) + ' px')
         else:
-            self.content_image_size.SetLabelText(Strings.status_error)
+            self.content_image_thumbnail_size.SetLabelText(Strings.status_error)
+
+        # Set original size
+        original_size = self._image.get_original_size()
+        if original_size:
+            self.content_image_original_size.SetLabelText(
+                str(original_size[0]) + ' x ' + str(original_size[1]) + ' px')
+        else:
+            self.content_image_original_size.SetLabelText(Strings.status_error)
 
         thumb_path = self._image.get_thumbnail_image_path()
         if thumb_path:

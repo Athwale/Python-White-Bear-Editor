@@ -45,7 +45,6 @@ class CustomRichText(rt.RichTextCtrl):
         self.Bind(wx.EVT_MENU, self.on_insert_link, main_frame.insert_link_tool)
         self.Bind(wx.EVT_MENU, self.on_bold, main_frame.bold_tool)
 
-
     @staticmethod
     def _add_text_handlers() -> None:
         """
@@ -195,7 +194,7 @@ class CustomRichText(rt.RichTextCtrl):
         :param element: The element (video, image in text) that will be on the field.
         :return: None
         """
-        new_field = self._register_field( element)
+        new_field = self._register_field(element)
         self.ApplyStyle(self._stylesheet.FindParagraphStyle(Strings.style_image))
         self.BeginParagraphStyle(Strings.style_image)
         self.WriteField(new_field.GetName(), rt.RichTextProperties())

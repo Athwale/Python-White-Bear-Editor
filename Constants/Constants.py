@@ -20,9 +20,11 @@ class Numbers:
     widget_border_size: int = 5
     photo_column_width: int = 300
     edit_aside_image_dialog_width: int = 900
-    edit_aside_image_dialog_height: int = 300
+    edit_aside_image_dialog_height: int = 340
     edit_text_image_dialog_width: int = 1200
     edit_text_image_dialog_height: int = 300
+    edit_video_dialog_width: int = 600
+    edit_video_dialog_height: int = 200
     edit_link_dialog_height: int = 255
     icon_width: int = 30
     icon_height: int = 30
@@ -162,6 +164,7 @@ class Strings:
     label_dialog_about: str = 'About'
     label_dialog_edit_image: str = 'Edit image'
     label_dialog_edit_link: str = 'Edit link'
+    label_dialog_edit_video: str = 'Edit video'
 
     label_article_menu_logo: str = 'Menu logo'
     label_article_menu_logo_name_placeholder: str = 'Menu item name'
@@ -188,7 +191,9 @@ class Strings:
     label_url: str = 'URL'
     label_text: str = 'Text'
     label_link_local: str = 'WhiteBear page'
-    label_image_size: str = 'Width/height'
+    label_thumbnail_size: str = 'Thumbnail size'
+    label_original_size: str = 'Original size'
+    label_video_size: str = 'Video size'
 
     status_loading: str = 'Loading and testing'
     status_ready: str = 'Ready'

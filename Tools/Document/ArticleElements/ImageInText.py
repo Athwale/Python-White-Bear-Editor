@@ -40,8 +40,9 @@ class ImageInText(BaseImage):
         else:
             # Image thumbnails in text must not be larger than 534 px.
             image = wx.Image(Fetch.get_resource_path(self._thumbnail_path), wx.BITMAP_TYPE_ANY)
-            self._size = image.GetSize()
-            if self._size[0] <= Numbers.text_image_max_size and self._size[1] <= Numbers.text_image_max_size:
+            self._thumbnail_size = image.GetSize()
+            if self._thumbnail_size[0] <= Numbers.text_image_max_size \
+                    and self._thumbnail_size[1] <= Numbers.text_image_max_size:
                 self._image = image
             else:
                 self._image = wx.Image(Fetch.get_resource_path('main_image_thumbnail_wrong.png'), wx.BITMAP_TYPE_PNG)

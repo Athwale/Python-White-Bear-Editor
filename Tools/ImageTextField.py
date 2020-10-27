@@ -2,8 +2,8 @@ import wx
 from wx.richtext import RichTextField, RichTextCtrl, RichTextBuffer, RichTextFieldTypeStandard
 
 from Constants.Constants import Strings
-from Gui.Dialogs.EditAsideImageDialog import EditAsideImageDialog
 from Gui.Dialogs.EditTextImageDialog import EditTextImageDialog
+from Gui.Dialogs.EditVideoDialog import EditVideoDialog
 from Tools.Document.ArticleElements.ImageInText import ImageInText
 from Tools.Document.ArticleElements.Video import Video
 
@@ -23,7 +23,7 @@ class ImageTextField(RichTextFieldTypeStandard):
             self._image: ImageInText = element
             self._video = None
         else:
-            path = element.get_url()
+            path = element.get_url()[0]
             self._video: Video = element
             self._image = None
         super().__init__(path, bitmap=wx.Bitmap(element.get_image()),
@@ -56,9 +56,7 @@ class ImageTextField(RichTextFieldTypeStandard):
         if self._image:
             edit_dialog = EditTextImageDialog(parent, self._image)
         else:
-            # TODO show video edit dialog
-            edit_dialog = None
-            pass
+            edit_dialog = EditVideoDialog(parent, self._video)
 
         result = edit_dialog.ShowModal()
         if result == wx.ID_OK:

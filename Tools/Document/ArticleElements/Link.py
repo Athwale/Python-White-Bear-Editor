@@ -79,7 +79,7 @@ class Link:
             try:
                 # todo uncomment this
                 pass
-                #requests.get(self._url, headers={"User-Agent": "Mozilla/5.0"})
+                # requests.get(self._url, headers={"User-Agent": "Mozilla/5.0"})
             except (requests.ConnectionError, requests.exceptions.MissingSchema) as ex:
                 self._url_error_message = Strings.seo_error_url_nonexistent
                 result = False
