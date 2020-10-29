@@ -61,6 +61,10 @@ class ImageTextField(RichTextFieldTypeStandard):
         result = edit_dialog.ShowModal()
         if result == wx.ID_OK:
             # TODO set document modified if an edit has been made in the dialog send a color change event from here
+            # Send an event to the main gui to signal document color change
+            color_evt = wx.CommandEvent(wx.wxEVT_COLOUR_CHANGED, parent.GetId())
+            color_evt.SetEventObject(self)
+            wx.PostEvent(parent.GetEventHandler(), color_evt)
             print('Ok')
         edit_dialog.Destroy()
         return False

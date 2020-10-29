@@ -27,6 +27,7 @@ class Video:
         self._url_error_message: str = ''
         self._status_color = None
         self._image = None
+        self._modified = False
 
     def seo_test_self(self) -> bool:
         """
@@ -102,6 +103,13 @@ class Video:
         """
         return self._width, self._height
 
+    def is_modified(self) -> bool:
+        """
+        Return true if this instance was modified.
+        :return: Return true if this instance was modified.
+        """
+        return self._modified
+
     def set_title(self, title) -> None:
         """
         Set a new title for this video.
@@ -109,6 +117,7 @@ class Video:
         :return: None
         """
         self._link_title = title
+        self._modified = True
 
     def set_url(self, url) -> None:
         """
@@ -117,6 +126,7 @@ class Video:
         :return: None
         """
         self._url = url
+        self._modified = True
 
     def __str__(self) -> str:
         return "Video: url: {}, title: {}, size: {} x {} px".format(self._url, self._link_title, self._width,

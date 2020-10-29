@@ -78,6 +78,15 @@ class AsideImage(BaseImage):
         """
         return self._caption, self._caption_error_message
 
+    def set_caption(self, caption: str) -> None:
+        """
+        Set new image caption
+        :param caption: The new caption
+        :return: None
+        """
+        self._caption = caption
+        self._modified = True
+
     def __str__(self) -> str:
         return "Aside image: {}, original: {}, thumbnail: {}, title: {}, alt: {}".format(self._caption,
                                                                                          self._original_image_path,

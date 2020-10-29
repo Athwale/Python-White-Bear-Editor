@@ -201,8 +201,6 @@ class CustomRichText(rt.RichTextCtrl):
         self.WriteText('\n')
         self.EndParagraphStyle()
         self.ApplyStyle(self._stylesheet.FindParagraphStyle(Strings.style_paragraph))
-        # TODO edit image on right click
-        # TODO edit video on right click
 
     @staticmethod
     def _register_field(element) -> ImageTextField:

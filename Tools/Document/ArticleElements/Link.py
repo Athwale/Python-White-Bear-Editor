@@ -36,6 +36,7 @@ class Link:
         self._loaded_pages = loaded_pages
         self._is_local = False
         self._status_color = None
+        self._modified = False
 
         # Create a unique ID from text, url and title
         self._link_id = str(Link.count)
@@ -135,6 +136,13 @@ class Link:
         """
         return self._is_local
 
+    def is_modified(self) -> bool:
+        """
+        Return true if this instance was modified.
+        :return: Return true if this instance was modified.
+        """
+        return self._modified
+
     def set_text(self, text: str) -> None:
         """
         Set a new visible text for the link.
@@ -142,6 +150,7 @@ class Link:
         :return: None
         """
         self._text = text
+        self._modified = True
 
     def set_url(self, url: str) -> None:
         """
@@ -150,6 +159,7 @@ class Link:
         :return: None
         """
         self._url = url
+        self._modified = True
 
     def set_title(self, title: str) -> None:
         """
@@ -158,6 +168,7 @@ class Link:
         :return: None
         """
         self._link_title = title
+        self._modified = True
 
     def set_local(self, is_local: bool) -> None:
         """
@@ -166,3 +177,4 @@ class Link:
         :return: None
         """
         self._is_local = is_local
+        self._modified = True

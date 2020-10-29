@@ -98,6 +98,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
         :return: None
         """
         # TODO Run self test on every setter method.
+        # TODO backup color in case it is blue
         # Check meta keywords and description
         super(WhitebearDocumentArticle, self).seo_test_self_basic()
         # Check page name length must be at least 3 and must not be default
@@ -526,6 +527,18 @@ class WhitebearDocumentArticle(WhitebearDocument):
         """
         return self._status_color
 
+    def is_modified(self) -> bool:
+        """
+        Return True if this file or it's images, links or videos were modified in the editor.
+        :return: True if this file was modified in the editor.
+        """
+        # Check links, videos and images
+        for list_var in [self._aside_images, self._images, self._links, self._videos]:
+            for content in list_var:
+                if content.is_modified():
+                    self.set_modified(True)
+        return self._modified
+
     def get_menu_section(self) -> WhitebearDocumentMenu:
         """
         Return to which menu section this article belongs.
@@ -572,6 +585,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
         """
         # TODO use the link list when regenerating elements list
         self._links.append(link)
+        self.set_modified(True)
 
     # Setters ----------------------------------------------------------------------------------------------------------
     def set_date(self, date: str) -> None:

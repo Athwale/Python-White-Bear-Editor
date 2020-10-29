@@ -194,6 +194,13 @@ class WhitebearDocument:
         """
         return self._working_directory
 
+    def get_status_color(self) -> wx.Colour:
+        """
+        Return the status color of this document. White if ok, Red if SEO check failed, Blue if modified.
+        :return: Return the status color of this document. White if ok, Red if SEO check failed, Blue if modified.
+        """
+        return self._status_color
+
     # Setters ----------------------------------------------------------------------------------------------------------
     def set_page_name(self, name: str) -> None:
         """

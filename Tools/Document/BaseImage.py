@@ -33,6 +33,7 @@ class BaseImage:
         self._status_color = None
         self._thumbnail_size = (0, 0)
         self._original_size = (0, 0)
+        self._modified = False
 
     def seo_test_self(self) -> bool:
         """
@@ -70,6 +71,13 @@ class BaseImage:
         if not result:
             self._status_color = wx.RED
         return result
+
+    def is_modified(self) -> bool:
+        """
+        Return true if this instance was modified.
+        :return: Return true if this instance was modified.
+        """
+        return self._modified
 
     def get_link_title(self) -> (str, str):
         """
@@ -142,6 +150,24 @@ class BaseImage:
         image = wx.Image(Fetch.get_resource_path(self._original_image_path), wx.BITMAP_TYPE_ANY)
         self._original_size = image.GetSize()
         return self._original_size
+
+    def set_title(self, title: str) -> None:
+        """
+        Set new title
+        :param title: The new title
+        :return: None
+        """
+        self._link_title = title
+        self._modified = True
+
+    def set_alt(self, alt: str) -> None:
+        """
+        Set new alt description
+        :param alt: The new alt description
+        :return: None
+        """
+        self._image_alt = alt
+        self._modified = True
 
     def __str__(self) -> str:
         return "Base image: original: {}, thumbnail: {}, title: {}, alt: {}".format(self._original_image_path,

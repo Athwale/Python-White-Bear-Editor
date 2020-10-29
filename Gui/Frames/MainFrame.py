@@ -691,7 +691,6 @@ class MainFrame(wx.Frame):
         :return: None
         """
         self._disable_editor(True)
-
         self.update_file_color()
         if doc.get_status_color() == Numbers.RED_COLOR:
             self._set_status_text(
@@ -750,7 +749,7 @@ class MainFrame(wx.Frame):
 
     def text_area_edit_handler(self, event: wx.CommandEvent) -> None:
         """
-        Handle special events that signal that the color of the selected item in the filelis should be updated.
+        Handle special events that signal that the color of the selected item in the filelist should be updated.
         This happens when an edit has been made to the document.
         :param event: Not used.
         :return: None
