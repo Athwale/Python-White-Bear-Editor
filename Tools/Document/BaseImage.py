@@ -72,6 +72,7 @@ class BaseImage:
             self._status_color = wx.RED
         return result
 
+    # Getters ----------------------------------------------------------------------------------------------------------
     def is_modified(self) -> bool:
         """
         Return true if this instance was modified.
@@ -151,14 +152,16 @@ class BaseImage:
         self._original_size = image.GetSize()
         return self._original_size
 
+    # Setters ----------------------------------------------------------------------------------------------------------
     def set_title(self, title: str) -> None:
         """
         Set new title
         :param title: The new title
         :return: None
         """
-        self._link_title = title
-        self._modified = True
+        if self._link_title != title:
+            self._link_title = title
+            self._modified = True
 
     def set_alt(self, alt: str) -> None:
         """
@@ -166,8 +169,9 @@ class BaseImage:
         :param alt: The new alt description
         :return: None
         """
-        self._image_alt = alt
-        self._modified = True
+        if self._image_alt != alt:
+            self._image_alt = alt
+            self._modified = True
 
     def __str__(self) -> str:
         return "Base image: original: {}, thumbnail: {}, title: {}, alt: {}".format(self._original_image_path,

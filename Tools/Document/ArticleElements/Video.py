@@ -68,6 +68,7 @@ class Video:
             self._status_color = wx.RED
         return result
 
+    # Getters ----------------------------------------------------------------------------------------------------------
     def get_image(self) -> wx.Image:
         """
         Return the placeholder image. Either correct video placeholder or error image.
@@ -110,14 +111,16 @@ class Video:
         """
         return self._modified
 
+    # Setters ----------------------------------------------------------------------------------------------------------
     def set_title(self, title) -> None:
         """
         Set a new title for this video.
         :param title: The new title.
         :return: None
         """
-        self._link_title = title
-        self._modified = True
+        if self._link_title != title:
+            self._link_title = title
+            self._modified = True
 
     def set_url(self, url) -> None:
         """
@@ -125,8 +128,9 @@ class Video:
         :param url: The new url.
         :return: None
         """
-        self._url = url
-        self._modified = True
+        if self._url != url:
+            self._url = url
+            self._modified = True
 
     def __str__(self) -> str:
         return "Video: url: {}, title: {}, size: {} x {} px".format(self._url, self._link_title, self._width,

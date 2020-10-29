@@ -71,6 +71,7 @@ class AsideImage(BaseImage):
             self._status_color = wx.RED
         return result
 
+    # Getters ----------------------------------------------------------------------------------------------------------
     def get_image_caption(self) -> (str, str):
         """
         Return the image caption and error to display in gui if there is one.
@@ -78,14 +79,16 @@ class AsideImage(BaseImage):
         """
         return self._caption, self._caption_error_message
 
+    # Setters ----------------------------------------------------------------------------------------------------------
     def set_caption(self, caption: str) -> None:
         """
         Set new image caption
         :param caption: The new caption
         :return: None
         """
-        self._caption = caption
-        self._modified = True
+        if self._caption != caption:
+            self._caption = caption
+            self._modified = True
 
     def __str__(self) -> str:
         return "Aside image: {}, original: {}, thumbnail: {}, title: {}, alt: {}".format(self._caption,

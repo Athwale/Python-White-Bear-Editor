@@ -87,6 +87,7 @@ class Link:
             self._status_color = wx.RED
         return result
 
+    # Getters ----------------------------------------------------------------------------------------------------------
     def get_id(self) -> str:
         """
         Return the ID of this link.
@@ -143,14 +144,16 @@ class Link:
         """
         return self._modified
 
+    # Setters ----------------------------------------------------------------------------------------------------------
     def set_text(self, text: str) -> None:
         """
         Set a new visible text for the link.
         :param text: The new text to display.
         :return: None
         """
-        self._text = text
-        self._modified = True
+        if self._text != text:
+            self._text = text
+            self._modified = True
 
     def set_url(self, url: str) -> None:
         """
@@ -158,8 +161,9 @@ class Link:
         :param url: The new url.
         :return: None
         """
-        self._url = url
-        self._modified = True
+        if self._url != url:
+            self._url = url
+            self._modified = True
 
     def set_title(self, title: str) -> None:
         """
@@ -167,8 +171,9 @@ class Link:
         :param title: The new title.
         :return: None
         """
-        self._link_title = title
-        self._modified = True
+        if self._link_title != title:
+            self._link_title = title
+            self._modified = True
 
     def set_local(self, is_local: bool) -> None:
         """
@@ -176,5 +181,6 @@ class Link:
         :param is_local: True if yes.
         :return: None
         """
-        self._is_local = is_local
-        self._modified = True
+        if self._is_local != is_local:
+            self._is_local = is_local
+            self._modified = True

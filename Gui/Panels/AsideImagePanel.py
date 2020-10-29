@@ -35,8 +35,8 @@ class AsideImagePanel(wx.lib.scrolledpanel.ScrolledPanel):
         :return: None
         """
         img_index = self._images.index(event.GetClientData())
+        # Rearrange the images in the list
         if event.GetId() == wx.ID_UP:
-            # Rearrange the images in the list
             if img_index == 0:
                 return
             self._images[img_index], self._images[img_index - 1] = self._images[img_index - 1], self._images[img_index]
@@ -46,17 +46,19 @@ class AsideImagePanel(wx.lib.scrolledpanel.ScrolledPanel):
                 return
             self._images[img_index], self._images[img_index + 1] = self._images[img_index + 1], self._images[img_index]
             self._document.set_modified(True)
+        # Remove image from list
         elif event.GetId() == wx.ID_DELETE:
             result = wx.MessageBox(Strings.text_remove_image, Strings.status_warning, wx.YES_NO | wx.ICON_WARNING)
             if result == wx.YES:
                 del self._images[img_index]
             self._document.set_modified(True)
         else:
+            # Modify image data
             edit_dialog = EditAsideImageDialog(self, self._images[img_index])
             result = edit_dialog.ShowModal()
             if result == wx.ID_OK:
-                # TODO set document modified if an edit has been made in the dialog
-                print('Ok')
+                pass
+                # TODO check this in the dialog itself and save the data into the image there.
             edit_dialog.Destroy()
         self._show_images()
         # Pass the event into the main frame to change document color in the file list to blue.
