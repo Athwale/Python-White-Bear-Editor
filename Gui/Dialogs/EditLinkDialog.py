@@ -13,8 +13,7 @@ class EditLinkDialog(wx.Dialog):
         :param parent: Parent frame.
         :param link: the Link instance to display.
         """
-        # TODO add interactivity
-        # TODO if you press ok the link must be set with the new values
+        # TODO if you press ok the link must be set with the new values in the text
         wx.Dialog.__init__(self, parent, title=Strings.label_dialog_edit_link,
                            size=(Numbers.edit_aside_image_dialog_width, Numbers.edit_link_dialog_height),
                            style=wx.DEFAULT_DIALOG_STYLE)
@@ -88,6 +87,28 @@ class EditLinkDialog(wx.Dialog):
                                      border=Numbers.widget_border_size)
         self.SetSizer(self.main_vertical_sizer)
         self._display_dialog_contents()
+
+        # Bind handlers
+        self.Bind(wx.EVT_BUTTON, self._handle_buttons, self.ok_button)
+        self.Bind(wx.EVT_BUTTON, self._handle_buttons, self.cancel_button)
+
+    def _handle_buttons(self, event: wx.CommandEvent) -> None:
+        """
+        Handle button clicks, run seo check on the new values and display results. Prevent closing if seo failed.
+        :param event: The button event
+        :return: None
+        """
+        event.Skip()
+        if event.GetId() == wx.ID_OK:
+            # Save new information into image and rerun seo test.
+            self._link.set_text(self.field_link_text.GetValue())
+            self._link.set_title(self.field_link_title.GetValue())
+            self._link.set_url(self.field_url.GetValue())
+
+            if self._link.seo_test_self():
+                return
+            else:
+                self._display_dialog_contents()
 
     def _combobox_handler(self, event: wx.CommandEvent) -> None:
         """

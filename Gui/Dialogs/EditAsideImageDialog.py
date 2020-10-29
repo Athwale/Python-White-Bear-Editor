@@ -13,7 +13,6 @@ class EditAsideImageDialog(wx.Dialog):
         :param parent: Parent frame.
         :param image: AsideImage instance being edited by tis dialog.
         """
-        # TODO make interactive when the user edits it. On OK run seo check and prevent from closing if wrong.
         wx.Dialog.__init__(self, parent, title=Strings.label_dialog_edit_image,
                            size=(Numbers.edit_aside_image_dialog_width, Numbers.edit_aside_image_dialog_height),
                            style=wx.DEFAULT_DIALOG_STYLE)
@@ -144,12 +143,17 @@ class EditAsideImageDialog(wx.Dialog):
         :param event: The button event
         :return: None
         """
+        event.Skip()
         if event.GetId() == wx.ID_OK:
             # Save new information into image and rerun seo test.
             self._image.set_caption(self.field_image_caption.GetValue())
             self._image.set_title(self.field_image_link_title.GetValue())
             self._image.set_alt(self.field_image_alt.GetValue())
-        event.Skip()
+
+            if self._image.seo_test_self():
+                return
+            else:
+                self._display_dialog_contents()
 
     def _display_dialog_contents(self) -> None:
         """

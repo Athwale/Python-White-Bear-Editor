@@ -74,6 +74,27 @@ class EditVideoDialog(wx.Dialog):
         self.SetSizer(self.main_vertical_sizer)
         self._display_dialog_contents()
 
+        # Bind handlers
+        self.Bind(wx.EVT_BUTTON, self._handle_buttons, self.ok_button)
+        self.Bind(wx.EVT_BUTTON, self._handle_buttons, self.cancel_button)
+
+    def _handle_buttons(self, event: wx.CommandEvent) -> None:
+        """
+        Handle button clicks, run seo check on the new values and display results. Prevent closing if seo failed.
+        :param event: The button event
+        :return: None
+        """
+        event.Skip()
+        if event.GetId() == wx.ID_OK:
+            # Save new information into image and rerun seo test.
+            self._video.set_title(self.field_video_link_title.GetValue())
+            self._video.set_url(self.field_video_url.GetValue())
+
+            if self._video.seo_test_self():
+                return
+            else:
+                self._display_dialog_contents()
+
     def _display_dialog_contents(self) -> None:
         """
         Display the image that this dialog edits in the gui along with field values and errors.
