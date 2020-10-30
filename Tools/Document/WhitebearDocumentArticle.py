@@ -149,9 +149,6 @@ class WhitebearDocumentArticle(WhitebearDocument):
             if not link.seo_test_self():
                 self.set_status_color(Numbers.RED_COLOR)
 
-        # TODO run seo check on link, video and in text image and do something with any errors.
-        # Show an error dialog in the gui when you open the document and color the element red.
-
     def _determine_menu_section_and_menu_item(self) -> None:
         """
         Find out which menu this article belongs in.
@@ -330,31 +327,8 @@ class WhitebearDocumentArticle(WhitebearDocument):
         Parse the main article image into an AsideImage instance
         :return: None
         """
-        # Parse image paths
         main_image_figure = self._parsed_html.find(name='figure', attrs={'id': 'articleImg'})
-        full_image_path = os.path.join(self._working_directory, main_image_figure.a['href'])
-        thumbnail_image_path = os.path.join(self._working_directory, main_image_figure.img['src'])
-        if not os.path.exists(full_image_path) or not os.access(full_image_path, os.R_OK) or \
-                not os.access(full_image_path, os.W_OK):
-            self._article_full_image_path = None
-
-        if not os.path.exists(thumbnail_image_path) or not os.access(thumbnail_image_path, os.R_OK) or \
-                not os.access(thumbnail_image_path, os.W_OK):
-            self._article_thumbnail_image_path = None
-
-        # Parse caption
-        # The figcaption tag is allowed to contain <br> which we have to skip
-        string_content = main_image_figure.figcaption.strings
-        caption = ''.join(string_content)
-
-        # Parse link title
-        link_title = main_image_figure.a['title']
-
-        # Parse alt description
-        alt = main_image_figure.img['alt']
-
-        self._article_image = AsideImage(caption, link_title, alt, full_image_path, thumbnail_image_path,
-                                         main_image_figure.a['href'], main_image_figure.img['src'])
+        self._article_image = self._prepare_aside_image(main_image_figure)
 
     def _parse_aside_images(self) -> None:
         """
@@ -366,23 +340,31 @@ class WhitebearDocumentArticle(WhitebearDocument):
         figures = aside.find_all(name='figure')
         if figures:
             for figure in figures:
-                full_original_image_path = os.path.join(self._working_directory, figure.a['href'])
-                title = figure.a['title']
-                alt = figure.img['alt']
-                full_thumbnail_path = os.path.join(self._working_directory, figure.img['src'])
-                figcaption = figure.figcaption.string
+                self._aside_images.append(self._prepare_aside_image(figure))
 
-                if not os.path.exists(full_original_image_path) or not os.access(full_original_image_path, os.R_OK) \
-                        or not os.access(full_original_image_path, os.W_OK):
-                    full_original_image_path = None
+    def _prepare_aside_image(self, figure: Tag) -> AsideImage:
+        """
+        Parse and prepare an AsideImage instance from html figure.
+        :param figure: The html whitebear figure element.
+        :return: A new instance of AsideImage
+        """
+        full_original_image_path = os.path.join(self._working_directory, figure.a['href'])
+        title = figure.a['title']
+        alt = figure.img['alt']
+        full_thumbnail_path = os.path.join(self._working_directory, figure.img['src'])
+        string_content = figure.figcaption.strings
+        figcaption = ''.join(string_content)
 
-                if not os.path.exists(full_thumbnail_path) or not os.access(full_thumbnail_path, os.R_OK) \
-                        or not os.access(full_thumbnail_path, os.W_OK):
-                    full_thumbnail_path = None
+        if not os.path.exists(full_original_image_path) or not os.access(full_original_image_path, os.R_OK) \
+                or not os.access(full_original_image_path, os.W_OK):
+            full_original_image_path = None
 
-                self._aside_images.append(
-                    AsideImage(figcaption, title, alt, full_original_image_path, full_thumbnail_path, figure.a['href'],
-                               figure.img['src']))
+        if not os.path.exists(full_thumbnail_path) or not os.access(full_thumbnail_path, os.R_OK) \
+                or not os.access(full_thumbnail_path, os.W_OK):
+            full_thumbnail_path = None
+
+        return AsideImage(figcaption, title, alt, full_original_image_path, full_thumbnail_path, figure.a['href'],
+                          figure.img['src'])
 
     def validate_self(self) -> (bool, List[str]):
         """
@@ -408,13 +390,6 @@ class WhitebearDocumentArticle(WhitebearDocument):
         :return: Return article creation date and error to display in gui if there is one.
         """
         return self._date, self._date_error_message
-
-    def get_article_image_path(self) -> str:
-        """
-        Return the path to the article image full version.
-        :return: Return the path to the article image full version.
-        """
-        return self._article_full_image_path
 
     def get_article_image(self) -> AsideImage:
         """
