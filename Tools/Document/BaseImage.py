@@ -173,6 +173,14 @@ class BaseImage:
             self._image_alt = alt
             self._modified = True
 
+    def set_modified(self, modified: bool) -> None:
+        """
+        Set new modified state.
+        :param modified: True or False
+        :return: None
+        """
+        self._modified = modified
+
     def __str__(self) -> str:
         return "Base image: original: {}, thumbnail: {}, title: {}, alt: {}".format(self._original_image_path,
                                                                                     self._thumbnail_path,

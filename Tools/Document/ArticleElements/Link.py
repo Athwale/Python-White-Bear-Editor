@@ -184,3 +184,11 @@ class Link:
         if self._is_local != is_local:
             self._is_local = is_local
             self._modified = True
+
+    def set_modified(self, modified: bool) -> None:
+        """
+        Set new modified state.
+        :param modified: True or False
+        :return: None
+        """
+        self._modified = modified

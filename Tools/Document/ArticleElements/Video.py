@@ -132,6 +132,14 @@ class Video:
             self._url = url
             self._modified = True
 
+    def set_modified(self, modified: bool) -> None:
+        """
+        Set new modified state.
+        :param modified: True or False
+        :return: None
+        """
+        self._modified = modified
+
     def __str__(self) -> str:
         return "Video: url: {}, title: {}, size: {} x {} px".format(self._url, self._link_title, self._width,
                                                                     self._height)

@@ -79,22 +79,32 @@ class EditVideoDialog(wx.Dialog):
         self.Bind(wx.EVT_BUTTON, self._handle_buttons, self.ok_button)
         self.Bind(wx.EVT_BUTTON, self._handle_buttons, self.cancel_button)
 
+        self._original_url = self._video.get_url()[0]
+        self._original_title = self._video.get_title()[0]
+
     def _handle_buttons(self, event: wx.CommandEvent) -> None:
         """
         Handle button clicks, run seo check on the new values and display results. Prevent closing if seo failed.
         :param event: The button event
         :return: None
         """
-        event.Skip()
         if event.GetId() == wx.ID_OK:
             # Save new information into image and rerun seo test.
             self._video.set_title(self.field_video_link_title.GetValue())
             self._video.set_url(self.field_video_url.GetValue())
 
             if self._video.seo_test_self():
+                event.Skip()
                 return
             else:
                 self._display_dialog_contents()
+        else:
+            # Restore original values
+            self._video.set_url(self._original_url)
+            self._video.set_title(self._original_title)
+            self._video.set_modified(False)
+            self._video.seo_test_self()
+            event.Skip()
 
     def _display_dialog_contents(self) -> None:
         """

@@ -130,22 +130,32 @@ class EditTextImageDialog(wx.Dialog):
         self.Bind(wx.EVT_BUTTON, self._handle_buttons, self.ok_button)
         self.Bind(wx.EVT_BUTTON, self._handle_buttons, self.cancel_button)
 
+        self._original_title = self._image.get_link_title()[0]
+        self._original_alt = self._image.get_image_alt()[0]
+
     def _handle_buttons(self, event: wx.CommandEvent) -> None:
         """
         Handle button clicks, run seo check on the new values and display results. Prevent closing if seo failed.
         :param event: The button event
         :return: None
         """
-        event.Skip()
         if event.GetId() == wx.ID_OK:
             # Save new information into image and rerun seo test.
             self._image.set_title(self.field_image_link_title.GetValue())
             self._image.set_alt(self.field_image_alt.GetValue())
 
             if self._image.seo_test_self():
+                event.Skip()
                 return
             else:
                 self._display_dialog_contents()
+        else:
+            # Restore original values
+            self._image.set_title(self._original_title)
+            self._image.set_alt(self._original_alt)
+            self._image.set_modified(False)
+            self._image.seo_test_self()
+            event.Skip()
 
     def _display_dialog_contents(self) -> None:
         """

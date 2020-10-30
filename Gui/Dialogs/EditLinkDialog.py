@@ -92,13 +92,16 @@ class EditLinkDialog(wx.Dialog):
         self.Bind(wx.EVT_BUTTON, self._handle_buttons, self.ok_button)
         self.Bind(wx.EVT_BUTTON, self._handle_buttons, self.cancel_button)
 
+        self._original_text = self._link.get_text()[0]
+        self._original_url = self._link.get_url()[0]
+        self._original_title = self._link.get_title()[0]
+
     def _handle_buttons(self, event: wx.CommandEvent) -> None:
         """
         Handle button clicks, run seo check on the new values and display results. Prevent closing if seo failed.
         :param event: The button event
         :return: None
         """
-        event.Skip()
         if event.GetId() == wx.ID_OK:
             # Save new information into image and rerun seo test.
             self._link.set_text(self.field_link_text.GetValue())
@@ -106,9 +109,18 @@ class EditLinkDialog(wx.Dialog):
             self._link.set_url(self.field_url.GetValue())
 
             if self._link.seo_test_self():
+                event.Skip()
                 return
             else:
                 self._display_dialog_contents()
+        else:
+            # Restore original values
+            self._link.set_url(self._original_url)
+            self._link.set_title(self._original_title)
+            self._link.set_text(self._original_text)
+            self._link.set_modified(False)
+            self._link.seo_test_self()
+            event.Skip()
 
     def _combobox_handler(self, event: wx.CommandEvent) -> None:
         """
