@@ -32,7 +32,7 @@ class ImagePanel(wx.Panel):
         self._menu = wx.Menu()
         self._menu_item_up = wx.MenuItem(self._menu, wx.ID_UP, Strings.label_menu_up)
         self._menu_item_down = wx.MenuItem(self._menu, wx.ID_DOWN, Strings.label_menu_down)
-        self._menu_item_edit = wx.MenuItem(self._menu, wx.ID_EDIT, Strings.label_menu_edit_image)
+        self._menu_item_edit = wx.MenuItem(self._menu, wx.ID_EDIT, Strings.label_dialog_edit_image)
         self._menu_item_remove = wx.MenuItem(self._menu, wx.ID_DELETE, Strings.label_menu_remove)
         self._menu.Append(self._menu_item_up)
         self._menu.Append(self._menu_item_down)

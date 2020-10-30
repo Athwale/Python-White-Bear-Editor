@@ -5,7 +5,6 @@ from Constants.Constants import Strings
 from Gui.Dialogs.EditTextImageDialog import EditTextImageDialog
 from Gui.Dialogs.EditVideoDialog import EditVideoDialog
 from Tools.Document.ArticleElements.ImageInText import ImageInText
-from Tools.Document.ArticleElements.Video import Video
 
 
 class ImageTextField(RichTextFieldTypeStandard):
@@ -18,16 +17,14 @@ class ImageTextField(RichTextFieldTypeStandard):
         Constructor for a custom label for displaying images with ability to edit.
         :param element: The Video or ImageInText instance to display.
         """
+        self._element = element
         if isinstance(element, ImageInText):
             path = element.get_thumbnail_image_path()
-            self._image: ImageInText = element
-            self._video = None
         else:
             path = element.get_url()[0]
-            self._video: Video = element
-            self._image = None
         super().__init__(path, bitmap=wx.Bitmap(element.get_image()),
                          displayStyle=RichTextFieldTypeStandard.RICHTEXT_FIELD_STYLE_RECTANGLE)
+        self.SetBorderColour(self._element.get_status_color())
 
     def CanEditProperties(self, obj: RichTextField) -> bool:
         """
@@ -43,7 +40,9 @@ class ImageTextField(RichTextFieldTypeStandard):
         :param obj: Unused
         :return: Label for the context menu.
         """
-        return Strings.label_menu_edit_image
+        if isinstance(self._element, ImageInText):
+            return Strings.label_dialog_edit_image
+        return Strings.label_dialog_edit_video
 
     def EditProperties(self, obj: RichTextField, parent: RichTextCtrl, buffer: RichTextBuffer) -> bool:
         """
@@ -53,10 +52,10 @@ class ImageTextField(RichTextFieldTypeStandard):
         :param buffer: The buffer of the control.
         :return: The result of the GUI dialog.
         """
-        if self._image:
-            edit_dialog = EditTextImageDialog(parent, self._image)
+        if isinstance(self._element, ImageInText):
+            edit_dialog = EditTextImageDialog(parent, self._element)
         else:
-            edit_dialog = EditVideoDialog(parent, self._video)
+            edit_dialog = EditVideoDialog(parent, self._element)
 
         result = edit_dialog.ShowModal()
         if result == wx.ID_OK:
@@ -65,4 +64,7 @@ class ImageTextField(RichTextFieldTypeStandard):
             color_evt.SetEventObject(self)
             wx.PostEvent(parent.GetEventHandler(), color_evt)
         edit_dialog.Destroy()
-        return False
+
+        self.SetBorderColour(self._element.get_status_color())
+        self.SetBitmap(wx.Bitmap(self._element.get_image()))
+        return result

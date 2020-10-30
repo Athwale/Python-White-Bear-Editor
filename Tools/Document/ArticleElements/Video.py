@@ -104,6 +104,13 @@ class Video:
         """
         return self._width, self._height
 
+    def get_status_color(self) -> wx.Colour:
+        """
+        Return the status color of this video. White if ok, Red if SEO check failed.
+        :return: Return the status color of this video. White if ok, Red if SEO check failed.
+        """
+        return self._status_color
+
     def is_modified(self) -> bool:
         """
         Return true if this instance was modified.

@@ -291,6 +291,8 @@ class MainFrame(wx.Frame):
         """
         # Insert GUI widgets into the sizers created above.
         # Logo section -------------------------------------------------------------------------------------------------
+        # TODO dialog for menu logo too?
+        # TODO react to right click on main image in the same way
         # Create a placeholder image
         placeholder_logo_image = wx.Image(Numbers.logo_image_size, Numbers.logo_image_size)
         placeholder_logo_image.Replace(0, 0, 0, 245, 255, 255)

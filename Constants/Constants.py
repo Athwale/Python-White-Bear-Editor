@@ -157,7 +157,6 @@ class Strings:
     # Pop up menu items
     label_menu_up: str = 'Move up'
     label_menu_down: str = 'Move Down'
-    label_menu_edit_image: str = 'Edit image'
     label_menu_remove: str = 'Remove'
 
     label_dialog_choose_wb_dir: str = 'Choose whitebear directory'
