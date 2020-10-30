@@ -15,7 +15,8 @@ class EditVideoDialog(wx.Dialog):
         """
         # TODO make interactive when the user edits it.
         wx.Dialog.__init__(self, parent, title=Strings.label_dialog_edit_video, size=(Numbers.edit_video_dialog_width,
-                           Numbers.edit_video_dialog_height), style=wx.DEFAULT_DIALOG_STYLE)
+                                                                                      Numbers.edit_video_dialog_height),
+                           style=wx.DEFAULT_DIALOG_STYLE)
         self._video = video
 
         self.main_vertical_sizer = wx.BoxSizer(wx.VERTICAL)

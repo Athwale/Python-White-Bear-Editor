@@ -335,8 +335,9 @@ class MainFrame(wx.Frame):
         # Add image placeholder into middle top left static sizer
         placeholder_main_image = wx.Image(Numbers.main_image_width, Numbers.main_image_height)
         placeholder_main_image.Replace(0, 0, 0, 245, 255, 255)
-        self.main_image = wx.StaticBitmap(self.right_panel, -1, wx.Bitmap(placeholder_main_image))
-        self.article_image_static_sizer.Add(self.main_image, flag=wx.LEFT | wx.BOTTOM | wx.RIGHT, border=1)
+        self._main_image_button = wx.Button(self.right_panel, -1, style=wx.BU_EXACTFIT | wx.BORDER_NONE)
+        self._main_image_button.SetBitmap(wx.Bitmap(placeholder_main_image))
+        self.article_image_static_sizer.Add(self._main_image_button, flag=wx.LEFT | wx.BOTTOM | wx.RIGHT, border=1)
 
         # Add text boxes
         self.field_main_image_alt = wx.TextCtrl(self.right_panel, -1, value=Strings.label_article_image_alt,
@@ -434,6 +435,7 @@ class MainFrame(wx.Frame):
         # Bind other controls clicks
         self.Bind(wx.EVT_LIST_ITEM_SELECTED, self.list_item_click_handler, self.page_list)
         self.Bind(wx.EVT_SPLITTER_SASH_POS_CHANGING, self.splitter_size_change_handler, self.split_screen)
+        self.Bind(wx.EVT_BUTTON, self.main_image_handler, self._main_image_button)
 
     def _set_status_text(self, text: str, position=0) -> None:
         """
@@ -568,6 +570,15 @@ class MainFrame(wx.Frame):
             attr.SetFlags(wx.TEXT_ATTR_TEXT_COLOUR)
             attr.SetTextColour(color)
             self.main_text_area.SetStyle(r, attr)
+
+    def main_image_handler(self, event: wx.CommandEvent) -> None:
+        """
+        Handle click on the main image button,
+        :param event: Not used
+        :return: None
+        """
+        print('image')
+        # TODO this
 
     def quit_button_handler(self, event) -> None:
         """
@@ -730,7 +741,7 @@ class MainFrame(wx.Frame):
             field.SetValue(value[0][0])
 
         # Set images
-        self.main_image.SetBitmap(wx.Bitmap(doc.get_article_image()))
+        self._main_image_button.SetBitmap(wx.Bitmap(doc.get_article_image()))
         self.menu_logo_image.SetBitmap(wx.Bitmap(doc.get_menu_item().get_menu_image()))
         # Set aside images
         self.side_photo_panel.load_document_images(doc)
@@ -755,3 +766,5 @@ class MainFrame(wx.Frame):
         :return: None
         """
         self.update_file_color()
+
+        # TODO use image panel as main image and get rid of extra fields
