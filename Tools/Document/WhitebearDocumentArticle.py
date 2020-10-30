@@ -62,16 +62,10 @@ class WhitebearDocumentArticle(WhitebearDocument):
 
         self._date = None
         self._date_error_message: str = ''
-        self._article_full_image_path = None
-        self._article_thumbnail_image_path = None
-        self._article_image_caption = ''
-        self._caption_error_message: str = ''
-        self._article_image_link_title = None
-        self._link_title_error_message: str = ''
-        self._article_image_alt = None
-        self._image_alt_error_message: str = ''
-        self._article_image = None
         self._main_text = None
+
+        # TODO Store image inside an AsideImage instance
+        self._article_image = None
 
     def parse_self(self) -> None:
         """
@@ -83,10 +77,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
         super(WhitebearDocumentArticle, self).parse_self()
         self._parse_page_name()
         self._parse_date()
-        self._parse_article_image_path()
-        self._parse_article_image_caption()
-        self._parse_article_image_link_title()
-        self._parse_article_image_alt()
+        self._parse_main_article_image()
         self._determine_menu_section_and_menu_item()
         self._parse_aside_images()
         self._parse_main_text()
@@ -104,9 +95,6 @@ class WhitebearDocumentArticle(WhitebearDocument):
         # Check page name length must be at least 3 and must not be default
         # Clear all errors on every new test
         self._date_error_message: str = ''
-        self._caption_error_message: str = ''
-        self._link_title_error_message: str = ''
-        self._image_alt_error_message: str = ''
 
         if len(self._page_name) < Numbers.article_name_min_length or len(
                 self._page_name) > Numbers.article_name_max_length:
@@ -133,53 +121,8 @@ class WhitebearDocumentArticle(WhitebearDocument):
                 self._date_error_message = Strings.seo_error_date_format_year
                 self.set_status_color(Numbers.RED_COLOR)
 
-        # Check article image disk path, original image may have whatever size
-        if not self._article_full_image_path:
-            self._article_image = wx.Image(Fetch.get_resource_path('main_image_missing.png'), wx.BITMAP_TYPE_PNG)
-            self.set_status_color(Numbers.RED_COLOR)
-        else:
-            # Check article image thumbnail disk path
-            if not self._article_thumbnail_image_path:
-                self._article_image = wx.Image(Fetch.get_resource_path('main_image_thumbnail_missing.png'),
-                                               wx.BITMAP_TYPE_PNG)
-                self.set_status_color(Numbers.RED_COLOR)
-            else:
-                image = wx.Image(Fetch.get_resource_path(self._article_thumbnail_image_path), wx.BITMAP_TYPE_ANY)
-                if image.GetSize() == (Numbers.main_image_width, Numbers.main_image_height):
-                    self._article_image = image
-                else:
-                    self._article_image = wx.Image(Fetch.get_resource_path('main_image_thumbnail_wrong.png'),
-                                                   wx.BITMAP_TYPE_ANY)
-                    self.set_status_color(Numbers.RED_COLOR)
-
-        # Check article image caption
-        if len(self._article_image_caption) < Numbers.article_image_caption_min or len(
-                self._article_image_caption) > Numbers.article_image_caption_max:
-            self._caption_error_message = Strings.seo_error_image_caption_length
-            self.set_status_color(Numbers.RED_COLOR)
-
-        if self._article_image_caption == Strings.label_article_image_caption:
-            self._image_alt_error_message = Strings.seo_error_default_value
-            self.set_status_color(Numbers.RED_COLOR)
-
-        # Check article image link title
-        if len(self._article_image_link_title) < Numbers.article_image_title_min or len(
-                self._article_image_link_title) > Numbers.article_image_title_max:
-            self._link_title_error_message = Strings.seo_error_link_title_length
-            self.set_status_color(Numbers.RED_COLOR)
-
-        if self._article_image_link_title == Strings.label_article_image_link_title:
-            self._link_title_error_message = Strings.seo_error_default_value
-            self.set_status_color(Numbers.RED_COLOR)
-
-        # Check article image alt
-        if len(self._article_image_alt) < Numbers.article_image_alt_min or len(
-                self._article_image_alt) > Numbers.article_image_alt_max:
-            self._image_alt_error_message = Strings.seo_error_image_alt_length
-            self.set_status_color(Numbers.RED_COLOR)
-
-        if self._article_image_alt == Strings.label_article_image_alt:
-            self._image_alt_error_message = Strings.seo_error_default_value
+        # Test main image
+        if not self._article_image.seo_test_self():
             self.set_status_color(Numbers.RED_COLOR)
 
         # Test menu item
@@ -382,48 +325,36 @@ class WhitebearDocumentArticle(WhitebearDocument):
         """
         self._date = self._parsed_html.find(name='p', attrs={'id': 'date'}).string
 
-    def _parse_article_image_path(self) -> None:
+    def _parse_main_article_image(self) -> None:
         """
-        Parse the absolute path to the main article image and save it into an instance variable.
-        If the image is not accessible on disk, the variable is set to None.
+        Parse the main article image into an AsideImage instance
         :return: None
         """
+        # Parse image paths
         main_image_figure = self._parsed_html.find(name='figure', attrs={'id': 'articleImg'})
-        self._article_full_image_path = os.path.join(self._working_directory, main_image_figure.a['href'])
-        self._article_thumbnail_image_path = os.path.join(self._working_directory, main_image_figure.img['src'])
-        if not os.path.exists(self._article_full_image_path) or \
-                not os.access(self._article_full_image_path, os.R_OK) or \
-                not os.access(self._article_full_image_path, os.W_OK):
+        full_image_path = os.path.join(self._working_directory, main_image_figure.a['href'])
+        thumbnail_image_path = os.path.join(self._working_directory, main_image_figure.img['src'])
+        if not os.path.exists(full_image_path) or not os.access(full_image_path, os.R_OK) or \
+                not os.access(full_image_path, os.W_OK):
             self._article_full_image_path = None
 
-        if not os.path.exists(self._article_thumbnail_image_path) or \
-                not os.access(self._article_thumbnail_image_path, os.R_OK) or \
-                not os.access(self._article_thumbnail_image_path, os.W_OK):
+        if not os.path.exists(thumbnail_image_path) or not os.access(thumbnail_image_path, os.R_OK) or \
+                not os.access(thumbnail_image_path, os.W_OK):
             self._article_thumbnail_image_path = None
 
-    def _parse_article_image_caption(self) -> None:
-        """
-        Parse the main article image caption text and save it into an instance variable.
-        :return: None
-        """
-        main_image_figure = self._parsed_html.find(name='figure', attrs={'id': 'articleImg'})
+        # Parse caption
         # The figcaption tag is allowed to contain <br> which we have to skip
         string_content = main_image_figure.figcaption.strings
-        self._article_image_caption = ''.join(string_content)
+        caption = ''.join(string_content)
 
-    def _parse_article_image_link_title(self) -> None:
-        """
-        Parse the main article image link title text and save it into an instance variable.
-        :return: None
-        """
-        self._article_image_link_title = self._parsed_html.find(name='figure', attrs={'id': 'articleImg'}).a['title']
+        # Parse link title
+        link_title = main_image_figure.a['title']
 
-    def _parse_article_image_alt(self) -> None:
-        """
-        Parse the main article image alt description text and save it into an instance variable.
-        :return: None
-        """
-        self._article_image_alt = self._parsed_html.find(name='figure', attrs={'id': 'articleImg'}).img['alt']
+        # Parse alt description
+        alt = main_image_figure.img['alt']
+
+        self._article_image = AsideImage(caption, link_title, alt, full_image_path, thumbnail_image_path,
+                                         main_image_figure.a['href'], main_image_figure.img['src'])
 
     def _parse_aside_images(self) -> None:
         """
@@ -485,33 +416,12 @@ class WhitebearDocumentArticle(WhitebearDocument):
         """
         return self._article_full_image_path
 
-    def get_article_image(self) -> wx.Image:
+    def get_article_image(self) -> AsideImage:
         """
-        Return the article image wx image instance.
-        :return: Return the article image wx image instance.
+        Return the article image AsideImage instance.
+        :return: Return the article AsideImage instance.
         """
         return self._article_image
-
-    def get_article_image_caption(self) -> (str, str):
-        """
-        Return the caption of the main article image and error to display in gui if there is one.
-        :return: Return the caption of the main article image and error to display in gui if there is one.
-        """
-        return self._article_image_caption, self._caption_error_message
-
-    def get_article_image_link_title(self) -> (str, str):
-        """
-        Return the link title of the main article image and error to display in gui if there is one.
-        :return: Return the link title of the main article image and error to display in gui if there is one.
-        """
-        return self._article_image_link_title, self._link_title_error_message
-
-    def get_article_image_alt(self) -> (str, str):
-        """
-        Return the alt description of the main article image and error to display in gui if there is one.
-        :return: Return the alt description of the main article image and error to display in gui if there is one.
-        """
-        return self._article_image_alt, self._image_alt_error_message
 
     def get_menu_item(self) -> MenuItem:
         """
@@ -537,6 +447,8 @@ class WhitebearDocumentArticle(WhitebearDocument):
             for content in list_var:
                 if content.is_modified():
                     self.set_modified(True)
+        if self._article_image.is_modified():
+            self.set_modified(True)
         return self._modified
 
     def get_menu_section(self) -> WhitebearDocumentMenu:
@@ -596,44 +508,4 @@ class WhitebearDocumentArticle(WhitebearDocument):
         :return: None
         """
         self._date = date
-        self.set_modified(True)
-
-    def set_article_image_path(self, path: str) -> None:
-        """
-        Set the new main article image file path for the full version.
-        Change modified attribute to True.
-        :param path: New image path in disk.
-        :return: None
-        """
-        self._article_full_image_path = path
-        self.set_modified(True)
-
-    def set_article_image_caption(self, text: str) -> None:
-        """
-        Set the new main article image caption.
-        Change modified attribute to True.
-        :param text: New image caption.
-        :return: None
-        """
-        self._article_image_caption = text
-        self.set_modified(True)
-
-    def set_article_image_link_title(self, text: str) -> None:
-        """
-        Set the new main article image link title.
-        Change modified attribute to True.
-        :param text: New image link title.
-        :return: None
-        """
-        self._article_image_link_title = text
-        self.set_modified(True)
-
-    def set_article_image_alt(self, text: str) -> None:
-        """
-        Set the new main article image alt description.
-        Change modified attribute to True.
-        :param text: New image alt description.
-        :return: None
-        """
-        self._article_image_alt = text
         self.set_modified(True)

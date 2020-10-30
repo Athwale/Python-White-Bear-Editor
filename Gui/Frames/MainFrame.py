@@ -8,6 +8,7 @@ from Constants.Constants import Numbers
 from Constants.Constants import Strings
 from Exceptions.UnrecognizedFileException import UnrecognizedFileException
 from Gui.Dialogs.AboutDialog import AboutDialog
+from Gui.Dialogs.EditAsideImageDialog import EditAsideImageDialog
 from Gui.Panels.AsideImagePanel import AsideImagePanel
 from Gui.Panels.CustomRichText import CustomRichText
 from Resources.Fetch import Fetch
@@ -340,21 +341,6 @@ class MainFrame(wx.Frame):
         self.article_image_static_sizer.Add(self._main_image_button, flag=wx.LEFT | wx.BOTTOM | wx.RIGHT, border=1)
 
         # Add text boxes
-        self.field_main_image_alt = wx.TextCtrl(self.right_panel, -1, value=Strings.label_article_image_alt,
-                                                size=wx.Size(160, 30))
-        self.field_main_image_alt_tip = Tools.get_warning_tip(self.field_main_image_alt,
-                                                              Strings.label_article_image_alt)
-
-        self.field_main_image_title = wx.TextCtrl(self.right_panel, -1, value=Strings.label_article_image_link_title,
-                                                  size=wx.Size(160, 30))
-        self.field_main_image_title_tip = Tools.get_warning_tip(self.field_main_image_title,
-                                                                Strings.label_article_image_link_title)
-
-        self.field_main_image_caption = wx.TextCtrl(self.right_panel, -1, value=Strings.label_article_image_caption,
-                                                    size=wx.Size(160, 30))
-        self.field_main_image_caption_tip = Tools.get_warning_tip(self.field_main_image_caption,
-                                                                  Strings.label_article_image_caption)
-
         self.field_article_date = wx.TextCtrl(self.right_panel, -1, value=Strings.label_article_date,
                                               size=wx.Size(160, 30))
         self.field_article_date_tip = Tools.get_warning_tip(self.field_article_date, Strings.label_article_date)
@@ -377,10 +363,7 @@ class MainFrame(wx.Frame):
                                                                    Strings.label_article_description)
 
         self.article_data_static_sizer.Add(self.field_article_date)
-        self.article_data_static_sizer.Add(self.field_main_image_caption, flag=wx.EXPAND)
-        self.article_data_static_sizer.Add(self.field_main_image_title, flag=wx.EXPAND)
-        self.article_data_static_sizer.Add(self.field_main_image_alt, flag=wx.EXPAND)
-        self.article_data_static_sizer.Add(self.field_article_name, flag=wx.TOP | wx.EXPAND, border=16)
+        self.article_data_static_sizer.Add(self.field_article_name, flag=wx.TOP | wx.EXPAND)
         self.article_data_static_sizer.Add(self.field_article_keywords, flag=wx.EXPAND)
         self.article_data_static_sizer.Add(self.field_article_description, flag=wx.EXPAND)
         # --------------------------------------------------------------------------------------------------------------
@@ -577,8 +560,11 @@ class MainFrame(wx.Frame):
         :param event: Not used
         :return: None
         """
-        print('image')
-        # TODO this
+        main_image = self.document_dictionary[self.current_document].get_article_image()
+        edit_dialog = EditAsideImageDialog(self, main_image)
+        _ = edit_dialog.ShowModal()
+        self.update_file_color()
+        edit_dialog.Destroy()
 
     def quit_button_handler(self, event) -> None:
         """
@@ -713,11 +699,6 @@ class MainFrame(wx.Frame):
         self.SetTitle(doc.get_filename())
         # Set article data
         field_to_value = {self.field_article_date: (doc.get_date(), self.field_article_date_tip),
-                          self.field_main_image_caption: (doc.get_article_image_caption(),
-                                                          self.field_main_image_caption_tip),
-                          self.field_main_image_title: (doc.get_article_image_link_title(),
-                                                        self.field_main_image_title_tip),
-                          self.field_main_image_alt: (doc.get_article_image_alt(), self.field_main_image_alt_tip),
                           self.field_article_name: (doc.get_page_name(), self.field_article_name_tip),
                           self.field_article_keywords: (doc.get_keywords_string(), self.field_article_keywords_tip),
                           self.field_article_description: (doc.get_description(), self.field_article_description_tip),
@@ -740,9 +721,10 @@ class MainFrame(wx.Frame):
                 field.SetBackgroundColour(Numbers.GREEN_COLOR)
             field.SetValue(value[0][0])
 
-        # Set images
-        self._main_image_button.SetBitmap(wx.Bitmap(doc.get_article_image()))
+        # Set main and menu images
+        self._main_image_button.SetBitmap(wx.Bitmap(doc.get_article_image().get_image()))
         self.menu_logo_image.SetBitmap(wx.Bitmap(doc.get_menu_item().get_menu_image()))
+
         # Set aside images
         self.side_photo_panel.load_document_images(doc)
         self.main_text_area.set_content(self.document_dictionary[self.current_document])
@@ -754,9 +736,11 @@ class MainFrame(wx.Frame):
         Change the color of the currently selected file in the filelist according to the document's state.
         :return: None
         """
-        selected_document_color = self.document_dictionary[self.current_document].get_status_color()
-        selected_item = self.page_list.GetFirstSelected()
-        self.page_list.SetItemBackgroundColour(selected_item, selected_document_color)
+        document_instance = self.document_dictionary[self.current_document]
+        if document_instance.is_modified():
+            new_color = document_instance.get_status_color()
+            selected_item = self.page_list.GetFirstSelected()
+            self.page_list.SetItemBackgroundColour(selected_item, new_color)
 
     def text_area_edit_handler(self, event: wx.CommandEvent) -> None:
         """
