@@ -296,9 +296,11 @@ class MainFrame(wx.Frame):
         # Create a placeholder image
         placeholder_logo_image = wx.Image(Numbers.logo_image_size, Numbers.logo_image_size)
         placeholder_logo_image.Replace(0, 0, 0, 245, 255, 255)
-        self.menu_logo_image = wx.StaticBitmap(self.right_panel, -1, wx.Bitmap(placeholder_logo_image))
+        self._menu_logo_button = wx.Button(self.right_panel, -1, style=wx.BU_EXACTFIT | wx.BORDER_NONE)
+        self._menu_logo_button.SetBitmap(wx.Bitmap(placeholder_logo_image))
+        self._menu_logo_name = wx.StaticText(self.right_panel, -1, Strings.label_article_image_caption)
         # Set border to the image
-        self.menu_logo_static_sizer.Add(self.menu_logo_image, flag=wx.LEFT | wx.BOTTOM | wx.RIGHT, border=1)
+        self.menu_logo_static_sizer.Add(self._menu_logo_button, flag=wx.LEFT | wx.BOTTOM | wx.RIGHT, border=1)
         # Create menu logo name text box
         self.field_menu_item_name = wx.TextCtrl(self.right_panel, -1,
                                                 value=Strings.label_article_menu_logo_name_placeholder,
@@ -423,6 +425,7 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_LIST_ITEM_SELECTED, self.list_item_click_handler, self.page_list)
         self.Bind(wx.EVT_SPLITTER_SASH_POS_CHANGING, self.splitter_size_change_handler, self.split_screen)
         self.Bind(wx.EVT_BUTTON, self.main_image_handler, self._main_image_button)
+        self.Bind(wx.EVT_BUTTON, self.menu_logo_handler, self._menu_logo_button)
 
     def _set_status_text(self, text: str, position=0) -> None:
         """
@@ -570,6 +573,14 @@ class MainFrame(wx.Frame):
         self._main_image_caption.SetLabelText(main_image.get_caption()[0])
         self.update_file_color()
         edit_dialog.Destroy()
+
+    def menu_logo_handler(self, event: wx.CommandEvent) -> None:
+        """
+        Handle click on the menu logo button,
+        :param event: Not used
+        :return: None
+        """
+        print('logo')
 
     def quit_button_handler(self, event) -> None:
         """
@@ -728,7 +739,7 @@ class MainFrame(wx.Frame):
 
         # Set main and menu images
         self._main_image_button.SetBitmap(wx.Bitmap(doc.get_article_image().get_image()))
-        self.menu_logo_image.SetBitmap(wx.Bitmap(doc.get_menu_item().get_menu_image()))
+        self._menu_logo_button.SetBitmap(wx.Bitmap(doc.get_menu_item().get_menu_image()))
 
         # Set aside images
         self.side_photo_panel.load_document_images(doc)
