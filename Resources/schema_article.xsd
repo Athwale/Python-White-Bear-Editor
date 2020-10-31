@@ -32,10 +32,10 @@
                             </xs:complexType>
                         </xs:element>
                         <xs:element name="figcaption">
-                            <xs:complexType mixed="true">
-                                <xs:choice minOccurs="0" maxOccurs="unbounded">
-                                    <xs:element name="br"/>
-                                </xs:choice>
+                            <xs:complexType>
+                                <xs:simpleContent>
+                                    <xs:extension base="xs:string"/>
+                                </xs:simpleContent>
                             </xs:complexType>
                         </xs:element>
                     </xs:sequence>

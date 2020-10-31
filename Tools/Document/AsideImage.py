@@ -38,9 +38,10 @@ class AsideImage(BaseImage):
 
         # First test the base class seo attributes
         result = super(AsideImage, self).seo_test_self()
+
         # Check caption length must be at least 3 and must not be default
-        if len(self._caption) < Numbers.article_name_min_length or len(
-                self._caption) > Numbers.article_name_max_length:
+        if len(self._caption) < Numbers.article_image_caption_min or len(
+                self._caption) > Numbers.article_image_caption_max:
             self._caption_error_message = Strings.seo_error_name_length
             result = False
 
@@ -72,7 +73,7 @@ class AsideImage(BaseImage):
         return result
 
     # Getters ----------------------------------------------------------------------------------------------------------
-    def get_image_caption(self) -> (str, str):
+    def get_caption(self) -> (str, str):
         """
         Return the image caption and error to display in gui if there is one.
         :return: Return the article name as it is in the menu item and error to display in gui if there is one.

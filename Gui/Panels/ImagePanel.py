@@ -69,7 +69,7 @@ class ImagePanel(wx.Panel):
         :return: None
         """
         self._image = image
-        self._label.SetLabelText(self._image.get_image_caption()[0])
+        self._label.SetLabelText(self._image.get_caption()[0])
         self._bitmap.SetBitmap(wx.Bitmap(self._image.get_image()))
         self.SetBackgroundColour(self._image.get_status_color())
         self.Layout()

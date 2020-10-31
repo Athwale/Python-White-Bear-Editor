@@ -137,7 +137,7 @@ class EditAsideImageDialog(wx.Dialog):
         self.Bind(wx.EVT_BUTTON, self._handle_buttons, self.ok_button)
         self.Bind(wx.EVT_BUTTON, self._handle_buttons, self.cancel_button)
 
-        self._original_caption = self._image.get_image_caption()[0]
+        self._original_caption = self._image.get_caption()[0]
         self._original_title = self._image.get_link_title()[0]
         self._original_alt = self._image.get_image_alt()[0]
 
@@ -174,7 +174,7 @@ class EditAsideImageDialog(wx.Dialog):
         """
         self.Disable()
         # Set image data
-        field_to_value = {self.field_image_caption: (self._image.get_image_caption(), self.field_image_caption_tip),
+        field_to_value = {self.field_image_caption: (self._image.get_caption(), self.field_image_caption_tip),
                           self.field_image_link_title: (self._image.get_link_title(), self.field_image_link_title_tip),
                           self.field_image_alt: (self._image.get_image_alt(), self.field_image_alt_tip)}
         for field, value in field_to_value.items():

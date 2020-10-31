@@ -254,7 +254,7 @@ class MainFrame(wx.Frame):
         # Contains article image sizer, article data sizer, menu logo static sizer
         self.right_top_sizer = wx.BoxSizer(wx.HORIZONTAL)
         # Contains main article image
-        self.article_image_static_sizer = wx.StaticBoxSizer(wx.HORIZONTAL, self.right_panel,
+        self.article_image_static_sizer = wx.StaticBoxSizer(wx.VERTICAL, self.right_panel,
                                                             label=Strings.label_article_image)
         # Contains article metadata controls
         self.article_data_static_sizer = wx.StaticBoxSizer(wx.VERTICAL, self.right_panel,
@@ -340,7 +340,9 @@ class MainFrame(wx.Frame):
         placeholder_main_image.Replace(0, 0, 0, 245, 255, 255)
         self._main_image_button = wx.Button(self.right_panel, -1, style=wx.BU_EXACTFIT | wx.BORDER_NONE)
         self._main_image_button.SetBitmap(wx.Bitmap(placeholder_main_image))
+        self._main_image_caption = wx.StaticText(self.right_panel, -1, Strings.label_article_image_caption)
         self.article_image_static_sizer.Add(self._main_image_button, flag=wx.LEFT | wx.BOTTOM | wx.RIGHT, border=1)
+        self.article_image_static_sizer.Add(self._main_image_caption, flag=wx.LEFT | wx.BOTTOM | wx.RIGHT, border=1)
 
         # Add text boxes
         self.field_article_date = wx.TextCtrl(self.right_panel, -1, value=Strings.label_article_date,
@@ -562,10 +564,10 @@ class MainFrame(wx.Frame):
         :param event: Not used
         :return: None
         """
-        # TODO show the caption
         main_image = self.document_dictionary[self.current_document].get_article_image()
         edit_dialog = EditAsideImageDialog(self, main_image)
         _ = edit_dialog.ShowModal()
+        self._main_image_caption.SetLabelText(main_image.get_caption()[0])
         self.update_file_color()
         edit_dialog.Destroy()
 
@@ -731,6 +733,10 @@ class MainFrame(wx.Frame):
         # Set aside images
         self.side_photo_panel.load_document_images(doc)
         self.main_text_area.set_content(self.document_dictionary[self.current_document])
+
+        # Set main image caption
+        self._main_image_caption.SetLabelText(
+            self.document_dictionary[self.current_document].get_article_image().get_caption()[0])
 
         self._disable_editor(False)
 
