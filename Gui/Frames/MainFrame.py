@@ -292,7 +292,7 @@ class MainFrame(wx.Frame):
         # Insert GUI widgets into the sizers created above.
         # Logo section -------------------------------------------------------------------------------------------------
         # TODO dialog for menu logo too?
-        # TODO react to right click on main image in the same way
+        # TODO react to right click on main image in the same way and left click on side panel images
         # Create a placeholder image
         placeholder_logo_image = wx.Image(Numbers.logo_image_size, Numbers.logo_image_size)
         placeholder_logo_image.Replace(0, 0, 0, 245, 255, 255)
@@ -562,6 +562,7 @@ class MainFrame(wx.Frame):
         :param event: Not used
         :return: None
         """
+        # TODO show the caption
         main_image = self.document_dictionary[self.current_document].get_article_image()
         edit_dialog = EditAsideImageDialog(self, main_image)
         _ = edit_dialog.ShowModal()

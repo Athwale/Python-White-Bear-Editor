@@ -127,6 +127,8 @@ class BaseImage:
         Return the image as wx image instance.
         :return: Return the image as wx image instance.
         """
+        if self._status_color == wx.RED:
+            return self._image.AdjustChannels(1, 0, 0)
         return self._image
 
     def get_status_color(self) -> wx.Colour:
