@@ -294,7 +294,6 @@ class MainFrame(wx.Frame):
         """
         # Insert GUI widgets into the sizers created above.
         # Logo section -------------------------------------------------------------------------------------------------
-        # TODO dialog for menu logo too?
         # TODO react to right click on main image in the same way and left click on side panel images
         # Create a placeholder image
         placeholder_logo_image = wx.Image(Numbers.menu_logo_image_size, Numbers.menu_logo_image_size)
@@ -573,7 +572,7 @@ class MainFrame(wx.Frame):
         main_image: AsideImage = self.document_dictionary[self.current_document].get_article_image()
         edit_dialog = EditAsideImageDialog(self, main_image)
         _ = edit_dialog.ShowModal()
-        self._main_image_caption.SetLabelText(main_image.get_caption()[0])
+        self._set_main_image_caption(main_image.get_caption()[0])
         self.update_file_color()
         edit_dialog.Destroy()
 
@@ -754,10 +753,19 @@ class MainFrame(wx.Frame):
         self.main_text_area.set_content(self.document_dictionary[self.current_document])
 
         # Set main image caption
-        self._main_image_caption.SetLabelText(
-            self.document_dictionary[self.current_document].get_article_image().get_caption()[0])
+        self._set_main_image_caption(self.document_dictionary[self.current_document].get_article_image().get_caption()[0])
 
         self._disable_editor(False)
+
+    def _set_main_image_caption(self, text: str) -> None:
+        """
+        Set the main image caption to the text parameter. If the length is wider than the image shorten it with ...
+        :param text: The text to set
+        :return: None
+        """
+        self._main_image_caption.SetLabelText(text)
+        if self._main_image_caption.GetSize()[0] >= Numbers.main_image_width:
+            self._main_image_caption.SetLabelText(text[:40] + '...')
 
     def update_file_color(self) -> None:
         """
