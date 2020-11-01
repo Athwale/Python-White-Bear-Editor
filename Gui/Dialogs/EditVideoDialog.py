@@ -59,7 +59,7 @@ class EditVideoDialog(wx.Dialog):
         grouping_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.cancel_button = wx.Button(self, wx.ID_CANCEL, Strings.button_cancel)
         self.ok_button = wx.Button(self, wx.ID_OK, Strings.button_ok)
-        self.cancel_button.SetDefault()
+        self.ok_button.SetDefault()
         grouping_sizer.Add(self.ok_button)
         grouping_sizer.Add((Numbers.widget_border_size, Numbers.widget_border_size))
         grouping_sizer.Add(self.cancel_button)

@@ -14,7 +14,7 @@ class EditMenuItemDialog(wx.Dialog):
         :param item: MenuItem instance being edited by tis dialog.
         """
         wx.Dialog.__init__(self, parent, title=Strings.label_dialog_edit_menu_item,
-                           size=(Numbers.edit_aside_image_dialog_width, Numbers.edit_aside_image_dialog_height),
+                           size=(Numbers.edit_aside_image_dialog_width, Numbers.edit_menu_item_dialog_height),
                            style=wx.DEFAULT_DIALOG_STYLE)
         self._item = item
 
@@ -59,7 +59,7 @@ class EditMenuItemDialog(wx.Dialog):
         self.label_item_name = wx.StaticText(self, -1, Strings.label_name + ': ')
         self.field_item_name = wx.TextCtrl(self, -1)
         self.name_sub_sizer.Add(self.label_item_name, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
-        self.name_sub_sizer.Add((44, -1))
+        self.name_sub_sizer.Add((59, -1))
         self.name_sub_sizer.Add(self.field_item_name, proportion=1)
         self.information_sizer.Add(self.name_sub_sizer, flag=wx.EXPAND | wx.TOP, border=Numbers.widget_border_size)
         self.field_item_name_tip = Tools.get_warning_tip(self.field_item_name,
@@ -70,7 +70,7 @@ class EditMenuItemDialog(wx.Dialog):
         self.label_image_title = wx.StaticText(self, -1, Strings.label_link_title + ': ')
         self.field_image_link_title = wx.TextCtrl(self, -1)
         self.title_sub_sizer.Add(self.label_image_title, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
-        self.title_sub_sizer.Add((48, -1))
+        self.title_sub_sizer.Add((44, -1))
         self.title_sub_sizer.Add(self.field_image_link_title, proportion=1)
         self.information_sizer.Add(self.title_sub_sizer, flag=wx.EXPAND | wx.TOP, border=Numbers.widget_border_size)
         self.field_image_link_title_tip = Tools.get_warning_tip(self.field_image_link_title,
@@ -107,7 +107,7 @@ class EditMenuItemDialog(wx.Dialog):
         grouping_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.cancel_button = wx.Button(self, wx.ID_CANCEL, Strings.button_cancel)
         self.ok_button = wx.Button(self, wx.ID_OK, Strings.button_ok)
-        self.cancel_button.SetDefault()
+        self.ok_button.SetDefault()
         grouping_sizer.Add(self.ok_button)
         grouping_sizer.Add((Numbers.widget_border_size, Numbers.widget_border_size))
         grouping_sizer.Add(self.cancel_button)
@@ -117,12 +117,12 @@ class EditMenuItemDialog(wx.Dialog):
         self.vertical_sizer.Add(self.information_sizer, 0, flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP,
                                 border=Numbers.widget_border_size)
         self.horizontal_sizer.Add(self.vertical_sizer, 1)
-        self.horizontal_sizer.Add(self.image_sizer, flag=wx.TOP | wx.RIGHT, border=Numbers.widget_border_size)
+        self.horizontal_sizer.Add(self.image_sizer, 0, flag=wx.TOP | wx.RIGHT | wx.EXPAND,
+                                  border=Numbers.widget_border_size)
         self.main_vertical_sizer.Add(self.horizontal_sizer, 1, flag=wx.EXPAND)
         self.main_vertical_sizer.Add(self.button_sizer, 0, flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM,
                                      border=Numbers.widget_border_size)
         self.SetSizer(self.main_vertical_sizer)
-        self._display_dialog_contents()
 
         # Bind handlers
         self.Bind(wx.EVT_BUTTON, self._handle_buttons, self.ok_button)
@@ -133,7 +133,7 @@ class EditMenuItemDialog(wx.Dialog):
         self._original_title = self._item.get_link_title()[0]
         self._original_alt = self._item.get_image_alt()[0]
 
-        # TODO test errors
+        # TODO test errors, try empty item name
 
     def _handle_name_change(self, event: wx.CommandEvent) -> None:
         """
@@ -150,9 +150,10 @@ class EditMenuItemDialog(wx.Dialog):
         :param text: The new text.
         :return: None
         """
+        # TODO watch out for empty string and display the error
         self._content_item_name.SetLabelText(text)
         self._content_item_name.Wrap(Numbers.menu_logo_image_size)
-        print(self._content_item_name.GetSize())
+        self.image_sizer.Layout()
         if self._content_item_name.GetSize()[1] > 30:
             # The menu name would have 3 lines which we do not want
             self.ok_button.Disable()
@@ -184,7 +185,7 @@ class EditMenuItemDialog(wx.Dialog):
                 event.Skip()
                 return
             else:
-                self._display_dialog_contents()
+                self.display_dialog_contents()
         else:
             # Restore original values
             self._item.set_name(self._original_name)
@@ -194,9 +195,10 @@ class EditMenuItemDialog(wx.Dialog):
             self._item.seo_test_self()
             event.Skip()
 
-    def _display_dialog_contents(self) -> None:
+    def display_dialog_contents(self) -> None:
         """
         Display the image that this dialog edits in the gui along with field values and errors.
+        Must be called after the dialog is constructed for label size measuring to work correctly.
         :return: None
         """
         self.Disable()
@@ -241,4 +243,3 @@ class EditMenuItemDialog(wx.Dialog):
         else:
             self.content_image_full_path.SetLabelText(self._item.get_image_path())
         self.Enable()
-

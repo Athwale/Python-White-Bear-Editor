@@ -26,6 +26,7 @@ class Numbers:
     edit_video_dialog_width: int = 600
     edit_video_dialog_height: int = 200
     edit_link_dialog_height: int = 255
+    edit_menu_item_dialog_height: int = 310
     icon_width: int = 30
     icon_height: int = 30
     color_icon_width: int = 15
@@ -56,7 +57,7 @@ class Numbers:
     article_name_min_length: int = 3
     article_name_max_length: int = 255
     menu_name_min_length: int = 3
-    menu_name_max_length: int = 30
+    menu_name_max_length: int = 31
     article_image_caption_min: int = 5
     article_image_caption_max: int = 255
     article_image_title_min: int = 5

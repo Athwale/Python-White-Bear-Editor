@@ -13,14 +13,10 @@ class EditTextImageDialog(wx.Dialog):
         :param parent: Parent frame.
         :param image: ImageInText instance being edited by tis dialog.
         """
-        # TODO make interactive when the user edits it.
         wx.Dialog.__init__(self, parent, title=Strings.label_dialog_edit_image,
                            size=(Numbers.edit_text_image_dialog_width, Numbers.edit_text_image_dialog_height),
                            style=wx.DEFAULT_DIALOG_STYLE)
         self._image = image
-        # Adjust dialog width to fit entire image.
-        if self._image.get_thumbnail_size()[1] > Numbers.edit_text_image_dialog_height:
-            self.SetSize(Numbers.edit_text_image_dialog_width, self._image.get_thumbnail_size()[1])
 
         self.main_vertical_sizer = wx.BoxSizer(wx.VERTICAL)
         self.horizontal_sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -104,12 +100,16 @@ class EditTextImageDialog(wx.Dialog):
         self._bitmap = wx.StaticBitmap(self, -1, wx.Bitmap(placeholder_image))
         self.image_sizer.Add(self._bitmap, flag=wx.ALL, border=1)
 
+        # Adjust dialog height to fit entire image.
+        if self._image.get_thumbnail_size()[1] > self.image_sizer.GetSize()[1]:
+            self.SetSize(self.GetSize()[0], self._image.get_thumbnail_size()[1] + 120)
+
         # Buttons
         self.button_sizer = wx.BoxSizer(wx.VERTICAL)
         grouping_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.cancel_button = wx.Button(self, wx.ID_CANCEL, Strings.button_cancel)
         self.ok_button = wx.Button(self, wx.ID_OK, Strings.button_ok)
-        self.cancel_button.SetDefault()
+        self.ok_button.SetDefault()
         grouping_sizer.Add(self.ok_button)
         grouping_sizer.Add((Numbers.widget_border_size, Numbers.widget_border_size))
         grouping_sizer.Add(self.cancel_button)

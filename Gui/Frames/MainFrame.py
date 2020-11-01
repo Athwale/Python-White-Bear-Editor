@@ -555,7 +555,7 @@ class MainFrame(wx.Frame):
         """
         main_image: AsideImage = self.document_dictionary[self.current_document].get_article_image()
         edit_dialog = EditAsideImageDialog(self, main_image)
-        _ = edit_dialog.ShowModal()
+        edit_dialog.ShowModal()
         self._text_main_image_caption.SetLabelText(main_image.get_caption()[0])
         self.update_file_color()
         edit_dialog.Destroy()
@@ -568,8 +568,13 @@ class MainFrame(wx.Frame):
         """
         menu_item: MenuItem = self.document_dictionary[self.current_document].get_menu_item()
         edit_dialog = EditMenuItemDialog(self, menu_item)
-        _ = edit_dialog.ShowModal()
-        # self._main_image_caption.SetLabelText(main_image.get_caption()[0])
+        # We first need to show the dialog so that the name label can calculate it's size and then switch to modal.
+        edit_dialog.Show()
+        edit_dialog.display_dialog_contents()
+        edit_dialog.ShowModal()
+        # TODO create a method for this, expand the sizer and call layout to realign the name
+        self._text_menu_item_name.SetLabelText(menu_item.get_article_name()[0])
+        self._text_menu_item_name.Wrap(Numbers.menu_logo_image_size)
         self.update_file_color()
         edit_dialog.Destroy()
 
