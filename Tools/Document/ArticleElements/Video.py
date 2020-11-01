@@ -1,4 +1,4 @@
-import requests
+import httplib2
 import wx
 
 from Constants.Constants import Numbers, Strings
@@ -58,10 +58,14 @@ class Video:
 
         # Check url
         try:
-            requests.get(self._url)
-        except (requests.ConnectionError, requests.exceptions.MissingSchema) as _:
-            self._url_error_message = Strings.seo_error_url_nonexistent
-            self._image = wx.Image(Fetch.get_resource_path('video_seo_error.png'), wx.BITMAP_TYPE_PNG)
+            h = httplib2.Http()
+            resp = h.request(self._url, 'HEAD')
+            if int(resp[0]['status']) >= 400:
+                self._url_error_message = Strings.seo_error_url_nonexistent
+                self._image = wx.Image(Fetch.get_resource_path('video_seo_error.png'), wx.BITMAP_TYPE_PNG)
+                result = False
+        except KeyError as _:
+            self._url_error_message = Strings.seo_error_url_malformed
             result = False
 
         if not result:

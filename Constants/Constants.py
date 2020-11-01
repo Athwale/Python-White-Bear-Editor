@@ -43,7 +43,7 @@ class Numbers:
     # SEO values
     year_min: int = 2000
     year_max: int = 3000
-    logo_image_size: int = 96
+    menu_logo_image_size: int = 96
     main_image_width: int = 300
     main_image_height: int = 225
     text_image_max_size: int = 534
@@ -56,7 +56,7 @@ class Numbers:
     article_name_min_length: int = 3
     article_name_max_length: int = 255
     article_image_caption_min: int = 5
-    article_image_caption_max: int = 45
+    article_image_caption_max: int = 46
     article_image_title_min: int = 5
     article_image_title_max: int = 512
     article_image_alt_min: int = 5
@@ -120,6 +120,7 @@ class Strings:
     seo_error_image_alt_length: str = 'Length must be: ' + str(Numbers.article_image_alt_min) + ' - ' + str(
         Numbers.article_image_alt_max) + ' characters long'
     seo_error_url_nonexistent: str = 'Target page does not exist'
+    seo_error_url_malformed: str = 'Url syntax error'
     seo_error_video_size_wrong: str = 'The size of the video element is incorrect'
     seo_check: str = 'SEO Check:'
 
@@ -190,6 +191,9 @@ class Strings:
     label_open_in_new_page: str = 'Opens in new page'
     label_url: str = 'URL'
     label_text: str = 'Text'
+    label_target: str = 'Target'
+    label_size: str = 'Size'
+    label_name: str = 'Name'
     label_link_local: str = 'WhiteBear page'
     label_thumbnail_size: str = 'Thumbnail size'
     label_original_size: str = 'Original size'

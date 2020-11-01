@@ -57,7 +57,7 @@ class MenuItem:
             result = False
         else:
             image = wx.Image(Fetch.get_resource_path(self._menu_image_path), wx.BITMAP_TYPE_ANY)
-            if image.GetSize() == (Numbers.logo_image_size, Numbers.logo_image_size):
+            if image.GetSize() == (Numbers.menu_logo_image_size, Numbers.menu_logo_image_size):
                 self._menu_image = image
             else:
                 self._menu_image = wx.Image(Fetch.get_resource_path('menu_image_wrong.png'), wx.BITMAP_TYPE_PNG)

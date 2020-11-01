@@ -1,7 +1,7 @@
 import os
 from typing import List
 
-import requests
+import httplib2
 import wx
 
 from Constants.Constants import Numbers, Strings
@@ -78,9 +78,13 @@ class Link:
         else:
             self._is_local = False
             try:
-                requests.get(self._url, headers={"User-Agent": "Mozilla/5.0"})
-            except (requests.ConnectionError, requests.exceptions.MissingSchema) as _:
-                self._url_error_message = Strings.seo_error_url_nonexistent
+                h = httplib2.Http()
+                resp = h.request(self._url, 'HEAD')
+                if int(resp[0]['status']) >= 400:
+                    self._url_error_message = Strings.seo_error_url_nonexistent
+                    result = False
+            except KeyError as _:
+                self._url_error_message = Strings.seo_error_url_malformed
                 result = False
 
         if not result:

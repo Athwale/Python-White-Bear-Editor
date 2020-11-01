@@ -9,11 +9,14 @@ from Constants.Constants import Strings
 from Exceptions.UnrecognizedFileException import UnrecognizedFileException
 from Gui.Dialogs.AboutDialog import AboutDialog
 from Gui.Dialogs.EditAsideImageDialog import EditAsideImageDialog
+from Gui.Dialogs.EditMenuItemDialog import EditMenuItemDialog
 from Gui.Panels.AsideImagePanel import AsideImagePanel
 from Gui.Panels.CustomRichText import CustomRichText
 from Resources.Fetch import Fetch
 from Threads.FileListThread import FileListThread
 from Tools.ConfigManager import ConfigManager
+from Tools.Document.AsideImage import AsideImage
+from Tools.Document.MenuItem import MenuItem
 from Tools.Document.WhitebearDocumentArticle import WhitebearDocumentArticle
 from Tools.Document.WhitebearDocumentCSS import WhitebearDocumentCSS
 from Tools.Tools import Tools
@@ -294,11 +297,11 @@ class MainFrame(wx.Frame):
         # TODO dialog for menu logo too?
         # TODO react to right click on main image in the same way and left click on side panel images
         # Create a placeholder image
-        placeholder_logo_image = wx.Image(Numbers.logo_image_size, Numbers.logo_image_size)
+        placeholder_logo_image = wx.Image(Numbers.menu_logo_image_size, Numbers.menu_logo_image_size)
         placeholder_logo_image.Replace(0, 0, 0, 245, 255, 255)
         self._menu_logo_button = wx.Button(self.right_panel, -1, style=wx.BU_EXACTFIT | wx.BORDER_NONE)
         self._menu_logo_button.SetBitmap(wx.Bitmap(placeholder_logo_image))
-        self._menu_logo_name = wx.StaticText(self.right_panel, -1, Strings.label_article_image_caption)
+        # self._menu_logo_name = wx.StaticText(self.right_panel, -1, Strings.label_article_image_caption)
         # Set border to the image
         self.menu_logo_static_sizer.Add(self._menu_logo_button, flag=wx.LEFT | wx.BOTTOM | wx.RIGHT, border=1)
         # Create menu logo name text box
@@ -567,7 +570,7 @@ class MainFrame(wx.Frame):
         :param event: Not used
         :return: None
         """
-        main_image = self.document_dictionary[self.current_document].get_article_image()
+        main_image: AsideImage = self.document_dictionary[self.current_document].get_article_image()
         edit_dialog = EditAsideImageDialog(self, main_image)
         _ = edit_dialog.ShowModal()
         self._main_image_caption.SetLabelText(main_image.get_caption()[0])
@@ -580,7 +583,12 @@ class MainFrame(wx.Frame):
         :param event: Not used
         :return: None
         """
-        print('logo')
+        menu_item: MenuItem = self.document_dictionary[self.current_document].get_menu_item()
+        edit_dialog = EditMenuItemDialog(self, menu_item)
+        _ = edit_dialog.ShowModal()
+        # self._main_image_caption.SetLabelText(main_image.get_caption()[0])
+        self.update_file_color()
+        edit_dialog.Destroy()
 
     def quit_button_handler(self, event) -> None:
         """

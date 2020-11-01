@@ -42,7 +42,7 @@ class AsideImage(BaseImage):
         # Check caption length must be at least 3 and must not be default
         if len(self._caption) < Numbers.article_image_caption_min or len(
                 self._caption) > Numbers.article_image_caption_max:
-            self._caption_error_message = Strings.seo_error_name_length
+            self._caption_error_message = Strings.seo_error_image_caption_length
             result = False
 
         if self._caption == Strings.label_article_image_caption:
