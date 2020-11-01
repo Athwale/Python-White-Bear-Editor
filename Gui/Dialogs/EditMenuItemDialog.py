@@ -150,12 +150,12 @@ class EditMenuItemDialog(wx.Dialog):
         :param text: The new text.
         :return: None
         """
-        # TODO watch out for empty string and display the error
         self._content_item_name.SetLabelText(text)
         self._content_item_name.Wrap(Numbers.menu_logo_image_size)
         self.image_sizer.Layout()
-        if self._content_item_name.GetSize()[1] > 30:
-            # The menu name would have 3 lines which we do not want
+        if self._content_item_name.GetSize()[1] > 30 or len(
+                self.field_item_name.GetValue()) < Numbers.menu_name_min_length:
+            # The menu name would have 3 or 0 lines which we do not want
             self.ok_button.Disable()
             self._content_item_name.SetBackgroundColour(Numbers.RED_COLOR)
             self.field_item_name.SetBackgroundColour(Numbers.RED_COLOR)
