@@ -104,7 +104,7 @@ class WhitebearDocumentMenu(WhitebearDocument):
         :return: Return a MenuItem that contains a link to the file_name, only one must exist. None if not found.
         """
         for item in self._menu_items:
-            if file_name == item.get_menu_link_href():
+            if file_name == item.get_link_href():
                 return item
         return None
 

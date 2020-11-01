@@ -55,6 +55,8 @@ class Numbers:
     min_body_word_length: int = 250
     article_name_min_length: int = 3
     article_name_max_length: int = 255
+    menu_name_min_length: int = 3
+    menu_name_max_length: int = 30
     article_image_caption_min: int = 5
     article_image_caption_max: int = 255
     article_image_title_min: int = 5
@@ -108,6 +110,8 @@ class Strings:
         Numbers.description_min_length) + ' - ' + str(Numbers.description_max_length) + ' characters long'
     seo_error_name_length: str = 'Length must be: ' + str(Numbers.article_name_min_length) + ' - ' + str(
         Numbers.article_name_max_length) + ' characters long'
+    seo_error_menu_name_length: str = 'Length must be: ' + str(Numbers.menu_name_min_length) + ' - ' + str(
+        Numbers.menu_name_max_length) + ' characters long'
     seo_error_default_value: str = 'Default value can not be used'
     seo_error_date_format: str = 'Date format incorrect (example: 31. Ledna 2020)'
     seo_error_date_format_day: str = 'Date format incorrect, day must be: 1-31'
@@ -165,11 +169,13 @@ class Strings:
     label_dialog_edit_image: str = 'Edit image'
     label_dialog_edit_link: str = 'Edit link'
     label_dialog_edit_video: str = 'Edit video'
+    label_dialog_edit_menu_item: str = 'Edit menu item'
 
     label_article_menu_logo: str = 'Menu logo'
     label_article_menu_logo_name_placeholder: str = 'Menu item name'
-    label_article_menu_logo_alt_placeholder: str = ' Alt description'
-    label_menu_logo_link_title_placeholder: str = ' Link title'
+    label_article_menu_logo_alt_placeholder: str = 'Alt description'
+    label_menu_logo_link_title_placeholder: str = 'Link title'
+    label_menu_item_name: str = 'Menu name'
     label_article_image: str = 'Article image'
     label_article_image_alt: str = 'Image alt description'
     label_article_image_link_title: str = 'Image link title'

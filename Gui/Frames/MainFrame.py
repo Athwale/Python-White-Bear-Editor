@@ -304,31 +304,12 @@ class MainFrame(wx.Frame):
         # Set border to the image
         self.menu_logo_static_sizer.Add(self._menu_logo_button, flag=wx.LEFT | wx.BOTTOM | wx.RIGHT, border=1)
         # Create menu logo name text box
-        self.field_menu_item_name = wx.TextCtrl(self.right_panel, -1,
-                                                value=Strings.label_article_menu_logo_name_placeholder,
-                                                size=wx.Size(98, 35),
-                                                style=wx.TE_MULTILINE | wx.TE_CENTRE | wx.TE_NO_VSCROLL)
-        self.field_menu_item_name.SetFont(self.menu_text_field_font)
-        self.field_menu_item_name_tip = Tools.get_warning_tip(self.field_menu_item_name,
-                                                              Strings.label_article_menu_logo_name_placeholder)
-
-        self.field_menu_item_alt = wx.TextCtrl(self.right_panel, -1,
-                                               value=Strings.label_article_menu_logo_alt_placeholder,
-                                               size=wx.Size(98, 45), style=wx.TE_MULTILINE)
-        self.field_menu_item_alt.SetFont(self.menu_text_field_font)
-        self.field_menu_item_alt_tip = Tools.get_warning_tip(self.field_menu_item_alt,
-                                                             Strings.label_article_menu_logo_alt_placeholder)
-
-        self.field_menu_item_link_title = wx.TextCtrl(self.right_panel, -1,
-                                                      value=Strings.label_menu_logo_link_title_placeholder,
-                                                      size=wx.Size(98, 49), style=wx.TE_MULTILINE)
-        self.field_menu_item_link_title.SetFont(self.menu_text_field_font)
-        self.field_menu_item_link_title_tip = Tools.get_warning_tip(self.field_menu_item_link_title,
-                                                                    Strings.label_menu_logo_link_title_placeholder)
-
-        self.menu_logo_static_sizer.Add(self.field_menu_item_name)
-        self.menu_logo_static_sizer.Add(self.field_menu_item_alt)
-        self.menu_logo_static_sizer.Add(self.field_menu_item_link_title)
+        self._text_menu_item_name = wx.StaticText(self.right_panel, -1,
+                                                  Strings.label_article_menu_logo_name_placeholder,
+                                                  style=wx.ALIGN_CENTRE_HORIZONTAL)
+        self._text_menu_item_name.SetFont(self.menu_text_field_font)
+        self._text_menu_item_name.SetMaxSize((Numbers.menu_logo_image_size, 30))
+        self.menu_logo_static_sizer.Add(self._text_menu_item_name, flag=wx.CENTER)
         # --------------------------------------------------------------------------------------------------------------
 
         # File list section --------------------------------------------------------------------------------------------
@@ -344,9 +325,12 @@ class MainFrame(wx.Frame):
         placeholder_main_image.Replace(0, 0, 0, 245, 255, 255)
         self._main_image_button = wx.Button(self.right_panel, -1, style=wx.BU_EXACTFIT | wx.BORDER_NONE)
         self._main_image_button.SetBitmap(wx.Bitmap(placeholder_main_image))
-        self._main_image_caption = wx.StaticText(self.right_panel, -1, Strings.label_article_image_caption)
+        self._text_main_image_caption = wx.StaticText(self.right_panel, -1, Strings.label_article_image_caption,
+                                                      style=wx.ST_ELLIPSIZE_END)
+        self._text_main_image_caption.SetMaxSize((Numbers.main_image_width, -1))
         self.article_image_static_sizer.Add(self._main_image_button, flag=wx.LEFT | wx.BOTTOM | wx.RIGHT, border=1)
-        self.article_image_static_sizer.Add(self._main_image_caption, flag=wx.LEFT | wx.BOTTOM | wx.RIGHT, border=1)
+        self.article_image_static_sizer.Add(self._text_main_image_caption, flag=wx.LEFT | wx.BOTTOM | wx.RIGHT,
+                                            border=1)
 
         # Add text boxes
         self.field_article_date = wx.TextCtrl(self.right_panel, -1, value=Strings.label_article_date,
@@ -572,7 +556,7 @@ class MainFrame(wx.Frame):
         main_image: AsideImage = self.document_dictionary[self.current_document].get_article_image()
         edit_dialog = EditAsideImageDialog(self, main_image)
         _ = edit_dialog.ShowModal()
-        self._set_main_image_caption(main_image.get_caption()[0])
+        self._text_main_image_caption.SetLabelText(main_image.get_caption()[0])
         self.update_file_color()
         edit_dialog.Destroy()
 
@@ -724,13 +708,7 @@ class MainFrame(wx.Frame):
         field_to_value = {self.field_article_date: (doc.get_date(), self.field_article_date_tip),
                           self.field_article_name: (doc.get_page_name(), self.field_article_name_tip),
                           self.field_article_keywords: (doc.get_keywords_string(), self.field_article_keywords_tip),
-                          self.field_article_description: (doc.get_description(), self.field_article_description_tip),
-                          self.field_menu_item_name: (doc.get_menu_item().get_menu_article_name(),
-                                                      self.field_menu_item_name_tip),
-                          self.field_menu_item_alt: (doc.get_menu_item().get_menu_image_alt(),
-                                                     self.field_menu_item_alt_tip),
-                          self.field_menu_item_link_title: (doc.get_menu_item().get_menu_link_title(),
-                                                            self.field_menu_item_link_title_tip)}
+                          self.field_article_description: (doc.get_description(), self.field_article_description_tip)}
         for field, value in field_to_value.items():
             tip = value[1]
             if value[0][1]:
@@ -746,26 +724,22 @@ class MainFrame(wx.Frame):
 
         # Set main and menu images
         self._main_image_button.SetBitmap(wx.Bitmap(doc.get_article_image().get_image()))
-        self._menu_logo_button.SetBitmap(wx.Bitmap(doc.get_menu_item().get_menu_image()))
+        self._menu_logo_button.SetBitmap(wx.Bitmap(doc.get_menu_item().get_image()))
 
         # Set aside images
         self.side_photo_panel.load_document_images(doc)
         self.main_text_area.set_content(self.document_dictionary[self.current_document])
 
         # Set main image caption
-        self._set_main_image_caption(self.document_dictionary[self.current_document].get_article_image().get_caption()[0])
+        self._text_main_image_caption.SetLabelText(self.document_dictionary[self.current_document].get_article_image().
+                                                   get_caption()[0])
+
+        # Set menu item name
+        self._text_menu_item_name.SetLabelText(
+            self.document_dictionary[self.current_document].get_menu_item().get_article_name()[0])
+        self._text_menu_item_name.Wrap(Numbers.menu_logo_image_size)
 
         self._disable_editor(False)
-
-    def _set_main_image_caption(self, text: str) -> None:
-        """
-        Set the main image caption to the text parameter. If the length is wider than the image shorten it with ...
-        :param text: The text to set
-        :return: None
-        """
-        self._main_image_caption.SetLabelText(text)
-        if self._main_image_caption.GetSize()[0] >= Numbers.main_image_width:
-            self._main_image_caption.SetLabelText(text[:40] + '...')
 
     def update_file_color(self) -> None:
         """

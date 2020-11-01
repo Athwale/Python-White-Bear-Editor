@@ -28,6 +28,8 @@ class MenuItem:
         self._href = href
         self._menu_image_path = disk_path
         self._menu_image = None
+        self._modified = False
+        self._status_color = None
 
     def seo_test_self(self) -> bool:
         """
@@ -39,12 +41,13 @@ class MenuItem:
         self._article_name_error_message: str = ''
         self._link_title_error_message: str = ''
         self._image_alt_error_message: str = ''
+        self._status_color = wx.NullColour
 
         result = True
         # Check page name length must be at least 3 and must not be default
-        if len(self._article_name) < Numbers.article_name_min_length or len(
-                self._article_name) > Numbers.article_name_max_length:
-            self._article_name_error_message = Strings.seo_error_name_length
+        if len(self._article_name) < Numbers.menu_name_min_length or len(
+                self._article_name) > Numbers.menu_name_max_length:
+            self._article_name_error_message = Strings.seo_error_menu_name_length
             result = False
 
         if self._article_name == Strings.label_article_menu_logo_name_placeholder:
@@ -83,9 +86,12 @@ class MenuItem:
             self._image_alt_error_message = Strings.seo_error_default_value
             result = False
 
+        if not result:
+            self._status_color = wx.RED
         return result
 
-    def get_menu_article_name(self) -> (str, str):
+    # Getters ----------------------------------------------------------------------------------------------------------
+    def get_article_name(self) -> (str, str):
         """
         Return the article name as it is in the menu item. May be different from the title on the actual article page
         and error to display in gui if there is one.
@@ -93,40 +99,95 @@ class MenuItem:
         """
         return self._article_name, self._article_name_error_message
 
-    def get_menu_link_title(self) -> (str, str):
+    def get_link_title(self) -> (str, str):
         """
         Return the link title of the menu item and error to display in gui if there is one.
         :return: Return the link title of the menu item and error to display in gui if there is one.
         """
         return self._link_title, self._link_title_error_message
 
-    def get_menu_image_alt(self) -> (str, str):
+    def get_image_alt(self) -> (str, str):
         """
         Return the image alt description of the menu item and error to display in gui if there is one.
         :return: Return the image alt description of the menu item and error to display in gui if there is one.
         """
         return self._image_alt, self._image_alt_error_message
 
-    def get_menu_link_href(self) -> str:
+    def get_link_href(self) -> str:
         """
         Return the link href of the menu item.
         :return: Return the link href of the menu item.
         """
         return self._href
 
-    def get_menu_image_path(self) -> str:
+    def get_image_path(self) -> str:
         """
         Return the image disk path of the menu item.
         :return: Return the image disk path of the menu item. None if the file is inaccessible on hard drive.
         """
         return self._menu_image_path
 
-    def get_menu_image(self) -> wx.Image:
+    def get_image(self) -> wx.Image:
         """
-        Return the menu image wx image instance.
-        :return: Return the menu image wx image instance.
+        Return the image as wx image instance. If there was a seo error the image will be red.
+        :return: Return the image as wx image instance.
         """
+        if self._status_color == wx.RED:
+            return self._menu_image.AdjustChannels(1, 0, 0)
         return self._menu_image
+
+    def get_image_size(self) -> (int, int):
+        """
+        Return the menu image size (width, height).
+        :return: Return the menu image size (width, height).
+        """
+        return self._menu_image.GetSize()
+
+    def is_modified(self) -> bool:
+        """
+        Return true if this instance was modified.
+        :return: Return true if this instance was modified.
+        """
+        return self._modified
+
+    # Setters ----------------------------------------------------------------------------------------------------------
+    def set_name(self, new_name: str) -> None:
+        """
+        Set a new name for this menu item. The name is displayed under the image.
+        :param new_name: The new name.
+        :return: None
+        """
+        if self._article_name != new_name:
+            self._article_name = new_name
+            self._modified = True
+
+    def set_link_title(self, new_title: str) -> None:
+        """
+        Set a new link title for this menu item.
+        :param new_title: The new title.
+        :return: None
+        """
+        if self._link_title != new_title:
+            self._link_title = new_title
+            self._modified = True
+
+    def set_image_alt(self, new_alt: str) -> None:
+        """
+        Set a new image alt description for this menu item.
+        :param new_alt: The new image alt description.
+        :return: None
+        """
+        if self._image_alt != new_alt:
+            self._image_alt = new_alt
+            self._modified = True
+
+    def set_modified(self, modified: bool) -> None:
+        """
+        Set new modified state.
+        :param modified: True or False
+        :return: None
+        """
+        self._modified = modified
 
     def __str__(self) -> str:
         return "Menu item {}, Link {}, Image {}".format(self._article_name, self._href, self._menu_image_path)

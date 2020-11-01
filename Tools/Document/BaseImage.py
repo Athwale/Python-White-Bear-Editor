@@ -124,7 +124,7 @@ class BaseImage:
 
     def get_image(self) -> wx.Image:
         """
-        Return the image as wx image instance.
+        Return the image as wx image instance. If there was a seo error the image will be red.
         :return: Return the image as wx image instance.
         """
         if self._status_color == wx.RED:
