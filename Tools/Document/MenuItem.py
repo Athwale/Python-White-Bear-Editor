@@ -10,7 +10,7 @@ class MenuItem:
     Carrier class for a parsed menu item.
     """
 
-    def __init__(self, name: str, title: str, image_alt: str, href: str, disk_path: str):
+    def __init__(self, name: str, title: str, image_alt: str, href: str, disk_path: str, img_filename: str):
         """
         Constructor for a menu item.
         :param name: Name of the article in the menu.
@@ -18,6 +18,7 @@ class MenuItem:
         :param image_alt: html alt description of the img element.
         :param href: link to the article html page.
         :param disk_path: path to the menu image.
+        :param img_filename: The filename of the menu image
         """
         self._article_name = name
         self._article_name_error_message: str = ''
@@ -30,6 +31,7 @@ class MenuItem:
         self._menu_image = None
         self._modified = False
         self._status_color = None
+        self._filename = img_filename
 
     def seo_test_self(self) -> bool:
         """
@@ -142,6 +144,13 @@ class MenuItem:
         :return: Return the menu image size (width, height).
         """
         return self._menu_image.GetSize()
+
+    def get_filename(self) -> str:
+        """
+        Return the image file name.
+        :return: Return the image filename.
+        """
+        return self._filename
 
     def is_modified(self) -> bool:
         """

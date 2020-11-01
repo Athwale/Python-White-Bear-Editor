@@ -161,7 +161,6 @@ class EditMenuItemDialog(wx.Dialog):
             self.field_item_name.SetBackgroundColour(Numbers.RED_COLOR)
             self.field_item_name_tip.SetMessage(Strings.seo_check + '\n' + Strings.seo_error_menu_name_length)
             self.field_item_name_tip.EnableTip(True)
-            self.field_item_name_tip.DoShowNow()
         else:
             self._content_item_name.SetBackgroundColour(wx.NullColour)
             self.field_item_name.SetBackgroundColour(Numbers.GREEN_COLOR)
@@ -241,5 +240,5 @@ class EditMenuItemDialog(wx.Dialog):
         if full_path:
             self.content_image_full_path.SetLabelText(full_path)
         else:
-            self.content_image_full_path.SetLabelText(self._item.get_image_path())
+            self.content_image_full_path.SetLabelText(self._item.get_filename())
         self.Enable()
