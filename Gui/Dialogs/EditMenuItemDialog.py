@@ -133,8 +133,6 @@ class EditMenuItemDialog(wx.Dialog):
         self._original_title = self._item.get_link_title()[0]
         self._original_alt = self._item.get_image_alt()[0]
 
-        # TODO test errors, try empty item name
-
     def _handle_name_change(self, event: wx.CommandEvent) -> None:
         """
         Handle text changes in the item name field, these have to be shown in the live preview under the image.

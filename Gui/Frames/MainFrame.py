@@ -281,7 +281,7 @@ class MainFrame(wx.Frame):
         self.right_top_sizer.Add(self.article_image_static_sizer, flag=wx.ALIGN_LEFT | wx.RIGHT,
                                  border=0)
         self.right_top_sizer.Add(self.article_data_static_sizer, 1, flag=wx.ALIGN_LEFT | wx.EXPAND)
-        self.right_top_sizer.Add(self.menu_logo_static_sizer, flag=wx.LEFT, border=Numbers.widget_border_size)
+        self.right_top_sizer.Add(self.menu_logo_static_sizer, 0, flag=wx.EXPAND, border=Numbers.widget_border_size)
         # Insert sizers with GUI into the respective panels, these are inserted into the splitter windows.s
         self.left_panel.SetSizer(self.filelist_column_sizer)
         self.right_panel.SetSizer(self.right_main_vertical_sizer)
@@ -327,7 +327,7 @@ class MainFrame(wx.Frame):
         self._main_image_button.SetBitmap(wx.Bitmap(placeholder_main_image))
         self._text_main_image_caption = wx.StaticText(self.right_panel, -1, Strings.label_article_image_caption,
                                                       style=wx.ST_ELLIPSIZE_END)
-        self._text_main_image_caption.SetMaxSize((Numbers.main_image_width, -1))
+        self._text_main_image_caption.SetMaxSize((Numbers.main_image_width -5, -1))
         self.article_image_static_sizer.Add(self._main_image_button, flag=wx.LEFT | wx.BOTTOM | wx.RIGHT, border=1)
         self.article_image_static_sizer.Add(self._text_main_image_caption, flag=wx.LEFT | wx.BOTTOM | wx.RIGHT,
                                             border=1)
@@ -556,7 +556,7 @@ class MainFrame(wx.Frame):
         main_image: AsideImage = self.document_dictionary[self.current_document].get_article_image()
         edit_dialog = EditAsideImageDialog(self, main_image)
         edit_dialog.ShowModal()
-        self._text_main_image_caption.SetLabelText(main_image.get_caption()[0])
+        self._update_article_image_sizer(main_image)
         self.update_file_color()
         edit_dialog.Destroy()
 
@@ -572,9 +572,7 @@ class MainFrame(wx.Frame):
         edit_dialog.Show()
         edit_dialog.display_dialog_contents()
         edit_dialog.ShowModal()
-        # TODO create a method for this, expand the sizer and call layout to realign the name
-        self._text_menu_item_name.SetLabelText(menu_item.get_article_name()[0])
-        self._text_menu_item_name.Wrap(Numbers.menu_logo_image_size)
+        self._update_menu_sizer(menu_item)
         self.update_file_color()
         edit_dialog.Destroy()
 
@@ -740,9 +738,7 @@ class MainFrame(wx.Frame):
                                                    get_caption()[0])
 
         # Set menu item name
-        self._text_menu_item_name.SetLabelText(
-            self.document_dictionary[self.current_document].get_menu_item().get_article_name()[0])
-        self._text_menu_item_name.Wrap(Numbers.menu_logo_image_size)
+        self._update_menu_sizer(self.document_dictionary[self.current_document].get_menu_item())
 
         self._disable_editor(False)
 
@@ -757,6 +753,26 @@ class MainFrame(wx.Frame):
             selected_item = self.page_list.GetFirstSelected()
             self.page_list.SetItemBackgroundColour(selected_item, new_color)
 
+    def _update_menu_sizer(self, menu_item: MenuItem) -> None:
+        """
+        Update the menu logo sizer with new content from the edited menu item and realign the label.
+        :param menu_item: The modified menu item
+        :return: None
+        """
+        self._menu_logo_button.SetBitmap(wx.Bitmap(menu_item.get_image()))
+        self._text_menu_item_name.SetLabelText(menu_item.get_article_name()[0])
+        self._text_menu_item_name.Wrap(Numbers.menu_logo_image_size)
+        self.menu_logo_static_sizer.Layout()
+
+    def _update_article_image_sizer(self, image: AsideImage) -> None:
+        """
+        Update the article image sizer with new content from the edited image.
+        :param image: The modified image
+        :return: None
+        """
+        self._main_image_button.SetBitmap(wx.Bitmap(image.get_image()))
+        self._text_main_image_caption.SetLabelText(image.get_caption()[0])
+
     def text_area_edit_handler(self, event: wx.CommandEvent) -> None:
         """
         Handle special events that signal that the color of the selected item in the filelist should be updated.
@@ -765,5 +781,3 @@ class MainFrame(wx.Frame):
         :return: None
         """
         self.update_file_color()
-
-        # TODO use image panel as main image and get rid of extra fields
