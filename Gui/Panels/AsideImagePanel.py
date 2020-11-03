@@ -3,7 +3,7 @@ from typing import List
 import wx
 import wx.lib.scrolledpanel
 
-from Constants.Constants import Strings
+from Constants.Constants import Strings, Numbers
 from Gui.Dialogs.EditAsideImageDialog import EditAsideImageDialog
 from Gui.Panels.ImagePanel import ImagePanel
 from Tools.Document.AsideImage import AsideImage
@@ -97,7 +97,7 @@ class AsideImagePanel(wx.lib.scrolledpanel.ScrolledPanel):
         for img in self._images:
             image_panel = ImagePanel(self)
             image_panel.set_image(img)
-            self._sizer.Add(image_panel)
+            self._sizer.Add(image_panel, flag=wx.ALL, border=Numbers.widget_border_size)
 
         self.SetupScrolling(scroll_x=False, scrollIntoView=True)
         self.Layout()

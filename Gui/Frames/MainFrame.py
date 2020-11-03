@@ -278,10 +278,10 @@ class MainFrame(wx.Frame):
                                            border=Numbers.widget_border_size, proportion=0)
         self.right_main_vertical_sizer.Add(self.right_bottom_sizer, flag=wx.RIGHT | wx.ALIGN_LEFT | wx.EXPAND,
                                            border=Numbers.widget_border_size, proportion=1)
+        self.right_top_sizer.Add(self.menu_logo_static_sizer, 0, flag=wx.EXPAND, border=Numbers.widget_border_size)
+        self.right_top_sizer.Add(self.article_data_static_sizer, 1, flag=wx.ALIGN_LEFT | wx.EXPAND)
         self.right_top_sizer.Add(self.article_image_static_sizer, flag=wx.ALIGN_LEFT | wx.RIGHT,
                                  border=0)
-        self.right_top_sizer.Add(self.article_data_static_sizer, 1, flag=wx.ALIGN_LEFT | wx.EXPAND)
-        self.right_top_sizer.Add(self.menu_logo_static_sizer, 0, flag=wx.EXPAND, border=Numbers.widget_border_size)
         # Insert sizers with GUI into the respective panels, these are inserted into the splitter windows.s
         self.left_panel.SetSizer(self.filelist_column_sizer)
         self.right_panel.SetSizer(self.right_main_vertical_sizer)
@@ -302,7 +302,8 @@ class MainFrame(wx.Frame):
         self._menu_logo_button.SetBitmap(wx.Bitmap(placeholder_logo_image))
         # self._menu_logo_name = wx.StaticText(self.right_panel, -1, Strings.label_article_image_caption)
         # Set border to the image
-        self.menu_logo_static_sizer.Add(self._menu_logo_button, flag=wx.LEFT | wx.BOTTOM | wx.RIGHT, border=1)
+        self.menu_logo_static_sizer.Add(self._menu_logo_button, flag=wx.LEFT | wx.BOTTOM | wx.RIGHT,
+                                        border=Numbers.widget_border_size)
         # Create menu logo name text box
         self._text_menu_item_name = wx.StaticText(self.right_panel, -1,
                                                   Strings.label_article_menu_logo_name_placeholder,
@@ -328,9 +329,10 @@ class MainFrame(wx.Frame):
         self._text_main_image_caption = wx.StaticText(self.right_panel, -1, Strings.label_article_image_caption,
                                                       style=wx.ST_ELLIPSIZE_END)
         self._text_main_image_caption.SetMaxSize((Numbers.main_image_width -5, -1))
-        self.article_image_static_sizer.Add(self._main_image_button, flag=wx.LEFT | wx.BOTTOM | wx.RIGHT, border=1)
+        self.article_image_static_sizer.Add(self._main_image_button, flag=wx.LEFT | wx.BOTTOM | wx.RIGHT,
+                                            border=Numbers.widget_border_size)
         self.article_image_static_sizer.Add(self._text_main_image_caption, flag=wx.LEFT | wx.BOTTOM | wx.RIGHT,
-                                            border=1)
+                                            border=Numbers.widget_border_size)
 
         # Add text boxes
         self.field_article_date = wx.TextCtrl(self.right_panel, -1, value=Strings.label_article_date,

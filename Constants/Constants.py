@@ -17,8 +17,8 @@ class Numbers:
     minimal_panel_size: int = 150
     maximal_panel_size: int = 300
     text_field_font_size: int = 9
-    widget_border_size: int = 5
-    photo_column_width: int = 300
+    widget_border_size: int = 3
+    photo_column_width: int = 306
     edit_aside_image_dialog_width: int = 900
     edit_aside_image_dialog_height: int = 340
     edit_text_image_dialog_width: int = 1200
