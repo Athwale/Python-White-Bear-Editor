@@ -86,6 +86,9 @@ class Link:
             except KeyError as _:
                 self._url_error_message = Strings.seo_error_url_malformed
                 result = False
+            except httplib2.ServerNotFoundError as _:
+                self._url_error_message = Strings.seo_error_url_nonexistent
+                result = False
 
         if not result:
             self._status_color = wx.RED

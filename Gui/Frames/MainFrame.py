@@ -253,9 +253,10 @@ class MainFrame(wx.Frame):
         # Contains file list of pages
         self.filelist_column_sizer = wx.BoxSizer(wx.VERTICAL)
         # Contains right top sizer, right bottom sizer
-        self.right_main_vertical_sizer = wx.BoxSizer(wx.VERTICAL)
+        self.right_main_vertical_sizer = wx.BoxSizer(wx.HORIZONTAL)
         # Contains article image sizer, article data sizer, menu logo static sizer
-        self.right_top_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.middle_top_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.right_vertical_sizer = wx.BoxSizer(wx.VERTICAL)
         # Contains main article image
         self.article_image_static_sizer = wx.StaticBoxSizer(wx.VERTICAL, self.right_panel,
                                                             label=Strings.label_article_image)
@@ -266,22 +267,26 @@ class MainFrame(wx.Frame):
         self.menu_logo_static_sizer = wx.StaticBoxSizer(wx.VERTICAL, self.right_panel,
                                                         label=Strings.label_article_menu_logo)
         # Contains main text area, photo column sizer
-        self.right_bottom_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self.middle_vertical_sizer = wx.BoxSizer(wx.VERTICAL)
 
         # Contains article photos
         self.side_photo_column_sizer = wx.StaticBoxSizer(wx.VERTICAL, self.right_panel,
                                                          label=Strings.label_article_photo_column)
         self.side_photo_column_sizer.SetMinSize((Numbers.photo_column_width, -1))
+        self.right_vertical_sizer.Add(self.article_image_static_sizer, flag=wx.ALIGN_LEFT | wx.RIGHT, border=0)
+        self.right_vertical_sizer.Add(self.side_photo_column_sizer, flag=wx.EXPAND, proportion=1,
+                                      border=Numbers.widget_border_size)
 
         # The | is a bitwise or and flags is a bit mask of constants
-        self.right_main_vertical_sizer.Add(self.right_top_sizer, flag=wx.RIGHT | wx.ALIGN_LEFT | wx.EXPAND,
-                                           border=Numbers.widget_border_size, proportion=0)
-        self.right_main_vertical_sizer.Add(self.right_bottom_sizer, flag=wx.RIGHT | wx.ALIGN_LEFT | wx.EXPAND,
-                                           border=Numbers.widget_border_size, proportion=1)
-        self.right_top_sizer.Add(self.menu_logo_static_sizer, 0, flag=wx.EXPAND, border=Numbers.widget_border_size)
-        self.right_top_sizer.Add(self.article_data_static_sizer, 1, flag=wx.ALIGN_LEFT | wx.EXPAND)
-        self.right_top_sizer.Add(self.article_image_static_sizer, flag=wx.ALIGN_LEFT | wx.RIGHT,
-                                 border=0)
+        self.middle_vertical_sizer.Add(self.middle_top_sizer, flag=wx.RIGHT | wx.ALIGN_LEFT | wx.EXPAND,
+                                       border=Numbers.widget_border_size, proportion=0)
+        self.right_main_vertical_sizer.Add(self.middle_vertical_sizer, border=Numbers.widget_border_size, proportion=1,
+                                           flag=wx.RIGHT | wx.LEFT | wx.ALIGN_LEFT | wx.EXPAND)
+        self.right_main_vertical_sizer.Add(self.right_vertical_sizer, flag=wx.EXPAND | wx.RIGHT, proportion=0,
+                                           border=Numbers.widget_border_size)
+        self.middle_top_sizer.Add(self.menu_logo_static_sizer, 0, flag=wx.EXPAND, border=Numbers.widget_border_size)
+        self.middle_top_sizer.Add(self.article_data_static_sizer, 1, flag=wx.EXPAND | wx.LEFT,
+                                  border=Numbers.widget_border_size)
         # Insert sizers with GUI into the respective panels, these are inserted into the splitter windows.s
         self.left_panel.SetSizer(self.filelist_column_sizer)
         self.right_panel.SetSizer(self.right_main_vertical_sizer)
@@ -328,7 +333,7 @@ class MainFrame(wx.Frame):
         self._main_image_button.SetBitmap(wx.Bitmap(placeholder_main_image))
         self._text_main_image_caption = wx.StaticText(self.right_panel, -1, Strings.label_article_image_caption,
                                                       style=wx.ST_ELLIPSIZE_END)
-        self._text_main_image_caption.SetMaxSize((Numbers.main_image_width -5, -1))
+        self._text_main_image_caption.SetMaxSize((Numbers.main_image_width - 5, -1))
         self.article_image_static_sizer.Add(self._main_image_button, flag=wx.LEFT | wx.BOTTOM | wx.RIGHT,
                                             border=Numbers.widget_border_size)
         self.article_image_static_sizer.Add(self._text_main_image_caption, flag=wx.LEFT | wx.BOTTOM | wx.RIGHT,
@@ -340,26 +345,29 @@ class MainFrame(wx.Frame):
         self.field_article_date_tip = Tools.get_warning_tip(self.field_article_date, Strings.label_article_date)
 
         self.field_article_name = wx.TextCtrl(self.right_panel, -1, value=Strings.label_article_title,
-                                              size=wx.Size(250, 30))
+                                              size=wx.Size(-1, 43))
         font: wx.Font = self.field_article_name.GetFont()
         font.SetWeight(wx.BOLD)
+        font.SetPointSize(Numbers.main_heading_size)
         self.field_article_name.SetFont(font)
         self.field_article_name_tip = Tools.get_warning_tip(self.field_article_name, Strings.label_article_title)
 
         self.field_article_keywords = wx.TextCtrl(self.right_panel, -1, value=Strings.label_article_keywords,
-                                                  size=wx.Size(250, 30))
+                                                  size=wx.Size(-1, 30))
         self.field_article_keywords_tip = Tools.get_warning_tip(self.field_article_keywords,
                                                                 Strings.label_article_keywords)
 
         self.field_article_description = wx.TextCtrl(self.right_panel, -1, value=Strings.label_article_description,
-                                                     size=wx.Size(250, 30))
+                                                     size=wx.Size(-1, 60), style=wx.TE_MULTILINE)
         self.field_article_description_tip = Tools.get_warning_tip(self.field_article_description,
                                                                    Strings.label_article_description)
 
-        self.article_data_static_sizer.Add(self.field_article_date)
-        self.article_data_static_sizer.Add(self.field_article_name, flag=wx.TOP | wx.EXPAND)
-        self.article_data_static_sizer.Add(self.field_article_keywords, flag=wx.EXPAND)
+        date_keywords_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        date_keywords_sizer.Add(self.field_article_keywords, 1, flag=wx.EXPAND)
+        date_keywords_sizer.Add(self.field_article_date)
+        self.article_data_static_sizer.Add(date_keywords_sizer, flag=wx.EXPAND)
         self.article_data_static_sizer.Add(self.field_article_description, flag=wx.EXPAND)
+        self.article_data_static_sizer.Add(self.field_article_name, 1, flag=wx.EXPAND)
         # --------------------------------------------------------------------------------------------------------------
 
         # Aside images section -----------------------------------------------------------------------------------------
@@ -374,9 +382,8 @@ class MainFrame(wx.Frame):
         """
         # Main text area section ---------------------------------------------------------------------------------------
         self.main_text_area = CustomRichText(self.style_control, self.right_panel, style=wx.VSCROLL)
-        self.right_bottom_sizer.Add(self.main_text_area, flag=wx.EXPAND | wx.LEFT | wx.TOP, proportion=1, border=2)
-        self.right_bottom_sizer.Add(self.side_photo_column_sizer, flag=wx.EXPAND | wx.LEFT,
-                                    border=Numbers.widget_border_size)
+        self.middle_vertical_sizer.Add(self.main_text_area, flag=wx.EXPAND | wx.TOP, proportion=1,
+                                       border=Numbers.widget_border_size)
         # --------------------------------------------------------------------------------------------------------------
 
     def _bind_handlers(self) -> None:

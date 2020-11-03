@@ -33,6 +33,7 @@ class Numbers:
     color_icon_height: int = 15
 
     # Styling
+    main_heading_size = 18
     heading_3_size: int = 16
     heading_4_size: int = 14
     paragraph_spacing: int = 20
@@ -185,8 +186,8 @@ class Strings:
     label_article_date: str = 'Date'
     label_article_title: str = 'Article name'
     label_article_keywords: str = 'Meta keywords'
-    label_article_description: str = 'Meta description'
-    label_article_info: str = 'Article data'
+    label_article_description: str = '   Meta description'
+    label_article_info: str = 'Article metadata'
     label_article_photo_column: str = 'Photos'
     label_image: str = 'Image'
     label_image_path: str = 'Full image'
