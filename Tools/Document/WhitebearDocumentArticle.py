@@ -328,9 +328,14 @@ class WhitebearDocumentArticle(WhitebearDocument):
             return_value = True
             paragraph.add_element(Text(str(parent_element), bold=bold))
         elif parent_element.name == 'span':
+            # These can contain br
             return_value = True
             color = self._css_document.translate_color(parent_element.attrs['class'][0])
-            paragraph.add_element(Text(str(parent_element.string), bold=bold, color=color))
+            for child in parent_element.children:
+                if child.name == 'br':
+                    paragraph.add_element(Break())
+                else:
+                    paragraph.add_element(Text(str(child.string), bold=bold, color=color))
         elif parent_element.name == 'br':
             return_value = True
             paragraph.add_element(Break())

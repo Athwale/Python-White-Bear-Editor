@@ -567,7 +567,7 @@ class MainFrame(wx.Frame):
         edit_dialog = EditAsideImageDialog(self, main_image)
         edit_dialog.ShowModal()
         self._update_article_image_sizer(main_image)
-        self.update_file_color()
+        self._update_file_color()
         edit_dialog.Destroy()
 
     def menu_logo_handler(self, event: wx.CommandEvent) -> None:
@@ -583,7 +583,7 @@ class MainFrame(wx.Frame):
         edit_dialog.display_dialog_contents()
         edit_dialog.ShowModal()
         self._update_menu_sizer(menu_item)
-        self.update_file_color()
+        self._update_file_color()
         edit_dialog.Destroy()
 
     def quit_button_handler(self, event) -> None:
@@ -708,7 +708,7 @@ class MainFrame(wx.Frame):
         :return: None
         """
         self._disable_editor(True)
-        self.update_file_color()
+        self._update_file_color()
         if doc.get_status_color() == Numbers.RED_COLOR:
             self._set_status_text(
                 Strings.status_invalid + ' ' + doc.get_filename() + ' - ' + doc.get_menu_section().get_page_name()[0])
@@ -758,7 +758,7 @@ class MainFrame(wx.Frame):
         self.field_article_name.SetBackgroundColour(color)
         self.field_article_name_tip.SetMessage(Strings.seo_check + '\n' + message)
         self.current_document_instance.set_page_name(self.field_article_name.GetValue())
-        self.update_file_color()
+        self._update_file_color()
 
     def _handle_date_change(self, event: wx.CommandEvent) -> None:
         """
@@ -770,7 +770,7 @@ class MainFrame(wx.Frame):
         self.field_article_date.SetBackgroundColour(color)
         self.field_article_date_tip.SetMessage(Strings.seo_check + '\n' + message)
         self.current_document_instance.set_date(self.field_article_date.GetValue())
-        self.update_file_color()
+        self._update_file_color()
 
     def _handle_keywords_change(self, event: wx.CommandEvent) -> None:
         """
@@ -783,7 +783,7 @@ class MainFrame(wx.Frame):
         self.field_article_keywords.SetBackgroundColour(color)
         self.field_article_keywords_tip.SetMessage(Strings.seo_check + '\n' + message)
         self.current_document_instance.set_keywords(keyword_list)
-        self.update_file_color()
+        self._update_file_color()
 
     def _handle_description_change(self, event: wx.CommandEvent) -> None:
         """
@@ -805,9 +805,9 @@ class MainFrame(wx.Frame):
 
         self.field_article_description_tip.SetMessage(Strings.seo_check + '\n' + message)
         self.current_document_instance.set_description(self.field_article_description.GetValue())
-        self.update_file_color()
+        self._update_file_color()
 
-    def update_file_color(self) -> None:
+    def _update_file_color(self) -> None:
         """
         Change the color of the currently selected file in the filelist according to the document's state.
         :return: None
@@ -844,4 +844,4 @@ class MainFrame(wx.Frame):
         :param event: Not used.
         :return: None
         """
-        self.update_file_color()
+        self._update_file_color()

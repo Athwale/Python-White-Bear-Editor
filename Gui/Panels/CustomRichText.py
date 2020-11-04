@@ -320,8 +320,6 @@ class CustomRichText(rt.RichTextCtrl):
         inserted into the current position.
         :return: None
         """
-        # TODO set document modified only if an edit has been made in the dialog
-        self._document.set_modified(True)
         self._document.add_link(link)
         if evt:
             # Replace an existing link
