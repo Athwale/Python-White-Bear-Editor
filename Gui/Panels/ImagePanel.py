@@ -22,9 +22,10 @@ class ImagePanel(wx.Panel):
         self._sizer = wx.BoxSizer(wx.VERTICAL)
         placeholder_image: wx.Image = wx.Image(Numbers.main_image_width, Numbers.main_image_height)
         placeholder_image.Replace(0, 0, 0, 245, 255, 255)
-        self._bitmap = wx.StaticBitmap(self, -1, wx.Bitmap(placeholder_image))
+        self._bitmap_button = wx.Button(self, -1, style=wx.BU_EXACTFIT | wx.BORDER_NONE)
+        self._bitmap_button.SetBitmap(wx.Bitmap(placeholder_image))
         self._label = wx.StaticText(self, -1, Strings.label_image)
-        self._sizer.Add(self._bitmap)
+        self._sizer.Add(self._bitmap_button)
         self._sizer.Add(self._label)
         self._sizer.Add((Numbers.widget_border_size, Numbers.widget_border_size))
 
@@ -41,6 +42,8 @@ class ImagePanel(wx.Panel):
 
         self.Bind(wx.EVT_CONTEXT_MENU, self.on_show_popup)
         self.Bind(wx.EVT_MENU, self.on_menu_click)
+        self.Bind(wx.EVT_BUTTON, self.on_menu_click, self._bitmap_button)
+
         self.SetSizer(self._sizer)
         self.Layout()
 
@@ -70,6 +73,6 @@ class ImagePanel(wx.Panel):
         """
         self._image = image
         self._label.SetLabelText(self._image.get_caption()[0])
-        self._bitmap.SetBitmap(wx.Bitmap(self._image.get_image()))
+        self._bitmap_button.SetBitmap(wx.Bitmap(self._image.get_image()))
         self.SetBackgroundColour(self._image.get_status_color())
         self.Layout()

@@ -276,7 +276,7 @@ class MainFrame(wx.Frame):
         self.right_vertical_sizer.Add(self.article_image_static_sizer, flag=wx.ALIGN_LEFT | wx.RIGHT, border=0)
         self.right_vertical_sizer.Add(self.side_photo_column_sizer, flag=wx.EXPAND, proportion=1,
                                       border=Numbers.widget_border_size)
-
+        # TODO rewrite comments on sizers
         # The | is a bitwise or and flags is a bit mask of constants
         self.middle_vertical_sizer.Add(self.middle_top_sizer, flag=wx.RIGHT | wx.ALIGN_LEFT | wx.EXPAND,
                                        border=Numbers.widget_border_size, proportion=0)
@@ -299,7 +299,6 @@ class MainFrame(wx.Frame):
         """
         # Insert GUI widgets into the sizers created above.
         # Logo section -------------------------------------------------------------------------------------------------
-        # TODO react to right click on main image in the same way and left click on side panel images
         # Create a placeholder image
         placeholder_logo_image = wx.Image(Numbers.menu_logo_image_size, Numbers.menu_logo_image_size)
         placeholder_logo_image.Replace(0, 0, 0, 245, 255, 255)

@@ -26,6 +26,7 @@ class AsideImagePanel(wx.lib.scrolledpanel.ScrolledPanel):
         self._sizer = wx.BoxSizer(wx.VERTICAL)
         self.SetSizer(self._sizer)
         self.Bind(wx.EVT_MENU, self.on_image_modify)
+        self.Bind(wx.EVT_BUTTON, self.on_image_modify)
 
     def on_image_modify(self, event: wx.CommandEvent):
         """
