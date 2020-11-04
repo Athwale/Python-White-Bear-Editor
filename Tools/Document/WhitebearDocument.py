@@ -98,15 +98,19 @@ class WhitebearDocument:
         :param keywords: The name to check
         :return: Return False, error string and new status color if incorrect.
         """
-        keywords_error_message = None
+        keywords_error_message = Strings.status_ok
         result = True
+        color = Numbers.GREEN_COLOR
         keywords_length = 0
         for word in keywords:
             keywords_length += len(word)
         if keywords_length < Numbers.keywords_min_length or keywords_length > Numbers.keywords_max_length:
             keywords_error_message = Strings.seo_error_keywords_length
             result = False
-        return result, keywords_error_message, Numbers.RED_COLOR
+
+        if not result:
+            color = Numbers.RED_COLOR
+        return result, keywords_error_message, color
 
     @staticmethod
     def seo_test_description(description: str) -> (bool, str, wx.Colour):
@@ -115,8 +119,9 @@ class WhitebearDocument:
         :param description: The name to check
         :return: Return False, error string and new status color if incorrect.
         """
-        description_error_message = None
+        description_error_message = Strings.status_ok
         result = True
+        color = Numbers.GREEN_COLOR
         if len(description) < Numbers.description_min_length or len(description) > Numbers.description_max_length:
             description_error_message = Strings.seo_error_description_length
             result = False
@@ -124,7 +129,10 @@ class WhitebearDocument:
         if description == Strings.label_article_description:
             description_error_message = Strings.seo_error_default_value
             result = False
-        return result, description_error_message, Numbers.RED_COLOR
+
+        if not result:
+            color = Numbers.RED_COLOR
+        return result, description_error_message, color
 
     def seo_test_self_basic(self) -> None:
         """

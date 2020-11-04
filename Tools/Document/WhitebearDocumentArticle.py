@@ -90,15 +90,19 @@ class WhitebearDocumentArticle(WhitebearDocument):
         :param name: The name to check
         :return: Return False, error string and new status color if incorrect.
         """
-        page_name_error_message = None
+        page_name_error_message = Strings.status_ok
         result = True
+        color = Numbers.GREEN_COLOR
         if len(name) < Numbers.article_name_min_length or len(name) > Numbers.article_name_max_length:
             page_name_error_message = Strings.seo_error_name_length
             result = False
         if name == Strings.label_article_title:
             page_name_error_message = Strings.seo_error_default_value
             result = False
-        return result, page_name_error_message, Numbers.RED_COLOR
+
+        if not result:
+            color = Numbers.RED_COLOR
+        return result, page_name_error_message, color
 
     def seo_test_date(self, date: str) -> (bool, str, wx.Colour):
         """
@@ -106,8 +110,9 @@ class WhitebearDocumentArticle(WhitebearDocument):
         :param date: The name to check
         :return: Return False, error string and new status color if incorrect.
         """
-        date_error_message = None
+        date_error_message = Strings.status_ok
         result = True
+        color = Numbers.GREEN_COLOR
         if not re.search(self._date_regex, date):
             date_error_message = Strings.seo_error_date_format
             result = False
@@ -122,7 +127,10 @@ class WhitebearDocumentArticle(WhitebearDocument):
             if int(year) < Numbers.year_min or int(year) > Numbers.year_max:
                 date_error_message = Strings.seo_error_date_format_year
                 result = False
-        return result, date_error_message, Numbers.RED_COLOR
+
+        if not result:
+            color = Numbers.RED_COLOR
+        return result, date_error_message, color
 
     def seo_test_self(self) -> None:
         """

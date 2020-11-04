@@ -41,7 +41,8 @@ class MainFrame(wx.Frame):
         self.tool_ids = []
         self.disableable_menu_items = []
         self.document_dictionary = {}
-        self.current_document = None
+        self.current_document_name = None
+        self.current_document_instance = None
         self.css_colors = None
 
         self._init_status_bar()
@@ -417,6 +418,10 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_SPLITTER_SASH_POS_CHANGING, self.splitter_size_change_handler, self.split_screen)
         self.Bind(wx.EVT_BUTTON, self.main_image_handler, self._main_image_button)
         self.Bind(wx.EVT_BUTTON, self.menu_logo_handler, self._menu_logo_button)
+        self.Bind(wx.EVT_TEXT, self._handle_name_change, self.field_article_name)
+        self.Bind(wx.EVT_TEXT, self._handle_date_change, self.field_article_date)
+        self.Bind(wx.EVT_TEXT, self._handle_keywords_change, self.field_article_keywords)
+        self.Bind(wx.EVT_TEXT, self._handle_description_change, self.field_article_description)
 
     def _set_status_text(self, text: str, position=0) -> None:
         """
@@ -558,7 +563,7 @@ class MainFrame(wx.Frame):
         :param event: Not used
         :return: None
         """
-        main_image: AsideImage = self.document_dictionary[self.current_document].get_article_image()
+        main_image: AsideImage = self.current_document_instance.get_article_image()
         edit_dialog = EditAsideImageDialog(self, main_image)
         edit_dialog.ShowModal()
         self._update_article_image_sizer(main_image)
@@ -571,7 +576,7 @@ class MainFrame(wx.Frame):
         :param event: Not used
         :return: None
         """
-        menu_item: MenuItem = self.document_dictionary[self.current_document].get_menu_item()
+        menu_item: MenuItem = self.current_document_instance.get_menu_item()
         edit_dialog = EditMenuItemDialog(self, menu_item)
         # We first need to show the dialog so that the name label can calculate it's size and then switch to modal.
         edit_dialog.Show()
@@ -655,14 +660,14 @@ class MainFrame(wx.Frame):
         :return: None
         """
         self._disable_editor(True)
-        self.current_document = event.GetText()
-        selected_document = self.document_dictionary[self.current_document]
+        self.current_document_name = event.GetText()
+        self.current_document_instance: WhitebearDocumentArticle = self.document_dictionary[self.current_document_name]
         try:
-            result = selected_document.validate_self()
+            result = self.current_document_instance.validate_self()
             if not result[0]:
-                self._set_status_text(Strings.status_invalid + ' ' + self.current_document)
+                self._set_status_text(Strings.status_invalid + ' ' + self.current_document_name)
                 # Prepare error string from all validation errors
-                error_string = Strings.exception_html_syntax_error + ': ' + self.current_document + '\n'
+                error_string = Strings.exception_html_syntax_error + ': ' + self.current_document_name + '\n'
                 for message in result[1]:
                     error_string = error_string + message + '\n'
                 self._show_error_dialog(error_string)
@@ -676,7 +681,7 @@ class MainFrame(wx.Frame):
             self._show_error_dialog(Strings.exception_last_document_missing)
             return
         # If the document is correct, now we can show it.
-        self._fill_editor(selected_document)
+        self._fill_editor(self.current_document_instance)
 
     def reload_button_handler(self, event):
         """
@@ -684,14 +689,13 @@ class MainFrame(wx.Frame):
         :param event: wx event, not used.
         :return: None
         """
-        # TODO filelist does not change color
         reload_dialog = wx.MessageDialog(self, Strings.text_reload_from_disk, Strings.status_warning,
                                          wx.YES_NO | wx.ICON_WARNING)
         result = reload_dialog.ShowModal()
         if result == wx.ID_YES:
             selected_item = self.page_list.GetItem(self.page_list.GetFirstSelected())
-            self.document_dictionary[selected_item.GetText()].get_menu_section().parse_self()
-            self.document_dictionary[selected_item.GetText()].parse_self()
+            self.current_document_instance.get_menu_section().parse_self()
+            self.current_document_instance.parse_self()
             event = wx.ListEvent()
             event.SetItem(selected_item)
             self.list_item_click_handler(event)
@@ -724,11 +728,8 @@ class MainFrame(wx.Frame):
                 tip.SetMessage(Strings.seo_check + '\n' + value[0][1])
                 tip.EnableTip(True)
                 tip.DoShowNow()
-                field.SetBackgroundColour(Numbers.RED_COLOR)
             else:
-                tip.SetMessage(Strings.seo_check + '\n' + Strings.status_ok)
                 tip.DoHideNow()
-                field.SetBackgroundColour(Numbers.GREEN_COLOR)
             field.SetValue(value[0][0])
 
         # Set main and menu images
@@ -737,27 +738,66 @@ class MainFrame(wx.Frame):
 
         # Set aside images
         self.side_photo_panel.load_document_images(doc)
-        self.main_text_area.set_content(self.document_dictionary[self.current_document])
+        self.main_text_area.set_content(doc)
 
         # Set main image caption
-        self._text_main_image_caption.SetLabelText(self.document_dictionary[self.current_document].get_article_image().
-                                                   get_caption()[0])
+        self._text_main_image_caption.SetLabelText(doc.get_article_image().get_caption()[0])
 
         # Set menu item name
-        self._update_menu_sizer(self.document_dictionary[self.current_document].get_menu_item())
+        self._update_menu_sizer(doc.get_menu_item())
 
         self._disable_editor(False)
+
+    def _handle_name_change(self, event: wx.CommandEvent) -> None:
+        """
+        Handle changes to the article name field real time.
+        :param event: Not used
+        :return: None
+        """
+        _, message, color = self.current_document_instance.seo_test_name(self.field_article_name.GetValue())
+        self.field_article_name.SetBackgroundColour(color)
+        self.field_article_name_tip.SetMessage(Strings.seo_check + '\n' + message)
+
+    def _handle_date_change(self, event: wx.CommandEvent) -> None:
+        """
+        Handle changes to the article date field real time.
+        :param event: Not used
+        :return: None
+        """
+        _, message, color = self.current_document_instance.seo_test_date(self.field_article_date.GetValue())
+        self.field_article_date.SetBackgroundColour(color)
+        self.field_article_date_tip.SetMessage(Strings.seo_check + '\n' + message)
+
+    def _handle_keywords_change(self, event: wx.CommandEvent) -> None:
+        """
+        Handle changes to the article keywords field real time.
+        :param event: Not used
+        :return: None
+        """
+        _, message, color = self.current_document_instance.seo_test_keywords(self.field_article_keywords.GetValue())
+        self.field_article_keywords.SetBackgroundColour(color)
+        self.field_article_keywords_tip.SetMessage(Strings.seo_check + '\n' + message)
+
+    def _handle_description_change(self, event: wx.CommandEvent) -> None:
+        """
+        Handle changes to the article description field real time.
+        :param event: Not used
+        :return: None
+        """
+        _, message, color = self.current_document_instance.seo_test_description(
+            self.field_article_description.GetValue())
+        self.field_article_description.SetBackgroundColour(color)
+        self.field_article_description_tip.SetMessage(Strings.seo_check + '\n' + message)
 
     def update_file_color(self) -> None:
         """
         Change the color of the currently selected file in the filelist according to the document's state.
         :return: None
         """
-        document_instance = self.document_dictionary[self.current_document]
-        if document_instance.is_modified():
-            new_color = document_instance.get_status_color()
-            selected_item = self.page_list.GetFirstSelected()
-            self.page_list.SetItemBackgroundColour(selected_item, new_color)
+        document_instance = self.document_dictionary[self.current_document_name]
+        new_color = document_instance.get_status_color()
+        selected_item = self.page_list.GetFirstSelected()
+        self.page_list.SetItemBackgroundColour(selected_item, new_color)
 
     def _update_menu_sizer(self, menu_item: MenuItem) -> None:
         """
