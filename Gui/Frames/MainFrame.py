@@ -732,7 +732,7 @@ class MainFrame(wx.Frame):
                 tip.DoHideNow()
             field.SetValue(value[0][0])
 
-        # Set main and menu images
+        # Set main image
         self._main_image_button.SetBitmap(wx.Bitmap(doc.get_article_image().get_image()))
         self._menu_logo_button.SetBitmap(wx.Bitmap(doc.get_menu_item().get_image()))
 
@@ -757,9 +757,8 @@ class MainFrame(wx.Frame):
         correct, message, color = self.current_document_instance.seo_test_name(self.field_article_name.GetValue())
         self.field_article_name.SetBackgroundColour(color)
         self.field_article_name_tip.SetMessage(Strings.seo_check + '\n' + message)
-        if correct:
-            self.current_document_instance.set_page_name(self.field_article_name.GetValue())
-            self.update_file_color()
+        self.current_document_instance.set_page_name(self.field_article_name.GetValue())
+        self.update_file_color()
 
     def _handle_date_change(self, event: wx.CommandEvent) -> None:
         """
@@ -770,9 +769,8 @@ class MainFrame(wx.Frame):
         correct, message, color = self.current_document_instance.seo_test_date(self.field_article_date.GetValue())
         self.field_article_date.SetBackgroundColour(color)
         self.field_article_date_tip.SetMessage(Strings.seo_check + '\n' + message)
-        if correct:
-            self.current_document_instance.set_date(self.field_article_date.GetValue())
-            self.update_file_color()
+        self.current_document_instance.set_date(self.field_article_date.GetValue())
+        self.update_file_color()
 
     def _handle_keywords_change(self, event: wx.CommandEvent) -> None:
         """
@@ -784,9 +782,8 @@ class MainFrame(wx.Frame):
         correct, message, color = self.current_document_instance.seo_test_keywords(keyword_list)
         self.field_article_keywords.SetBackgroundColour(color)
         self.field_article_keywords_tip.SetMessage(Strings.seo_check + '\n' + message)
-        if correct:
-            self.current_document_instance.set_keywords(keyword_list)
-            self.update_file_color()
+        self.current_document_instance.set_keywords(keyword_list)
+        self.update_file_color()
 
     def _handle_description_change(self, event: wx.CommandEvent) -> None:
         """
@@ -796,11 +793,19 @@ class MainFrame(wx.Frame):
         """
         correct, message, color = self.current_document_instance.seo_test_description(
             self.field_article_description.GetValue())
+
+        # Set color
         self.field_article_description.SetBackgroundColour(color)
+        style_carrier = wx.TextAttr()
+
+        # Set color for the current text separately, it does not work with just background color
+        self.field_article_description.GetStyle(0, style_carrier)
+        style_carrier.SetBackgroundColour(color)
+        self.field_article_description.SetStyle(0, len(self.field_article_description.GetValue()), style_carrier)
+
         self.field_article_description_tip.SetMessage(Strings.seo_check + '\n' + message)
-        if correct:
-            self.current_document_instance.set_description(self.field_article_description.GetValue())
-            self.update_file_color()
+        self.current_document_instance.set_description(self.field_article_description.GetValue())
+        self.update_file_color()
 
     def update_file_color(self) -> None:
         """
