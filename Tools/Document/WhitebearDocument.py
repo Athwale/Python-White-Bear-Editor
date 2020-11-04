@@ -91,6 +91,41 @@ class WhitebearDocument:
             minimized = minimized.replace('<br> ', '<br>')
             self._parsed_html = BeautifulSoup(minimized, 'html5lib')
 
+    @staticmethod
+    def seo_test_keywords(keywords: str) -> (bool, str, wx.Colour):
+        """
+        SEO test keywords and return False, error string and new status color if incorrect.
+        :param keywords: The name to check
+        :return: Return False, error string and new status color if incorrect.
+        """
+        keywords_error_message = None
+        result = True
+        keywords_length = 0
+        for word in keywords:
+            keywords_length += len(word)
+        if keywords_length < Numbers.keywords_min_length or keywords_length > Numbers.keywords_max_length:
+            keywords_error_message = Strings.seo_error_keywords_length
+            result = False
+        return result, keywords_error_message, Numbers.RED_COLOR
+
+    @staticmethod
+    def seo_test_description(description: str) -> (bool, str, wx.Colour):
+        """
+        SEO test description and return False, error string and new status color if incorrect.
+        :param description: The name to check
+        :return: Return False, error string and new status color if incorrect.
+        """
+        description_error_message = None
+        result = True
+        if len(description) < Numbers.description_min_length or len(description) > Numbers.description_max_length:
+            description_error_message = Strings.seo_error_description_length
+            result = False
+
+        if description == Strings.label_article_description:
+            description_error_message = Strings.seo_error_default_value
+            result = False
+        return result, description_error_message, Numbers.RED_COLOR
+
     def seo_test_self_basic(self) -> None:
         """
         Perform basic SEO self test and change internal instance state accordingly. If description or
@@ -105,22 +140,17 @@ class WhitebearDocument:
         if not self._status_color:
             self._status_color = wx.WHITE
 
-        keywords_length = 0
-        for word in self._meta_keywords:
-            keywords_length += len(word)
-        if keywords_length < Numbers.keywords_min_length or keywords_length > Numbers.keywords_max_length:
-            self._keywords_error_message = Strings.seo_error_keywords_length
-            self.set_status_color(Numbers.RED_COLOR)
+        # Check meta keywords
+        keywords_result, error, color = self.seo_test_keywords(self._meta_keywords)
+        if not keywords_result:
+            self._keywords_error_message = error
+            self.set_status_color(color)
 
         # Check meta description
-        if len(self._meta_description) < Numbers.description_min_length or len(
-                self._meta_description) > Numbers.description_max_length:
-            self._description_error_message = Strings.seo_error_description_length
-            self.set_status_color(Numbers.RED_COLOR)
-
-        if self._meta_description == Strings.label_article_description:
-            self._description_error_message = Strings.seo_error_default_value
-            self.set_status_color(Numbers.RED_COLOR)
+        description_result, error, color = self.seo_test_description(self._meta_description)
+        if not description_result:
+            self._description_error_message = error
+            self.set_status_color(color)
 
     # Boolean functions ------------------------------------------------------------------------------------------------
     def is_valid(self) -> bool:

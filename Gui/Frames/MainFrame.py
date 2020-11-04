@@ -252,9 +252,7 @@ class MainFrame(wx.Frame):
         # Create sizers that go into the panels.
         # Contains file list of pages
         self.filelist_column_sizer = wx.BoxSizer(wx.VERTICAL)
-        # Contains right top sizer, right bottom sizer
         self.right_main_vertical_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        # Contains article image sizer, article data sizer, menu logo static sizer
         self.middle_top_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.right_vertical_sizer = wx.BoxSizer(wx.VERTICAL)
         # Contains main article image
@@ -266,7 +264,7 @@ class MainFrame(wx.Frame):
         # Contains menu logo controls
         self.menu_logo_static_sizer = wx.StaticBoxSizer(wx.VERTICAL, self.right_panel,
                                                         label=Strings.label_article_menu_logo)
-        # Contains main text area, photo column sizer
+        # Contains main text area, middle top sizer
         self.middle_vertical_sizer = wx.BoxSizer(wx.VERTICAL)
 
         # Contains article photos
@@ -276,7 +274,6 @@ class MainFrame(wx.Frame):
         self.right_vertical_sizer.Add(self.article_image_static_sizer, flag=wx.ALIGN_LEFT | wx.RIGHT, border=0)
         self.right_vertical_sizer.Add(self.side_photo_column_sizer, flag=wx.EXPAND, proportion=1,
                                       border=Numbers.widget_border_size)
-        # TODO rewrite comments on sizers
         # The | is a bitwise or and flags is a bit mask of constants
         self.middle_vertical_sizer.Add(self.middle_top_sizer, flag=wx.RIGHT | wx.ALIGN_LEFT | wx.EXPAND,
                                        border=Numbers.widget_border_size, proportion=0)
@@ -687,6 +684,7 @@ class MainFrame(wx.Frame):
         :param event: wx event, not used.
         :return: None
         """
+        # TODO filelist does not change color
         reload_dialog = wx.MessageDialog(self, Strings.text_reload_from_disk, Strings.status_warning,
                                          wx.YES_NO | wx.ICON_WARNING)
         result = reload_dialog.ShowModal()

@@ -83,43 +83,69 @@ class WhitebearDocumentArticle(WhitebearDocument):
         self._parse_main_text()
         self.seo_test_self()
 
+    @staticmethod
+    def seo_test_name(name: str) -> (bool, str, wx.Colour):
+        """
+        SEO test article name and return False, error string and new status color if incorrect.
+        :param name: The name to check
+        :return: Return False, error string and new status color if incorrect.
+        """
+        page_name_error_message = None
+        result = True
+        if len(name) < Numbers.article_name_min_length or len(name) > Numbers.article_name_max_length:
+            page_name_error_message = Strings.seo_error_name_length
+            result = False
+        if name == Strings.label_article_title:
+            page_name_error_message = Strings.seo_error_default_value
+            result = False
+        return result, page_name_error_message, Numbers.RED_COLOR
+
+    def seo_test_date(self, date: str) -> (bool, str, wx.Colour):
+        """
+        SEO test date and return False, error string and new status color if incorrect.
+        :param date: The name to check
+        :return: Return False, error string and new status color if incorrect.
+        """
+        date_error_message = None
+        result = True
+        if not re.search(self._date_regex, date):
+            date_error_message = Strings.seo_error_date_format
+            result = False
+        else:
+            day, _, year = date.split(' ', 3)
+            # Check day range
+            if int(day.replace('.', '')) < 1 or int(day.replace('.', '')) > 31:
+                date_error_message = Strings.seo_error_date_format_day
+                result = False
+
+            # Check year range
+            if int(year) < Numbers.year_min or int(year) > Numbers.year_max:
+                date_error_message = Strings.seo_error_date_format_year
+                result = False
+        return result, date_error_message, Numbers.RED_COLOR
+
     def seo_test_self(self) -> None:
         """
         Perform a SEO test on this document.
         :return: None
         """
-        # TODO Run self test on every setter method.
         # TODO backup color in case it is blue
         # Check meta keywords and description
         super(WhitebearDocumentArticle, self).seo_test_self_basic()
-        # Check page name length must be at least 3 and must not be default
         # Clear all errors on every new test
         self._date_error_message: str = ''
 
-        if len(self._page_name) < Numbers.article_name_min_length or len(
-                self._page_name) > Numbers.article_name_max_length:
-            self._page_name_error_message = Strings.seo_error_name_length
-            self.set_status_color(Numbers.RED_COLOR)
-
-        if self._page_name == Strings.label_article_title:
-            self._page_name_error_message = Strings.seo_error_default_value
-            self.set_status_color(Numbers.RED_COLOR)
+        # Check page name length must be at least 3 and must not be default
+        name_result, error, color = self.seo_test_name(self._page_name)
+        if not name_result:
+            self._page_name_error_message = error
+            self.set_status_color(color)
 
         # Check date format
-        if not re.search(self._date_regex, self._date):
-            self._date_error_message = Strings.seo_error_date_format
-            self.set_status_color(Numbers.RED_COLOR)
-        else:
-            day, _, year = self._date.split(' ', 3)
-            # Check day range
-            if int(day.replace('.', '')) < 1 or int(day.replace('.', '')) > 31:
-                self._date_error_message = Strings.seo_error_date_format_day
-                self.set_status_color(Numbers.RED_COLOR)
-
-            # Check year range
-            if int(year) < Numbers.year_min or int(year) > Numbers.year_max:
-                self._date_error_message = Strings.seo_error_date_format_year
-                self.set_status_color(Numbers.RED_COLOR)
+        date_result, error, color = self.seo_test_date(self._date)
+        if not date_result:
+            self._date_error_message = error
+            self.set_status_color(color)
 
         # Test main image
         if not self._article_image.seo_test_self():
