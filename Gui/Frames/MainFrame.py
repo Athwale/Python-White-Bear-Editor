@@ -42,7 +42,7 @@ class MainFrame(wx.Frame):
         self.disableable_menu_items = []
         self.document_dictionary = {}
         self.current_document_name = None
-        self.current_document_instance = None
+        self.current_document_instance: WhitebearDocumentArticle = None
         self.css_colors = None
 
         self._init_status_bar()
@@ -754,9 +754,12 @@ class MainFrame(wx.Frame):
         :param event: Not used
         :return: None
         """
-        _, message, color = self.current_document_instance.seo_test_name(self.field_article_name.GetValue())
+        correct, message, color = self.current_document_instance.seo_test_name(self.field_article_name.GetValue())
         self.field_article_name.SetBackgroundColour(color)
         self.field_article_name_tip.SetMessage(Strings.seo_check + '\n' + message)
+        if correct:
+            self.current_document_instance.set_page_name(self.field_article_name.GetValue())
+            self.update_file_color()
 
     def _handle_date_change(self, event: wx.CommandEvent) -> None:
         """
@@ -764,9 +767,12 @@ class MainFrame(wx.Frame):
         :param event: Not used
         :return: None
         """
-        _, message, color = self.current_document_instance.seo_test_date(self.field_article_date.GetValue())
+        correct, message, color = self.current_document_instance.seo_test_date(self.field_article_date.GetValue())
         self.field_article_date.SetBackgroundColour(color)
         self.field_article_date_tip.SetMessage(Strings.seo_check + '\n' + message)
+        if correct:
+            self.current_document_instance.set_date(self.field_article_date.GetValue())
+            self.update_file_color()
 
     def _handle_keywords_change(self, event: wx.CommandEvent) -> None:
         """
@@ -774,9 +780,13 @@ class MainFrame(wx.Frame):
         :param event: Not used
         :return: None
         """
-        _, message, color = self.current_document_instance.seo_test_keywords(self.field_article_keywords.GetValue())
+        keyword_list = [word.strip() for word in self.field_article_keywords.GetValue().split(',')]
+        correct, message, color = self.current_document_instance.seo_test_keywords(keyword_list)
         self.field_article_keywords.SetBackgroundColour(color)
         self.field_article_keywords_tip.SetMessage(Strings.seo_check + '\n' + message)
+        if correct:
+            self.current_document_instance.set_keywords(keyword_list)
+            self.update_file_color()
 
     def _handle_description_change(self, event: wx.CommandEvent) -> None:
         """
@@ -784,10 +794,13 @@ class MainFrame(wx.Frame):
         :param event: Not used
         :return: None
         """
-        _, message, color = self.current_document_instance.seo_test_description(
+        correct, message, color = self.current_document_instance.seo_test_description(
             self.field_article_description.GetValue())
         self.field_article_description.SetBackgroundColour(color)
         self.field_article_description_tip.SetMessage(Strings.seo_check + '\n' + message)
+        if correct:
+            self.current_document_instance.set_description(self.field_article_description.GetValue())
+            self.update_file_color()
 
     def update_file_color(self) -> None:
         """

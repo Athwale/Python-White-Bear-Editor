@@ -516,5 +516,6 @@ class WhitebearDocumentArticle(WhitebearDocument):
         :param date: New article creation date.
         :return: None
         """
-        self._date = date
-        self.set_modified(True)
+        if date != self._date:
+            self._date = date
+            self.set_modified(True)

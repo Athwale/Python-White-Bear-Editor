@@ -92,10 +92,10 @@ class WhitebearDocument:
             self._parsed_html = BeautifulSoup(minimized, 'html5lib')
 
     @staticmethod
-    def seo_test_keywords(keywords: str) -> (bool, str, wx.Colour):
+    def seo_test_keywords(keywords: [str]) -> (bool, str, wx.Colour):
         """
         SEO test keywords and return False, error string and new status color if incorrect.
-        :param keywords: The name to check
+        :param keywords: The keyword list to check
         :return: Return False, error string and new status color if incorrect.
         """
         keywords_error_message = Strings.status_ok
@@ -116,7 +116,7 @@ class WhitebearDocument:
     def seo_test_description(description: str) -> (bool, str, wx.Colour):
         """
         SEO test description and return False, error string and new status color if incorrect.
-        :param description: The name to check
+        :param description: The description to check
         :return: Return False, error string and new status color if incorrect.
         """
         description_error_message = Strings.status_ok
@@ -247,8 +247,9 @@ class WhitebearDocument:
         :param name: New article name for the web page.
         :return: None
         """
-        self._page_name = name
-        self.set_modified(True)
+        if name != self._page_name:
+            self._page_name = name
+            self.set_modified(True)
 
     def set_description(self, description: str) -> None:
         """
@@ -257,18 +258,20 @@ class WhitebearDocument:
         :param description: New description for the web page.
         :return: None
         """
-        self._meta_description = description
-        self.set_modified(True)
+        if self._meta_description != description:
+            self._meta_description = description
+            self.set_modified(True)
 
-    def set_keywords(self, keywords: str) -> None:
+    def set_keywords(self, keywords: [str]) -> None:
         """
         Set the new keywords of the web page.
         Change modified attribute to True.
-        :param keywords: New keywords for the web page.
+        :param keywords: New keywords list for the web page.
         :return: None
         """
-        self._meta_keywords = keywords
-        self.set_modified(True)
+        if self._meta_keywords != keywords:
+            self._meta_keywords = keywords
+            self.set_modified(True)
 
     def set_parsed_html(self, parsed_html) -> None:
         """
