@@ -69,9 +69,24 @@ soup.body.div.p ...
 
 styledTextCtrl, syntax highlighting Scintilla
 
-
-
-
+    def on_keypress(self, event):
+        """
+        :param event:
+        :return:
+        """
+        current_style = self._stylesheet.FindParagraphStyle(Strings.style_paragraph).GetStyle().GetParagraphStyleName()
+        current_position = self.GetCaretPosition()
+        print('pos: ' + str(current_position))
+        print('previous: ' + str(
+            str(self._get_style_at_pos(current_position - 1)) + ' ' + self.GetRange(current_position - 1,
+                                                                                    current_position)))
+        print('current: ' + str(
+            str(self._get_style_at_pos(current_position + 1)) + ' ' + self.GetRange(current_position,
+                                                                                    current_position + 1)))
+        print('next: ' + str(
+            str(self._get_style_at_pos(current_position + 2)) + ' ' + self.GetRange(current_position + 1,
+                                                                                    current_position + 2)))
+        event.Skip()
 
 
 

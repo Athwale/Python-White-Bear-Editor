@@ -353,76 +353,21 @@ class CustomRichText(rt.RichTextCtrl):
         style_carrier = rt.RichTextAttr()
         self.GetStyle(position, style_carrier)
         if style_carrier.GetCharacterStyleName():
-            return style_carrier.GetCharacterStyleName(), style_carrier.HasURL()
-        return style_carrier.GetParagraphStyleName(), style_carrier.HasURL()
+            # HasUrl()
+            return style_carrier.GetCharacterStyleName()
+        return style_carrier.GetParagraphStyleName()
 
     def on_keypress(self, event):
         """
         :param event:
         :return:
         """
-        print(self._style_control.GetValue())
-        current_style = self._stylesheet.FindParagraphStyle(Strings.style_paragraph).GetStyle().GetParagraphStyleName()
+        print('current style: ' + self._style_control.GetValue())
         current_position = self.GetCaretPosition()
-        print('pos: ' + str(current_position))
-        print('previous: ' + str(
-            str(self._get_style_at_pos(current_position - 1)) + ' ' + self.GetRange(current_position - 1,
-                                                                                    current_position)))
-        print('current: ' + str(
-            str(self._get_style_at_pos(current_position + 1)) + ' ' + self.GetRange(current_position,
-                                                                                    current_position + 1)))
-        print('next: ' + str(
-            str(self._get_style_at_pos(current_position + 2)) + ' ' + self.GetRange(current_position + 1,
-                                                                                    current_position + 2)))
-
+        print('previous: ' + str(self._get_style_at_pos(current_position - 1)) + ' ' +
+              str(self.GetRange(current_position - 1, current_position)))
+        print('current pos: ' + str(current_position) + ' ' + str(self._get_style_at_pos(current_position + 1)) + ' ' +
+              str(self.GetRange(current_position, current_position + 1)))
+        print('next: ' + str(self._get_style_at_pos(current_position + 2)) + ' ' +
+              str(self.GetRange(current_position + 1, current_position + 2)))
         event.Skip()
-
-    def insert_sample_text(self) -> None:
-        if True:
-            self.ApplyStyle(self._stylesheet.FindParagraphStyle(Strings.style_paragraph))
-            self.BeginParagraphStyle(Strings.style_paragraph)
-            self.WriteText('paragraph1')
-            self.EndParagraphStyle()
-
-            self.Newline()
-
-            self.ApplyStyle(self._stylesheet.FindParagraphStyle(Strings.style_heading_3))
-            self.BeginParagraphStyle(Strings.style_heading_3)
-            self.WriteText('Heading3')
-            self.WriteText('\n')
-            self.EndParagraphStyle()
-
-            self.ApplyStyle(self._stylesheet.FindParagraphStyle(Strings.style_paragraph))
-            self.BeginParagraphStyle(Strings.style_paragraph)
-            self.WriteText('paragraph2')
-            self.EndParagraphStyle()
-
-            self.Newline()
-
-            self.ApplyStyle(self._stylesheet.FindParagraphStyle(Strings.style_list))
-            self.BeginParagraphStyle(Strings.style_list)
-            self.WriteText('List item 1\n')
-            self.WriteText('List item 2\n')
-            self.WriteText('List item 3\n')
-            self.EndParagraphStyle()
-
-            self.ApplyStyle(self._stylesheet.FindParagraphStyle(Strings.style_paragraph))
-            self.BeginParagraphStyle(Strings.style_paragraph)
-            self.WriteText('paragraph4')
-            self.EndParagraphStyle()
-
-            self.Newline()
-
-            self.ApplyStyle(self._stylesheet.FindParagraphStyle(Strings.style_image))
-            self.BeginParagraphStyle(Strings.style_image)
-            field = self.WriteField('imageFieldType', rt.RichTextProperties())
-            field.SetName('image1')
-            self.WriteText('\n')
-            self.EndParagraphStyle()
-
-            self.ApplyStyle(self._stylesheet.FindParagraphStyle(Strings.style_paragraph))
-            self.BeginParagraphStyle(Strings.style_paragraph)
-            self.WriteText('paragraph5 sample of a longer text for testing url creation')
-            self.EndParagraphStyle()
-
-            self.Newline()

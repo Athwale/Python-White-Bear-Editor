@@ -190,6 +190,7 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.forward_event, self.insert_img_tool)
         self.Bind(wx.EVT_MENU, self.forward_event, self.insert_link_tool)
         self.Bind(wx.EVT_MENU, self.forward_event, self.bold_tool)
+        self.Bind(wx.EVT_MENU, self.save_document_handler, self.save_tool)
         self.tool_bar.Realize()
 
     def _create_color_tool(self, name: str, toolbar: wx.ToolBar, color: wx.Colour) -> None:
@@ -378,8 +379,8 @@ class MainFrame(wx.Frame):
         :return: None
         """
         # Main text area section ---------------------------------------------------------------------------------------
-        self.main_text_area = CustomRichText(self.style_control, self.right_panel, style=wx.VSCROLL)
-        self.middle_vertical_sizer.Add(self.main_text_area, flag=wx.EXPAND | wx.TOP, proportion=1,
+        self._main_text_area = CustomRichText(self.style_control, self.right_panel, style=wx.VSCROLL)
+        self.middle_vertical_sizer.Add(self._main_text_area, flag=wx.EXPAND | wx.TOP, proportion=1,
                                        border=Numbers.widget_border_size)
         # --------------------------------------------------------------------------------------------------------------
 
@@ -532,7 +533,7 @@ class MainFrame(wx.Frame):
         :param evt: Event to forward
         :return: None
         """
-        self.main_text_area.ProcessEvent(evt)
+        self._main_text_area.ProcessEvent(evt)
 
     def on_color(self, evt: wx.CommandEvent) -> None:
         """
@@ -544,18 +545,37 @@ class MainFrame(wx.Frame):
         attr = wx.TextAttr()
         attr.SetFlags(wx.TEXT_ATTR_TEXT_COLOUR)
         # TODO what is this colour data??
-        if self.main_text_area.GetStyle(self.main_text_area.GetInsertionPoint(), attr):
+        if self._main_text_area.GetStyle(self._main_text_area.GetInsertionPoint(), attr):
             colour_data.SetColour(attr.GetTextColour())
 
         tool: wx.ToolBarToolBase = self.tool_bar.FindById(evt.GetId())
         color = self.css_colors[tool.GetShortHelp()]
-        if not self.main_text_area.HasSelection():
-            self.main_text_area.BeginTextColour(color)
+        if not self._main_text_area.HasSelection():
+            self._main_text_area.BeginTextColour(color)
         else:
-            r = self.main_text_area.GetSelectionRange()
+            r = self._main_text_area.GetSelectionRange()
             attr.SetFlags(wx.TEXT_ATTR_TEXT_COLOUR)
             attr.SetTextColour(color)
-            self.main_text_area.SetStyle(r, attr)
+            self._main_text_area.SetStyle(r, attr)
+
+    def save_document_handler(self, event: wx.CommandEvent) -> None:
+        """
+
+        :param event:
+        :return: None
+        """
+        # TODO this
+        wildcard, types = rt.RichTextBuffer.GetExtWildcard(save=True)
+        dlg = wx.FileDialog(self, "Choose a filename", wildcard=wildcard, style=wx.FD_SAVE)
+        if dlg.ShowModal() == wx.ID_OK:
+            path = dlg.GetPath()
+            if path:
+                file_type = types[dlg.GetFilterIndex()]
+                ext = rt.RichTextBuffer.FindHandlerByType(file_type).GetExtension()
+                if not path.endswith(ext):
+                    path += '.' + ext
+                self._main_text_area.SaveFile(path, file_type)
+        dlg.Destroy()
 
     def main_image_handler(self, event: wx.CommandEvent) -> None:
         """
@@ -683,6 +703,8 @@ class MainFrame(wx.Frame):
         # If the document is correct, now we can show it.
         self._fill_editor(self.current_document_instance)
 
+    # TODO write save function
+
     def reload_button_handler(self, event):
         """
         Reparse the selected file from disk. Used in case the user has to fix something in html or images.
@@ -738,7 +760,7 @@ class MainFrame(wx.Frame):
 
         # Set aside images
         self.side_photo_panel.load_document_images(doc)
-        self.main_text_area.set_content(doc)
+        self._main_text_area.set_content(doc)
 
         # Set main image caption
         self._text_main_image_caption.SetLabelText(doc.get_article_image().get_caption()[0])
