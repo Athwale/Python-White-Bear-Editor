@@ -27,6 +27,16 @@ class RichTextFrame(wx.Frame):
         self._create_styles()
         self._insert_sample_text()
         self.rtc.Bind(wx.EVT_KEY_UP, self.on_keypress, self.rtc)
+        self.rtc.Bind(wx.EVT_TEXT_URL, self.url_in_text_click_handler, self.rtc)
+
+    @staticmethod
+    def url_in_text_click_handler(evt: wx.TextUrlEvent) -> None:
+        """
+        Handles click on url links inside text.
+        :param evt: Not used
+        :return: None
+        """
+        print(evt.GetString(), evt.GetURLStart(), evt.GetURLEnd())
 
     def _create_styles(self) -> None:
         """

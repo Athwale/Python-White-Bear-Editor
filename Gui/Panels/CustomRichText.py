@@ -131,17 +131,6 @@ class CustomRichText(rt.RichTextCtrl):
         style_link.SetStyle(stl_link)
         self._stylesheet.AddCharacterStyle(style_link)
 
-        # Error Link style
-        # TODO replace with in place backgroud change
-        stl_error_link = rt.RichTextAttr()
-        stl_error_link.SetFlags(wx.TEXT_ATTR_URL)
-        stl_error_link.SetFontUnderlined(True)
-        stl_error_link.SetBackgroundColour(wx.RED)
-        self.style_error_link: rt.RichTextCharacterStyleDefinition = rt.RichTextCharacterStyleDefinition(
-            Strings.style_error_url)
-        self.style_error_link.SetStyle(stl_error_link)
-        #self._stylesheet.AddCharacterStyle(style_error_link)
-
         self.SetStyleSheet(self._stylesheet)
         self._style_control.SetRichTextCtrl(self)
         self._style_control.SetStyleSheet(self._stylesheet)
@@ -278,7 +267,9 @@ class CustomRichText(rt.RichTextCtrl):
         """
         url_style: rt.RichTextAttr = self._stylesheet.FindCharacterStyle(Strings.style_url).GetStyle()
         if color == wx.RED:
-            print(type(url_style))
+            url_style.SetBackgroundColour(wx.RED)
+        else:
+            url_style.SetBackgroundColour(wx.WHITE)
 
         self.BeginStyle(url_style)
         self.BeginURL(link_id)
@@ -308,6 +299,8 @@ class CustomRichText(rt.RichTextCtrl):
         :param evt: Not used
         :return: None
         """
+        # todo link style does not click
+        print('a')
         link = self._document.find_link(evt.GetString())
         link_text = self.GetRange(evt.GetURLStart(), evt.GetURLEnd() + 1)
         link.set_text(link_text)
@@ -325,7 +318,6 @@ class CustomRichText(rt.RichTextCtrl):
         inserted into the current position.
         :return: None
         """
-        # todo fix red link not going normal after fix
         self._document.add_link(link)
         self.Remove(evt.GetURLStart(), evt.GetURLEnd() + 1)
         self._insert_link(link.get_text()[0], link.get_id(), link.get_status_color())
