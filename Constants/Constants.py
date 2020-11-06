@@ -83,8 +83,6 @@ class Strings:
     editor_version: str = '0.1'
     link_stub: str = 'https://www.'
 
-    column_pages = 'Name'
-
     text_about_contents: str = '<p>Unfinished whitebear web editor.<br>' \
                                '<i>https://github.com/Athwale/Python-White-Bear-Editor</i><br>' \
                                'version: <b>' + editor_version + '</b></p>'
@@ -206,6 +204,8 @@ class Strings:
     label_thumbnail_size: str = 'Thumbnail size'
     label_original_size: str = 'Original size'
     label_video_size: str = 'Video size'
+    label_filelist: str = 'Files'
+    label_styles: str = 'Styles'
 
     status_loading: str = 'Loading and testing'
     status_ready: str = 'Ready'
@@ -222,7 +222,7 @@ class Strings:
     style_list: str = 'List'
     style_image: str = 'Image'
     style_url: str = 'Url'
-    style_error_url: str = 'UrlError'
+    style_error_url: str = 'UrlRed'
 
     toolbar_new_file: str = 'New file'
     toolbar_bold: str = 'Bold'

@@ -12,7 +12,10 @@ class RichTextFrame(wx.Frame):
         self._stylesheet = rt.RichTextStyleSheet()
         self._stylesheet.SetName('Stylesheet')
 
-        self.style_control = rt.RichTextStyleComboCtrl(self, -1)
+        self.style_control = rt.RichTextStyleListBox(self, 1, size=(140, 60))
+        self.style_control.SetStyleType(0)
+        self.style_control.SetMargins(-5, -5)
+
         self.rtc.SetStyleSheet(self._stylesheet)
         self.style_control.SetRichTextCtrl(self.rtc)
         self.style_control.SetStyleSheet(self._stylesheet)
@@ -78,32 +81,14 @@ class RichTextFrame(wx.Frame):
         self.rtc.Newline()
         self.rtc.EndParagraphStyle()
 
-    def _get_style_at_pos(self, position: int = 0) -> (str, bool):
-        """
-        Get the style name at given position in the text. 0 - current position, -1 - before current position 1 - after
-        current position.
-        :param position: The position.
-        :return: Style name.
-        """
-        style_carrier = rt.RichTextAttr()
-        self.rtc.GetStyle(position, style_carrier)
-        if style_carrier.GetCharacterStyleName():
-            # HasUrl()
-            return style_carrier.GetCharacterStyleName()
-        return style_carrier.GetParagraphStyleName()
-
     def on_keypress(self, event: wx.CommandEvent) -> None:
         """
         Run on key up.
         :param event:
         :return:
         """
-        print('\ncurrent style from ctrl: ' + self.style_control.GetValue())
-        current_position = self.rtc.GetCaretPosition()
-        print('previous: ' + str(self._get_style_at_pos(current_position - 1)))
-        print('current pos: ' + str(current_position) + ' ' + str(self._get_style_at_pos(current_position)))
-        print('next: ' + str(self._get_style_at_pos(current_position + 1)))
-
+        current_style = str(self.style_control.GetStyle(self.style_control.GetSelection()).GetName())
+        print(current_style)
         event.Skip()
 
 

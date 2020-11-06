@@ -170,8 +170,6 @@ class MainFrame(wx.Frame):
 
         self.tool_bar = self.CreateToolBar(style=wx.TB_DEFAULT_STYLE)
         # Add toolbar tools
-        self.style_control = rt.RichTextStyleComboCtrl(self.tool_bar, -1)
-        self.tool_bar.AddControl(self.style_control)
         self.new_file_tool = self.tool_bar.AddTool(self._add_tool_id(), Strings.toolbar_new_file,
                                                    scale_icon('new-file.png'),
                                                    Strings.toolbar_new_file)
@@ -254,6 +252,8 @@ class MainFrame(wx.Frame):
         # Create sizers that go into the panels.
         # Contains file list of pages
         self.filelist_column_sizer = wx.BoxSizer(wx.VERTICAL)
+        self.style_sizer = wx.StaticBoxSizer(wx.VERTICAL, self.left_panel, label=Strings.label_styles)
+
         self.right_main_vertical_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.middle_top_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.right_vertical_sizer = wx.BoxSizer(wx.VERTICAL)
@@ -317,8 +317,12 @@ class MainFrame(wx.Frame):
         # --------------------------------------------------------------------------------------------------------------
 
         # File list section --------------------------------------------------------------------------------------------
+        self.style_control = rt.RichTextStyleListBox(self.left_panel, -1, size=(-1, 160))
+        # TODO put static sizers around this and pages, find a way of coloring bad links without a style
+        self.style_sizer.Add(self.style_control, 1, flag=wx.EXPAND)
         self.page_list = wx.ListCtrl(self.left_panel, -1, style=wx.LC_REPORT | wx.LC_SINGLE_SEL)
         self.page_list.SetFont(self.menu_text_field_font)
+        self.filelist_column_sizer.Add(self.style_sizer, flag=wx.EXPAND, border=Numbers.widget_border_size)
         # Add the list into the bottom sizer, give it a sizing weight and let it expand vertically
         self.filelist_column_sizer.Add(self.page_list, flag=wx.EXPAND, border=Numbers.widget_border_size, proportion=1)
         # --------------------------------------------------------------------------------------------------------------
@@ -508,7 +512,7 @@ class MainFrame(wx.Frame):
         self.document_dictionary = documents
         MainFrame.LOADED_PAGES = list(documents.keys())
         self.page_list.ClearAll()
-        self.page_list.InsertColumn(0, Strings.column_pages, format=wx.LIST_FORMAT_LEFT)
+        self.page_list.InsertColumn(0, Strings.label_filelist, format=wx.LIST_FORMAT_LEFT)
         self.page_list.SetColumnWidth(0, self.left_panel.GetSize()[0])
         for document_name in sorted(list(self.document_dictionary.keys()), reverse=True):
             status_color = self.document_dictionary[document_name].get_status_color()

@@ -19,7 +19,7 @@ class CustomRichText(rt.RichTextCtrl):
     Custom rich text control
     """
 
-    def __init__(self, style_control: rt.RichTextStyleComboCtrl, parent, style):
+    def __init__(self, style_control: rt.RichTextStyleListBox, parent, style):
         """
         Constructor for the custom rich text control.
         :param style_control: Style control from gui.
@@ -32,6 +32,9 @@ class CustomRichText(rt.RichTextCtrl):
         self._stylesheet.SetName('Stylesheet')
         self._style_control = style_control
         self._document = None
+
+        self._style_control.SetStyleType(0)
+        self._style_control.SetMargins(-5, -5)
 
         self._create_styles()
         self._add_text_handlers()
@@ -129,14 +132,15 @@ class CustomRichText(rt.RichTextCtrl):
         self._stylesheet.AddCharacterStyle(style_link)
 
         # Error Link style
+        # TODO replace with in place backgroud change
         stl_error_link = rt.RichTextAttr()
         stl_error_link.SetFlags(wx.TEXT_ATTR_URL)
         stl_error_link.SetFontUnderlined(True)
         stl_error_link.SetBackgroundColour(wx.RED)
-        style_error_link: rt.RichTextCharacterStyleDefinition = rt.RichTextCharacterStyleDefinition(
+        self.style_error_link: rt.RichTextCharacterStyleDefinition = rt.RichTextCharacterStyleDefinition(
             Strings.style_error_url)
-        style_error_link.SetStyle(stl_error_link)
-        self._stylesheet.AddCharacterStyle(style_error_link)
+        self.style_error_link.SetStyle(stl_error_link)
+        #self._stylesheet.AddCharacterStyle(style_error_link)
 
         self.SetStyleSheet(self._stylesheet)
         self._style_control.SetRichTextCtrl(self)
@@ -272,10 +276,11 @@ class CustomRichText(rt.RichTextCtrl):
         :param color: The color of the background of the link.
         :return: None
         """
+        url_style: rt.RichTextAttr = self._stylesheet.FindCharacterStyle(Strings.style_url).GetStyle()
         if color == wx.RED:
-            self.BeginStyle(self._stylesheet.FindCharacterStyle(Strings.style_error_url).GetStyle())
-        else:
-            self.BeginStyle(self._stylesheet.FindCharacterStyle(Strings.style_url).GetStyle())
+            print(type(url_style))
+
+        self.BeginStyle(url_style)
         self.BeginURL(link_id)
         self.WriteText(text)
         self.EndURL()
@@ -320,10 +325,9 @@ class CustomRichText(rt.RichTextCtrl):
         inserted into the current position.
         :return: None
         """
+        # todo fix red link not going normal after fix
         self._document.add_link(link)
-        if evt:
-            # Replace an existing link
-            self.Remove(evt.GetURLStart(), evt.GetURLEnd() + 1)
+        self.Remove(evt.GetURLStart(), evt.GetURLEnd() + 1)
         self._insert_link(link.get_text()[0], link.get_id(), link.get_status_color())
         # Send an event to the main gui to signal document color change
         color_evt = wx.CommandEvent(wx.wxEVT_COLOUR_CHANGED, self.GetId())
@@ -343,31 +347,11 @@ class CustomRichText(rt.RichTextCtrl):
         """
         self.ApplyBoldToSelection()
 
-    def _get_style_at_pos(self, position: int = 0) -> (str, bool):
-        """
-        Get the style name at given position in the text. 0 - current position, -1 - before current position
-        1 - after current position.
-        :param position: The position.
-        :return: Style name.
-        """
-        style_carrier = rt.RichTextAttr()
-        self.GetStyle(position, style_carrier)
-        if style_carrier.GetCharacterStyleName():
-            # HasUrl()
-            return style_carrier.GetCharacterStyleName()
-        return style_carrier.GetParagraphStyleName()
-
     def on_keypress(self, event):
         """
         :param event:
         :return:
         """
-        print('current style: ' + self._style_control.GetValue())
-        current_position = self.GetCaretPosition()
-        print('previous: ' + str(self._get_style_at_pos(current_position - 1)) + ' ' +
-              str(self.GetRange(current_position - 1, current_position)))
-        print('current pos: ' + str(current_position) + ' ' + str(self._get_style_at_pos(current_position + 1)) + ' ' +
-              str(self.GetRange(current_position, current_position + 1)))
-        print('next: ' + str(self._get_style_at_pos(current_position + 2)) + ' ' +
-              str(self.GetRange(current_position + 1, current_position + 2)))
+        current_style = str(self._style_control.GetStyle(self._style_control.GetSelection()).GetName())
+        print(current_style)
         event.Skip()
