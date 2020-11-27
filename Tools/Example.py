@@ -1,5 +1,6 @@
 import wx
 import wx.richtext as rt
+import wx.html
 
 
 class RichTextFrame(wx.Frame):
@@ -26,8 +27,8 @@ class RichTextFrame(wx.Frame):
 
         self._create_styles()
         self._insert_sample_text()
-        self.rtc.Bind(wx.EVT_KEY_UP, self.on_keypress, self.rtc)
         self.rtc.Bind(wx.EVT_TEXT_URL, self.url_in_text_click_handler, self.rtc)
+        self.style_control.Bind(wx.EVT_LISTBOX, self.style_changed, self.style_control)
 
     @staticmethod
     def url_in_text_click_handler(evt: wx.TextUrlEvent) -> None:
@@ -38,12 +39,24 @@ class RichTextFrame(wx.Frame):
         """
         print(evt.GetString(), evt.GetURLStart(), evt.GetURLEnd())
 
+    def style_changed(self, evt: wx.CommandEvent):
+        """
+        Respond to single clicks on styles in style control
+        :param evt:
+        :return:
+        """
+        style = self.style_control.GetStyle(evt.GetSelection()).GetName()
+        if style == 'url' and self.rtc.HasSelection():
+            print('url')
+            # TODO get the selection, remove it and reinsert it as an url.
+            # TODO double click still mess things up (maybe fake it, insert normal style)
+
     def _create_styles(self) -> None:
         """
         Create styles for rich text control.
         :return: None
         """
-        # Normal style
+        # Paragraph style
         stl_paragraph: rt.RichTextAttr = self.rtc.GetDefaultStyleEx()
         stl_paragraph.SetParagraphSpacingBefore(10)
         stl_paragraph.SetParagraphSpacingAfter(10)
@@ -64,6 +77,19 @@ class RichTextFrame(wx.Frame):
         self._stylesheet.AddCharacterStyle(style_link)
         self.style_control.UpdateStyles()
 
+    def _insert_sample_text(self) -> None:
+        """
+        Insert sample text.
+        :return: None
+        """
+        self.rtc.ApplyStyle(self._stylesheet.FindParagraphStyle('paragraph'))
+        self.rtc.BeginParagraphStyle('paragraph')
+        self.rtc.WriteText('Paragraph adding some text ')
+        self._insert_link('google', 'fe80')
+        self.rtc.WriteText(' some more text after a link')
+        self.rtc.Newline()
+        self.rtc.EndParagraphStyle()
+
     def _insert_link(self, text: str, link_id: str) -> None:
         """
         Insert a link into text at current position.
@@ -78,27 +104,32 @@ class RichTextFrame(wx.Frame):
         self.rtc.EndStyle()
         self.rtc.ApplyStyle(self._stylesheet.FindParagraphStyle('paragraph'))
 
-    def _insert_sample_text(self) -> None:
+    def _get_style_at_pos(self, position: int = 0) -> (str, bool):
         """
-        Insert sample text.
-        :return: None
+        Get the style name at given position in the text. 0 - current position, -1 - before current position
+        1 - after current position.
+        :param position: The position.
+        :return: Style name.
         """
-        self.rtc.ApplyStyle(self._stylesheet.FindParagraphStyle('paragraph'))
-        self.rtc.BeginParagraphStyle('paragraph')
-        self.rtc.WriteText('Paragraph adding some text ')
-        self._insert_link('google', 'fe80')
-        self.rtc.WriteText(' some more text after a link')
-        self.rtc.Newline()
-        self.rtc.EndParagraphStyle()
+        style_carrier = rt.RichTextAttr()
+        self.rtc.GetStyle(position, style_carrier)
+        if style_carrier.GetCharacterStyleName():
+            # HasUrl()
+            return style_carrier.GetCharacterStyleName()
+        return style_carrier.GetParagraphStyleName()
 
-    def on_keypress(self, event: wx.CommandEvent) -> None:
+    def on_keypress(self, event):
         """
-        Run on key up.
         :param event:
         :return:
         """
-        current_style = str(self.style_control.GetStyle(self.style_control.GetSelection()).GetName())
-        print(current_style)
+        current_position = self.rtc.GetCaretPosition()
+        print('previous: ' + str(self._get_style_at_pos(current_position - 1)) + ' ' +
+              str(self.rtc.GetRange(current_position - 1, current_position)))
+        print('current pos: ' + str(current_position) + ' ' + str(self._get_style_at_pos(current_position + 1)) + ' ' +
+              str(self.rtc.GetRange(current_position, current_position + 1)))
+        print('next: ' + str(self._get_style_at_pos(current_position + 2)) + ' ' +
+              str(self.rtc.GetRange(current_position + 1, current_position + 2)))
         event.Skip()
 
 

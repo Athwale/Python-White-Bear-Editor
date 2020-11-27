@@ -40,13 +40,11 @@ class CustomRichText(rt.RichTextCtrl):
         self._add_text_handlers()
 
         main_frame = wx.GetTopLevelParent(self)
-        self.Bind(wx.EVT_KEY_UP, self.on_keypress)
         self.Bind(wx.EVT_TEXT_URL, self.url_in_text_click_handler, self)
         self.Bind(wx.EVT_MENU, self.on_insert_image, main_frame.edit_menu_item_insert_img)
-        self.Bind(wx.EVT_MENU, self.on_insert_link, main_frame.edit_menu_item_insert_link)
         self.Bind(wx.EVT_MENU, self.on_insert_image, main_frame.insert_img_tool)
-        self.Bind(wx.EVT_MENU, self.on_insert_link, main_frame.insert_link_tool)
         self.Bind(wx.EVT_MENU, self.on_bold, main_frame.bold_tool)
+        #self.Bind(rt.EVT_RICHTEXT_STYLE_CHANGED, self.style_changed, self)
 
     @staticmethod
     def _add_text_handlers() -> None:
@@ -124,7 +122,7 @@ class CustomRichText(rt.RichTextCtrl):
 
         # Link style
         stl_link = rt.RichTextAttr()
-        stl_link.SetFlags(wx.TEXT_ATTR_URL)
+        stl_link.SetURL(Strings.link_stub)
         stl_link.SetFontUnderlined(True)
         stl_link.SetTextColour(wx.BLUE)
         style_link: rt.RichTextCharacterStyleDefinition = rt.RichTextCharacterStyleDefinition(Strings.style_url)
@@ -135,6 +133,15 @@ class CustomRichText(rt.RichTextCtrl):
         self._style_control.SetRichTextCtrl(self)
         self._style_control.SetStyleSheet(self._stylesheet)
         self._style_control.UpdateStyles()
+
+    def style_changed(self, evt: wx.CommandEvent):
+        """
+        Respond to single clicks on styles in style control
+        :param evt:
+        :return:
+        """
+        style = self._style_control.GetStyle(evt.GetSelection()).GetName()
+        print(style)
 
     def set_content(self, doc: WhitebearDocumentArticle) -> None:
         """
@@ -278,49 +285,51 @@ class CustomRichText(rt.RichTextCtrl):
         self.EndStyle()
         self.ApplyStyle(self._stylesheet.FindParagraphStyle(Strings.style_paragraph))
 
-    def on_insert_link(self, evt: wx.CommandEvent) -> None:
-        """
-        Insert a url link in the current position.
-        :param evt: Unused,
-        :return: None
-        """
-        new_link = Link("", Strings.link_stub, "", self._document.get_other_articles(),
-                        self._document.get_working_directory())
-        new_link.seo_test_self()
-        edit_dialog = EditLinkDialog(self, new_link)
-        result = edit_dialog.ShowModal()
-        if result == wx.ID_OK:
-            self._handle_link_edit(new_link)
-        edit_dialog.Destroy()
-
     def url_in_text_click_handler(self, evt: wx.TextUrlEvent) -> None:
         """
         Handles click on url links inside text.
         :param evt: Not used
         :return: None
         """
-        # todo link style does not click
-        print('a')
         link = self._document.find_link(evt.GetString())
+        url = evt.GetString()
         link_text = self.GetRange(evt.GetURLStart(), evt.GetURLEnd() + 1)
+        if not link:
+            # Create a new link
+            link = Link(link_text, url, link_text, self._document.get_other_articles(),
+                        self._document.get_working_directory())
+            link.seo_test_self()
+
         link.set_text(link_text)
         edit_dialog = EditLinkDialog(self, link)
         result = edit_dialog.ShowModal()
-        if result == wx.ID_OK:
-            self._handle_link_edit(link, evt)
+        self._handle_link_edit(result, link, evt)
         edit_dialog.Destroy()
 
-    def _handle_link_edit(self, link: Link, evt: wx.TextUrlEvent = None) -> None:
+    def _handle_link_edit(self, result: int, link: Link, evt: wx.TextUrlEvent = None) -> None:
         """
         Handle actions needed after a link has been edited in the link edit dialog.
+        :param result: The wx result ID_OK, ID_CANCEL from the edit dialog
         :param link: The modified Link instance
         :param evt: If an event is passed in it is used to find where to replace the link, otherwise the link is
         inserted into the current position.
         :return: None
         """
-        self._document.add_link(link)
-        self.Remove(evt.GetURLStart(), evt.GetURLEnd() + 1)
-        self._insert_link(link.get_text()[0], link.get_id(), link.get_status_color())
+        stored_link = self._document.find_link(link.get_id())
+        if result == wx.ID_OK:
+            # Only add link that is not already in the list
+            if not stored_link:
+                self._document.add_link(link)
+            self.Remove(evt.GetURLStart(), evt.GetURLEnd() + 1)
+            self._insert_link(link.get_text()[0], link.get_id(), link.get_status_color())
+        else:
+            # If it is a new link remove the link style from the text
+            if not stored_link:
+                # TODO reset style on a destroyed link
+                style: rt.RichTextAttr = self._stylesheet.FindParagraphStyle(Strings.style_paragraph).GetStyle()
+                print(style)
+                self.SetStyle(evt.GetURLStart(), evt.GetURLEnd(), style)
+
         # Send an event to the main gui to signal document color change
         color_evt = wx.CommandEvent(wx.wxEVT_COLOUR_CHANGED, self.GetId())
         color_evt.SetEventObject(self)
@@ -339,11 +348,3 @@ class CustomRichText(rt.RichTextCtrl):
         """
         self.ApplyBoldToSelection()
 
-    def on_keypress(self, event):
-        """
-        :param event:
-        :return:
-        """
-        current_style = str(self._style_control.GetStyle(self._style_control.GetSelection()).GetName())
-        print(current_style)
-        event.Skip()

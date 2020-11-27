@@ -179,14 +179,10 @@ class MainFrame(wx.Frame):
         self.insert_img_tool = self.tool_bar.AddTool(self._add_tool_id(), Strings.toolbar_insert_img,
                                                      scale_icon('insert-image.png'),
                                                      Strings.toolbar_insert_img)
-        self.insert_link_tool = self.tool_bar.AddTool(self._add_tool_id(), Strings.toolbar_insert_link,
-                                                      scale_icon('insert-link.png'),
-                                                      Strings.toolbar_insert_link)
         self.bold_tool = self.tool_bar.AddTool(self._add_tool_id(), Strings.toolbar_bold,
                                                scale_icon('bold.png'),
                                                Strings.toolbar_bold)
         self.Bind(wx.EVT_MENU, self.forward_event, self.insert_img_tool)
-        self.Bind(wx.EVT_MENU, self.forward_event, self.insert_link_tool)
         self.Bind(wx.EVT_MENU, self.forward_event, self.bold_tool)
         self.Bind(wx.EVT_MENU, self.save_document_handler, self.save_tool)
         self.tool_bar.Realize()
