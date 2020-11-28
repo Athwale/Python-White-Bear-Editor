@@ -28,28 +28,18 @@ class RichTextFrame(wx.Frame):
         self._create_styles()
         self._insert_sample_text()
         self.rtc.Bind(wx.EVT_TEXT_URL, self.url_in_text_click_handler, self.rtc)
-        self.style_control.Bind(wx.EVT_LISTBOX, self.style_changed, self.style_control)
 
-    @staticmethod
-    def url_in_text_click_handler(evt: wx.TextUrlEvent) -> None:
+    def url_in_text_click_handler(self, evt: wx.TextUrlEvent) -> None:
         """
         Handles click on url links inside text.
         :param evt: Not used
         :return: None
         """
-        print(evt.GetString(), evt.GetURLStart(), evt.GetURLEnd())
-
-    def style_changed(self, evt: wx.CommandEvent):
-        """
-        Respond to single clicks on styles in style control
-        :param evt:
-        :return:
-        """
-        style = self.style_control.GetStyle(evt.GetSelection()).GetName()
-        if style == 'url' and self.rtc.HasSelection():
-            print('url')
-            # TODO get the selection, remove it and reinsert it as an url.
-            # TODO double click still mess things up (maybe fake it, insert normal style)
+        dialog = wx.MessageDialog(self, 'Clear formating', caption='Clear formatting', style=wx.OK | wx.CANCEL)
+        if dialog.ShowModal() == wx.ID_OK:
+            style: rt.RichTextAttr = self._stylesheet.FindParagraphStyle('paragraph').GetStyle()
+            style.SetBackgroundColour(wx.RED)
+            self.rtc.SetStyle(evt.GetURLStart(), evt.GetURLEnd(), style)
 
     def _create_styles(self) -> None:
         """
@@ -71,6 +61,7 @@ class RichTextFrame(wx.Frame):
         stl_link = rt.RichTextAttr()
         stl_link.SetFlags(wx.TEXT_ATTR_URL)
         stl_link.SetFontUnderlined(True)
+        stl_link.SetURL('http://')
         stl_link.SetTextColour(wx.BLUE)
         style_link: rt.RichTextCharacterStyleDefinition = rt.RichTextCharacterStyleDefinition('url')
         style_link.SetStyle(stl_link)
@@ -103,34 +94,6 @@ class RichTextFrame(wx.Frame):
         self.rtc.EndURL()
         self.rtc.EndStyle()
         self.rtc.ApplyStyle(self._stylesheet.FindParagraphStyle('paragraph'))
-
-    def _get_style_at_pos(self, position: int = 0) -> (str, bool):
-        """
-        Get the style name at given position in the text. 0 - current position, -1 - before current position
-        1 - after current position.
-        :param position: The position.
-        :return: Style name.
-        """
-        style_carrier = rt.RichTextAttr()
-        self.rtc.GetStyle(position, style_carrier)
-        if style_carrier.GetCharacterStyleName():
-            # HasUrl()
-            return style_carrier.GetCharacterStyleName()
-        return style_carrier.GetParagraphStyleName()
-
-    def on_keypress(self, event):
-        """
-        :param event:
-        :return:
-        """
-        current_position = self.rtc.GetCaretPosition()
-        print('previous: ' + str(self._get_style_at_pos(current_position - 1)) + ' ' +
-              str(self.rtc.GetRange(current_position - 1, current_position)))
-        print('current pos: ' + str(current_position) + ' ' + str(self._get_style_at_pos(current_position + 1)) + ' ' +
-              str(self.rtc.GetRange(current_position, current_position + 1)))
-        print('next: ' + str(self._get_style_at_pos(current_position + 2)) + ' ' +
-              str(self.rtc.GetRange(current_position + 1, current_position + 2)))
-        event.Skip()
 
 
 class MyApp(wx.App):

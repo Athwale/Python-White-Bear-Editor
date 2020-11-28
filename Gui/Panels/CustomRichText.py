@@ -327,6 +327,7 @@ class CustomRichText(rt.RichTextCtrl):
             if not stored_link:
                 # TODO reset style on a destroyed link
                 style: rt.RichTextAttr = self._stylesheet.FindParagraphStyle(Strings.style_paragraph).GetStyle()
+                style.SetBackgroundColour(wx.RED)
                 print(style)
                 self.SetStyle(evt.GetURLStart(), evt.GetURLEnd(), style)
 
