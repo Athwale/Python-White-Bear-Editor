@@ -172,6 +172,7 @@ class CustomRichText(rt.RichTextCtrl):
             elif isinstance(element, Video):
                 last_was_paragraph = False
                 self._write_field(element)
+        self.LayoutContent()
 
     def _write_list(self, ul: UnorderedList) -> None:
         """
@@ -325,11 +326,9 @@ class CustomRichText(rt.RichTextCtrl):
         else:
             # If it is a new link remove the link style from the text
             if not stored_link:
-                # TODO reset style on a destroyed link
-                style: rt.RichTextAttr = self._stylesheet.FindParagraphStyle(Strings.style_paragraph).GetStyle()
-                style.SetBackgroundColour(wx.RED)
-                print(style)
-                self.SetStyle(evt.GetURLStart(), evt.GetURLEnd(), style)
+                style: rt.RichTextAttr = self._stylesheet.FindCharacterStyle(Strings.style_url).GetStyle()
+                style_range = rt.RichTextRange(evt.GetURLStart(), evt.GetURLEnd() + 1)
+                self.SetStyleEx(style_range, style, rt.RICHTEXT_SETSTYLE_REMOVE)
 
         # Send an event to the main gui to signal document color change
         color_evt = wx.CommandEvent(wx.wxEVT_COLOUR_CHANGED, self.GetId())

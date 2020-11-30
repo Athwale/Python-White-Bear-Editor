@@ -35,7 +35,7 @@ class RichTextFrame(wx.Frame):
         :param evt: Not used
         :return: None
         """
-        dialog = wx.MessageDialog(self, 'Clear formating', caption='Clear formatting', style=wx.OK | wx.CANCEL)
+        dialog = wx.MessageDialog(self, 'Clear formatting', caption='Clear formatting', style=wx.OK | wx.CANCEL)
         if dialog.ShowModal() == wx.ID_OK:
             style: rt.RichTextAttr = self._stylesheet.FindParagraphStyle('paragraph').GetStyle()
             style.SetBackgroundColour(wx.RED)
