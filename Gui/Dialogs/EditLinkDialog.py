@@ -72,9 +72,12 @@ class EditLinkDialog(wx.Dialog):
         self.cancel_button = wx.Button(self, wx.ID_CANCEL, Strings.button_cancel)
         self.ok_button = wx.Button(self, wx.ID_OK, Strings.button_ok)
         self.ok_button.SetDefault()
+        self.delete_button = wx.Button(self, wx.ID_DELETE, Strings.button_remove_link)
         grouping_sizer.Add(self.ok_button)
         grouping_sizer.Add((Numbers.widget_border_size, Numbers.widget_border_size))
         grouping_sizer.Add(self.cancel_button)
+        grouping_sizer.Add((Numbers.widget_border_size, Numbers.widget_border_size))
+        grouping_sizer.Add(self.delete_button)
         self.button_sizer.Add(grouping_sizer, flag=wx.ALIGN_CENTER_HORIZONTAL)
 
         # Putting the sizers together
@@ -90,6 +93,7 @@ class EditLinkDialog(wx.Dialog):
         # Bind handlers
         self.Bind(wx.EVT_BUTTON, self._handle_buttons, self.ok_button)
         self.Bind(wx.EVT_BUTTON, self._handle_buttons, self.cancel_button)
+        self.Bind(wx.EVT_BUTTON, self._handle_buttons, self.delete_button)
 
         self._original_text = self._link.get_text()[0]
         self._original_url = self._link.get_url()[0]
@@ -101,7 +105,11 @@ class EditLinkDialog(wx.Dialog):
         :param event: The button event
         :return: None
         """
-        if event.GetId() == wx.ID_OK:
+        if event.GetId() == wx.ID_DELETE:
+            # Only OK and Cancel button close the dialog by default.
+            event.Skip()
+            self.EndModal(wx.ID_DELETE)
+        elif event.GetId() == wx.ID_OK:
             # Save new information into image and rerun seo test.
             self._link.set_text(self.field_link_text.GetValue())
             self._link.set_title(self.field_link_title.GetValue())

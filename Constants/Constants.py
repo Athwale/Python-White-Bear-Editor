@@ -233,3 +233,5 @@ class Strings:
     button_close: str = 'Close'
     button_cancel: str = 'Cancel'
     button_ok: str = 'Ok'
+    button_remove_link: str = 'Remove link'
+

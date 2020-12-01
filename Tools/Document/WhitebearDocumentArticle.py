@@ -495,7 +495,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
 
     def find_link(self, link_id: str) -> Link:
         """
-        Find the link instance identified by the text and url parameters.
+        Find the link instance identified by the id.
         :param link_id: Unique identifier of a Link
         :return: a Link instance
         """
@@ -512,6 +512,16 @@ class WhitebearDocumentArticle(WhitebearDocument):
         # TODO use the link list when regenerating elements list
         self._links.append(link)
         self.set_modified(True)
+
+    def remove_link(self, link_id: str) -> None:
+        """
+        Remove a Link from the list of links based on id,
+        :param link_id: Unique identifier of a Link
+        :return: None
+        """
+        for link in self._links:
+            if link.get_id() == link_id:
+                self._links.remove(link)
 
     # Setters ----------------------------------------------------------------------------------------------------------
     def set_date(self, date: str) -> None:

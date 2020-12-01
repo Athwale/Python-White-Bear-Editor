@@ -323,12 +323,15 @@ class CustomRichText(rt.RichTextCtrl):
                 self._document.add_link(link)
             self.Remove(evt.GetURLStart(), evt.GetURLEnd() + 1)
             self._insert_link(link.get_text()[0], link.get_id(), link.get_status_color())
-        else:
-            # If it is a new link remove the link style from the text
-            if not stored_link:
+        elif result == wx.ID_DELETE or result == wx.ID_CANCEL:
+            if stored_link and result == wx.ID_CANCEL:
+                return
+            else:
                 style: rt.RichTextAttr = self._stylesheet.FindCharacterStyle(Strings.style_url).GetStyle()
                 style_range = rt.RichTextRange(evt.GetURLStart(), evt.GetURLEnd() + 1)
+                # If it is a new link remove the link style from the text
                 self.SetStyleEx(style_range, style, rt.RICHTEXT_SETSTYLE_REMOVE)
+                self._document.remove_link(stored_link)
 
         # Send an event to the main gui to signal document color change
         color_evt = wx.CommandEvent(wx.wxEVT_COLOUR_CHANGED, self.GetId())
