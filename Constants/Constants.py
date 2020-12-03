@@ -37,6 +37,7 @@ class Numbers:
     heading_3_size: int = 16
     heading_4_size: int = 14
     paragraph_spacing: int = 20
+    paragraph_font_size: int = 11
     image_spacing: int = 5
     list_spacing: int = 10
     list_left_indent: int = 20

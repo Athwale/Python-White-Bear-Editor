@@ -522,6 +522,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
         for link in self._links:
             if link.get_id() == link_id:
                 self._links.remove(link)
+        self.set_modified(True)
 
     # Setters ----------------------------------------------------------------------------------------------------------
     def set_date(self, date: str) -> None:

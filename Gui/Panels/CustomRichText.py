@@ -44,7 +44,6 @@ class CustomRichText(rt.RichTextCtrl):
         self.Bind(wx.EVT_MENU, self.on_insert_image, main_frame.edit_menu_item_insert_img)
         self.Bind(wx.EVT_MENU, self.on_insert_image, main_frame.insert_img_tool)
         self.Bind(wx.EVT_MENU, self.on_bold, main_frame.bold_tool)
-        #self.Bind(rt.EVT_RICHTEXT_STYLE_CHANGED, self.style_changed, self)
 
     @staticmethod
     def _add_text_handlers() -> None:
@@ -60,60 +59,85 @@ class CustomRichText(rt.RichTextCtrl):
         Create styles for rich text control.
         :return: None
         """
+        # TODO font does not change on style change
         # Paragraph style
-        stl_paragraph: rt.RichTextAttr = self.GetDefaultStyleEx()
+        stl_paragraph: rt.RichTextAttr = rt.RichTextAttr()
+        stl_paragraph.SetFlags(wx.TEXT_ATTR_FONT_SIZE | wx.TEXT_ATTR_ALIGNMENT | wx.TEXT_ATTR_FONT_WEIGHT | wx.TEXT_ATTR_PARA_SPACING_AFTER | wx.TEXT_ATTR_PARA_SPACING_BEFORE)
+        stl_paragraph.SetFontSize(Numbers.paragraph_font_size)
+        stl_paragraph.SetAlignment(wx.TEXT_ALIGNMENT_LEFT)
+        stl_paragraph.SetFontWeight(wx.FONTWEIGHT_NORMAL)
         stl_paragraph.SetParagraphSpacingBefore(0)
         stl_paragraph.SetParagraphSpacingAfter(0)
+        #stl_paragraph.SetBackgroundColour(wx.BLUE)
+
         style_paragraph: rt.RichTextParagraphStyleDefinition = rt.RichTextParagraphStyleDefinition(
             Strings.style_paragraph)
         style_paragraph.SetStyle(stl_paragraph)
         style_paragraph.SetNextStyle(Strings.style_paragraph)
         self._stylesheet.AddParagraphStyle(style_paragraph)
-        self.ApplyStyle(style_paragraph)
-        self.SetDefaultStyle(stl_paragraph)
 
         # Heading 3 style
-        stl_heading_3: rt.RichTextAttr = self.GetDefaultStyleEx()
+        stl_heading_3: rt.RichTextAttr = rt.RichTextAttr()
+        stl_heading_3.SetFlags(wx.TEXT_ATTR_FONT_SIZE | wx.TEXT_ATTR_ALIGNMENT | wx.TEXT_ATTR_FONT_WEIGHT | wx.TEXT_ATTR_PARA_SPACING_AFTER | wx.TEXT_ATTR_PARA_SPACING_BEFORE)
+        stl_heading_3.SetFontSize(Numbers.heading_3_size)
         stl_heading_3.SetAlignment(wx.TEXT_ALIGNMENT_LEFT)
         stl_heading_3.SetFontWeight(wx.BOLD)
-        stl_heading_3.SetFontSize(Numbers.heading_3_size)
         stl_heading_3.SetParagraphSpacingBefore(Numbers.paragraph_spacing)
         stl_heading_3.SetParagraphSpacingAfter(Numbers.paragraph_spacing)
+        #stl_heading_3.SetBackgroundColour(wx.RED)
+
         style_h3: rt.RichTextParagraphStyleDefinition = rt.RichTextParagraphStyleDefinition(Strings.style_heading_3)
         style_h3.SetStyle(stl_heading_3)
         style_h3.SetNextStyle(Strings.style_paragraph)
         self._stylesheet.AddParagraphStyle(style_h3)
 
         # Heading 4 style
-        stl_heading_4: rt.RichTextAttr = self.GetDefaultStyleEx()
+        stl_heading_4: rt.RichTextAttr = rt.RichTextAttr()
+        stl_heading_4.SetFlags(wx.TEXT_ATTR_FONT_SIZE | wx.TEXT_ATTR_ALIGNMENT | wx.TEXT_ATTR_FONT_WEIGHT | wx.TEXT_ATTR_PARA_SPACING_AFTER | wx.TEXT_ATTR_PARA_SPACING_BEFORE)
+        stl_heading_4.SetFontSize(Numbers.heading_4_size)
         stl_heading_4.SetAlignment(wx.TEXT_ALIGNMENT_LEFT)
         stl_heading_4.SetFontWeight(wx.BOLD)
-        stl_heading_4.SetFontSize(Numbers.heading_4_size)
         stl_heading_4.SetParagraphSpacingBefore(Numbers.paragraph_spacing / 2)
         stl_heading_4.SetParagraphSpacingAfter(Numbers.paragraph_spacing / 2)
+
         style_h4: rt.RichTextParagraphStyleDefinition = rt.RichTextParagraphStyleDefinition(Strings.style_heading_4)
         style_h4.SetStyle(stl_heading_4)
         style_h4.SetNextStyle(Strings.style_paragraph)
         self._stylesheet.AddParagraphStyle(style_h4)
 
         # Image style
-        stl_image: rt.RichTextAttr = self.GetDefaultStyleEx()
+        stl_image: rt.RichTextAttr = rt.RichTextAttr()
+        stl_image.SetFlags(wx.TEXT_ATTR_FONT_SIZE | wx.TEXT_ATTR_ALIGNMENT | wx.TEXT_ATTR_FONT_WEIGHT | wx.TEXT_ATTR_PARA_SPACING_AFTER | wx.TEXT_ATTR_PARA_SPACING_BEFORE)
+        stl_image.SetFontSize(Numbers.paragraph_font_size)
         stl_image.SetAlignment(wx.TEXT_ALIGNMENT_CENTER)
+        stl_image.SetFontWeight(wx.FONTWEIGHT_NORMAL)
         stl_image.SetParagraphSpacingAfter(Numbers.image_spacing)
         stl_image.SetParagraphSpacingBefore(Numbers.image_spacing)
+
         style_image: rt.RichTextParagraphStyleDefinition = rt.RichTextParagraphStyleDefinition(Strings.style_image)
         style_image.SetStyle(stl_image)
         style_image.SetNextStyle(Strings.style_paragraph)
         self._stylesheet.AddParagraphStyle(style_image)
 
         # List style
-        stl_list: rt.RichTextAttr = self.GetDefaultStyleEx()
+        stl_list: rt.RichTextAttr = rt.RichTextAttr()
+        stl_list.SetFlags(wx.TEXT_ATTR_FONT_SIZE | wx.TEXT_ATTR_ALIGNMENT | wx.TEXT_ATTR_FONT_WEIGHT | wx.TEXT_ATTR_PARA_SPACING_AFTER | wx.TEXT_ATTR_PARA_SPACING_BEFORE)
+        stl_list.SetFontSize(Numbers.paragraph_font_size)
         stl_list.SetAlignment(wx.TEXT_ALIGNMENT_LEFT)
+        stl_list.SetFontWeight(wx.FONTWEIGHT_NORMAL)
         stl_list.SetParagraphSpacingBefore(Numbers.list_spacing)
         stl_list.SetParagraphSpacingAfter(Numbers.list_spacing)
-        stl_list_1: rt.RichTextAttr = self.GetDefaultStyleEx()
+
+        stl_list_1: rt.RichTextAttr = rt.RichTextAttr()
+        stl_list_1.SetFlags(wx.TEXT_ATTR_FONT_SIZE | wx.TEXT_ATTR_ALIGNMENT | wx.TEXT_ATTR_FONT_WEIGHT | wx.TEXT_ATTR_PARA_SPACING_AFTER | wx.TEXT_ATTR_PARA_SPACING_BEFORE | wx.TEXT_ATTR_BULLET_STYLE | wx.TEXT_ATTR_LEFT_INDENT)
+        stl_list_1.SetFontSize(Numbers.paragraph_font_size)
+        stl_list_1.SetAlignment(wx.TEXT_ALIGNMENT_LEFT)
+        stl_list_1.SetFontWeight(wx.FONTWEIGHT_NORMAL)
+        stl_list.SetParagraphSpacingBefore(Numbers.list_spacing)
+        stl_list.SetParagraphSpacingAfter(Numbers.list_spacing)
         stl_list_1.SetBulletStyle(wx.TEXT_ATTR_BULLET_STYLE_STANDARD)
         stl_list_1.SetLeftIndent(Numbers.list_left_indent, Numbers.list_left_sub_indent)
+
         style_list: rt.RichTextListStyleDefinition = rt.RichTextListStyleDefinition(Strings.style_list)
         style_list.SetLevelAttributes(0, stl_list_1)
         style_list.SetStyle(stl_list)
@@ -125,11 +149,13 @@ class CustomRichText(rt.RichTextCtrl):
         stl_link.SetURL(Strings.link_stub)
         stl_link.SetFontUnderlined(True)
         stl_link.SetTextColour(wx.BLUE)
+        stl_link.SetBackgroundColour(wx.RED)
         style_link: rt.RichTextCharacterStyleDefinition = rt.RichTextCharacterStyleDefinition(Strings.style_url)
         style_link.SetStyle(stl_link)
         self._stylesheet.AddCharacterStyle(style_link)
 
         self.SetStyleSheet(self._stylesheet)
+        self.ApplyStyleSheet(self._stylesheet)
         self._style_control.SetRichTextCtrl(self)
         self._style_control.SetStyleSheet(self._stylesheet)
         self._style_control.UpdateStyles()
@@ -187,7 +213,6 @@ class CustomRichText(rt.RichTextCtrl):
                 self._write_text(element)
             self.WriteText('\n')
         self.EndParagraphStyle()
-        self.ApplyStyle(self._stylesheet.FindParagraphStyle(Strings.style_paragraph))
 
     def _write_field(self, element) -> None:
         """
@@ -229,7 +254,7 @@ class CustomRichText(rt.RichTextCtrl):
         self._write_text(h.get_text())
         self.WriteText('\n')
         self.EndParagraphStyle()
-        self.ApplyStyle(self._stylesheet.FindParagraphStyle(Strings.style_paragraph))
+        #self.ApplyStyle(self._stylesheet.FindParagraphStyle(Strings.style_paragraph))
 
     def _write_paragraph(self, p: Paragraph) -> None:
         """
@@ -239,8 +264,6 @@ class CustomRichText(rt.RichTextCtrl):
         """
         self.ApplyStyle(self._stylesheet.FindParagraphStyle(Strings.style_paragraph))
         self.BeginParagraphStyle(Strings.style_paragraph)
-        attr = wx.TextAttr()
-        attr.SetFlags(wx.TEXT_ATTR_TEXT_COLOUR)
         for element in p.get_elements():
             self._write_text(element)
         self.EndParagraphStyle()
@@ -316,6 +339,7 @@ class CustomRichText(rt.RichTextCtrl):
         inserted into the current position.
         :return: None
         """
+        # TODO catch any red incorrect links when doing seo when switching to a different document/save
         stored_link = self._document.find_link(link.get_id())
         if result == wx.ID_OK:
             # Only add link that is not already in the list
@@ -331,7 +355,9 @@ class CustomRichText(rt.RichTextCtrl):
                 style_range = rt.RichTextRange(evt.GetURLStart(), evt.GetURLEnd() + 1)
                 # If it is a new link remove the link style from the text
                 self.SetStyleEx(style_range, style, rt.RICHTEXT_SETSTYLE_REMOVE)
-                self._document.remove_link(stored_link)
+                self._document.remove_link(stored_link.get_id())
+                # Without moving the caret you can still type in the now incorrect url style.
+                self.MoveLeft(0)
 
         # Send an event to the main gui to signal document color change
         color_evt = wx.CommandEvent(wx.wxEVT_COLOUR_CHANGED, self.GetId())
@@ -342,6 +368,8 @@ class CustomRichText(rt.RichTextCtrl):
         # TODO this.
         field = self.WriteField('imageFieldType', rt.RichTextProperties())
         field.SetName('image1')
+        # TODO forbid the user from doing various things based on the style the cursor is on at the moment
+        # TODO make titles change font when turned into other style
 
     def on_bold(self, evt) -> None:
         """
