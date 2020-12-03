@@ -142,7 +142,8 @@ class CustomRichText(rt.RichTextCtrl):
         style_list.SetLevelAttributes(0, stl_list_1)
         style_list.SetStyle(stl_list)
         style_list.SetNextStyle(Strings.style_paragraph)
-        self._stylesheet.AddParagraphStyle(style_list)
+        # todo list style stopped working
+        self._stylesheet.AddListStyle(style_list)
 
         # Link style
         stl_link = rt.RichTextAttr()
@@ -155,7 +156,7 @@ class CustomRichText(rt.RichTextCtrl):
         self._stylesheet.AddCharacterStyle(style_link)
 
         self.SetStyleSheet(self._stylesheet)
-        self.ApplyStyleSheet(self._stylesheet)
+        #self.ApplyStyle(style_list)
         self._style_control.SetRichTextCtrl(self)
         self._style_control.SetStyleSheet(self._stylesheet)
         self._style_control.UpdateStyles()
@@ -166,6 +167,7 @@ class CustomRichText(rt.RichTextCtrl):
         :param evt:
         :return:
         """
+        # TODO remove this
         style = self._style_control.GetStyle(evt.GetSelection()).GetName()
         print(style)
 
@@ -206,13 +208,13 @@ class CustomRichText(rt.RichTextCtrl):
         :param ul: The list that will be on the field.
         :return: None
         """
-        self.ApplyStyle(self._stylesheet.FindParagraphStyle(Strings.style_list))
-        self.BeginParagraphStyle(Strings.style_list)
+        # todo apply list style from sheet does not work for some reason
+        self.BeginListStyle(Strings.style_list)
         for li in ul.get_paragraphs():
             for element in li.get_elements():
                 self._write_text(element)
             self.WriteText('\n')
-        self.EndParagraphStyle()
+        self.EndListStyle()
 
     def _write_field(self, element) -> None:
         """
@@ -221,12 +223,10 @@ class CustomRichText(rt.RichTextCtrl):
         :return: None
         """
         new_field = self._register_field(element)
-        self.ApplyStyle(self._stylesheet.FindParagraphStyle(Strings.style_image))
         self.BeginParagraphStyle(Strings.style_image)
         self.WriteField(new_field.GetName(), rt.RichTextProperties())
         self.WriteText('\n')
         self.EndParagraphStyle()
-        self.ApplyStyle(self._stylesheet.FindParagraphStyle(Strings.style_paragraph))
 
     @staticmethod
     def _register_field(element) -> ImageTextField:
@@ -249,12 +249,10 @@ class CustomRichText(rt.RichTextCtrl):
             style = Strings.style_heading_3
         else:
             style = Strings.style_heading_4
-        self.ApplyStyle(self._stylesheet.FindParagraphStyle(style))
         self.BeginParagraphStyle(style)
         self._write_text(h.get_text())
         self.WriteText('\n')
         self.EndParagraphStyle()
-        #self.ApplyStyle(self._stylesheet.FindParagraphStyle(Strings.style_paragraph))
 
     def _write_paragraph(self, p: Paragraph) -> None:
         """
@@ -262,7 +260,6 @@ class CustomRichText(rt.RichTextCtrl):
         :param p: A Paragraph instance.
         :return: None
         """
-        self.ApplyStyle(self._stylesheet.FindParagraphStyle(Strings.style_paragraph))
         self.BeginParagraphStyle(Strings.style_paragraph)
         for element in p.get_elements():
             self._write_text(element)
@@ -307,7 +304,6 @@ class CustomRichText(rt.RichTextCtrl):
         self.WriteText(text)
         self.EndURL()
         self.EndStyle()
-        self.ApplyStyle(self._stylesheet.FindParagraphStyle(Strings.style_paragraph))
 
     def url_in_text_click_handler(self, evt: wx.TextUrlEvent) -> None:
         """
