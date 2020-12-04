@@ -121,9 +121,8 @@ class RichTextFrame(wx.Frame):
         self.rtc.EndParagraphStyle()
         self.rtc.Newline()
 
-        #self.rtc.ApplyStyle(self._stylesheet.FindListStyle(Strings.style_list))
-        self.rtc.BeginListStyle(Strings.style_list)
-        for i in range(10):
+        self.rtc.BeginListStyle(Strings.style_list, 0)
+        for i in range(5):
             self.rtc.WriteText('Example list item')
             self.rtc.WriteText('\n')
         self.rtc.EndListStyle()

@@ -142,7 +142,6 @@ class CustomRichText(rt.RichTextCtrl):
         style_list.SetLevelAttributes(0, stl_list_1)
         style_list.SetStyle(stl_list)
         style_list.SetNextStyle(Strings.style_paragraph)
-        # todo list style stopped working
         self._stylesheet.AddListStyle(style_list)
 
         # Link style
@@ -208,8 +207,7 @@ class CustomRichText(rt.RichTextCtrl):
         :param ul: The list that will be on the field.
         :return: None
         """
-        # todo apply list style from sheet does not work for some reason
-        self.BeginListStyle(Strings.style_list)
+        self.BeginListStyle(Strings.style_list, 0)
         for li in ul.get_paragraphs():
             for element in li.get_elements():
                 self._write_text(element)
