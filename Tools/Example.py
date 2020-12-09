@@ -78,18 +78,18 @@ class RichTextFrame(wx.Frame):
         """
         self.rtc.BeginParagraphStyle(Strings.style_paragraph)
         self.rtc.WriteText('Example paragraph')
-        self.rtc.EndParagraphStyle()
         self.rtc.Newline()
+        self.rtc.EndParagraphStyle()
 
         self.rtc.BeginParagraphStyle(Strings.style_paragraph_bold)
         self.rtc.WriteText('Example paragraph')
-        self.rtc.WriteText('\n')
+        self.rtc.Newline()
         self.rtc.EndParagraphStyle()
 
         self.rtc.BeginParagraphStyle(Strings.style_paragraph)
         self.rtc.WriteText('Example paragraph')
-        self.rtc.EndParagraphStyle()
         self.rtc.Newline()
+        self.rtc.EndParagraphStyle()
 
         self.rtc.LayoutContent()
 
