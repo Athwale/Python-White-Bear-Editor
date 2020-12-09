@@ -13,6 +13,7 @@ class RichTextFrame(wx.Frame):
         self._stylesheet.SetName('Stylesheet')
 
         self._style_control = rt.RichTextStyleListBox(self, 1, size=(140, 60))
+        self._style_control.SetApplyOnSelection(True)
         self._style_control.SetStyleType(0)
         self._style_control.SetMargins(-5, -5)
 
@@ -25,7 +26,6 @@ class RichTextFrame(wx.Frame):
         self.SetSizer(self.sizer)
 
         self._create_styles()
-        self._insert_sample_text()
 
     def _create_styles(self) -> None:
         """
@@ -36,6 +36,7 @@ class RichTextFrame(wx.Frame):
         stl_paragraph: rt.RichTextAttr = rt.RichTextAttr()
         stl_paragraph.SetFontSize(Numbers.paragraph_font_size)
         stl_paragraph.SetAlignment(wx.TEXT_ALIGNMENT_LEFT)
+        # todo font weight and size is ignored
         stl_paragraph.SetFontWeight(wx.FONTWEIGHT_NORMAL)
         stl_paragraph.SetParagraphSpacingBefore(Numbers.paragraph_spacing)
         stl_paragraph.SetParagraphSpacingAfter(Numbers.paragraph_spacing)
@@ -51,9 +52,9 @@ class RichTextFrame(wx.Frame):
         stl_paragraph_bold: rt.RichTextAttr = rt.RichTextAttr()
         stl_paragraph_bold.SetFontSize(Numbers.paragraph_font_size_1)
         stl_paragraph_bold.SetAlignment(wx.TEXT_ALIGNMENT_LEFT)
-        stl_paragraph_bold.SetFontWeight(wx.BOLD)
-        stl_paragraph_bold.SetParagraphSpacingBefore(Numbers.paragraph_spacing)
-        stl_paragraph_bold.SetParagraphSpacingAfter(Numbers.paragraph_spacing)
+        stl_paragraph_bold.SetFontWeight(wx.FONTWEIGHT_BOLD)
+        stl_paragraph_bold.SetParagraphSpacingBefore(Numbers.paragraph_spacing_bold)
+        stl_paragraph_bold.SetParagraphSpacingAfter(Numbers.paragraph_spacing_bold)
         stl_paragraph_bold.SetBackgroundColour(wx.BLUE)
 
         style_paragraph_bold: rt.RichTextParagraphStyleDefinition = rt.RichTextParagraphStyleDefinition(
@@ -67,7 +68,10 @@ class RichTextFrame(wx.Frame):
         self._style_control.SetStyleSheet(self._stylesheet)
         self._style_control.UpdateStyles()
 
-    def _insert_sample_text(self) -> None:
+        # This somehow makes the style picker work, kinda.
+        self.rtc.SetDefaultStyle(self._stylesheet.FindParagraphStyle(Strings.style_paragraph).GetStyle())
+
+    def insert_sample_text(self) -> None:
         """
         Insert sample text.
         :return: None
@@ -79,13 +83,15 @@ class RichTextFrame(wx.Frame):
 
         self.rtc.BeginParagraphStyle(Strings.style_paragraph_bold)
         self.rtc.WriteText('Example paragraph')
+        self.rtc.WriteText('\n')
         self.rtc.EndParagraphStyle()
-        self.rtc.Newline()
 
         self.rtc.BeginParagraphStyle(Strings.style_paragraph)
         self.rtc.WriteText('Example paragraph')
         self.rtc.EndParagraphStyle()
         self.rtc.Newline()
+
+        self.rtc.LayoutContent()
 
 
 class Strings:
@@ -97,9 +103,10 @@ class Strings:
 
 
 class Numbers:
-    paragraph_font_size: int = 12
-    paragraph_font_size_1: int = 16
+    paragraph_font_size: int = 10
+    paragraph_font_size_1: int = 20
     paragraph_spacing: int = 20
+    paragraph_spacing_bold: int = 35
 
 
 class MyApp(wx.App):
@@ -115,6 +122,7 @@ class MyApp(wx.App):
         self.frame = RichTextFrame(None, -1, "RichTextCtrl", size=(900, 700), style=wx.DEFAULT_FRAME_STYLE)
         self.SetTopWindow(self.frame)
         self.frame.Show()
+        self.frame.insert_sample_text()
         return True
 
 

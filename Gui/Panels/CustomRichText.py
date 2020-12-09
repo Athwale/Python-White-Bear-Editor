@@ -155,7 +155,6 @@ class CustomRichText(rt.RichTextCtrl):
         self._stylesheet.AddCharacterStyle(style_link)
 
         self.SetStyleSheet(self._stylesheet)
-        #self.ApplyStyle(style_list)
         self._style_control.SetRichTextCtrl(self)
         self._style_control.SetStyleSheet(self._stylesheet)
         self._style_control.UpdateStyles()

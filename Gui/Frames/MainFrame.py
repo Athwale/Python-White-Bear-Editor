@@ -314,6 +314,7 @@ class MainFrame(wx.Frame):
 
         # File list section --------------------------------------------------------------------------------------------
         self.style_control = rt.RichTextStyleListBox(self.left_panel, -1, size=(-1, 160))
+        self.style_control.SetApplyOnSelection(True)
         self.style_sizer.Add(self.style_control, 1, flag=wx.EXPAND)
         self.page_list = wx.ListCtrl(self.left_panel, -1, style=wx.LC_REPORT | wx.LC_SINGLE_SEL)
         self.page_list.SetFont(self.menu_text_field_font)
