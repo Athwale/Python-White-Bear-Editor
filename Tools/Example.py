@@ -17,15 +17,27 @@ class RichTextFrame(wx.Frame):
         self._style_control.SetStyleType(0)
         self._style_control.SetMargins(-5, -5)
 
+        self._button = wx.Button(self, -1, 'Apply bold style')
+        self.Bind(wx.EVT_BUTTON, self._style_button_handler, self._button)
+
         self.rtc.SetStyleSheet(self._stylesheet)
         self._style_control.SetRichTextCtrl(self.rtc)
         self._style_control.SetStyleSheet(self._stylesheet)
 
         self.sizer.Add(self.rtc, 1, flag=wx.EXPAND)
         self.sizer.Add(self._style_control)
+        self.sizer.Add(self._button)
         self.SetSizer(self.sizer)
 
         self._create_styles()
+
+    def _style_button_handler(self, evt: wx.CommandEvent) -> None:
+        """
+        Handles button clicks.
+        :param evt: Not used
+        :return: None
+        """
+        self.rtc.ApplyStyle(self._stylesheet.FindParagraphStyle(Strings.style_paragraph_bold))
 
     def _create_styles(self) -> None:
         """
@@ -67,26 +79,30 @@ class RichTextFrame(wx.Frame):
         self._style_control.SetRichTextCtrl(self.rtc)
         self._style_control.SetStyleSheet(self._stylesheet)
         self._style_control.UpdateStyles()
+        self.rtc.SetDefaultStyle(self._stylesheet.FindParagraphStyle(Strings.style_paragraph).GetStyle())
 
     def insert_sample_text(self) -> None:
         """
         Insert sample text.
         :return: None
         """
-        self.rtc.BeginParagraphStyle(Strings.style_paragraph)
+        # self._style_control.ApplyStyle(0)
+        # self.rtc.BeginParagraphStyle(Strings.style_paragraph)
         self.rtc.WriteText('Example paragraph')
-        self.rtc.Newline()
-        self.rtc.EndParagraphStyle()
+        # self.rtc.Newline()
+        # self.rtc.EndParagraphStyle()
 
-        self.rtc.BeginParagraphStyle(Strings.style_paragraph_bold)
-        self.rtc.WriteText('Example paragraph')
-        self.rtc.Newline()
-        self.rtc.EndParagraphStyle()
+        # self.rtc.BeginParagraphStyle(Strings.style_paragraph_bold)
+        # self.rtc.WriteText('Example paragraph')
+        # self.rtc.Newline()
+        # self.rtc.EndParagraphStyle()
 
-        self.rtc.BeginParagraphStyle(Strings.style_paragraph)
-        self.rtc.WriteText('Example paragraph')
+        # self.rtc.BeginParagraphStyle(Strings.style_paragraph)
+        # self.rtc.WriteText('Example paragraph')
+        # self.rtc.Newline()
+        # self.rtc.EndParagraphStyle()
+
         self.rtc.Newline()
-        self.rtc.EndParagraphStyle()
 
         self.rtc.LayoutContent()
 
@@ -103,7 +119,7 @@ class Numbers:
     paragraph_font_size: int = 10
     paragraph_font_size_1: int = 20
     paragraph_spacing: int = 20
-    paragraph_spacing_bold: int = 35
+    paragraph_spacing_bold: int = 50
 
 
 class MyApp(wx.App):
