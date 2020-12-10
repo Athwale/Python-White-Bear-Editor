@@ -45,7 +45,7 @@ class RichTextFrame(wx.Frame):
         :return: None
         """
         # Paragraph style
-        stl_paragraph: rt.RichTextAttr = rt.RichTextAttr()
+        stl_paragraph: rt.RichTextAttr = MyAttr()
         stl_paragraph.SetFontSize(Numbers.paragraph_font_size)
         stl_paragraph.SetAlignment(wx.TEXT_ALIGNMENT_LEFT)
         # todo font weight and size is ignored
@@ -61,7 +61,7 @@ class RichTextFrame(wx.Frame):
         self._stylesheet.AddParagraphStyle(style_paragraph)
 
         # Paragraph style bold
-        stl_paragraph_bold: rt.RichTextAttr = rt.RichTextAttr()
+        stl_paragraph_bold: rt.RichTextAttr = MyAttr()
         stl_paragraph_bold.SetFontSize(Numbers.paragraph_font_size_1)
         stl_paragraph_bold.SetAlignment(wx.TEXT_ALIGNMENT_LEFT)
         stl_paragraph_bold.SetFontWeight(wx.FONTWEIGHT_BOLD)
@@ -120,6 +120,14 @@ class Numbers:
     paragraph_font_size_1: int = 20
     paragraph_spacing: int = 20
     paragraph_spacing_bold: int = 50
+
+
+class MyAttr(rt.RichTextAttr):
+
+    def Apply(self, style, compareWith=None):
+        print(style)
+        print(compareWith)
+        super(MyAttr, self).Apply(style, None)
 
 
 class MyApp(wx.App):
