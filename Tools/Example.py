@@ -160,10 +160,21 @@ class RichTextFrame(wx.Frame):
         :param evt: The name of the style in stylesheet
         :return: None
         """
-        style = self._stylesheet.FindStyle(evt.GetString()).GetStyle()
-        p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(self.rtc.GetCaretPosition()+1)
-        self.rtc.SetStyleEx(p.GetRange().FromInternal(), style, flags=rt.RICHTEXT_SETSTYLE_RESET |
-                            rt.RICHTEXT_SETSTYLE_OPTIMIZE | rt.RICHTEXT_SETSTYLE_WITH_UNDO)
+        style: rt.RichTextAttr = self._stylesheet.FindStyle(evt.GetString()).GetStyle()
+        if style.GetParagraphStyleName():
+            p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(
+                self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition()))
+            self.rtc.SetStyleEx(p.GetRange().FromInternal(), style, flags=rt.RICHTEXT_SETSTYLE_RESET |
+                                                                          rt.RICHTEXT_SETSTYLE_OPTIMIZE |
+                                                                          rt.RICHTEXT_SETSTYLE_WITH_UNDO)
+        elif style.GetListStyleName():
+            position = self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition())
+            list_range = rt.RichTextRange(position, position + 1)
+            self.rtc.SetListStyle(list_range, self._stylesheet.FindStyle(evt.GetString()), flags=rt.RICHTEXT_SETSTYLE_RESET | rt.RICHTEXT_SETSTYLE_OPTIMIZE |
+                                                      rt.RICHTEXT_SETSTYLE_WITH_UNDO |
+                                                      rt.RICHTEXT_SETSTYLE_PARAGRAPHS_ONLY)
+        else:
+            print('character')
 
     def insert_sample_text(self) -> None:
         """
