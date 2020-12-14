@@ -165,16 +165,20 @@ class RichTextFrame(wx.Frame):
             p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(
                 self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition()))
             self.rtc.SetStyleEx(p.GetRange().FromInternal(), style, flags=rt.RICHTEXT_SETSTYLE_RESET |
-                                                                          rt.RICHTEXT_SETSTYLE_OPTIMIZE |
-                                                                          rt.RICHTEXT_SETSTYLE_WITH_UNDO)
+                                rt.RICHTEXT_SETSTYLE_OPTIMIZE |
+                                rt.RICHTEXT_SETSTYLE_WITH_UNDO)
         elif style.GetListStyleName():
             position = self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition())
             list_range = rt.RichTextRange(position, position + 1)
-            self.rtc.SetListStyle(list_range, self._stylesheet.FindStyle(evt.GetString()), flags=rt.RICHTEXT_SETSTYLE_RESET | rt.RICHTEXT_SETSTYLE_OPTIMIZE |
-                                                      rt.RICHTEXT_SETSTYLE_WITH_UNDO |
-                                                      rt.RICHTEXT_SETSTYLE_PARAGRAPHS_ONLY)
+            self.rtc.SetListStyle(list_range, self._stylesheet.FindStyle(evt.GetString()),
+                                  flags=rt.RICHTEXT_SETSTYLE_RESET | rt.RICHTEXT_SETSTYLE_OPTIMIZE |
+                                  rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_PARAGRAPHS_ONLY)
         else:
-            print('character')
+            if self.rtc.HasSelection():
+                link_range = self.rtc.GetSelectionRange()
+                self.rtc.SetStyleEx(link_range, self._stylesheet.FindStyle(evt.GetString()).GetStyle(),
+                                    flags=rt.RICHTEXT_SETSTYLE_RESET | rt.RICHTEXT_SETSTYLE_OPTIMIZE |
+                                    rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_CHARACTERS_ONLY)
 
     def insert_sample_text(self) -> None:
         """
