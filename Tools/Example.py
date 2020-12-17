@@ -34,6 +34,7 @@ class RichTextFrame(wx.Frame):
         self.SetSizer(self._main_sizer)
 
         self.Bind(wx.EVT_LISTBOX, self._change_style, self._style_picker)
+        self.rtc.Bind(wx.EVT_KEY_UP, self.on_keypress)
 
         self._create_styles()
         self._fill_picker()
@@ -109,6 +110,8 @@ class RichTextFrame(wx.Frame):
         stl_list.SetParagraphSpacingBefore(Numbers.list_spacing)
         stl_list.SetParagraphSpacingAfter(Numbers.list_spacing)
 
+        stl_list.SetBackgroundColour(wx.GREEN)
+
         stl_list_1: rt.RichTextAttr = rt.RichTextAttr()
         stl_list_1.SetFontSize(Numbers.paragraph_font_size)
         stl_list_1.SetAlignment(wx.TEXT_ALIGNMENT_LEFT)
@@ -161,24 +164,89 @@ class RichTextFrame(wx.Frame):
         :return: None
         """
         style: rt.RichTextAttr = self._stylesheet.FindStyle(evt.GetString()).GetStyle()
+        style_name = evt.GetString()
+        # Decide which styling attributes we want to keep based on which style we are switching to.
+        if style_name == Strings.style_heading_3 or style_name == Strings.style_heading_4:
+            # When changing into heading, we only want to keep text color.
+            style.SetFlags(wx.TEXT_ATTR_FONT_UNDERLINE |
+                           wx.TEXT_ATTR_FONT_STRIKETHROUGH |
+                           wx.TEXT_ATTR_FONT_ENCODING |
+                           wx.TEXT_ATTR_FONT_FAMILY |
+                           wx.TEXT_ATTR_FONT_SIZE |
+                           wx.TEXT_ATTR_ALIGNMENT |
+                           wx.TEXT_ATTR_LEFT_INDENT |
+                           wx.TEXT_ATTR_RIGHT_INDENT |
+                           wx.TEXT_ATTR_TABS |
+                           wx.TEXT_ATTR_PARA_SPACING_AFTER |
+                           wx.TEXT_ATTR_PARA_SPACING_BEFORE |
+                           wx.TEXT_ATTR_LINE_SPACING |
+                           wx.TEXT_ATTR_CHARACTER_STYLE_NAME |
+                           wx.TEXT_ATTR_PARAGRAPH_STYLE_NAME |
+                           wx.TEXT_ATTR_LIST_STYLE_NAME |
+                           wx.TEXT_ATTR_BULLET_STYLE |
+                           wx.TEXT_ATTR_BULLET_NUMBER |
+                           wx.TEXT_ATTR_BULLET_TEXT |
+                           wx.TEXT_ATTR_BULLET_NAME |
+                           wx.TEXT_ATTR_URL |
+                           wx.TEXT_ATTR_PAGE_BREAK |
+                           wx.TEXT_ATTR_EFFECTS |
+                           wx.TEXT_ATTR_OUTLINE_LEVEL |
+                           wx.TEXT_ATTR_AVOID_PAGE_BREAK_BEFORE |
+                           wx.TEXT_ATTR_AVOID_PAGE_BREAK_AFTER)
+
         if style.GetParagraphStyleName():
             p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(
                 self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition()))
-            self.rtc.SetStyleEx(p.GetRange().FromInternal(), style, flags=rt.RICHTEXT_SETSTYLE_RESET |
-                                rt.RICHTEXT_SETSTYLE_OPTIMIZE |
-                                rt.RICHTEXT_SETSTYLE_WITH_UNDO)
+            self.rtc.SetStyleEx(p.GetRange().FromInternal(), style, flags=rt.RICHTEXT_SETSTYLE_OPTIMIZE |
+                                                                          rt.RICHTEXT_SETSTYLE_WITH_UNDO)
+
         elif style.GetListStyleName():
             position = self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition())
             list_range = rt.RichTextRange(position, position + 1)
             self.rtc.SetListStyle(list_range, self._stylesheet.FindStyle(evt.GetString()),
                                   flags=rt.RICHTEXT_SETSTYLE_RESET | rt.RICHTEXT_SETSTYLE_OPTIMIZE |
-                                  rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_PARAGRAPHS_ONLY)
+                                        rt.RICHTEXT_SETSTYLE_WITH_UNDO)
         else:
+            # URL Character style
             if self.rtc.HasSelection():
                 link_range = self.rtc.GetSelectionRange()
                 self.rtc.SetStyleEx(link_range, self._stylesheet.FindStyle(evt.GetString()).GetStyle(),
                                     flags=rt.RICHTEXT_SETSTYLE_RESET | rt.RICHTEXT_SETSTYLE_OPTIMIZE |
-                                    rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_CHARACTERS_ONLY)
+                                          rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_CHARACTERS_ONLY)
+
+    def _get_style_at_pos(self, position: int = 0) -> (str, bool):
+        """
+        Get the style name at given position in the text. 0 - current position, -1 - before current position
+        1 - after current position.
+        :param position: The position.
+        :return: Style name.
+        """
+        style_carrier = rt.RichTextAttr()
+        self.rtc.GetStyle(position, style_carrier)
+        if style_carrier.GetCharacterStyleName():
+            return style_carrier.GetCharacterStyleName(), style_carrier.HasURL()
+        return style_carrier.GetParagraphStyleName(), style_carrier.HasURL()
+
+    def on_keypress(self, event):
+        """
+        :param event:
+        :return:
+        """
+        print('from ctrl: ' + self._style_control.GetStyle(self._style_control.GetSelection()).GetName())
+        current_style = self._stylesheet.FindParagraphStyle(Strings.style_paragraph).GetStyle().GetParagraphStyleName()
+        current_position = self.rtc.GetCaretPosition()
+        print('pos: ' + str(current_position))
+        print('previous: ' + str(
+            str(self._get_style_at_pos(current_position - 1)) + ' ' + self.rtc.GetRange(current_position - 1,
+                                                                                        current_position)))
+        print('current: ' + str(
+            str(self._get_style_at_pos(current_position + 1)) + ' ' + self.rtc.GetRange(current_position,
+                                                                                        current_position + 1)))
+        print('next: ' + str(
+            str(self._get_style_at_pos(current_position + 2)) + ' ' + self.rtc.GetRange(current_position + 1,
+                                                                                        current_position + 2)))
+        print('\n')
+        event.Skip()
 
     def insert_sample_text(self) -> None:
         """
