@@ -81,7 +81,7 @@ class CustomRichText(rt.RichTextCtrl):
         stl_heading_3.SetFlags(wx.TEXT_ATTR_FONT_SIZE | wx.TEXT_ATTR_ALIGNMENT | wx.TEXT_ATTR_FONT_WEIGHT | wx.TEXT_ATTR_PARA_SPACING_AFTER | wx.TEXT_ATTR_PARA_SPACING_BEFORE)
         stl_heading_3.SetFontSize(Numbers.heading_3_size)
         stl_heading_3.SetAlignment(wx.TEXT_ALIGNMENT_LEFT)
-        stl_heading_3.SetFontWeight(wx.BOLD)
+        stl_heading_3.SetFontWeight(wx.FONTWEIGHT_BOLD)
         stl_heading_3.SetParagraphSpacingBefore(Numbers.paragraph_spacing)
         stl_heading_3.SetParagraphSpacingAfter(Numbers.paragraph_spacing)
         #stl_heading_3.SetBackgroundColour(wx.RED)
@@ -96,7 +96,7 @@ class CustomRichText(rt.RichTextCtrl):
         stl_heading_4.SetFlags(wx.TEXT_ATTR_FONT_SIZE | wx.TEXT_ATTR_ALIGNMENT | wx.TEXT_ATTR_FONT_WEIGHT | wx.TEXT_ATTR_PARA_SPACING_AFTER | wx.TEXT_ATTR_PARA_SPACING_BEFORE)
         stl_heading_4.SetFontSize(Numbers.heading_4_size)
         stl_heading_4.SetAlignment(wx.TEXT_ALIGNMENT_LEFT)
-        stl_heading_4.SetFontWeight(wx.BOLD)
+        stl_heading_4.SetFontWeight(wx.FONTWEIGHT_BOLD)
         stl_heading_4.SetParagraphSpacingBefore(Numbers.paragraph_spacing / 2)
         stl_heading_4.SetParagraphSpacingAfter(Numbers.paragraph_spacing / 2)
 

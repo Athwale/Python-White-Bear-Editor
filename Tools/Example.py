@@ -178,18 +178,20 @@ class RichTextFrame(wx.Frame):
         :param evt: The name of the style in stylesheet
         :return: None
         """
-        reset_flag = 0
         style: rt.RichTextAttr = self._stylesheet.FindStyle(evt.GetString()).GetStyle()
         style_name = evt.GetString()
+
         # Decide which styling attributes we want to keep based on which style we are switching to.
         if style_name == Strings.style_heading_3 or style_name == Strings.style_heading_4:
-            # When changing into heading, we only want to keep text color.
-            reset_flag = rt.RICHTEXT_SETSTYLE_REMOVE
-
-        if style.GetParagraphStyleName():
+            # When changing into heading, we reset everything.
             p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(
                 self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition()))
-            self.rtc.SetStyleEx(p.GetRange().FromInternal(), style, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | reset_flag)
+            # Reset any url character style too, it will not disappear if only paragraph style is reset.
+            url_style: rt.RichTextAttr = self._stylesheet.FindCharacterStyle(Strings.style_url).GetStyle()
+            self.rtc.SetStyleEx(p.GetRange(), url_style, rt.RICHTEXT_SETSTYLE_REMOVE)
+            # Reset the paragraph style
+            self.rtc.SetStyleEx(p.GetRange().FromInternal(), style, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO |
+                                                                          rt.RICHTEXT_SETSTYLE_RESET)
 
         elif style.GetListStyleName():
             position = self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition())
