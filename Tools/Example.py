@@ -25,15 +25,18 @@ class RichTextFrame(wx.Frame):
         self.rtc.SetStyleSheet(self._stylesheet)
         self._style_control.SetRichTextCtrl(self.rtc)
         self._style_control.SetStyleSheet(self._stylesheet)
+        self._color_button = wx.Button(self, -1, 'green')
 
         self._controls_sizer.Add(self._style_control)
         self._controls_sizer.Add(self._style_picker)
+        self._controls_sizer.Add(self._color_button)
 
         self._main_sizer.Add(self.rtc, 1, flag=wx.EXPAND)
         self._main_sizer.Add(self._controls_sizer)
         self.SetSizer(self._main_sizer)
 
         self.Bind(wx.EVT_LISTBOX, self._change_style, self._style_picker)
+        self.Bind(wx.EVT_BUTTON, self._change_color, self._color_button)
         self.rtc.Bind(wx.EVT_KEY_UP, self.on_keypress)
 
         self._create_styles()
@@ -157,48 +160,36 @@ class RichTextFrame(wx.Frame):
 
         self._style_picker.InsertItems(names, 0)
 
+    def _change_color(self, evt: wx.CommandEvent) -> None:
+        """
+        Change text color to green
+        :param evt: Not used
+        :return: None
+        """
+        attr = wx.TextAttr()
+        r = self.rtc.GetSelectionRange()
+        attr.SetFlags(wx.TEXT_ATTR_TEXT_COLOUR)
+        attr.SetTextColour(wx.GREEN)
+        self.rtc.SetStyle(r, attr)
+
     def _change_style(self, evt: wx.CommandEvent) -> None:
         """
         Handles button clicks.
         :param evt: The name of the style in stylesheet
         :return: None
         """
+        reset_flag = 0
         style: rt.RichTextAttr = self._stylesheet.FindStyle(evt.GetString()).GetStyle()
         style_name = evt.GetString()
         # Decide which styling attributes we want to keep based on which style we are switching to.
         if style_name == Strings.style_heading_3 or style_name == Strings.style_heading_4:
             # When changing into heading, we only want to keep text color.
-            style.SetFlags(wx.TEXT_ATTR_FONT_UNDERLINE |
-                           wx.TEXT_ATTR_FONT_STRIKETHROUGH |
-                           wx.TEXT_ATTR_FONT_ENCODING |
-                           wx.TEXT_ATTR_FONT_FAMILY |
-                           wx.TEXT_ATTR_FONT_SIZE |
-                           wx.TEXT_ATTR_ALIGNMENT |
-                           wx.TEXT_ATTR_LEFT_INDENT |
-                           wx.TEXT_ATTR_RIGHT_INDENT |
-                           wx.TEXT_ATTR_TABS |
-                           wx.TEXT_ATTR_PARA_SPACING_AFTER |
-                           wx.TEXT_ATTR_PARA_SPACING_BEFORE |
-                           wx.TEXT_ATTR_LINE_SPACING |
-                           wx.TEXT_ATTR_CHARACTER_STYLE_NAME |
-                           wx.TEXT_ATTR_PARAGRAPH_STYLE_NAME |
-                           wx.TEXT_ATTR_LIST_STYLE_NAME |
-                           wx.TEXT_ATTR_BULLET_STYLE |
-                           wx.TEXT_ATTR_BULLET_NUMBER |
-                           wx.TEXT_ATTR_BULLET_TEXT |
-                           wx.TEXT_ATTR_BULLET_NAME |
-                           wx.TEXT_ATTR_URL |
-                           wx.TEXT_ATTR_PAGE_BREAK |
-                           wx.TEXT_ATTR_EFFECTS |
-                           wx.TEXT_ATTR_OUTLINE_LEVEL |
-                           wx.TEXT_ATTR_AVOID_PAGE_BREAK_BEFORE |
-                           wx.TEXT_ATTR_AVOID_PAGE_BREAK_AFTER)
+            reset_flag = rt.RICHTEXT_SETSTYLE_REMOVE
 
         if style.GetParagraphStyleName():
             p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(
                 self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition()))
-            self.rtc.SetStyleEx(p.GetRange().FromInternal(), style, flags=rt.RICHTEXT_SETSTYLE_OPTIMIZE |
-                                                                          rt.RICHTEXT_SETSTYLE_WITH_UNDO)
+            self.rtc.SetStyleEx(p.GetRange().FromInternal(), style, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | reset_flag)
 
         elif style.GetListStyleName():
             position = self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition())
