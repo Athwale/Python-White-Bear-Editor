@@ -235,7 +235,6 @@ class RichTextFrame(wx.Frame):
             self.rtc.ClearListStyle(p.GetRange())
             self._change_paragraph_style(style, False, True)
 
-        # TODO reaplying the style again does something weird, select the current style automatically in the list.
         elif style_name == Strings.style_list:
             # When changing text into list, change everything into paragraph first to get rid of other styles.
             list_style: rt.RichTextAttr = self._stylesheet.FindStyle(Strings.style_list).GetStyle()
@@ -244,7 +243,8 @@ class RichTextFrame(wx.Frame):
             p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(
                 self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition()))
             self.rtc.SetListStyle(p.GetRange(), self._stylesheet.FindStyle(evt.GetString()),
-                                  flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO)
+                                  flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_SPECIFY_LEVEL,
+                                  specifiedLevel=0)
         else:
             # URL Character style
             if self.rtc.HasSelection():
