@@ -236,15 +236,17 @@ class RichTextFrame(wx.Frame):
             self._change_paragraph_style(style, False, True)
 
         elif style_name == Strings.style_list:
+            # todo if switching from heading, disable limit to paragraph only
             # When changing text into list, change everything into paragraph first to get rid of other styles.
             list_style: rt.RichTextAttr = self._stylesheet.FindStyle(Strings.style_list).GetStyle()
-            self._change_paragraph_style(list_style, False, True)
+            self._change_paragraph_style(list_style, True, True)
 
             p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(
                 self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition()))
             self.rtc.SetListStyle(p.GetRange(), self._stylesheet.FindStyle(evt.GetString()),
                                   flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_SPECIFY_LEVEL,
                                   specifiedLevel=0)
+
         else:
             # URL Character style
             if self.rtc.HasSelection():
@@ -264,6 +266,8 @@ class RichTextFrame(wx.Frame):
         self.rtc.GetStyle(position, style_carrier)
         if style_carrier.GetCharacterStyleName():
             return style_carrier.GetCharacterStyleName(), style_carrier.HasURL()
+        elif style_carrier.GetListStyleName():
+            return style_carrier.GetListStyleName(), style_carrier.HasURL()
         return style_carrier.GetParagraphStyleName(), style_carrier.HasURL()
 
     def on_keypress(self, event):
@@ -272,7 +276,6 @@ class RichTextFrame(wx.Frame):
         :return:
         """
         print('from ctrl: ' + self._style_control.GetStyle(self._style_control.GetSelection()).GetName())
-        current_style = self._stylesheet.FindParagraphStyle(Strings.style_paragraph).GetStyle().GetParagraphStyleName()
         current_position = self.rtc.GetCaretPosition()
         print('pos: ' + str(current_position))
         print('previous: ' + str(
