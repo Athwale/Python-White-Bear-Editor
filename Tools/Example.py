@@ -41,9 +41,10 @@ class RichTextFrame(wx.Frame):
         self.Bind(wx.EVT_BUTTON, self._change_color, self._color_button)
         self.Bind(wx.EVT_BUTTON, self._change_bold, self._bold_button)
         self.rtc.Bind(wx.EVT_KEY_UP, self.on_keypress)
+        self.rtc.Bind(wx.EVT_LEFT_UP, self.on_keypress)
 
         self._create_styles()
-        self._fill_picker()
+        self._fill_style_picker()
 
     def _create_styles(self) -> None:
         """
@@ -148,7 +149,7 @@ class RichTextFrame(wx.Frame):
         self._style_control.SetStyleSheet(self._stylesheet)
         self._style_control.UpdateStyles()
 
-    def _fill_picker(self) -> None:
+    def _fill_style_picker(self) -> None:
         """
         Fill picker list box with style names
         :return: None
