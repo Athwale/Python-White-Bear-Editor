@@ -221,52 +221,21 @@ class RichTextFrame(wx.Frame):
             self._apply_heading_style(style_name)
 
         elif style_name == Strings.style_paragraph:
-            # When switching from heading style, disable limit to paragraph only since we want to get rid of the
-            # heading style attributes completely.
-            paragraph_only_flag = True
-            current_style = self._get_style_at_pos(self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition()))[0]
-            if current_style == Strings.style_heading_3 or current_style == Strings.style_heading_4:
-                paragraph_only_flag = False
-            p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(
-                self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition()))
-            self.rtc.ClearListStyle(p.GetRange())
-            self._change_current_paragraph_style(style, paragraphs_only=paragraph_only_flag, remove=False)
+            self._apply_paragraph_style()
 
         elif style_name == Strings.style_list:
-            # When switching from heading style, disable limit to paragraph only since we want to get rid of the
-            # heading style attributes completely. When changing text into list, change everything into list style
-            # first to get rid of other styles.
-            paragraph_only_flag = True
-            current_style = self._get_style_at_pos(self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition()))[0]
-            if current_style == Strings.style_heading_3 or current_style == Strings.style_heading_4:
-                paragraph_only_flag = False
-
-            # Reset to paragraph style to get rid of any extra styles
-            paragraph_style: rt.RichTextAttr = self._stylesheet.FindStyle(Strings.style_paragraph).GetStyle()
-            self._change_current_paragraph_style(paragraph_style, paragraphs_only=paragraph_only_flag, remove=False)
-            # Remove paragraph style before applying list style. Otherwise it will still appear to be paragraph style.
-            self._change_current_paragraph_style(paragraph_style, paragraphs_only=True, remove=True)
-
-            p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(
-                self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition()))
-            self.rtc.SetListStyle(p.GetRange(), self._stylesheet.FindStyle(evt.GetString()),
-                                  flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_SPECIFY_LEVEL,
-                                  specifiedLevel=0)
+            self._apply_list_style()
 
         # TODO reapply style on delete and backspace to get rid of mixed styles.
         # todo continue list style on enter
         # TODO disable options in list based on current style.
 
         elif style_name == Strings.style_image:
+            # TODO this
             print('img')
 
         else:
-            # URL Character style
-            if self.rtc.HasSelection():
-                link_range = self.rtc.GetSelectionRange()
-                self.rtc.SetStyleEx(link_range, self._stylesheet.FindStyle(evt.GetString()).GetStyle(),
-                                    flags=rt.RICHTEXT_SETSTYLE_RESET | rt.RICHTEXT_SETSTYLE_OPTIMIZE |
-                                          rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_CHARACTERS_ONLY)
+            self._apply_url_style()
 
         self._update_style_picker()
 
@@ -286,6 +255,59 @@ class RichTextFrame(wx.Frame):
         # Change the paragraph style into a heading style.
         self.rtc.ClearListStyle(p.GetRange())
         self._change_current_paragraph_style(style, paragraphs_only=False, remove=False)
+
+    def _apply_paragraph_style(self) -> None:
+        """
+        Changes current paragraph under the cursor into the paragraph style defined for normal text.
+        :return: None
+        """
+        style: rt.RichTextAttr = self._stylesheet.FindStyle(Strings.style_paragraph).GetStyle()
+        # When switching from heading style, disable limit to paragraph only since we want to get rid of the
+        # heading style attributes completely.
+        paragraph_only_flag = True
+        current_style = self._get_style_at_pos(self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition()))[0]
+        if current_style == Strings.style_heading_3 or current_style == Strings.style_heading_4:
+            paragraph_only_flag = False
+        p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(
+            self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition()))
+        self.rtc.ClearListStyle(p.GetRange())
+        self._change_current_paragraph_style(style, paragraphs_only=paragraph_only_flag, remove=False)
+
+    def _apply_list_style(self) -> None:
+        """
+        Changes current paragraph under the cursor into list item.
+        :return: None
+        """
+        # When switching from heading style, disable limit to paragraph only since we want to get rid of the
+        # heading style attributes completely. When changing text into list, change everything into list style
+        # first to get rid of other styles.
+        paragraph_only_flag = True
+        current_style = self._get_style_at_pos(self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition()))[0]
+        if current_style == Strings.style_heading_3 or current_style == Strings.style_heading_4:
+            paragraph_only_flag = False
+
+        # Reset to paragraph style to get rid of any extra styles
+        paragraph_style: rt.RichTextAttr = self._stylesheet.FindStyle(Strings.style_paragraph).GetStyle()
+        self._change_current_paragraph_style(paragraph_style, paragraphs_only=paragraph_only_flag, remove=False)
+        # Remove paragraph style before applying list style. Otherwise it will still appear to be paragraph style.
+        self._change_current_paragraph_style(paragraph_style, paragraphs_only=True, remove=True)
+
+        p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(
+            self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition()))
+        self.rtc.SetListStyle(p.GetRange(), self._stylesheet.FindStyle(Strings.style_list),
+                              flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_SPECIFY_LEVEL,
+                              specifiedLevel=0)
+
+    def _apply_url_style(self) -> None:
+        """
+        Changes current selection the url character style.
+        :return: None
+        """
+        if self.rtc.HasSelection():
+            link_range = self.rtc.GetSelectionRange()
+            self.rtc.SetStyleEx(link_range, self._stylesheet.FindStyle(Strings.style_url).GetStyle(),
+                                flags=rt.RICHTEXT_SETSTYLE_RESET | rt.RICHTEXT_SETSTYLE_OPTIMIZE |
+                                      rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_CHARACTERS_ONLY)
 
     def _get_style_at_pos(self, position: int = 0) -> (str, str):
         """
@@ -368,12 +390,12 @@ class RichTextFrame(wx.Frame):
         self.rtc.EndParagraphStyle()
 
         self.rtc.BeginParagraphStyle(Strings.style_heading_3)
-        self.rtc.WriteText('Example paragraph')
+        self.rtc.WriteText('Example H3 Heading')
         self.rtc.Newline()
         self.rtc.EndParagraphStyle()
 
         self.rtc.BeginParagraphStyle(Strings.style_heading_4)
-        self.rtc.WriteText('Example paragraph')
+        self.rtc.WriteText('Example H4 Heading')
         self.rtc.Newline()
         self.rtc.EndParagraphStyle()
 
@@ -383,9 +405,9 @@ class RichTextFrame(wx.Frame):
         self.rtc.EndParagraphStyle()
 
         self.rtc.BeginListStyle(Strings.style_list, 0)
-        self.rtc.WriteText('list item')
+        self.rtc.WriteText('Example list item')
         self.rtc.Newline()
-        self.rtc.WriteText('list item')
+        self.rtc.WriteText('Example list item')
         self.rtc.Newline()
         self.rtc.EndListStyle()
 
