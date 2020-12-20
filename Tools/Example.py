@@ -188,19 +188,24 @@ class RichTextFrame(wx.Frame):
             attr.SetFontWeight(wx.FONTWEIGHT_BOLD)
             self.rtc.SetStyleEx(bold_range, attr, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO)
 
-    def _change_paragraph_style(self, style: rt.RichTextAttr, paragraphs_only: bool) -> None:
+    def _change_paragraph_style(self, style: rt.RichTextAttr, paragraphs_only: bool, remove: bool) -> None:
         """
         Change the current paragraph into the paragraph style from parameter without destroying urls.
         :param style: The paragraph style
         :param paragraphs_only: Limit style to paragraphs
+        :param remove: Remove the style from the current paragraph.
         :return: None
         """
         paragraphs_flag = 0
+        remove_flag = 0
         if paragraphs_only:
             paragraphs_flag = rt.RICHTEXT_SETSTYLE_PARAGRAPHS_ONLY
+        if remove:
+            remove_flag = rt.RICHTEXT_SETSTYLE_REMOVE
         p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(
             self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition()))
-        self.rtc.SetStyleEx(p.GetRange().FromInternal(), style, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | paragraphs_flag)
+        self.rtc.SetStyleEx(p.GetRange().FromInternal(), style, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | paragraphs_flag |
+                            remove_flag)
 
     def _change_style(self, evt: wx.CommandEvent) -> None:
         """
@@ -220,7 +225,7 @@ class RichTextFrame(wx.Frame):
             self.rtc.SetStyleEx(p.GetRange(), url_style, rt.RICHTEXT_SETSTYLE_REMOVE)
             # Change the paragraph style into a heading style.
             self.rtc.ClearListStyle(p.GetRange())
-            self._change_paragraph_style(style, False)
+            self._change_paragraph_style(style, paragraphs_only=False, remove=False)
 
         elif style_name == Strings.style_paragraph:
             # When switching from heading style, disable limit to paragraph only since we want to get rid of the
@@ -232,10 +237,9 @@ class RichTextFrame(wx.Frame):
             p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(
                 self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition()))
             self.rtc.ClearListStyle(p.GetRange())
-            self._change_paragraph_style(style, paragraph_only_flag)
+            self._change_paragraph_style(style, paragraphs_only=paragraph_only_flag, remove=False)
 
         elif style_name == Strings.style_list:
-            # todo list style contains paragraph but does not report as list style
             # When switching from heading style, disable limit to paragraph only since we want to get rid of the
             # heading style attributes completely. When changing text into list, change everything into list style
             # first to get rid of other styles.
@@ -246,13 +250,9 @@ class RichTextFrame(wx.Frame):
 
             # Reset to paragraph style to get rid of any extra styles
             paragraph_style: rt.RichTextAttr = self._stylesheet.FindStyle(Strings.style_paragraph).GetStyle()
-            self._change_paragraph_style(paragraph_style, paragraph_only_flag)
-
-            # todo remove paragraph style before list style
-            p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(
-                self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition()))
-            self.rtc.SetStyleEx(p.GetRange().FromInternal(), paragraph_style, flags=rt.RICHTEXT_SETSTYLE_REMOVE |
-                                                                                    rt.RICHTEXT_SETSTYLE_PARAGRAPHS_ONLY)
+            self._change_paragraph_style(paragraph_style, paragraphs_only=paragraph_only_flag, remove=False)
+            # Remove paragraph style before applying list style. Otherwise it will still appear to be paragraph style.
+            self._change_paragraph_style(paragraph_style, paragraphs_only=True, remove=True)
 
             p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(
                 self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition()))
@@ -261,6 +261,7 @@ class RichTextFrame(wx.Frame):
                                   specifiedLevel=0)
 
         # TODO reapply style on delete and backspace to get rid of mixed styles.
+        # todo continue list style on enter
         # TODO get style on pos on mouse click
         # TODO disable options in list based on current style.
 
@@ -274,6 +275,8 @@ class RichTextFrame(wx.Frame):
                 self.rtc.SetStyleEx(link_range, self._stylesheet.FindStyle(evt.GetString()).GetStyle(),
                                     flags=rt.RICHTEXT_SETSTYLE_RESET | rt.RICHTEXT_SETSTYLE_OPTIMIZE |
                                           rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_CHARACTERS_ONLY)
+
+        self._update_style_picker()
 
     def _get_style_at_pos(self, position: int = 0) -> (str, str):
         """
@@ -292,20 +295,26 @@ class RichTextFrame(wx.Frame):
             paragraph_style_name = style_carrier.GetListStyleName()
         if style_carrier.GetParagraphStyleName():
             paragraph_style_name = style_carrier.GetParagraphStyleName()
-        # Set the current style name into the style list box.
+        return paragraph_style_name, character_style_name
+
+    def _update_style_picker(self):
+        """
+        Show current style under cursor in the style box.
+        """
+        paragraph_style_name, character_style_name = self._get_style_at_pos(self.rtc.GetAdjustedCaretPosition
+                                                                            (self.rtc.GetCaretPosition()))
         if character_style_name:
             self._style_picker.SetSelection(self._style_picker.FindString(character_style_name))
         else:
             self._style_picker.SetSelection(self._style_picker.FindString(paragraph_style_name))
-        return paragraph_style_name, character_style_name
 
     def on_keypress(self, event):
         """
         :param event:
         :return:
         """
-        print('adjusted style name: ' + str(self._get_style_at_pos
-                                            (self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition()))))
+        self._update_style_picker()
+
         print('from ctrl: ' + self._style_control.GetStyle(self._style_control.GetSelection()).GetName())
         current_position = self.rtc.GetCaretPosition()
         print('pos: ' + str(current_position))
