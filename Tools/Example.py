@@ -219,17 +219,19 @@ class RichTextFrame(wx.Frame):
         """
         self._change_style(evt.GetString())
 
-    def _change_style(self, style_name: str) -> None:
+    def _change_style(self, style_name: str, force_paragraph=False) -> None:
         """
         Changes the style of the current paragraph or selection.
         :param style_name: The name of a style in stylesheet.
+        :param force_paragraph: Used in setting paragraph style to override whether character style should be set too.
+        This is used when joining heading and ordinary paragraph using delete or backspace.
         :return: None
         """
         if style_name == Strings.style_heading_3 or style_name == Strings.style_heading_4:
             self._apply_heading_style(style_name)
 
         elif style_name == Strings.style_paragraph:
-            self._apply_paragraph_style()
+            self._apply_paragraph_style(force=force_paragraph)
 
         elif style_name == Strings.style_list:
             self._apply_list_style()
@@ -262,9 +264,10 @@ class RichTextFrame(wx.Frame):
         self.rtc.ClearListStyle(p.GetRange())
         self._change_paragraph_style(style, paragraphs_only=False, remove=False)
 
-    def _apply_paragraph_style(self) -> None:
+    def _apply_paragraph_style(self, force=False) -> None:
         """
         Changes current paragraph under the cursor into the paragraph style defined for normal text.
+        :param force: Force application of paragraph style on both paragraph and characters. False if not set.
         :return: None
         """
         style: rt.RichTextAttr = self._stylesheet.FindStyle(Strings.style_paragraph).GetStyle()
@@ -278,6 +281,8 @@ class RichTextFrame(wx.Frame):
             self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition()))
         # Remove any list style
         self.rtc.ClearListStyle(p.GetRange())
+        if force:
+            paragraph_only_flag = False
         self._change_paragraph_style(style, paragraphs_only=paragraph_only_flag, remove=False)
 
     def _apply_list_style(self, position=None) -> None:
@@ -384,7 +389,7 @@ class RichTextFrame(wx.Frame):
             if not paragraph_style == Strings.style_list:
                 # Does not work for list since the style is reapplied and prevents deletion of list item.
                 # We first need to wait for the condition above to reapply paragraph style.
-                self._change_style(paragraph_style)
+                self._change_style(paragraph_style, force_paragraph=True)
         event.Skip()
 
     def on_mouse(self, event: wx.MouseEvent):
