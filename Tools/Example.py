@@ -37,7 +37,7 @@ class RichTextFrame(wx.Frame):
         self._main_sizer.Add(self._controls_sizer)
         self.SetSizer(self._main_sizer)
 
-        self.Bind(wx.EVT_LISTBOX, self._change_style, self._style_picker)
+        self.Bind(wx.EVT_LISTBOX, self._style_picker_handler, self._style_picker)
         self.Bind(wx.EVT_BUTTON, self._change_color, self._color_button)
         self.Bind(wx.EVT_BUTTON, self._change_bold, self._bold_button)
         self.rtc.Bind(wx.EVT_KEY_UP, self.on_keypress)
@@ -189,32 +189,42 @@ class RichTextFrame(wx.Frame):
             attr.SetFontWeight(wx.FONTWEIGHT_BOLD)
             self.rtc.SetStyleEx(bold_range, attr, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO)
 
-    def _change_current_paragraph_style(self, new_style: rt.RichTextAttr, paragraphs_only: bool, remove: bool) -> None:
+    def _change_paragraph_style(self, new_style: rt.RichTextAttr, paragraphs_only: bool,
+                                remove: bool, position=None) -> None:
         """
         Change the current paragraph into the paragraph style from parameter without destroying urls.
         :param new_style: The paragraph style
         :param paragraphs_only: Limit style to paragraphs
         :param remove: Remove the style from the current paragraph.
+        :param position: The position where to change the paragraph. If None, current paragraph is used.
         :return: None
         """
+        if not position:
+            position = self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition())
         paragraphs_flag = 0
         remove_flag = 0
         if paragraphs_only:
             paragraphs_flag = rt.RICHTEXT_SETSTYLE_PARAGRAPHS_ONLY
         if remove:
             remove_flag = rt.RICHTEXT_SETSTYLE_REMOVE
-        p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(
-            self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition()))
+        p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(position)
         self.rtc.SetStyleEx(p.GetRange().FromInternal(), new_style, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO |
                             paragraphs_flag | remove_flag | rt.RICHTEXT_SETSTYLE_RESET)
 
-    def _change_style(self, evt: wx.CommandEvent) -> None:
+    def _style_picker_handler(self, evt: wx.CommandEvent) -> None:
         """
         Handles style changes from the style picker list box.
-        :param evt: The name of the style in stylesheet
+        :param evt: Used to get the name of the style in stylesheet
         :return: None
         """
-        style_name = evt.GetString()
+        self._change_style(evt.GetString())
+
+    def _change_style(self, style_name: str) -> None:
+        """
+        Changes the style of the current paragraph or selection.
+        :param style_name: The name of a style in stylesheet.
+        :return: None
+        """
         if style_name == Strings.style_heading_3 or style_name == Strings.style_heading_4:
             self._apply_heading_style(style_name)
 
@@ -224,7 +234,6 @@ class RichTextFrame(wx.Frame):
         elif style_name == Strings.style_list:
             self._apply_list_style()
 
-        # TODO reapply style on delete and backspace to get rid of mixed styles.
         # TODO disable options in list based on current style.
 
         elif style_name == Strings.style_image:
@@ -251,7 +260,7 @@ class RichTextFrame(wx.Frame):
         self.rtc.SetStyleEx(p.GetRange(), url_style, rt.RICHTEXT_SETSTYLE_REMOVE)
         # Change the paragraph style into a heading style.
         self.rtc.ClearListStyle(p.GetRange())
-        self._change_current_paragraph_style(style, paragraphs_only=False, remove=False)
+        self._change_paragraph_style(style, paragraphs_only=False, remove=False)
 
     def _apply_paragraph_style(self) -> None:
         """
@@ -267,14 +276,20 @@ class RichTextFrame(wx.Frame):
             paragraph_only_flag = False
         p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(
             self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition()))
+        # Remove any list style
         self.rtc.ClearListStyle(p.GetRange())
-        self._change_current_paragraph_style(style, paragraphs_only=paragraph_only_flag, remove=False)
+        self._change_paragraph_style(style, paragraphs_only=paragraph_only_flag, remove=False)
 
-    def _apply_list_style(self) -> None:
+    def _apply_list_style(self, position=None) -> None:
         """
         Changes current paragraph under the cursor into list item.
+        :param position: Where to apply the style, if not set, current paragraph is used.
         :return: None
         """
+        # This is used to keep the list style going when return key is pressed. We move one position back and reapply
+        # the style there. In other cases we want to apply the style in the current paragraph.
+        if not position:
+            position = self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition())
         # When switching from heading style, disable limit to paragraph only since we want to get rid of the
         # heading style attributes completely. When changing text into list, change everything into list style
         # first to get rid of other styles.
@@ -285,12 +300,12 @@ class RichTextFrame(wx.Frame):
 
         # Reset to paragraph style to get rid of any extra styles
         paragraph_style: rt.RichTextAttr = self._stylesheet.FindStyle(Strings.style_paragraph).GetStyle()
-        self._change_current_paragraph_style(paragraph_style, paragraphs_only=paragraph_only_flag, remove=False)
+        self._change_paragraph_style(paragraph_style, paragraphs_only=paragraph_only_flag, remove=False,
+                                     position=position)
         # Remove paragraph style before applying list style. Otherwise it will still appear to be paragraph style.
-        self._change_current_paragraph_style(paragraph_style, paragraphs_only=True, remove=True)
+        self._change_paragraph_style(paragraph_style, paragraphs_only=True, remove=True, position=position)
 
-        p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(
-            self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition()))
+        p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(position)
         self.rtc.SetListStyle(p.GetRange(), self._stylesheet.FindStyle(Strings.style_list),
                               flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_SPECIFY_LEVEL,
                               specifiedLevel=0)
@@ -344,15 +359,32 @@ class RichTextFrame(wx.Frame):
         :param event:
         :return:
         """
-        self.print_current_styles()
+        # TODO default list style behaves weirdly on return key
+        # TODO prevent return key in headings and urls?? Use HasCharacterAttributes??
+        # TODO reapply style on delete and backspace to get rid of mixed styles. Does not work for paragraph style
+        #  because it keeps character styles but only for heading styles!!
+
+        #self.print_current_styles()
         self._update_style_picker()
+        paragraph_style, _ = self._get_style_at_pos(self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition()))
+        if event.GetKeyCode() == wx.WXK_RETURN and event.GetModifiers() == wx.MOD_SHIFT:
+            # TODO Does not work
+            return
         if event.GetKeyCode() == wx.WXK_RETURN:
-            # Reapply list style on current line if we are currently in list style.
-            paragraph_style, _ = self._get_style_at_pos(self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition()))
             if paragraph_style == Strings.style_list:
-                self.rtc.MoveUp()
-                self._apply_list_style()
-                self.rtc.MoveDown()
+                # Reapply list style on previous line if we are currently in list style. Otherwise for some reason the
+                # list will not continue.
+                self._apply_list_style(position=self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition()) - 1)
+            if paragraph_style == Strings.style_paragraph:
+                # Reapply paragraph style to get rid of remaining paragraph spacing from list style or other style.
+                self._apply_paragraph_style()
+        if event.GetKeyCode() == wx.WXK_BACK or event.GetKeyCode() == wx.WXK_DELETE:
+            # Reapply current paragraph style on backspace or delete to prevent mixed styles
+            # (like joining heading + paragraph)
+            if not paragraph_style == Strings.style_list:
+                # Does not work for list since the style is reapplied and prevents deletion of list item.
+                # We first need to wait for the condition above to reapply paragraph style.
+                self._change_style(paragraph_style)
         event.Skip()
 
     def on_mouse(self, event: wx.MouseEvent):
