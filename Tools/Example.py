@@ -214,9 +214,7 @@ class RichTextFrame(wx.Frame):
         :param evt: The name of the style in stylesheet
         :return: None
         """
-        style: rt.RichTextAttr = self._stylesheet.FindStyle(evt.GetString()).GetStyle()
         style_name = evt.GetString()
-
         if style_name == Strings.style_heading_3 or style_name == Strings.style_heading_4:
             self._apply_heading_style(style_name)
 
@@ -227,7 +225,6 @@ class RichTextFrame(wx.Frame):
             self._apply_list_style()
 
         # TODO reapply style on delete and backspace to get rid of mixed styles.
-        # todo continue list style on enter
         # TODO disable options in list based on current style.
 
         elif style_name == Strings.style_image:
@@ -351,7 +348,11 @@ class RichTextFrame(wx.Frame):
         self._update_style_picker()
         if event.GetKeyCode() == wx.WXK_RETURN:
             # Reapply list style on current line if we are currently in list style.
-            print('return')
+            paragraph_style, _ = self._get_style_at_pos(self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition()))
+            if paragraph_style == Strings.style_list:
+                self.rtc.MoveUp()
+                self._apply_list_style()
+                self.rtc.MoveDown()
         event.Skip()
 
     def on_mouse(self, event: wx.MouseEvent):
