@@ -209,7 +209,7 @@ class RichTextFrame(wx.Frame):
             remove_flag = rt.RICHTEXT_SETSTYLE_REMOVE
         p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(position)
         self.rtc.SetStyleEx(p.GetRange().FromInternal(), new_style, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO |
-                            paragraphs_flag | remove_flag | rt.RICHTEXT_SETSTYLE_RESET)
+                                                                          paragraphs_flag | remove_flag | rt.RICHTEXT_SETSTYLE_RESET)
 
     def _style_picker_handler(self, evt: wx.CommandEvent) -> None:
         """
@@ -236,11 +236,8 @@ class RichTextFrame(wx.Frame):
         elif style_name == Strings.style_list:
             self._apply_list_style()
 
-        # TODO disable options in list based on current style.
-
         elif style_name == Strings.style_image:
-            # TODO this
-            print('img')
+            self._apply_image_style()
 
         else:
             self._apply_url_style()
@@ -287,7 +284,7 @@ class RichTextFrame(wx.Frame):
 
     def _apply_list_style(self, position=None) -> None:
         """
-        Changes current paragraph under the cursor into list item.
+        Changes paragraph on position into list item.
         :param position: Where to apply the style, if not set, current paragraph is used.
         :return: None
         """
@@ -314,6 +311,14 @@ class RichTextFrame(wx.Frame):
         self.rtc.SetListStyle(p.GetRange(), self._stylesheet.FindStyle(Strings.style_list),
                               flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_SPECIFY_LEVEL,
                               specifiedLevel=0)
+
+    def _apply_image_style(self):
+        """
+        Changes current paragraph under the cursor into an image style.
+        :return: None
+        """
+        # TODO make pictures a stand alone objects that can not have text next to them.
+        print('img')
 
     def _apply_url_style(self) -> None:
         """
@@ -366,10 +371,9 @@ class RichTextFrame(wx.Frame):
         """
         # TODO default list style behaves weirdly on return key
         # TODO prevent return key in headings and urls?? Use HasCharacterAttributes??
-        # TODO reapply style on delete and backspace to get rid of mixed styles. Does not work for paragraph style
-        #  because it keeps character styles but only for heading styles!!
+        # TODO disable options in list based on current style.
 
-        #self.print_current_styles()
+        # self.print_current_styles()
         self._update_style_picker()
         paragraph_style, _ = self._get_style_at_pos(self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition()))
         if event.GetKeyCode() == wx.WXK_RETURN and event.GetModifiers() == wx.MOD_SHIFT:
