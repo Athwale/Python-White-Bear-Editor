@@ -41,6 +41,7 @@ class RichTextFrame(wx.Frame):
         self.Bind(wx.EVT_BUTTON, self._change_color, self._color_button)
         self.Bind(wx.EVT_BUTTON, self._change_bold, self._bold_button)
         self.rtc.Bind(wx.EVT_KEY_UP, self.on_keypress)
+        self.rtc.Bind(wx.EVT_KEY_DOWN, self.skip_key)
         self.rtc.Bind(wx.EVT_LEFT_UP, self.on_mouse)
 
         self._create_styles()
@@ -365,20 +366,16 @@ class RichTextFrame(wx.Frame):
 
     def on_keypress(self, event: wx.KeyEvent):
         """
-        Handle key presses.
+        Handle key up events.
         :param event:
         :return:
         """
         # TODO default list style behaves weirdly on return key
         # TODO prevent return key in headings and urls?? Use HasCharacterAttributes??
         # TODO disable options in list based on current style.
-
         # self.print_current_styles()
         self._update_style_picker()
         paragraph_style, _ = self._get_style_at_pos(self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition()))
-        if event.GetKeyCode() == wx.WXK_RETURN and event.GetModifiers() == wx.MOD_SHIFT:
-            # TODO Does not work
-            return
         if event.GetKeyCode() == wx.WXK_RETURN:
             if paragraph_style == Strings.style_list:
                 # Reapply list style on previous line if we are currently in list style. Otherwise for some reason the
@@ -394,6 +391,17 @@ class RichTextFrame(wx.Frame):
                 # Does not work for list since the style is reapplied and prevents deletion of list item.
                 # We first need to wait for the condition above to reapply paragraph style.
                 self._change_style(paragraph_style, force_paragraph=True)
+        event.Skip()
+
+    def skip_key(self, event: wx.KeyEvent):
+        """
+        Handle key presses that should be ignored.
+        :param event:
+        :return:
+        """
+        # Disable shift enter since it is broken and does not break lines consistently.
+        if event.GetKeyCode() == wx.WXK_RETURN and event.GetModifiers() == wx.MOD_SHIFT:
+            return
         event.Skip()
 
     def on_mouse(self, event: wx.MouseEvent):
