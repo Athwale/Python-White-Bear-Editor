@@ -2,6 +2,8 @@ import wx
 import wx.richtext as rt
 
 from Constants.Constants import Strings, Numbers
+from Tools.Document.ArticleElements.Video import Video
+from Tools.ImageTextField import ImageTextField
 
 
 class RichTextFrame(wx.Frame):
@@ -27,11 +29,13 @@ class RichTextFrame(wx.Frame):
         self._style_control.SetStyleSheet(self._stylesheet)
         self._color_button = wx.Button(self, -1, 'color')
         self._bold_button = wx.Button(self, -1, 'bold')
+        self._image_button = wx.Button(self, -1, 'image')
 
         self._controls_sizer.Add(self._style_control)
         self._controls_sizer.Add(self._style_picker)
         self._controls_sizer.Add(self._color_button)
         self._controls_sizer.Add(self._bold_button)
+        self._controls_sizer.Add(self._image_button)
 
         self._main_sizer.Add(self.rtc, 1, flag=wx.EXPAND)
         self._main_sizer.Add(self._controls_sizer)
@@ -40,10 +44,12 @@ class RichTextFrame(wx.Frame):
         self.Bind(wx.EVT_LISTBOX, self._style_picker_handler, self._style_picker)
         self.Bind(wx.EVT_BUTTON, self._change_color, self._color_button)
         self.Bind(wx.EVT_BUTTON, self._change_bold, self._bold_button)
+        self.Bind(wx.EVT_BUTTON, self._write_field, self._image_button)
         self.rtc.Bind(wx.EVT_KEY_UP, self.on_keypress)
         self.rtc.Bind(wx.EVT_KEY_DOWN, self.skip_key)
         self.rtc.Bind(wx.EVT_LEFT_UP, self.on_mouse)
 
+        self.rtc.GetBuffer().CleanUpFieldTypes()
         self._create_styles()
         self._fill_style_picker()
 
@@ -428,6 +434,31 @@ class RichTextFrame(wx.Frame):
         print('next: ' + str(
             str(self._get_style_at_pos(current_position + 2)) + ' ' + self.rtc.GetRange(current_position + 1,
                                                                                         current_position + 2)))
+
+    def _write_field(self, evt: wx.CommandEvent) -> None:
+        """
+        Write an ImageInText or Video into the text area.
+        :param evt: Not used.
+        :return: None
+        """
+        new_field = self._register_field()
+        # self.BeginParagraphStyle(Strings.style_image)
+        self.rtc.WriteField(new_field.GetName(), rt.RichTextProperties())
+        # self.WriteText('\n')
+        # self.EndParagraphStyle()
+
+    @staticmethod
+    def _register_field() -> ImageTextField:
+        """
+        Register a new custom field that represent an image.
+        :return: None
+        """
+        video = Video('test video', 534, 534, 'http://www.google.com')
+        video.seo_test_self()
+        print(video.get_image())
+        field_type = ImageTextField(video)
+        rt.RichTextBuffer.AddFieldType(field_type)
+        return field_type
 
     def insert_sample_text(self) -> None:
         """

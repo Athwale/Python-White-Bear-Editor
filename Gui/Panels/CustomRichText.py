@@ -159,16 +159,6 @@ class CustomRichText(rt.RichTextCtrl):
         self._style_control.SetStyleSheet(self._stylesheet)
         self._style_control.UpdateStyles()
 
-    def style_changed(self, evt: wx.CommandEvent):
-        """
-        Respond to single clicks on styles in style control
-        :param evt:
-        :return:
-        """
-        # TODO remove this
-        style = self._style_control.GetStyle(evt.GetSelection()).GetName()
-        print(style)
-
     def set_content(self, doc: WhitebearDocumentArticle) -> None:
         """
         Set the document this text area is displaying.
