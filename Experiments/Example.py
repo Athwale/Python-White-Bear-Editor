@@ -26,6 +26,7 @@ class RichTextFrame(wx.Frame):
         self._style_control.Enable(True)
 
         self._style_picker = wx.ListBox(self, -1, size=(100, 160))
+        self._previous_style: str = Strings.style_paragraph
 
         self.rtc.SetStyleSheet(self._stylesheet)
         self._style_control.SetRichTextCtrl(self.rtc)
@@ -359,6 +360,7 @@ class RichTextFrame(wx.Frame):
         # TODO prevent return key in headings and urls?? Use HasCharacterAttributes??
         # TODO disable options in list based on current style.
         # self.print_current_styles()
+        event.Skip()
         self._update_style_picker()
         paragraph_style, _ = self._get_style_at_pos(self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition()))
         if event.GetKeyCode() == wx.WXK_RETURN:
@@ -379,13 +381,17 @@ class RichTextFrame(wx.Frame):
                     p.RemoveChild(child, deleteChild=True)
                     self.rtc.Invalidate()
                     self.rtc.Refresh()
+        if paragraph_style == Strings.style_image:
+            # If backspacing into an image from a different style, the image style would survive so we have to reapply
+            # the correct previous style saved in skip key method. This needs to be applied to lists too.
+            self._change_style(self._previous_style, force_paragraph=True)
+            return
         if paragraph_style != Strings.style_list:
             # Reapply current paragraph style on backspace or delete to prevent mixed styles
             # (like joining heading + paragraph)
             # Does not work for list since the style is reapplied and prevents deletion of list item.
             # We first need to wait for the condition above to reapply paragraph style.
             self._change_style(paragraph_style, force_paragraph=True)
-        event.Skip()
 
     def skip_key(self, event: wx.KeyEvent):
         """
@@ -399,6 +405,8 @@ class RichTextFrame(wx.Frame):
             return
 
         paragraph_style, _ = self._get_style_at_pos(self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition()))
+        # Save style before the caret moves to prevent incorrect styling after backspacing into an image.
+        self._previous_style = paragraph_style
         if paragraph_style == Strings.style_image:
             # Prevent everything except arrows and return.
             if key_code == wx.WXK_LEFT or key_code == wx.WXK_RIGHT or key_code == wx.WXK_UP or key_code == wx.WXK_DOWN \
