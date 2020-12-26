@@ -377,8 +377,8 @@ class RichTextFrame(wx.Frame):
             for child in p.GetChildren():
                 if isinstance(child, rt.RichTextField):
                     p.RemoveChild(child, deleteChild=True)
-                    # todo refresh paragraph
-                    self.rtc.MoveUp()
+                    self.rtc.Invalidate()
+                    self.rtc.Refresh()
         if paragraph_style != Strings.style_list:
             # Reapply current paragraph style on backspace or delete to prevent mixed styles
             # (like joining heading + paragraph)
