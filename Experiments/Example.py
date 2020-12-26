@@ -2,7 +2,10 @@ import wx
 import wx.richtext as rt
 
 from Constants.Constants import Strings, Numbers
-from Tools.Document.ArticleElements.Video import Video
+try:
+    from Tools.Document.ArticleElements.Video import Video
+except Exception:
+    pass
 from Tools.ImageTextField import ImageTextField
 
 
@@ -203,7 +206,7 @@ class RichTextFrame(wx.Frame):
             remove_flag = rt.RICHTEXT_SETSTYLE_REMOVE
         p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(position)
         self.rtc.SetStyleEx(p.GetRange().FromInternal(), new_style, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO |
-                            paragraphs_flag | remove_flag | rt.RICHTEXT_SETSTYLE_RESET)
+                                                                          paragraphs_flag | remove_flag | rt.RICHTEXT_SETSTYLE_RESET)
 
     def _style_picker_handler(self, evt: wx.CommandEvent) -> None:
         """
@@ -229,9 +232,6 @@ class RichTextFrame(wx.Frame):
 
         elif style_name == Strings.style_list:
             self._apply_list_style()
-
-        elif style_name == Strings.style_image:
-            self._apply_image_style()
 
         else:
             self._apply_url_style()
@@ -306,15 +306,6 @@ class RichTextFrame(wx.Frame):
                               flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_SPECIFY_LEVEL,
                               specifiedLevel=0)
 
-    def _apply_image_style(self):
-        """
-        Changes current paragraph under the cursor into an image style.
-        :return: None
-        """
-        # TODO make pictures a stand alone objects that can not have text next to them.
-        # TODO Maybe just use a button and not a style in picker
-        self._write_field(wx.CommandEvent())
-
     def _apply_url_style(self) -> None:
         """
         Changes current selection the url character style.
@@ -353,7 +344,7 @@ class RichTextFrame(wx.Frame):
                                                                             (self.rtc.GetCaretPosition()))
         if character_style_name:
             self._style_picker.SetSelection(self._style_picker.FindString(character_style_name))
-        else:
+        elif paragraph_style_name:
             self._style_picker.SetSelection(self._style_picker.FindString(paragraph_style_name))
         # Return focus back into the text area. The focus must happen a little later when the style picker is finished.
         wx.CallLater(100, self.rtc.SetFocus)
@@ -367,7 +358,6 @@ class RichTextFrame(wx.Frame):
         # TODO default list style behaves weirdly on return key
         # TODO prevent return key in headings and urls?? Use HasCharacterAttributes??
         # TODO disable options in list based on current style.
-        # TODO remove any images when joining styles
         # self.print_current_styles()
         self._update_style_picker()
         paragraph_style, _ = self._get_style_at_pos(self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition()))
@@ -381,20 +371,20 @@ class RichTextFrame(wx.Frame):
                 # Reapply paragraph style after an image.
                 self._apply_paragraph_style()
         if event.GetKeyCode() == wx.WXK_BACK or event.GetKeyCode() == wx.WXK_DELETE:
-            # Remove image on any delete key
-            if paragraph_style == Strings.style_image:
-                # Remove the whole paragraph.
-                position = self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition())
-                p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(position)
-                self.rtc.Delete(p.GetRange())
-                # Reapply default paragraph style.
-                self._change_style(Strings.style_paragraph, force_paragraph=True)
+            # Remove any image on any delete key and turn all potential text into the next style.
+            position = self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition())
+            p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(position)
+            for child in p.GetChildren():
+                if isinstance(child, rt.RichTextField):
+                    p.RemoveChild(child, deleteChild=True)
+                    # todo refresh paragraph
+                    self.rtc.MoveUp()
+        if paragraph_style != Strings.style_list:
             # Reapply current paragraph style on backspace or delete to prevent mixed styles
             # (like joining heading + paragraph)
-            elif not paragraph_style == Strings.style_list:
-                # Does not work for list since the style is reapplied and prevents deletion of list item.
-                # We first need to wait for the condition above to reapply paragraph style.
-                self._change_style(paragraph_style, force_paragraph=True)
+            # Does not work for list since the style is reapplied and prevents deletion of list item.
+            # We first need to wait for the condition above to reapply paragraph style.
+            self._change_style(paragraph_style, force_paragraph=True)
         event.Skip()
 
     def skip_key(self, event: wx.KeyEvent):
@@ -410,8 +400,8 @@ class RichTextFrame(wx.Frame):
 
         paragraph_style, _ = self._get_style_at_pos(self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition()))
         if paragraph_style == Strings.style_image:
-            # TODO prevent everything except delete, arrows and return
-            if key_code == wx.WXK_LEFT or key_code == wx.WXK_RIGHT or key_code == wx.WXK_UP or key_code == wx.WXK_DOWN\
+            # Prevent everything except arrows and return.
+            if key_code == wx.WXK_LEFT or key_code == wx.WXK_RIGHT or key_code == wx.WXK_UP or key_code == wx.WXK_DOWN \
                     or key_code == wx.WXK_RETURN:
                 event.Skip()
             else:
@@ -450,6 +440,7 @@ class RichTextFrame(wx.Frame):
         :param evt: Not used.
         :return: None
         """
+        # TODO insert image on new line.
         # Image style
         stl_image: rt.RichTextAttr = rt.RichTextAttr()
         stl_image.SetFontSize(Numbers.paragraph_font_size)
