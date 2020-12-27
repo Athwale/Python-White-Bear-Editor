@@ -437,7 +437,10 @@ class RichTextFrame(wx.Frame):
             self._image_button.Enable()
         else:
             self._image_button.Disable()
-        # TODO disable style picker when inside image style
+        if paragraph_style == Strings.style_image:
+            self._style_picker.Disable()
+        else:
+            self._style_picker.Enable()
         # TODO enter directly before image breaks things.
         # TODO disable options in list based on current style.
 
