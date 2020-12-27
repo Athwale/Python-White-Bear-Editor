@@ -366,9 +366,10 @@ class RichTextFrame(wx.Frame):
         :param event: Used to get key code.
         :return: None
         """
-        # TODO default list style behaves weirdly on return key
         # TODO prevent return key in urls?? Use HasCharacterAttributes or underlined??
-        # TODO reapply par style on previous empty line
+        # TODO default list style behaves weirdly on return key
+        # TODO list style does not continue correctly if enter in the middle of text
+        # TODO broken backspace from one empty line under image
         event.Skip()
         self._update_style_picker()
         position = self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition())
@@ -378,7 +379,16 @@ class RichTextFrame(wx.Frame):
             if paragraph_style == Strings.style_list:
                 # Reapply list style on previous line if we are currently in list style. Otherwise for some reason the
                 # list will not continue.
-                self._apply_list_style(position=self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition()) - 1)
+                pass
+                #self._apply_list_style(position=self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition()) - 1)
+            previous_par: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(position - 1)
+            if not previous_par.GetTextForRange(previous_par.GetRange()):
+                if not isinstance(previous_par.GetChild(0), rt.RichTextField):
+                    # There must not be an image in the paragraph either.
+                    # TODO breaks lists.
+                    # Reapply paragraph style on empty previous lines.
+                    self._change_paragraph_style(self._stylesheet.FindStyle(Strings.style_paragraph).GetStyle(),
+                                                 paragraphs_only=False, remove=False, position=position - 1)
         if event.GetKeyCode() == wx.WXK_BACK or event.GetKeyCode() == wx.WXK_DELETE:
             # Remove any image on any delete key and turn all potential text into the next style.
             for child in p.GetChildren():
@@ -390,6 +400,7 @@ class RichTextFrame(wx.Frame):
                 # If backspacing into an image from a different style, the image style would survive so we have to
                 # reapply the correct previous style saved in skip key method. This needs to be applied to lists too.
                 self._change_style(self._previous_style, force_paragraph=True)
+                self.rtc.MoveToLineStart()
                 return
         if paragraph_style != Strings.style_list:
             # Reapply current paragraph style on backspace or delete to prevent mixed styles
@@ -448,7 +459,6 @@ class RichTextFrame(wx.Frame):
             self._style_picker.SetSelection(wx.NOT_FOUND)
         else:
             self._style_picker.Enable()
-        # TODO disable options in list based on current style.
 
     def on_mouse(self, event: wx.MouseEvent):
         """
