@@ -2,10 +2,7 @@ import wx
 import wx.richtext as rt
 
 from Constants.Constants import Strings, Numbers
-try:
-    from Tools.Document.ArticleElements.Video import Video
-except Exception:
-    pass
+from Tools.Document.ArticleElements.Video import Video
 from Tools.ImageTextField import ImageTextField
 
 
@@ -20,22 +17,15 @@ class RichTextFrame(wx.Frame):
         self._stylesheet = rt.RichTextStyleSheet()
         self._stylesheet.SetName('Stylesheet')
 
-        self._style_control = rt.RichTextStyleListBox(self, 1, size=(100, 160))
-        self._style_control.SetStyleType(0)
-        self._style_control.SetMargins(-5, -5)
-        self._style_control.Enable(True)
-
         self._style_picker = wx.ListBox(self, -1, size=(100, 160))
         self._previous_style: str = Strings.style_paragraph
 
         self.rtc.SetStyleSheet(self._stylesheet)
-        self._style_control.SetRichTextCtrl(self.rtc)
-        self._style_control.SetStyleSheet(self._stylesheet)
         self._color_button = wx.Button(self, -1, 'color')
         self._bold_button = wx.Button(self, -1, 'bold')
         self._image_button = wx.Button(self, -1, 'image')
+        self._image_button.Disable()
 
-        self._controls_sizer.Add(self._style_control)
         self._controls_sizer.Add(self._style_picker)
         self._controls_sizer.Add(self._color_button)
         self._controls_sizer.Add(self._bold_button)
@@ -49,9 +39,14 @@ class RichTextFrame(wx.Frame):
         self.Bind(wx.EVT_BUTTON, self._change_color, self._color_button)
         self.Bind(wx.EVT_BUTTON, self._change_bold, self._bold_button)
         self.Bind(wx.EVT_BUTTON, self._write_field, self._image_button)
+
+        self.rtc.Bind(wx.EVT_LEFT_UP, self.on_mouse)
+        self.rtc.Bind(wx.EVT_LEFT_UP, self._enable_buttons)
+
         self.rtc.Bind(wx.EVT_KEY_UP, self.on_keypress)
         self.rtc.Bind(wx.EVT_KEY_DOWN, self.skip_key)
-        self.rtc.Bind(wx.EVT_LEFT_UP, self.on_mouse)
+        self.rtc.Bind(wx.EVT_KEY_UP, self._enable_buttons)
+        self.rtc.Bind(wx.EVT_TEXT, self._enable_buttons)
 
         self.rtc.GetBuffer().CleanUpFieldTypes()
         self._create_styles()
@@ -142,10 +137,23 @@ class RichTextFrame(wx.Frame):
         style_link.SetStyle(stl_link)
         self._stylesheet.AddCharacterStyle(style_link)
 
+        # Image style
+        # Add the image style even though we do not use it from the style picker, this allows easy next style
+        # definition.
+        stl_image: rt.RichTextAttr = rt.RichTextAttr()
+        stl_image.SetFontSize(Numbers.paragraph_font_size)
+        stl_image.SetAlignment(wx.TEXT_ALIGNMENT_CENTER)
+        stl_image.SetFontWeight(wx.FONTWEIGHT_NORMAL)
+        stl_image.SetParagraphSpacingAfter(Numbers.image_spacing)
+        stl_image.SetParagraphSpacingBefore(Numbers.image_spacing)
+        stl_image.SetParagraphStyleName(Strings.style_image)
+
+        style_image: rt.RichTextParagraphStyleDefinition = rt.RichTextParagraphStyleDefinition(Strings.style_image)
+        style_image.SetStyle(stl_image)
+        style_image.SetNextStyle(Strings.style_paragraph)
+        self._stylesheet.AddParagraphStyle(style_image)
+
         self.rtc.SetStyleSheet(self._stylesheet)
-        self._style_control.SetRichTextCtrl(self.rtc)
-        self._style_control.SetStyleSheet(self._stylesheet)
-        self._style_control.UpdateStyles()
 
     def _fill_style_picker(self) -> None:
         """
@@ -154,7 +162,9 @@ class RichTextFrame(wx.Frame):
         """
         names = []
         for n in range(self._stylesheet.GetParagraphStyleCount()):
-            names.append(self._stylesheet.GetParagraphStyle(n).GetName())
+            if self._stylesheet.GetParagraphStyle(n).GetName() != Strings.style_image:
+                # Ignore the image style.
+                names.append(self._stylesheet.GetParagraphStyle(n).GetName())
         for n in range(self._stylesheet.GetListStyleCount()):
             names.append(self._stylesheet.GetListStyle(n).GetName())
         for n in range(self._stylesheet.GetListStyleCount()):
@@ -199,15 +209,15 @@ class RichTextFrame(wx.Frame):
         """
         if not position:
             position = self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition())
-        paragraphs_flag = 0
+        par_flag = 0
         remove_flag = 0
         if paragraphs_only:
-            paragraphs_flag = rt.RICHTEXT_SETSTYLE_PARAGRAPHS_ONLY
+            par_flag = rt.RICHTEXT_SETSTYLE_PARAGRAPHS_ONLY
         if remove:
             remove_flag = rt.RICHTEXT_SETSTYLE_REMOVE
         p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(position)
-        self.rtc.SetStyleEx(p.GetRange().FromInternal(), new_style, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO |
-                                                                          paragraphs_flag | remove_flag | rt.RICHTEXT_SETSTYLE_RESET)
+        self.rtc.SetStyleEx(p.GetRange().FromInternal(), new_style,
+                            flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | par_flag | remove_flag | rt.RICHTEXT_SETSTYLE_RESET)
 
     def _style_picker_handler(self, evt: wx.CommandEvent) -> None:
         """
@@ -350,42 +360,37 @@ class RichTextFrame(wx.Frame):
         # Return focus back into the text area. The focus must happen a little later when the style picker is finished.
         wx.CallLater(100, self.rtc.SetFocus)
 
-    def on_keypress(self, event: wx.KeyEvent):
+    def on_keypress(self, event: wx.KeyEvent) -> None:
         """
         Handle key up events.
-        :param event:
-        :return:
+        :param event: Used to get key code.
+        :return: None
         """
         # TODO default list style behaves weirdly on return key
-        # TODO prevent return key in headings and urls?? Use HasCharacterAttributes??
-        # TODO disable options in list based on current style.
-        # self.print_current_styles()
+        # TODO prevent return key in urls?? Use HasCharacterAttributes or underlined??
+        # TODO reapply par style on previous empty line
         event.Skip()
         self._update_style_picker()
-        paragraph_style, _ = self._get_style_at_pos(self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition()))
+        position = self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition())
+        p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(position)
+        paragraph_style, _ = self._get_style_at_pos(position)
         if event.GetKeyCode() == wx.WXK_RETURN:
             if paragraph_style == Strings.style_list:
                 # Reapply list style on previous line if we are currently in list style. Otherwise for some reason the
                 # list will not continue.
                 self._apply_list_style(position=self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition()) - 1)
-            if paragraph_style == Strings.style_paragraph or paragraph_style == Strings.style_image:
-                # Reapply paragraph style to get rid of remaining paragraph spacing from list style or other style.
-                # Reapply paragraph style after an image.
-                self._apply_paragraph_style()
         if event.GetKeyCode() == wx.WXK_BACK or event.GetKeyCode() == wx.WXK_DELETE:
             # Remove any image on any delete key and turn all potential text into the next style.
-            position = self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition())
-            p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(position)
             for child in p.GetChildren():
                 if isinstance(child, rt.RichTextField):
                     p.RemoveChild(child, deleteChild=True)
                     self.rtc.Invalidate()
                     self.rtc.Refresh()
-        if paragraph_style == Strings.style_image:
-            # If backspacing into an image from a different style, the image style would survive so we have to reapply
-            # the correct previous style saved in skip key method. This needs to be applied to lists too.
-            self._change_style(self._previous_style, force_paragraph=True)
-            return
+            if paragraph_style == Strings.style_image:
+                # If backspacing into an image from a different style, the image style would survive so we have to
+                # reapply the correct previous style saved in skip key method. This needs to be applied to lists too.
+                self._change_style(self._previous_style, force_paragraph=True)
+                return
         if paragraph_style != Strings.style_list:
             # Reapply current paragraph style on backspace or delete to prevent mixed styles
             # (like joining heading + paragraph)
@@ -417,6 +422,25 @@ class RichTextFrame(wx.Frame):
         else:
             event.Skip()
 
+    def _enable_buttons(self, event: wx.KeyEvent) -> None:
+        """
+        Enable or disable styling buttons based on caret position.
+        :param event: The keyboard event.
+        :return: None
+        """
+        event.Skip()
+        position = self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition())
+        paragraph_style, character_style = self._get_style_at_pos(position)
+        p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(position)
+        # Only allow inserting images on an empty line.
+        if not p.GetTextForRange(p.GetRange()) and paragraph_style == Strings.style_paragraph:
+            self._image_button.Enable()
+        else:
+            self._image_button.Disable()
+        # TODO disable style picker when inside image style
+        # TODO enter directly before image breaks things.
+        # TODO disable options in list based on current style.
+
     def on_mouse(self, event: wx.MouseEvent):
         """
         Handle left mouse click.
@@ -424,12 +448,10 @@ class RichTextFrame(wx.Frame):
         :return: None
         """
         self._update_style_picker()
-        self.print_current_styles()
         event.Skip()
 
     def print_current_styles(self):
         print('---')
-        print('from ctrl: ' + self._style_control.GetStyle(self._style_control.GetSelection()).GetName())
         current_position = self.rtc.GetCaretPosition()
         print('pos: ' + str(current_position))
         print('previous: ' + str(
@@ -448,16 +470,6 @@ class RichTextFrame(wx.Frame):
         :param evt: Not used.
         :return: None
         """
-        # TODO insert image on new line.
-        # Image style
-        stl_image: rt.RichTextAttr = rt.RichTextAttr()
-        stl_image.SetFontSize(Numbers.paragraph_font_size)
-        stl_image.SetAlignment(wx.TEXT_ALIGNMENT_CENTER)
-        stl_image.SetFontWeight(wx.FONTWEIGHT_NORMAL)
-        stl_image.SetParagraphSpacingAfter(Numbers.image_spacing)
-        stl_image.SetParagraphSpacingBefore(Numbers.image_spacing)
-        stl_image.SetParagraphStyleName(Strings.style_image)
-
         position = self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition())
         # Reset to paragraph style to get rid of any extra styles
         paragraph_style: rt.RichTextAttr = self._stylesheet.FindStyle(Strings.style_paragraph).GetStyle()
@@ -465,10 +477,13 @@ class RichTextFrame(wx.Frame):
         # Remove paragraph style before applying image style. Otherwise it will still appear to be paragraph style.
         self._change_paragraph_style(paragraph_style, paragraphs_only=True, remove=True, position=position)
         # Set the image style.
-        self._change_paragraph_style(stl_image, paragraphs_only=False, remove=False, position=position)
+        img_style = self._stylesheet.FindParagraphStyle(Strings.style_image).GetStyle()
+        self._change_paragraph_style(img_style, paragraphs_only=False, remove=False, position=position)
 
         new_field = self._register_field()
         self.rtc.WriteField(new_field.GetName(), rt.RichTextProperties())
+        # Return focus to the text area.
+        wx.CallLater(100, self.rtc.SetFocus)
 
     @staticmethod
     def _register_field() -> ImageTextField:
