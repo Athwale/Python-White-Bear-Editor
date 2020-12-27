@@ -409,13 +409,18 @@ class RichTextFrame(wx.Frame):
         if key_code == wx.WXK_RETURN and event.GetModifiers() == wx.MOD_SHIFT:
             return
 
-        paragraph_style, _ = self._get_style_at_pos(self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition()))
+        position = self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition())
+        paragraph_style, _ = self._get_style_at_pos(position)
         # Save style before the caret moves to prevent incorrect styling after backspacing into an image.
         self._previous_style = paragraph_style
         if paragraph_style == Strings.style_image:
             # Prevent everything except arrows and return.
             if key_code == wx.WXK_LEFT or key_code == wx.WXK_RIGHT or key_code == wx.WXK_UP or key_code == wx.WXK_DOWN \
                     or key_code == wx.WXK_RETURN:
+                if key_code == wx.WXK_RETURN:
+                    # Move to the end of the paragraph and finish the new line there. New lines before image incorrectly
+                    # continues the image style.
+                    self.rtc.MoveToLineEnd()
                 event.Skip()
             else:
                 return
@@ -439,9 +444,10 @@ class RichTextFrame(wx.Frame):
             self._image_button.Disable()
         if paragraph_style == Strings.style_image:
             self._style_picker.Disable()
+            # Remove selection from the picker to avoid confusing flicker.
+            self._style_picker.SetSelection(wx.NOT_FOUND)
         else:
             self._style_picker.Enable()
-        # TODO enter directly before image breaks things.
         # TODO disable options in list based on current style.
 
     def on_mouse(self, event: wx.MouseEvent):
@@ -496,7 +502,6 @@ class RichTextFrame(wx.Frame):
         """
         video = Video('test video', 534, 534, 'http://www.google.com')
         video.seo_test_self()
-        print(video.get_image())
         field_type = ImageTextField(video)
         rt.RichTextBuffer.AddFieldType(field_type)
         return field_type
