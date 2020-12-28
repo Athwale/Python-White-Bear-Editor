@@ -361,10 +361,8 @@ class RichTextFrame(wx.Frame):
         :return: None
         """
         # TODO prevent return key in urls?? Use HasCharacterAttributes or underlined??
-        # TODO broken backspace from one empty line under image
         # TODO weird list behavior on delete last item in builtin lists, maybe do not use builtin lists.
         # TODO how to stop writing a url?
-        # TODO image insertion does not work right after image was deleted
         event.Skip()
         self._update_style_picker()
         self._enable_buttons()
@@ -385,7 +383,8 @@ class RichTextFrame(wx.Frame):
             for child in p.GetChildren():
                 if isinstance(child, rt.RichTextField):
                     if len(p.GetChildren()) == 1:
-                        # There is no text being appended, remove the image paragraph completely
+                        # There is no text being appended, remove the image paragraph completely, removing just the
+                        # child removes the paragraph but confuses the control.
                         self.rtc.Delete(p.GetRange())
                     else:
                         # Backspacing into the image with some text from the next paragraph, remove just the image.
@@ -407,6 +406,7 @@ class RichTextFrame(wx.Frame):
                 attrs: rt.RichTextAttr = p.GetAttributes()
                 if attrs.GetBulletStyle() != wx.TEXT_ATTR_BULLET_STYLE_STANDARD:
                     self._change_style(Strings.style_paragraph)
+                    self._enable_buttons()
             if self._previous_style != paragraph_style:
                 if self._previous_style == Strings.style_paragraph and paragraph_style == Strings.style_paragraph:
                     # Do not reapply style if the two lines are paragraphs.
