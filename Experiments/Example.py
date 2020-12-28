@@ -153,23 +153,19 @@ class RichTextFrame(wx.Frame):
 
         self.rtc.SetStyleSheet(self._stylesheet)
 
-    def _fill_style_picker(self, ignore_url=False) -> None:
+    def _fill_style_picker(self) -> None:
         """
         Fill picker list box with style names
-        :param ignore_url: Do not insert url style
         :return: None
         """
         names = []
-        self._style_picker.Clear()
         for n in range(self._stylesheet.GetParagraphStyleCount()):
             if self._stylesheet.GetParagraphStyle(n).GetName() != Strings.style_image:
                 # Ignore the image style.
                 names.append(self._stylesheet.GetParagraphStyle(n).GetName())
         # There is only one list style
         names.append(Strings.style_list)
-        if not ignore_url:
-            # There is only one character url style anyway.
-            names.append(Strings.style_url)
+        names.append(Strings.style_url)
 
         self._style_picker.InsertItems(names, 0)
 
@@ -368,6 +364,7 @@ class RichTextFrame(wx.Frame):
         # TODO prevent return key in urls?? Use HasCharacterAttributes or underlined??
         # TODO broken backspace from one empty line under image
         # TODO weird list behavior on delete last item in builtin lists
+        # TODO how to stop writing a url?
         event.Skip()
         self._update_style_picker()
         position = self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition())
@@ -462,9 +459,11 @@ class RichTextFrame(wx.Frame):
         else:
             self._style_picker.Enable()
         if paragraph_style == Strings.style_heading_3 or paragraph_style == Strings.style_heading_4:
-            self._fill_style_picker(ignore_url=True)
-        else:
-            self._fill_style_picker(ignore_url=False)
+            url_index = self._style_picker.FindString(Strings.style_url)
+            if url_index != wx.NOT_FOUND:
+                self._style_picker.Delete(url_index)
+        elif self._style_picker.FindString(Strings.style_url) == wx.NOT_FOUND:
+            self._style_picker.Append(Strings.style_url)
 
     def on_mouse(self, event: wx.MouseEvent):
         """
