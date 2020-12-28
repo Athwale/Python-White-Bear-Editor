@@ -384,20 +384,23 @@ class RichTextFrame(wx.Frame):
             # Remove any image on any delete key and turn all potential text into the next style.
             for child in p.GetChildren():
                 if isinstance(child, rt.RichTextField):
-                    p.RemoveChild(child, deleteChild=True)
-                    self.rtc.Invalidate()
-                    self.rtc.Refresh()
+                    if len(p.GetChildren()) == 1:
+                        # There is no text being appended, remove the image paragraph completely
+                        self.rtc.Delete(p.GetRange())
+                    else:
+                        # Backspacing into the image with some text from the next paragraph, remove just the image.
+                        p.RemoveChild(child, deleteChild=True)
+                        self.rtc.Invalidate()
+                        self.rtc.Refresh()
             if paragraph_style == Strings.style_image:
                 # If backspacing into an image from a different style, the image style would survive so we have to
                 # reapply the correct previous style saved in skip key method. This needs to be applied to lists too.
-                print(self._previous_style)
                 if self._previous_style == Strings.style_image:
-                    # TODO this reports image previous style, paragraph style has to be reapplied here.
-                    pass
-                self._change_style(self._previous_style, force_paragraph=True)
-                self.rtc.MoveToLineStart()
+                    self._change_style(Strings.style_paragraph, force_paragraph=True)
+                else:
+                    self._change_style(self._previous_style, force_paragraph=True)
+                    self.rtc.MoveToParagraphStart()
                 self._enable_buttons()
-                #Put this into a separate callable method
                 return
             if event.GetKeyCode() == wx.WXK_BACK and paragraph_style == Strings.style_list:
                 # Turn a list item into paragraph if the bullet is deleted.
@@ -485,7 +488,6 @@ class RichTextFrame(wx.Frame):
         :param event: Not used.
         :return: None
         """
-        print(type(event))
         self._update_style_picker()
         self._enable_buttons()
         event.Skip()
@@ -511,11 +513,6 @@ class RichTextFrame(wx.Frame):
         :return: None
         """
         position = self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition())
-        # Reset to paragraph style to get rid of any extra styles
-        paragraph_style: rt.RichTextAttr = self._stylesheet.FindStyle(Strings.style_paragraph).GetStyle()
-        self._change_paragraph_style(paragraph_style, paragraphs_only=False, remove=False, position=position)
-        # Remove paragraph style before applying image style. Otherwise it will still appear to be paragraph style.
-        self._change_paragraph_style(paragraph_style, paragraphs_only=True, remove=True, position=position)
         # Set the image style.
         img_style = self._stylesheet.FindParagraphStyle(Strings.style_image).GetStyle()
         self._change_paragraph_style(img_style, paragraphs_only=False, remove=False, position=position)
