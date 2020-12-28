@@ -116,15 +116,13 @@ class RichTextFrame(wx.Frame):
         stl_list_1.SetFontSize(Numbers.paragraph_font_size)
         stl_list_1.SetAlignment(wx.TEXT_ALIGNMENT_LEFT)
         stl_list_1.SetFontWeight(wx.FONTWEIGHT_NORMAL)
-        stl_list.SetParagraphSpacingBefore(Numbers.list_spacing)
-        stl_list.SetParagraphSpacingAfter(Numbers.list_spacing)
         stl_list_1.SetBulletStyle(wx.TEXT_ATTR_BULLET_STYLE_STANDARD)
         stl_list_1.SetLeftIndent(Numbers.list_left_indent, Numbers.list_left_sub_indent)
 
         style_list: rt.RichTextListStyleDefinition = rt.RichTextListStyleDefinition(Strings.style_list)
         style_list.SetLevelAttributes(0, stl_list_1)
         style_list.SetStyle(stl_list)
-        style_list.SetNextStyle(Strings.style_paragraph)
+        style_list.SetNextStyle(Strings.style_list)
         self._stylesheet.AddListStyle(style_list)
 
         # Link style
@@ -305,12 +303,10 @@ class RichTextFrame(wx.Frame):
         if current_style == Strings.style_heading_3 or current_style == Strings.style_heading_4:
             paragraph_only_flag = False
 
-        # Reset to paragraph style to get rid of any extra styles
-        paragraph_style: rt.RichTextAttr = self._stylesheet.FindStyle(Strings.style_paragraph).GetStyle()
-        self._change_paragraph_style(paragraph_style, paragraphs_only=paragraph_only_flag, remove=False,
+        # Reset to list style to get rid of any extra styles
+        list_style: rt.RichTextAttr = self._stylesheet.FindStyle(Strings.style_list).GetStyle()
+        self._change_paragraph_style(list_style, paragraphs_only=paragraph_only_flag, remove=False,
                                      position=position)
-        # Remove paragraph style before applying list style. Otherwise it will still appear to be paragraph style.
-        self._change_paragraph_style(paragraph_style, paragraphs_only=True, remove=True, position=position)
 
         p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(position)
         self.rtc.SetListStyle(p.GetRange(), self._stylesheet.FindStyle(Strings.style_list),
@@ -367,28 +363,23 @@ class RichTextFrame(wx.Frame):
         :return: None
         """
         # TODO prevent return key in urls?? Use HasCharacterAttributes or underlined??
-        # TODO default list style behaves weirdly on return key
-        # TODO list style does not continue correctly if enter in the middle of text
         # TODO broken backspace from one empty line under image
+        # TODO disable url style in headings
+        # TODO weird list behavior on delete last item in builtin lists
         event.Skip()
         self._update_style_picker()
         position = self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition())
         p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(position)
         paragraph_style, _ = self._get_style_at_pos(position)
         if event.GetKeyCode() == wx.WXK_RETURN:
-            if paragraph_style == Strings.style_list:
-                # Reapply list style on previous line if we are currently in list style. Otherwise for some reason the
-                # list will not continue.
-                pass
-                #self._apply_list_style(position=self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition()) - 1)
             previous_par: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(position - 1)
             if not previous_par.GetTextForRange(previous_par.GetRange()):
                 if not isinstance(previous_par.GetChild(0), rt.RichTextField):
                     # There must not be an image in the paragraph either.
-                    # TODO breaks lists.
-                    # Reapply paragraph style on empty previous lines.
-                    self._change_paragraph_style(self._stylesheet.FindStyle(Strings.style_paragraph).GetStyle(),
-                                                 paragraphs_only=False, remove=False, position=position - 1)
+                    if paragraph_style != Strings.style_list:
+                        # Reapply paragraph style on empty previous lines.
+                        self._change_paragraph_style(self._stylesheet.FindStyle(Strings.style_paragraph).GetStyle(),
+                                                     paragraphs_only=False, remove=False, position=position - 1)
         if event.GetKeyCode() == wx.WXK_BACK or event.GetKeyCode() == wx.WXK_DELETE:
             # Remove any image on any delete key and turn all potential text into the next style.
             for child in p.GetChildren():
@@ -402,12 +393,20 @@ class RichTextFrame(wx.Frame):
                 self._change_style(self._previous_style, force_paragraph=True)
                 self.rtc.MoveToLineStart()
                 return
-        if paragraph_style != Strings.style_list:
-            # Reapply current paragraph style on backspace or delete to prevent mixed styles
-            # (like joining heading + paragraph)
-            # Does not work for list since the style is reapplied and prevents deletion of list item.
-            # We first need to wait for the condition above to reapply paragraph style.
-            self._change_style(paragraph_style, force_paragraph=True)
+            if event.GetKeyCode() == wx.WXK_BACK and paragraph_style == Strings.style_list:
+                # Turn a list item into paragraph if the bullet is deleted.
+                attrs: rt.RichTextAttr = p.GetAttributes()
+                if attrs.GetBulletStyle() != wx.TEXT_ATTR_BULLET_STYLE_STANDARD:
+                    self._change_style(Strings.style_paragraph)
+            if self._previous_style != paragraph_style:
+                if self._previous_style == Strings.style_paragraph and paragraph_style == Strings.style_paragraph:
+                    # Do not reapply style if the two lines are paragraphs.
+                    return
+                if paragraph_style != Strings.style_list:
+                    # Reapply current paragraph style on backspace or delete to prevent mixed styles
+                    # (like joining heading + paragraph)
+                    # Does not work for list since the style is reapplied turns the removed list back into list again.
+                    self._change_style(paragraph_style, force_paragraph=True)
 
     def skip_key(self, event: wx.KeyEvent):
         """
