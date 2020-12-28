@@ -41,12 +41,11 @@ class RichTextFrame(wx.Frame):
         self.Bind(wx.EVT_BUTTON, self._write_field, self._image_button)
 
         self.rtc.Bind(wx.EVT_LEFT_UP, self.on_mouse)
-        self.rtc.Bind(wx.EVT_LEFT_UP, self._enable_buttons)
+        self.rtc.Bind(wx.EVT_MOUSE_EVENTS, self.on_mouse)
 
         self.rtc.Bind(wx.EVT_KEY_UP, self.on_keypress)
         self.rtc.Bind(wx.EVT_KEY_DOWN, self.skip_key)
-        self.rtc.Bind(wx.EVT_KEY_UP, self._enable_buttons)
-        self.rtc.Bind(wx.EVT_TEXT, self._enable_buttons)
+        self.rtc.Bind(wx.EVT_TEXT, self._text_evt_handler)
 
         self.rtc.GetBuffer().CleanUpFieldTypes()
         self._create_styles()
@@ -363,10 +362,12 @@ class RichTextFrame(wx.Frame):
         """
         # TODO prevent return key in urls?? Use HasCharacterAttributes or underlined??
         # TODO broken backspace from one empty line under image
-        # TODO weird list behavior on delete last item in builtin lists
+        # TODO weird list behavior on delete last item in builtin lists, maybe do not use builtin lists.
         # TODO how to stop writing a url?
+        # TODO image insertion does not work right after image was deleted
         event.Skip()
         self._update_style_picker()
+        self._enable_buttons()
         position = self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition())
         p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(position)
         paragraph_style, _ = self._get_style_at_pos(position)
@@ -389,9 +390,14 @@ class RichTextFrame(wx.Frame):
             if paragraph_style == Strings.style_image:
                 # If backspacing into an image from a different style, the image style would survive so we have to
                 # reapply the correct previous style saved in skip key method. This needs to be applied to lists too.
+                print(self._previous_style)
+                if self._previous_style == Strings.style_image:
+                    # TODO this reports image previous style, paragraph style has to be reapplied here.
+                    pass
                 self._change_style(self._previous_style, force_paragraph=True)
                 self.rtc.MoveToLineStart()
-                self._style_picker.Enable()
+                self._enable_buttons()
+                #Put this into a separate callable method
                 return
             if event.GetKeyCode() == wx.WXK_BACK and paragraph_style == Strings.style_list:
                 # Turn a list item into paragraph if the bullet is deleted.
@@ -437,13 +443,11 @@ class RichTextFrame(wx.Frame):
         else:
             event.Skip()
 
-    def _enable_buttons(self, event: wx.KeyEvent) -> None:
+    def _enable_buttons(self) -> None:
         """
         Enable or disable styling buttons based on caret position.
-        :param event: The keyboard event.
         :return: None
         """
-        event.Skip()
         position = self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition())
         paragraph_style, character_style = self._get_style_at_pos(position)
         p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(position)
@@ -465,13 +469,25 @@ class RichTextFrame(wx.Frame):
         elif self._style_picker.FindString(Strings.style_url) == wx.NOT_FOUND:
             self._style_picker.Append(Strings.style_url)
 
-    def on_mouse(self, event: wx.MouseEvent):
+    def on_mouse(self, event: wx.MouseEvent) -> None:
         """
-        Handle left mouse click.
+        Handle left mouse click. Updates GUI controls.
         :param event: Not used.
         :return: None
         """
         self._update_style_picker()
+        self._enable_buttons()
+        event.Skip()
+
+    def _text_evt_handler(self, event: wx.CommandEvent) -> None:
+        """
+        Handle left mouse click. Updates GUI controls.
+        :param event: Not used.
+        :return: None
+        """
+        print(type(event))
+        self._update_style_picker()
+        self._enable_buttons()
         event.Skip()
 
     def print_current_styles(self):
