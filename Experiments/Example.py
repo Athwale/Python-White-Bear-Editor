@@ -361,9 +361,9 @@ class RichTextFrame(wx.Frame):
         :return: None
         """
         # TODO prevent return key in urls?? Use HasCharacterAttributes or underlined??
-        # TODO weird list behavior on delete last item in builtin lists, maybe do not use builtin lists.
+        # TODO weird list behavior on delete last item in builtin lists, maybe do not use builtin lists and new item
+        # insertion
         # TODO how to stop writing a url?
-        # TODO joining par to heading does not reapply heading style on delete key
         event.Skip()
         self._update_style_picker()
         self._enable_buttons()
@@ -408,8 +408,6 @@ class RichTextFrame(wx.Frame):
                 if attrs.GetBulletStyle() != wx.TEXT_ATTR_BULLET_STYLE_STANDARD:
                     self._change_style(Strings.style_paragraph)
                     self._enable_buttons()
-            print(self._previous_style)
-            print(paragraph_style)
             if self._previous_style == Strings.style_paragraph and paragraph_style == Strings.style_paragraph:
                 # Do not reapply style if the two lines are paragraphs.
                 return
@@ -584,7 +582,7 @@ class MyApp(wx.App):
         self.frame = None
 
     def OnInit(self):
-        self.frame = RichTextFrame(None, -1, "RichTextCtrl", size=(900, 700), style=wx.DEFAULT_FRAME_STYLE)
+        self.frame = RichTextFrame(None, -1, "RichTextCtrl", size=(500, 500), style=wx.DEFAULT_FRAME_STYLE)
         self.SetTopWindow(self.frame)
         self.frame.Show()
         self.frame.insert_sample_text()
