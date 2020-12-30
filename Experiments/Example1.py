@@ -62,6 +62,13 @@ class RichTextFrame(wx.Frame):
         self.rtc.Newline()
         self.rtc.EndListStyle()
 
+        self.rtc.BeginSymbolBullet('*', 20, 20, bulletStyle=wx.TEXT_ATTR_BULLET_STYLE_STANDARD)
+        self.rtc.WriteText('Example list item 1')
+        self.rtc.Newline()
+        self.rtc.WriteText('Example list item 1')
+        self.rtc.Newline()
+        self.rtc.EndSymbolBullet()
+
 
 class MyApp(wx.App):
     """

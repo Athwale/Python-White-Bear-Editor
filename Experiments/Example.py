@@ -361,8 +361,6 @@ class RichTextFrame(wx.Frame):
         :return: None
         """
         # TODO prevent return key in urls?? Use HasCharacterAttributes or underlined??
-        # TODO weird list behavior on delete last item in builtin lists, maybe do not use builtin lists and new item
-        # insertion
         # TODO how to stop writing a url?
         event.Skip()
         self._update_style_picker()
@@ -559,12 +557,13 @@ class RichTextFrame(wx.Frame):
         self.rtc.Newline()
         self.rtc.EndParagraphStyle()
 
-        self.rtc.BeginListStyle(Strings.style_list, 0)
+        list_style = self._stylesheet.FindListStyle(Strings.style_list).GetCombinedStyleForLevel(0)
+        self.rtc.BeginStyle(list_style)
         self.rtc.WriteText('Example list item')
         self.rtc.Newline()
         self.rtc.WriteText('Example list item')
         self.rtc.Newline()
-        self.rtc.EndListStyle()
+        self.rtc.EndStyle()
 
         self.rtc.ApplyStyle(self._stylesheet.FindParagraphStyle(Strings.style_paragraph))
         self.rtc.Newline()
