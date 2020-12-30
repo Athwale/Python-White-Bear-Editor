@@ -363,6 +363,7 @@ class RichTextFrame(wx.Frame):
         # TODO prevent return key in urls?? Use HasCharacterAttributes or underlined??
         # TODO weird list behavior on delete last item in builtin lists, maybe do not use builtin lists.
         # TODO how to stop writing a url?
+        # TODO joining par to heading does not reapply heading style on delete key
         event.Skip()
         self._update_style_picker()
         self._enable_buttons()
@@ -407,15 +408,16 @@ class RichTextFrame(wx.Frame):
                 if attrs.GetBulletStyle() != wx.TEXT_ATTR_BULLET_STYLE_STANDARD:
                     self._change_style(Strings.style_paragraph)
                     self._enable_buttons()
-            if self._previous_style != paragraph_style:
-                if self._previous_style == Strings.style_paragraph and paragraph_style == Strings.style_paragraph:
-                    # Do not reapply style if the two lines are paragraphs.
-                    return
-                if paragraph_style != Strings.style_list:
-                    # Reapply current paragraph style on backspace or delete to prevent mixed styles
-                    # (like joining heading + paragraph)
-                    # Does not work for list since the style is reapplied turns the removed list back into list again.
-                    self._change_style(paragraph_style, force_paragraph=True)
+            print(self._previous_style)
+            print(paragraph_style)
+            if self._previous_style == Strings.style_paragraph and paragraph_style == Strings.style_paragraph:
+                # Do not reapply style if the two lines are paragraphs.
+                return
+            if paragraph_style != Strings.style_list:
+                # Reapply current paragraph style on backspace or delete to prevent mixed styles
+                # (like joining heading + paragraph)
+                # Does not work for list since the style is reapplied turns the removed list back into list again.
+                self._change_style(paragraph_style, force_paragraph=True)
 
     def skip_key(self, event: wx.KeyEvent):
         """
