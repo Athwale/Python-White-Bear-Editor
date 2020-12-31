@@ -53,21 +53,15 @@ class RichTextFrame(wx.Frame):
         Insert sample text.
         :return: None
         """
-        self.rtc.BeginListStyle('list', 0)
+        list_style = self._stylesheet.FindListStyle('list').GetCombinedStyleForLevel(0)
+        self.rtc.BeginStyle(list_style)
         self.rtc.WriteText('Example list item 1')
         self.rtc.Newline()
         self.rtc.WriteText('Example list item 2')
         self.rtc.Newline()
         self.rtc.WriteText('Example list item 3')
         self.rtc.Newline()
-        self.rtc.EndListStyle()
-
-        self.rtc.BeginSymbolBullet('*', 20, 20, bulletStyle=wx.TEXT_ATTR_BULLET_STYLE_STANDARD)
-        self.rtc.WriteText('Example list item 1')
-        self.rtc.Newline()
-        self.rtc.WriteText('Example list item 1')
-        self.rtc.Newline()
-        self.rtc.EndSymbolBullet()
+        self.rtc.EndStyle()
 
 
 class MyApp(wx.App):

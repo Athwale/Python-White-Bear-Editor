@@ -361,13 +361,13 @@ class RichTextFrame(wx.Frame):
         :return: None
         """
         # TODO prevent return key in urls?? Use HasCharacterAttributes or underlined??
-        # TODO how to stop writing a url?
+        # TODO how to stop writing a url, end url on return or on last character?
         event.Skip()
         self._update_style_picker()
         self._enable_buttons()
         position = self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition())
         p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(position)
-        paragraph_style, _ = self._get_style_at_pos(position)
+        paragraph_style, character_style = self._get_style_at_pos(position)
         if event.GetKeyCode() == wx.WXK_RETURN:
             previous_par: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(position - 1)
             if not previous_par.GetTextForRange(previous_par.GetRange()):
@@ -427,9 +427,16 @@ class RichTextFrame(wx.Frame):
             return
 
         position = self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition())
-        paragraph_style, _ = self._get_style_at_pos(position)
+        paragraph_style, character_style = self._get_style_at_pos(position)
         # Save style before the caret moves to prevent incorrect styling after backspacing into an image.
         self._previous_style = paragraph_style
+
+        _, next_character_style = self._get_style_at_pos(position + 1)
+        if character_style == Strings.style_url and next_character_style == Strings.style_url:
+            if event.GetKeyCode() == wx.WXK_RETURN:
+                # Prevent return key inside url style but not at the end of the link.
+                return
+
         if paragraph_style == Strings.style_image:
             # Prevent everything except arrows and return.
             if key_code == wx.WXK_LEFT or key_code == wx.WXK_RIGHT or key_code == wx.WXK_UP or key_code == wx.WXK_DOWN \
