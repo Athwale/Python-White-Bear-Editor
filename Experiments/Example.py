@@ -322,6 +322,26 @@ class RichTextFrame(wx.Frame):
                                 flags=rt.RICHTEXT_SETSTYLE_RESET | rt.RICHTEXT_SETSTYLE_OPTIMIZE |
                                       rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_CHARACTERS_ONLY)
 
+    def _insert_link(self, text: str, link_id: str, color: wx.Colour) -> None:
+        """
+        Insert a link into text at current position.
+        :param text: The visible text.
+        :param link_id: The ID of the link
+        :param color: The color of the background of the link.
+        :return: None
+        """
+        url_style: rt.RichTextAttr = self._stylesheet.FindCharacterStyle(Strings.style_url).GetStyle()
+        if color == wx.RED:
+            url_style.SetBackgroundColour(wx.RED)
+        else:
+            url_style.SetBackgroundColour(wx.WHITE)
+
+        self.rtc.BeginStyle(url_style)
+        self.rtc.BeginURL(link_id)
+        self.rtc.WriteText(text)
+        self.rtc.EndURL()
+        self.rtc.EndStyle()
+
     def _get_style_at_pos(self, position: int = 0) -> (str, str):
         """
         Get the style name at given position in the text. 0 - current position, -1 - before current position
@@ -361,13 +381,30 @@ class RichTextFrame(wx.Frame):
         :return: None
         """
         # TODO prevent return key in urls?? Use HasCharacterAttributes or underlined??
-        # TODO how to stop writing a url, end url on return or on last character?
+        # TODO how to stop writing a url, if next character has different or no url exit url style
         event.Skip()
         self._update_style_picker()
         self._enable_buttons()
         position = self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition())
         p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(position)
         paragraph_style, character_style = self._get_style_at_pos(position)
+        if character_style == Strings.style_url and event.GetKeyCode() == wx.WXK_SPACE:
+            # End url style if next character has different or no url.
+            style_carrier = rt.RichTextAttr()
+            self.rtc.GetStyle(position, style_carrier)
+            current_url = style_carrier.GetURL()
+            self.rtc.GetStyle(position + 1, style_carrier)
+            next_url = style_carrier.GetURL()
+            if not next_url or current_url != next_url:
+                # TODO does not work on end of line
+                url_style: rt.RichTextAttr = self._stylesheet.FindCharacterStyle(Strings.style_url).GetStyle()
+                self.rtc.SetStyleEx(rt.RichTextRange(position, position + 1), url_style, rt.RICHTEXT_SETSTYLE_REMOVE)
+                # Without moving the caret you can still type in the now incorrect url style.
+                self.rtc.MoveRight(0)
+                self.rtc.Invalidate()
+                self.rtc.Refresh()
+                self._enable_buttons()
+                self._update_style_picker()
         if event.GetKeyCode() == wx.WXK_RETURN:
             previous_par: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(position - 1)
             if not previous_par.GetTextForRange(previous_par.GetRange()):
@@ -561,12 +598,15 @@ class RichTextFrame(wx.Frame):
 
         self.rtc.BeginParagraphStyle(Strings.style_paragraph)
         self.rtc.WriteText('Example paragraph')
+        self._insert_link('link', '42', wx.RED)
         self.rtc.Newline()
         self.rtc.EndParagraphStyle()
 
         list_style = self._stylesheet.FindListStyle(Strings.style_list).GetCombinedStyleForLevel(0)
         self.rtc.BeginStyle(list_style)
-        self.rtc.WriteText('Example list item')
+        self.rtc.WriteText('Example list ')
+        self._insert_link('link', '43', wx.WHITE)
+        self.rtc.WriteText(' item')
         self.rtc.Newline()
         self.rtc.WriteText('Example list item')
         self.rtc.Newline()
