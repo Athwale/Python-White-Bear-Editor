@@ -380,8 +380,6 @@ class RichTextFrame(wx.Frame):
         :param event: Used to get key code.
         :return: None
         """
-        # TODO prevent return key in urls?? Use HasCharacterAttributes or underlined??
-        # TODO how to stop writing a url, if next character has different or no url exit url style
         event.Skip()
         self._update_style_picker()
         self._enable_buttons()
@@ -395,8 +393,8 @@ class RichTextFrame(wx.Frame):
             current_url = style_carrier.GetURL()
             self.rtc.GetStyle(position + 1, style_carrier)
             next_url = style_carrier.GetURL()
-            if not next_url or current_url != next_url:
-                # TODO does not work on end of line
+            if not next_url or current_url != next_url or position == (p.GetRange()[1] - 1):
+                # End url style if we are at th end of a url, between different urls or at the end of paragraph.
                 url_style: rt.RichTextAttr = self._stylesheet.FindCharacterStyle(Strings.style_url).GetStyle()
                 self.rtc.SetStyleEx(rt.RichTextRange(position, position + 1), url_style, rt.RICHTEXT_SETSTYLE_REMOVE)
                 # Without moving the caret you can still type in the now incorrect url style.
