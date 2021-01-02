@@ -236,8 +236,4 @@ class Strings:
     button_ok: str = 'Ok'
     button_remove_link: str = 'Remove link'
 
-    undo_insert_image: str = 'Undo insert image'
-    undo_insert_link: str = 'Undo insert link'
-    undo_apply_list: str = 'Undo list'
-    undo_apply_paragraph: str = 'Undo paragraph style'
-    undo_apply_heading: str = 'Undo heading style'
+    undo_last_action: str = 'Last action'

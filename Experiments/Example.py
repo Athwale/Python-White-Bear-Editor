@@ -24,12 +24,14 @@ class RichTextFrame(wx.Frame):
         self._color_button = wx.Button(self, -1, 'color')
         self._bold_button = wx.Button(self, -1, 'bold')
         self._image_button = wx.Button(self, -1, 'image')
+        self._refresh_button = wx.Button(self, -1, 'refresh')
         self._image_button.Disable()
 
         self._controls_sizer.Add(self._style_picker)
         self._controls_sizer.Add(self._color_button)
         self._controls_sizer.Add(self._bold_button)
         self._controls_sizer.Add(self._image_button)
+        self._controls_sizer.Add(self._refresh_button)
 
         self._main_sizer.Add(self.rtc, 1, flag=wx.EXPAND)
         self._main_sizer.Add(self._controls_sizer)
@@ -39,6 +41,7 @@ class RichTextFrame(wx.Frame):
         self.Bind(wx.EVT_BUTTON, self._change_color, self._color_button)
         self.Bind(wx.EVT_BUTTON, self._change_bold, self._bold_button)
         self.Bind(wx.EVT_BUTTON, self._write_field, self._image_button)
+        self.Bind(wx.EVT_BUTTON, self._refresh, self._refresh_button)
 
         self.rtc.Bind(wx.EVT_LEFT_UP, self.on_mouse)
         self.rtc.Bind(wx.EVT_MOUSE_EVENTS, self.on_mouse)
@@ -50,6 +53,15 @@ class RichTextFrame(wx.Frame):
         self.rtc.GetBuffer().CleanUpFieldTypes()
         self._create_styles()
         self._fill_style_picker()
+
+    def _refresh(self, evt: wx.CommandEvent) -> None:
+        """
+        Refresh the text field.
+        :param evt: Not used
+        :return: None
+        """
+        self.rtc.Invalidate()
+        self.rtc.Refresh()
 
     def _create_styles(self) -> None:
         """
@@ -316,13 +328,11 @@ class RichTextFrame(wx.Frame):
         Changes current selection the url character style.
         :return: None
         """
-        self.rtc.BeginBatchUndo(Strings.undo_insert_link)
         if self.rtc.HasSelection():
             link_range = self.rtc.GetSelectionRange()
             self.rtc.SetStyleEx(link_range, self._stylesheet.FindStyle(Strings.style_url).GetStyle(),
                                 flags=rt.RICHTEXT_SETSTYLE_RESET | rt.RICHTEXT_SETSTYLE_OPTIMIZE |
                                       rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_CHARACTERS_ONLY)
-        self.rtc.EndBatchUndo()
 
     def _insert_link(self, text: str, link_id: str, color: wx.Colour) -> None:
         """
@@ -338,7 +348,7 @@ class RichTextFrame(wx.Frame):
         else:
             url_style.SetBackgroundColour(wx.WHITE)
 
-        self.rtc.BeginBatchUndo(Strings.undo_insert_link)
+        self.rtc.BeginBatchUndo(Strings.undo_last_action)
         self.rtc.BeginStyle(url_style)
         self.rtc.BeginURL(link_id)
         self.rtc.WriteText(text)
@@ -438,17 +448,17 @@ class RichTextFrame(wx.Frame):
                     self._change_style(self._previous_style, force_paragraph=True)
                     self.rtc.MoveToParagraphStart()
                 self._enable_buttons()
+                self.rtc.EndBatchUndo()
                 return
             if event.GetKeyCode() == wx.WXK_BACK and paragraph_style == Strings.style_list:
                 # Turn a list item into paragraph if the bullet is deleted.
                 attrs: rt.RichTextAttr = p.GetAttributes()
                 if attrs.GetBulletStyle() != wx.TEXT_ATTR_BULLET_STYLE_STANDARD:
-                    self.rtc.BeginSuppressUndo()
                     self._change_style(Strings.style_paragraph)
                     self.rtc.EndSuppressUndo()
-                    self._enable_buttons()
             if self._previous_style == Strings.style_paragraph and paragraph_style == Strings.style_paragraph:
                 # Do not reapply style if the two lines are paragraphs.
+                self.rtc.EndBatchUndo()
                 return
             if paragraph_style != Strings.style_list:
                 # Reapply current paragraph style on backspace or delete to prevent mixed styles
@@ -456,6 +466,11 @@ class RichTextFrame(wx.Frame):
                 # Does not work for list since the style is reapplied turns the removed list back into list again.
                 self._change_style(paragraph_style, force_paragraph=True)
                 self.rtc.MoveLeft(0)
+                self.rtc.EndBatchUndo()
+                return
+        if self.rtc.BatchingUndo():
+            self.rtc.EndBatchUndo()
+        # TODO undo problem when holding down backspace
 
     def skip_key(self, event: wx.KeyEvent) -> None:
         """
@@ -472,6 +487,10 @@ class RichTextFrame(wx.Frame):
         paragraph_style, character_style = self._get_style_at_pos(position)
         # Save style before the caret moves to prevent incorrect styling after backspacing into an image.
         self._previous_style = paragraph_style
+
+        if key_code == wx.WXK_BACK or key_code == wx.WXK_DELETE:
+            # Undo batch needs to start here, otherwise rtc manages to process delete text before the batch starts.
+            self.rtc.BeginBatchUndo(Strings.undo_last_action)
 
         _, next_character_style = self._get_style_at_pos(position + 1)
         if character_style == Strings.style_url and next_character_style == Strings.style_url:
@@ -640,7 +659,7 @@ class MyApp(wx.App):
         self.frame = None
 
     def OnInit(self):
-        self.frame = RichTextFrame(None, -1, "RichTextCtrl", size=(700, 800), style=wx.DEFAULT_FRAME_STYLE)
+        self.frame = RichTextFrame(None, -1, "RichTextCtrl", size=(700, 700), style=wx.DEFAULT_FRAME_STYLE)
         self.SetTopWindow(self.frame)
         self.frame.Show()
         self.frame.insert_sample_text()
