@@ -251,6 +251,7 @@ class RichTextFrame(wx.Frame):
         :param size: The heading style size.
         :return: None
         """
+        self.rtc.BeginBatchUndo(Strings.undo_apply_heading)
         style: rt.RichTextAttr = self._stylesheet.FindStyle(size).GetStyle()
         # When changing into heading, we reset everything and remove any list style.
         p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(
@@ -261,6 +262,7 @@ class RichTextFrame(wx.Frame):
         # Change the paragraph style into a heading style.
         self.rtc.ClearListStyle(p.GetRange())
         self._change_paragraph_style(style, paragraphs_only=False, remove=False)
+        self.rtc.EndBatchUndo()
 
     def _apply_paragraph_style(self, force=False) -> None:
         """
@@ -268,6 +270,7 @@ class RichTextFrame(wx.Frame):
         :param force: Force application of paragraph style on both paragraph and characters. False if not set.
         :return: None
         """
+        self.rtc.BeginBatchUndo(Strings.undo_apply_paragraph)
         style: rt.RichTextAttr = self._stylesheet.FindStyle(Strings.style_paragraph).GetStyle()
         # When switching from heading style, disable limit to paragraph only since we want to get rid of the
         # heading style attributes completely.
@@ -282,6 +285,7 @@ class RichTextFrame(wx.Frame):
         if force:
             paragraph_only_flag = False
         self._change_paragraph_style(style, paragraphs_only=paragraph_only_flag, remove=False)
+        self.rtc.EndBatchUndo()
 
     def _apply_list_style(self, position=None) -> None:
         """
@@ -289,6 +293,7 @@ class RichTextFrame(wx.Frame):
         :param position: Where to apply the style, if not set, current paragraph is used.
         :return: None
         """
+        self.rtc.BeginBatchUndo(Strings.undo_apply_list)
         # This is used to keep the list style going when return key is pressed. We move one position back and reapply
         # the style there. In other cases we want to apply the style in the current paragraph.
         if not position:
@@ -310,17 +315,20 @@ class RichTextFrame(wx.Frame):
         self.rtc.SetListStyle(p.GetRange(), self._stylesheet.FindStyle(Strings.style_list),
                               flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_SPECIFY_LEVEL,
                               specifiedLevel=0)
+        self.rtc.EndBatchUndo()
 
     def _apply_url_style(self) -> None:
         """
         Changes current selection the url character style.
         :return: None
         """
+        self.rtc.BeginBatchUndo(Strings.undo_insert_link)
         if self.rtc.HasSelection():
             link_range = self.rtc.GetSelectionRange()
             self.rtc.SetStyleEx(link_range, self._stylesheet.FindStyle(Strings.style_url).GetStyle(),
                                 flags=rt.RICHTEXT_SETSTYLE_RESET | rt.RICHTEXT_SETSTYLE_OPTIMIZE |
                                       rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_CHARACTERS_ONLY)
+        self.rtc.EndBatchUndo()
 
     def _insert_link(self, text: str, link_id: str, color: wx.Colour) -> None:
         """
@@ -336,11 +344,13 @@ class RichTextFrame(wx.Frame):
         else:
             url_style.SetBackgroundColour(wx.WHITE)
 
+        self.rtc.BeginBatchUndo(Strings.undo_insert_link)
         self.rtc.BeginStyle(url_style)
         self.rtc.BeginURL(link_id)
         self.rtc.WriteText(text)
         self.rtc.EndURL()
         self.rtc.EndStyle()
+        self.rtc.EndBatchUndo()
 
     def _get_style_at_pos(self, position: int = 0) -> (str, str):
         """
@@ -552,6 +562,10 @@ class RichTextFrame(wx.Frame):
         :param evt: Not used.
         :return: None
         """
+        # TODO add appropriate batch undo
+        # TODO copy paste problems
+        # TODO memory leak in orphaned images and link, maybe reconsile on idle.
+        self.rtc.BeginBatchUndo(Strings.undo_insert_image)
         position = self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition())
         # Set the image style.
         img_style = self._stylesheet.FindParagraphStyle(Strings.style_image).GetStyle()
@@ -560,6 +574,7 @@ class RichTextFrame(wx.Frame):
         new_field = self._register_field()
         self.rtc.WriteField(new_field.GetName(), rt.RichTextProperties())
         # Return focus to the text area.
+        self.rtc.EndBatchUndo()
         wx.CallLater(100, self.rtc.SetFocus)
 
     @staticmethod
@@ -579,6 +594,7 @@ class RichTextFrame(wx.Frame):
         Insert sample text.
         :return: None
         """
+        self.rtc.BeginSuppressUndo()
         self.rtc.BeginParagraphStyle(Strings.style_paragraph)
         self.rtc.WriteText('Example paragraph')
         self.rtc.Newline()
@@ -614,6 +630,7 @@ class RichTextFrame(wx.Frame):
         self.rtc.Newline()
 
         self.rtc.LayoutContent()
+        self.rtc.EndSuppressUndo()
 
 
 class MyApp(wx.App):
@@ -626,7 +643,7 @@ class MyApp(wx.App):
         self.frame = None
 
     def OnInit(self):
-        self.frame = RichTextFrame(None, -1, "RichTextCtrl", size=(500, 500), style=wx.DEFAULT_FRAME_STYLE)
+        self.frame = RichTextFrame(None, -1, "RichTextCtrl", size=(700, 800), style=wx.DEFAULT_FRAME_STYLE)
         self.SetTopWindow(self.frame)
         self.frame.Show()
         self.frame.insert_sample_text()
