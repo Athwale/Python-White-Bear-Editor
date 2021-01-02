@@ -251,7 +251,6 @@ class RichTextFrame(wx.Frame):
         :param size: The heading style size.
         :return: None
         """
-        self.rtc.BeginBatchUndo(Strings.undo_apply_heading)
         style: rt.RichTextAttr = self._stylesheet.FindStyle(size).GetStyle()
         # When changing into heading, we reset everything and remove any list style.
         p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(
@@ -262,7 +261,6 @@ class RichTextFrame(wx.Frame):
         # Change the paragraph style into a heading style.
         self.rtc.ClearListStyle(p.GetRange())
         self._change_paragraph_style(style, paragraphs_only=False, remove=False)
-        self.rtc.EndBatchUndo()
 
     def _apply_paragraph_style(self, force=False) -> None:
         """
@@ -270,7 +268,6 @@ class RichTextFrame(wx.Frame):
         :param force: Force application of paragraph style on both paragraph and characters. False if not set.
         :return: None
         """
-        self.rtc.BeginBatchUndo(Strings.undo_apply_paragraph)
         style: rt.RichTextAttr = self._stylesheet.FindStyle(Strings.style_paragraph).GetStyle()
         # When switching from heading style, disable limit to paragraph only since we want to get rid of the
         # heading style attributes completely.
@@ -285,7 +282,6 @@ class RichTextFrame(wx.Frame):
         if force:
             paragraph_only_flag = False
         self._change_paragraph_style(style, paragraphs_only=paragraph_only_flag, remove=False)
-        self.rtc.EndBatchUndo()
 
     def _apply_list_style(self, position=None) -> None:
         """
@@ -293,7 +289,6 @@ class RichTextFrame(wx.Frame):
         :param position: Where to apply the style, if not set, current paragraph is used.
         :return: None
         """
-        self.rtc.BeginBatchUndo(Strings.undo_apply_list)
         # This is used to keep the list style going when return key is pressed. We move one position back and reapply
         # the style there. In other cases we want to apply the style in the current paragraph.
         if not position:
@@ -315,7 +310,6 @@ class RichTextFrame(wx.Frame):
         self.rtc.SetListStyle(p.GetRange(), self._stylesheet.FindStyle(Strings.style_list),
                               flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_SPECIFY_LEVEL,
                               specifiedLevel=0)
-        self.rtc.EndBatchUndo()
 
     def _apply_url_style(self) -> None:
         """
@@ -449,7 +443,9 @@ class RichTextFrame(wx.Frame):
                 # Turn a list item into paragraph if the bullet is deleted.
                 attrs: rt.RichTextAttr = p.GetAttributes()
                 if attrs.GetBulletStyle() != wx.TEXT_ATTR_BULLET_STYLE_STANDARD:
+                    self.rtc.BeginSuppressUndo()
                     self._change_style(Strings.style_paragraph)
+                    self.rtc.EndSuppressUndo()
                     self._enable_buttons()
             if self._previous_style == Strings.style_paragraph and paragraph_style == Strings.style_paragraph:
                 # Do not reapply style if the two lines are paragraphs.
@@ -459,12 +455,13 @@ class RichTextFrame(wx.Frame):
                 # (like joining heading + paragraph)
                 # Does not work for list since the style is reapplied turns the removed list back into list again.
                 self._change_style(paragraph_style, force_paragraph=True)
+                self.rtc.MoveLeft(0)
 
-    def skip_key(self, event: wx.KeyEvent):
+    def skip_key(self, event: wx.KeyEvent) -> None:
         """
         Handle key presses that should be ignored.
-        :param event:
-        :return:
+        :param event: Used to get key code.
+        :return: None
         """
         key_code = event.GetKeyCode()
         # Disable shift enter since it is broken and does not break lines consistently.
