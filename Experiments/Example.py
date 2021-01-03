@@ -456,6 +456,7 @@ class RichTextFrame(wx.Frame):
             if self._previous_style == Strings.style_paragraph and paragraph_style == Strings.style_paragraph:
                 # Do not reapply style if the two lines are paragraphs. Prevents broken join of paragraphs where links
                 # and bold text would disappear.
+                print(p.GetChildren())
                 self.rtc.EndBatchUndo()
                 return
             if paragraph_style != Strings.style_list:
