@@ -49,6 +49,7 @@ class RichTextFrame(wx.Frame):
         self.rtc.Bind(wx.EVT_KEY_DOWN, self._on_key_down)
         self.rtc.Bind(wx.EVT_TEXT, self._text_evt_handler)
         self.rtc.Bind(wx.EVT_CHAR, self._on_key)
+        self.rtc.Bind(wx.EVT_KEY_UP, self._on_key)
 
         self.rtc.GetBuffer().CleanUpFieldTypes()
         self._create_styles()
@@ -106,6 +107,7 @@ class RichTextFrame(wx.Frame):
 
         # Heading 4 style
         stl_heading_4: rt.RichTextAttr = rt.RichTextAttr()
+        stl_heading_4.SetFontSize(Numbers.heading_4_size)
         stl_heading_4.SetAlignment(wx.TEXT_ALIGNMENT_LEFT)
         stl_heading_4.SetFontWeight(wx.FONTWEIGHT_BOLD)
         stl_heading_4.SetParagraphSpacingBefore(Numbers.paragraph_spacing / 2)
@@ -237,6 +239,8 @@ class RichTextFrame(wx.Frame):
             self._apply_url_style()
 
         self._update_style_picker()
+        self.rtc.Invalidate()
+        self.rtc.Refresh()
 
     def _apply_heading_style(self, heading_type: str) -> None:
         """
@@ -247,20 +251,45 @@ class RichTextFrame(wx.Frame):
         style: rt.RichTextAttr = self._stylesheet.FindStyle(heading_type).GetStyle()
         p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(
             self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition()))
-        # Brute force the paragraph into the heading style both paragraph and character attributes. This removes all
-        # other style attributes except URL flag.
-        self.rtc.SetStyleEx(p.GetRange().FromInternal(), style,
-                            flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_RESET)
+        p_range = p.GetRange().FromInternal()
+        # Save text children attributes to restore them after forcing the paragraph style.
+        # We need text weight, color, background, underline. URL flag remains untouched. Font size will be replaced by
+        # the heading style.
+        child_list = []
+        for child in p.GetChildren():
+            saved_attrs = {}
+            # The built in wx Copy method causes the children to disappear for a wtf reason.
+            # We only need to preserve font color, the rest will be set by the heading style.
+            attrs: rt.RichTextAttr = child.GetAttributes()
+            saved_attrs['color'] = attrs.GetTextColour()
+            child_list.append(saved_attrs)
+
+        # Brute force the paragraph into the heading style paragraph attributes are reset completely which removes list
+        # style. Character attributes are changed but not reset. Specific attributes are then changed separately.
+        self.rtc.BeginBatchUndo(Strings.undo_last_action)
+        self.rtc.SetStyleEx(p_range, style, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_PARAGRAPHS_ONLY
+                            | rt.RICHTEXT_SETSTYLE_RESET)
+        self.rtc.SetStyleEx(p_range, style, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_CHARACTERS_ONLY)
+        self.rtc.EndBatchUndo()
+
         # The paragraph changes after style set, so find it again.
         p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(
             self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition()))
-        for child in p.GetChildren():
-            # If any child has a url flag, remove it.
+        # Restore and set only relevant attributes for the style.
+        for child, attr_dict in zip(p.GetChildren(), child_list):
             attrs: rt.RichTextAttr = child.GetAttributes()
+            attrs.SetFontSize(style.GetFontSize())
+            attrs.SetFontWeight(style.GetFontWeight())
+            attrs.SetParagraphSpacingBefore(style.GetParagraphSpacingBefore())
+            attrs.SetParagraphSpacingAfter(style.GetParagraphSpacingAfter())
+            # Only links can be underlined, it is safe to remove it here.
+            attrs.SetFontUnderlined(style.GetFontUnderlined())
             if attrs.HasURL():
                 # TODO try save, this might still appear in xml if we use it. How is other url remove going to work?
+                # If any child has a url flag, remove it and set font color to normal.
                 attrs.SetURL('')
                 attrs.SetFlags(attrs.GetFlags() ^ wx.TEXT_ATTR_URL)
+                attrs.SetTextColour(style.GetTextColour())
 
     def _apply_paragraph_style(self) -> None:
         """
@@ -271,11 +300,54 @@ class RichTextFrame(wx.Frame):
         style: rt.RichTextAttr = self._stylesheet.FindStyle(Strings.style_paragraph).GetStyle()
         p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(
             self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition()))
-        # Save text children attributes to restore them after forcing the paragraph style.
-        # We need text weight, color, background, underline. URL flag remains untouched. Font size will be replaced by
-        # the paragraph style.
+        p_range = p.GetRange().FromInternal()
         child_list = []
         for child in p.GetChildren():
+            saved_attrs = {}
+            attrs: rt.RichTextAttr = child.GetAttributes()
+            if attrs.GetFontFaceName() == Strings.style_heading_3 or attrs.GetFontFaceName() == Strings.style_heading_4:
+                # Do not save bold font weight from heading style we assume the weight should be normal.
+                saved_attrs['weight'] = wx.FONTWEIGHT_NORMAL
+            else:
+                saved_attrs['weight'] = attrs.GetFontWeight()
+            # Font color does not need to be saved, it is preserved from the previous child.
+            saved_attrs['background'] = attrs.GetBackgroundColour()
+            saved_attrs['underlined'] = attrs.GetFontUnderlined()
+            child_list.append(saved_attrs)
+
+        self.rtc.BeginBatchUndo(Strings.undo_last_action)
+        self.rtc.SetStyleEx(p_range, style, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_PARAGRAPHS_ONLY
+                            | rt.RICHTEXT_SETSTYLE_RESET)
+        self.rtc.SetStyleEx(p_range, style, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_CHARACTERS_ONLY)
+        self.rtc.EndBatchUndo()
+
+        p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(
+            self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition()))
+        for child, attr_dict in zip(p.GetChildren(), child_list):
+            attrs: rt.RichTextAttr = child.GetAttributes()
+            attrs.SetFontWeight(attr_dict['weight'])
+            attrs.SetFontSize(style.GetFontSize())
+            attrs.SetParagraphSpacingBefore(style.GetParagraphSpacingBefore())
+            attrs.SetParagraphSpacingAfter(style.GetParagraphSpacingAfter())
+            if attrs.HasURL():
+                # Only urls have background color and underline.
+                attrs.SetBackgroundColour(attr_dict['background'])
+                attrs.SetFontUnderlined(attr_dict['underlined'])
+
+    def _apply_list_style(self) -> None:
+        """
+        Changes paragraph on position into list item.
+        :return: None
+        """
+        style_def: rt.RichTextListStyleDefinition = self._stylesheet.FindStyle(Strings.style_list)
+        style: rt.RichTextAttr = style_def.GetStyle()
+        p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(
+            self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition()))
+        p_range = p.GetRange().FromInternal()
+        print(p.GetChildren())
+        child_list = []
+        for child in p.GetChildren():
+            child: rt.RichTextPlainText
             saved_attrs = {}
             # The build in wx Copy method causes the children to disappear for a wtf reason.
             attrs: rt.RichTextAttr = child.GetAttributes()
@@ -284,54 +356,36 @@ class RichTextFrame(wx.Frame):
                 saved_attrs['weight'] = wx.FONTWEIGHT_NORMAL
             else:
                 saved_attrs['weight'] = attrs.GetFontWeight()
-            saved_attrs['color'] = attrs.GetTextColour()
+            # Font color does not need to be saved, it is preserved from the previous child.
             saved_attrs['background'] = attrs.GetBackgroundColour()
             saved_attrs['underlined'] = attrs.GetFontUnderlined()
             child_list.append(saved_attrs)
-        # Brute force the paragraph into the paragraph style both paragraph and character attributes. This removes all.
-        # other style attributes except URL flag.
-        self.rtc.SetStyleEx(p.GetRange().FromInternal(), style,
-                            flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_RESET)
-        # The paragraph changes after style set, so find it again.
+
+        # TODO update style picker on undo
+        # TODO behaves weirdly when a word is only bold, the children are lost, maybe set explicit black color for text.
+        # TODO Move(0) after style change
+
+        self.rtc.BeginBatchUndo(Strings.undo_last_action)
+        self.rtc.SetStyleEx(p_range, style, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_PARAGRAPHS_ONLY
+                            | rt.RICHTEXT_SETSTYLE_RESET)
+        self.rtc.SetStyleEx(p_range, style, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_CHARACTERS_ONLY)
+        self.rtc.SetListStyle(p_range, style_def, specifiedLevel=0, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO
+                              | rt.RICHTEXT_SETSTYLE_SPECIFY_LEVEL)
+        self.rtc.EndBatchUndo()
+
         p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(
             self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition()))
+        print(p.GetChildren())
         # Restore only relevant attributes to the new children. The order is the same.
         for child, attr_dict in zip(p.GetChildren(), child_list):
             attrs: rt.RichTextAttr = child.GetAttributes()
             attrs.SetFontWeight(attr_dict['weight'])
-            attrs.SetTextColour(attr_dict['color'])
+            attrs.SetFontSize(style.GetFontSize())
+            attrs.SetParagraphSpacingBefore(style.GetParagraphSpacingBefore())
+            attrs.SetParagraphSpacingAfter(style.GetParagraphSpacingAfter())
             if attrs.HasURL():
-                # Only urls have background color and underline.
                 attrs.SetBackgroundColour(attr_dict['background'])
                 attrs.SetFontUnderlined(attr_dict['underlined'])
-
-    def _apply_list_style(self, position=None) -> None:
-        """
-        Changes paragraph on position into list item.
-        :param position: Where to apply the style, if not set, current paragraph is used.
-        :return: None
-        """
-        # This is used to keep the list style going when return key is pressed. We move one position back and reapply
-        # the style there. In other cases we want to apply the style in the current paragraph.
-        if not position:
-            position = self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition())
-        # When switching from heading style, disable limit to paragraph only since we want to get rid of the
-        # heading style attributes completely. When changing text into list, change everything into list style
-        # first to get rid of other styles.
-        paragraph_only_flag = True
-        current_style = self._get_style_at_pos(self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition()))[0]
-        if current_style == Strings.style_heading_3 or current_style == Strings.style_heading_4:
-            paragraph_only_flag = False
-
-        # Reset to list style to get rid of any extra styles
-        list_style: rt.RichTextAttr = self._stylesheet.FindStyle(Strings.style_list).GetStyle()
-        self._change_paragraph_style(list_style, paragraphs_only=paragraph_only_flag, remove=False,
-                                     position=position)
-
-        p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(position)
-        self.rtc.SetListStyle(p.GetRange(), self._stylesheet.FindStyle(Strings.style_list),
-                              flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_SPECIFY_LEVEL,
-                              specifiedLevel=0)
 
     def _apply_url_style(self) -> None:
         """
@@ -518,9 +572,10 @@ class RichTextFrame(wx.Frame):
         :param event: Used to get key code.
         :return: None
         """
-        print('key')
+        self._update_style_picker()
+        self._enable_buttons()
         event.Skip()
-        #self._modify_text(event.GetKeyCode())
+        # self._modify_text(event.GetKeyCode())
 
     def _text_evt_handler(self, event: wx.CommandEvent) -> None:
         """
@@ -528,7 +583,6 @@ class RichTextFrame(wx.Frame):
         :param event: Not used.
         :return: None
         """
-        print('text')
         self._update_style_picker()
         self._enable_buttons()
         event.Skip()
@@ -650,10 +704,10 @@ class RichTextFrame(wx.Frame):
         :return: None
         """
         attr = rt.RichTextAttr()
-        r = self.rtc.GetSelectionRange()
+        color_range = self.rtc.GetSelectionRange()
         attr.SetFlags(wx.TEXT_ATTR_TEXT_COLOUR)
         attr.SetTextColour(wx.Colour(234, 134, 88))
-        self.rtc.SetStyleEx(r, attr, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO)
+        self.rtc.SetStyleEx(color_range, attr, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO)
 
     def _change_bold(self, evt: wx.CommandEvent) -> None:
         """
@@ -662,11 +716,12 @@ class RichTextFrame(wx.Frame):
         :return: None
         """
         if self.rtc.HasSelection():
-            bold_range = self.rtc.GetSelectionRange()
-            attr = rt.RichTextAttr()
-            attr.SetFlags(wx.TEXT_ATTR_FONT_WEIGHT)
-            attr.SetFontWeight(wx.FONTWEIGHT_BOLD)
-            self.rtc.SetStyleEx(bold_range, attr, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO)
+            self.rtc.ApplyBoldToSelection()
+            # bold_range = self.rtc.GetSelectionRange()
+            # attr = rt.RichTextAttr()
+            # attr.SetFlags(wx.TEXT_ATTR_FONT_WEIGHT)
+            # attr.SetFontWeight(wx.FONTWEIGHT_BOLD)
+            # self.rtc.SetStyleEx(bold_range, attr, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO)
 
     def insert_sample_text(self) -> None:
         """
