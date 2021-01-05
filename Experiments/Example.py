@@ -70,6 +70,7 @@ class RichTextFrame(wx.Frame):
         :return: None
         """
         # Paragraph style
+        # Do not se specific font color, color is retained in each text object.
         stl_paragraph: rt.RichTextAttr = rt.RichTextAttr()
         stl_paragraph.SetFontSize(Numbers.paragraph_font_size)
         stl_paragraph.SetAlignment(wx.TEXT_ALIGNMENT_LEFT)
@@ -344,7 +345,6 @@ class RichTextFrame(wx.Frame):
         p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(
             self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition()))
         p_range = p.GetRange().FromInternal()
-        print(p.GetChildren())
         child_list = []
         for child in p.GetChildren():
             child: rt.RichTextPlainText
@@ -362,7 +362,6 @@ class RichTextFrame(wx.Frame):
             child_list.append(saved_attrs)
 
         # TODO update style picker on undo
-        # TODO behaves weirdly when a word is only bold, the children are lost, maybe set explicit black color for text.
         # TODO Move(0) after style change
 
         self.rtc.BeginBatchUndo(Strings.undo_last_action)
@@ -375,7 +374,6 @@ class RichTextFrame(wx.Frame):
 
         p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(
             self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition()))
-        print(p.GetChildren())
         # Restore only relevant attributes to the new children. The order is the same.
         for child, attr_dict in zip(p.GetChildren(), child_list):
             attrs: rt.RichTextAttr = child.GetAttributes()
@@ -705,7 +703,7 @@ class RichTextFrame(wx.Frame):
         """
         attr = rt.RichTextAttr()
         color_range = self.rtc.GetSelectionRange()
-        attr.SetFlags(wx.TEXT_ATTR_TEXT_COLOUR)
+        self.rtc.GetStyleForRange(color_range, attr)
         attr.SetTextColour(wx.Colour(234, 134, 88))
         self.rtc.SetStyleEx(color_range, attr, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO)
 
@@ -715,13 +713,15 @@ class RichTextFrame(wx.Frame):
         :param evt: Not used
         :return: None
         """
+        # TODO unbold
         if self.rtc.HasSelection():
-            self.rtc.ApplyBoldToSelection()
-            # bold_range = self.rtc.GetSelectionRange()
-            # attr = rt.RichTextAttr()
-            # attr.SetFlags(wx.TEXT_ATTR_FONT_WEIGHT)
-            # attr.SetFontWeight(wx.FONTWEIGHT_BOLD)
-            # self.rtc.SetStyleEx(bold_range, attr, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO)
+            bold_range = self.rtc.GetSelectionRange()
+            # Get the attributes of the currently selected range and modify them in place. Otherwise changing paragraph
+            # style is broken since the attributes are reset for the range.
+            attr = rt.RichTextAttr()
+            self.rtc.GetStyleForRange(bold_range, attr)
+            attr.SetFontWeight(wx.FONTWEIGHT_BOLD)
+            self.rtc.SetStyleEx(bold_range, attr, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO)
 
     def insert_sample_text(self) -> None:
         """
