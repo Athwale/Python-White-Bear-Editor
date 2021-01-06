@@ -21,7 +21,8 @@ class RichTextFrame(wx.Frame):
         self._previous_style: str = Strings.style_paragraph
 
         self.rtc.SetStyleSheet(self._stylesheet)
-        self._color_button = wx.Button(self, -1, 'color')
+        self._color_button = wx.Button(self, wx.ID_FILE1, 'color 1')
+        self._color_button_1 = wx.Button(self, wx.ID_FILE2, 'color 2')
         self._bold_button = wx.Button(self, -1, 'bold')
         self._image_button = wx.Button(self, -1, 'image')
         self._refresh_button = wx.Button(self, -1, 'refresh')
@@ -29,6 +30,7 @@ class RichTextFrame(wx.Frame):
 
         self._controls_sizer.Add(self._style_picker)
         self._controls_sizer.Add(self._color_button)
+        self._controls_sizer.Add(self._color_button_1)
         self._controls_sizer.Add(self._bold_button)
         self._controls_sizer.Add(self._image_button)
         self._controls_sizer.Add(self._refresh_button)
@@ -39,6 +41,7 @@ class RichTextFrame(wx.Frame):
 
         self.Bind(wx.EVT_LISTBOX, self._style_picker_handler, self._style_picker)
         self.Bind(wx.EVT_BUTTON, self._change_color, self._color_button)
+        self.Bind(wx.EVT_BUTTON, self._change_color, self._color_button_1)
         self.Bind(wx.EVT_BUTTON, self._change_bold, self._bold_button)
         self.Bind(wx.EVT_BUTTON, self._write_field, self._image_button)
         self.Bind(wx.EVT_BUTTON, self._refresh, self._refresh_button)
@@ -197,28 +200,6 @@ class RichTextFrame(wx.Frame):
 
         self._style_picker.InsertItems(names, 0)
 
-    def _change_paragraph_style(self, new_style: rt.RichTextAttr, paragraphs_only: bool,
-                                remove: bool, position=None) -> None:
-        """
-        Change the current paragraph into the paragraph style from parameter without destroying urls.
-        :param new_style: The paragraph style
-        :param paragraphs_only: Limit style to paragraphs
-        :param remove: Remove the style from the current paragraph.
-        :param position: The position where to change the paragraph. If None, current paragraph is used.
-        :return: None
-        """
-        if not position:
-            position = self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition())
-        par_flag = 0
-        remove_flag = 0
-        if paragraphs_only:
-            par_flag = rt.RICHTEXT_SETSTYLE_PARAGRAPHS_ONLY
-        if remove:
-            remove_flag = rt.RICHTEXT_SETSTYLE_REMOVE
-        p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(position)
-        self.rtc.SetStyleEx(p.GetRange().FromInternal(), new_style,
-                            flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | par_flag | remove_flag | rt.RICHTEXT_SETSTYLE_RESET)
-
     def _change_style(self, style_name: str, force_paragraph=False) -> None:
         """
         Changes the style of the current paragraph or selection.
@@ -239,6 +220,8 @@ class RichTextFrame(wx.Frame):
         else:
             self._apply_url_style()
 
+        # Unless we simulate a move, you can still type in the wrong style after change.
+        self.rtc.MoveRight(0)
         self._update_style_picker()
         self.rtc.Invalidate()
         self.rtc.Refresh()
@@ -362,7 +345,6 @@ class RichTextFrame(wx.Frame):
             child_list.append(saved_attrs)
 
         # TODO update style picker on undo
-        # TODO Move(0) after style change
 
         self.rtc.BeginBatchUndo(Strings.undo_last_action)
         self.rtc.SetStyleEx(p_range, style, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_PARAGRAPHS_ONLY
@@ -393,8 +375,7 @@ class RichTextFrame(wx.Frame):
         if self.rtc.HasSelection():
             link_range = self.rtc.GetSelectionRange()
             self.rtc.SetStyleEx(link_range, self._stylesheet.FindStyle(Strings.style_url).GetStyle(),
-                                flags=rt.RICHTEXT_SETSTYLE_RESET | rt.RICHTEXT_SETSTYLE_OPTIMIZE |
-                                      rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_CHARACTERS_ONLY)
+                                flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_CHARACTERS_ONLY)
 
     def _get_style_at_pos(self, position: int = 0) -> (str, str):
         """
@@ -515,8 +496,8 @@ class RichTextFrame(wx.Frame):
         # backspace/delete long press.
         self._previous_style = None
         # TODO link not restored on title to par undo
-        # TODO disable bold in heading style
         # TODO selection delete does weird things
+        # TODO change list to par if dot is removed
 
     def _on_key_down(self, event: wx.KeyEvent) -> None:
         """
@@ -626,8 +607,11 @@ class RichTextFrame(wx.Frame):
             url_index = self._style_picker.FindString(Strings.style_url)
             if url_index != wx.NOT_FOUND:
                 self._style_picker.Delete(url_index)
+            # Disable bold button
+            self._bold_button.Disable()
         elif self._style_picker.FindString(Strings.style_url) == wx.NOT_FOUND:
             self._style_picker.Append(Strings.style_url)
+            self._bold_button.Enable()
 
     def print_current_styles(self):
         print('---')
@@ -649,18 +633,24 @@ class RichTextFrame(wx.Frame):
         :param evt: Not used.
         :return: None
         """
+        new_field = self._register_field()
+        position = self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition())
+        buffer: rt.RichTextBuffer = self.rtc.GetFocusObject()
+
+        style: rt.RichTextAttr = self._stylesheet.FindStyle(Strings.style_image).GetStyle()
+        p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(position)
+        p_range = p.GetRange().FromInternal()
+
+        self.rtc.BeginBatchUndo(Strings.undo_last_action)
+        self.rtc.SetStyleEx(p_range, style, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_RESET)
+        buffer.InsertFieldWithUndo(self.rtc.GetBuffer(), position, new_field.GetName(), rt.RichTextProperties(),
+                                   self.rtc, rt.RICHTEXT_INSERT_WITH_PREVIOUS_PARAGRAPH_STYLE, rt.RichTextAttr())
+        self.rtc.EndBatchUndo()
+
         # TODO copy paste problems
         # TODO memory leak in orphaned images and link, maybe reconcile on idle.
-        self.rtc.BeginBatchUndo(Strings.undo_last_action)
-        position = self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition())
-        # Set the image style.
-        img_style = self._stylesheet.FindParagraphStyle(Strings.style_image).GetStyle()
-        self._change_paragraph_style(img_style, paragraphs_only=False, remove=False, position=position)
 
-        new_field = self._register_field()
-        self.rtc.WriteField(new_field.GetName(), rt.RichTextProperties())
         # Return focus to the text area.
-        self.rtc.EndBatchUndo()
         wx.CallLater(100, self.rtc.SetFocus)
 
     @staticmethod
@@ -701,10 +691,14 @@ class RichTextFrame(wx.Frame):
         :param evt: Not used
         :return: None
         """
+        if evt.GetId() == wx.ID_FILE1:
+            color = wx.Colour(234, 134, 88)
+        else:
+            color = wx.Colour(124, 144, 25)
         attr = rt.RichTextAttr()
         color_range = self.rtc.GetSelectionRange()
         self.rtc.GetStyleForRange(color_range, attr)
-        attr.SetTextColour(wx.Colour(234, 134, 88))
+        attr.SetTextColour(color)
         self.rtc.SetStyleEx(color_range, attr, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO)
 
     def _change_bold(self, evt: wx.CommandEvent) -> None:
@@ -713,14 +707,16 @@ class RichTextFrame(wx.Frame):
         :param evt: Not used
         :return: None
         """
-        # TODO unbold
         if self.rtc.HasSelection():
             bold_range = self.rtc.GetSelectionRange()
             # Get the attributes of the currently selected range and modify them in place. Otherwise changing paragraph
             # style is broken since the attributes are reset for the range.
             attr = rt.RichTextAttr()
             self.rtc.GetStyleForRange(bold_range, attr)
-            attr.SetFontWeight(wx.FONTWEIGHT_BOLD)
+            if attr.GetFontWeight() == wx.FONTWEIGHT_NORMAL:
+                attr.SetFontWeight(wx.FONTWEIGHT_BOLD)
+            else:
+                attr.SetFontWeight(wx.FONTWEIGHT_NORMAL)
             self.rtc.SetStyleEx(bold_range, attr, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO)
 
     def insert_sample_text(self) -> None:
