@@ -344,8 +344,6 @@ class RichTextFrame(wx.Frame):
             saved_attrs['underlined'] = attrs.GetFontUnderlined()
             child_list.append(saved_attrs)
 
-        # TODO update style picker on undo
-
         self.rtc.BeginBatchUndo(Strings.undo_last_action)
         self.rtc.SetStyleEx(p_range, style, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_PARAGRAPHS_ONLY
                             | rt.RICHTEXT_SETSTYLE_RESET)
@@ -411,7 +409,7 @@ class RichTextFrame(wx.Frame):
 
     def _modify_text(self, key_code) -> None:
         """
-        Handle key up events.
+        Handle keypress events.
         :param key_code: Wxpython WXK key code.
         :return: None
         """
@@ -420,6 +418,7 @@ class RichTextFrame(wx.Frame):
         position = self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition())
         p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(position)
         paragraph_style, character_style = self._get_style_at_pos(position)
+
         if character_style == Strings.style_url and key_code == wx.WXK_SPACE:
             # End url style if next character has different or no url.
             style_carrier = rt.RichTextAttr()
@@ -437,6 +436,7 @@ class RichTextFrame(wx.Frame):
                 self.rtc.Refresh()
                 self._enable_buttons()
                 self._update_style_picker()
+
         if key_code == wx.WXK_RETURN:
             previous_par: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(position - 1)
             if not previous_par.GetTextForRange(previous_par.GetRange()):
@@ -446,6 +446,7 @@ class RichTextFrame(wx.Frame):
                         # Reapply paragraph style on empty previous lines.
                         self._change_paragraph_style(self._stylesheet.FindStyle(Strings.style_paragraph).GetStyle(),
                                                      paragraphs_only=False, remove=False, position=position - 1)
+
         if key_code == wx.WXK_BACK or key_code == wx.WXK_DELETE:
             # Remove any image on any delete key and turn all potential text into the next style.
             for child in p.GetChildren():
@@ -490,6 +491,7 @@ class RichTextFrame(wx.Frame):
                 self.rtc.MoveLeft(0)
                 self.rtc.EndBatchUndo()
                 return
+
         if self.rtc.BatchingUndo():
             self.rtc.EndBatchUndo()
         # Clear previous style once it has been used. This allows storing previous style only once in the beginning of
@@ -554,7 +556,7 @@ class RichTextFrame(wx.Frame):
         self._update_style_picker()
         self._enable_buttons()
         event.Skip()
-        # self._modify_text(event.GetKeyCode())
+        self._modify_text(event.GetKeyCode())
 
     def _text_evt_handler(self, event: wx.CommandEvent) -> None:
         """
