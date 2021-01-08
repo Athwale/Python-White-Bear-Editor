@@ -16,8 +16,45 @@ class RichTextFrame(wx.Frame):
         self.sizer.Add(self.rtc, 1, flag=wx.EXPAND)
         self.SetSizer(self.sizer)
 
+        self.rtc.Bind(wx.EVT_TEXT, self._on_text_handler)
+        self.rtc.Bind(wx.EVT_KEY_UP, self._on_key_up_handler)
+        self.rtc.Bind(wx.EVT_KEY_DOWN, self._on_key_down_handler)
+
         self._create_styles()
         self._insert_sample_text()
+
+    def _on_text_handler(self, evt: wx.CommandEvent) -> None:
+        """
+        Handle text events.
+        :param evt: Not used
+        :return: None
+        """
+        evt.Skip()
+        position = self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition())
+        p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(position)
+        print(p.GetTextForRange(p.GetRange()) + ' TEXT EVENT')
+
+    def _on_key_up_handler(self, evt: wx.CommandEvent) -> None:
+        """
+        Handle text events.
+        :param evt: Not used
+        :return: None
+        """
+        evt.Skip()
+        position = self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition())
+        p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(position)
+        print(p.GetTextForRange(p.GetRange()) + ' KEY UP')
+
+    def _on_key_down_handler(self, evt: wx.CommandEvent) -> None:
+        """
+        Handle text events.
+        :param evt: Not used
+        :return: None
+        """
+        evt.Skip()
+        position = self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition())
+        p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(position)
+        print(p.GetTextForRange(p.GetRange()) + ' KEY DOWN')
 
     def _create_styles(self) -> None:
         """

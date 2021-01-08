@@ -50,9 +50,8 @@ class RichTextFrame(wx.Frame):
         self.rtc.Bind(wx.EVT_MOUSE_EVENTS, self._on_mouse)
 
         self.rtc.Bind(wx.EVT_KEY_DOWN, self._on_key_down)
-        self.rtc.Bind(wx.EVT_TEXT, self._text_evt_handler)
-        self.rtc.Bind(wx.EVT_CHAR, self._on_key)
-        self.rtc.Bind(wx.EVT_KEY_UP, self._on_key)
+        self.rtc.Bind(wx.EVT_KEY_UP, self._update_gui_handler)
+        self.rtc.Bind(wx.EVT_TEXT, self._on_text_handler)
 
         self.rtc.GetBuffer().CleanUpFieldTypes()
         self._create_styles()
@@ -407,10 +406,9 @@ class RichTextFrame(wx.Frame):
         # Return focus back into the text area. The focus must happen a little later when the style picker is finished.
         wx.CallLater(100, self.rtc.SetFocus)
 
-    def _modify_text(self, key_code) -> None:
+    def _modify_text(self) -> None:
         """
-        Handle keypress events.
-        :param key_code: Wxpython WXK key code.
+        Handle keypress events. Runs on key down.
         :return: None
         """
         self._update_style_picker()
@@ -419,8 +417,14 @@ class RichTextFrame(wx.Frame):
         p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(position)
         paragraph_style, character_style = self._get_style_at_pos(position)
 
-        if character_style == Strings.style_url and key_code == wx.WXK_SPACE:
-            # End url style if next character has different or no url.
+        # Prevent mixed styles
+        # TODO paragraphs is picked up before it is joined on delete
+        print(p.GetTextForRange(p.GetRange()))
+
+        # End url style if next character has different or no url.
+        # TODO does not work on line end probably due to running on key down
+        # TODO do this without a key code.
+        if character_style == Strings.style_url:
             style_carrier = rt.RichTextAttr()
             self.rtc.GetStyle(position, style_carrier)
             current_url = style_carrier.GetURL()
@@ -437,69 +441,29 @@ class RichTextFrame(wx.Frame):
                 self._enable_buttons()
                 self._update_style_picker()
 
-        if key_code == wx.WXK_RETURN:
-            previous_par: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(position - 1)
-            if not previous_par.GetTextForRange(previous_par.GetRange()):
-                if not isinstance(previous_par.GetChild(0), rt.RichTextField):
-                    # There must not be an image in the paragraph either.
-                    if paragraph_style != Strings.style_list:
-                        # Reapply paragraph style on empty previous lines.
-                        self._change_paragraph_style(self._stylesheet.FindStyle(Strings.style_paragraph).GetStyle(),
-                                                     paragraphs_only=False, remove=False, position=position - 1)
+        # Turn a list item into paragraph if the bullet is deleted. Must be here because bullet delete is not considered
+        # a text event.
+        # TODO undo does not work, text event not fired here, we need to run this on every window update
+        if paragraph_style == Strings.style_list:
+            attrs: rt.RichTextAttr = p.GetAttributes()
+            if attrs.GetBulletStyle() != wx.TEXT_ATTR_BULLET_STYLE_STANDARD:
+                self._change_style(Strings.style_paragraph)
 
-        if key_code == wx.WXK_BACK or key_code == wx.WXK_DELETE:
-            # Remove any image on any delete key and turn all potential text into the next style.
-            for child in p.GetChildren():
-                if isinstance(child, rt.RichTextField):
-                    if len(p.GetChildren()) == 1:
-                        # There is no text being appended, remove the image paragraph completely, removing just the
-                        # child removes the paragraph but confuses the control.
-                        self.rtc.Delete(p.GetRange())
-                    else:
-                        # Backspacing into the image with some text from the next paragraph, remove just the image.
-                        p.RemoveChild(child, deleteChild=True)
-                        self.rtc.Invalidate()
-                        self.rtc.Refresh()
-            if paragraph_style == Strings.style_image:
-                # If backspacing into an image from a different style, the image style would survive so we have to
-                # reapply the correct previous style saved in skip key method. This needs to be applied to lists too.
-                if self._previous_style == Strings.style_image:
-                    self._change_style(Strings.style_paragraph, force_paragraph=True)
-                else:
-                    self._change_style(self._previous_style, force_paragraph=True)
-                    self.rtc.MoveToParagraphStart()
-                self._enable_buttons()
-                self.rtc.EndBatchUndo()
-                return
-            if key_code == wx.WXK_BACK and paragraph_style == Strings.style_list:
-                # Turn a list item into paragraph if the bullet is deleted.
-                attrs: rt.RichTextAttr = p.GetAttributes()
-                if attrs.GetBulletStyle() != wx.TEXT_ATTR_BULLET_STYLE_STANDARD:
-                    self._change_style(Strings.style_paragraph)
-                    self.rtc.EndSuppressUndo()
-            if self._previous_style == Strings.style_paragraph and paragraph_style == Strings.style_paragraph:
-                # Do not reapply style if the two lines are paragraphs. Prevents broken join of paragraphs where links
-                # and bold text would disappear.
-                print(p.GetChildren())
-                self.rtc.EndBatchUndo()
-                return
-            if paragraph_style != Strings.style_list:
-                # Reapply current paragraph style on backspace or delete to prevent mixed styles
-                # (like joining heading + paragraph)
-                # Does not work for list since the style is reapplied turns the removed list back into list again.
-                self._change_style(paragraph_style, force_paragraph=True)
-                self.rtc.MoveLeft(0)
-                self.rtc.EndBatchUndo()
-                return
-
-        if self.rtc.BatchingUndo():
-            self.rtc.EndBatchUndo()
-        # Clear previous style once it has been used. This allows storing previous style only once in the beginning of
-        # backspace/delete long press.
-        self._previous_style = None
         # TODO link not restored on title to par undo
         # TODO selection delete does weird things
-        # TODO change list to par if dot is removed
+
+    def _on_text_handler(self, event: wx.CommandEvent) -> None:
+        """
+        Handle char (happens on key down) events except arrow keys.
+        :param event: Used to get key code.
+        :return: None
+        """
+        event.Skip()
+        self._update_style_picker()
+        self._enable_buttons()
+        if not self.rtc.SuppressingUndo():
+            # Only do this while hidden text operations are not taking place
+            self._modify_text()
 
     def _on_key_down(self, event: wx.KeyEvent) -> None:
         """
@@ -514,10 +478,6 @@ class RichTextFrame(wx.Frame):
 
         position = self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition())
         paragraph_style, character_style = self._get_style_at_pos(position)
-        # Save style before the caret moves to prevent incorrect styling after backspacing into an image.
-        # Also used in paragraph joining.
-        if not self._previous_style:
-            self._previous_style = paragraph_style
 
         if key_code == wx.WXK_BACK or key_code == wx.WXK_DELETE:
             # Undo batch needs to start here, otherwise rtc manages to process delete text before the batch starts.
@@ -547,20 +507,9 @@ class RichTextFrame(wx.Frame):
         else:
             event.Skip()
 
-    def _on_key(self, event: wx.KeyEvent) -> None:
+    def _update_gui_handler(self, event: wx.CommandEvent) -> None:
         """
-        Handle key up events.
-        :param event: Used to get key code.
-        :return: None
-        """
-        self._update_style_picker()
-        self._enable_buttons()
-        event.Skip()
-        self._modify_text(event.GetKeyCode())
-
-    def _text_evt_handler(self, event: wx.CommandEvent) -> None:
-        """
-        Handle left mouse click. Updates GUI controls.
+        Handle key events to update GUI controls.
         :param event: Not used.
         :return: None
         """
