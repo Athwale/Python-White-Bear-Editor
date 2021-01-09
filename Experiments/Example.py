@@ -51,9 +51,9 @@ class RichTextFrame(wx.Frame):
 
         self.rtc.Bind(wx.EVT_KEY_DOWN, self._on_key_down)
         self.rtc.Bind(wx.EVT_KEY_UP, self._update_gui_handler)
-        self.rtc.Bind(wx.EVT_TEXT, self._on_text_handler)
 
         self.rtc.GetBuffer().CleanUpFieldTypes()
+
         self._create_styles()
         self._fill_style_picker()
 
@@ -417,13 +417,11 @@ class RichTextFrame(wx.Frame):
         p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(position)
         paragraph_style, character_style = self._get_style_at_pos(position)
 
-        # Prevent mixed styles
-        # TODO paragraphs is picked up before it is joined on delete
+        # TODO Prevent mixed styles
         print(p.GetTextForRange(p.GetRange()))
 
         # End url style if next character has different or no url.
-        # TODO does not work on line end probably due to running on key down
-        # TODO do this without a key code.
+        # TODO does not work on line end when you delete the last par space
         if character_style == Strings.style_url:
             style_carrier = rt.RichTextAttr()
             self.rtc.GetStyle(position, style_carrier)
@@ -443,7 +441,6 @@ class RichTextFrame(wx.Frame):
 
         # Turn a list item into paragraph if the bullet is deleted. Must be here because bullet delete is not considered
         # a text event.
-        # TODO undo does not work, text event not fired here, we need to run this on every window update
         if paragraph_style == Strings.style_list:
             attrs: rt.RichTextAttr = p.GetAttributes()
             if attrs.GetBulletStyle() != wx.TEXT_ATTR_BULLET_STYLE_STANDARD:
@@ -451,19 +448,6 @@ class RichTextFrame(wx.Frame):
 
         # TODO link not restored on title to par undo
         # TODO selection delete does weird things
-
-    def _on_text_handler(self, event: wx.CommandEvent) -> None:
-        """
-        Handle char (happens on key down) events except arrow keys.
-        :param event: Used to get key code.
-        :return: None
-        """
-        event.Skip()
-        self._update_style_picker()
-        self._enable_buttons()
-        if not self.rtc.SuppressingUndo():
-            # Only do this while hidden text operations are not taking place
-            self._modify_text()
 
     def _on_key_down(self, event: wx.KeyEvent) -> None:
         """
@@ -506,6 +490,9 @@ class RichTextFrame(wx.Frame):
                 return
         else:
             event.Skip()
+        # Calls the function when the current event handler has exited. wx.TEXT_EVT can not be used because it does not
+        # fire on list bullet deletion.
+        wx.CallAfter(self._modify_text)
 
     def _update_gui_handler(self, event: wx.CommandEvent) -> None:
         """
