@@ -221,7 +221,6 @@ class Strings:
     style_heading_3: str = 'Title 3'
     style_heading_4: str = 'Title 4'
     style_list: str = 'List'
-    style_link: str = 'Link'
     style_image: str = 'Image'
     style_url: str = 'Url'
 

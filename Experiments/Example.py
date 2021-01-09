@@ -158,8 +158,8 @@ class RichTextFrame(wx.Frame):
         stl_link.SetFontUnderlined(True)
         stl_link.SetTextColour(wx.BLUE)
         stl_link.SetBackgroundColour(wx.RED)
-        stl_link.SetCharacterStyleName(Strings.style_link)
-        stl_link.SetFontFaceName(Strings.style_link)
+        stl_link.SetCharacterStyleName(Strings.style_url)
+        stl_link.SetFontFaceName(Strings.style_url)
         style_link: rt.RichTextCharacterStyleDefinition = rt.RichTextCharacterStyleDefinition(Strings.style_url)
         style_link.SetStyle(stl_link)
         self._stylesheet.AddCharacterStyle(style_link)
@@ -199,11 +199,10 @@ class RichTextFrame(wx.Frame):
 
         self._style_picker.InsertItems(names, 0)
 
-    def _change_style(self, style_name: str, force_paragraph=False) -> None:
+    def _change_style(self, style_name: str) -> None:
         """
         Changes the style of the current paragraph or selection.
         :param style_name: The name of a style in stylesheet.
-        :param force_paragraph: Used in setting paragraph style to override whether character style should be set too.
         This is used when joining heading and ordinary paragraph using delete or backspace.
         :return: None
         """
@@ -417,8 +416,28 @@ class RichTextFrame(wx.Frame):
         p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(position)
         paragraph_style, character_style = self._get_style_at_pos(position)
 
-        # TODO Prevent mixed styles
-        print(p.GetTextForRange(p.GetRange()))
+        # Turn a list item into paragraph if the bullet is deleted. Must be here because bullet delete is not considered
+        # a text event. The order here is important, this must be before mixed style fix.
+        if paragraph_style == Strings.style_list:
+            attrs: rt.RichTextAttr = p.GetAttributes()
+            if attrs.GetBulletStyle() != wx.TEXT_ATTR_BULLET_STYLE_STANDARD:
+                self._change_style(Strings.style_paragraph)
+
+        # Prevent mixed styles using child based approach. try also on images
+        # The style of the first paragraph style.
+        base_style: str = p.GetChild(0).GetAttributes().GetFontFaceName()
+        for child in p.GetChildren():
+            # If any of the children has different style than the first child, change thw whole paragraph to the first
+            # child's style.
+            child: rt.RichTextPlainText
+            attrs: rt.RichTextAttr = child.GetAttributes()
+            if attrs.GetFontFaceName() != Strings.style_url:
+                # Ignore link style we only change paragraph style
+                if attrs.GetFontFaceName() != base_style:
+                    # Do not do this many times, just once on the first wrong child.
+                    self._change_style(base_style)
+                    break
+
 
         # End url style if next character has different or no url.
         # TODO does not work on line end when you delete the last par space
@@ -439,14 +458,8 @@ class RichTextFrame(wx.Frame):
                 self._enable_buttons()
                 self._update_style_picker()
 
-        # Turn a list item into paragraph if the bullet is deleted. Must be here because bullet delete is not considered
-        # a text event.
-        if paragraph_style == Strings.style_list:
-            attrs: rt.RichTextAttr = p.GetAttributes()
-            if attrs.GetBulletStyle() != wx.TEXT_ATTR_BULLET_STYLE_STANDARD:
-                self._change_style(Strings.style_paragraph)
-
         # TODO link not restored on title to par undo
+        # TODO undo does not work
         # TODO selection delete does weird things
 
     def _on_key_down(self, event: wx.KeyEvent) -> None:
