@@ -423,7 +423,11 @@ class RichTextFrame(wx.Frame):
             if attrs.GetBulletStyle() != wx.TEXT_ATTR_BULLET_STYLE_STANDARD:
                 self._change_style(Strings.style_paragraph)
 
-        # Prevent mixed styles using child based approach. try also on images
+        # Turn empty lines into paragraph style
+        if not p.GetTextForRange(p.GetRange()):
+            self._change_style(Strings.style_paragraph)
+
+        # Prevent mixed styles using child based approach
         # The style of the first paragraph style.
         base_style: str = p.GetChild(0).GetAttributes().GetFontFaceName()
         for child in p.GetChildren():
@@ -437,7 +441,6 @@ class RichTextFrame(wx.Frame):
                     # Do not do this many times, just once on the first wrong child.
                     self._change_style(base_style)
                     break
-
 
         # End url style if next character has different or no url.
         # TODO does not work on line end when you delete the last par space
@@ -458,6 +461,32 @@ class RichTextFrame(wx.Frame):
                 self._enable_buttons()
                 self._update_style_picker()
 
+        """
+        if key_code == wx.WXK_BACK or key_code == wx.WXK_DELETE:
+            # Remove any image on any delete key and turn all potential text into the next style.
+            for child in p.GetChildren():
+                if isinstance(child, rt.RichTextField):
+                    if len(p.GetChildren()) == 1:
+                        # There is no text being appended, remove the image paragraph completely, removing just the
+                        # child removes the paragraph but confuses the control.
+                        self.rtc.Delete(p.GetRange())
+                    else:
+                        # Backspacing into the image with some text from the next paragraph, remove just the image.
+                        p.RemoveChild(child, deleteChild=True)
+                        self.rtc.Invalidate()
+                        self.rtc.Refresh()
+            if paragraph_style == Strings.style_image:
+                # If backspacing into an image from a different style, the image style would survive so we have to
+                # reapply the correct previous style saved in skip key method. This needs to be applied to lists too.
+                if self._previous_style == Strings.style_image:
+                    self._change_style(Strings.style_paragraph, force_paragraph=True)
+                else:
+                    self._change_style(self._previous_style, force_paragraph=True)
+                    self.rtc.MoveToParagraphStart()
+                self._enable_buttons()
+                self.rtc.EndBatchUndo()
+                return
+        """
         # TODO link not restored on title to par undo
         # TODO undo does not work
         # TODO selection delete does weird things
