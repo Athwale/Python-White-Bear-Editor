@@ -104,6 +104,7 @@ class Strings:
     exception_last_document_missing: str = 'Last open document not found'
     exception_menu_item_missing: str = 'Menu item missing'
     exception_unrecognized_color: str = 'Unrecognized CSS color'
+    exception_wrong_style: str = 'Unrecognized style'
 
     seo_error_keywords_length: str = 'Length must be: ' + str(Numbers.keywords_min_length) + ' - ' + str(
         Numbers.keywords_max_length) + ' characters long'

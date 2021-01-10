@@ -2,6 +2,7 @@ import wx
 import wx.richtext as rt
 
 from Constants.Constants import Strings, Numbers
+from Exceptions.WrongFormatException import WrongFormatException
 from Tools.Document.ArticleElements.Video import Video
 from Tools.ImageTextField import ImageTextField
 
@@ -199,24 +200,32 @@ class RichTextFrame(wx.Frame):
 
         self._style_picker.InsertItems(names, 0)
 
-    def _change_style(self, style_name: str) -> None:
+    def _change_style(self, style_name: str, paragraph: rt.RichTextParagraph = None) -> None:
         """
         Changes the style of the current paragraph or selection.
         :param style_name: The name of a style in stylesheet.
+        :param paragraph: The paragraph to change, if None, current paragraph is used.
         This is used when joining heading and ordinary paragraph using delete or backspace.
         :return: None
         """
+        if not paragraph:
+            paragraph = self.rtc.GetFocusObject().GetParagraphAtPosition(self.rtc.GetAdjustedCaretPosition
+                                                                         (self.rtc.GetCaretPosition()))
+
         if style_name == Strings.style_heading_3 or style_name == Strings.style_heading_4:
-            self._apply_heading_style(style_name)
+            self._apply_heading_style(style_name, paragraph)
 
         elif style_name == Strings.style_paragraph:
-            self._apply_paragraph_style()
+            self._apply_paragraph_style(paragraph)
 
         elif style_name == Strings.style_list:
-            self._apply_list_style()
+            self._apply_list_style(paragraph)
+
+        elif style_name == Strings.style_url:
+            self._apply_url_style()
 
         else:
-            self._apply_url_style()
+            raise WrongFormatException(Strings.exception_wrong_style)
 
         # Unless we simulate a move, you can still type in the wrong style after change.
         self.rtc.MoveRight(0)
@@ -224,15 +233,14 @@ class RichTextFrame(wx.Frame):
         self.rtc.Invalidate()
         self.rtc.Refresh()
 
-    def _apply_heading_style(self, heading_type: str) -> None:
+    def _apply_heading_style(self, heading_type: str, p: rt.RichTextParagraph) -> None:
         """
         Changes current paragraph under the cursor into a heading 3 or 4, removing any links.
         :param heading_type: The heading style size.
+        :param p: The paragraph to change, if None, current paragraph is used.
         :return: None
         """
         style: rt.RichTextAttr = self._stylesheet.FindStyle(heading_type).GetStyle()
-        p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(
-            self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition()))
         p_range = p.GetRange().FromInternal()
         # Save text children attributes to restore them after forcing the paragraph style.
         # We need text weight, color, background, underline. URL flag remains untouched. Font size will be replaced by
@@ -264,6 +272,8 @@ class RichTextFrame(wx.Frame):
             attrs.SetFontWeight(style.GetFontWeight())
             attrs.SetParagraphSpacingBefore(style.GetParagraphSpacingBefore())
             attrs.SetParagraphSpacingAfter(style.GetParagraphSpacingAfter())
+            attrs.SetFontFaceName(style.GetFontFaceName())
+            attrs.SetAlignment(wx.TEXT_ALIGNMENT_LEFT)
             # Only links can be underlined, it is safe to remove it here.
             attrs.SetFontUnderlined(style.GetFontUnderlined())
             if attrs.HasURL():
@@ -273,15 +283,14 @@ class RichTextFrame(wx.Frame):
                 attrs.SetFlags(attrs.GetFlags() ^ wx.TEXT_ATTR_URL)
                 attrs.SetTextColour(style.GetTextColour())
 
-    def _apply_paragraph_style(self) -> None:
+    def _apply_paragraph_style(self, p: rt.RichTextParagraph) -> None:
         """
         Changes current paragraph under the cursor into the paragraph style defined for normal text.
         Retains links, text weight and color.
+        :param p: The paragraph to change, if None, current paragraph is used.
         :return: None
         """
         style: rt.RichTextAttr = self._stylesheet.FindStyle(Strings.style_paragraph).GetStyle()
-        p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(
-            self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition()))
         p_range = p.GetRange().FromInternal()
         child_list = []
         for child in p.GetChildren():
@@ -311,20 +320,21 @@ class RichTextFrame(wx.Frame):
             attrs.SetFontSize(style.GetFontSize())
             attrs.SetParagraphSpacingBefore(style.GetParagraphSpacingBefore())
             attrs.SetParagraphSpacingAfter(style.GetParagraphSpacingAfter())
+            attrs.SetFontFaceName(Strings.style_paragraph)
+            attrs.SetAlignment(wx.TEXT_ALIGNMENT_LEFT)
             if attrs.HasURL():
                 # Only urls have background color and underline.
                 attrs.SetBackgroundColour(attr_dict['background'])
                 attrs.SetFontUnderlined(attr_dict['underlined'])
 
-    def _apply_list_style(self) -> None:
+    def _apply_list_style(self, p: rt.RichTextParagraph) -> None:
         """
         Changes paragraph on position into list item.
+        :param p: The paragraph to change, if None, current paragraph is used.
         :return: None
         """
         style_def: rt.RichTextListStyleDefinition = self._stylesheet.FindStyle(Strings.style_list)
         style: rt.RichTextAttr = style_def.GetStyle()
-        p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(
-            self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition()))
         p_range = p.GetRange().FromInternal()
         child_list = []
         for child in p.GetChildren():
@@ -359,6 +369,8 @@ class RichTextFrame(wx.Frame):
             attrs.SetFontSize(style.GetFontSize())
             attrs.SetParagraphSpacingBefore(style.GetParagraphSpacingBefore())
             attrs.SetParagraphSpacingAfter(style.GetParagraphSpacingAfter())
+            attrs.SetFontFaceName(Strings.style_list)
+            attrs.SetAlignment(wx.TEXT_ALIGNMENT_LEFT)
             if attrs.HasURL():
                 attrs.SetBackgroundColour(attr_dict['background'])
                 attrs.SetFontUnderlined(attr_dict['underlined'])
@@ -423,25 +435,46 @@ class RichTextFrame(wx.Frame):
             if attrs.GetBulletStyle() != wx.TEXT_ATTR_BULLET_STYLE_STANDARD:
                 self._change_style(Strings.style_paragraph)
 
-        # Turn empty lines into paragraph style
+        # Turn empty lines into paragraph style. Also turns deleted images into paragraph style.
         if not p.GetTextForRange(p.GetRange()):
-            self._change_style(Strings.style_paragraph)
+            if not isinstance(p.GetChild(0), rt.RichTextField):
+                # Field is not seen as text.
+                self._change_style(Strings.style_paragraph)
 
-        # Prevent mixed styles using child based approach
-        # The style of the first paragraph style.
+        #  Prevent images in other styles
+        if len(p.GetChildren()) > 1:
+            # Two cases can happen. Image is the first child, delete it.
+            # TODO somehow restore the style of the appended text.
+            if isinstance(p.GetChild(0), rt.RichTextField):
+                # TODO breaks next line, this somehow confuses the paragraphs.
+                p.RemoveChild(p.GetChild(0), deleteChild=True)
+                p.Defragment(rt.RichTextDrawingContext(self.rtc.GetBuffer()))
+                #self.rtc.Delete(rt.RichTextRange(p.GetRange()[0], p.GetRange()[0]+1))
+                # Change the style of the new image-less paragraph to the correct next style.
+                font_face = p.GetChild(0).GetAttributes().GetFontFaceName()
+                if font_face == Strings.style_url:
+                    # We do not want to change whole paragraphs into links, so use paragraph.
+                    font_face = Strings.style_paragraph
+                self._change_style(font_face)
+            # TODO image is not first
+
+        # Prevent mixed styles using child based approach.
+        # The style of the first paragraph child.
         base_style: str = p.GetChild(0).GetAttributes().GetFontFaceName()
         for child in p.GetChildren():
-            # If any of the children has different style than the first child, change thw whole paragraph to the first
+            # If any of the children has different style than the first child, change the whole paragraph to the first
             # child's style.
-            child: rt.RichTextPlainText
             attrs: rt.RichTextAttr = child.GetAttributes()
-            if attrs.GetFontFaceName() != Strings.style_url:
-                # Ignore link style we only change paragraph style
-                if attrs.GetFontFaceName() != base_style:
-                    # Do not do this many times, just once on the first wrong child.
-                    self._change_style(base_style)
-                    break
+            font_face = attrs.GetFontFaceName()
+            if font_face == Strings.style_url:
+                # We do not want to change whole paragraphs into links, so in case we only have a link, use paragraph.
+                font_face = paragraph_style
+            if font_face != base_style:
+                # Do not do this many times, just once on the first wrong child.
+                self._change_style(base_style)
+                break
 
+        """
         # End url style if next character has different or no url.
         # TODO does not work on line end when you delete the last par space
         if character_style == Strings.style_url:
@@ -460,6 +493,7 @@ class RichTextFrame(wx.Frame):
                 self.rtc.Refresh()
                 self._enable_buttons()
                 self._update_style_picker()
+        """
 
         """
         if key_code == wx.WXK_BACK or key_code == wx.WXK_DELETE:
@@ -520,9 +554,9 @@ class RichTextFrame(wx.Frame):
                 return
 
         if paragraph_style == Strings.style_image:
-            # Prevent everything except arrows and return.
+            # Prevent everything except arrows, return and erase keys.
             if key_code == wx.WXK_LEFT or key_code == wx.WXK_RIGHT or key_code == wx.WXK_UP or key_code == wx.WXK_DOWN \
-                    or key_code == wx.WXK_RETURN:
+                    or key_code == wx.WXK_RETURN or key_code == wx.WXK_BACK or key_code == wx.WXK_DELETE:
                 if key_code == wx.WXK_RETURN:
                     # Move to the end of the paragraph and finish the new line there. New lines before image incorrectly
                     # continues the image style.
