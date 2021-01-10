@@ -422,6 +422,7 @@ class RichTextFrame(wx.Frame):
         Handle keypress events. Runs on key down.
         :return: None
         """
+        # TODO disable other keyboard input wihle this method is working?
         self._update_style_picker()
         self._enable_buttons()
         position = self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition())
@@ -443,20 +444,23 @@ class RichTextFrame(wx.Frame):
 
         #  Prevent images in other styles
         if len(p.GetChildren()) > 1:
-            # Two cases can happen. Image is the first child, delete it.
-            # TODO somehow restore the style of the appended text.
+            # Two things can happen. Image is the first child, delete it.
             if isinstance(p.GetChild(0), rt.RichTextField):
-                # TODO breaks next line, this somehow confuses the paragraphs.
-                p.RemoveChild(p.GetChild(0), deleteChild=True)
-                p.Defragment(rt.RichTextDrawingContext(self.rtc.GetBuffer()))
-                #self.rtc.Delete(rt.RichTextRange(p.GetRange()[0], p.GetRange()[0]+1))
+                # We can not delete the child directly, it confuses the paragraphs.
+                self.rtc.Delete(rt.RichTextRange(p.GetRange()[0], p.GetRange()[0]+1))
                 # Change the style of the new image-less paragraph to the correct next style.
                 font_face = p.GetChild(0).GetAttributes().GetFontFaceName()
                 if font_face == Strings.style_url:
                     # We do not want to change whole paragraphs into links, so use paragraph.
                     font_face = Strings.style_paragraph
                 self._change_style(font_face)
-            # TODO image is not first
+            else:
+                # Image is not the first child, find it and delete it.
+                for child in p.GetChildren():
+                    if isinstance(child, rt.RichTextField):
+                        p.RemoveChild(child, deleteChild=True)
+                        self.rtc.Invalidate()
+                        self.rtc.Refresh()
 
         # Prevent mixed styles using child based approach.
         # The style of the first paragraph child.
