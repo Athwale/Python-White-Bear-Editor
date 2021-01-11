@@ -17,6 +17,7 @@ class RichTextFrame(wx.Frame):
         # Create style stylesheet and control
         self._stylesheet = rt.RichTextStyleSheet()
         self._stylesheet.SetName('Stylesheet')
+        self._disable_input = False
 
         self._style_picker = wx.ListBox(self, -1, size=(100, 160))
         self._previous_style: str = Strings.style_paragraph
@@ -422,12 +423,28 @@ class RichTextFrame(wx.Frame):
         Handle keypress events. Runs on key down.
         :return: None
         """
-        # TODO disable other keyboard input wihle this method is working?
-        self._update_style_picker()
-        self._enable_buttons()
+        # Disable other keyboard input while this method is working?
+        self._disable_input = True
+
         position = self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition())
         p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(position)
         paragraph_style, character_style = self._get_style_at_pos(position)
+
+        # End url style if next character has different or no url.
+        if character_style == Strings.style_url:
+            style_carrier = rt.RichTextAttr()
+            self.rtc.GetStyle(position, style_carrier)
+            current_url = style_carrier.GetURL()
+            self.rtc.GetStyle(position + 1, style_carrier)
+            next_url = style_carrier.GetURL()
+            if not next_url or current_url != next_url or position == (p.GetRange()[1] - 1):
+                # End url style if we are at th end of a url, between different urls or at the end of paragraph.
+                url_style: rt.RichTextAttr = self._stylesheet.FindCharacterStyle(Strings.style_url).GetStyle()
+                if p.GetTextForRange(rt.RichTextRange(position, position)) == ' ':
+                    # Stop the url style on blank space
+                    self.rtc.SetStyleEx(rt.RichTextRange(position, position + 1), url_style, rt.RICHTEXT_SETSTYLE_REMOVE)
+                # Without moving the caret you can still type in the now incorrect url style.
+                self.rtc.MoveRight(0)
 
         # Turn a list item into paragraph if the bullet is deleted. Must be here because bullet delete is not considered
         # a text event. The order here is important, this must be before mixed style fix.
@@ -435,12 +452,16 @@ class RichTextFrame(wx.Frame):
             attrs: rt.RichTextAttr = p.GetAttributes()
             if attrs.GetBulletStyle() != wx.TEXT_ATTR_BULLET_STYLE_STANDARD:
                 self._change_style(Strings.style_paragraph)
-
         # Turn empty lines into paragraph style. Also turns deleted images into paragraph style.
-        if not p.GetTextForRange(p.GetRange()):
-            if not isinstance(p.GetChild(0), rt.RichTextField):
-                # Field is not seen as text.
-                self._change_style(Strings.style_paragraph)
+        elif not p.GetTextForRange(p.GetRange()):
+            attrs: rt.RichTextAttr = p.GetAttributes()
+            if attrs.GetBulletStyle() != wx.TEXT_ATTR_BULLET_STYLE_STANDARD:
+                if not isinstance(p.GetChild(0), rt.RichTextField):
+                    # Field is not seen as text.
+                    self._change_style(Strings.style_paragraph)
+        # Changing the style above also changes the paragraph address in memory, find it again then. Not doing this may
+        # cause segfaults.
+        p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(position)
 
         #  Prevent images in other styles
         if len(p.GetChildren()) > 1:
@@ -454,6 +475,9 @@ class RichTextFrame(wx.Frame):
                     # We do not want to change whole paragraphs into links, so use paragraph.
                     font_face = Strings.style_paragraph
                 self._change_style(font_face)
+                # Changing the style above also changes the paragraph address in memory, find it again then.
+                # TODO return the new p from the change method.
+                p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(position)
             else:
                 # Image is not the first child, find it and delete it.
                 for child in p.GetChildren():
@@ -463,71 +487,23 @@ class RichTextFrame(wx.Frame):
                         self.rtc.Refresh()
 
         # Prevent mixed styles using child based approach.
-        # The style of the first paragraph child.
-        base_style: str = p.GetChild(0).GetAttributes().GetFontFaceName()
-        for child in p.GetChildren():
-            # If any of the children has different style than the first child, change the whole paragraph to the first
-            # child's style.
-            attrs: rt.RichTextAttr = child.GetAttributes()
-            font_face = attrs.GetFontFaceName()
-            if font_face == Strings.style_url:
-                # We do not want to change whole paragraphs into links, so in case we only have a link, use paragraph.
-                font_face = paragraph_style
-            if font_face != base_style:
-                # Do not do this many times, just once on the first wrong child.
-                self._change_style(base_style)
-                break
+        if not isinstance(p.GetChild(0), rt.RichTextField):
+            # The style of the first paragraph child.
+            first_style: str = p.GetChild(0).GetAttributes().GetFontFaceName()
+            attrs: rt.RichTextAttr = p.GetAttributes()
+            if attrs.GetBulletStyle() == wx.TEXT_ATTR_BULLET_STYLE_STANDARD:
+                first_style = Strings.style_list
+            if first_style == Strings.style_url:
+                first_style = paragraph_style
+            self._change_style(first_style)
 
-        """
-        # End url style if next character has different or no url.
-        # TODO does not work on line end when you delete the last par space
-        if character_style == Strings.style_url:
-            style_carrier = rt.RichTextAttr()
-            self.rtc.GetStyle(position, style_carrier)
-            current_url = style_carrier.GetURL()
-            self.rtc.GetStyle(position + 1, style_carrier)
-            next_url = style_carrier.GetURL()
-            if not next_url or current_url != next_url or position == (p.GetRange()[1] - 1):
-                # End url style if we are at th end of a url, between different urls or at the end of paragraph.
-                url_style: rt.RichTextAttr = self._stylesheet.FindCharacterStyle(Strings.style_url).GetStyle()
-                self.rtc.SetStyleEx(rt.RichTextRange(position, position + 1), url_style, rt.RICHTEXT_SETSTYLE_REMOVE)
-                # Without moving the caret you can still type in the now incorrect url style.
-                self.rtc.MoveRight(0)
-                self.rtc.Invalidate()
-                self.rtc.Refresh()
-                self._enable_buttons()
-                self._update_style_picker()
-        """
-
-        """
-        if key_code == wx.WXK_BACK or key_code == wx.WXK_DELETE:
-            # Remove any image on any delete key and turn all potential text into the next style.
-            for child in p.GetChildren():
-                if isinstance(child, rt.RichTextField):
-                    if len(p.GetChildren()) == 1:
-                        # There is no text being appended, remove the image paragraph completely, removing just the
-                        # child removes the paragraph but confuses the control.
-                        self.rtc.Delete(p.GetRange())
-                    else:
-                        # Backspacing into the image with some text from the next paragraph, remove just the image.
-                        p.RemoveChild(child, deleteChild=True)
-                        self.rtc.Invalidate()
-                        self.rtc.Refresh()
-            if paragraph_style == Strings.style_image:
-                # If backspacing into an image from a different style, the image style would survive so we have to
-                # reapply the correct previous style saved in skip key method. This needs to be applied to lists too.
-                if self._previous_style == Strings.style_image:
-                    self._change_style(Strings.style_paragraph, force_paragraph=True)
-                else:
-                    self._change_style(self._previous_style, force_paragraph=True)
-                    self.rtc.MoveToParagraphStart()
-                self._enable_buttons()
-                self.rtc.EndBatchUndo()
-                return
-        """
+        self._update_style_picker()
+        self._enable_buttons()
+        self._disable_input = False
         # TODO link not restored on title to par undo
         # TODO undo does not work
-        # TODO selection delete does weird things
+        # TODO selection delete does weird things when the last line is a list
+        # TODO link at the end of heading disallows return key, appending link to heading does not change style
 
     def _on_key_down(self, event: wx.KeyEvent) -> None:
         """
@@ -535,6 +511,9 @@ class RichTextFrame(wx.Frame):
         :param event: Used to get key code.
         :return: None
         """
+        if self._disable_input:
+            return
+
         key_code = event.GetKeyCode()
         # Disable shift enter since it is broken and does not break lines consistently.
         if key_code == wx.WXK_RETURN and event.GetModifiers() == wx.MOD_SHIFT:
@@ -552,6 +531,7 @@ class RichTextFrame(wx.Frame):
                 self.rtc.BeginBatchUndo(Strings.undo_last_action)
 
         _, next_character_style = self._get_style_at_pos(position + 1)
+        # TODO this is broken
         if character_style == Strings.style_url and next_character_style == Strings.style_url:
             if event.GetKeyCode() == wx.WXK_RETURN:
                 # Prevent return key inside url style but not at the end of the link.
