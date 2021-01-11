@@ -283,6 +283,7 @@ class RichTextFrame(wx.Frame):
                 attrs.SetURL('')
                 attrs.SetFlags(attrs.GetFlags() ^ wx.TEXT_ATTR_URL)
                 attrs.SetTextColour(style.GetTextColour())
+                attrs.SetCharacterStyleName('')
 
     def _apply_paragraph_style(self, p: rt.RichTextParagraph) -> None:
         """
@@ -503,7 +504,6 @@ class RichTextFrame(wx.Frame):
         # TODO link not restored on title to par undo
         # TODO undo does not work
         # TODO selection delete does weird things when the last line is a list
-        # TODO link at the end of heading disallows return key, appending link to heading does not change style
 
     def _on_key_down(self, event: wx.KeyEvent) -> None:
         """
@@ -531,7 +531,6 @@ class RichTextFrame(wx.Frame):
                 self.rtc.BeginBatchUndo(Strings.undo_last_action)
 
         _, next_character_style = self._get_style_at_pos(position + 1)
-        # TODO this is broken
         if character_style == Strings.style_url and next_character_style == Strings.style_url:
             if event.GetKeyCode() == wx.WXK_RETURN:
                 # Prevent return key inside url style but not at the end of the link.
