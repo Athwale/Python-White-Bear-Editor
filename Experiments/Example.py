@@ -257,11 +257,17 @@ class RichTextFrame(wx.Frame):
 
         # Brute force the paragraph into the heading style paragraph attributes are reset completely which removes list
         # style. Character attributes are changed but not reset. Specific attributes are then changed separately.
-        self.rtc.BeginBatchUndo(Strings.undo_last_action)
+        end_batch = False
+        if not self.rtc.BatchingUndo():
+            # Only batch undo if we are not already reconding changes from the beginning of modify text method.
+            # Basically only if this method is called from the style picker.
+            self.rtc.BeginBatchUndo(Strings.undo_last_action)
+            end_batch = True
         self.rtc.SetStyleEx(p_range, style, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_PARAGRAPHS_ONLY
                             | rt.RICHTEXT_SETSTYLE_RESET)
         self.rtc.SetStyleEx(p_range, style, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_CHARACTERS_ONLY)
-        self.rtc.EndBatchUndo()
+        if end_batch:
+            self.rtc.EndBatchUndo()
 
         # The paragraph changes after style set, so find it again.
         p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(
@@ -308,11 +314,15 @@ class RichTextFrame(wx.Frame):
             saved_attrs['underlined'] = attrs.GetFontUnderlined()
             child_list.append(saved_attrs)
 
-        self.rtc.BeginBatchUndo(Strings.undo_last_action)
+        end_batch = False
+        if not self.rtc.BatchingUndo():
+            self.rtc.BeginBatchUndo(Strings.undo_last_action)
+            end_batch = True
         self.rtc.SetStyleEx(p_range, style, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_PARAGRAPHS_ONLY
                             | rt.RICHTEXT_SETSTYLE_RESET)
         self.rtc.SetStyleEx(p_range, style, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_CHARACTERS_ONLY)
-        self.rtc.EndBatchUndo()
+        if end_batch:
+            self.rtc.EndBatchUndo()
 
         p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(
             self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition()))
@@ -354,13 +364,17 @@ class RichTextFrame(wx.Frame):
             saved_attrs['underlined'] = attrs.GetFontUnderlined()
             child_list.append(saved_attrs)
 
-        self.rtc.BeginBatchUndo(Strings.undo_last_action)
+        end_batch = False
+        if not self.rtc.BatchingUndo():
+            self.rtc.BeginBatchUndo(Strings.undo_last_action)
+            end_batch = True
         self.rtc.SetStyleEx(p_range, style, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_PARAGRAPHS_ONLY
                             | rt.RICHTEXT_SETSTYLE_RESET)
         self.rtc.SetStyleEx(p_range, style, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_CHARACTERS_ONLY)
         self.rtc.SetListStyle(p_range, style_def, specifiedLevel=0, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO
                               | rt.RICHTEXT_SETSTYLE_SPECIFY_LEVEL)
-        self.rtc.EndBatchUndo()
+        if end_batch:
+            self.rtc.EndBatchUndo()
 
         p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(
             self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition()))
@@ -426,6 +440,7 @@ class RichTextFrame(wx.Frame):
         """
         # Disable other keyboard input while this method is working?
         self._disable_input = True
+        self.rtc.BeginBatchUndo(Strings.undo_last_action)
 
         position = self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition())
         p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(position)
@@ -501,9 +516,12 @@ class RichTextFrame(wx.Frame):
 
         self._update_style_picker()
         self._enable_buttons()
+        self.rtc.EndBatchUndo()
         self._disable_input = False
+        print('mod')
         # TODO link not restored on title to par undo
-        # TODO undo does not work
+        # TODO undo does not work, it is undo last action and undo delete text.
+        # TODO changing style for more than one pars does not work
 
     def _on_key_down(self, event: wx.KeyEvent) -> None:
         """
@@ -511,12 +529,18 @@ class RichTextFrame(wx.Frame):
         :param event: Used to get key code.
         :return: None
         """
+        print('down')
         if self._disable_input:
             return
 
         key_code = event.GetKeyCode()
         # Disable shift enter since it is broken and does not break lines consistently.
         if key_code == wx.WXK_RETURN and event.GetModifiers() == wx.MOD_SHIFT:
+            return
+
+        # TODO undo redo
+        # Do not run this method when we pressed ctrl. Events for ctrl-z are EVT_MENU.
+        if event.ControlDown():
             return
 
         position = self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition())
