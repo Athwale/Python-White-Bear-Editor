@@ -453,6 +453,7 @@ class RichTextFrame(wx.Frame):
             attrs: rt.RichTextAttr = p.GetAttributes()
             if attrs.GetBulletStyle() != wx.TEXT_ATTR_BULLET_STYLE_STANDARD:
                 self._change_style(Strings.style_paragraph)
+                p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(position)
         # Turn empty lines into paragraph style. Also turns deleted images into paragraph style.
         elif not p.GetTextForRange(p.GetRange()):
             attrs: rt.RichTextAttr = p.GetAttributes()
@@ -460,9 +461,9 @@ class RichTextFrame(wx.Frame):
                 if not isinstance(p.GetChild(0), rt.RichTextField):
                     # Field is not seen as text.
                     self._change_style(Strings.style_paragraph)
-        # Changing the style above also changes the paragraph address in memory, find it again then. Not doing this may
-        # cause segfaults.
-        p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(position)
+                    # Changing the style above also changes the paragraph address in memory, find it again then.
+                    # Not doing this may cause segfaults.
+                    p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(position)
 
         #  Prevent images in other styles
         if len(p.GetChildren()) > 1:
@@ -477,7 +478,6 @@ class RichTextFrame(wx.Frame):
                     font_face = Strings.style_paragraph
                 self._change_style(font_face)
                 # Changing the style above also changes the paragraph address in memory, find it again then.
-                # TODO return the new p from the change method.
                 p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(position)
             else:
                 # Image is not the first child, find it and delete it.
@@ -492,7 +492,8 @@ class RichTextFrame(wx.Frame):
             # The style of the first paragraph child.
             first_style: str = p.GetChild(0).GetAttributes().GetFontFaceName()
             attrs: rt.RichTextAttr = p.GetAttributes()
-            if attrs.GetBulletStyle() == wx.TEXT_ATTR_BULLET_STYLE_STANDARD:
+            if attrs.GetBulletStyle() == wx.TEXT_ATTR_BULLET_STYLE_STANDARD and not first_style:
+                # Empty list line has not child and no first style.
                 first_style = Strings.style_list
             if first_style == Strings.style_url:
                 first_style = paragraph_style
@@ -503,7 +504,6 @@ class RichTextFrame(wx.Frame):
         self._disable_input = False
         # TODO link not restored on title to par undo
         # TODO undo does not work
-        # TODO selection delete does weird things when the last line is a list
 
     def _on_key_down(self, event: wx.KeyEvent) -> None:
         """
@@ -521,14 +521,6 @@ class RichTextFrame(wx.Frame):
 
         position = self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition())
         paragraph_style, character_style = self._get_style_at_pos(position)
-
-        if key_code == wx.WXK_BACK or key_code == wx.WXK_DELETE:
-            # Undo batch needs to start here, otherwise rtc manages to process delete text before the batch starts.
-            if not self.rtc.BatchingUndo():
-                # Prevent starting multiple batch undo actions while holding backspace/delete key. This would lead to
-                # the need to press ctrl+z multiple times without seeing any change. Because you get multiple key down
-                # event but only one batch finishing up event. This way the whole deleted section is undone.
-                self.rtc.BeginBatchUndo(Strings.undo_last_action)
 
         _, next_character_style = self._get_style_at_pos(position + 1)
         if character_style == Strings.style_url and next_character_style == Strings.style_url:
