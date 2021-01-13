@@ -440,7 +440,6 @@ class RichTextFrame(wx.Frame):
         """
         # Disable other keyboard input while this method is working?
         self._disable_input = True
-        self.rtc.BeginBatchUndo(Strings.undo_last_action)
 
         position = self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition())
         p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(position)
@@ -516,11 +515,11 @@ class RichTextFrame(wx.Frame):
 
         self._update_style_picker()
         self._enable_buttons()
-        self.rtc.EndBatchUndo()
+
+        if self.rtc.BatchingUndo():
+            self.rtc.EndBatchUndo()
+
         self._disable_input = False
-        print('mod')
-        # TODO link not restored on title to par undo
-        # TODO undo does not work, it is undo last action and undo delete text.
         # TODO changing style for more than one pars does not work
 
     def _on_key_down(self, event: wx.KeyEvent) -> None:
@@ -529,7 +528,6 @@ class RichTextFrame(wx.Frame):
         :param event: Used to get key code.
         :return: None
         """
-        print('down')
         if self._disable_input:
             return
 
@@ -538,10 +536,13 @@ class RichTextFrame(wx.Frame):
         if key_code == wx.WXK_RETURN and event.GetModifiers() == wx.MOD_SHIFT:
             return
 
-        # TODO undo redo
         # Do not run this method when we pressed ctrl. Events for ctrl-z are EVT_MENU.
         if event.ControlDown():
             return
+
+        if not self.rtc.BatchingUndo():
+            # Start batch here because delete text would go through before the batch would be started in modify text.
+            self.rtc.BeginBatchUndo(Strings.undo_last_action)
 
         position = self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition())
         paragraph_style, character_style = self._get_style_at_pos(position)
