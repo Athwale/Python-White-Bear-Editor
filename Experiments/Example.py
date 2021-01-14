@@ -524,7 +524,6 @@ class RichTextFrame(wx.Frame):
 
         self._disable_input = False
         # TODO changing style for more than one pars does not work
-        # TODO broken unrecognized style on last line
 
     def _on_key_down(self, event: wx.KeyEvent) -> None:
         """
@@ -701,7 +700,6 @@ class RichTextFrame(wx.Frame):
                                    self.rtc, rt.RICHTEXT_INSERT_WITH_PREVIOUS_PARAGRAPH_STYLE, rt.RichTextAttr())
         self.rtc.EndBatchUndo()
 
-        # TODO copy paste problems
         # TODO memory leak in orphaned images and link, maybe reconcile on idle.
 
         # Return focus to the text area.
@@ -811,7 +809,7 @@ class RichTextFrame(wx.Frame):
         self.rtc.EndStyle()
 
         self.rtc.ApplyStyle(self._stylesheet.FindParagraphStyle(Strings.style_paragraph))
-        self.rtc.Newline()
+        self._change_style(Strings.style_paragraph)
 
         self.rtc.LayoutContent()
         self.rtc.EndSuppressUndo()
