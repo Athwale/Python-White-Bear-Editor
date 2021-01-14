@@ -53,6 +53,9 @@ class RichTextFrame(wx.Frame):
 
         self.rtc.Bind(wx.EVT_KEY_DOWN, self._on_key_down)
         self.rtc.Bind(wx.EVT_KEY_UP, self._update_gui_handler)
+        self.rtc.Bind(wx.EVT_MENU, self._prevent_paste, id=wx.ID_PASTE)
+        self.rtc.Bind(wx.EVT_MENU, self._undo_redo, id=wx.ID_UNDO)
+        self.rtc.Bind(wx.EVT_MENU, self._undo_redo, id=wx.ID_REDO)
 
         self.rtc.GetBuffer().CleanUpFieldTypes()
 
@@ -521,6 +524,7 @@ class RichTextFrame(wx.Frame):
 
         self._disable_input = False
         # TODO changing style for more than one pars does not work
+        # TODO broken unrecognized style on last line
 
     def _on_key_down(self, event: wx.KeyEvent) -> None:
         """
@@ -569,6 +573,42 @@ class RichTextFrame(wx.Frame):
         # Calls the function when the current event handler has exited. wx.TEXT_EVT can not be used because it does not
         # fire on list bullet deletion.
         wx.CallAfter(self._modify_text)
+
+    def _prevent_paste(self, event: wx.CommandEvent) -> None:
+        """
+        Prevent paste if we are in an image style.
+        :param event: Used to get id.
+        :return: None
+        """
+        if event.GetId() == wx.ID_PASTE:
+            if not self.rtc.BatchingUndo():
+                # We get here without starting undo batch, since on key down ignores ctrl.
+                self.rtc.BeginBatchUndo(Strings.undo_last_action)
+            position = self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition())
+            paragraph_style, _ = self._get_style_at_pos(position)
+            if paragraph_style == Strings.style_image:
+                return
+            self._modify_text()
+        event.Skip()
+
+    def _undo_redo(self, event: wx.CommandEvent):
+        processor: wx.CommandProcessor = self.rtc.GetCommandProcessor()
+        if processor.GetCurrentCommand():
+            # There may be no command.
+            if event.GetId() == wx.ID_UNDO:
+                if processor.GetCurrentCommand().GetName() == 'Paste':
+                    # Paste is followed by style change, we want to undo both in one go.
+                    processor.Undo()
+                    processor.Undo()
+                else:
+                    processor.Undo()
+            elif event.GetId() == wx.ID_REDO:
+                if processor.GetCurrentCommand().GetName() == 'Paste':
+                    # Paste is followed by style change, we want to undo both in one go.
+                    processor.Redo()
+                    processor.Redo()
+                else:
+                    processor.Redo()
 
     def _update_gui_handler(self, event: wx.CommandEvent) -> None:
         """
