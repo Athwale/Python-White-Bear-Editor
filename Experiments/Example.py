@@ -215,7 +215,6 @@ class RichTextFrame(wx.Frame):
         if not paragraph:
             paragraph = self.rtc.GetFocusObject().GetParagraphAtPosition(self.rtc.GetAdjustedCaretPosition
                                                                          (self.rtc.GetCaretPosition()))
-
         if style_name == Strings.style_heading_3 or style_name == Strings.style_heading_4:
             self._apply_heading_style(style_name, paragraph)
 
@@ -279,7 +278,7 @@ class RichTextFrame(wx.Frame):
         for child, attr_dict in zip(p.GetChildren(), child_list):
             attrs: rt.RichTextAttr = child.GetAttributes()
             attrs.SetFontSize(style.GetFontSize())
-            attrs.SetFontWeight(style.GetFontWeight())
+            attrs.SetFontWeight(wx.FONTWEIGHT_BOLD)
             attrs.SetParagraphSpacingBefore(style.GetParagraphSpacingBefore())
             attrs.SetParagraphSpacingAfter(style.GetParagraphSpacingAfter())
             attrs.SetFontFaceName(style.GetFontFaceName())
@@ -635,7 +634,23 @@ class RichTextFrame(wx.Frame):
         :param evt: Used to get the name of the style in stylesheet
         :return: None
         """
-        self._change_style(evt.GetString())
+        # TODO undo broken on plain style change
+        # TODO undo broken on heading boldness.
+        if not self.rtc.BatchingUndo():
+            self.rtc.BeginBatchUndo(Strings.undo_last_action)
+        if self.rtc.HasSelection():
+            selection_range = self.rtc.GetSelectionRange()
+            paragraphs = set()
+            for position in range(selection_range[0], selection_range[1] + 1):
+                # Get the different paragraphs in the selection
+                p = self.rtc.GetFocusObject().GetParagraphAtPosition(position)
+                paragraphs.add(p)
+            # Apply style to all the paragraphs
+            for p in paragraphs:
+                self._change_style(evt.GetString(), p)
+            self.rtc.EndBatchUndo()
+        else:
+            self._change_style(evt.GetString())
 
     def _enable_buttons(self) -> None:
         """
@@ -760,6 +775,7 @@ class RichTextFrame(wx.Frame):
         :return: None
         """
         if self.rtc.HasSelection():
+            self.rtc.BeginBatchUndo(Strings.undo_bold)
             bold_range = self.rtc.GetSelectionRange()
             # Get the attributes of the currently selected range and modify them in place. Otherwise changing paragraph
             # style is broken since the attributes are reset for the range.
@@ -770,6 +786,7 @@ class RichTextFrame(wx.Frame):
             else:
                 attr.SetFontWeight(wx.FONTWEIGHT_NORMAL)
             self.rtc.SetStyleEx(bold_range, attr, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO)
+            self.rtc.EndBatchUndo()
 
     def insert_sample_text(self) -> None:
         """

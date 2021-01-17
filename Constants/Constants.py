@@ -238,3 +238,4 @@ class Strings:
     button_remove_link: str = 'Remove link'
 
     undo_last_action: str = 'Last action'
+    undo_bold: str = 'Undo bold text'
