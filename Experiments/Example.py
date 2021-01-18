@@ -261,7 +261,7 @@ class RichTextFrame(wx.Frame):
         # style. Character attributes are changed but not reset. Specific attributes are then changed separately.
         end_batch = False
         if not self.rtc.BatchingUndo():
-            # Only batch undo if we are not already reconding changes from the beginning of modify text method.
+            # Only batch undo if we are not already recording changes from the beginning of modify text method.
             # Basically only if this method is called from the style picker.
             self.rtc.BeginBatchUndo(Strings.undo_last_action)
             end_batch = True
@@ -522,7 +522,6 @@ class RichTextFrame(wx.Frame):
             self.rtc.EndBatchUndo()
 
         self._disable_input = False
-        # TODO changing style for more than one pars does not work
 
     def _on_key_down(self, event: wx.KeyEvent) -> None:
         """
@@ -634,23 +633,19 @@ class RichTextFrame(wx.Frame):
         :param evt: Used to get the name of the style in stylesheet
         :return: None
         """
-        # TODO undo broken on plain style change
-        # TODO undo broken on heading boldness.
         if not self.rtc.BatchingUndo():
             self.rtc.BeginBatchUndo(Strings.undo_last_action)
         if self.rtc.HasSelection():
             selection_range = self.rtc.GetSelectionRange()
-            paragraphs = set()
             for position in range(selection_range[0], selection_range[1] + 1):
                 # Get the different paragraphs in the selection
-                p = self.rtc.GetFocusObject().GetParagraphAtPosition(position)
-                paragraphs.add(p)
-            # Apply style to all the paragraphs
-            for p in paragraphs:
-                self._change_style(evt.GetString(), p)
-            self.rtc.EndBatchUndo()
+                p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(position)
+                if p.GetAttributes().GetFontFaceName() != evt.GetString():
+                    # Apply style to all the paragraphs unless they are already in the style
+                    self._change_style(evt.GetString(), p)
         else:
             self._change_style(evt.GetString())
+        self.rtc.EndBatchUndo()
 
     def _enable_buttons(self) -> None:
         """
