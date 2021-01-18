@@ -204,25 +204,26 @@ class RichTextFrame(wx.Frame):
 
         self._style_picker.InsertItems(names, 0)
 
-    def _change_style(self, style_name: str, paragraph: rt.RichTextParagraph = None) -> None:
+    def _change_style(self, style_name: str, position: int = -1) -> None:
         """
         Changes the style of the current paragraph or selection.
         :param style_name: The name of a style in stylesheet.
-        :param paragraph: The paragraph to change, if None, current paragraph is used.
+        :param position: The position of the caret. This is needed because when changing style over multiple paragraphs
+        the position is passed from selection.
         This is used when joining heading and ordinary paragraph using delete or backspace.
         :return: None
         """
-        if not paragraph:
-            paragraph = self.rtc.GetFocusObject().GetParagraphAtPosition(self.rtc.GetAdjustedCaretPosition
-                                                                         (self.rtc.GetCaretPosition()))
+        if position == -1:
+            position = self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition())
+
         if style_name == Strings.style_heading_3 or style_name == Strings.style_heading_4:
-            self._apply_heading_style(style_name, paragraph)
+            self._apply_heading_style(style_name, position)
 
         elif style_name == Strings.style_paragraph:
-            self._apply_paragraph_style(paragraph)
+            self._apply_paragraph_style(position)
 
         elif style_name == Strings.style_list:
-            self._apply_list_style(paragraph)
+            self._apply_list_style(position)
 
         elif style_name == Strings.style_url:
             self._apply_url_style()
@@ -236,13 +237,14 @@ class RichTextFrame(wx.Frame):
         self.rtc.Invalidate()
         self.rtc.Refresh()
 
-    def _apply_heading_style(self, heading_type: str, p: rt.RichTextParagraph) -> None:
+    def _apply_heading_style(self, heading_type: str, position: int) -> None:
         """
         Changes current paragraph under the cursor into a heading 3 or 4, removing any links.
         :param heading_type: The heading style size.
-        :param p: The paragraph to change, if None, current paragraph is used.
+        :param position: The position of the caret.
         :return: None
         """
+        p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(position)
         style: rt.RichTextAttr = self._stylesheet.FindStyle(heading_type).GetStyle()
         p_range = p.GetRange().FromInternal()
         # Save text children attributes to restore them after forcing the paragraph style.
@@ -272,8 +274,7 @@ class RichTextFrame(wx.Frame):
             self.rtc.EndBatchUndo()
 
         # The paragraph changes after style set, so find it again.
-        p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(
-            self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition()))
+        p = self.rtc.GetFocusObject().GetParagraphAtPosition(position)
         # Restore and set only relevant attributes for the style.
         for child, attr_dict in zip(p.GetChildren(), child_list):
             attrs: rt.RichTextAttr = child.GetAttributes()
@@ -285,6 +286,7 @@ class RichTextFrame(wx.Frame):
             attrs.SetAlignment(wx.TEXT_ALIGNMENT_LEFT)
             # Only links can be underlined, it is safe to remove it here.
             attrs.SetFontUnderlined(style.GetFontUnderlined())
+            print(attrs.HasURL())
             if attrs.HasURL():
                 # TODO try save, this might still appear in xml if we use it. How is other url remove going to work?
                 # If any child has a url flag, remove it and set font color to normal.
@@ -293,13 +295,14 @@ class RichTextFrame(wx.Frame):
                 attrs.SetTextColour(style.GetTextColour())
                 attrs.SetCharacterStyleName('')
 
-    def _apply_paragraph_style(self, p: rt.RichTextParagraph) -> None:
+    def _apply_paragraph_style(self, position: int) -> None:
         """
         Changes current paragraph under the cursor into the paragraph style defined for normal text.
         Retains links, text weight and color.
-        :param p: The paragraph to change, if None, current paragraph is used.
+        :param position: The position of the caret.
         :return: None
         """
+        p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(position)
         style: rt.RichTextAttr = self._stylesheet.FindStyle(Strings.style_paragraph).GetStyle()
         p_range = p.GetRange().FromInternal()
         child_list = []
@@ -326,8 +329,7 @@ class RichTextFrame(wx.Frame):
         if end_batch:
             self.rtc.EndBatchUndo()
 
-        p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(
-            self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition()))
+        p = self.rtc.GetFocusObject().GetParagraphAtPosition(position)
         for child, attr_dict in zip(p.GetChildren(), child_list):
             attrs: rt.RichTextAttr = child.GetAttributes()
             attrs.SetFontWeight(attr_dict['weight'])
@@ -341,12 +343,13 @@ class RichTextFrame(wx.Frame):
                 attrs.SetBackgroundColour(attr_dict['background'])
                 attrs.SetFontUnderlined(attr_dict['underlined'])
 
-    def _apply_list_style(self, p: rt.RichTextParagraph) -> None:
+    def _apply_list_style(self, position: int) -> None:
         """
         Changes paragraph on position into list item.
-        :param p: The paragraph to change, if None, current paragraph is used.
+        :param position: The position of the caret.
         :return: None
         """
+        p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(position)
         style_def: rt.RichTextListStyleDefinition = self._stylesheet.FindStyle(Strings.style_list)
         style: rt.RichTextAttr = style_def.GetStyle()
         p_range = p.GetRange().FromInternal()
@@ -378,8 +381,7 @@ class RichTextFrame(wx.Frame):
         if end_batch:
             self.rtc.EndBatchUndo()
 
-        p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(
-            self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition()))
+        p = self.rtc.GetFocusObject().GetParagraphAtPosition(position)
         # Restore only relevant attributes to the new children. The order is the same.
         for child, attr_dict in zip(p.GetChildren(), child_list):
             attrs: rt.RichTextAttr = child.GetAttributes()
@@ -642,7 +644,7 @@ class RichTextFrame(wx.Frame):
                 p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(position)
                 if p.GetAttributes().GetFontFaceName() != evt.GetString():
                     # Apply style to all the paragraphs unless they are already in the style
-                    self._change_style(evt.GetString(), p)
+                    self._change_style(evt.GetString(), position)
         else:
             self._change_style(evt.GetString())
         self.rtc.EndBatchUndo()
