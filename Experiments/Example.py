@@ -286,7 +286,6 @@ class RichTextFrame(wx.Frame):
             attrs.SetAlignment(wx.TEXT_ALIGNMENT_LEFT)
             # Only links can be underlined, it is safe to remove it here.
             attrs.SetFontUnderlined(style.GetFontUnderlined())
-            print(attrs.HasURL())
             if attrs.HasURL():
                 # TODO try save, this might still appear in xml if we use it. How is other url remove going to work?
                 # If any child has a url flag, remove it and set font color to normal.
@@ -400,6 +399,7 @@ class RichTextFrame(wx.Frame):
         Changes current selection the url character style.
         :return: None
         """
+        # TODO url style can be applied everywhere when multiple pars are selected.
         if self.rtc.HasSelection():
             link_range = self.rtc.GetSelectionRange()
             self.rtc.SetStyleEx(link_range, self._stylesheet.FindStyle(Strings.style_url).GetStyle(),
@@ -642,9 +642,11 @@ class RichTextFrame(wx.Frame):
             for position in range(selection_range[0], selection_range[1] + 1):
                 # Get the different paragraphs in the selection
                 p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(position)
-                if p.GetAttributes().GetFontFaceName() != evt.GetString():
-                    # Apply style to all the paragraphs unless they are already in the style
-                    self._change_style(evt.GetString(), position)
+                if p and not isinstance(p.GetChild(0), rt.RichTextField):
+                    # Skip changing style on images
+                    if p.GetAttributes().GetFontFaceName() != evt.GetString():
+                        # Apply style to all the paragraphs unless they are already in the style
+                        self._change_style(evt.GetString(), position)
         else:
             self._change_style(evt.GetString())
         self.rtc.EndBatchUndo()
@@ -698,6 +700,7 @@ class RichTextFrame(wx.Frame):
         :param evt: Not used.
         :return: None
         """
+        self._image_button.Disable()
         new_field = self._register_field()
         position = self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition())
         buffer: rt.RichTextBuffer = self.rtc.GetFocusObject()
