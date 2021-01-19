@@ -670,15 +670,19 @@ class RichTextFrame(wx.Frame):
             self._style_picker.SetSelection(wx.NOT_FOUND)
         else:
             self._style_picker.Enable()
-        if paragraph_style == Strings.style_heading_3 or paragraph_style == Strings.style_heading_4:
+        if paragraph_style == Strings.style_heading_3 or paragraph_style == Strings.style_heading_4 \
+                or not self.rtc.HasSelection():
             url_index = self._style_picker.FindString(Strings.style_url)
             if url_index != wx.NOT_FOUND:
                 self._style_picker.Delete(url_index)
             # Disable bold button
             self._bold_button.Disable()
         elif self._style_picker.FindString(Strings.style_url) == wx.NOT_FOUND:
-            self._style_picker.Append(Strings.style_url)
+            if self.rtc.HasSelection():
+                self._style_picker.Append(Strings.style_url)
             self._bold_button.Enable()
+
+    # TODO prevent bold url
 
     def print_current_styles(self):
         print('---')
