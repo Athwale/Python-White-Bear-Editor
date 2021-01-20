@@ -400,7 +400,6 @@ class RichTextFrame(wx.Frame):
         Changes current selection the url character style.
         :return: None
         """
-        # TODO url style can be applied everywhere when multiple pars are selected.
         if self.rtc.HasSelection():
             link_range = self.rtc.GetSelectionRange()
             self.rtc.SetStyleEx(link_range, self._stylesheet.FindStyle(Strings.style_url).GetStyle(),
@@ -671,21 +670,30 @@ class RichTextFrame(wx.Frame):
             self._style_picker.SetSelection(wx.NOT_FOUND)
         else:
             self._style_picker.Enable()
+
         if not self.rtc.HasSelection():
-            # Disable url style unless we have a selecton.
+            # Disable url style unless we have a selection.
             url_index = self._style_picker.FindString(Strings.style_url)
             if url_index != wx.NOT_FOUND:
                 self._style_picker.Delete(url_index)
         if paragraph_style == Strings.style_heading_3 or paragraph_style == Strings.style_heading_4:
+            # Disable url option in headings.
             url_index = self._style_picker.FindString(Strings.style_url)
             if url_index != wx.NOT_FOUND:
                 self._style_picker.Delete(url_index)
-            # Disable bold button
-            self._bold_button.Disable()
-        elif self._style_picker.FindString(Strings.style_url) == wx.NOT_FOUND:
-            if self.rtc.HasSelection():
-                self._style_picker.Append(Strings.style_url)
-            self._bold_button.Enable()
+        elif self.rtc.HasSelection():
+            selection_range = self.rtc.GetSelectionRange()
+            paragraphs = set()
+            for position in range(selection_range[0], selection_range[1] + 1):
+                # Get the different paragraphs in the selection
+                paragraphs.add(self.rtc.GetFocusObject().GetParagraphAtPosition(position))
+            if len(paragraphs) == 1:
+                if self._style_picker.FindString(Strings.style_url) == wx.NOT_FOUND:
+                    self._style_picker.Append(Strings.style_url)
+            else:
+                url_index = self._style_picker.FindString(Strings.style_url)
+                if url_index != wx.NOT_FOUND:
+                    self._style_picker.Delete(url_index)
 
     def print_current_styles(self):
         print('---')
@@ -765,7 +773,6 @@ class RichTextFrame(wx.Frame):
         :param evt: Not used
         :return: None
         """
-        # TODO add some busy waiting to these actions.
         if evt.GetId() == wx.ID_FILE1:
             color = wx.Colour(234, 134, 88)
         else:
