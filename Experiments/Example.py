@@ -49,6 +49,8 @@ class RichTextFrame(wx.Frame):
         self.Bind(wx.EVT_BUTTON, self._refresh, self._refresh_button)
 
         self.rtc.Bind(wx.EVT_LEFT_UP, self._on_mouse)
+        # Updates style picker in times mouse is not registered.
+        self.rtc.Bind(wx.EVT_IDLE, self._on_mouse)
         self.rtc.Bind(wx.EVT_MOUSE_EVENTS, self._on_mouse)
 
         self.rtc.Bind(wx.EVT_KEY_DOWN, self._on_key_down)
@@ -163,6 +165,7 @@ class RichTextFrame(wx.Frame):
         stl_link.SetFontUnderlined(True)
         stl_link.SetTextColour(wx.BLUE)
         stl_link.SetBackgroundColour(wx.RED)
+        stl_link.SetFontWeight(wx.FONTWEIGHT_NORMAL)
         stl_link.SetCharacterStyleName(Strings.style_url)
         stl_link.SetFontFaceName(Strings.style_url)
         style_link: rt.RichTextCharacterStyleDefinition = rt.RichTextCharacterStyleDefinition(Strings.style_url)
@@ -200,8 +203,6 @@ class RichTextFrame(wx.Frame):
                 names.append(self._stylesheet.GetParagraphStyle(n).GetName())
         # There is only one list style
         names.append(Strings.style_list)
-        names.append(Strings.style_url)
-
         self._style_picker.InsertItems(names, 0)
 
     def _change_style(self, style_name: str, position: int = -1) -> None:
@@ -670,8 +671,12 @@ class RichTextFrame(wx.Frame):
             self._style_picker.SetSelection(wx.NOT_FOUND)
         else:
             self._style_picker.Enable()
-        if paragraph_style == Strings.style_heading_3 or paragraph_style == Strings.style_heading_4 \
-                or not self.rtc.HasSelection():
+        if not self.rtc.HasSelection():
+            # Disable url style unless we have a selecton.
+            url_index = self._style_picker.FindString(Strings.style_url)
+            if url_index != wx.NOT_FOUND:
+                self._style_picker.Delete(url_index)
+        if paragraph_style == Strings.style_heading_3 or paragraph_style == Strings.style_heading_4:
             url_index = self._style_picker.FindString(Strings.style_url)
             if url_index != wx.NOT_FOUND:
                 self._style_picker.Delete(url_index)
@@ -681,8 +686,6 @@ class RichTextFrame(wx.Frame):
             if self.rtc.HasSelection():
                 self._style_picker.Append(Strings.style_url)
             self._bold_button.Enable()
-
-    # TODO prevent bold url
 
     def print_current_styles(self):
         print('---')
@@ -762,15 +765,19 @@ class RichTextFrame(wx.Frame):
         :param evt: Not used
         :return: None
         """
+        # TODO changing color in multiple par selection breaks titles.
         if evt.GetId() == wx.ID_FILE1:
             color = wx.Colour(234, 134, 88)
         else:
             color = wx.Colour(124, 144, 25)
-        attr = rt.RichTextAttr()
-        color_range = self.rtc.GetSelectionRange()
-        self.rtc.GetStyleForRange(color_range, attr)
-        attr.SetTextColour(color)
-        self.rtc.SetStyleEx(color_range, attr, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO)
+        if self.rtc.HasSelection():
+            attr = rt.RichTextAttr()
+            color_range = self.rtc.GetSelectionRange()
+            self.rtc.GetStyleForRange(color_range, attr)
+            attr.SetTextColour(color)
+            self.rtc.SetStyleEx(color_range, attr, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO)
+        else:
+            self.rtc.BeginTextColour(color)
 
     def _change_bold(self, evt: wx.CommandEvent) -> None:
         """
@@ -778,18 +785,32 @@ class RichTextFrame(wx.Frame):
         :param evt: Not used
         :return: None
         """
+        # TODO prevent bold url, the same with color.
+        # TODO bold can be applied to titles in multiple par selection. Can not be done by whole pars because selection. Go character by character.
+        # TODO what happens to the children of a paragraph like this?
         if self.rtc.HasSelection():
             self.rtc.BeginBatchUndo(Strings.undo_bold)
             bold_range = self.rtc.GetSelectionRange()
-            # Get the attributes of the currently selected range and modify them in place. Otherwise changing paragraph
-            # style is broken since the attributes are reset for the range.
-            attr = rt.RichTextAttr()
-            self.rtc.GetStyleForRange(bold_range, attr)
-            if attr.GetFontWeight() == wx.FONTWEIGHT_NORMAL:
-                attr.SetFontWeight(wx.FONTWEIGHT_BOLD)
-            else:
-                attr.SetFontWeight(wx.FONTWEIGHT_NORMAL)
-            self.rtc.SetStyleEx(bold_range, attr, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO)
+            for char in range(bold_range[0], bold_range[1] + 1):
+                if char + 1 > bold_range[1] + 1:
+                    break
+                single_range = rt.RichTextRange(char, char + 1)
+                # Get the attributes of the single char range and modify them in place. Otherwise changing paragraph.
+                # style is broken since the attributes are reset for the range.
+                attr = rt.RichTextAttr()
+                self.rtc.GetStyleForRange(single_range, attr)
+                font_face = attr.GetFontFaceName()
+                # Ignore links and headings.
+                if font_face == Strings.style_heading_3 or font_face == Strings.style_heading_4:
+                    continue
+                if attr.HasURL():
+                    continue
+                # Switch bold to normal and normal to bold.
+                if attr.GetFontWeight() == wx.FONTWEIGHT_NORMAL:
+                    attr.SetFontWeight(wx.FONTWEIGHT_BOLD)
+                else:
+                    attr.SetFontWeight(wx.FONTWEIGHT_NORMAL)
+                self.rtc.SetStyleEx(single_range, attr, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO)
             self.rtc.EndBatchUndo()
 
     def insert_sample_text(self) -> None:
