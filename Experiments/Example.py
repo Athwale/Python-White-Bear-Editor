@@ -205,7 +205,7 @@ class RichTextFrame(wx.Frame):
         names.append(Strings.style_list)
         self._style_picker.InsertItems(names, 0)
 
-    def _change_style(self, style_name: str, position: int = -1) -> None:
+    def _change_style(self, style_name: str, position: int) -> None:
         """
         Changes the style of the current paragraph or selection.
         :param style_name: The name of a style in stylesheet.
@@ -235,8 +235,6 @@ class RichTextFrame(wx.Frame):
         # Unless we simulate a move, you can still type in the wrong style after change.
         self.rtc.MoveRight(0)
         self._update_style_picker()
-        self.rtc.Invalidate()
-        self.rtc.Refresh()
 
     def _apply_heading_style(self, heading_type: str, position: int) -> None:
         """
@@ -303,6 +301,8 @@ class RichTextFrame(wx.Frame):
         :return: None
         """
         p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(position)
+        # This is needed to prevent loss of children attributes for some reason.
+        p.Defragment(rt.RichTextDrawingContext(p.GetBuffer()))
         style: rt.RichTextAttr = self._stylesheet.FindStyle(Strings.style_paragraph).GetStyle()
         p_range = p.GetRange().FromInternal()
         child_list = []
@@ -314,9 +314,8 @@ class RichTextFrame(wx.Frame):
                 saved_attrs['weight'] = wx.FONTWEIGHT_NORMAL
             else:
                 saved_attrs['weight'] = attrs.GetFontWeight()
-            # Font color does not need to be saved, it is preserved from the previous child.
+            # Font color does not need to be saved, it is preserved from the previous child. Background is for urls.
             saved_attrs['background'] = attrs.GetBackgroundColour()
-            saved_attrs['underlined'] = attrs.GetFontUnderlined()
             child_list.append(saved_attrs)
 
         end_batch = False
@@ -341,7 +340,7 @@ class RichTextFrame(wx.Frame):
             if attrs.HasURL():
                 # Only urls have background color and underline.
                 attrs.SetBackgroundColour(attr_dict['background'])
-                attrs.SetFontUnderlined(attr_dict['underlined'])
+                attrs.SetFontUnderlined(True)
 
     def _apply_list_style(self, position: int) -> None:
         """
@@ -350,6 +349,7 @@ class RichTextFrame(wx.Frame):
         :return: None
         """
         p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(position)
+        p.Defragment(rt.RichTextDrawingContext(p.GetBuffer()))
         style_def: rt.RichTextListStyleDefinition = self._stylesheet.FindStyle(Strings.style_list)
         style: rt.RichTextAttr = style_def.GetStyle()
         p_range = p.GetRange().FromInternal()
@@ -366,7 +366,6 @@ class RichTextFrame(wx.Frame):
                 saved_attrs['weight'] = attrs.GetFontWeight()
             # Font color does not need to be saved, it is preserved from the previous child.
             saved_attrs['background'] = attrs.GetBackgroundColour()
-            saved_attrs['underlined'] = attrs.GetFontUnderlined()
             child_list.append(saved_attrs)
 
         end_batch = False
@@ -393,7 +392,7 @@ class RichTextFrame(wx.Frame):
             attrs.SetAlignment(wx.TEXT_ALIGNMENT_LEFT)
             if attrs.HasURL():
                 attrs.SetBackgroundColour(attr_dict['background'])
-                attrs.SetFontUnderlined(attr_dict['underlined'])
+                attrs.SetFontUnderlined(True)
 
     def _apply_url_style(self) -> None:
         """
@@ -470,7 +469,7 @@ class RichTextFrame(wx.Frame):
         if paragraph_style == Strings.style_list:
             attrs: rt.RichTextAttr = p.GetAttributes()
             if attrs.GetBulletStyle() != wx.TEXT_ATTR_BULLET_STYLE_STANDARD:
-                self._change_style(Strings.style_paragraph)
+                self._change_style(Strings.style_paragraph, position=-1)
                 p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(position)
         # Turn empty lines into paragraph style. Also turns deleted images into paragraph style.
         elif not p.GetTextForRange(p.GetRange()):
@@ -478,7 +477,7 @@ class RichTextFrame(wx.Frame):
             if attrs.GetBulletStyle() != wx.TEXT_ATTR_BULLET_STYLE_STANDARD:
                 if not isinstance(p.GetChild(0), rt.RichTextField):
                     # Field is not seen as text.
-                    self._change_style(Strings.style_paragraph)
+                    self._change_style(Strings.style_paragraph, position=-1)
                     # Changing the style above also changes the paragraph address in memory, find it again then.
                     # Not doing this may cause segfaults.
                     p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(position)
@@ -494,7 +493,7 @@ class RichTextFrame(wx.Frame):
                 if font_face == Strings.style_url:
                     # We do not want to change whole paragraphs into links, so use paragraph.
                     font_face = Strings.style_paragraph
-                self._change_style(font_face)
+                self._change_style(font_face, position=-1)
                 # Changing the style above also changes the paragraph address in memory, find it again then.
                 p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(position)
             else:
@@ -511,11 +510,11 @@ class RichTextFrame(wx.Frame):
             first_style: str = p.GetChild(0).GetAttributes().GetFontFaceName()
             attrs: rt.RichTextAttr = p.GetAttributes()
             if attrs.GetBulletStyle() == wx.TEXT_ATTR_BULLET_STYLE_STANDARD and not first_style:
-                # Empty list line has not child and no first style.
+                # Empty list line has no child and no first style.
                 first_style = Strings.style_list
             if first_style == Strings.style_url:
                 first_style = paragraph_style
-            self._change_style(first_style)
+            self._change_style(first_style, position=-1)
 
         self._update_style_picker()
         self._enable_buttons()
@@ -648,7 +647,7 @@ class RichTextFrame(wx.Frame):
                         # Apply style to all the paragraphs unless they are already in the style
                         self._change_style(evt.GetString(), position)
         else:
-            self._change_style(evt.GetString())
+            self._change_style(evt.GetString(), position=-1)
         self.rtc.EndBatchUndo()
 
     def _enable_buttons(self) -> None:
@@ -780,7 +779,7 @@ class RichTextFrame(wx.Frame):
         if self.rtc.HasSelection():
             self.rtc.BeginBatchUndo(Strings.undo_bold)
             color_range = self.rtc.GetSelectionRange()
-            for char in range(color_range[0], color_range[1] + 1):
+            for char in range(color_range[0], color_range[1]):
                 if char + 1 > color_range[1] + 1:
                     break
                 single_range = rt.RichTextRange(char, char + 1)
@@ -788,7 +787,6 @@ class RichTextFrame(wx.Frame):
                 # style is broken since the attributes are reset for the range.
                 attr = rt.RichTextAttr()
                 self.rtc.GetStyleForRange(single_range, attr)
-                font_face = attr.GetFontFaceName()
                 # Ignore links.
                 if attr.HasURL():
                     continue
@@ -805,10 +803,11 @@ class RichTextFrame(wx.Frame):
         :return: None
         """
         # TODO what happens to the children of a paragraph like this?
+        # TODO can not stop writing in bold
         if self.rtc.HasSelection():
             self.rtc.BeginBatchUndo(Strings.undo_bold)
             bold_range = self.rtc.GetSelectionRange()
-            for char in range(bold_range[0], bold_range[1] + 1):
+            for char in range(bold_range[0], bold_range[1]):
                 if char + 1 > bold_range[1] + 1:
                     break
                 single_range = rt.RichTextRange(char, char + 1)
@@ -869,7 +868,7 @@ class RichTextFrame(wx.Frame):
         self.rtc.EndStyle()
 
         self.rtc.ApplyStyle(self._stylesheet.FindParagraphStyle(Strings.style_paragraph))
-        self._change_style(Strings.style_paragraph)
+        self._change_style(Strings.style_paragraph, position=-1)
 
         self.rtc.LayoutContent()
         self.rtc.EndSuppressUndo()
