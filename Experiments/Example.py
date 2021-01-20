@@ -765,17 +765,29 @@ class RichTextFrame(wx.Frame):
         :param evt: Not used
         :return: None
         """
-        # TODO changing color in multiple par selection breaks titles.
+        # TODO add some busy waiting to these actions.
         if evt.GetId() == wx.ID_FILE1:
             color = wx.Colour(234, 134, 88)
         else:
             color = wx.Colour(124, 144, 25)
         if self.rtc.HasSelection():
-            attr = rt.RichTextAttr()
+            self.rtc.BeginBatchUndo(Strings.undo_bold)
             color_range = self.rtc.GetSelectionRange()
-            self.rtc.GetStyleForRange(color_range, attr)
-            attr.SetTextColour(color)
-            self.rtc.SetStyleEx(color_range, attr, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO)
+            for char in range(color_range[0], color_range[1] + 1):
+                if char + 1 > color_range[1] + 1:
+                    break
+                single_range = rt.RichTextRange(char, char + 1)
+                # Get the attributes of the single char range and modify them in place. Otherwise changing paragraph.
+                # style is broken since the attributes are reset for the range.
+                attr = rt.RichTextAttr()
+                self.rtc.GetStyleForRange(single_range, attr)
+                font_face = attr.GetFontFaceName()
+                # Ignore links.
+                if attr.HasURL():
+                    continue
+                attr.SetTextColour(color)
+                self.rtc.SetStyleEx(single_range, attr, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO)
+            self.rtc.EndBatchUndo()
         else:
             self.rtc.BeginTextColour(color)
 
@@ -785,8 +797,6 @@ class RichTextFrame(wx.Frame):
         :param evt: Not used
         :return: None
         """
-        # TODO prevent bold url, the same with color.
-        # TODO bold can be applied to titles in multiple par selection. Can not be done by whole pars because selection. Go character by character.
         # TODO what happens to the children of a paragraph like this?
         if self.rtc.HasSelection():
             self.rtc.BeginBatchUndo(Strings.undo_bold)
@@ -801,7 +811,8 @@ class RichTextFrame(wx.Frame):
                 self.rtc.GetStyleForRange(single_range, attr)
                 font_face = attr.GetFontFaceName()
                 # Ignore links and headings.
-                if font_face == Strings.style_heading_3 or font_face == Strings.style_heading_4:
+                if font_face == Strings.style_heading_3 or font_face == Strings.style_heading_4 or \
+                        font_face == Strings.style_image:
                     continue
                 if attr.HasURL():
                     continue
