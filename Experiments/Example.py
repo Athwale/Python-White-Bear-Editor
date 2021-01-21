@@ -807,8 +807,6 @@ class RichTextFrame(wx.Frame):
         :return: None
         """
         # TODO what happens to the children of a paragraph like this?
-        # TODO removing bold from a part of bold word and pressing arrow key breaks children.
-        # TODO can not stop writing in bold
         if self.rtc.HasSelection():
             self.rtc.BeginBatchUndo(Strings.undo_bold)
             bold_range = self.rtc.GetSelectionRange()
@@ -834,6 +832,11 @@ class RichTextFrame(wx.Frame):
                     attr.SetFontWeight(wx.FONTWEIGHT_NORMAL)
                 self.rtc.SetStyleEx(single_range, attr, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO)
             self.rtc.EndBatchUndo()
+        else:
+            if not self.rtc.IsSelectionBold():
+                self.rtc.BeginBold()
+            else:
+                self.rtc.EndBold()
 
     def insert_sample_text(self) -> None:
         """
