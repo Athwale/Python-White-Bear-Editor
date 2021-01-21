@@ -233,6 +233,8 @@ class RichTextFrame(wx.Frame):
             raise WrongFormatException(Strings.exception_wrong_style)
 
         # Unless we simulate a move, you can still type in the wrong style after change.
+        self.rtc.Invalidate()
+        self.rtc.Refresh()
         self.rtc.MoveRight(0)
         self._update_style_picker()
 
@@ -303,12 +305,15 @@ class RichTextFrame(wx.Frame):
         p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(position)
         # This is needed to prevent loss of children attributes for some reason.
         p.Defragment(rt.RichTextDrawingContext(p.GetBuffer()))
+        print(len(p.GetChildren()))
         style: rt.RichTextAttr = self._stylesheet.FindStyle(Strings.style_paragraph).GetStyle()
         p_range = p.GetRange().FromInternal()
         child_list = []
         for child in p.GetChildren():
             saved_attrs = {}
             attrs: rt.RichTextAttr = child.GetAttributes()
+            # TODO maybe make children somehow unique so they can not merge
+            print(attrs.GetFontFaceName())
             if attrs.GetFontFaceName() == Strings.style_heading_3 or attrs.GetFontFaceName() == Strings.style_heading_4:
                 # Do not save bold font weight from heading style we assume the weight should be normal.
                 saved_attrs['weight'] = wx.FONTWEIGHT_NORMAL
@@ -324,11 +329,13 @@ class RichTextFrame(wx.Frame):
             end_batch = True
         self.rtc.SetStyleEx(p_range, style, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_PARAGRAPHS_ONLY
                             | rt.RICHTEXT_SETSTYLE_RESET)
-        self.rtc.SetStyleEx(p_range, style, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_CHARACTERS_ONLY)
+        # TODO this messes it up, it merges the children because the style becomes the same. Focus object is buffer.
+        #self.rtc.GetFocusObject().SetStyle(p_range.ToInternal(), style, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_CHARACTERS_ONLY)
         if end_batch:
             self.rtc.EndBatchUndo()
 
         p = self.rtc.GetFocusObject().GetParagraphAtPosition(position)
+        print(len(p.GetChildren()))
         for child, attr_dict in zip(p.GetChildren(), child_list):
             attrs: rt.RichTextAttr = child.GetAttributes()
             attrs.SetFontWeight(attr_dict['weight'])
@@ -341,6 +348,8 @@ class RichTextFrame(wx.Frame):
                 # Only urls have background color and underline.
                 attrs.SetBackgroundColour(attr_dict['background'])
                 attrs.SetFontUnderlined(True)
+                attrs.SetFontFaceName(Strings.style_url)
+            print(attrs.GetFontFaceName())
 
     def _apply_list_style(self, position: int) -> None:
         """
@@ -393,6 +402,7 @@ class RichTextFrame(wx.Frame):
             if attrs.HasURL():
                 attrs.SetBackgroundColour(attr_dict['background'])
                 attrs.SetFontUnderlined(True)
+                attrs.SetFontFaceName(Strings.style_url)
 
     def _apply_url_style(self) -> None:
         """
@@ -803,6 +813,7 @@ class RichTextFrame(wx.Frame):
         :return: None
         """
         # TODO what happens to the children of a paragraph like this?
+        # TODO removing bold from a part of bold word and pressing arrow key breaks children.
         # TODO can not stop writing in bold
         if self.rtc.HasSelection():
             self.rtc.BeginBatchUndo(Strings.undo_bold)
