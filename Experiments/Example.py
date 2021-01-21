@@ -303,17 +303,14 @@ class RichTextFrame(wx.Frame):
         :return: None
         """
         p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(position)
-        # This is needed to prevent loss of children attributes for some reason.
+        # This is needed to prevent loss of children attributes when typing quickly for some reason.
         p.Defragment(rt.RichTextDrawingContext(p.GetBuffer()))
-        print(len(p.GetChildren()))
         style: rt.RichTextAttr = self._stylesheet.FindStyle(Strings.style_paragraph).GetStyle()
         p_range = p.GetRange().FromInternal()
         child_list = []
         for child in p.GetChildren():
             saved_attrs = {}
             attrs: rt.RichTextAttr = child.GetAttributes()
-            # TODO maybe make children somehow unique so they can not merge
-            print(attrs.GetFontFaceName())
             if attrs.GetFontFaceName() == Strings.style_heading_3 or attrs.GetFontFaceName() == Strings.style_heading_4:
                 # Do not save bold font weight from heading style we assume the weight should be normal.
                 saved_attrs['weight'] = wx.FONTWEIGHT_NORMAL
@@ -329,16 +326,14 @@ class RichTextFrame(wx.Frame):
             end_batch = True
         self.rtc.SetStyleEx(p_range, style, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_PARAGRAPHS_ONLY
                             | rt.RICHTEXT_SETSTYLE_RESET)
-        # TODO this messes it up, it merges the children because the style becomes the same. Focus object is buffer.
-        #self.rtc.GetFocusObject().SetStyle(p_range.ToInternal(), style, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_CHARACTERS_ONLY)
         if end_batch:
             self.rtc.EndBatchUndo()
 
         p = self.rtc.GetFocusObject().GetParagraphAtPosition(position)
-        print(len(p.GetChildren()))
         for child, attr_dict in zip(p.GetChildren(), child_list):
             attrs: rt.RichTextAttr = child.GetAttributes()
             attrs.SetFontWeight(attr_dict['weight'])
+            attrs.SetBackgroundColour(style.GetBackgroundColour())
             attrs.SetFontSize(style.GetFontSize())
             attrs.SetParagraphSpacingBefore(style.GetParagraphSpacingBefore())
             attrs.SetParagraphSpacingAfter(style.GetParagraphSpacingAfter())
@@ -349,7 +344,6 @@ class RichTextFrame(wx.Frame):
                 attrs.SetBackgroundColour(attr_dict['background'])
                 attrs.SetFontUnderlined(True)
                 attrs.SetFontFaceName(Strings.style_url)
-            print(attrs.GetFontFaceName())
 
     def _apply_list_style(self, position: int) -> None:
         """
@@ -383,7 +377,6 @@ class RichTextFrame(wx.Frame):
             end_batch = True
         self.rtc.SetStyleEx(p_range, style, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_PARAGRAPHS_ONLY
                             | rt.RICHTEXT_SETSTYLE_RESET)
-        self.rtc.SetStyleEx(p_range, style, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_CHARACTERS_ONLY)
         self.rtc.SetListStyle(p_range, style_def, specifiedLevel=0, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO
                               | rt.RICHTEXT_SETSTYLE_SPECIFY_LEVEL)
         if end_batch:
@@ -395,6 +388,7 @@ class RichTextFrame(wx.Frame):
             attrs: rt.RichTextAttr = child.GetAttributes()
             attrs.SetFontWeight(attr_dict['weight'])
             attrs.SetFontSize(style.GetFontSize())
+            attrs.SetBackgroundColour(style.GetBackgroundColour())
             attrs.SetParagraphSpacingBefore(style.GetParagraphSpacingBefore())
             attrs.SetParagraphSpacingAfter(style.GetParagraphSpacingAfter())
             attrs.SetFontFaceName(Strings.style_list)
