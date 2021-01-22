@@ -63,6 +63,8 @@ class RichTextFrame(wx.Frame):
         self.rtc.Bind(wx.EVT_MENU, self._undo_redo, id=wx.ID_REDO)
 
         self.rtc.GetBuffer().CleanUpFieldTypes()
+        # Disable drag and drop text.
+        self.rtc.SetDropTarget(None)
 
         self._create_styles()
         self._fill_style_picker()
