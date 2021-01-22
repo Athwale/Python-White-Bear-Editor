@@ -2,7 +2,6 @@ import wx
 import wx.richtext as rt
 
 from Constants.Constants import Strings, Numbers
-from Exceptions.WrongFormatException import WrongFormatException
 from Tools.Document.ArticleElements.Video import Video
 from Tools.ImageTextField import ImageTextField
 
@@ -234,9 +233,6 @@ class RichTextFrame(wx.Frame):
         elif style_name == Strings.style_url:
             self._apply_url_style()
 
-        else:
-            raise WrongFormatException(Strings.exception_wrong_style)
-
         # Unless we simulate a move, you can still type in the wrong style after change.
         self.rtc.Invalidate()
         self.rtc.Refresh()
@@ -274,8 +270,7 @@ class RichTextFrame(wx.Frame):
             self.rtc.BeginBatchUndo(Strings.undo_last_action)
             end_batch = True
         self.rtc.SetStyleEx(p_range, style, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_PARAGRAPHS_ONLY
-                            | rt.RICHTEXT_SETSTYLE_RESET)
-        self.rtc.SetStyleEx(p_range, style, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_CHARACTERS_ONLY)
+                                                  | rt.RICHTEXT_SETSTYLE_RESET)
         if end_batch:
             self.rtc.EndBatchUndo()
 
@@ -286,6 +281,7 @@ class RichTextFrame(wx.Frame):
             attrs: rt.RichTextAttr = child.GetAttributes()
             attrs.SetFontSize(style.GetFontSize())
             attrs.SetFontWeight(wx.FONTWEIGHT_BOLD)
+            attrs.SetBackgroundColour(style.GetBackgroundColour())
             attrs.SetParagraphSpacingBefore(style.GetParagraphSpacingBefore())
             attrs.SetParagraphSpacingAfter(style.GetParagraphSpacingAfter())
             attrs.SetFontFaceName(style.GetFontFaceName())
@@ -330,7 +326,7 @@ class RichTextFrame(wx.Frame):
             self.rtc.BeginBatchUndo(Strings.undo_last_action)
             end_batch = True
         self.rtc.SetStyleEx(p_range, style, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_PARAGRAPHS_ONLY
-                            | rt.RICHTEXT_SETSTYLE_RESET)
+                                                  | rt.RICHTEXT_SETSTYLE_RESET)
         if end_batch:
             self.rtc.EndBatchUndo()
 
@@ -381,9 +377,9 @@ class RichTextFrame(wx.Frame):
             self.rtc.BeginBatchUndo(Strings.undo_last_action)
             end_batch = True
         self.rtc.SetStyleEx(p_range, style, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_PARAGRAPHS_ONLY
-                            | rt.RICHTEXT_SETSTYLE_RESET)
+                                                  | rt.RICHTEXT_SETSTYLE_RESET)
         self.rtc.SetListStyle(p_range, style_def, specifiedLevel=0, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO
-                              | rt.RICHTEXT_SETSTYLE_SPECIFY_LEVEL)
+                                                                          | rt.RICHTEXT_SETSTYLE_SPECIFY_LEVEL)
         if end_batch:
             self.rtc.EndBatchUndo()
 
@@ -469,7 +465,8 @@ class RichTextFrame(wx.Frame):
                 url_style: rt.RichTextAttr = self._stylesheet.FindCharacterStyle(Strings.style_url).GetStyle()
                 if p.GetTextForRange(rt.RichTextRange(position, position)) == ' ':
                     # Stop the url style on blank space
-                    self.rtc.SetStyleEx(rt.RichTextRange(position, position + 1), url_style, rt.RICHTEXT_SETSTYLE_REMOVE)
+                    self.rtc.SetStyleEx(rt.RichTextRange(position, position + 1), url_style,
+                                        rt.RICHTEXT_SETSTYLE_REMOVE)
                 # Without moving the caret you can still type in the now incorrect url style.
                 self.rtc.MoveRight(0)
 
@@ -479,6 +476,7 @@ class RichTextFrame(wx.Frame):
             attrs: rt.RichTextAttr = p.GetAttributes()
             if attrs.GetBulletStyle() != wx.TEXT_ATTR_BULLET_STYLE_STANDARD:
                 self._change_style(Strings.style_paragraph, position=-1)
+                paragraph_style = Strings.style_paragraph
                 p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(position)
         # Turn empty lines into paragraph style. Also turns deleted images into paragraph style.
         elif not p.GetTextForRange(p.GetRange()):
@@ -496,7 +494,7 @@ class RichTextFrame(wx.Frame):
             # Two things can happen. Image is the first child, delete it.
             if isinstance(p.GetChild(0), rt.RichTextField):
                 # We can not delete the child directly, it confuses the paragraphs.
-                self.rtc.Delete(rt.RichTextRange(p.GetRange()[0], p.GetRange()[0]+1))
+                self.rtc.Delete(rt.RichTextRange(p.GetRange()[0], p.GetRange()[0] + 1))
                 # Change the style of the new image-less paragraph to the correct next style.
                 font_face = p.GetChild(0).GetAttributes().GetFontFaceName()
                 if font_face == Strings.style_url:
@@ -509,9 +507,7 @@ class RichTextFrame(wx.Frame):
                 # Image is not the first child, find it and delete it.
                 for child in p.GetChildren():
                     if isinstance(child, rt.RichTextField):
-                        p.RemoveChild(child, deleteChild=True)
-                        self.rtc.Invalidate()
-                        self.rtc.Refresh()
+                        self.rtc.Delete(rt.RichTextRange(child.GetRange()[0], child.GetRange()[1] + 1))
 
         # Prevent mixed styles using child based approach.
         if not isinstance(p.GetChild(0), rt.RichTextField):
