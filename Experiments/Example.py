@@ -19,6 +19,10 @@ class RichTextFrame(wx.Frame):
         self._stylesheet.SetName('Stylesheet')
         self._disable_input = False
 
+        self._click_counter = 0
+        self._timer = wx.Timer(self)
+        self.Bind(wx.EVT_TIMER, self._on_click_timer, self._timer)
+
         self._style_picker = wx.ListBox(self, -1, size=(100, 160))
         self._previous_style: str = Strings.style_paragraph
 
@@ -48,10 +52,9 @@ class RichTextFrame(wx.Frame):
         self.Bind(wx.EVT_BUTTON, self._write_field, self._image_button)
         self.Bind(wx.EVT_BUTTON, self._refresh, self._refresh_button)
 
-        self.rtc.Bind(wx.EVT_LEFT_UP, self._on_mouse)
+        self.rtc.Bind(wx.EVT_LEFT_UP, self._on_mouse_left)
         # Updates style picker in times mouse is not registered.
-        self.rtc.Bind(wx.EVT_IDLE, self._on_mouse)
-        self.rtc.Bind(wx.EVT_MOUSE_EVENTS, self._on_mouse)
+        self.rtc.Bind(wx.EVT_IDLE, self._update_gui_handler)
 
         self.rtc.Bind(wx.EVT_KEY_DOWN, self._on_key_down)
         self.rtc.Bind(wx.EVT_KEY_UP, self._update_gui_handler)
@@ -611,6 +614,7 @@ class RichTextFrame(wx.Frame):
                     processor.Redo()
                 else:
                     processor.Redo()
+        self.rtc.MoveRight(0)
 
     def _update_gui_handler(self, event: wx.CommandEvent) -> None:
         """
@@ -622,15 +626,29 @@ class RichTextFrame(wx.Frame):
         self._enable_buttons()
         event.Skip()
 
-    def _on_mouse(self, event: wx.MouseEvent) -> None:
+    def _on_mouse_left(self, event: wx.MouseEvent) -> None:
         """
-        Handle left mouse click. Updates GUI controls.
+        Handle left mouse click. Starts a timer and counts left mouse clicks in order to allow three click select.
         :param event: Not used.
         :return: None
         """
-        self._update_style_picker()
-        self._enable_buttons()
+        if not self._timer.IsRunning():
+            self._timer.Start(Numbers.three_click_timeout)
+        self._click_counter = self._click_counter + 1
         event.Skip()
+
+    def _on_click_timer(self, event) -> None:
+        """
+        When the timer runs out and if three left click were made, select whole current paragraph.
+        :param event: Not used.
+        :return: None
+        """
+        if self._click_counter >= 3:
+            position = self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition())
+            p_range: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(position).GetRange()
+            self.rtc.SetSelectionRange(p_range)
+        self._click_counter = 0
+        self._timer.Stop()
 
     def _style_picker_handler(self, evt: wx.CommandEvent) -> None:
         """
@@ -806,9 +824,9 @@ class RichTextFrame(wx.Frame):
         :param evt: Not used
         :return: None
         """
-        # TODO what happens to the children of a paragraph like this?
         if self.rtc.HasSelection():
             self.rtc.BeginBatchUndo(Strings.undo_bold)
+            self.rtc.BeginBold()
             bold_range = self.rtc.GetSelectionRange()
             for char in range(bold_range[0], bold_range[1]):
                 if char + 1 > bold_range[1] + 1:

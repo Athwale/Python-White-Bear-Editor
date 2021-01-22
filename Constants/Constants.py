@@ -9,7 +9,8 @@ class Numbers:
     YELLOW_COLOR = Colour(250, 255, 196)
     BLUE_COLOR = Colour(145, 207, 255)
 
-    splashscreen_timeout = 15000
+    splashscreen_timeout: int = 15000
+    three_click_timeout: int = 400
 
     minimal_window_size_width: int = 1200
     minimal_window_size_height: int = 700
