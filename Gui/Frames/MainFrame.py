@@ -313,8 +313,7 @@ class MainFrame(wx.Frame):
         # --------------------------------------------------------------------------------------------------------------
 
         # File list section --------------------------------------------------------------------------------------------
-        self.style_control = rt.RichTextStyleListBox(self.left_panel, -1, size=(-1, 160))
-        self.style_control.SetApplyOnSelection(True)
+        self.style_control = wx.ListBox(self.left_panel, -1, size=(-1, 160))
         self.style_sizer.Add(self.style_control, 1, flag=wx.EXPAND)
         self.page_list = wx.ListCtrl(self.left_panel, -1, style=wx.LC_REPORT | wx.LC_SINGLE_SEL)
         self.page_list.SetFont(self.menu_text_field_font)
@@ -345,7 +344,7 @@ class MainFrame(wx.Frame):
         self.field_article_name = wx.TextCtrl(self.right_panel, -1, value=Strings.label_article_title,
                                               size=wx.Size(-1, 43))
         font: wx.Font = self.field_article_name.GetFont()
-        font.SetWeight(wx.BOLD)
+        font.SetWeight(wx.FONTWEIGHT_BOLD)
         font.SetPointSize(Numbers.main_heading_size)
         self.field_article_name.SetFont(font)
         self.field_article_name_tip = Tools.get_warning_tip(self.field_article_name, Strings.label_article_title)

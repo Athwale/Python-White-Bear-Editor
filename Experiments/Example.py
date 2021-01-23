@@ -23,7 +23,6 @@ class RichTextFrame(wx.Frame):
         self.Bind(wx.EVT_TIMER, self._on_click_timer, self._timer)
 
         self._style_picker = wx.ListBox(self, -1, size=(100, 160))
-        self._previous_style: str = Strings.style_paragraph
 
         self.rtc.SetStyleSheet(self._stylesheet)
         self._color_button = wx.Button(self, wx.ID_FILE1, 'color 1')
@@ -713,7 +712,7 @@ class RichTextFrame(wx.Frame):
                 url_index = self._style_picker.FindString(Strings.style_url)
                 if url_index != wx.NOT_FOUND:
                     self._style_picker.Delete(url_index)
-
+# TODO from here down
     def print_current_styles(self):
         print('---')
         current_position = self.rtc.GetCaretPosition()
