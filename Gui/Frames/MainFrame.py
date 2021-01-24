@@ -42,7 +42,7 @@ class MainFrame(wx.Frame):
         self.disableable_menu_items = []
         self.document_dictionary = {}
         self.current_document_name = None
-        self.current_document_instance: WhitebearDocumentArticle = None
+        self.current_document_instance = None
         self.css_colors = None
 
         self._init_status_bar()
@@ -448,7 +448,6 @@ class MainFrame(wx.Frame):
             self.split_screen.Enable()
             self.page_list.SetBackgroundColour(wx.WHITE)
             self.page_list.SetForegroundColour(wx.BLACK)
-            self.style_control.UpdateStyles()
         # Disable toolbar buttons
         for tool_id in self.tool_ids:
             self.tool_bar.EnableTool(tool_id, (not state))

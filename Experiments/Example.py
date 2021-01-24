@@ -677,7 +677,8 @@ class RichTextFrame(wx.Frame):
         position = self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition())
         paragraph_style, character_style = self._get_style_at_pos(position)
         p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(position)
-        if not p.GetTextForRange(p.GetRange()) and paragraph_style == Strings.style_paragraph:
+        if not p.GetTextForRange(p.GetRange()) and paragraph_style == Strings.style_paragraph \
+                and not isinstance(p.GetChild(0), rt.RichTextField):
             # Only allow inserting images on an empty line.
             self._image_button.Enable()
         else:
@@ -712,7 +713,7 @@ class RichTextFrame(wx.Frame):
                 url_index = self._style_picker.FindString(Strings.style_url)
                 if url_index != wx.NOT_FOUND:
                     self._style_picker.Delete(url_index)
-# TODO from here down
+
     def print_current_styles(self):
         print('---')
         current_position = self.rtc.GetCaretPosition()
@@ -734,36 +735,10 @@ class RichTextFrame(wx.Frame):
         :return: None
         """
         self._image_button.Disable()
-        new_field = self._register_field()
-        position = self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition())
-        buffer: rt.RichTextBuffer = self.rtc.GetFocusObject()
-
-        style: rt.RichTextAttr = self._stylesheet.FindStyle(Strings.style_image).GetStyle()
-        p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(position)
-        p_range = p.GetRange().FromInternal()
-
-        self.rtc.BeginBatchUndo(Strings.undo_last_action)
-        self.rtc.SetStyleEx(p_range, style, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_RESET)
-        buffer.InsertFieldWithUndo(self.rtc.GetBuffer(), position, new_field.GetName(), rt.RichTextProperties(),
-                                   self.rtc, rt.RICHTEXT_INSERT_WITH_PREVIOUS_PARAGRAPH_STYLE, rt.RichTextAttr())
-        self.rtc.EndBatchUndo()
-
+        self._write_image(from_button=True)
         # TODO memory leak in orphaned images and link, maybe reconcile on idle.
-
         # Return focus to the text area.
         wx.CallLater(100, self.rtc.SetFocus)
-
-    @staticmethod
-    def _register_field() -> ImageTextField:
-        """
-        Register a new custom field that represent an image.
-        :return: None
-        """
-        video = Video('test video', 534, 534, 'http://www.google.com')
-        video.seo_test_self()
-        field_type = ImageTextField(video)
-        rt.RichTextBuffer.AddFieldType(field_type)
-        return field_type
 
     def _insert_link(self, text: str, link_id: str, color: wx.Colour) -> None:
         """
@@ -853,6 +828,39 @@ class RichTextFrame(wx.Frame):
             else:
                 self.rtc.EndBold()
 
+    def _write_image(self, from_button: bool) -> None:
+        """
+        Write an ImageInText or Video into the text area.
+        :param from_button: Must be True if the insert is made from GUI.
+        :return: None
+        """
+        new_field = self._register_field()
+        position = self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition())
+        buffer: rt.RichTextBuffer = self.rtc.GetFocusObject()
+
+        style: rt.RichTextAttr = self._stylesheet.FindStyle(Strings.style_image).GetStyle()
+        p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(position)
+        p_range = p.GetRange().FromInternal()
+
+        self.rtc.BeginBatchUndo(Strings.undo_last_action)
+        if from_button:
+            self.rtc.SetStyleEx(p_range, style, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_RESET)
+        buffer.InsertFieldWithUndo(self.rtc.GetBuffer(), position, new_field.GetName(), rt.RichTextProperties(),
+                                   self.rtc, rt.RICHTEXT_INSERT_NONE, rt.RichTextAttr())
+        self.rtc.EndBatchUndo()
+
+    @staticmethod
+    def _register_field() -> ImageTextField:
+        """
+        Register a new custom field that represent an image.
+        :return: None
+        """
+        video = Video('test video', 534, 534, 'http://www.google.com')
+        video.seo_test_self()
+        field_type = ImageTextField(video)
+        rt.RichTextBuffer.AddFieldType(field_type)
+        return field_type
+
     def insert_sample_text(self) -> None:
         """
         Insert sample text.
@@ -879,6 +887,11 @@ class RichTextFrame(wx.Frame):
         self._insert_link('link', '42', wx.RED)
         self.rtc.Newline()
         self.rtc.EndParagraphStyle()
+
+        self.rtc.BeginStyle(self._stylesheet.FindStyle(Strings.style_image).GetStyle())
+        self._write_image(from_button=False)
+        self.rtc.Newline()
+        self.rtc.EndStyle()
 
         list_style = self._stylesheet.FindListStyle(Strings.style_list).GetCombinedStyleForLevel(0)
         self.rtc.BeginStyle(list_style)

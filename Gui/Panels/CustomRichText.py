@@ -28,22 +28,23 @@ class CustomRichText(rt.RichTextCtrl):
         """
         super().__init__(parent, -1, style=style)
         self._parent = parent
-        self._stylesheet = rt.RichTextStyleSheet()
-        self._stylesheet.SetName('Stylesheet')
-        self._style_picker = style_control
         self._document = None
         # Used to prevent over-calling methods on keypress.
         self._disable_input = False
         self._click_counter = 0
+
+        self._stylesheet = rt.RichTextStyleSheet()
+        self._stylesheet.SetName('Stylesheet')
+        self.SetStyleSheet(self._stylesheet)
+
+        self._style_picker = style_control
+
         # Used for three click select.
         self._timer = wx.Timer(self)
         self.Bind(wx.EVT_TIMER, self._on_click_timer, self._timer)
 
-        self._create_styles()
-        self._fill_style_picker()
-        self._add_text_handlers()
-
         main_frame = wx.GetTopLevelParent(self)
+        self.Bind(wx.EVT_LISTBOX, self._style_picker_handler, self._style_picker)
         self.Bind(wx.EVT_TEXT_URL, self.url_in_text_click_handler, self)
         self.Bind(wx.EVT_MENU, self.on_insert_image, main_frame.edit_menu_item_insert_img)
         self.Bind(wx.EVT_MENU, self.on_insert_image, main_frame.insert_img_tool)
@@ -61,6 +62,10 @@ class CustomRichText(rt.RichTextCtrl):
 
         # Disable drag and drop text.
         self.SetDropTarget(None)
+
+        self._add_text_handlers()
+        self._create_styles()
+        self._fill_style_picker()
 
     @staticmethod
     def _add_text_handlers() -> None:
@@ -227,11 +232,24 @@ class CustomRichText(rt.RichTextCtrl):
         elif style_name == Strings.style_url:
             self._apply_url_style()
 
+        elif style_name == Strings.style_clear:
+            self._clear_style(position)
+
         # Unless we simulate a move, you can still type in the wrong style after change.
         self.Invalidate()
         self.Refresh()
         self.MoveRight(0)
         self._update_style_picker()
+
+    def _clear_style(self, position: int) -> None:
+        """
+        Resets and clears style in the richtextctrl.
+        :param position: The position of the caret.
+        :return: None
+        """
+        p: rt.RichTextParagraph = self.GetFocusObject().GetParagraphAtPosition(position)
+        p_range = p.GetRange().FromInternal()
+        self.SetStyleEx(p_range, rt.RichTextAttr(), flags=rt.RICHTEXT_SETSTYLE_RESET)
 
     def _apply_heading_style(self, heading_type: str, position: int) -> None:
         """
@@ -373,7 +391,7 @@ class CustomRichText(rt.RichTextCtrl):
         self.SetStyleEx(p_range, style, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_PARAGRAPHS_ONLY
                                               | rt.RICHTEXT_SETSTYLE_RESET)
         self.SetListStyle(p_range, style_def, specifiedLevel=0, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO
-                                                                      | rt.RICHTEXT_SETSTYLE_SPECIFY_LEVEL)
+                          | rt.RICHTEXT_SETSTYLE_SPECIFY_LEVEL)
         if end_batch:
             self.EndBatchUndo()
 
@@ -428,6 +446,7 @@ class CustomRichText(rt.RichTextCtrl):
         """
         paragraph_style_name, character_style_name = self._get_style_at_pos(self.GetAdjustedCaretPosition
                                                                             (self.GetCaretPosition()))
+        print(paragraph_style_name, character_style_name)
         if character_style_name:
             self._style_picker.SetSelection(self._style_picker.FindString(character_style_name))
         elif paragraph_style_name:
@@ -672,9 +691,10 @@ class CustomRichText(rt.RichTextCtrl):
         position = self.GetAdjustedCaretPosition(self.GetCaretPosition())
         paragraph_style, character_style = self._get_style_at_pos(position)
         p: rt.RichTextParagraph = self.GetFocusObject().GetParagraphAtPosition(position)
-        if not p.GetTextForRange(p.GetRange()) and paragraph_style == Strings.style_paragraph:
+        if not p.GetTextForRange(p.GetRange()) and paragraph_style == Strings.style_paragraph \
+                and not isinstance(p.GetChild(0), rt.RichTextField):
             # TODO this
-            # Only allow inserting images on an empty line.
+            # Only allow inserting images on an empty paragraph line with no other images.
             pass
             # self._image_button.Enable()
         else:
@@ -711,21 +731,70 @@ class CustomRichText(rt.RichTextCtrl):
                 if url_index != wx.NOT_FOUND:
                     self._style_picker.Delete(url_index)
 
+    def set_content_old(self, doc: WhitebearDocumentArticle) -> None:
+        """
+        Insert sample text.
+        :return: None
+        """
+        self.BeginSuppressUndo()
+        self.BeginParagraphStyle(Strings.style_paragraph)
+        self.WriteText('Example paragraph')
+        self.Newline()
+        self.EndParagraphStyle()
+
+        self.BeginParagraphStyle(Strings.style_heading_3)
+        self.WriteText('Example H3 Heading')
+        self.Newline()
+        self.EndParagraphStyle()
+
+        self.BeginParagraphStyle(Strings.style_heading_4)
+        self.WriteText('Example H4 Heading')
+        self.Newline()
+        self.EndParagraphStyle()
+
+        self.BeginParagraphStyle(Strings.style_paragraph)
+        self.WriteText('Example paragraph ')
+        self._insert_link('link', '42', wx.RED)
+        self.Newline()
+        self.EndParagraphStyle()
+
+        list_style = self._stylesheet.FindListStyle(Strings.style_list).GetCombinedStyleForLevel(0)
+        self.BeginStyle(list_style)
+        self.WriteText('Example list ')
+        self._insert_link('link', '43', wx.WHITE)
+        self.WriteText(' item')
+        self.Newline()
+        self.WriteText('Example list item')
+        self.Newline()
+        self.EndStyle()
+
+        self.ApplyStyle(self._stylesheet.FindParagraphStyle(Strings.style_paragraph))
+        self._change_style(Strings.style_paragraph, position=-1)
+
+        self.LayoutContent()
+        self.EndSuppressUndo()
+
     def set_content(self, doc: WhitebearDocumentArticle) -> None:
         """
         Set the document this text area is displaying.
         :param doc: The white bear article.
         :return: None
         """
-        self.BeginSuppressUndo()
-        self.Clear()
         self._document = doc
+        # Clear current settings.
+        self.Clear()
         self.GetBuffer().CleanUpFieldTypes()
+        self._change_style(Strings.style_clear, -1)
+
+        self.BeginSuppressUndo()
         last_was_paragraph = False
         for element in doc.get_main_text_elements():
             if isinstance(element, Paragraph):
                 if last_was_paragraph:
-                    self.Newline()
+                    # Empty paragraph substitutes shift-enter line break.
+                    self.BeginParagraphStyle(Strings.style_paragraph)
+                    self.WriteText('')
+                    self.EndParagraphStyle()
                 self._write_paragraph(element)
                 last_was_paragraph = True
             elif isinstance(element, Heading):
@@ -733,13 +802,16 @@ class CustomRichText(rt.RichTextCtrl):
                 self._write_heading(element)
             elif isinstance(element, ImageInText):
                 last_was_paragraph = False
-                self._write_field(element)
+                self._write_image(element)
             elif isinstance(element, UnorderedList):
                 last_was_paragraph = False
                 self._write_list(element)
             elif isinstance(element, Video):
                 last_was_paragraph = False
-                self._write_field(element)
+                self._write_image(element)
+
+        self.ApplyStyle(self._stylesheet.FindParagraphStyle(Strings.style_paragraph))
+        self._change_style(Strings.style_paragraph, position=-1)
         self.LayoutContent()
         self.EndSuppressUndo()
 
@@ -756,15 +828,25 @@ class CustomRichText(rt.RichTextCtrl):
                 self._write_text(element)
             self.Newline()
         self.EndStyle()
-
-    def _write_field(self, element) -> None:
+    
+    def _write_image(self, element) -> None:
         """
         Write an ImageInText or Video into the text area.
-        :param element: The element (video, image in text) that will be on the field.
+        :param element: The Video or ImageInText instance.
         :return: None
         """
-        # TODO this
-        # self._image_button.Disable()
+        self.BeginStyle(self._stylesheet.FindStyle(Strings.style_image).GetStyle())
+        self._write_field(element, from_button=False)
+        self.Newline()
+        self.EndStyle()
+        # TODO wrong style after image
+        
+    def _write_field(self, element, from_button: bool) -> None:
+        """
+        Write an ImageInText or Video into the text area.
+        :param from_button: Must be True if the insert is made from GUI.
+        :return: None
+        """
         new_field = self._register_field(element)
         position = self.GetAdjustedCaretPosition(self.GetCaretPosition())
         buffer: rt.RichTextBuffer = self.GetFocusObject()
@@ -774,15 +856,12 @@ class CustomRichText(rt.RichTextCtrl):
         p_range = p.GetRange().FromInternal()
 
         self.BeginBatchUndo(Strings.undo_last_action)
-        self.SetStyleEx(p_range, style, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_RESET)
+        if from_button:
+            self.SetStyleEx(p_range, style, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_RESET)
         buffer.InsertFieldWithUndo(self.GetBuffer(), position, new_field.GetName(), rt.RichTextProperties(),
-                                   self, rt.RICHTEXT_INSERT_WITH_PREVIOUS_PARAGRAPH_STYLE, rt.RichTextAttr())
+                                   self, rt.RICHTEXT_INSERT_NONE, rt.RichTextAttr())
         self.EndBatchUndo()
-
         # TODO memory leak in orphaned images and link, maybe reconcile on idle.
-
-        # Return focus to the text area.
-        wx.CallLater(100, self.SetFocus)
 
     @staticmethod
     def _register_field(element) -> ImageTextField:
@@ -918,10 +997,11 @@ class CustomRichText(rt.RichTextCtrl):
 
     def on_insert_image(self, evt):
         # TODO this.
-        field = self.WriteField('imageFieldType', rt.RichTextProperties())
-        field.SetName('image1')
-        # TODO forbid the user from doing various things based on the style the cursor is on at the moment
-        # TODO make titles change font when turned into other style
+        #self._image_button.Disable()
+        #self._write_field(from_button=True)
+        # TODO memory leak in orphaned images and link, maybe reconcile on idle.        
+        # Return focus to the text area.
+        wx.CallLater(100, self.SetFocus)
 
     def _change_color(self, evt: wx.CommandEvent) -> None:
         # TODO connect this to color buttons.
