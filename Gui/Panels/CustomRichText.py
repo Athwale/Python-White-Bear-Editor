@@ -785,6 +785,7 @@ class CustomRichText(rt.RichTextCtrl):
         self.Clear()
         self.GetBuffer().CleanUpFieldTypes()
         self._change_style(Strings.style_clear, -1)
+        self.EndAllStyles()
 
         self.BeginSuppressUndo()
         last_was_paragraph = False
@@ -810,8 +811,8 @@ class CustomRichText(rt.RichTextCtrl):
                 last_was_paragraph = False
                 self._write_image(element)
 
-        self.ApplyStyle(self._stylesheet.FindParagraphStyle(Strings.style_paragraph))
-        self._change_style(Strings.style_paragraph, position=-1)
+        # Make the last blank line a default paragraph
+        self._change_style(Strings.style_paragraph, -1)
         self.LayoutContent()
         self.EndSuppressUndo()
 
@@ -837,10 +838,10 @@ class CustomRichText(rt.RichTextCtrl):
         """
         self.BeginStyle(self._stylesheet.FindStyle(Strings.style_image).GetStyle())
         self._write_field(element, from_button=False)
-        self.Newline()
+        # This new line is written as \n because otherwise the style does not end correctly at the end of page.
+        self.WriteText('\n')
         self.EndStyle()
-        # TODO wrong style after image
-        
+
     def _write_field(self, element, from_button: bool) -> None:
         """
         Write an ImageInText or Video into the text area.

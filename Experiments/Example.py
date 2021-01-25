@@ -891,7 +891,7 @@ class RichTextFrame(wx.Frame):
 
         self.rtc.BeginStyle(self._stylesheet.FindStyle(Strings.style_image).GetStyle())
         self._write_image(from_button=False)
-        self.rtc.Newline()
+        self.rtc.WriteText('\n')
         self.rtc.EndStyle()
 
         list_style = self._stylesheet.FindListStyle(Strings.style_list).GetCombinedStyleForLevel(0)
@@ -909,10 +909,6 @@ class RichTextFrame(wx.Frame):
         self.rtc.WriteText('\n')
         self.rtc.EndStyle()
         self._change_style(Strings.style_paragraph, -1)
-
-        #self.rtc.BeginParagraphStyle(Strings.style_paragraph)
-        #self.rtc.WriteText(' ')
-        #self.rtc.EndParagraphStyle()
 
         self.rtc.LayoutContent()
         self.rtc.EndSuppressUndo()
