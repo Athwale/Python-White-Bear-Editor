@@ -534,6 +534,9 @@ class RichTextFrame(wx.Frame):
         :param event: Used to get key code.
         :return: None
         """
+        position = self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition())
+        paragraph_style, character_style = self._get_style_at_pos(position)
+        print(paragraph_style, character_style)
         if self._disable_input:
             return
 
@@ -836,7 +839,6 @@ class RichTextFrame(wx.Frame):
         """
         new_field = self._register_field()
         position = self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition())
-        buffer: rt.RichTextBuffer = self.rtc.GetFocusObject()
 
         style: rt.RichTextAttr = self._stylesheet.FindStyle(Strings.style_image).GetStyle()
         p: rt.RichTextParagraph = self.rtc.GetFocusObject().GetParagraphAtPosition(position)
@@ -845,8 +847,7 @@ class RichTextFrame(wx.Frame):
         self.rtc.BeginBatchUndo(Strings.undo_last_action)
         if from_button:
             self.rtc.SetStyleEx(p_range, style, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_RESET)
-        buffer.InsertFieldWithUndo(self.rtc.GetBuffer(), position, new_field.GetName(), rt.RichTextProperties(),
-                                   self.rtc, rt.RICHTEXT_INSERT_NONE, rt.RichTextAttr())
+        self.rtc.WriteField(new_field.GetName(), rt.RichTextProperties())
         self.rtc.EndBatchUndo()
 
     @staticmethod
@@ -903,8 +904,15 @@ class RichTextFrame(wx.Frame):
         self.rtc.Newline()
         self.rtc.EndStyle()
 
-        self.rtc.ApplyStyle(self._stylesheet.FindParagraphStyle(Strings.style_paragraph))
-        self._change_style(Strings.style_paragraph, position=-1)
+        self.rtc.BeginStyle(self._stylesheet.FindStyle(Strings.style_image).GetStyle())
+        self._write_image(from_button=False)
+        self.rtc.WriteText('\n')
+        self.rtc.EndStyle()
+        self._change_style(Strings.style_paragraph, -1)
+
+        #self.rtc.BeginParagraphStyle(Strings.style_paragraph)
+        #self.rtc.WriteText(' ')
+        #self.rtc.EndParagraphStyle()
 
         self.rtc.LayoutContent()
         self.rtc.EndSuppressUndo()
