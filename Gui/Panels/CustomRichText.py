@@ -62,6 +62,7 @@ class CustomRichText(rt.RichTextCtrl):
 
         # Disable drag and drop text.
         self.SetDropTarget(None)
+        self._default_style: rt.RichTextAttr = self.GetDefaultStyleEx()
 
         self._add_text_handlers()
         self._create_styles()
@@ -232,24 +233,11 @@ class CustomRichText(rt.RichTextCtrl):
         elif style_name == Strings.style_url:
             self._apply_url_style()
 
-        elif style_name == Strings.style_clear:
-            self._clear_style(position)
-
         # Unless we simulate a move, you can still type in the wrong style after change.
         self.Invalidate()
         self.Refresh()
         self.MoveRight(0)
         self._update_style_picker()
-
-    def _clear_style(self, position: int) -> None:
-        """
-        Resets and clears style in the richtextctrl.
-        :param position: The position of the caret.
-        :return: None
-        """
-        p: rt.RichTextParagraph = self.GetFocusObject().GetParagraphAtPosition(position)
-        p_range = p.GetRange().FromInternal()
-        self.SetStyleEx(p_range, rt.RichTextAttr(), flags=rt.RICHTEXT_SETSTYLE_RESET)
 
     def _apply_heading_style(self, heading_type: str, position: int) -> None:
         """
@@ -446,7 +434,6 @@ class CustomRichText(rt.RichTextCtrl):
         """
         paragraph_style_name, character_style_name = self._get_style_at_pos(self.GetAdjustedCaretPosition
                                                                             (self.GetCaretPosition()))
-        print(paragraph_style_name, character_style_name)
         if character_style_name:
             self._style_picker.SetSelection(self._style_picker.FindString(character_style_name))
         elif paragraph_style_name:
@@ -731,48 +718,27 @@ class CustomRichText(rt.RichTextCtrl):
                 if url_index != wx.NOT_FOUND:
                     self._style_picker.Delete(url_index)
 
-    def set_content_old(self, doc: WhitebearDocumentArticle) -> None:
+    def _clear_self(self) -> None:
         """
-        Insert sample text.
+        Clears all styles and prepares the control for a new article.
         :return: None
         """
-        self.BeginSuppressUndo()
+        # Ensure we always end with a consistent paragraph style, this is needed because for some reason the last style
+        # survives clearing.
         self.BeginParagraphStyle(Strings.style_paragraph)
-        self.WriteText('Example paragraph')
-        self.Newline()
+        self.WriteText(' ')
         self.EndParagraphStyle()
+        self._modify_text()
+        self.Clear()
+        self.GetBuffer().CleanUpFieldTypes()
 
-        self.BeginParagraphStyle(Strings.style_heading_3)
-        self.WriteText('Example H3 Heading')
-        self.Newline()
-        self.EndParagraphStyle()
-
-        self.BeginParagraphStyle(Strings.style_heading_4)
-        self.WriteText('Example H4 Heading')
-        self.Newline()
-        self.EndParagraphStyle()
-
-        self.BeginParagraphStyle(Strings.style_paragraph)
-        self.WriteText('Example paragraph ')
-        self._insert_link('link', '42', wx.RED)
-        self.Newline()
-        self.EndParagraphStyle()
-
-        list_style = self._stylesheet.FindListStyle(Strings.style_list).GetCombinedStyleForLevel(0)
-        self.BeginStyle(list_style)
-        self.WriteText('Example list ')
-        self._insert_link('link', '43', wx.WHITE)
-        self.WriteText(' item')
-        self.Newline()
-        self.WriteText('Example list item')
-        self.Newline()
-        self.EndStyle()
-
-        self.ApplyStyle(self._stylesheet.FindParagraphStyle(Strings.style_paragraph))
-        self._change_style(Strings.style_paragraph, position=-1)
-
-        self.LayoutContent()
-        self.EndSuppressUndo()
+        print(self._get_style_at_pos(self.GetAdjustedCaretPosition(self.GetCaretPosition())))
+        self.SetStyleEx(rt.RichTextRange(0, 1), self._stylesheet.FindParagraphStyle(Strings.style_paragraph).GetStyle(),
+                        flags=rt.RICHTEXT_SETSTYLE_REMOVE)
+        # List for some reason does not get replaced by paragraph above.
+        self.SetStyleEx(rt.RichTextRange(0, 1), self._stylesheet.FindListStyle(Strings.style_list).GetStyle(),
+                        flags=rt.RICHTEXT_SETSTYLE_REMOVE)
+        print(self._get_style_at_pos(self.GetAdjustedCaretPosition(self.GetCaretPosition())))
 
     def set_content(self, doc: WhitebearDocumentArticle) -> None:
         """
@@ -781,13 +747,9 @@ class CustomRichText(rt.RichTextCtrl):
         :return: None
         """
         self._document = doc
-        # Clear current settings.
-        self.Clear()
-        self.GetBuffer().CleanUpFieldTypes()
-        self._change_style(Strings.style_clear, -1)
-        self.EndAllStyles()
-
         self.BeginSuppressUndo()
+        self._clear_self()
+
         last_was_paragraph = False
         for element in doc.get_main_text_elements():
             if isinstance(element, Paragraph):
@@ -811,10 +773,9 @@ class CustomRichText(rt.RichTextCtrl):
                 last_was_paragraph = False
                 self._write_image(element)
 
-        # Make the last blank line a default paragraph
-        self._change_style(Strings.style_paragraph, -1)
         self.LayoutContent()
         self.EndSuppressUndo()
+        self._modify_text()
 
     def _write_list(self, ul: UnorderedList) -> None:
         """
@@ -829,7 +790,7 @@ class CustomRichText(rt.RichTextCtrl):
                 self._write_text(element)
             self.Newline()
         self.EndStyle()
-    
+
     def _write_image(self, element) -> None:
         """
         Write an ImageInText or Video into the text area.
@@ -1000,7 +961,7 @@ class CustomRichText(rt.RichTextCtrl):
         # TODO this.
         #self._image_button.Disable()
         #self._write_field(from_button=True)
-        # TODO memory leak in orphaned images and link, maybe reconcile on idle.        
+        # TODO memory leak in orphaned images and link, maybe reconcile on idle.
         # Return focus to the text area.
         wx.CallLater(100, self.SetFocus)
 
