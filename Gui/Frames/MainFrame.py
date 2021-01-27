@@ -197,7 +197,7 @@ class MainFrame(wx.Frame):
         """
         bmp = self._make_bitmap(color)
         tool = toolbar.AddTool(self._add_tool_id(), Strings.toolbar_color, bmp, name)
-        self.Bind(wx.EVT_MENU, self.on_color, tool)
+        self.Bind(wx.EVT_MENU, self._change_color, tool)
 
     @staticmethod
     def _make_bitmap(color: wx.Colour) -> wx.Bitmap:
@@ -533,28 +533,33 @@ class MainFrame(wx.Frame):
         """
         self._main_text_area.ProcessEvent(evt)
 
-    def on_color(self, evt: wx.CommandEvent) -> None:
+    def _change_color(self, evt: wx.CommandEvent) -> None:
         """
         Color text based on which button was clicked.
         :param evt: Used to get which color to use.
         :return:
         """
-        colour_data = wx.ColourData()
-        attr = wx.TextAttr()
-        attr.SetFlags(wx.TEXT_ATTR_TEXT_COLOUR)
-        # TODO what is this colour data??
-        if self._main_text_area.GetStyle(self._main_text_area.GetInsertionPoint(), attr):
-            colour_data.SetColour(attr.GetTextColour())
-
         tool: wx.ToolBarToolBase = self.tool_bar.FindById(evt.GetId())
         color = self.css_colors[tool.GetShortHelp()]
-        if not self._main_text_area.HasSelection():
-            self._main_text_area.BeginTextColour(color)
+        if self._main_text_area.HasSelection():
+            self._main_text_area.BeginBatchUndo(Strings.undo_bold)
+            color_range = self._main_text_area.GetSelectionRange()
+            for char in range(color_range[0], color_range[1]):
+                if char + 1 > color_range[1] + 1:
+                    break
+                single_range = rt.RichTextRange(char, char + 1)
+                # Get the attributes of the single char range and modify them in place. Otherwise changing paragraph.
+                # style is broken since the attributes are reset for the range.
+                attr = rt.RichTextAttr()
+                self._main_text_area.GetStyleForRange(single_range, attr)
+                # Ignore links.
+                if attr.HasURL():
+                    continue
+                attr.SetTextColour(color)
+                self._main_text_area.SetStyleEx(single_range, attr, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO)
+            self._main_text_area.EndBatchUndo()
         else:
-            r = self._main_text_area.GetSelectionRange()
-            attr.SetFlags(wx.TEXT_ATTR_TEXT_COLOUR)
-            attr.SetTextColour(color)
-            self._main_text_area.SetStyle(r, attr)
+            self._main_text_area.BeginTextColour(color)
 
     def save_document_handler(self, event: wx.CommandEvent) -> None:
         """

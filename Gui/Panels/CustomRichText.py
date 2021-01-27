@@ -732,13 +732,11 @@ class CustomRichText(rt.RichTextCtrl):
         self.Clear()
         self.GetBuffer().CleanUpFieldTypes()
 
-        print(self._get_style_at_pos(self.GetAdjustedCaretPosition(self.GetCaretPosition())))
         self.SetStyleEx(rt.RichTextRange(0, 1), self._stylesheet.FindParagraphStyle(Strings.style_paragraph).GetStyle(),
                         flags=rt.RICHTEXT_SETSTYLE_REMOVE)
         # List for some reason does not get replaced by paragraph above.
         self.SetStyleEx(rt.RichTextRange(0, 1), self._stylesheet.FindListStyle(Strings.style_list).GetStyle(),
                         flags=rt.RICHTEXT_SETSTYLE_REMOVE)
-        print(self._get_style_at_pos(self.GetAdjustedCaretPosition(self.GetCaretPosition())))
 
     def set_content(self, doc: WhitebearDocumentArticle) -> None:
         """
@@ -964,37 +962,6 @@ class CustomRichText(rt.RichTextCtrl):
         # TODO memory leak in orphaned images and link, maybe reconcile on idle.
         # Return focus to the text area.
         wx.CallLater(100, self.SetFocus)
-
-    def _change_color(self, evt: wx.CommandEvent) -> None:
-        # TODO connect this to color buttons.
-        """
-        Change text color to green
-        :param evt: Not used
-        :return: None
-        """
-        if evt.GetId() == wx.ID_FILE1:
-            color = wx.Colour(234, 134, 88)
-        else:
-            color = wx.Colour(124, 144, 25)
-        if self.HasSelection():
-            self.BeginBatchUndo(Strings.undo_bold)
-            color_range = self.GetSelectionRange()
-            for char in range(color_range[0], color_range[1]):
-                if char + 1 > color_range[1] + 1:
-                    break
-                single_range = rt.RichTextRange(char, char + 1)
-                # Get the attributes of the single char range and modify them in place. Otherwise changing paragraph.
-                # style is broken since the attributes are reset for the range.
-                attr = rt.RichTextAttr()
-                self.GetStyleForRange(single_range, attr)
-                # Ignore links.
-                if attr.HasURL():
-                    continue
-                attr.SetTextColour(color)
-                self.SetStyleEx(single_range, attr, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO)
-            self.EndBatchUndo()
-        else:
-            self.BeginTextColour(color)
 
     def _change_bold(self, evt: wx.CommandEvent) -> None:
         """
