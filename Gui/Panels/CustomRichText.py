@@ -19,9 +19,10 @@ class CustomRichText(rt.RichTextCtrl):
     Custom rich text control
     """
 
-    def __init__(self, style_control: wx.ListBox, parent, style):
+    def __init__(self, img_tool_id: int, style_control: wx.ListBox, parent, style):
         """
         Constructor for the custom rich text control.
+        :param img_tool_id: Id of the insert image tool.
         :param style_control: Style control from gui.
         :param parent: Parent of this control.
         :param style: wx style attributes.
@@ -29,6 +30,7 @@ class CustomRichText(rt.RichTextCtrl):
         super().__init__(parent, -1, style=style)
         self._parent = parent
         self._document = None
+        self.img_tool_id = img_tool_id
         # Used to prevent over-calling methods on keypress.
         self._disable_input = False
         self._click_counter = 0
@@ -43,12 +45,12 @@ class CustomRichText(rt.RichTextCtrl):
         self._timer = wx.Timer(self)
         self.Bind(wx.EVT_TIMER, self._on_click_timer, self._timer)
 
-        main_frame = wx.GetTopLevelParent(self)
+        self._main_frame = wx.GetTopLevelParent(self)
         self.Bind(wx.EVT_LISTBOX, self._style_picker_handler, self._style_picker)
         self.Bind(wx.EVT_TEXT_URL, self.url_in_text_click_handler, self)
-        self.Bind(wx.EVT_MENU, self.on_insert_image, main_frame.edit_menu_item_insert_img)
-        self.Bind(wx.EVT_MENU, self.on_insert_image, main_frame.insert_img_tool)
-        self.Bind(wx.EVT_MENU, self._change_bold, main_frame.bold_tool)
+        self.Bind(wx.EVT_MENU, self.on_insert_image, self._main_frame.edit_menu_item_insert_img)
+        self.Bind(wx.EVT_MENU, self.on_insert_image, self._main_frame.insert_img_tool)
+        self.Bind(wx.EVT_MENU, self._change_bold, self._main_frame.bold_tool)
 
         self.Bind(wx.EVT_LEFT_UP, self._on_mouse_left)
         # Updates style picker in times mouse is not registered.
@@ -680,13 +682,10 @@ class CustomRichText(rt.RichTextCtrl):
         p: rt.RichTextParagraph = self.GetFocusObject().GetParagraphAtPosition(position)
         if not p.GetTextForRange(p.GetRange()) and paragraph_style == Strings.style_paragraph \
                 and not isinstance(p.GetChild(0), rt.RichTextField):
-            # TODO this
             # Only allow inserting images on an empty paragraph line with no other images.
-            pass
-            # self._image_button.Enable()
+            self._main_frame.tool_bar.EnableTool(self.img_tool_id, True)
         else:
-            pass
-            # self._image_button.Disable()
+            self._main_frame.tool_bar.EnableTool(self.img_tool_id, False)
         if paragraph_style == Strings.style_image:
             self._style_picker.Disable()
             # Remove selection from the picker to avoid confusing flicker.

@@ -45,6 +45,9 @@ class MainFrame(wx.Frame):
         self.current_document_instance = None
         self.css_colors = None
 
+        # Special tool ids.
+        self._image_tool_id = None
+
         self._init_status_bar()
         self._init_menu()
         self._init_sizers_panels()
@@ -168,7 +171,7 @@ class MainFrame(wx.Frame):
             image = image.Scale(Numbers.icon_width, Numbers.icon_height, wx.IMAGE_QUALITY_HIGH)
             return wx.Bitmap(image)
 
-        self.tool_bar = self.CreateToolBar(style=wx.TB_DEFAULT_STYLE)
+        self.tool_bar: wx.ToolBar = self.CreateToolBar(style=wx.TB_DEFAULT_STYLE)
         # Add toolbar tools
         self.new_file_tool = self.tool_bar.AddTool(self._add_tool_id(), Strings.toolbar_new_file,
                                                    scale_icon('new-file.png'),
@@ -176,7 +179,8 @@ class MainFrame(wx.Frame):
         self.save_tool = self.tool_bar.AddTool(self._add_tool_id(), Strings.toolbar_save,
                                                scale_icon('save.png'),
                                                Strings.toolbar_save)
-        self.insert_img_tool = self.tool_bar.AddTool(self._add_tool_id(), Strings.toolbar_insert_img,
+        self._image_tool_id = self._add_tool_id()
+        self.insert_img_tool = self.tool_bar.AddTool(self._image_tool_id, Strings.toolbar_insert_img,
                                                      scale_icon('insert-image.png'),
                                                      Strings.toolbar_insert_img)
         self.bold_tool = self.tool_bar.AddTool(self._add_tool_id(), Strings.toolbar_bold,
@@ -378,7 +382,8 @@ class MainFrame(wx.Frame):
         :return: None
         """
         # Main text area section ---------------------------------------------------------------------------------------
-        self._main_text_area = CustomRichText(self.style_control, self.right_panel, style=wx.VSCROLL)
+        self._main_text_area = CustomRichText(self._image_tool_id, self.style_control, self.right_panel,
+                                              style=wx.VSCROLL)
         self.middle_vertical_sizer.Add(self._main_text_area, flag=wx.EXPAND | wx.TOP, proportion=1,
                                        border=Numbers.widget_border_size)
         # --------------------------------------------------------------------------------------------------------------
