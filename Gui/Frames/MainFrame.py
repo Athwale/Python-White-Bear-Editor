@@ -320,8 +320,8 @@ class MainFrame(wx.Frame):
         # --------------------------------------------------------------------------------------------------------------
 
         # File list section --------------------------------------------------------------------------------------------
-        self.style_control = wx.ListBox(self.left_panel, -1, size=(-1, 160))
-        self.style_sizer.Add(self.style_control, 1, flag=wx.EXPAND)
+        self._style_picker = wx.ListBox(self.left_panel, -1, size=(-1, 160))
+        self.style_sizer.Add(self._style_picker, 1, flag=wx.EXPAND)
         self.page_list = wx.ListCtrl(self.left_panel, -1, style=wx.LC_REPORT | wx.LC_SINGLE_SEL)
         self.page_list.SetFont(self.menu_text_field_font)
         self.filelist_column_sizer.Add(self.style_sizer, flag=wx.EXPAND, border=Numbers.widget_border_size)
@@ -385,7 +385,7 @@ class MainFrame(wx.Frame):
         :return: None
         """
         # Main text area section ---------------------------------------------------------------------------------------
-        self._main_text_area = CustomRichText(self._image_tool_id, self.style_control, self.right_panel,
+        self._main_text_area = CustomRichText(self._image_tool_id, self._style_picker, self.right_panel,
                                               style=wx.VSCROLL)
         self.middle_vertical_sizer.Add(self._main_text_area, flag=wx.EXPAND | wx.TOP, proportion=1,
                                        border=Numbers.widget_border_size)
@@ -430,6 +430,7 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_TEXT, self._handle_date_change, self.field_article_date)
         self.Bind(wx.EVT_TEXT, self._handle_keywords_change, self.field_article_keywords)
         self.Bind(wx.EVT_TEXT, self._handle_description_change, self.field_article_description)
+        self.Bind(wx.EVT_LISTBOX, self.forward_event, self._style_picker)
 
     def _set_status_text(self, text: str, position=0) -> None:
         """
