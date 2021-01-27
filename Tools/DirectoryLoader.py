@@ -21,7 +21,6 @@ class DirectoryLoader:
     This class loads and parses white bear web root directory. The output is a dictionary of file names + full path
     to them on the system. If the directory is not readable or writable or the files are not readable or writeable,
     AccessException is raised.
-    # TODO parse css
     """
 
     def __init__(self):

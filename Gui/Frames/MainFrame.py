@@ -10,6 +10,7 @@ from Exceptions.UnrecognizedFileException import UnrecognizedFileException
 from Gui.Dialogs.AboutDialog import AboutDialog
 from Gui.Dialogs.EditAsideImageDialog import EditAsideImageDialog
 from Gui.Dialogs.EditMenuItemDialog import EditMenuItemDialog
+from Gui.Dialogs.LoadingDialog import LoadingDialog
 from Gui.Panels.AsideImagePanel import AsideImagePanel
 from Gui.Panels.CustomRichText import CustomRichText
 from Resources.Fetch import Fetch
@@ -33,6 +34,7 @@ class MainFrame(wx.Frame):
         """
         # -1 is a special ID which generates a random wx ID
         super(MainFrame, self).__init__(None, -1, title=Strings.editor_name, style=wx.DEFAULT_FRAME_STYLE)
+
         # Create font for text fields
         self.menu_text_field_font = wx.Font(Numbers.text_field_font_size, wx.FONTFAMILY_DEFAULT,
                                             wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, False)
@@ -44,6 +46,7 @@ class MainFrame(wx.Frame):
         self.current_document_name = None
         self.current_document_instance = None
         self.css_colors = None
+        self.loading_dlg = None
 
         # Special tool ids.
         self._image_tool_id = None
@@ -466,6 +469,9 @@ class MainFrame(wx.Frame):
         :param path: str, path to the working directory
         :return: None
         """
+
+        self.loading_dlg = LoadingDialog(None)
+        self.loading_dlg.Show()
         # Disable the gui until load is done
         self.Disable()
         self._set_status_text(Strings.status_loading, 3)
@@ -489,6 +495,7 @@ class MainFrame(wx.Frame):
         :param e: Exception that caused the call of this method.
         :return: None
         """
+        self.loading_dlg.Destroy()
         self._show_error_dialog(str(e))
         self._disable_editor(True)
 
@@ -528,6 +535,7 @@ class MainFrame(wx.Frame):
         self._set_status_text(Strings.status_ready, 3)
         self._set_status_text(Strings.status_articles + ' ' + str(len(self.document_dictionary)), 2)
         self._disable_editor(False)
+        self.loading_dlg.Destroy()
 
     def forward_event(self, evt) -> None:
         """

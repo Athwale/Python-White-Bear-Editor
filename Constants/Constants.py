@@ -9,7 +9,6 @@ class Numbers:
     YELLOW_COLOR = Colour(250, 255, 196)
     BLUE_COLOR = Colour(145, 207, 255)
 
-    splashscreen_timeout: int = 15000
     three_click_timeout: int = 400
 
     minimal_window_size_width: int = 1200
@@ -32,6 +31,7 @@ class Numbers:
     icon_height: int = 30
     color_icon_width: int = 15
     color_icon_height: int = 15
+    splashscreen_dialog_size: (int, int) = (300, 337)
 
     # Styling
     main_heading_size = 18
