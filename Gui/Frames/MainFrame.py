@@ -8,6 +8,7 @@ from Constants.Constants import Numbers
 from Constants.Constants import Strings
 from Exceptions.UnrecognizedFileException import UnrecognizedFileException
 from Gui.Dialogs.AboutDialog import AboutDialog
+from Gui.Dialogs.AddImageDialog import AddImageDialog
 from Gui.Dialogs.EditAsideImageDialog import EditAsideImageDialog
 from Gui.Dialogs.EditMenuItemDialog import EditMenuItemDialog
 from Gui.Dialogs.LoadingDialog import LoadingDialog
@@ -47,6 +48,7 @@ class MainFrame(wx.Frame):
         self.current_document_instance = None
         self.css_colors = None
         self.loading_dlg = None
+        self._ignore_change = False
 
         # Special tool ids.
         self._image_tool_id = None
@@ -86,10 +88,12 @@ class MainFrame(wx.Frame):
         self.file_menu = wx.Menu(style=wx.MENU_TEAROFF)
         self.help_menu = wx.Menu(style=wx.MENU_TEAROFF)
         self.edit_menu = wx.Menu(style=wx.MENU_TEAROFF)
+        self.add_menu = wx.Menu(style=wx.MENU_TEAROFF)
 
         # Add the file menu into the menu bar.
         self.menu_bar.Append(self.file_menu, Strings.label_menu_file)
         self.menu_bar.Append(self.edit_menu, Strings.label_menu_edit)
+        self.menu_bar.Append(self.add_menu, Strings.label_menu_add)
         self.menu_bar.Append(self.help_menu, Strings.label_menu_help)
 
         # File menu ----------------------------------------------------------------------------------------------------
@@ -129,20 +133,30 @@ class MainFrame(wx.Frame):
                                                      Strings.label_menu_item_select_all,
                                                      Strings.label_menu_item_select_all_hint)
         self.disableable_menu_items.append(self.edit_menu_item_select_all)
-        self.edit_menu_item_insert_img = wx.MenuItem(self.edit_menu, wx.ID_ANY, Strings.label_menu_item_insert_img,
-                                                     Strings.label_menu_item_insert_img_hint)
-        self.disableable_menu_items.append(self.edit_menu_item_insert_img)
-        self.edit_menu_item_insert_link = wx.MenuItem(self.edit_menu, wx.ID_ANY, Strings.label_menu_item_insert_link,
-                                                      Strings.label_menu_item_insert_link_hint)
-        self.disableable_menu_items.append(self.edit_menu_item_insert_link)
+
         self.edit_menu.Append(self.edit_menu_item_undo)
         self.edit_menu.Append(self.edit_menu_item_redo)
         self.edit_menu.Append(self.edit_menu_item_copy)
         self.edit_menu.Append(self.edit_menu_item_cut)
         self.edit_menu.Append(self.edit_menu_item_paste)
         self.edit_menu.Append(self.edit_menu_item_select_all)
-        self.edit_menu.Append(self.edit_menu_item_insert_img)
-        self.edit_menu.Append(self.edit_menu_item_insert_link)
+
+        # Add menu ---------------------------------------------------------------------------------------------------
+        # TODO insert side image, only correct thumbnail sizes are acceptable.
+        # TODO change menu logo and main image
+        self.add_menu_item_add_image = wx.MenuItem(self.add_menu, wx.ID_ADD, Strings.label_menu_item_add_text_image,
+                                                   Strings.label_menu_item_add_text_image_hint)
+        self.disableable_menu_items.append(self.add_menu_item_add_image)
+        self.add_menu_item_add_logo = wx.MenuItem(self.add_menu, wx.ID_FILE1, Strings.label_menu_item_add_logo,
+                                                  Strings.label_menu_item_add_logo_hint)
+        self.disableable_menu_items.append(self.add_menu_item_add_logo)
+        self.add_menu_item_side_image = wx.MenuItem(self.add_menu, wx.ID_FILE2, Strings.label_menu_item_add_side_image,
+                                                    Strings.label_menu_item_add_side_image_hint)
+        self.disableable_menu_items.append(self.add_menu_item_side_image)
+
+        self.add_menu.Append(self.add_menu_item_add_image)
+        self.add_menu.Append(self.add_menu_item_add_logo)
+        self.add_menu.Append(self.add_menu_item_side_image)
 
         # About menu ---------------------------------------------------------------------------------------------------
         self.help_menu_item_about = wx.MenuItem(self.help_menu, wx.ID_ABOUT, Strings.label_menu_item_about,
@@ -167,7 +181,6 @@ class MainFrame(wx.Frame):
         Set up top tool bar for the frame.
         :return: None
         """
-
         def scale_icon(name: str) -> wx.Bitmap:
             path = Fetch.get_resource_path(name)
             image = wx.Image(path, wx.BITMAP_TYPE_ANY)
@@ -196,12 +209,17 @@ class MainFrame(wx.Frame):
 
     def _create_color_tool(self, name: str, toolbar: wx.ToolBar, color: wx.Colour) -> None:
         """
-        Create a tool for the toolbar with  a colored square button.
+        Create a tool for the toolbar with  a colored square button only if the tool does not exist already.
         :param name: Name of the color
         :param toolbar: Application's toolbar
         :param color: The color to use.
         :return: None
         """
+        for tool_id in self.tool_ids:
+            tool: wx.ToolBarToolBase = self.tool_bar.FindById(tool_id)
+            if tool.GetShortHelp() == name:
+                # Do not recreate tools on working directory reload, only create potential new color tools.
+                return
         bmp = self._make_bitmap(color)
         tool = toolbar.AddTool(self._add_tool_id(), Strings.toolbar_color, bmp, name)
         self.Bind(wx.EVT_MENU, self._change_color, tool)
@@ -418,8 +436,7 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.forward_event, self.edit_menu_item_undo)
         self.Bind(wx.EVT_MENU, self.forward_event, self.edit_menu_item_redo)
         self.Bind(wx.EVT_MENU, self.forward_event, self.edit_menu_item_select_all)
-        self.Bind(wx.EVT_MENU, self.forward_event, self.edit_menu_item_insert_img)
-        self.Bind(wx.EVT_MENU, self.forward_event, self.edit_menu_item_insert_link)
+        self.Bind(wx.EVT_MENU, self.add_image_handler, self.add_menu_item_add_image)
 
         # Bind other controls clicks
         self.Bind(wx.EVT_LIST_ITEM_SELECTED, self.list_item_click_handler, self.page_list)
@@ -470,7 +487,6 @@ class MainFrame(wx.Frame):
         :param path: str, path to the working directory
         :return: None
         """
-
         self.loading_dlg = LoadingDialog(None)
         self.loading_dlg.Show()
         # Disable the gui until load is done
@@ -499,6 +515,7 @@ class MainFrame(wx.Frame):
         self.loading_dlg.Destroy()
         self._show_error_dialog(str(e))
         self._disable_editor(True)
+        self._clear_editor()
 
     def on_css_parsed(self, css: WhitebearDocumentCSS) -> None:
         """
@@ -689,6 +706,36 @@ class MainFrame(wx.Frame):
         new_size = self.left_panel.GetSize()[0]
         self.page_list.SetColumnWidth(0, new_size)
 
+    def _clear_editor(self) -> None:
+        """
+        Clear all controls.
+        :return: None
+        """
+        # TODO clear editor on error
+        # TODO disable insert image tool on error too. Should be disabled but is not, clear then disable.
+        # Ignore changes to article metadata so it is not saved into the file.
+        self._ignore_change = True
+        self.SetTitle(Strings.editor_name)
+        placeholder_logo_image = wx.Image(Numbers.menu_logo_image_size, Numbers.menu_logo_image_size)
+        placeholder_logo_image.Replace(0, 0, 0, 245, 255, 255)
+        self._menu_logo_button.SetBitmap(wx.Bitmap(placeholder_logo_image))
+        placeholder_main_image = wx.Image(Numbers.main_image_width, Numbers.main_image_height)
+        placeholder_main_image.Replace(0, 0, 0, 245, 255, 255)
+        self._main_image_button.SetBitmap(wx.Bitmap(placeholder_main_image))
+        self.page_list.ClearAll()
+        self.side_photo_panel.clear_panel()
+        self._main_text_area.clear_self()
+        self._text_menu_item_name.SetLabelText('')
+        self._text_main_image_caption.SetLabelText('')
+        self.field_article_name.SetValue(Strings.label_article_title)
+        self.field_article_date.SetValue(Strings.label_article_date)
+        self.field_article_description.SetValue(Strings.label_article_description)
+        self.field_article_keywords.SetValue(Strings.label_article_keywords)
+        self._set_status_text(Strings.status_error, 0)
+        self._set_status_text(Strings.status_error, 3)
+        self._ignore_change = False
+        pass
+
     def list_item_click_handler(self, event):
         """
         Handler function for clicking a page name in the web page list. Revalidates the document against schema. If
@@ -709,13 +756,16 @@ class MainFrame(wx.Frame):
                     error_string = error_string + message + '\n'
                 self._show_error_dialog(error_string)
                 self._disable_editor(True)
+                self._clear_editor()
                 return
         except UnrecognizedFileException as e:
             self._show_error_dialog(str(e))
             self._disable_editor(True)
+            self._clear_editor()
             return
         except KeyError as _:
             self._show_error_dialog(Strings.exception_last_document_missing)
+            self._clear_editor()
             return
         # If the document is correct, now we can show it.
         self._fill_editor(self.current_document_instance)
@@ -793,11 +843,12 @@ class MainFrame(wx.Frame):
         :param event: Not used
         :return: None
         """
-        correct, message, color = self.current_document_instance.seo_test_name(self.field_article_name.GetValue())
-        self.field_article_name.SetBackgroundColour(color)
-        self.field_article_name_tip.SetMessage(Strings.seo_check + '\n' + message)
-        self.current_document_instance.set_page_name(self.field_article_name.GetValue())
-        self._update_file_color()
+        if not self._ignore_change:
+            correct, message, color = self.current_document_instance.seo_test_name(self.field_article_name.GetValue())
+            self.field_article_name.SetBackgroundColour(color)
+            self.field_article_name_tip.SetMessage(Strings.seo_check + '\n' + message)
+            self.current_document_instance.set_page_name(self.field_article_name.GetValue())
+            self._update_file_color()
 
     def _handle_date_change(self, event: wx.CommandEvent) -> None:
         """
@@ -805,11 +856,12 @@ class MainFrame(wx.Frame):
         :param event: Not used
         :return: None
         """
-        correct, message, color = self.current_document_instance.seo_test_date(self.field_article_date.GetValue())
-        self.field_article_date.SetBackgroundColour(color)
-        self.field_article_date_tip.SetMessage(Strings.seo_check + '\n' + message)
-        self.current_document_instance.set_date(self.field_article_date.GetValue())
-        self._update_file_color()
+        if not self._ignore_change:
+            correct, message, color = self.current_document_instance.seo_test_date(self.field_article_date.GetValue())
+            self.field_article_date.SetBackgroundColour(color)
+            self.field_article_date_tip.SetMessage(Strings.seo_check + '\n' + message)
+            self.current_document_instance.set_date(self.field_article_date.GetValue())
+            self._update_file_color()
 
     def _handle_keywords_change(self, event: wx.CommandEvent) -> None:
         """
@@ -817,12 +869,13 @@ class MainFrame(wx.Frame):
         :param event: Not used
         :return: None
         """
-        keyword_list = [word.strip() for word in self.field_article_keywords.GetValue().split(',')]
-        correct, message, color = self.current_document_instance.seo_test_keywords(keyword_list)
-        self.field_article_keywords.SetBackgroundColour(color)
-        self.field_article_keywords_tip.SetMessage(Strings.seo_check + '\n' + message)
-        self.current_document_instance.set_keywords(keyword_list)
-        self._update_file_color()
+        if not self._ignore_change:
+            keyword_list = [word.strip() for word in self.field_article_keywords.GetValue().split(',')]
+            correct, message, color = self.current_document_instance.seo_test_keywords(keyword_list)
+            self.field_article_keywords.SetBackgroundColour(color)
+            self.field_article_keywords_tip.SetMessage(Strings.seo_check + '\n' + message)
+            self.current_document_instance.set_keywords(keyword_list)
+            self._update_file_color()
 
     def _handle_description_change(self, event: wx.CommandEvent) -> None:
         """
@@ -830,21 +883,22 @@ class MainFrame(wx.Frame):
         :param event: Not used
         :return: None
         """
-        correct, message, color = self.current_document_instance.seo_test_description(
-            self.field_article_description.GetValue())
+        if not self._ignore_change:
+            correct, message, color = self.current_document_instance.seo_test_description(
+                self.field_article_description.GetValue())
 
-        # Set color
-        self.field_article_description.SetBackgroundColour(color)
-        style_carrier = wx.TextAttr()
+            # Set color
+            self.field_article_description.SetBackgroundColour(color)
+            style_carrier = wx.TextAttr()
 
-        # Set color for the current text separately, it does not work with just background color
-        self.field_article_description.GetStyle(0, style_carrier)
-        style_carrier.SetBackgroundColour(color)
-        self.field_article_description.SetStyle(0, len(self.field_article_description.GetValue()), style_carrier)
+            # Set color for the current text separately, it does not work with just background color
+            self.field_article_description.GetStyle(0, style_carrier)
+            style_carrier.SetBackgroundColour(color)
+            self.field_article_description.SetStyle(0, len(self.field_article_description.GetValue()), style_carrier)
 
-        self.field_article_description_tip.SetMessage(Strings.seo_check + '\n' + message)
-        self.current_document_instance.set_description(self.field_article_description.GetValue())
-        self._update_file_color()
+            self.field_article_description_tip.SetMessage(Strings.seo_check + '\n' + message)
+            self.current_document_instance.set_description(self.field_article_description.GetValue())
+            self._update_file_color()
 
     def _update_file_color(self) -> None:
         """
@@ -884,3 +938,13 @@ class MainFrame(wx.Frame):
         :return: None
         """
         self._update_file_color()
+
+    def add_image_handler(self, event: wx.CommandEvent) -> None:
+        """
+        Handle adding a new image into the image folder structure.
+        :param event: Not used
+        :return: None
+        """
+        dlg = AddImageDialog(self, self.current_document_instance)
+        dlg.ShowModal()
+        dlg.Destroy()

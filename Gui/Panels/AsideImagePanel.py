@@ -73,11 +73,11 @@ class AsideImagePanel(wx.lib.scrolledpanel.ScrolledPanel):
         :return: None
         """
         self._document = doc
-        self._clear_panel()
+        self.clear_panel()
         self._images = self._document.get_aside_images()
         self._show_images()
 
-    def _clear_panel(self) -> None:
+    def clear_panel(self) -> None:
         """
         Clear loaded bitmaps and free memory.
         :return: None
@@ -92,7 +92,7 @@ class AsideImagePanel(wx.lib.scrolledpanel.ScrolledPanel):
         """
         self.Hide()
         # First clear already displayed images
-        self._clear_panel()
+        self.clear_panel()
 
         # Create and show new images
         for img in self._images:

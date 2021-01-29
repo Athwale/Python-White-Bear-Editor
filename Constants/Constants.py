@@ -27,6 +27,7 @@ class Numbers:
     edit_video_dialog_height: int = 200
     edit_link_dialog_height: int = 255
     edit_menu_item_dialog_height: int = 310
+    add_image_dialog_width: int = 600
     icon_width: int = 30
     icon_height: int = 30
     color_icon_width: int = 15
@@ -78,6 +79,7 @@ class Strings:
     cz_months = '|'.join(
         ['Ledna', 'Února', 'Března', 'Dubna', 'Května', 'Června', 'Července', 'Srpna', 'Září', 'Října', 'Listopadu',
          'Prosince'])
+    image_extensions: str = 'JPG files (*.jpg)|*.jpg|PNG files (*.png)|*.png'
     home_directory: str = os.path.expanduser('~')
     editor_config_file: str = os.path.join(home_directory, '.whitebearEditor.conf')
     editor_output_debug_file: str = os.path.join(home_directory, 'whitebearEditor.log')
@@ -157,10 +159,14 @@ class Strings:
     label_menu_item_paste_hint: str = 'Paste'
     label_menu_item_select_all: str = 'Select all\tctrl+a'
     label_menu_item_select_all_hint: str = 'Select all'
-    label_menu_item_insert_img: str = 'Insert image\tctrl+i'
-    label_menu_item_insert_img_hint: str = 'Insert image into text'
-    label_menu_item_insert_link: str = 'Insert link\tctrl+l'
-    label_menu_item_insert_link_hint: str = 'Insert link into text'
+
+    label_menu_add: str = 'Add'
+    label_menu_item_add_text_image: str = 'Add image to collection\tctrl+i'
+    label_menu_item_add_text_image_hint: str = 'Add text image'
+    label_menu_item_add_logo: str = 'Add menu logo to collection\tctrl+l'
+    label_menu_item_add_logo_hint: str = 'Add menu logo'
+    label_menu_item_add_side_image: str = 'Insert aside image\tctrl+p'
+    label_menu_item_add_side_image_hint: str = 'Insert aside image'
 
     # Pop up menu items
     label_menu_up: str = 'Move up'
@@ -173,6 +179,7 @@ class Strings:
     label_dialog_edit_link: str = 'Edit link'
     label_dialog_edit_video: str = 'Edit video'
     label_dialog_edit_menu_item: str = 'Edit menu item'
+    label_dialog_add_image: str = 'Add image'
 
     label_article_menu_logo: str = 'Menu logo'
     label_article_menu_logo_name_placeholder: str = 'Menu item name'
@@ -193,6 +200,7 @@ class Strings:
     label_image: str = 'Image'
     label_image_path: str = 'Full image'
     label_image_thumbnail_path: str = 'Thumbnail'
+    label_image_original_path: str = 'Original'
     label_caption: str = 'Caption'
     label_link_title: str = 'Link title'
     label_alt_description: str = 'Alt description'
@@ -209,6 +217,7 @@ class Strings:
     label_video_size: str = 'Video size'
     label_filelist: str = 'Files'
     label_styles: str = 'Styles'
+    label_select_image: str = 'Select image'
 
     status_loading: str = 'Loading and testing'
     status_ready: str = 'Ready'
@@ -238,6 +247,7 @@ class Strings:
     button_cancel: str = 'Cancel'
     button_ok: str = 'Ok'
     button_remove_link: str = 'Remove link'
+    button_browse: str = 'Browse'
 
     undo_last_action: str = 'Last action'
     undo_bold: str = 'Undo bold text'

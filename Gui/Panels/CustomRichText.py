@@ -48,13 +48,13 @@ class CustomRichText(rt.RichTextCtrl):
         self._main_frame = wx.GetTopLevelParent(self)
         self.Bind(wx.EVT_LISTBOX, self._style_picker_handler, self._style_picker)
         self.Bind(wx.EVT_TEXT_URL, self.url_in_text_click_handler, self)
-        self.Bind(wx.EVT_MENU, self.on_insert_image, self._main_frame.edit_menu_item_insert_img)
+        self.Bind(wx.EVT_MENU, self.on_insert_image, self._main_frame.insert_img_tool)
         self.Bind(wx.EVT_MENU, self.on_insert_image, self._main_frame.insert_img_tool)
         self.Bind(wx.EVT_MENU, self._change_bold, self._main_frame.bold_tool)
 
         self.Bind(wx.EVT_LEFT_UP, self._on_mouse_left)
-        # Updates style picker in times mouse is not registered.
-        self.Bind(wx.EVT_IDLE, self._update_gui_handler)
+        self.Bind(wx.EVT_MOTION, self._update_gui_handler)
+        self.Bind(wx.EVT_LEFT_UP, self._update_gui_handler)
 
         self.Bind(wx.EVT_KEY_DOWN, self._on_key_down)
         self.Bind(wx.EVT_KEY_UP, self._update_gui_handler)
@@ -622,8 +622,9 @@ class CustomRichText(rt.RichTextCtrl):
         :param event: Not used.
         :return: None
         """
-        self._update_style_picker()
-        self._enable_buttons()
+        if self.HasFocus():
+            self._update_style_picker()
+            self._enable_buttons()
         event.Skip()
 
     def _on_mouse_left(self, event: wx.MouseEvent) -> None:
@@ -717,7 +718,7 @@ class CustomRichText(rt.RichTextCtrl):
                 if url_index != wx.NOT_FOUND:
                     self._style_picker.Delete(url_index)
 
-    def _clear_self(self) -> None:
+    def clear_self(self) -> None:
         """
         Clears all styles and prepares the control for a new article.
         :return: None
@@ -745,7 +746,7 @@ class CustomRichText(rt.RichTextCtrl):
         """
         self._document = doc
         self.BeginSuppressUndo()
-        self._clear_self()
+        self.clear_self()
 
         last_was_paragraph = False
         for element in doc.get_main_text_elements():
@@ -929,12 +930,13 @@ class CustomRichText(rt.RichTextCtrl):
         inserted into the current position.
         :return: None
         """
-        # TODO catch any red incorrect links when doing seo when switching to a different document/save
+        # TODO catch any red incorrect links when doing seo when switching to a different document/save and turn doc red
         stored_link = self._document.find_link(link.get_id())
         if result == wx.ID_OK:
             # Only add link that is not already in the list
             if not stored_link:
                 self._document.add_link(link)
+            # Replace the text with link
             self.Remove(evt.GetURLStart(), evt.GetURLEnd() + 1)
             self._insert_link(link.get_text()[0], link.get_id(), link.get_status_color())
         elif result == wx.ID_DELETE or result == wx.ID_CANCEL:
@@ -945,7 +947,8 @@ class CustomRichText(rt.RichTextCtrl):
                 style_range = rt.RichTextRange(evt.GetURLStart(), evt.GetURLEnd() + 1)
                 # If it is a new link remove the link style from the text
                 self.SetStyleEx(style_range, style, rt.RICHTEXT_SETSTYLE_REMOVE)
-                self._document.remove_link(stored_link.get_id())
+                if stored_link:
+                    self._document.remove_link(stored_link.get_id())
                 # Without moving the caret you can still type in the now incorrect url style.
                 self.MoveLeft(0)
 
@@ -955,7 +958,10 @@ class CustomRichText(rt.RichTextCtrl):
         wx.PostEvent(self.GetEventHandler(), color_evt)
 
     def on_insert_image(self, evt):
+        print('insert image')
         # TODO this.
+        # TODO insert video
+        # TODO insert aside image
         #self._image_button.Disable()
         #self._write_field(from_button=True)
         # TODO memory leak in orphaned images and link, maybe reconcile on idle.
