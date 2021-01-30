@@ -3,14 +3,11 @@
 """Starting class for the whitebear editor GUI. This
 class is necessary and must be in all wx python programs. OnInit must be overridden here"""
 
-import time
-
 import wx
 import wx.adv
 
-from Constants.Constants import Strings, Numbers
+from Constants.Constants import Strings
 from Gui.Frames.MainFrame import MainFrame
-from Resources.Fetch import Fetch
 
 
 class MyApp(wx.App):

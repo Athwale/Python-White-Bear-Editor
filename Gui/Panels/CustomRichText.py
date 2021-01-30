@@ -381,7 +381,7 @@ class CustomRichText(rt.RichTextCtrl):
         self.SetStyleEx(p_range, style, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_PARAGRAPHS_ONLY
                                               | rt.RICHTEXT_SETSTYLE_RESET)
         self.SetListStyle(p_range, style_def, specifiedLevel=0, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO
-                          | rt.RICHTEXT_SETSTYLE_SPECIFY_LEVEL)
+                                                                      | rt.RICHTEXT_SETSTYLE_SPECIFY_LEVEL)
         if end_batch:
             self.EndBatchUndo()
 
@@ -626,6 +626,8 @@ class CustomRichText(rt.RichTextCtrl):
             self._update_style_picker()
             self._enable_buttons()
         event.Skip()
+
+    # todo image click does not work
 
     def _on_mouse_left(self, event: wx.MouseEvent) -> None:
         """
@@ -962,8 +964,8 @@ class CustomRichText(rt.RichTextCtrl):
         # TODO this.
         # TODO insert video
         # TODO insert aside image
-        #self._image_button.Disable()
-        #self._write_field(from_button=True)
+        # self._image_button.Disable()
+        # self._write_field(from_button=True)
         # TODO memory leak in orphaned images and link, maybe reconcile on idle.
         # Return focus to the text area.
         wx.CallLater(100, self.SetFocus)

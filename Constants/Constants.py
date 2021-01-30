@@ -27,7 +27,7 @@ class Numbers:
     edit_video_dialog_height: int = 200
     edit_link_dialog_height: int = 255
     edit_menu_item_dialog_height: int = 310
-    add_image_dialog_width: int = 600
+    add_image_dialog_width: int = 800
     icon_width: int = 30
     icon_height: int = 30
     color_icon_width: int = 15

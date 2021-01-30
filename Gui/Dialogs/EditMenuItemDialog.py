@@ -26,19 +26,20 @@ class EditMenuItemDialog(wx.Dialog):
         # Disk location
         self.full_disk_location_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.label_image_full_path = wx.StaticText(self, -1, Strings.label_image + ': ')
-        self.content_image_full_path = wx.StaticText(self, -1, Strings.label_none)
+        self.content_image_full_path = wx.StaticText(self, -1, Strings.label_none,
+                                                     style=wx.ST_ELLIPSIZE_MIDDLE | wx.ST_NO_AUTORESIZE)
         self.full_disk_location_sub_sizer.Add(self.label_image_full_path, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
-        self.full_disk_location_sub_sizer.Add(self.content_image_full_path,
-                                              flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
+        self.full_disk_location_sub_sizer.Add(self.content_image_full_path, 1, flag=wx.EXPAND)
         self.information_sizer.Add(self.full_disk_location_sub_sizer, flag=wx.EXPAND | wx.TOP,
                                    border=Numbers.widget_border_size)
 
         # Link href
         self.href_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.label_href = wx.StaticText(self, -1, Strings.label_target + ': ')
-        self.content_href = wx.StaticText(self, -1, Strings.label_none)
+        self.content_href = wx.StaticText(self, -1, Strings.label_none,
+                                          style=wx.ST_ELLIPSIZE_MIDDLE | wx.ST_NO_AUTORESIZE)
         self.href_sub_sizer.Add(self.label_href, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
-        self.href_sub_sizer.Add(self.content_href, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
+        self.href_sub_sizer.Add(self.content_href, 1, flag=wx.EXPAND)
         self.information_sizer.Add(self.href_sub_sizer, flag=wx.EXPAND | wx.TOP,
                                    border=Numbers.widget_border_size)
 

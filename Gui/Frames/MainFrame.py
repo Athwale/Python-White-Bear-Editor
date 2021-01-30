@@ -181,6 +181,7 @@ class MainFrame(wx.Frame):
         Set up top tool bar for the frame.
         :return: None
         """
+
         def scale_icon(name: str) -> wx.Bitmap:
             path = Fetch.get_resource_path(name)
             image = wx.Image(path, wx.BITMAP_TYPE_ANY)
@@ -711,7 +712,6 @@ class MainFrame(wx.Frame):
         Clear all controls.
         :return: None
         """
-        # TODO clear editor on error
         # TODO disable insert image tool on error too. Should be disabled but is not, clear then disable.
         # Ignore changes to article metadata so it is not saved into the file.
         self._ignore_change = True

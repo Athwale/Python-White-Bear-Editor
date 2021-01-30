@@ -26,20 +26,20 @@ class EditTextImageDialog(wx.Dialog):
         # Disk locations
         self.full_disk_location_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.label_image_full_path = wx.StaticText(self, -1, Strings.label_image_path + ': ')
-        self.content_image_full_path = wx.StaticText(self, -1, Strings.label_none)
+        self.content_image_full_path = wx.StaticText(self, -1, Strings.label_none,
+                                                     style=wx.ST_ELLIPSIZE_MIDDLE | wx.ST_NO_AUTORESIZE)
         self.full_disk_location_sub_sizer.Add(self.label_image_full_path, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
-        self.full_disk_location_sub_sizer.Add(self.content_image_full_path,
-                                              flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
+        self.full_disk_location_sub_sizer.Add(self.content_image_full_path, 1, flag=wx.EXPAND)
         self.information_sizer.Add(self.full_disk_location_sub_sizer, flag=wx.EXPAND | wx.TOP,
                                    border=Numbers.widget_border_size)
 
         self.thumb_disk_location_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.label_image_thumbnail_path = wx.StaticText(self, -1, Strings.label_image_thumbnail_path + ': ')
-        self.content_image_thumbnail_path = wx.StaticText(self, -1, Strings.label_none)
+        self.content_image_thumbnail_path = wx.StaticText(self, -1, Strings.label_none,
+                                                          style=wx.ST_ELLIPSIZE_MIDDLE | wx.ST_NO_AUTORESIZE)
         self.thumb_disk_location_sub_sizer.Add(self.label_image_thumbnail_path,
                                                flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
-        self.thumb_disk_location_sub_sizer.Add(self.content_image_thumbnail_path,
-                                               flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
+        self.thumb_disk_location_sub_sizer.Add(self.content_image_thumbnail_path, 1, flag=wx.EXPAND)
         self.information_sizer.Add(self.thumb_disk_location_sub_sizer, flag=wx.EXPAND | wx.TOP,
                                    border=Numbers.widget_border_size)
 
