@@ -3,6 +3,7 @@ import os.path
 from wx import Colour
 from fractions import Fraction
 
+
 class Numbers:
     RED_COLOR = Colour(242, 207, 206)
     GREEN_COLOR = Colour(201, 255, 199)
@@ -134,6 +135,7 @@ class Strings:
     seo_error_url_malformed: str = 'Url syntax error'
     seo_error_video_size_wrong: str = 'The size of the video element is incorrect'
     seo_check: str = 'SEO Check:'
+    warning_name_incorrect: str = 'Incorrect name'
 
     label_menu_file: str = 'File'
     label_menu_item_open: str = 'Open directory...\tctrl+o'
@@ -224,6 +226,7 @@ class Strings:
     label_text_image: str = 'Text image (width ' + str(Numbers.text_image_max_size) + 'px)'
     label_aside_image: str = 'Aside/Main image (' + str(Numbers.main_image_width) + 'x' +\
                              str(Numbers.main_image_height) + 'px)'
+    label_image_name: str = 'Image name'
 
     status_loading: str = 'Loading and testing'
     status_ready: str = 'Ready'
@@ -254,6 +257,7 @@ class Strings:
     button_ok: str = 'Ok'
     button_remove_link: str = 'Remove link'
     button_browse: str = 'Browse'
+    button_save: str = 'Save'
 
     undo_last_action: str = 'Last action'
     undo_bold: str = 'Undo bold text'

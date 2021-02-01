@@ -104,9 +104,8 @@ class AddImageDialog(wx.Dialog):
         self.name_sub_sizer.Add((5, -1))
         self.name_sub_sizer.Add(self.field_image_name, proportion=1)
         self.information_sizer.Add(self.name_sub_sizer, flag=wx.EXPAND | wx.TOP, border=Numbers.widget_border_size)
-        # TODO this, not empty, no /
-        self.field_image_link_title_tip = Tools.get_warning_tip(self.field_image_name,
-                                                                Strings.label_article_image_link_title)
+        self.field_image_name_tip = Tools.get_warning_tip(self.field_image_name, Strings.label_image_name)
+        self.field_image_name_tip.SetMessage('')
 
         # Image type sub sizer
         self.type_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -129,11 +128,11 @@ class AddImageDialog(wx.Dialog):
         self.button_sizer = wx.BoxSizer(wx.VERTICAL)
         grouping_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.cancel_button = wx.Button(self, wx.ID_CANCEL, Strings.button_cancel)
-        self.ok_button = wx.Button(self, wx.ID_OK, Strings.button_ok)
+        self.save_button = wx.Button(self, wx.ID_OK, Strings.button_save)
         self.browse_button = wx.Button(self, wx.ID_OPEN, Strings.button_browse)
-        self.ok_button.Disable()
+        self.save_button.Disable()
         self.browse_button.SetDefault()
-        grouping_sizer.Add(self.ok_button)
+        grouping_sizer.Add(self.save_button)
         grouping_sizer.Add((Numbers.widget_border_size, Numbers.widget_border_size))
         grouping_sizer.Add(self.cancel_button)
         grouping_sizer.Add((Numbers.widget_border_size, Numbers.widget_border_size))
@@ -151,7 +150,7 @@ class AddImageDialog(wx.Dialog):
         self.SetSizer(self.main_vertical_sizer)
 
         # Bind handlers
-        self.Bind(wx.EVT_BUTTON, self._handle_buttons, self.ok_button)
+        self.Bind(wx.EVT_BUTTON, self._handle_buttons, self.save_button)
         self.Bind(wx.EVT_BUTTON, self._handle_buttons, self.cancel_button)
         self.Bind(wx.EVT_BUTTON, self._handle_buttons, self.browse_button)
         self.Bind(wx.EVT_RADIOBUTTON, self._handle_radio_buttons)
@@ -176,9 +175,37 @@ class AddImageDialog(wx.Dialog):
         :return: None
         """
         if event.GetId() == wx.ID_OPEN:
+            self.save_button.Disable()
             self._image_path, self._image_name = self._ask_for_image()
             self._load_image()
-        event.Skip()
+            self.save_button.Enable()
+        elif event.GetId() == wx.ID_OK:
+            if self._save():
+                event.Skip()
+        elif event.GetId() == wx.ID_CANCEL:
+            event.Skip()
+
+    def _save(self) -> bool:
+        """
+        Save the images in correct locations.
+        :return: True if save successful.
+        """
+        # TODO do not save double extension
+        working_directory = self._doc.get_working_directory()
+        # Check filename
+        new_name = self.field_image_name.GetValue()
+        if '/' in new_name or '\\' in new_name or str.startswith(new_name, '.') or not new_name:
+            self.field_image_name.SetBackgroundColour(Numbers.RED_COLOR)
+            self.field_image_name_tip.SetMessage(Strings.warning_name_incorrect)
+            self.field_image_name_tip.EnableTip(True)
+            return False
+        else:
+            self.field_image_name_tip.SetMessage(Strings.status_ok)
+            self.field_image_name_tip.DoHideNow()
+            self.field_image_name.SetBackgroundColour(Numbers.GREEN_COLOR)
+        # Attempt to save the files
+
+        return True
 
     def _handle_radio_buttons(self, event: wx.CommandEvent) -> None:
         """
@@ -193,7 +220,6 @@ class AddImageDialog(wx.Dialog):
         Copy the selected image into the right place and make a thumbnail.
         :return: None
         """
-        working_directory = self._doc.get_working_directory()
         self.content_image_original_path.SetLabelText(self._image_path)
         self.field_image_name.SetValue(self._image_name)
 
