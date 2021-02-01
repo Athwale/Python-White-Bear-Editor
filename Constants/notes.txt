@@ -19,7 +19,7 @@ automatically break article image caption if too long
 
 Obrázky zmensit na 50%
 Obrazky zmensovat do thumbnails na 300x225 vsechny thumbnails vcetne main article image
-Nahled thumbnailu v aside = 211 x 158
+Nahled thumbnailu v aside = 211 x 158 (neni nutno delat tento thumbnail)
 Obrazky v textu max sirka 534 vyska 534
 
 flash 534x405

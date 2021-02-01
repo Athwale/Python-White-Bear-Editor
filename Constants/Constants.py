@@ -1,7 +1,7 @@
 import os.path
 
 from wx import Colour
-
+from fractions import Fraction
 
 class Numbers:
     RED_COLOR = Colour(242, 207, 206)
@@ -10,6 +10,7 @@ class Numbers:
     BLUE_COLOR = Colour(145, 207, 255)
 
     three_click_timeout: int = 400
+    photo_ratio: Fraction = Fraction(4, 3)
 
     minimal_window_size_width: int = 1200
     minimal_window_size_height: int = 700
@@ -27,7 +28,7 @@ class Numbers:
     edit_video_dialog_height: int = 200
     edit_link_dialog_height: int = 255
     edit_menu_item_dialog_height: int = 310
-    add_image_dialog_width: int = 800
+    add_image_dialog_width: int = 1000
     icon_width: int = 30
     icon_height: int = 30
     color_icon_width: int = 15
@@ -70,6 +71,7 @@ class Numbers:
     article_image_alt_max: int = 125
     video_width: int = 534
     video_height: int = 405
+    original_image_max_width: int = 2000
 
 
 class Strings:
@@ -218,6 +220,10 @@ class Strings:
     label_filelist: str = 'Files'
     label_styles: str = 'Styles'
     label_select_image: str = 'Select image'
+    label_target_section: str = 'Target section'
+    label_text_image: str = 'Text image (width ' + str(Numbers.text_image_max_size) + 'px)'
+    label_aside_image: str = 'Aside/Main image (' + str(Numbers.main_image_width) + 'x' +\
+                             str(Numbers.main_image_height) + 'px)'
 
     status_loading: str = 'Loading and testing'
     status_ready: str = 'Ready'

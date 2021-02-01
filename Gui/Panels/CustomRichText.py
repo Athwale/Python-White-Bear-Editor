@@ -627,8 +627,6 @@ class CustomRichText(rt.RichTextCtrl):
             self._enable_buttons()
         event.Skip()
 
-    # todo image click does not work
-
     def _on_mouse_left(self, event: wx.MouseEvent) -> None:
         """
         Handle left mouse click. Starts a timer and counts left mouse clicks in order to allow three click select.
