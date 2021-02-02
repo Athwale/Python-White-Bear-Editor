@@ -89,6 +89,9 @@ class Strings:
     editor_name: str = 'Whitebear editor'
     editor_version: str = '0.1'
     link_stub: str = 'https://www.'
+    folder_images: str = 'images'
+    folder_originals: str = 'originals'
+    folder_thumbnails: str = 'thumbnails'
 
     text_about_contents: str = '<p>Unfinished whitebear web editor.<br>' \
                                '<i>https://github.com/Athwale/Python-White-Bear-Editor</i><br>' \
@@ -204,7 +207,6 @@ class Strings:
     label_image: str = 'Image'
     label_image_path: str = 'Full image'
     label_image_thumbnail_path: str = 'Thumbnail'
-    label_image_original_path: str = 'Original'
     label_caption: str = 'Caption'
     label_link_title: str = 'Link title'
     label_alt_description: str = 'Alt description'
@@ -218,11 +220,12 @@ class Strings:
     label_link_local: str = 'WhiteBear page'
     label_thumbnail_size: str = 'Thumbnail size'
     label_original_size: str = 'Original size'
+    label_full_size: str = 'Full image size'
     label_video_size: str = 'Video size'
     label_filelist: str = 'Files'
     label_styles: str = 'Styles'
     label_select_image: str = 'Select image'
-    label_target_section: str = 'Target section'
+    label_target_section: str = 'Section'
     label_text_image: str = 'Text image (width ' + str(Numbers.text_image_max_size) + 'px)'
     label_aside_image: str = 'Aside/Main image (' + str(Numbers.main_image_width) + 'x' +\
                              str(Numbers.main_image_height) + 'px)'
