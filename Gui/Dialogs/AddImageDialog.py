@@ -151,12 +151,14 @@ class AddImageDialog(wx.Dialog):
     def _ask_for_image(self) -> (str, str):
         """
         Show a file picker dialog to get an image from the user.
-        :return: (file path, file name)
+        :return: (file path, file name) or None, None if canceled
         """
         with wx.FileDialog(self, Strings.label_select_image, Strings.home_directory, wildcard=Strings.image_extensions,
                            style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST | wx.FD_PREVIEW) as dlg:
             if dlg.ShowModal() == wx.ID_OK:
+                dlg: wx.FileDialog
                 return dlg.GetPath(), dlg.GetFilename()
+            return None, None
 
     def _handle_buttons(self, event: wx.CommandEvent) -> None:
         """
@@ -167,8 +169,9 @@ class AddImageDialog(wx.Dialog):
         if event.GetId() == wx.ID_OPEN:
             self._save_button.Disable()
             self._image_path, self._image_name = self._ask_for_image()
-            self._load_image()
-            self._save_button.Enable()
+            if self._image_path and self._image_name:
+                self._load_image()
+                self._save_button.Enable()
         elif event.GetId() == wx.ID_OK:
             if self._save():
                 event.Skip()
@@ -181,8 +184,15 @@ class AddImageDialog(wx.Dialog):
         :return: True if save successful.
         """
         # Check filename
-        new_name = self._field_image_name.GetValue()
-        if '/' in new_name or '\\' in new_name or str.startswith(new_name, '.') or not new_name:
+        new_name: str = self._field_image_name.GetValue()
+        # Only letters, - and numbers are allowed in image names.
+        wrong_name: bool = False
+        for c in new_name:
+            if not c.isalnum():
+                wrong_name = True
+            if c == '-':
+                wrong_name = False
+        if wrong_name:
             self._field_image_name.SetBackgroundColour(Numbers.RED_COLOR)
             self._field_image_name_tip.SetMessage(Strings.warning_name_incorrect)
             self._field_image_name_tip.EnableTip(True)
@@ -191,9 +201,8 @@ class AddImageDialog(wx.Dialog):
             self._field_image_name_tip.SetMessage(Strings.status_ok)
             self._field_image_name_tip.DoHideNow()
             self._field_image_name.SetBackgroundColour(Numbers.GREEN_COLOR)
+
         # Attempt to save the files
-        # TODO do not save double extension
-        # TODO label saying why image can not be aside
         thumbnail_file: str = os.path.join(self._thumbnails_path, new_name)
         full_file: str = os.path.join(self._originals_path, new_name)
         if os.path.exists(thumbnail_file):
@@ -205,9 +214,16 @@ class AddImageDialog(wx.Dialog):
                           wx.OK | wx.ICON_ERROR)
             return False
 
-        print(thumbnail_file)
-        print(full_file)
+        # Determine the file type, we can only open jpg and png files in the browse dialog.
+        _, file_extension = os.path.splitext(os.path.join(self._image_path, self._image_name))
+        if file_extension == Strings.extension_jpg:
+            img_type = wx.BITMAP_TYPE_JPEG
+        else:
+            img_type = wx.BITMAP_TYPE_PNG
 
+        self._full_image.SaveFile(full_file + file_extension, img_type)
+        self._thumbnail.SaveFile(thumbnail_file + file_extension, img_type)
+        # Exceptions from here are caught automatically
         return True
 
     def _handle_radio_buttons(self, event: wx.CommandEvent) -> None:
@@ -224,7 +240,8 @@ class AddImageDialog(wx.Dialog):
         :return: None
         """
         self._content_image_original_path.SetLabelText(self._image_path)
-        self._field_image_name.SetValue(self._image_name)
+        image_name: str = os.path.splitext(self._image_name)[0]
+        self._field_image_name.SetValue(image_name)
 
         # Create the base image for resizing.
         self._full_image = wx.Image(self._image_path, wx.BITMAP_TYPE_ANY)

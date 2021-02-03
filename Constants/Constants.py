@@ -82,7 +82,10 @@ class Strings:
     cz_months = '|'.join(
         ['Ledna', 'Února', 'Března', 'Dubna', 'Května', 'Června', 'Července', 'Srpna', 'Září', 'Října', 'Listopadu',
          'Prosince'])
-    image_extensions: str = 'JPG files (*.jpg)|*.jpg|PNG files (*.png)|*.png'
+    extension_jpg: str = '.jpg'
+    extension_png: str = '.png'
+    image_extensions: str = 'JPG files (*' + extension_jpg + ')|*' + extension_jpg +\
+                            '|PNG files (*' + extension_png + ')|*' + extension_jpg + ''
     home_directory: str = os.path.expanduser('~')
     editor_config_file: str = os.path.join(home_directory, '.whitebearEditor.conf')
     editor_output_debug_file: str = os.path.join(home_directory, 'whitebearEditor.log')
@@ -90,7 +93,7 @@ class Strings:
     editor_version: str = '0.1'
     link_stub: str = 'https://www.'
     folder_images: str = 'images'
-    folder_originals: str = 'originals'
+    folder_originals: str = 'original'
     folder_thumbnails: str = 'thumbnails'
 
     text_about_contents: str = '<p>Unfinished whitebear web editor.<br>' \
@@ -138,7 +141,7 @@ class Strings:
     seo_error_url_malformed: str = 'Url syntax error'
     seo_error_video_size_wrong: str = 'The size of the video element is incorrect'
     seo_check: str = 'SEO Check:'
-    warning_name_incorrect: str = 'Incorrect name'
+    warning_name_incorrect: str = 'Incorrect name\nDo not use file extension\nDo not use special characters'
     warning_file_exists: str = 'File already exists'
     warning_aside_impossible: str = 'Aspect ratio must be 4/3 for aside image'
 
