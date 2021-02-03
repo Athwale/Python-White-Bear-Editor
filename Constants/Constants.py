@@ -139,6 +139,8 @@ class Strings:
     seo_error_video_size_wrong: str = 'The size of the video element is incorrect'
     seo_check: str = 'SEO Check:'
     warning_name_incorrect: str = 'Incorrect name'
+    warning_file_exists: str = 'File already exists'
+    warning_aside_impossible: str = 'Aspect ratio must be 4/3 for aside image'
 
     label_menu_file: str = 'File'
     label_menu_item_open: str = 'Open directory...\tctrl+o'

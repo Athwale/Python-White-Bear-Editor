@@ -100,6 +100,13 @@ class AddImageDialog(wx.Dialog):
         self._type_sub_sizer.Add(self._radio_aside, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
         self._information_sizer.Add(self._type_sub_sizer, flag=wx.EXPAND | wx.TOP, border=Numbers.widget_border_size)
 
+        # Image name sub sizer
+        self._warning_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self._label_warning = wx.StaticText(self, -1, Strings.warning_aside_impossible)
+        self._warning_sub_sizer.Add(self._label_warning, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
+        self._information_sizer.Add(self._warning_sub_sizer, flag=wx.EXPAND | wx.TOP, border=Numbers.widget_border_size)
+        self._label_warning.Hide()
+
         # Image preview
         self._image_sizer = wx.BoxSizer(wx.VERTICAL)
         placeholder_image: wx.Image = wx.Image(Numbers.main_image_width, Numbers.main_image_height)
@@ -186,9 +193,20 @@ class AddImageDialog(wx.Dialog):
             self._field_image_name.SetBackgroundColour(Numbers.GREEN_COLOR)
         # Attempt to save the files
         # TODO do not save double extension
+        # TODO label saying why image can not be aside
+        thumbnail_file: str = os.path.join(self._thumbnails_path, new_name)
+        full_file: str = os.path.join(self._originals_path, new_name)
+        if os.path.exists(thumbnail_file):
+            wx.MessageBox(Strings.warning_file_exists + ': ' + thumbnail_file, Strings.status_error,
+                          wx.OK | wx.ICON_ERROR)
+            return False
+        if os.path.exists(full_file):
+            wx.MessageBox(Strings.warning_file_exists + ': ' + full_file, Strings.status_error,
+                          wx.OK | wx.ICON_ERROR)
+            return False
 
-        print(self._originals_path)
-        print(self._thumbnails_path)
+        print(thumbnail_file)
+        print(full_file)
 
         return True
 
@@ -213,8 +231,11 @@ class AddImageDialog(wx.Dialog):
         # Check aspect ratio of the image and disable the aside image option if 300x225 resize is impossible.
         if Numbers.photo_ratio != Fraction(self._full_image.GetWidth(), self._full_image.GetHeight()):
             self._radio_aside.Disable()
+            self._radio_text.SetValue(True)
+            self._label_warning.Show(True)
         else:
             self._radio_aside.Enable()
+            self._label_warning.Show(False)
         if self._full_image.GetWidth() > Numbers.original_image_max_width:
             # Resize the original image to 50% if too bit.
             self._full_image.Rescale(self._full_image.GetWidth() / 2, self._full_image.GetHeight() / 2,
