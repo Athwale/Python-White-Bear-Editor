@@ -821,7 +821,6 @@ class CustomRichText(rt.RichTextCtrl):
         buffer.InsertFieldWithUndo(self.GetBuffer(), position, new_field.GetName(), rt.RichTextProperties(),
                                    self, rt.RICHTEXT_INSERT_NONE, rt.RichTextAttr())
         self.EndBatchUndo()
-        # TODO memory leak in orphaned images and link, maybe reconcile on idle.
 
     @staticmethod
     def _register_field(element) -> ImageTextField:
@@ -930,7 +929,11 @@ class CustomRichText(rt.RichTextCtrl):
         inserted into the current position.
         :return: None
         """
+        # TODO undo on link changes broken, sometimes undoes into a white link.
         # TODO catch any red incorrect links when doing seo when switching to a different document/save and turn doc red
+        # TODO deleted links are not removed from the document to make undo work, reconcile links and images on save.
+        if not self.BatchingUndo():
+            self.BeginBatchUndo(Strings.undo_last_action)
         stored_link = self._document.find_link(link.get_id())
         if result == wx.ID_OK:
             # Only add link that is not already in the list
@@ -941,16 +944,21 @@ class CustomRichText(rt.RichTextCtrl):
             self._insert_link(link.get_text()[0], link.get_id(), link.get_status_color())
         elif result == wx.ID_DELETE or result == wx.ID_CANCEL:
             if stored_link and result == wx.ID_CANCEL:
+                if self.BatchingUndo():
+                    self.EndBatchUndo()
                 return
             else:
                 style: rt.RichTextAttr = self._stylesheet.FindCharacterStyle(Strings.style_url).GetStyle()
                 style_range = rt.RichTextRange(evt.GetURLStart(), evt.GetURLEnd() + 1)
                 # If it is a new link remove the link style from the text
-                self.SetStyleEx(style_range, style, rt.RICHTEXT_SETSTYLE_REMOVE)
-                if stored_link:
-                    self._document.remove_link(stored_link.get_id())
+                self.SetStyleEx(style_range, style, rt.RICHTEXT_SETSTYLE_REMOVE | rt.RICHTEXT_SETSTYLE_WITH_UNDO)
                 # Without moving the caret you can still type in the now incorrect url style.
                 self.MoveLeft(0)
+                self.Invalidate()
+                self.Refresh()
+
+        if self.BatchingUndo():
+            self.EndBatchUndo()
 
         # Send an event to the main gui to signal document color change
         color_evt = wx.CommandEvent(wx.wxEVT_COLOUR_CHANGED, self.GetId())
@@ -959,7 +967,6 @@ class CustomRichText(rt.RichTextCtrl):
 
     def on_insert_image(self, evt):
         print('insert image')
-        # TODO this.
         # TODO insert video
         # TODO insert aside image
         # self._image_button.Disable()
