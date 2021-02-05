@@ -200,6 +200,10 @@ class MainFrame(wx.Frame):
         self.insert_img_tool = self.tool_bar.AddTool(self._image_tool_id, Strings.toolbar_insert_img,
                                                      scale_icon('insert-image.png'),
                                                      Strings.toolbar_insert_img)
+        self._video_tool_id = self._add_tool_id()
+        self.insert_video_tool = self.tool_bar.AddTool(self._video_tool_id, Strings.toolbar_insert_video,
+                                                       scale_icon('insert-video.png'),
+                                                       Strings.toolbar_insert_video)
         self.bold_tool = self.tool_bar.AddTool(self._add_tool_id(), Strings.toolbar_bold,
                                                scale_icon('bold.png'),
                                                Strings.toolbar_bold)
@@ -404,7 +408,7 @@ class MainFrame(wx.Frame):
         :return: None
         """
         # Main text area section ---------------------------------------------------------------------------------------
-        self._main_text_area = CustomRichText(self._image_tool_id, self._style_picker, self.right_panel,
+        self._main_text_area = CustomRichText(self._image_tool_id, self._video_tool_id, self._style_picker, self.right_panel,
                                               style=wx.VSCROLL)
         self.middle_vertical_sizer.Add(self._main_text_area, flag=wx.EXPAND | wx.TOP, proportion=1,
                                        border=Numbers.widget_border_size)

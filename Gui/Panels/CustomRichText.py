@@ -19,10 +19,11 @@ class CustomRichText(rt.RichTextCtrl):
     Custom rich text control
     """
 
-    def __init__(self, img_tool_id: int, style_control: wx.ListBox, parent, style):
+    def __init__(self, img_tool_id: int, video_tool_id: int, style_control: wx.ListBox, parent, style):
         """
         Constructor for the custom rich text control.
         :param img_tool_id: Id of the insert image tool.
+        :param video_tool_id: Id of the insert video tool.
         :param style_control: Style control from gui.
         :param parent: Parent of this control.
         :param style: wx style attributes.
@@ -31,6 +32,7 @@ class CustomRichText(rt.RichTextCtrl):
         self._parent = parent
         self._document = None
         self.img_tool_id = img_tool_id
+        self.video_tool_id = video_tool_id
         # Used to prevent over-calling methods on keypress.
         self._disable_input = False
         self._click_counter = 0
@@ -685,8 +687,10 @@ class CustomRichText(rt.RichTextCtrl):
                 and not isinstance(p.GetChild(0), rt.RichTextField):
             # Only allow inserting images on an empty paragraph line with no other images.
             self._main_frame.tool_bar.EnableTool(self.img_tool_id, True)
+            self._main_frame.tool_bar.EnableTool(self.video_tool_id, True)
         else:
             self._main_frame.tool_bar.EnableTool(self.img_tool_id, False)
+            self._main_frame.tool_bar.EnableTool(self.video_tool_id, False)
         if paragraph_style == Strings.style_image:
             self._style_picker.Disable()
             # Remove selection from the picker to avoid confusing flicker.
@@ -929,9 +933,8 @@ class CustomRichText(rt.RichTextCtrl):
         inserted into the current position.
         :return: None
         """
-        # TODO undo on link changes broken, sometimes undoes into a white link.
         # TODO catch any red incorrect links when doing seo when switching to a different document/save and turn doc red
-        # TODO deleted links are not removed from the document to make undo work, reconcile links and images on save.
+        # TODO Deleted links are not removed from the document to make undo work, reconcile links and images on save.
         if not self.BatchingUndo():
             self.BeginBatchUndo(Strings.undo_last_action)
         stored_link = self._document.find_link(link.get_id())

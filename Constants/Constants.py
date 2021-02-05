@@ -256,6 +256,7 @@ class Strings:
     toolbar_new_file: str = 'New file'
     toolbar_bold: str = 'Bold'
     toolbar_insert_img: str = 'Insert image'
+    toolbar_insert_video: str = 'Insert video'
     toolbar_insert_link: str = 'Insert link'
     toolbar_save: str = 'Save'
     toolbar_color: str = 'Color text'
