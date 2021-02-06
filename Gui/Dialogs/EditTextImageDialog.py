@@ -106,10 +106,6 @@ class EditTextImageDialog(wx.Dialog):
         self._bitmap = wx.StaticBitmap(self, -1, wx.Bitmap(placeholder_image))
         self.image_sizer.Add(self._bitmap, flag=wx.ALL, border=1)
 
-        # Adjust dialog height to fit entire image.
-        if self._image_copy.get_thumbnail_size()[1] > self.image_sizer.GetSize()[1]:
-            self.SetSize(self.GetSize()[0], self._image_copy.get_thumbnail_size()[1] + 120)
-
         # Buttons
         self.button_sizer = wx.BoxSizer(wx.VERTICAL)
         grouping_sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -154,20 +150,34 @@ class EditTextImageDialog(wx.Dialog):
                 return
             else:
                 # Display the new image
-                # TODO this
-                print(new_path)
-                print(os.path.join(Strings.folder_images, Strings.folder_thumbnails, self._original_image.get_section(), new_name))
-                self._image_copy = ImageInText(self.field_image_link_title.GetValue(), self.field_image_alt.GetValue(),
+                new_section: str = os.path.dirname(new_path)
+                html_thumbnail_filename: str = os.path.join(Strings.folder_images, Strings.folder_thumbnails,
+                                                            new_section, new_name)
+                self._image_copy = ImageInText(new_section, self.field_image_link_title.GetValue(),
+                                               self.field_image_alt.GetValue(),
                                                new_path.replace(Strings.folder_thumbnails, Strings.folder_originals),
-                                               new_path, )
+                                               new_path, html_thumbnail_filename.replace(Strings.folder_thumbnails,
+                                                                                         Strings.folder_originals),
+                                               html_thumbnail_filename)
+                # Initializes all internal variables.
+                self._image_copy.seo_test_self()
                 self._display_dialog_contents()
         elif event.GetId() == wx.ID_OK:
-            # Save new information into image and rerun seo test.
-            self._image_copy.set_title(self.field_image_link_title.GetValue())
+            # Save new information into the copy of the image and rerun seo test.
+            self._image_copy.set_link_title(self.field_image_link_title.GetValue())
             self._image_copy.set_alt(self.field_image_alt.GetValue())
 
             if self._image_copy.seo_test_self():
-                self._original_image = self._image_copy
+                # If the seo test is good, transfer all information into the original image.
+                self._original_image.set_section(self._image_copy.get_section())
+                self._original_image.set_link_title(self._image_copy.get_link_title()[0])
+                self._original_image.set_alt(self._image_copy.get_image_alt()[0])
+                self._original_image.set_original_image_path(self._image_copy.get_original_image_path())
+                self._original_image.set_thumbnail_image_path(self._image_copy.get_thumbnail_image_path())
+                self._original_image.set_full_filename(self._image_copy.get_full_filename())
+                self._original_image.set_thumbnail_filename(self._image_copy.get_thumbnail_filename())
+                # Reinitialize internal variables after changes, this should never fail as the test was done on the copy
+                self._original_image.seo_test_self()
                 event.Skip()
                 return
             else:
@@ -241,4 +251,8 @@ class EditTextImageDialog(wx.Dialog):
             self.content_image_thumbnail_path.SetLabelText(thumb_path)
         else:
             self.content_image_thumbnail_path.SetLabelText(self._image_copy.get_thumbnail_filename())
+
+        # Adapt dialog size to the new image
+        self.SetSize(Numbers.edit_text_image_dialog_width, self._image_copy.get_thumbnail_size()[1] + 120)
+
         self.Enable()

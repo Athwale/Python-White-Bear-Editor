@@ -1,3 +1,5 @@
+import os
+
 import wx
 
 from Constants.Constants import Numbers
@@ -10,8 +12,8 @@ class BaseImage:
     Base class for AsideImage and ImageInText.
     """
 
-    def __init__(self, section: str, title: str, image_alt: str, original_image_path: str, thumbnail_path: str, full_filename: str,
-                 thumbnail_filename: str):
+    def __init__(self, section: str, title: str, image_alt: str, original_image_path: str, thumbnail_path: str,
+                 full_filename: str, thumbnail_filename: str):
         """
         Constructor for a base image instance.
         :param section: The website section the image belongs to (elektronika,...)
@@ -160,13 +162,25 @@ class BaseImage:
         :return: Return a tuple of this image's original size (width, height).
         """
         if not self._original_image_path:
-            return None
+            return None, None
+        if not os.path.exists(self._original_image_path):
+            return None, None
         image = wx.Image(Fetch.get_resource_path(self._original_image_path), wx.BITMAP_TYPE_ANY)
         self._original_size = image.GetSize()
         return self._original_size
 
     # Setters ----------------------------------------------------------------------------------------------------------
-    def set_title(self, title: str) -> None:
+    def set_section(self, section: str) -> None:
+        """
+        Set new section
+        :param section: The new section
+        :return: None
+        """
+        if self._section != section:
+            self._section = section
+            self._modified = True
+
+    def set_link_title(self, title: str) -> None:
         """
         Set new title
         :param title: The new title
@@ -184,6 +198,46 @@ class BaseImage:
         """
         if self._image_alt != alt:
             self._image_alt = alt
+            self._modified = True
+
+    def set_original_image_path(self, path: str) -> None:
+        """
+        Set new original image path.
+        :param path: The new original image path.
+        :return: None
+        """
+        if self._original_image_path != path:
+            self._original_image_path = path
+            self._modified = True
+
+    def set_thumbnail_image_path(self, path: str) -> None:
+        """
+        Set new thumbnail image path.
+        :param path: The new thumbnail image path.
+        :return: None
+        """
+        if self._thumbnail_path != path:
+            self._thumbnail_path = path
+            self._modified = True
+
+    def set_full_filename(self, name: str) -> None:
+        """
+        Set new original image filename.
+        :param name: The new original image filename.
+        :return: None
+        """
+        if self._full_filename != name:
+            self._full_filename = name
+            self._modified = True
+
+    def set_thumbnail_filename(self, name: str) -> None:
+        """
+        Set new thumbnail image filename.
+        :param name: The new thumbnail image filename.
+        :return: None
+        """
+        if self._thumbnail_filename != name:
+            self._thumbnail_filename = name
             self._modified = True
 
     def set_modified(self, modified: bool) -> None:

@@ -1,3 +1,5 @@
+import os
+
 import wx
 
 from Constants.Constants import Numbers
@@ -44,7 +46,7 @@ class ImageInText(BaseImage):
         result = super(ImageInText, self).seo_test_self()
 
         # Check thumbnail image disk path
-        if not self._thumbnail_path:
+        if not self._thumbnail_path or not os.path.exists(self._thumbnail_path):
             # The image has generic text and can be reused.
             self._image = wx.Image(Fetch.get_resource_path('main_image_thumbnail_missing.png'), wx.BITMAP_TYPE_PNG)
             result = False
@@ -60,7 +62,7 @@ class ImageInText(BaseImage):
                 result = False
 
             # Check full image disk path, size can be whatever the user likes
-            if not self._original_image_path:
+            if not self._original_image_path or not os.path.exists(self._original_image_path):
                 self._image = wx.Image(Fetch.get_resource_path('main_image_missing.png'), wx.BITMAP_TYPE_PNG)
                 result = False
 

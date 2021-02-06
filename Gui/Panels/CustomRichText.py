@@ -63,6 +63,7 @@ class CustomRichText(rt.RichTextCtrl):
         self.Bind(wx.EVT_MENU, self._prevent_paste, id=wx.ID_PASTE)
         self.Bind(wx.EVT_MENU, self._undo_redo, id=wx.ID_UNDO)
         self.Bind(wx.EVT_MENU, self._undo_redo, id=wx.ID_REDO)
+        self.Bind(wx.EVT_COLOUR_CHANGED, self._refresh)
 
         # Disable drag and drop text.
         self.SetDropTarget(None)
@@ -71,6 +72,17 @@ class CustomRichText(rt.RichTextCtrl):
         self._add_text_handlers()
         self._create_styles()
         self._fill_style_picker()
+
+    def _refresh(self, evt: wx.CommandEvent) -> None:
+        """
+        Refresh the text field when something in it has changed and trigger the colour change event. This is emitted by
+        changing an image in text for example. Skip the event further to propagate the color change.
+        :param evt: Not used
+        :return: None
+        """
+        evt.Skip()
+        self.Invalidate()
+        self.Refresh()
 
     @staticmethod
     def _add_text_handlers() -> None:

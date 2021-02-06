@@ -70,6 +70,8 @@ class Video:
         except httplib2.ServerNotFoundError as _:
             self._url_error_message = Strings.seo_error_url_nonexistent
             result = False
+        except ConnectionResetError as _:
+            pass
 
         if not result:
             self._status_color = wx.RED

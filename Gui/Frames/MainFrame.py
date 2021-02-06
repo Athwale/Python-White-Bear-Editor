@@ -910,6 +910,7 @@ class MainFrame(wx.Frame):
         :return: None
         """
         document_instance = self.document_dictionary[self.current_document_name]
+        document_instance.is_modified()
         new_color = document_instance.get_status_color()
         selected_item = self.page_list.GetFirstSelected()
         self.page_list.SetItemBackgroundColour(selected_item, new_color)

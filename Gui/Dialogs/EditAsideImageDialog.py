@@ -150,7 +150,7 @@ class EditAsideImageDialog(wx.Dialog):
         if event.GetId() == wx.ID_OK:
             # Save new information into image and rerun seo test.
             self._image.set_caption(self.field_image_caption.GetValue())
-            self._image.set_title(self.field_image_link_title.GetValue())
+            self._image.set_link_title(self.field_image_link_title.GetValue())
             self._image.set_alt(self.field_image_alt.GetValue())
 
             if self._image.seo_test_self():
@@ -161,7 +161,7 @@ class EditAsideImageDialog(wx.Dialog):
         else:
             # Restore original values
             self._image.set_caption(self._original_caption)
-            self._image.set_title(self._original_title)
+            self._image.set_link_title(self._original_title)
             self._image.set_alt(self._original_alt)
             self._image.set_modified(False)
             self._image.seo_test_self()
