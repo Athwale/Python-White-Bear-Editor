@@ -12,11 +12,13 @@ class ImageTextField(RichTextFieldTypeStandard):
     Custom RichTextFieldType class with image edit dialog.
     """
 
-    def __init__(self, element):
+    def __init__(self, element, working_dir: str):
         """
         Constructor for a custom label for displaying images with ability to edit.
         :param element: The Video or ImageInText instance to display.
+        :param working_dir: Working directory of the editor
         """
+        self._work_dir = working_dir
         self._element = element
         if isinstance(element, ImageInText):
             path = element.get_thumbnail_image_path()
@@ -53,7 +55,7 @@ class ImageTextField(RichTextFieldTypeStandard):
         :return: The result of the GUI dialog.
         """
         if isinstance(self._element, ImageInText):
-            edit_dialog = EditTextImageDialog(parent, self._element)
+            edit_dialog = EditTextImageDialog(parent, self._element, self._work_dir)
         else:
             edit_dialog = EditVideoDialog(parent, self._element)
 

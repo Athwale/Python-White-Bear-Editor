@@ -826,14 +826,13 @@ class CustomRichText(rt.RichTextCtrl):
                                    self, rt.RICHTEXT_INSERT_NONE, rt.RichTextAttr())
         self.EndBatchUndo()
 
-    @staticmethod
-    def _register_field(element) -> ImageTextField:
+    def _register_field(self, element) -> ImageTextField:
         """
         Register a new custom field that represent an image.
         :param element: The Video or ImageInText to display.
         :return: None
         """
-        field_type = ImageTextField(element)
+        field_type = ImageTextField(element, self._document.get_working_directory())
         rt.RichTextBuffer.AddFieldType(field_type)
         return field_type
 
@@ -968,13 +967,21 @@ class CustomRichText(rt.RichTextCtrl):
         color_evt.SetEventObject(self)
         wx.PostEvent(self.GetEventHandler(), color_evt)
 
-    def on_insert_image(self, evt):
-        print('insert image')
-        # TODO insert video
-        # TODO insert aside image
-        # self._image_button.Disable()
-        # self._write_field(from_button=True)
+    # TODO insert video
+    # TODO insert aside image
+    def on_insert_image(self, evt: wx.CommandEvent) -> None:
+        """
+
+        :param evt: Not used
+        :return: None
+        """
         # TODO memory leak in orphaned images and link, maybe reconcile on idle.
+        self._main_frame.tool_bar.EnableTool(self.img_tool_id, False)
+        # Open image selection dialog
+
+
+        # self._write_field(from_button=True)
+
         # Return focus to the text area.
         wx.CallLater(100, self.SetFocus)
 

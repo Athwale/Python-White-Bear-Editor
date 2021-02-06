@@ -77,8 +77,8 @@ class WhitebearDocumentArticle(WhitebearDocument):
         super(WhitebearDocumentArticle, self).parse_self()
         self._parse_page_name()
         self._parse_date()
-        self._parse_main_article_image()
         self._determine_menu_section_and_menu_item()
+        self._parse_main_article_image()
         self._parse_aside_images()
         self._parse_main_text()
         self.seo_test_self()
@@ -261,7 +261,8 @@ class WhitebearDocumentArticle(WhitebearDocument):
                 or not os.access(full_thumbnail_path, os.W_OK):
             full_thumbnail_path = None
 
-        return ImageInText(title, alt, full_original_image_path, full_thumbnail_path, div.a['href'], div.img['src'])
+        return ImageInText(self.get_menu_section().get_page_name()[0].lower(), title, alt, full_original_image_path,
+                           full_thumbnail_path, div.a['href'], div.img['src'])
 
     @staticmethod
     def _process_h(h: Tag) -> Heading:
@@ -402,8 +403,8 @@ class WhitebearDocumentArticle(WhitebearDocument):
                 or not os.access(full_thumbnail_path, os.W_OK):
             full_thumbnail_path = None
 
-        return AsideImage(figcaption, title, alt, full_original_image_path, full_thumbnail_path, figure.a['href'],
-                          figure.img['src'])
+        return AsideImage(self.get_menu_section().get_page_name()[0].lower(), figcaption, title, alt,
+                          full_original_image_path, full_thumbnail_path, figure.a['href'], figure.img['src'])
 
     def validate_self(self) -> (bool, List[str]):
         """

@@ -11,10 +11,11 @@ class AsideImage(BaseImage):
     Carrier class for a parsed aside image.
     """
 
-    def __init__(self, caption: str, title: str, image_alt: str, original_image_path: str, thumbnail_path: str,
-                 full_filename: str, thumbnail_filename: str):
+    def __init__(self, section: str, caption: str, title: str, image_alt: str, original_image_path: str,
+                 thumbnail_path: str, full_filename: str, thumbnail_filename: str):
         """
         Constructor for an aside image.
+        :param section: The website section the image belongs to (elektronika,...)
         :param caption: Figcaption of the aside image.
         :param title: html title of the link element.
         :param image_alt: html alt description of the img element.
@@ -23,7 +24,8 @@ class AsideImage(BaseImage):
         :param full_filename: file name of the full image
         :param thumbnail_filename: file name of the thumbnail image
         """
-        super().__init__(title, image_alt, original_image_path, thumbnail_path, full_filename, thumbnail_filename)
+        super().__init__(section, title, image_alt, original_image_path, thumbnail_path, full_filename,
+                         thumbnail_filename)
         self._caption = caption
         self._caption_error_message: str = ''
 
