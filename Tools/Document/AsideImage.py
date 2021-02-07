@@ -31,6 +31,15 @@ class AsideImage(BaseImage):
         self._caption = caption
         self._caption_error_message: str = ''
 
+    def copy(self):
+        """
+        Returns a copy of this image.
+        :return: A copy of this image.
+        """
+        return AsideImage(self.get_section(), self.get_caption()[0], self.get_link_title()[0], self.get_image_alt()[0],
+                          self.get_original_image_path(), self.get_thumbnail_image_path(), self.get_full_filename(),
+                          self.get_thumbnail_filename())
+
     def seo_test_self(self) -> bool:
         """
         SEO test self for caption, alt and link title. If the image and thumbnail is not accessible on disk, set a

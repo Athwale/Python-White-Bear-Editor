@@ -623,7 +623,7 @@ class MainFrame(wx.Frame):
         :return: None
         """
         main_image: AsideImage = self.current_document_instance.get_article_image()
-        edit_dialog = EditAsideImageDialog(self, main_image)
+        edit_dialog = EditAsideImageDialog(self, main_image, self.config_manager.get_working_dir())
         edit_dialog.ShowModal()
         self._update_article_image_sizer(main_image)
         self._update_file_color()

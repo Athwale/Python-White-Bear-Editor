@@ -143,7 +143,7 @@ class Strings:
     seo_check: str = 'SEO Check:'
     warning_name_incorrect: str = 'Incorrect name\nDo not use file extension\nDo not use special characters'
     warning_file_exists: str = 'File already exists'
-    warning_aside_impossible: str = 'Aspect ratio must be 4/3 for aside image'
+    warning_aside_impossible: str = 'Aspect ratio must be 4/3 for aside or main image'
     warning_wrong_image_folder: str = 'Images must come from whitebear thumbnails folder'
 
     label_menu_file: str = 'File'
