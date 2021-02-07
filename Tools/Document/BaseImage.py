@@ -162,9 +162,9 @@ class BaseImage:
         :return: Return a tuple of this image's original size (width, height).
         """
         if not self._original_image_path:
-            return None, None
+            return None
         if not os.path.exists(self._original_image_path):
-            return None, None
+            return None
         image = wx.Image(Fetch.get_resource_path(self._original_image_path), wx.BITMAP_TYPE_ANY)
         self._original_size = image.GetSize()
         return self._original_size

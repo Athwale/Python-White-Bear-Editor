@@ -98,6 +98,13 @@ class WhitebearDocumentMenu(WhitebearDocument):
         """
         return self._menu_items
 
+    def get_section_name(self) -> str:
+        """
+        Return the name of the menu section which is identical to the main title but lowercase in this case.
+        :return: Return the name of the menu section.
+        """
+        return self.get_page_name()[0].lower()
+
     def find_item_by_file_name(self, file_name: str):
         """
         Return a MenuItem that contains a link to the file_name, only one must exist. None if not found.

@@ -49,6 +49,7 @@ class ImageInText(BaseImage):
         if not self._thumbnail_path or not os.path.exists(self._thumbnail_path):
             # The image has generic text and can be reused.
             self._image = wx.Image(Fetch.get_resource_path('main_image_thumbnail_missing.png'), wx.BITMAP_TYPE_PNG)
+            self._thumbnail_size = self._image.GetSize()
             result = False
         else:
             # Image thumbnails in text must not be larger than 534 px.
@@ -59,6 +60,7 @@ class ImageInText(BaseImage):
                 self._image = image
             else:
                 self._image = wx.Image(Fetch.get_resource_path('main_image_thumbnail_wrong.png'), wx.BITMAP_TYPE_PNG)
+                self._thumbnail_size = self._image.GetSize()
                 result = False
 
             # Check full image disk path, size can be whatever the user likes

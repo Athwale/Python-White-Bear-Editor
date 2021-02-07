@@ -158,6 +158,10 @@ class EditAsideImageDialog(wx.Dialog):
         if event.GetId() == wx.ID_OPEN:
             new_path, new_name = self._ask_for_image()
             img_dir: str = os.path.join(self._work_dir, Strings.folder_images, Strings.folder_thumbnails)
+            if not new_path:
+                # No image was selected
+                event.Skip()
+                return
             if img_dir not in new_path:
                 wx.MessageBox(Strings.warning_wrong_image_folder, Strings.status_error, wx.OK | wx.ICON_ERROR)
                 return

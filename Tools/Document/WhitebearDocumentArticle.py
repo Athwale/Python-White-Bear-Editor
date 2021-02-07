@@ -64,7 +64,6 @@ class WhitebearDocumentArticle(WhitebearDocument):
         self._date_error_message: str = ''
         self._main_text = None
 
-        # TODO Store image inside an AsideImage instance
         self._article_image = None
 
     def parse_self(self) -> None:
@@ -261,7 +260,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
                 or not os.access(full_thumbnail_path, os.W_OK):
             full_thumbnail_path = None
 
-        return ImageInText(self.get_menu_section().get_page_name()[0].lower(), title, alt, full_original_image_path,
+        return ImageInText(self.get_menu_section().get_section_name(), title, alt, full_original_image_path,
                            full_thumbnail_path, div.a['href'], div.img['src'])
 
     @staticmethod
@@ -403,7 +402,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
                 or not os.access(full_thumbnail_path, os.W_OK):
             full_thumbnail_path = None
 
-        return AsideImage(self.get_menu_section().get_page_name()[0].lower(), figcaption, title, alt,
+        return AsideImage(self.get_menu_section().get_section_name(), figcaption, title, alt,
                           full_original_image_path, full_thumbnail_path, figure.a['href'], figure.img['src'])
 
     def validate_self(self) -> (bool, List[str]):
@@ -523,6 +522,15 @@ class WhitebearDocumentArticle(WhitebearDocument):
         for link in self._links:
             if link.get_id() == link_id:
                 self._links.remove(link)
+        self.set_modified(True)
+
+    def add_image(self, image: ImageInText) -> None:
+        """
+        Add a new in text image into the document.
+        :param image: The new image.
+        :return: None
+        """
+        self._images.add(image)
         self.set_modified(True)
 
     # Setters ----------------------------------------------------------------------------------------------------------

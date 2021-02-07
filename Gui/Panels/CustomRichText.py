@@ -3,6 +3,7 @@ import wx.richtext as rt
 
 from Constants.Constants import Strings, Numbers
 from Gui.Dialogs.EditLinkDialog import EditLinkDialog
+from Gui.Dialogs.EditTextImageDialog import EditTextImageDialog
 from Tools.Document.ArticleElements.Heading import Heading
 from Tools.Document.ArticleElements.ImageInText import ImageInText
 from Tools.Document.ArticleElements.Link import Link
@@ -30,7 +31,7 @@ class CustomRichText(rt.RichTextCtrl):
         """
         super().__init__(parent, -1, style=style)
         self._parent = parent
-        self._document = None
+        self._doc = None
         self.img_tool_id = img_tool_id
         self.video_tool_id = video_tool_id
         # Used to prevent over-calling methods on keypress.
@@ -760,7 +761,7 @@ class CustomRichText(rt.RichTextCtrl):
         :param doc: The white bear article.
         :return: None
         """
-        self._document = doc
+        self._doc = doc
         self.BeginSuppressUndo()
         self.clear_self()
 
@@ -844,7 +845,7 @@ class CustomRichText(rt.RichTextCtrl):
         :param element: The Video or ImageInText to display.
         :return: None
         """
-        field_type = ImageTextField(element, self._document.get_working_directory())
+        field_type = ImageTextField(element, self._doc.get_working_directory())
         rt.RichTextBuffer.AddFieldType(field_type)
         return field_type
 
@@ -920,13 +921,13 @@ class CustomRichText(rt.RichTextCtrl):
         :param evt: Not used
         :return: None
         """
-        link = self._document.find_link(evt.GetString())
+        link = self._doc.find_link(evt.GetString())
         url = evt.GetString()
         link_text = self.GetRange(evt.GetURLStart(), evt.GetURLEnd() + 1)
         if not link:
             # Create a new link
-            link = Link(link_text, url, link_text, self._document.get_other_articles(),
-                        self._document.get_working_directory())
+            link = Link(link_text, url, link_text, self._doc.get_other_articles(),
+                        self._doc.get_working_directory())
             link.seo_test_self()
 
         link.set_text(link_text)
@@ -948,11 +949,11 @@ class CustomRichText(rt.RichTextCtrl):
         # TODO Deleted links are not removed from the document to make undo work, reconcile links and images on save.
         if not self.BatchingUndo():
             self.BeginBatchUndo(Strings.undo_last_action)
-        stored_link = self._document.find_link(link.get_id())
+        stored_link = self._doc.find_link(link.get_id())
         if result == wx.ID_OK:
             # Only add link that is not already in the list
             if not stored_link:
-                self._document.add_link(link)
+                self._doc.add_link(link)
             # Replace the text with link
             self.Remove(evt.GetURLStart(), evt.GetURLEnd() + 1)
             self._insert_link(link.get_text()[0], link.get_id(), link.get_status_color())
@@ -983,17 +984,28 @@ class CustomRichText(rt.RichTextCtrl):
     # TODO insert aside image
     def on_insert_image(self, evt: wx.CommandEvent) -> None:
         """
-
+        Insert a new image in the current location in the text field.
         :param evt: Not used
         :return: None
         """
-        # TODO memory leak in orphaned images and link, maybe reconcile on idle.
         self._main_frame.tool_bar.EnableTool(self.img_tool_id, False)
+        # Create a new placeholder text image
+        self._doc: WhitebearDocumentArticle
+        new_image = ImageInText(self._doc.get_menu_section().get_section_name(), '', '', '', '', Strings.status_none,
+                                Strings.status_none)
+        # This will set the image internal state to missing image placeholder.
+        new_image.seo_test_self()
         # Open image selection dialog
-
-
-        # self._write_field(from_button=True)
-
+        edit_dialog = EditTextImageDialog(self._parent, new_image, self._doc.get_working_directory())
+        result = edit_dialog.ShowModal()
+        if result == wx.ID_OK:
+            # Send an event to the main gui to signal document color change
+            self._doc.add_image(new_image)
+            self._write_field(new_image, from_button=True)
+            color_evt = wx.CommandEvent(wx.wxEVT_COLOUR_CHANGED, self.GetId())
+            color_evt.SetEventObject(self)
+            wx.PostEvent(self.GetEventHandler(), color_evt)
+        edit_dialog.Destroy()
         # Return focus to the text area.
         wx.CallLater(100, self.SetFocus)
 

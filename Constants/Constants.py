@@ -250,6 +250,7 @@ class Strings:
     status_invalid: str = 'Invalid:'
     status_articles: str = 'Articles:'
     status_ok: str = 'Ok'
+    status_none: str = 'None'
 
     style_paragraph: str = 'Paragraph'
     style_heading_3: str = 'Title 3'

@@ -145,6 +145,10 @@ class EditTextImageDialog(wx.Dialog):
         if event.GetId() == wx.ID_OPEN:
             new_path, new_name = self._ask_for_image()
             img_dir: str = os.path.join(self._work_dir, Strings.folder_images, Strings.folder_thumbnails)
+            if not new_path:
+                # No image was selected
+                event.Skip()
+                return
             if img_dir not in new_path:
                 wx.MessageBox(Strings.warning_wrong_image_folder, Strings.status_error, wx.OK | wx.ICON_ERROR)
                 return
@@ -192,6 +196,9 @@ class EditTextImageDialog(wx.Dialog):
         :return: (file path, file name) or None, None if canceled
         """
         path = os.path.dirname(self._image_copy.get_thumbnail_image_path())
+        if not path:
+            path = os.path.join(self._work_dir, Strings.folder_images, Strings.folder_thumbnails,
+                                self._image_copy.get_section())
         with wx.FileDialog(self, Strings.label_select_image, path, wildcard=Strings.image_extensions,
                            style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST | wx.FD_PREVIEW) as dlg:
             if dlg.ShowModal() == wx.ID_OK:
@@ -206,7 +213,8 @@ class EditTextImageDialog(wx.Dialog):
         """
         self.Disable()
         # Set image data
-        field_to_value = {self.field_image_link_title: (self._image_copy.get_link_title(), self.field_image_link_title_tip),
+        field_to_value = {self.field_image_link_title: (self._image_copy.get_link_title(),
+                                                        self.field_image_link_title_tip),
                           self.field_image_alt: (self._image_copy.get_image_alt(), self.field_image_alt_tip)}
         for field, value in field_to_value.items():
             tip = value[1]
@@ -244,12 +252,13 @@ class EditTextImageDialog(wx.Dialog):
             self.content_image_original_size.SetLabelText(
                 str(original_size[0]) + ' x ' + str(original_size[1]) + ' px')
         else:
-            self.content_image_original_size.SetLabelText(Strings.status_error)
+            self.content_image_original_size.SetLabelText(Strings.status_none)
 
         thumb_path = self._image_copy.get_thumbnail_image_path()
         if thumb_path:
             self.content_image_thumbnail_path.SetLabelText(thumb_path)
         else:
+            # Show which picture is should have been.
             self.content_image_thumbnail_path.SetLabelText(self._image_copy.get_thumbnail_filename())
 
         # Adapt dialog size to the new image
