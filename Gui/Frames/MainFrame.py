@@ -636,7 +636,7 @@ class MainFrame(wx.Frame):
         :return: None
         """
         menu_item: MenuItem = self.current_document_instance.get_menu_item()
-        edit_dialog = EditMenuItemDialog(self, menu_item)
+        edit_dialog = EditMenuItemDialog(self, menu_item, self.config_manager.get_working_dir())
         # We first need to show the dialog so that the name label can calculate it's size and then switch to modal.
         edit_dialog.Show()
         edit_dialog.display_dialog_contents()

@@ -62,7 +62,8 @@ class WhitebearDocumentMenu(WhitebearDocument):
                     full_image_path, os.W_OK):
                 full_image_path = None
 
-            self._menu_items.append(MenuItem(name, title, image_alt, href, full_image_path, div.img['src']))
+            self._menu_items.append(MenuItem(name.lower(), name, title, image_alt, href, full_image_path,
+                                             div.img['src']))
 
     def _parse_page_name(self) -> None:
         """

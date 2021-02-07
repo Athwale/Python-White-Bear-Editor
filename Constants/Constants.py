@@ -93,6 +93,7 @@ class Strings:
     editor_version: str = '0.1'
     link_stub: str = 'https://www.'
     folder_images: str = 'images'
+    folder_logos: str = 'logos'
     folder_originals: str = 'original'
     folder_thumbnails: str = 'thumbnails'
 
@@ -141,10 +142,14 @@ class Strings:
     seo_error_url_malformed: str = 'Url syntax error'
     seo_error_video_size_wrong: str = 'The size of the video element is incorrect'
     seo_check: str = 'SEO Check:'
+
     warning_name_incorrect: str = 'Incorrect name\nDo not use file extension\nDo not use special characters'
     warning_file_exists: str = 'File already exists'
     warning_aside_impossible: str = 'Aspect ratio must be 4/3 for aside or main image'
     warning_wrong_image_folder: str = 'Images must come from whitebear thumbnails folder'
+    warning_wrong_logo_folder: str = 'Menu image must come from whitebear logos folder'
+    warning_wrong_logo_size: str = 'Menu image must be ' + str(Numbers.menu_logo_image_size) + 'x' + \
+                                   str(Numbers.menu_logo_image_size) + 'px'
 
     label_menu_file: str = 'File'
     label_menu_item_open: str = 'Open directory...\tctrl+o'

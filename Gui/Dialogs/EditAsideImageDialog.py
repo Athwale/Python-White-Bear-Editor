@@ -15,7 +15,7 @@ class EditAsideImageDialog(wx.Dialog):
         Display a dialog with information about the image where the user can edit it.
         :param parent: Parent frame.
         :param image: AsideImage instance being edited by tis dialog.
-        :param working_dir: Working directory of the editor
+        :param working_dir: Working directory of the editor.
         """
         wx.Dialog.__init__(self, parent, title=Strings.label_dialog_edit_image,
                            size=(Numbers.edit_aside_image_dialog_width, Numbers.edit_aside_image_dialog_height),
@@ -228,7 +228,8 @@ class EditAsideImageDialog(wx.Dialog):
         self.Disable()
         # Set image data
         field_to_value = {self.field_image_caption: (self._image_copy.get_caption(), self.field_image_caption_tip),
-                          self.field_image_link_title: (self._image_copy.get_link_title(), self.field_image_link_title_tip),
+                          self.field_image_link_title: (self._image_copy.get_link_title(),
+                                                        self.field_image_link_title_tip),
                           self.field_image_alt: (self._image_copy.get_image_alt(), self.field_image_alt_tip)}
         for field, value in field_to_value.items():
             tip = value[1]

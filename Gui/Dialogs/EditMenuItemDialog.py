@@ -1,3 +1,6 @@
+import os
+from fractions import Fraction
+
 import wx
 
 from Constants.Constants import Strings, Numbers
@@ -7,16 +10,21 @@ from Tools.Tools import Tools
 
 class EditMenuItemDialog(wx.Dialog):
 
-    def __init__(self, parent, item: MenuItem):
+    def __init__(self, parent, item: MenuItem, working_dir: str):
         """
         Display a dialog with information about the image where the user can edit it.
         :param parent: Parent frame.
         :param item: MenuItem instance being edited by tis dialog.
+        :param working_dir: Working directory of the editor.
         """
         wx.Dialog.__init__(self, parent, title=Strings.label_dialog_edit_menu_item,
                            size=(Numbers.edit_aside_image_dialog_width, Numbers.edit_menu_item_dialog_height),
                            style=wx.DEFAULT_DIALOG_STYLE)
-        self._item = item
+
+        self._work_dir = working_dir
+        self._original_item: MenuItem = item
+        self._item_copy: MenuItem = self._original_item.copy()
+        self._item_copy.seo_test_self()
 
         self.main_vertical_sizer = wx.BoxSizer(wx.VERTICAL)
         self.horizontal_sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -109,9 +117,12 @@ class EditMenuItemDialog(wx.Dialog):
         self.cancel_button = wx.Button(self, wx.ID_CANCEL, Strings.button_cancel)
         self.ok_button = wx.Button(self, wx.ID_OK, Strings.button_ok)
         self.ok_button.SetDefault()
+        self._browse_button = wx.Button(self, wx.ID_OPEN, Strings.button_browse)
         grouping_sizer.Add(self.ok_button)
         grouping_sizer.Add((Numbers.widget_border_size, Numbers.widget_border_size))
         grouping_sizer.Add(self.cancel_button)
+        grouping_sizer.Add((Numbers.widget_border_size, Numbers.widget_border_size))
+        grouping_sizer.Add(self._browse_button)
         self.button_sizer.Add(grouping_sizer, flag=wx.ALIGN_CENTER_HORIZONTAL)
 
         # Putting the sizers together
@@ -129,10 +140,7 @@ class EditMenuItemDialog(wx.Dialog):
         self.Bind(wx.EVT_BUTTON, self._handle_buttons, self.ok_button)
         self.Bind(wx.EVT_BUTTON, self._handle_buttons, self.cancel_button)
         self.Bind(wx.EVT_TEXT, self._handle_name_change, self.field_item_name)
-
-        self._original_name = self._item.get_article_name()[0]
-        self._original_title = self._item.get_link_title()[0]
-        self._original_alt = self._item.get_image_alt()[0]
+        self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._browse_button)
 
     def _handle_name_change(self, event: wx.CommandEvent) -> None:
         """
@@ -173,25 +181,65 @@ class EditMenuItemDialog(wx.Dialog):
         :param event: The button event
         :return: None
         """
-        if event.GetId() == wx.ID_OK:
-            # Save new information into image and rerun seo test.
-            self._item.set_name(self.field_item_name.GetValue())
-            self._item.set_link_title(self.field_image_link_title.GetValue())
-            self._item.set_image_alt(self.field_image_alt.GetValue())
+        if event.GetId() == wx.ID_OPEN:
+            new_path, new_name = self._ask_for_image()
+            img_dir: str = os.path.join(self._work_dir, Strings.folder_images, Strings.folder_logos)
+            if img_dir not in new_path:
+                wx.MessageBox(Strings.warning_wrong_logo_folder, Strings.status_error, wx.OK | wx.ICON_ERROR)
+                return
 
-            if self._item.seo_test_self():
+            image = wx.Image(new_path, wx.BITMAP_TYPE_ANY)
+            if image.GetSize() != (Numbers.menu_logo_image_size, Numbers.menu_logo_image_size):
+                wx.MessageBox(Strings.warning_wrong_logo_size, Strings.status_error, wx.OK | wx.ICON_ERROR)
+                return
+            else:
+                # Display the new image
+                new_section: str = os.path.dirname(new_path)
+                html_image_filename: str = os.path.join(Strings.folder_images, Strings.folder_logos, new_section,
+                                                        new_name)
+                self._item_copy = MenuItem(new_section, self.field_item_name.GetValue(),
+                                           self.field_image_link_title.GetValue(),
+                                           self.field_image_alt.GetValue(),
+                                           self._original_item.get_link_href(),
+                                           new_path, html_image_filename)
+                # Initializes all internal variables.
+                self._item_copy.seo_test_self()
+                self.display_dialog_contents()
+        elif event.GetId() == wx.ID_OK:
+            # Save new information into image and rerun seo test.
+            self._item_copy.set_article_name(self.field_item_name.GetValue())
+            self._item_copy.set_link_title(self.field_image_link_title.GetValue())
+            self._item_copy.set_image_alt(self.field_image_alt.GetValue())
+
+            if self._item_copy.seo_test_self():
+                self._original_item.set_section(self._item_copy.get_section())
+                self._original_item.set_article_name(self._item_copy.get_article_name()[0])
+                self._original_item.set_link_title(self._item_copy.get_link_title()[0])
+                self._original_item.set_image_alt(self._item_copy.get_image_alt()[0])
+                self._original_item.set_href(self._item_copy.get_link_href())
+                self._original_item.set_image_path(self._item_copy.get_image_path())
+                self._original_item.set_filename(self._item_copy.get_filename())
+                self._original_item.seo_test_self()
                 event.Skip()
                 return
             else:
                 self.display_dialog_contents()
         else:
-            # Restore original values
-            self._item.set_name(self._original_name)
-            self._item.set_link_title(self._original_title)
-            self._item.set_image_alt(self._original_alt)
-            self._item.set_modified(False)
-            self._item.seo_test_self()
+            # Leave the original item as it is.
             event.Skip()
+
+    def _ask_for_image(self) -> (str, str):
+        """
+        Show a file picker dialog to get an image from the user.
+        :return: (file path, file name) or None, None if canceled
+        """
+        path = os.path.dirname(self._item_copy.get_image_path())
+        with wx.FileDialog(self, Strings.label_select_image, path, wildcard=Strings.image_extensions,
+                           style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST | wx.FD_PREVIEW) as dlg:
+            if dlg.ShowModal() == wx.ID_OK:
+                dlg: wx.FileDialog
+                return dlg.GetPath(), dlg.GetFilename()
+            return None, None
 
     def display_dialog_contents(self) -> None:
         """
@@ -201,9 +249,10 @@ class EditMenuItemDialog(wx.Dialog):
         """
         self.Disable()
         # Set image data
-        field_to_value = {self.field_item_name: (self._item.get_article_name(), self.field_item_name_tip),
-                          self.field_image_link_title: (self._item.get_link_title(), self.field_image_link_title_tip),
-                          self.field_image_alt: (self._item.get_image_alt(), self.field_image_alt_tip)}
+        field_to_value = {self.field_item_name: (self._item_copy.get_article_name(), self.field_item_name_tip),
+                          self.field_image_link_title: (self._item_copy.get_link_title(),
+                                                        self.field_image_link_title_tip),
+                          self.field_image_alt: (self._item_copy.get_image_alt(), self.field_image_alt_tip)}
         for field, value in field_to_value.items():
             tip = value[1]
             if value[0][1]:
@@ -217,16 +266,16 @@ class EditMenuItemDialog(wx.Dialog):
             field.SetValue(value[0][0])
 
         # Set image
-        self._bitmap.SetBitmap(wx.Bitmap(self._item.get_image()))
+        self._bitmap.SetBitmap(wx.Bitmap(self._item_copy.get_image()))
 
         # Set target
-        self.content_href.SetLabelText(self._item.get_link_href())
+        self.content_href.SetLabelText(self._item_copy.get_link_href())
 
         # Set name label
-        self._set_interactive_item_name(self._item.get_article_name()[0])
+        self._set_interactive_item_name(self._item_copy.get_article_name()[0])
 
         # Set image size
-        size = self._item.get_image_size()
+        size = self._item_copy.get_image_size()
         if size:
             self.content_image_size.SetLabelText(
                 str(size[0]) + ' x ' + str(size[1]) + ' px')
@@ -234,10 +283,10 @@ class EditMenuItemDialog(wx.Dialog):
             self.content_image_size.SetLabelText(Strings.status_error)
 
         # Set disk paths
-        full_path = self._item.get_image_path()
-        self.SetTitle(Strings.label_dialog_edit_menu_item + ': ' + self._item.get_article_name()[0])
+        full_path = self._item_copy.get_image_path()
+        self.SetTitle(Strings.label_dialog_edit_menu_item + ': ' + self._item_copy.get_article_name()[0])
         if full_path:
             self.content_image_full_path.SetLabelText(full_path)
         else:
-            self.content_image_full_path.SetLabelText(self._item.get_filename())
+            self.content_image_full_path.SetLabelText(self._item_copy.get_filename())
         self.Enable()
