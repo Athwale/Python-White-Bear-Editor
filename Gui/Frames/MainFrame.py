@@ -441,6 +441,7 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.forward_event, self.edit_menu_item_redo)
         self.Bind(wx.EVT_MENU, self.forward_event, self.edit_menu_item_select_all)
         self.Bind(wx.EVT_MENU, self.add_image_handler, self.add_menu_item_add_image)
+        self.Bind(wx.EVT_MENU, self.insert_aside_image_handler, self.add_menu_item_side_image)
 
         # Bind other controls clicks
         self.Bind(wx.EVT_LIST_ITEM_SELECTED, self.list_item_click_handler, self.page_list)
@@ -952,3 +953,26 @@ class MainFrame(wx.Frame):
         dlg = AddImageDialog(self, self.current_document_instance)
         dlg.ShowModal()
         dlg.Destroy()
+
+    def insert_aside_image_handler(self, event: wx.CommandEvent) -> None:
+        """
+        Handle adding a new image into the document's aside images.
+        :param event: Not used
+        :return: None
+        """
+        # Create a new placeholder text image or video
+        new_image = AsideImage(self.current_document_instance.get_menu_section().get_section_name(), '', '', '', '', '',
+                               Strings.status_none, Strings.status_none)
+        # This will set the image internal state to missing image placeholder.
+        new_image.seo_test_self()
+        # Open edit dialog.
+        edit_dialog = EditAsideImageDialog(self, new_image, self.current_document_instance.get_working_directory())
+        result = edit_dialog.ShowModal()
+        if result == wx.ID_OK:
+            self.current_document_instance.add_aside_image(new_image)
+            self.side_photo_panel.load_document_images(self.current_document_instance)
+            self._update_file_color()
+        edit_dialog.Destroy()
+        event.Skip()
+        # Return focus to the text area.
+        wx.CallLater(100, self.SetFocus)

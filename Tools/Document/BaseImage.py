@@ -133,11 +133,14 @@ class BaseImage:
         """
         return self._full_filename
 
-    def get_image(self) -> wx.Image:
+    def get_image(self, normal: bool = False) -> wx.Image:
         """
         Return the image as wx image instance. If there was a seo error the image will be red.
+        :param normal: Do not return red image even if there was a problem.
         :return: Return the image as wx image instance.
         """
+        if normal:
+            return self._image
         if self._status_color == wx.RED:
             return self._image.AdjustChannels(1, 0, 0)
         return self._image

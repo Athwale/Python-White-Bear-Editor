@@ -217,6 +217,9 @@ class EditAsideImageDialog(wx.Dialog):
         :return: (file path, file name) or None, None if canceled
         """
         path = os.path.dirname(self._image_copy.get_thumbnail_image_path())
+        if not path:
+            path = os.path.join(self._work_dir, Strings.folder_images, Strings.folder_thumbnails,
+                                self._image_copy.get_section())
         with wx.FileDialog(self, Strings.label_select_image, path, wildcard=Strings.image_extensions,
                            style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST | wx.FD_PREVIEW) as dlg:
             if dlg.ShowModal() == wx.ID_OK:
@@ -248,7 +251,7 @@ class EditAsideImageDialog(wx.Dialog):
             field.SetValue(value[0][0])
 
         # Set images
-        self._bitmap.SetBitmap(wx.Bitmap(self._image_copy.get_image()))
+        self._bitmap.SetBitmap(wx.Bitmap(self._image_copy.get_image(normal=True)))
 
         # Set thumbnail size
         thumbnail_size = self._image_copy.get_thumbnail_size()

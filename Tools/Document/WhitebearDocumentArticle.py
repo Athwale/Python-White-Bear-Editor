@@ -542,6 +542,15 @@ class WhitebearDocumentArticle(WhitebearDocument):
         self._videos.add(video)
         self.set_modified(True)
 
+    def add_aside_image(self, image: ImageInText) -> None:
+        """
+        Add a new in text image into the document.
+        :param image: The new image.
+        :return: None
+        """
+        self._aside_images.append(image)
+        self.set_modified(True)
+
     # Setters ----------------------------------------------------------------------------------------------------------
     def set_date(self, date: str) -> None:
         """

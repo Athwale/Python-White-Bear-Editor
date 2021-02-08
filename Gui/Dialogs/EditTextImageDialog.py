@@ -229,7 +229,7 @@ class EditTextImageDialog(wx.Dialog):
             field.SetValue(value[0][0])
 
         # Set images
-        self._bitmap.SetBitmap(wx.Bitmap(self._image_copy.get_image()))
+        self._bitmap.SetBitmap(wx.Bitmap(self._image_copy.get_image(normal=True)))
         # Set disk paths
         full_path = self._image_copy.get_original_image_path()
         self.SetTitle(Strings.label_dialog_edit_image + ': ' + self._image_copy.get_full_filename())

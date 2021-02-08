@@ -270,7 +270,7 @@ class EditMenuItemDialog(wx.Dialog):
             field.SetValue(value[0][0])
 
         # Set image
-        self._bitmap.SetBitmap(wx.Bitmap(self._item_copy.get_image()))
+        self._bitmap.SetBitmap(wx.Bitmap(self._item_copy.get_image(normal=True)))
 
         # Set target
         self.content_href.SetLabelText(self._item_copy.get_link_href())
