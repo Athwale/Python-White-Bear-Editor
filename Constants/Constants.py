@@ -91,7 +91,7 @@ class Strings:
     editor_output_debug_file: str = os.path.join(home_directory, 'whitebearEditor.log')
     editor_name: str = 'Whitebear editor'
     editor_version: str = '0.1'
-    link_stub: str = 'https://www.'
+    url_stub: str = 'https://www.'
     folder_images: str = 'images'
     folder_logos: str = 'logos'
     folder_originals: str = 'original'

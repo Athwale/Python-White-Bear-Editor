@@ -4,6 +4,7 @@ import wx.richtext as rt
 from Constants.Constants import Strings, Numbers
 from Gui.Dialogs.EditLinkDialog import EditLinkDialog
 from Gui.Dialogs.EditTextImageDialog import EditTextImageDialog
+from Gui.Dialogs.EditVideoDialog import EditVideoDialog
 from Tools.Document.ArticleElements.Heading import Heading
 from Tools.Document.ArticleElements.ImageInText import ImageInText
 from Tools.Document.ArticleElements.Link import Link
@@ -51,8 +52,8 @@ class CustomRichText(rt.RichTextCtrl):
         self._main_frame = wx.GetTopLevelParent(self)
         self.Bind(wx.EVT_LISTBOX, self._style_picker_handler, self._style_picker)
         self.Bind(wx.EVT_TEXT_URL, self.url_in_text_click_handler, self)
-        self.Bind(wx.EVT_MENU, self.on_insert_image, self._main_frame.insert_img_tool)
-        self.Bind(wx.EVT_MENU, self.on_insert_image, self._main_frame.insert_img_tool)
+        self.Bind(wx.EVT_MENU, self.on_insert_tool, self._main_frame.insert_img_tool)
+        self.Bind(wx.EVT_MENU, self.on_insert_tool, self._main_frame.insert_video_tool)
         self.Bind(wx.EVT_MENU, self._change_bold, self._main_frame.bold_tool)
 
         self.Bind(wx.EVT_LEFT_UP, self._on_mouse_left)
@@ -182,7 +183,7 @@ class CustomRichText(rt.RichTextCtrl):
 
         # Link style
         stl_link = rt.RichTextAttr()
-        stl_link.SetURL(Strings.link_stub)
+        stl_link.SetURL(Strings.url_stub)
         stl_link.SetFontUnderlined(True)
         stl_link.SetTextColour(wx.BLUE)
         stl_link.SetBackgroundColour(wx.RED)
@@ -980,28 +981,35 @@ class CustomRichText(rt.RichTextCtrl):
         color_evt.SetEventObject(self)
         wx.PostEvent(self.GetEventHandler(), color_evt)
 
-    # TODO insert video
     # TODO insert aside image
-    def on_insert_image(self, evt: wx.CommandEvent) -> None:
+    def on_insert_tool(self, evt: wx.CommandEvent) -> None:
         """
-        Insert a new image in the current location in the text field.
-        :param evt: Not used
+        Insert a new image or video in the current location in the text field.
+        :param evt: Used to get tool id.
         :return: None
         """
-        self._main_frame.tool_bar.EnableTool(self.img_tool_id, False)
-        # Create a new placeholder text image
-        self._doc: WhitebearDocumentArticle
-        new_image = ImageInText(self._doc.get_menu_section().get_section_name(), '', '', '', '', Strings.status_none,
-                                Strings.status_none)
+        self._main_frame.tool_bar.EnableTool(evt.GetId(), False)
+        # Create a new placeholder text image or video
+        if evt.GetId() == self.img_tool_id:
+            new_element = ImageInText(self._doc.get_menu_section().get_section_name(), '', '', '', '',
+                                      Strings.status_none, Strings.status_none)
+        else:
+            new_element = Video('', Numbers.video_width, Numbers.video_height, Strings.url_stub)
         # This will set the image internal state to missing image placeholder.
-        new_image.seo_test_self()
-        # Open image selection dialog
-        edit_dialog = EditTextImageDialog(self._parent, new_image, self._doc.get_working_directory())
+        new_element.seo_test_self()
+        # Open edit dialog.
+        if evt.GetId() == self.img_tool_id:
+            edit_dialog = EditTextImageDialog(self._parent, new_element, self._doc.get_working_directory())
+        else:
+            edit_dialog = EditVideoDialog(self._parent, new_element)
         result = edit_dialog.ShowModal()
         if result == wx.ID_OK:
             # Send an event to the main gui to signal document color change
-            self._doc.add_image(new_image)
-            self._write_field(new_image, from_button=True)
+            if evt.GetId() == self.img_tool_id:
+                self._doc.add_image(new_element)
+            else:
+                self._doc.add_video(new_element)
+            self._write_field(new_element, from_button=True)
             color_evt = wx.CommandEvent(wx.wxEVT_COLOUR_CHANGED, self.GetId())
             color_evt.SetEventObject(self)
             wx.PostEvent(self.GetEventHandler(), color_evt)

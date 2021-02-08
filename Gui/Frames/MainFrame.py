@@ -142,8 +142,6 @@ class MainFrame(wx.Frame):
         self.edit_menu.Append(self.edit_menu_item_select_all)
 
         # Add menu ---------------------------------------------------------------------------------------------------
-        # TODO insert side image, only correct thumbnail sizes are acceptable.
-        # TODO change menu logo and main image
         self.add_menu_item_add_image = wx.MenuItem(self.add_menu, wx.ID_ADD, Strings.label_menu_item_add_text_image,
                                                    Strings.label_menu_item_add_text_image_hint)
         self.disableable_menu_items.append(self.add_menu_item_add_image)
@@ -208,6 +206,7 @@ class MainFrame(wx.Frame):
                                                scale_icon('bold.png'),
                                                Strings.toolbar_bold)
         self.Bind(wx.EVT_MENU, self.forward_event, self.insert_img_tool)
+        self.Bind(wx.EVT_MENU, self.forward_event, self.insert_video_tool)
         self.Bind(wx.EVT_MENU, self.forward_event, self.bold_tool)
         self.Bind(wx.EVT_MENU, self.save_document_handler, self.save_tool)
         self.tool_bar.Realize()

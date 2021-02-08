@@ -164,7 +164,7 @@ class RichTextFrame(wx.Frame):
 
         # Link style
         stl_link = rt.RichTextAttr()
-        stl_link.SetURL(Strings.link_stub)
+        stl_link.SetURL(Strings.url_stub)
         stl_link.SetFontUnderlined(True)
         stl_link.SetTextColour(wx.BLUE)
         stl_link.SetBackgroundColour(wx.RED)
