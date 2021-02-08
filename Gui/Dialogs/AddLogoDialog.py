@@ -5,10 +5,9 @@ import wx
 from Constants.Constants import Strings, Numbers
 from Tools.Document.WhitebearDocumentArticle import WhitebearDocumentArticle
 from Tools.Tools import Tools
-from fractions import Fraction
 
 
-class AddImageDialog(wx.Dialog):
+class AddLogoDialog(wx.Dialog):
 
     def __init__(self, parent, doc: WhitebearDocumentArticle):
         """
@@ -16,8 +15,8 @@ class AddImageDialog(wx.Dialog):
         :param parent: Parent frame.
         :param doc: The currently opened document.
         """
-        wx.Dialog.__init__(self, parent, title=Strings.label_dialog_add_image,
-                           size=(Numbers.add_image_dialog_width, Numbers.edit_text_image_dialog_height),
+        wx.Dialog.__init__(self, parent, title=Strings.label_dialog_add_logo,
+                           size=(Numbers.add_logo_dialog_width, Numbers.add_logo_dialog_height),
                            style=wx.DEFAULT_DIALOG_STYLE)
 
         self._main_vertical_sizer = wx.BoxSizer(wx.VERTICAL)
@@ -28,10 +27,8 @@ class AddImageDialog(wx.Dialog):
         self._image_path = None
         self._image_name = None
         self._menu_section = None
-        self._full_image = None
-        self._thumbnail = None
-        self._originals_path = None
-        self._thumbnails_path = None
+        self._menu_image = None
+        self._logos_path = None
         self._working_directory = self._doc.get_working_directory()
 
         # Disk location
@@ -58,25 +55,14 @@ class AddImageDialog(wx.Dialog):
 
         # Original size
         self._image_original_size_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self._label_image_original_size = wx.StaticText(self, -1, Strings.label_full_size + ': ')
-        self._content_image_original_size = wx.StaticText(self, -1, Strings.label_none,
-                                                          style=wx.ST_ELLIPSIZE_MIDDLE | wx.ST_NO_AUTORESIZE)
-        self._image_original_size_sub_sizer.Add(self._label_image_original_size,
+        self._label_image_size = wx.StaticText(self, -1, Strings.label_size + ': ')
+        self._content_image_size = wx.StaticText(self, -1, Strings.label_none,
+                                                 style=wx.ST_ELLIPSIZE_MIDDLE | wx.ST_NO_AUTORESIZE)
+        self._image_original_size_sub_sizer.Add(self._label_image_size,
                                                 flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
         self._image_original_size_sub_sizer.Add((1, -1))
-        self._image_original_size_sub_sizer.Add(self._content_image_original_size, 1, flag=wx.EXPAND)
+        self._image_original_size_sub_sizer.Add(self._content_image_size, 1, flag=wx.EXPAND)
         self._information_sizer.Add(self._image_original_size_sub_sizer, flag=wx.EXPAND | wx.TOP,
-                                    border=Numbers.widget_border_size)
-
-        # Thumbnail size
-        self._image_thumbnail_size_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self._label_image_thumbnail_size = wx.StaticText(self, -1, Strings.label_thumbnail_size + ': ')
-        self._content_image_thumbnail_size = wx.StaticText(self, -1, Strings.label_none,
-                                                           style=wx.ST_ELLIPSIZE_MIDDLE | wx.ST_NO_AUTORESIZE)
-        self._image_thumbnail_size_sub_sizer.Add(self._label_image_thumbnail_size,
-                                                 flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
-        self._image_thumbnail_size_sub_sizer.Add(self._content_image_thumbnail_size, 1, flag=wx.EXPAND)
-        self._information_sizer.Add(self._image_thumbnail_size_sub_sizer, flag=wx.EXPAND | wx.TOP,
                                     border=Numbers.widget_border_size)
 
         # Image name sub sizer
@@ -90,26 +76,9 @@ class AddImageDialog(wx.Dialog):
         self._field_image_name_tip = Tools.get_warning_tip(self._field_image_name, Strings.label_image_name)
         self._field_image_name_tip.SetMessage('')
 
-        # Image type sub sizer
-        self._type_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self._radio_text = wx.RadioButton(self, -1, Strings.label_text_image)
-        self._radio_aside = wx.RadioButton(self, -1, Strings.label_aside_image)
-        # Disable by default, the button will be enabled only if 300x225 resize is possible after an image is selected.
-        self._radio_aside.Disable()
-        self._type_sub_sizer.Add(self._radio_text, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
-        self._type_sub_sizer.Add(self._radio_aside, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
-        self._information_sizer.Add(self._type_sub_sizer, flag=wx.EXPAND | wx.TOP, border=Numbers.widget_border_size)
-
-        # Warning sub sizer
-        self._warning_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self._label_warning = wx.StaticText(self, -1, Strings.warning_aside_impossible)
-        self._warning_sub_sizer.Add(self._label_warning, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
-        self._information_sizer.Add(self._warning_sub_sizer, flag=wx.EXPAND | wx.TOP, border=Numbers.widget_border_size)
-        self._label_warning.Hide()
-
         # Image preview
         self._image_sizer = wx.BoxSizer(wx.VERTICAL)
-        placeholder_image: wx.Image = wx.Image(Numbers.main_image_width, Numbers.main_image_height)
+        placeholder_image: wx.Image = wx.Image(Numbers.menu_logo_image_size, Numbers.menu_logo_image_size)
         placeholder_image.Replace(0, 0, 0, 245, 255, 255)
         self._bitmap = wx.StaticBitmap(self, -1, wx.Bitmap(placeholder_image))
         self._image_sizer.Add(self._bitmap, flag=wx.ALL, border=1)
@@ -143,7 +112,6 @@ class AddImageDialog(wx.Dialog):
         self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._save_button)
         self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._cancel_button)
         self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._browse_button)
-        self.Bind(wx.EVT_RADIOBUTTON, self._handle_radio_buttons)
 
         self._menu_section = self._doc.get_menu_section().get_page_name()[0]
         self._content_target_section.SetLabelText(self._menu_section)
@@ -153,7 +121,7 @@ class AddImageDialog(wx.Dialog):
         Show a file picker dialog to get an image from the user.
         :return: (file path, file name) or None, None if canceled
         """
-        with wx.FileDialog(self, Strings.label_select_image, Strings.home_directory, wildcard=Strings.image_extensions,
+        with wx.FileDialog(self, Strings.label_select_image, Strings.home_directory, wildcard=Strings.image_jpg_only,
                            style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST | wx.FD_PREVIEW) as dlg:
             if dlg.ShowModal() == wx.ID_OK:
                 dlg: wx.FileDialog
@@ -170,8 +138,8 @@ class AddImageDialog(wx.Dialog):
             self._save_button.Disable()
             self._image_path, self._image_name = self._ask_for_image()
             if self._image_path and self._image_name:
-                self._load_image()
                 self._save_button.Enable()
+                self._load_image()
         elif event.GetId() == wx.ID_OK:
             if self._save():
                 event.Skip()
@@ -203,87 +171,40 @@ class AddImageDialog(wx.Dialog):
             self._field_image_name.SetBackgroundColour(Numbers.GREEN_COLOR)
 
         # Attempt to save the files
-        self._originals_path: str = os.path.join(self._working_directory, Strings.folder_images,
-                                                 Strings.folder_originals, self._menu_section.lower())
-        self._thumbnails_path: str = os.path.join(self._working_directory, Strings.folder_images,
-                                                  Strings.folder_thumbnails, self._menu_section.lower())
-        thumbnail_file: str = os.path.join(self._thumbnails_path, new_name)
-        full_file: str = os.path.join(self._originals_path, new_name)
-        if os.path.exists(thumbnail_file):
-            wx.MessageBox(Strings.warning_file_exists + ': ' + thumbnail_file, Strings.status_error,
-                          wx.OK | wx.ICON_ERROR)
-            return False
-        if os.path.exists(full_file):
-            wx.MessageBox(Strings.warning_file_exists + ': ' + full_file, Strings.status_error,
+        self._logos_path: str = os.path.join(self._working_directory, Strings.folder_images,
+                                             Strings.folder_logos, self._menu_section.lower())
+        logo_file: str = os.path.join(self._logos_path, new_name)
+        if os.path.exists(logo_file):
+            wx.MessageBox(Strings.warning_file_exists + ': ' + logo_file, Strings.status_error,
                           wx.OK | wx.ICON_ERROR)
             return False
 
-        # Determine the file type, we can only open jpg and png files in the browse dialog.
-        _, file_extension = os.path.splitext(os.path.join(self._image_path, self._image_name))
-        if file_extension == Strings.extension_jpg:
-            img_type = wx.BITMAP_TYPE_JPEG
-        else:
-            img_type = wx.BITMAP_TYPE_PNG
-
-        self._full_image.SaveFile(full_file + file_extension, img_type)
-        self._thumbnail.SaveFile(thumbnail_file + file_extension, img_type)
+        self._menu_image.SaveFile(logo_file + Strings.extension_jpg, wx.BITMAP_TYPE_JPEG)
         # Exceptions from here are caught automatically
         return True
 
-    def _handle_radio_buttons(self, event: wx.CommandEvent) -> None:
-        """
-        Simply remake the thumbnail based on selected option.
-        :param event: Not used.
-        :return: None
-        """
-        self._load_thumbnail()
-
     def _load_image(self) -> None:
         """
-        Load and display the image, resize it if needed and make a thumbnail.
+        Load and display the image and prepare a logo from it.
         :return: None
         """
+        # Create the base image for resizing.
+        self._menu_image = wx.Image(self._image_path, wx.BITMAP_TYPE_ANY)
+        # Check image is a square
+        if self._menu_image.GetWidth() != self._menu_image.GetHeight():
+            wx.MessageBox(Strings.warning_not_square, Strings.status_error, wx.OK | wx.ICON_ERROR)
+            self._save_button.Disable()
+            return
+
         self._content_image_original_path.SetLabelText(self._image_path)
         image_name: str = os.path.splitext(self._image_name)[0]
-        self._field_image_name.SetValue(image_name)
+        self._field_image_name.SetValue(Strings.label_logo + image_name.capitalize())
 
-        # Create the base image for resizing.
-        self._full_image = wx.Image(self._image_path, wx.BITMAP_TYPE_ANY)
-        # Check aspect ratio of the image and disable the aside image option if 300x225 resize is impossible.
-        if Numbers.photo_ratio != Fraction(self._full_image.GetWidth(), self._full_image.GetHeight()):
-            self._radio_aside.Disable()
-            self._radio_text.SetValue(True)
-            self._label_warning.Show(True)
-        else:
-            self._radio_aside.Enable()
-            self._label_warning.Show(False)
-        if self._full_image.GetWidth() > Numbers.original_image_max_width:
-            # Resize the original image to 50% if too bit.
-            self._full_image.Rescale(self._full_image.GetWidth() / 2, self._full_image.GetHeight() / 2,
-                                     wx.IMAGE_QUALITY_HIGH)
-        # Display the originals image width
-        self._content_image_original_size.SetLabelText(
-            str(self._full_image.GetWidth()) + ' x ' + str(self._full_image.GetHeight()) + ' px')
-        # Create the thumbnail and show it.
-        self._load_thumbnail()
+        if self._menu_image.GetSize() != (Numbers.menu_logo_image_size, Numbers.menu_logo_image_size):
+            self._menu_image.Rescale(Numbers.menu_logo_image_size, Numbers.menu_logo_image_size, wx.IMAGE_QUALITY_HIGH)
 
-    def _load_thumbnail(self) -> None:
-        """
-        Create and display the correct thumbnail according to selected image type.
-        :return: None
-        """
-        self._thumbnail: wx.Image = self._full_image.Copy()
-        if self._radio_text.GetValue():
-            # Text image thumbnail must be max 534px wide create a thumbnail and resize it if needed.
-            if self._thumbnail.GetWidth() > Numbers.text_image_max_size:
-                new_height = self._thumbnail.GetHeight() * (Numbers.text_image_max_size / self._thumbnail.GetWidth())
-                self._thumbnail.Rescale(Numbers.text_image_max_size, new_height, wx.IMAGE_QUALITY_HIGH)
-        else:
-            # The other option is aside or main image which must be exactly 300x225px.
-            self._thumbnail.Rescale(Numbers.main_image_width, Numbers.main_image_height, wx.IMAGE_QUALITY_HIGH)
-
-        self._content_image_thumbnail_size.SetLabelText(str(self._thumbnail.GetWidth()) + ' x ' +
-                                                        str(self._thumbnail.GetHeight()) + ' px')
-        self._bitmap.SetBitmap(wx.Bitmap(self._thumbnail))
-        self.SetSize(Numbers.add_image_dialog_width, self._thumbnail.GetHeight() + 120)
+        self._content_image_size.SetLabelText(str(self._menu_image.GetWidth()) + ' x ' +
+                                              str(self._menu_image.GetHeight()) + ' px')
+        # Show the image.
+        self._bitmap.SetBitmap(wx.Bitmap(self._menu_image))
         self.Layout()

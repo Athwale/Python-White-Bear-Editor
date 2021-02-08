@@ -9,6 +9,7 @@ from Constants.Constants import Strings
 from Exceptions.UnrecognizedFileException import UnrecognizedFileException
 from Gui.Dialogs.AboutDialog import AboutDialog
 from Gui.Dialogs.AddImageDialog import AddImageDialog
+from Gui.Dialogs.AddLogoDialog import AddLogoDialog
 from Gui.Dialogs.EditAsideImageDialog import EditAsideImageDialog
 from Gui.Dialogs.EditMenuItemDialog import EditMenuItemDialog
 from Gui.Dialogs.LoadingDialog import LoadingDialog
@@ -98,8 +99,15 @@ class MainFrame(wx.Frame):
 
         # File menu ----------------------------------------------------------------------------------------------------
         # Create a menu item for open
+        self.file_menu_item_new = wx.MenuItem(self.file_menu, wx.ID_NEW, Strings.label_menu_item_new,
+                                              Strings.label_menu_item_new_hint)
+
         self.file_menu_item_open = wx.MenuItem(self.file_menu, wx.ID_OPEN, Strings.label_menu_item_open,
                                                Strings.label_menu_item_open_hint)
+
+        self.file_menu_item_save = wx.MenuItem(self.file_menu, wx.ID_SAVE, Strings.label_menu_item_save,
+                                               Strings.label_menu_item_save_hint)
+        self.disableable_menu_items.append(self.file_menu_item_save)
 
         self.file_menu_item_reload = wx.MenuItem(self.file_menu, wx.ID_REFRESH, Strings.label_menu_item_reload,
                                                  Strings.label_menu_item_reload_hint)
@@ -107,10 +115,18 @@ class MainFrame(wx.Frame):
 
         self.file_menu_item_quit = wx.MenuItem(self.file_menu, wx.ID_CLOSE, Strings.label_menu_item_quit,
                                                Strings.label_menu_item_quit_hint)
+
+        self.file_menu_item_upload = wx.MenuItem(self.file_menu, wx.ID_EXECUTE, Strings.label_menu_item_upload,
+                                                 Strings.label_menu_item_upload_hint)
+        self.disableable_menu_items.append(self.file_menu_item_upload)
+
         # Put menu items into the menu buttons
+        self.file_menu.Append(self.file_menu_item_new)
         self.file_menu.Append(self.file_menu_item_open)
+        self.file_menu.Append(self.file_menu_item_save)
         self.file_menu.AppendSeparator()
         self.file_menu.Append(self.file_menu_item_reload)
+        self.file_menu.Append(self.file_menu_item_upload)
         self.file_menu.Append(self.file_menu_item_quit)
 
         # Edit menu ----------------------------------------------------------------------------------------------------
@@ -152,9 +168,10 @@ class MainFrame(wx.Frame):
                                                     Strings.label_menu_item_add_side_image_hint)
         self.disableable_menu_items.append(self.add_menu_item_side_image)
 
+        self.add_menu.Append(self.add_menu_item_side_image)
+        self.add_menu.AppendSeparator()
         self.add_menu.Append(self.add_menu_item_add_image)
         self.add_menu.Append(self.add_menu_item_add_logo)
-        self.add_menu.Append(self.add_menu_item_side_image)
 
         # About menu ---------------------------------------------------------------------------------------------------
         self.help_menu_item_about = wx.MenuItem(self.help_menu, wx.ID_ABOUT, Strings.label_menu_item_about,
@@ -442,6 +459,7 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self.forward_event, self.edit_menu_item_select_all)
         self.Bind(wx.EVT_MENU, self.add_image_handler, self.add_menu_item_add_image)
         self.Bind(wx.EVT_MENU, self.insert_aside_image_handler, self.add_menu_item_side_image)
+        self.Bind(wx.EVT_MENU, self.add_menu_logo_handler, self.add_menu_item_add_logo)
 
         # Bind other controls clicks
         self.Bind(wx.EVT_LIST_ITEM_SELECTED, self.list_item_click_handler, self.page_list)
@@ -976,3 +994,13 @@ class MainFrame(wx.Frame):
         event.Skip()
         # Return focus to the text area.
         wx.CallLater(100, self.SetFocus)
+
+    def add_menu_logo_handler(self, event: wx.CommandEvent) -> None:
+        """
+        Handle adding a new image into the image folder structure.
+        :param event: Not used
+        :return: None
+        """
+        dlg = AddLogoDialog(self, self.current_document_instance)
+        dlg.ShowModal()
+        dlg.Destroy()

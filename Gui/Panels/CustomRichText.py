@@ -981,7 +981,6 @@ class CustomRichText(rt.RichTextCtrl):
         color_evt.SetEventObject(self)
         wx.PostEvent(self.GetEventHandler(), color_evt)
 
-    # TODO insert aside image
     def on_insert_tool(self, evt: wx.CommandEvent) -> None:
         """
         Insert a new image or video in the current location in the text field.

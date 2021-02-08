@@ -26,10 +26,12 @@ class Numbers:
     edit_text_image_dialog_width: int = 1200
     edit_text_image_dialog_height: int = 300
     edit_video_dialog_width: int = 600
-    edit_video_dialog_height: int = 200
+    edit_video_dialog_height: int = 210
     edit_link_dialog_height: int = 255
-    edit_menu_item_dialog_height: int = 310
+    edit_menu_item_dialog_height: int = 300
     add_image_dialog_width: int = 1000
+    add_logo_dialog_width: int = 500
+    add_logo_dialog_height: int = 220
     icon_width: int = 30
     icon_height: int = 30
     color_icon_width: int = 15
@@ -86,6 +88,7 @@ class Strings:
     extension_png: str = '.png'
     image_extensions: str = 'JPG files (*' + extension_jpg + ')|*' + extension_jpg +\
                             '|PNG files (*' + extension_png + ')|*' + extension_jpg + ''
+    image_jpg_only: str = 'JPG files (*' + extension_jpg + ')|*' + extension_jpg
     home_directory: str = os.path.expanduser('~')
     editor_config_file: str = os.path.join(home_directory, '.whitebearEditor.conf')
     editor_output_debug_file: str = os.path.join(home_directory, 'whitebearEditor.log')
@@ -150,12 +153,19 @@ class Strings:
     warning_wrong_logo_folder: str = 'Menu image must come from whitebear logos folder'
     warning_wrong_logo_size: str = 'Menu image must be ' + str(Numbers.menu_logo_image_size) + 'x' + \
                                    str(Numbers.menu_logo_image_size) + 'px'
+    warning_not_square: str = 'Menu image must be square'
 
     label_menu_file: str = 'File'
+    label_menu_item_new: str = 'New document...\tctrl+n'
+    label_menu_item_new_hint: str = 'Create a new document'
     label_menu_item_open: str = 'Open directory...\tctrl+o'
     label_menu_item_open_hint: str = 'Open a whitebear web directory'
+    label_menu_item_save: str = 'Save document\tctrl+s'
+    label_menu_item_save_hint: str = 'Save current document'
     label_menu_item_reload: str = 'Reload file from disk'
     label_menu_item_reload_hint: str = 'Parse file again from disk'
+    label_menu_item_upload: str = 'Upload all changes...\tctrl+f'
+    label_menu_item_upload_hint: str = 'Upload all modified documents'
 
     label_menu_item_quit: str = 'Quit\tctrl+q'
     label_menu_item_quit_hint: str = 'Quit editor'
@@ -183,7 +193,7 @@ class Strings:
     label_menu_item_add_text_image_hint: str = 'Add text image'
     label_menu_item_add_logo: str = 'Add menu logo to collection\tctrl+l'
     label_menu_item_add_logo_hint: str = 'Add menu logo'
-    label_menu_item_add_side_image: str = 'Insert aside image\tctrl+p'
+    label_menu_item_add_side_image: str = 'Add aside image into document\tctrl+p'
     label_menu_item_add_side_image_hint: str = 'Insert aside image'
 
     # Pop up menu items
@@ -198,6 +208,7 @@ class Strings:
     label_dialog_edit_video: str = 'Edit video'
     label_dialog_edit_menu_item: str = 'Edit menu item'
     label_dialog_add_image: str = 'Add image'
+    label_dialog_add_logo: str = 'Add menu logo'
 
     label_article_menu_logo: str = 'Menu logo'
     label_article_menu_logo_name_placeholder: str = 'Menu item name'
@@ -235,6 +246,7 @@ class Strings:
     label_video_size: str = 'Video size'
     label_filelist: str = 'Files'
     label_styles: str = 'Styles'
+    label_logo: str = 'logo'
     label_select_image: str = 'Select image'
     label_target_section: str = 'Section'
     label_text_image: str = 'Text image (width ' + str(Numbers.text_image_max_size) + 'px)'
