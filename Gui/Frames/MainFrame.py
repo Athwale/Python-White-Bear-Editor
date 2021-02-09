@@ -50,6 +50,7 @@ class MainFrame(wx.Frame):
         self.css_colors = None
         self.loading_dlg = None
         self._ignore_change = False
+        self._no_save = False
 
         # Special tool ids.
         self._image_tool_id = None
@@ -615,12 +616,18 @@ class MainFrame(wx.Frame):
         else:
             self._main_text_area.BeginTextColour(color)
 
-    def save_document_handler(self, event: wx.CommandEvent) -> None:
+    def save(self, confirm=False) -> bool:
         """
+        Save current document onto disk.
+        :param confirm: Require user confirmation.
+        :return: True if saved sucessfully.
+        """
+        # Force save current document.
+        if confirm:
+            result = wx.MessageBox(Strings.label_menu_item_save_hint, Strings.toolbar_save, wx.YES_NO | wx.ICON_WARNING)
+            if result == wx.NO:
+                return False
 
-        :param event:
-        :return: None
-        """
         # TODO this
         wildcard, types = rt.RichTextBuffer.GetExtWildcard(save=True)
         dlg = wx.FileDialog(self, "Choose a filename", wildcard=wildcard, style=wx.FD_SAVE)
@@ -632,7 +639,11 @@ class MainFrame(wx.Frame):
                 if not path.endswith(ext):
                     path += '.' + ext
                 self._main_text_area.SaveFile(path, file_type)
-        dlg.Destroy()
+            dlg.Destroy()
+            return True
+        else:
+            dlg.Destroy()
+            return False
 
     def main_image_handler(self, event: wx.CommandEvent) -> None:
         """
@@ -708,6 +719,7 @@ class MainFrame(wx.Frame):
         # Modal means the user is locked into this dialog an can not use the rest of the application
         if dlg.ShowModal() == wx.ID_OK:
             self.config_manager.store_working_dir(dlg.GetPath())
+            self.current_document_instance = None
             self._load_working_directory(self.config_manager.get_working_dir())
         # This must be called, the dialog stays in memory so you can retrieve data and would not be destroyed.
         dlg.Destroy()
@@ -765,6 +777,12 @@ class MainFrame(wx.Frame):
         :param event: wx event, brings the selected string from the menu.
         :return: None
         """
+        if self.current_document_instance and event.GetClientData() != Strings.flag_no_save:
+            # Only ask to save if there is a document already opened in the editor and saving is allowed.
+            # TODO save into current file, do not show file dialog
+            # TODO save a backup copy
+            self.save(confirm=True)
+
         self._disable_editor(True)
         self.current_document_name = event.GetText()
         self.current_document_instance: WhitebearDocumentArticle = self.document_dictionary[self.current_document_name]
@@ -792,8 +810,6 @@ class MainFrame(wx.Frame):
         # If the document is correct, now we can show it.
         self._fill_editor(self.current_document_instance)
 
-    # TODO write save function
-
     def reload_button_handler(self, event):
         """
         Reparse the selected file from disk. Used in case the user has to fix something in html or images.
@@ -804,11 +820,14 @@ class MainFrame(wx.Frame):
                                          wx.YES_NO | wx.ICON_WARNING)
         result = reload_dialog.ShowModal()
         if result == wx.ID_YES:
+            reload_dialog.Destroy()
+            self.save(confirm=True)
             selected_item = self.page_list.GetItem(self.page_list.GetFirstSelected())
             self.current_document_instance.get_menu_section().parse_self()
             self.current_document_instance.parse_self()
             event = wx.ListEvent()
             event.SetItem(selected_item)
+            event.SetClientData(Strings.flag_no_save)
             self.list_item_click_handler(event)
         reload_dialog.Destroy()
 
@@ -1004,3 +1023,11 @@ class MainFrame(wx.Frame):
         dlg = AddLogoDialog(self, self.current_document_instance)
         dlg.ShowModal()
         dlg.Destroy()
+
+    def save_document_handler(self, event: wx.CommandEvent) -> None:
+        """
+        Handles save button clicks.
+        :param event: Not used.
+        :return: None
+        """
+        self.save()

@@ -289,3 +289,5 @@ class Strings:
 
     undo_last_action: str = 'Last action'
     undo_bold: str = 'Undo bold text'
+
+    flag_no_save: str = 'dont_save'

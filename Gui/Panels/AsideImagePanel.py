@@ -90,6 +90,7 @@ class AsideImagePanel(wx.lib.scrolledpanel.ScrolledPanel):
         Show the list of images on the panel.
         :return: None
         """
+        # TODO wrong borders on first load
         self.Hide()
         # First clear already displayed images
         self.clear_panel()
