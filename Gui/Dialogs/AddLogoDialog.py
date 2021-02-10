@@ -174,7 +174,7 @@ class AddLogoDialog(wx.Dialog):
         self._logos_path: str = os.path.join(self._working_directory, Strings.folder_images,
                                              Strings.folder_logos, self._menu_section.lower())
         logo_file: str = os.path.join(self._logos_path, new_name)
-        if os.path.exists(logo_file):
+        if os.path.exists(logo_file + Strings.extension_jpg):
             wx.MessageBox(Strings.warning_file_exists + ': ' + logo_file, Strings.status_error,
                           wx.OK | wx.ICON_ERROR)
             return False

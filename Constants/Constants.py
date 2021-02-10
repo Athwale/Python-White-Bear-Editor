@@ -1,7 +1,6 @@
 import os.path
 
 from wx import Colour
-from fractions import Fraction
 
 
 class Numbers:
@@ -11,7 +10,7 @@ class Numbers:
     BLUE_COLOR = Colour(145, 207, 255)
 
     three_click_timeout: int = 400
-    photo_ratio: Fraction = Fraction(4, 3)
+    photo_ratio: (int, int) = (4, 3)
 
     minimal_window_size_width: int = 1200
     minimal_window_size_height: int = 700
@@ -147,7 +146,7 @@ class Strings:
     seo_check: str = 'SEO Check:'
 
     warning_name_incorrect: str = 'Incorrect name\nDo not use file extension\nDo not use special characters'
-    warning_file_exists: str = 'File already exists'
+    warning_file_exists: str = 'File already exists. Overwrite?'
     warning_aside_impossible: str = 'Aspect ratio must be 4/3 for aside or main image'
     warning_wrong_image_folder: str = 'Images must come from whitebear thumbnails folder'
     warning_wrong_logo_folder: str = 'Menu image must come from whitebear logos folder'

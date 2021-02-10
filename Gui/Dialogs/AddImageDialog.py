@@ -1,11 +1,11 @@
 import os
 
 import wx
+import whratio
 
 from Constants.Constants import Strings, Numbers
 from Tools.Document.WhitebearDocumentArticle import WhitebearDocumentArticle
 from Tools.Tools import Tools
-from fractions import Fraction
 
 
 class AddImageDialog(wx.Dialog):
@@ -209,15 +209,6 @@ class AddImageDialog(wx.Dialog):
                                                   Strings.folder_thumbnails, self._menu_section.lower())
         thumbnail_file: str = os.path.join(self._thumbnails_path, new_name)
         full_file: str = os.path.join(self._originals_path, new_name)
-        if os.path.exists(thumbnail_file):
-            wx.MessageBox(Strings.warning_file_exists + ': ' + thumbnail_file, Strings.status_error,
-                          wx.OK | wx.ICON_ERROR)
-            return False
-        if os.path.exists(full_file):
-            wx.MessageBox(Strings.warning_file_exists + ': ' + full_file, Strings.status_error,
-                          wx.OK | wx.ICON_ERROR)
-            return False
-
         # Determine the file type, we can only open jpg and png files in the browse dialog.
         _, file_extension = os.path.splitext(os.path.join(self._image_path, self._image_name))
         if file_extension == Strings.extension_jpg:
@@ -225,8 +216,20 @@ class AddImageDialog(wx.Dialog):
         else:
             img_type = wx.BITMAP_TYPE_PNG
 
-        self._full_image.SaveFile(full_file + file_extension, img_type)
+        if os.path.exists(thumbnail_file + file_extension):
+            result = wx.MessageBox(Strings.warning_file_exists + ': ' + thumbnail_file + file_extension,
+                                   Strings.status_error, wx.YES_NO | wx.ICON_ERROR)
+            if result == wx.NO:
+                return False
         self._thumbnail.SaveFile(thumbnail_file + file_extension, img_type)
+
+        if os.path.exists(full_file + file_extension):
+            result = wx.MessageBox(Strings.warning_file_exists + ': ' + full_file + file_extension,
+                                   Strings.status_error, wx.YES_NO | wx.ICON_ERROR)
+            if result == wx.NO:
+                return False
+        self._full_image.SaveFile(full_file + file_extension, img_type)
+
         # Exceptions from here are caught automatically
         return True
 
@@ -250,7 +253,7 @@ class AddImageDialog(wx.Dialog):
         # Create the base image for resizing.
         self._full_image = wx.Image(self._image_path, wx.BITMAP_TYPE_ANY)
         # Check aspect ratio of the image and disable the aside image option if 300x225 resize is impossible.
-        if Numbers.photo_ratio != Fraction(self._full_image.GetWidth(), self._full_image.GetHeight()):
+        if Numbers.photo_ratio != whratio.as_int(self._full_image.GetWidth(), self._full_image.GetHeight()):
             self._radio_aside.Disable()
             self._radio_text.SetValue(True)
             self._label_warning.Show(True)

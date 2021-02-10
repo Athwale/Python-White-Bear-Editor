@@ -868,6 +868,7 @@ class MainFrame(wx.Frame):
 
         # Set aside images
         self.side_photo_panel.load_document_images(doc)
+        self.side_photo_panel.Refresh()
         self._main_text_area.set_content(doc)
 
         # Set main image caption
