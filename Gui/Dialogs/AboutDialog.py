@@ -12,20 +12,20 @@ class AboutDialog(wx.Dialog):
         :param parent: Parent frame.
         """
         wx.Dialog.__init__(self, parent, title=Strings.label_dialog_about)
-        self.main_vertical_sizer = wx.BoxSizer(wx.VERTICAL)
+        self._main_vertical_sizer = wx.BoxSizer(wx.VERTICAL)
         self.SetMinSize((410, 250))
 
-        self.html_window = wx.html.HtmlWindow(self, style=wx.html.HW_SCROLLBAR_NEVER)
+        self._html_window = wx.html.HtmlWindow(self, style=wx.html.HW_SCROLLBAR_NEVER)
         if 'gtk2' in wx.PlatformInfo:
-            self.html_window.SetStandardFonts()
+            self._html_window.SetStandardFonts()
 
-        self.close_button = wx.Button(self, wx.ID_OK, Strings.button_close)
-        self.close_button.SetDefault()
-        self.html_window.SetPage(Strings.text_about_contents)
+        self._close_button = wx.Button(self, wx.ID_OK, Strings.button_close)
+        self._close_button.SetDefault()
+        self._html_window.SetPage(Strings.text_about_contents)
 
-        self.main_vertical_sizer.Add(self.html_window, 1, flag=wx.EXPAND)
-        self.main_vertical_sizer.Add(self.close_button, flag=wx.EXPAND)
-        self.SetSizer(self.main_vertical_sizer)
+        self._main_vertical_sizer.Add(self._html_window, 1, flag=wx.EXPAND)
+        self._main_vertical_sizer.Add(self._close_button, flag=wx.EXPAND)
+        self.SetSizer(self._main_vertical_sizer)
 
         self.ShowModal()
         self.Destroy()

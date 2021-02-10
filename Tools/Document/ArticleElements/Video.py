@@ -22,7 +22,7 @@ class Video:
         self._link_title_error_message: str = ''
         self._width = width
         self._height = height
-        self.size_error_message: str = ''
+        self._size_error_message: str = ''
         self._url = url
         self._url_error_message: str = ''
         self._status_color = None
@@ -38,7 +38,7 @@ class Video:
         # Clear all error before each retest
         self._link_title_error_message = ''
         self._url_error_message = ''
-        self.size_error_message = ''
+        self._size_error_message = ''
         self._status_color = wx.NullColour
 
         result = True
@@ -52,7 +52,7 @@ class Video:
 
         # Check dimensions
         if self._width != Numbers.video_width or self._height != Numbers.video_height:
-            self.size_error_message = Strings.seo_error_video_size_wrong
+            self._size_error_message = Strings.seo_error_video_size_wrong
             self._image = wx.Image(Fetch.get_resource_path('video_size_incorrect.png'), wx.BITMAP_TYPE_PNG)
             result = False
 
@@ -104,7 +104,7 @@ class Video:
         Return the element size error if there is any, empty string otherwise.
         :return: Return the element size error if there is any, empty string otherwise.
         """
-        return self.size_error_message
+        return self._size_error_message
 
     def get_size(self) -> (int, int):
         """

@@ -25,77 +25,78 @@ class EditMenuItemDialog(wx.Dialog):
         self._item_copy: MenuItem = self._original_item.copy()
         self._item_copy.seo_test_self()
 
-        self.main_vertical_sizer = wx.BoxSizer(wx.VERTICAL)
-        self.horizontal_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.vertical_sizer = wx.BoxSizer(wx.VERTICAL)
-        self.information_sizer = wx.BoxSizer(wx.VERTICAL)
+        self._main_vertical_sizer = wx.BoxSizer(wx.VERTICAL)
+        self._horizontal_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self._vertical_sizer = wx.BoxSizer(wx.VERTICAL)
+        self._information_sizer = wx.BoxSizer(wx.VERTICAL)
 
         # Disk location
-        self.full_disk_location_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self._full_disk_location_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self.label_image_full_path = wx.StaticText(self, -1, Strings.label_image + ': ')
         self.content_image_full_path = wx.StaticText(self, -1, Strings.label_none,
                                                      style=wx.ST_ELLIPSIZE_MIDDLE | wx.ST_NO_AUTORESIZE)
-        self.full_disk_location_sub_sizer.Add(self.label_image_full_path, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
-        self.full_disk_location_sub_sizer.Add(self.content_image_full_path, 1, flag=wx.EXPAND)
-        self.information_sizer.Add(self.full_disk_location_sub_sizer, flag=wx.EXPAND | wx.TOP,
-                                   border=Numbers.widget_border_size)
+        self._full_disk_location_sub_sizer.Add(self.label_image_full_path,
+                                               flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
+        self._full_disk_location_sub_sizer.Add(self.content_image_full_path, 1, flag=wx.EXPAND)
+        self._information_sizer.Add(self._full_disk_location_sub_sizer, flag=wx.EXPAND | wx.TOP,
+                                    border=Numbers.widget_border_size)
 
         # Link href
-        self.href_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.label_href = wx.StaticText(self, -1, Strings.label_target + ': ')
-        self.content_href = wx.StaticText(self, -1, Strings.label_none,
-                                          style=wx.ST_ELLIPSIZE_MIDDLE | wx.ST_NO_AUTORESIZE)
-        self.href_sub_sizer.Add(self.label_href, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
-        self.href_sub_sizer.Add(self.content_href, 1, flag=wx.EXPAND)
-        self.information_sizer.Add(self.href_sub_sizer, flag=wx.EXPAND | wx.TOP,
-                                   border=Numbers.widget_border_size)
+        self._href_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self._label_href = wx.StaticText(self, -1, Strings.label_target + ': ')
+        self._content_href = wx.StaticText(self, -1, Strings.label_none,
+                                           style=wx.ST_ELLIPSIZE_MIDDLE | wx.ST_NO_AUTORESIZE)
+        self._href_sub_sizer.Add(self._label_href, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
+        self._href_sub_sizer.Add(self._content_href, 1, flag=wx.EXPAND)
+        self._information_sizer.Add(self._href_sub_sizer, flag=wx.EXPAND | wx.TOP,
+                                    border=Numbers.widget_border_size)
 
         # Original size
-        self.image_size_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.label_image_size = wx.StaticText(self, -1, Strings.label_size + ': ')
-        self.content_image_size = wx.StaticText(self, -1, Strings.label_none)
-        self.image_size_sub_sizer.Add(self.label_image_size,
-                                      flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
-        self.image_size_sub_sizer.Add((16, -1))
-        self.image_size_sub_sizer.Add(self.content_image_size,
-                                      flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
-        self.information_sizer.Add(self.image_size_sub_sizer, flag=wx.EXPAND | wx.TOP,
-                                   border=Numbers.widget_border_size)
+        self._image_size_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self._label_image_size = wx.StaticText(self, -1, Strings.label_size + ': ')
+        self._content_image_size = wx.StaticText(self, -1, Strings.label_none)
+        self._image_size_sub_sizer.Add(self._label_image_size,
+                                       flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
+        self._image_size_sub_sizer.Add((16, -1))
+        self._image_size_sub_sizer.Add(self._content_image_size,
+                                       flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
+        self._information_sizer.Add(self._image_size_sub_sizer, flag=wx.EXPAND | wx.TOP,
+                                    border=Numbers.widget_border_size)
 
         # Image name sub sizer
-        self.name_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.label_item_name = wx.StaticText(self, -1, Strings.label_name + ': ')
-        self.field_item_name = wx.TextCtrl(self, -1)
-        self.name_sub_sizer.Add(self.label_item_name, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
-        self.name_sub_sizer.Add((59, -1))
-        self.name_sub_sizer.Add(self.field_item_name, proportion=1)
-        self.information_sizer.Add(self.name_sub_sizer, flag=wx.EXPAND | wx.TOP, border=Numbers.widget_border_size)
-        self.field_item_name_tip = Tools.get_warning_tip(self.field_item_name,
-                                                         Strings.label_menu_item_name)
+        self._name_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self._label_item_name = wx.StaticText(self, -1, Strings.label_name + ': ')
+        self._field_item_name = wx.TextCtrl(self, -1)
+        self._name_sub_sizer.Add(self._label_item_name, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
+        self._name_sub_sizer.Add((59, -1))
+        self._name_sub_sizer.Add(self._field_item_name, proportion=1)
+        self._information_sizer.Add(self._name_sub_sizer, flag=wx.EXPAND | wx.TOP, border=Numbers.widget_border_size)
+        self._field_item_name_tip = Tools.get_warning_tip(self._field_item_name,
+                                                          Strings.label_menu_item_name)
 
         # Image link title sub sizer
-        self.title_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.label_image_title = wx.StaticText(self, -1, Strings.label_link_title + ': ')
-        self.field_image_link_title = wx.TextCtrl(self, -1)
-        self.title_sub_sizer.Add(self.label_image_title, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
-        self.title_sub_sizer.Add((44, -1))
-        self.title_sub_sizer.Add(self.field_image_link_title, proportion=1)
-        self.information_sizer.Add(self.title_sub_sizer, flag=wx.EXPAND | wx.TOP, border=Numbers.widget_border_size)
-        self.field_image_link_title_tip = Tools.get_warning_tip(self.field_image_link_title,
-                                                                Strings.label_article_image_link_title)
+        self._title_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self._label_image_title = wx.StaticText(self, -1, Strings.label_link_title + ': ')
+        self._field_image_link_title = wx.TextCtrl(self, -1)
+        self._title_sub_sizer.Add(self._label_image_title, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
+        self._title_sub_sizer.Add((44, -1))
+        self._title_sub_sizer.Add(self._field_image_link_title, proportion=1)
+        self._information_sizer.Add(self._title_sub_sizer, flag=wx.EXPAND | wx.TOP, border=Numbers.widget_border_size)
+        self._field_image_link_title_tip = Tools.get_warning_tip(self._field_image_link_title,
+                                                                 Strings.label_article_image_link_title)
 
         # Image alt sub sizer
-        self.alt_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.label_image_alt = wx.StaticText(self, -1, Strings.label_alt_description + ': ')
-        self.field_image_alt = wx.TextCtrl(self, -1)
-        self.alt_sub_sizer.Add(self.label_image_alt, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
-        self.alt_sub_sizer.Add((5, -1))
-        self.alt_sub_sizer.Add(self.field_image_alt, proportion=1)
-        self.information_sizer.Add(self.alt_sub_sizer, flag=wx.EXPAND | wx.TOP, border=Numbers.widget_border_size)
-        self.field_image_alt_tip = Tools.get_warning_tip(self.field_image_alt, Strings.label_article_image_alt)
+        self._alt_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self._label_image_alt = wx.StaticText(self, -1, Strings.label_alt_description + ': ')
+        self._field_image_alt = wx.TextCtrl(self, -1)
+        self._alt_sub_sizer.Add(self._label_image_alt, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
+        self._alt_sub_sizer.Add((5, -1))
+        self._alt_sub_sizer.Add(self._field_image_alt, proportion=1)
+        self._information_sizer.Add(self._alt_sub_sizer, flag=wx.EXPAND | wx.TOP, border=Numbers.widget_border_size)
+        self._field_image_alt_tip = Tools.get_warning_tip(self._field_image_alt, Strings.label_article_image_alt)
 
         # Image preview
-        self.image_sizer = wx.BoxSizer(wx.VERTICAL)
+        self._image_sizer = wx.BoxSizer(wx.VERTICAL)
         placeholder_image: wx.Image = wx.Image(Numbers.menu_logo_image_size, Numbers.menu_logo_image_size)
         placeholder_image.Replace(0, 0, 0, 245, 255, 255)
         self._bitmap = wx.StaticBitmap(self, -1, wx.Bitmap(placeholder_image))
@@ -107,38 +108,38 @@ class EditMenuItemDialog(wx.Dialog):
                                                 style=wx.ALIGN_CENTRE_HORIZONTAL)
         self._content_item_name.SetMaxSize((Numbers.menu_logo_image_size, -1))
         self._content_item_name.SetFont(menu_text_field_font)
-        self.image_sizer.Add(self._bitmap, flag=wx.CENTER | wx.ALL, border=1)
-        self.image_sizer.Add(self._content_item_name, flag=wx.CENTER | wx.ALL, border=1)
+        self._image_sizer.Add(self._bitmap, flag=wx.CENTER | wx.ALL, border=1)
+        self._image_sizer.Add(self._content_item_name, flag=wx.CENTER | wx.ALL, border=1)
 
         # Buttons
-        self.button_sizer = wx.BoxSizer(wx.VERTICAL)
+        self._button_sizer = wx.BoxSizer(wx.VERTICAL)
         grouping_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.cancel_button = wx.Button(self, wx.ID_CANCEL, Strings.button_cancel)
-        self.ok_button = wx.Button(self, wx.ID_OK, Strings.button_ok)
-        self.ok_button.SetDefault()
+        self._cancel_button = wx.Button(self, wx.ID_CANCEL, Strings.button_cancel)
+        self._ok_button = wx.Button(self, wx.ID_OK, Strings.button_ok)
+        self._ok_button.SetDefault()
         self._browse_button = wx.Button(self, wx.ID_OPEN, Strings.button_browse)
-        grouping_sizer.Add(self.ok_button)
+        grouping_sizer.Add(self._ok_button)
         grouping_sizer.Add((Numbers.widget_border_size, Numbers.widget_border_size))
-        grouping_sizer.Add(self.cancel_button)
+        grouping_sizer.Add(self._cancel_button)
         grouping_sizer.Add((Numbers.widget_border_size, Numbers.widget_border_size))
         grouping_sizer.Add(self._browse_button)
-        self.button_sizer.Add(grouping_sizer, flag=wx.ALIGN_CENTER_HORIZONTAL)
+        self._button_sizer.Add(grouping_sizer, flag=wx.ALIGN_CENTER_HORIZONTAL)
 
         # Putting the sizers together
-        self.vertical_sizer.Add(self.information_sizer, 0, flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP,
-                                border=Numbers.widget_border_size)
-        self.horizontal_sizer.Add(self.vertical_sizer, 1)
-        self.horizontal_sizer.Add(self.image_sizer, 0, flag=wx.TOP | wx.RIGHT | wx.EXPAND,
-                                  border=Numbers.widget_border_size)
-        self.main_vertical_sizer.Add(self.horizontal_sizer, 1, flag=wx.EXPAND)
-        self.main_vertical_sizer.Add(self.button_sizer, 0, flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM,
-                                     border=Numbers.widget_border_size)
-        self.SetSizer(self.main_vertical_sizer)
+        self._vertical_sizer.Add(self._information_sizer, 0, flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP,
+                                 border=Numbers.widget_border_size)
+        self._horizontal_sizer.Add(self._vertical_sizer, 1)
+        self._horizontal_sizer.Add(self._image_sizer, 0, flag=wx.TOP | wx.RIGHT | wx.EXPAND,
+                                   border=Numbers.widget_border_size)
+        self._main_vertical_sizer.Add(self._horizontal_sizer, 1, flag=wx.EXPAND)
+        self._main_vertical_sizer.Add(self._button_sizer, 0, flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM,
+                                      border=Numbers.widget_border_size)
+        self.SetSizer(self._main_vertical_sizer)
 
         # Bind handlers
-        self.Bind(wx.EVT_BUTTON, self._handle_buttons, self.ok_button)
-        self.Bind(wx.EVT_BUTTON, self._handle_buttons, self.cancel_button)
-        self.Bind(wx.EVT_TEXT, self._handle_name_change, self.field_item_name)
+        self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._ok_button)
+        self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._cancel_button)
+        self.Bind(wx.EVT_TEXT, self._handle_name_change, self._field_item_name)
         self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._browse_button)
 
     # noinspection PyUnusedLocal
@@ -148,7 +149,7 @@ class EditMenuItemDialog(wx.Dialog):
         :param event: Not used
         :return: None
         """
-        self._set_interactive_item_name(self.field_item_name.GetValue())
+        self._set_interactive_item_name(self._field_item_name.GetValue())
 
     def _set_interactive_item_name(self, text: str) -> None:
         """
@@ -159,21 +160,21 @@ class EditMenuItemDialog(wx.Dialog):
         """
         self._content_item_name.SetLabelText(text)
         self._content_item_name.Wrap(Numbers.menu_logo_image_size)
-        self.image_sizer.Layout()
+        self._image_sizer.Layout()
         if self._content_item_name.GetSize()[1] > 30 or len(
-                self.field_item_name.GetValue()) < Numbers.menu_name_min_length:
+                self._field_item_name.GetValue()) < Numbers.menu_name_min_length:
             # The menu name would have 3 or 0 lines which we do not want
-            self.ok_button.Disable()
+            self._ok_button.Disable()
             self._content_item_name.SetBackgroundColour(Numbers.RED_COLOR)
-            self.field_item_name.SetBackgroundColour(Numbers.RED_COLOR)
-            self.field_item_name_tip.SetMessage(Strings.seo_check + '\n' + Strings.seo_error_menu_name_length)
-            self.field_item_name_tip.EnableTip(True)
+            self._field_item_name.SetBackgroundColour(Numbers.RED_COLOR)
+            self._field_item_name_tip.SetMessage(Strings.seo_check + '\n' + Strings.seo_error_menu_name_length)
+            self._field_item_name_tip.EnableTip(True)
         else:
             self._content_item_name.SetBackgroundColour(wx.NullColour)
-            self.field_item_name.SetBackgroundColour(Numbers.GREEN_COLOR)
-            self.field_item_name_tip.SetMessage(Strings.seo_check + '\n' + Strings.status_ok)
-            self.field_item_name_tip.DoHideNow()
-            self.ok_button.Enable()
+            self._field_item_name.SetBackgroundColour(Numbers.GREEN_COLOR)
+            self._field_item_name_tip.SetMessage(Strings.seo_check + '\n' + Strings.status_ok)
+            self._field_item_name_tip.DoHideNow()
+            self._ok_button.Enable()
 
     def _handle_buttons(self, event: wx.CommandEvent) -> None:
         """
@@ -201,9 +202,9 @@ class EditMenuItemDialog(wx.Dialog):
                 new_section: str = os.path.dirname(new_path)
                 html_image_filename: str = os.path.join(Strings.folder_images, Strings.folder_logos, new_section,
                                                         new_name)
-                self._item_copy = MenuItem(new_section, self.field_item_name.GetValue(),
-                                           self.field_image_link_title.GetValue(),
-                                           self.field_image_alt.GetValue(),
+                self._item_copy = MenuItem(new_section, self._field_item_name.GetValue(),
+                                           self._field_image_link_title.GetValue(),
+                                           self._field_image_alt.GetValue(),
                                            self._original_item.get_link_href(),
                                            new_path, html_image_filename)
                 # Initializes all internal variables.
@@ -211,9 +212,9 @@ class EditMenuItemDialog(wx.Dialog):
                 self.display_dialog_contents()
         elif event.GetId() == wx.ID_OK:
             # Save new information into image and rerun seo test.
-            self._item_copy.set_article_name(self.field_item_name.GetValue())
-            self._item_copy.set_link_title(self.field_image_link_title.GetValue())
-            self._item_copy.set_image_alt(self.field_image_alt.GetValue())
+            self._item_copy.set_article_name(self._field_item_name.GetValue())
+            self._item_copy.set_link_title(self._field_image_link_title.GetValue())
+            self._item_copy.set_image_alt(self._field_image_alt.GetValue())
 
             if self._item_copy.seo_test_self():
                 self._original_item.set_section(self._item_copy.get_section())
@@ -253,10 +254,10 @@ class EditMenuItemDialog(wx.Dialog):
         """
         self.Disable()
         # Set image data
-        field_to_value = {self.field_item_name: (self._item_copy.get_article_name(), self.field_item_name_tip),
-                          self.field_image_link_title: (self._item_copy.get_link_title(),
-                                                        self.field_image_link_title_tip),
-                          self.field_image_alt: (self._item_copy.get_image_alt(), self.field_image_alt_tip)}
+        field_to_value = {self._field_item_name: (self._item_copy.get_article_name(), self._field_item_name_tip),
+                          self._field_image_link_title: (self._item_copy.get_link_title(),
+                                                         self._field_image_link_title_tip),
+                          self._field_image_alt: (self._item_copy.get_image_alt(), self._field_image_alt_tip)}
         for field, value in field_to_value.items():
             tip = value[1]
             if value[0][1]:
@@ -273,7 +274,7 @@ class EditMenuItemDialog(wx.Dialog):
         self._bitmap.SetBitmap(wx.Bitmap(self._item_copy.get_image(normal=True)))
 
         # Set target
-        self.content_href.SetLabelText(self._item_copy.get_link_href())
+        self._content_href.SetLabelText(self._item_copy.get_link_href())
 
         # Set name label
         self._set_interactive_item_name(self._item_copy.get_article_name()[0])
@@ -281,10 +282,10 @@ class EditMenuItemDialog(wx.Dialog):
         # Set image size
         size = self._item_copy.get_image_size()
         if size:
-            self.content_image_size.SetLabelText(
+            self._content_image_size.SetLabelText(
                 str(size[0]) + ' x ' + str(size[1]) + ' px')
         else:
-            self.content_image_size.SetLabelText(Strings.status_error)
+            self._content_image_size.SetLabelText(Strings.status_error)
 
         # Set disk paths
         full_path = self._item_copy.get_image_path()

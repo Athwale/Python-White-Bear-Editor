@@ -24,116 +24,117 @@ class EditTextImageDialog(wx.Dialog):
         self._image_copy: ImageInText = self._original_image.copy()
         self._image_copy.seo_test_self()
 
-        self.main_vertical_sizer = wx.BoxSizer(wx.VERTICAL)
-        self.horizontal_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.vertical_sizer = wx.BoxSizer(wx.VERTICAL)
-        self.information_sizer = wx.BoxSizer(wx.VERTICAL)
+        self._main_vertical_sizer = wx.BoxSizer(wx.VERTICAL)
+        self._horizontal_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self._vertical_sizer = wx.BoxSizer(wx.VERTICAL)
+        self._information_sizer = wx.BoxSizer(wx.VERTICAL)
 
         # Disk locations
-        self.full_disk_location_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.label_image_full_path = wx.StaticText(self, -1, Strings.label_image_path + ': ')
-        self.content_image_full_path = wx.StaticText(self, -1, Strings.label_none,
-                                                     style=wx.ST_ELLIPSIZE_MIDDLE | wx.ST_NO_AUTORESIZE)
-        self.full_disk_location_sub_sizer.Add(self.label_image_full_path, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
-        self.full_disk_location_sub_sizer.Add(self.content_image_full_path, 1, flag=wx.EXPAND)
-        self.information_sizer.Add(self.full_disk_location_sub_sizer, flag=wx.EXPAND | wx.TOP,
-                                   border=Numbers.widget_border_size)
-
-        self.thumb_disk_location_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.label_image_thumbnail_path = wx.StaticText(self, -1, Strings.label_image_thumbnail_path + ': ')
-        self.content_image_thumbnail_path = wx.StaticText(self, -1, Strings.label_none,
-                                                          style=wx.ST_ELLIPSIZE_MIDDLE | wx.ST_NO_AUTORESIZE)
-        self.thumb_disk_location_sub_sizer.Add(self.label_image_thumbnail_path,
+        self._full_disk_location_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self._label_image_full_path = wx.StaticText(self, -1, Strings.label_image_path + ': ')
+        self._content_image_full_path = wx.StaticText(self, -1, Strings.label_none,
+                                                      style=wx.ST_ELLIPSIZE_MIDDLE | wx.ST_NO_AUTORESIZE)
+        self._full_disk_location_sub_sizer.Add(self._label_image_full_path,
                                                flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
-        self.thumb_disk_location_sub_sizer.Add(self.content_image_thumbnail_path, 1, flag=wx.EXPAND)
-        self.information_sizer.Add(self.thumb_disk_location_sub_sizer, flag=wx.EXPAND | wx.TOP,
-                                   border=Numbers.widget_border_size)
+        self._full_disk_location_sub_sizer.Add(self._content_image_full_path, 1, flag=wx.EXPAND)
+        self._information_sizer.Add(self._full_disk_location_sub_sizer, flag=wx.EXPAND | wx.TOP,
+                                    border=Numbers.widget_border_size)
+
+        self._thumb_disk_location_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self._label_image_thumbnail_path = wx.StaticText(self, -1, Strings.label_image_thumbnail_path + ': ')
+        self._content_image_thumbnail_path = wx.StaticText(self, -1, Strings.label_none,
+                                                           style=wx.ST_ELLIPSIZE_MIDDLE | wx.ST_NO_AUTORESIZE)
+        self._thumb_disk_location_sub_sizer.Add(self._label_image_thumbnail_path,
+                                                flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
+        self._thumb_disk_location_sub_sizer.Add(self._content_image_thumbnail_path, 1, flag=wx.EXPAND)
+        self._information_sizer.Add(self._thumb_disk_location_sub_sizer, flag=wx.EXPAND | wx.TOP,
+                                    border=Numbers.widget_border_size)
 
         # Original size
-        self.image_original_size_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.label_image_original_size = wx.StaticText(self, -1, Strings.label_original_size + ': ')
-        self.content_image_original_size = wx.StaticText(self, -1, Strings.label_none)
-        self.image_original_size_sub_sizer.Add(self.label_image_original_size,
-                                               flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
-        self.image_original_size_sub_sizer.Add((16, -1))
-        self.image_original_size_sub_sizer.Add(self.content_image_original_size,
-                                               flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
-        self.information_sizer.Add(self.image_original_size_sub_sizer, flag=wx.EXPAND | wx.TOP,
-                                   border=Numbers.widget_border_size)
+        self._image_original_size_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self._label_image_original_size = wx.StaticText(self, -1, Strings.label_original_size + ': ')
+        self._content_image_original_size = wx.StaticText(self, -1, Strings.label_none)
+        self._image_original_size_sub_sizer.Add(self._label_image_original_size,
+                                                flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
+        self._image_original_size_sub_sizer.Add((16, -1))
+        self._image_original_size_sub_sizer.Add(self._content_image_original_size,
+                                                flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
+        self._information_sizer.Add(self._image_original_size_sub_sizer, flag=wx.EXPAND | wx.TOP,
+                                    border=Numbers.widget_border_size)
 
         # Thumbnail size
-        self.image_thumbnail_size_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.label_image_thumbnail_size = wx.StaticText(self, -1, Strings.label_thumbnail_size + ': ')
-        self.content_image_thumbnail_size = wx.StaticText(self, -1, Strings.label_none)
-        self.image_thumbnail_size_sub_sizer.Add(self.label_image_thumbnail_size,
-                                                flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
-        self.image_thumbnail_size_sub_sizer.Add(self.content_image_thumbnail_size,
-                                                flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
-        self.information_sizer.Add(self.image_thumbnail_size_sub_sizer, flag=wx.EXPAND | wx.TOP,
-                                   border=Numbers.widget_border_size)
+        self._image_thumbnail_size_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self._label_image_thumbnail_size = wx.StaticText(self, -1, Strings.label_thumbnail_size + ': ')
+        self._content_image_thumbnail_size = wx.StaticText(self, -1, Strings.label_none)
+        self._image_thumbnail_size_sub_sizer.Add(self._label_image_thumbnail_size,
+                                                 flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
+        self._image_thumbnail_size_sub_sizer.Add(self._content_image_thumbnail_size,
+                                                 flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
+        self._information_sizer.Add(self._image_thumbnail_size_sub_sizer, flag=wx.EXPAND | wx.TOP,
+                                    border=Numbers.widget_border_size)
 
         # Image link title sub sizer
-        self.title_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.label_image_title = wx.StaticText(self, -1, Strings.label_link_title + ': ')
-        self.field_image_link_title = wx.TextCtrl(self, -1)
-        self.title_sub_sizer.Add(self.label_image_title, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
-        self.title_sub_sizer.Add((44, -1))
-        self.title_sub_sizer.Add(self.field_image_link_title, proportion=1)
-        self.information_sizer.Add(self.title_sub_sizer, flag=wx.EXPAND | wx.TOP, border=Numbers.widget_border_size)
-        self.field_image_link_title_tip = Tools.get_warning_tip(self.field_image_link_title,
-                                                                Strings.label_article_image_link_title)
+        self._title_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self._label_image_title = wx.StaticText(self, -1, Strings.label_link_title + ': ')
+        self._field_image_link_title = wx.TextCtrl(self, -1)
+        self._title_sub_sizer.Add(self._label_image_title, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
+        self._title_sub_sizer.Add((44, -1))
+        self._title_sub_sizer.Add(self._field_image_link_title, proportion=1)
+        self._information_sizer.Add(self._title_sub_sizer, flag=wx.EXPAND | wx.TOP, border=Numbers.widget_border_size)
+        self._field_image_link_title_tip = Tools.get_warning_tip(self._field_image_link_title,
+                                                                 Strings.label_article_image_link_title)
 
         # Image alt sub sizer
-        self.alt_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.label_image_alt = wx.StaticText(self, -1, Strings.label_alt_description + ': ')
-        self.field_image_alt = wx.TextCtrl(self, -1)
-        self.alt_sub_sizer.Add(self.label_image_alt, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
-        self.alt_sub_sizer.Add((5, -1))
-        self.alt_sub_sizer.Add(self.field_image_alt, proportion=1)
-        self.information_sizer.Add(self.alt_sub_sizer, flag=wx.EXPAND | wx.TOP, border=Numbers.widget_border_size)
-        self.field_image_alt_tip = Tools.get_warning_tip(self.field_image_alt, Strings.label_article_image_alt)
+        self._alt_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self._label_image_alt = wx.StaticText(self, -1, Strings.label_alt_description + ': ')
+        self._field_image_alt = wx.TextCtrl(self, -1)
+        self._alt_sub_sizer.Add(self._label_image_alt, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
+        self._alt_sub_sizer.Add((5, -1))
+        self._alt_sub_sizer.Add(self._field_image_alt, proportion=1)
+        self._information_sizer.Add(self._alt_sub_sizer, flag=wx.EXPAND | wx.TOP, border=Numbers.widget_border_size)
+        self._field_image_alt_tip = Tools.get_warning_tip(self._field_image_alt, Strings.label_article_image_alt)
 
         # Target blank checkbox all link always open in new page
-        self.checkbox_target_blank = wx.CheckBox(self, -1, label=Strings.label_open_in_new_page)
-        self.checkbox_target_blank.SetValue(True)
-        self.checkbox_target_blank.Disable()
-        self.information_sizer.Add(self.checkbox_target_blank, flag=wx.TOP, border=Numbers.widget_border_size)
+        self._checkbox_target_blank = wx.CheckBox(self, -1, label=Strings.label_open_in_new_page)
+        self._checkbox_target_blank.SetValue(True)
+        self._checkbox_target_blank.Disable()
+        self._information_sizer.Add(self._checkbox_target_blank, flag=wx.TOP, border=Numbers.widget_border_size)
 
         # Image preview
-        self.image_sizer = wx.BoxSizer(wx.VERTICAL)
+        self._image_sizer = wx.BoxSizer(wx.VERTICAL)
         placeholder_image: wx.Image = wx.Image(Numbers.main_image_width, Numbers.main_image_height)
         placeholder_image.Replace(0, 0, 0, 245, 255, 255)
         self._bitmap = wx.StaticBitmap(self, -1, wx.Bitmap(placeholder_image))
-        self.image_sizer.Add(self._bitmap, flag=wx.ALL, border=1)
+        self._image_sizer.Add(self._bitmap, flag=wx.ALL, border=1)
 
         # Buttons
-        self.button_sizer = wx.BoxSizer(wx.VERTICAL)
+        self._button_sizer = wx.BoxSizer(wx.VERTICAL)
         grouping_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.cancel_button = wx.Button(self, wx.ID_CANCEL, Strings.button_cancel)
-        self.ok_button = wx.Button(self, wx.ID_OK, Strings.button_ok)
-        self.ok_button.SetDefault()
+        self._cancel_button = wx.Button(self, wx.ID_CANCEL, Strings.button_cancel)
+        self._ok_button = wx.Button(self, wx.ID_OK, Strings.button_ok)
+        self._ok_button.SetDefault()
         self._browse_button = wx.Button(self, wx.ID_OPEN, Strings.button_browse)
-        grouping_sizer.Add(self.ok_button)
+        grouping_sizer.Add(self._ok_button)
         grouping_sizer.Add((Numbers.widget_border_size, Numbers.widget_border_size))
-        grouping_sizer.Add(self.cancel_button)
+        grouping_sizer.Add(self._cancel_button)
         grouping_sizer.Add((Numbers.widget_border_size, Numbers.widget_border_size))
         grouping_sizer.Add(self._browse_button)
-        self.button_sizer.Add(grouping_sizer, flag=wx.ALIGN_CENTER_HORIZONTAL)
+        self._button_sizer.Add(grouping_sizer, flag=wx.ALIGN_CENTER_HORIZONTAL)
 
         # Putting the sizers together
-        self.vertical_sizer.Add(self.information_sizer, 0, flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP,
-                                border=Numbers.widget_border_size)
-        self.horizontal_sizer.Add(self.vertical_sizer, 1)
-        self.horizontal_sizer.Add(self.image_sizer, flag=wx.TOP | wx.RIGHT, border=Numbers.widget_border_size)
-        self.main_vertical_sizer.Add(self.horizontal_sizer, 1, flag=wx.EXPAND)
-        self.main_vertical_sizer.Add(self.button_sizer, 0, flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM,
-                                     border=Numbers.widget_border_size)
-        self.SetSizer(self.main_vertical_sizer)
+        self._vertical_sizer.Add(self._information_sizer, 0, flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP,
+                                 border=Numbers.widget_border_size)
+        self._horizontal_sizer.Add(self._vertical_sizer, 1)
+        self._horizontal_sizer.Add(self._image_sizer, flag=wx.TOP | wx.RIGHT, border=Numbers.widget_border_size)
+        self._main_vertical_sizer.Add(self._horizontal_sizer, 1, flag=wx.EXPAND)
+        self._main_vertical_sizer.Add(self._button_sizer, 0, flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM,
+                                      border=Numbers.widget_border_size)
+        self.SetSizer(self._main_vertical_sizer)
         self._display_dialog_contents()
 
         # Bind handlers
-        self.Bind(wx.EVT_BUTTON, self._handle_buttons, self.ok_button)
-        self.Bind(wx.EVT_BUTTON, self._handle_buttons, self.cancel_button)
+        self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._ok_button)
+        self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._cancel_button)
         self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._browse_button)
 
     def _handle_buttons(self, event: wx.CommandEvent) -> None:
@@ -157,8 +158,8 @@ class EditTextImageDialog(wx.Dialog):
                 new_section: str = os.path.dirname(new_path)
                 html_thumbnail_filename: str = os.path.join(Strings.folder_images, Strings.folder_thumbnails,
                                                             new_section, new_name)
-                self._image_copy = ImageInText(new_section, self.field_image_link_title.GetValue(),
-                                               self.field_image_alt.GetValue(),
+                self._image_copy = ImageInText(new_section, self._field_image_link_title.GetValue(),
+                                               self._field_image_alt.GetValue(),
                                                new_path.replace(Strings.folder_thumbnails, Strings.folder_originals),
                                                new_path, html_thumbnail_filename.replace(Strings.folder_thumbnails,
                                                                                          Strings.folder_originals),
@@ -168,8 +169,8 @@ class EditTextImageDialog(wx.Dialog):
                 self._display_dialog_contents()
         elif event.GetId() == wx.ID_OK:
             # Save new information into the copy of the image and rerun seo test.
-            self._image_copy.set_link_title(self.field_image_link_title.GetValue())
-            self._image_copy.set_alt(self.field_image_alt.GetValue())
+            self._image_copy.set_link_title(self._field_image_link_title.GetValue())
+            self._image_copy.set_alt(self._field_image_alt.GetValue())
 
             if self._image_copy.seo_test_self():
                 # If the seo test is good, transfer all information into the original image.
@@ -213,9 +214,9 @@ class EditTextImageDialog(wx.Dialog):
         """
         self.Disable()
         # Set image data
-        field_to_value = {self.field_image_link_title: (self._image_copy.get_link_title(),
-                                                        self.field_image_link_title_tip),
-                          self.field_image_alt: (self._image_copy.get_image_alt(), self.field_image_alt_tip)}
+        field_to_value = {self._field_image_link_title: (self._image_copy.get_link_title(),
+                                                         self._field_image_link_title_tip),
+                          self._field_image_alt: (self._image_copy.get_image_alt(), self._field_image_alt_tip)}
         for field, value in field_to_value.items():
             tip = value[1]
             if value[0][1]:
@@ -234,32 +235,32 @@ class EditTextImageDialog(wx.Dialog):
         full_path = self._image_copy.get_original_image_path()
         self.SetTitle(Strings.label_dialog_edit_image + ': ' + self._image_copy.get_full_filename())
         if full_path:
-            self.content_image_full_path.SetLabelText(full_path)
+            self._content_image_full_path.SetLabelText(full_path)
         else:
-            self.content_image_full_path.SetLabelText(self._image_copy.get_full_filename())
+            self._content_image_full_path.SetLabelText(self._image_copy.get_full_filename())
 
         # Set thumbnail size
         thumbnail_size = self._image_copy.get_thumbnail_size()
         if thumbnail_size:
-            self.content_image_thumbnail_size.SetLabelText(
+            self._content_image_thumbnail_size.SetLabelText(
                 str(thumbnail_size[0]) + ' x ' + str(thumbnail_size[1]) + ' px')
         else:
-            self.content_image_thumbnail_size.SetLabelText(Strings.status_error)
+            self._content_image_thumbnail_size.SetLabelText(Strings.status_error)
 
         # Set original size
         original_size = self._image_copy.get_original_size()
         if original_size:
-            self.content_image_original_size.SetLabelText(
+            self._content_image_original_size.SetLabelText(
                 str(original_size[0]) + ' x ' + str(original_size[1]) + ' px')
         else:
-            self.content_image_original_size.SetLabelText(Strings.status_none)
+            self._content_image_original_size.SetLabelText(Strings.status_none)
 
         thumb_path = self._image_copy.get_thumbnail_image_path()
         if thumb_path:
-            self.content_image_thumbnail_path.SetLabelText(thumb_path)
+            self._content_image_thumbnail_path.SetLabelText(thumb_path)
         else:
             # Show which picture is should have been.
-            self.content_image_thumbnail_path.SetLabelText(self._image_copy.get_thumbnail_filename())
+            self._content_image_thumbnail_path.SetLabelText(self._image_copy.get_thumbnail_filename())
 
         # Adapt dialog size to the new image
         self.SetSize(Numbers.edit_text_image_dialog_width, self._image_copy.get_thumbnail_size()[1] + 120)

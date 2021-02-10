@@ -17,14 +17,14 @@ class MyApp(wx.App):
 
     def __init__(self, redirect, filename):
         wx.App.__init__(self, redirect, filename)
-        self.frame = None
+        self._frame = None
 
     def OnInit(self):
         # Frame with None parent is a top level frame. This frame must be created after the App object is created.
-        self.frame = MainFrame()
+        self._frame = MainFrame()
         # Optional set the frame as the main one, the main window is the default parent for dialogs without parent set.
-        self.SetTopWindow(self.frame)
-        self.frame.Show()
+        self.SetTopWindow(self._frame)
+        self._frame.Show()
         return True
 
     def OnExit(self):

@@ -40,14 +40,14 @@ class ImagePanel(wx.Panel):
         self._menu.Append(self._menu_item_edit)
         self._menu.Append(self._menu_item_remove)
 
-        self.Bind(wx.EVT_CONTEXT_MENU, self.on_show_popup)
-        self.Bind(wx.EVT_MENU, self.on_menu_click)
-        self.Bind(wx.EVT_BUTTON, self.on_menu_click, self._bitmap_button)
+        self.Bind(wx.EVT_CONTEXT_MENU, self._on_show_popup)
+        self.Bind(wx.EVT_MENU, self._on_menu_click)
+        self.Bind(wx.EVT_BUTTON, self._on_menu_click, self._bitmap_button)
 
         self.SetSizer(self._sizer)
         self.Layout()
 
-    def on_menu_click(self, event: wx.CommandEvent) -> None:
+    def _on_menu_click(self, event: wx.CommandEvent) -> None:
         """
         When the image is moved, we add the AsideImage instance into the event so that the containing panel knows
         which image is being moved.
@@ -57,7 +57,7 @@ class ImagePanel(wx.Panel):
         event.SetClientData(self._image)
         event.Skip()
 
-    def on_show_popup(self, event) -> None:
+    def _on_show_popup(self, event) -> None:
         """
         Display the context pop up menu.
         :param event: Used to get menu coordinates.

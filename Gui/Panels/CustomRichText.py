@@ -33,7 +33,7 @@ class CustomRichText(rt.RichTextCtrl):
         super().__init__(parent, -1, style=style)
         self._parent = parent
         self._doc = None
-        self.img_tool_id = img_tool_id
+        self._img_tool_id = img_tool_id
         self.video_tool_id = video_tool_id
         # Used to prevent over-calling methods on keypress.
         self._disable_input = False
@@ -51,9 +51,9 @@ class CustomRichText(rt.RichTextCtrl):
 
         self._main_frame = wx.GetTopLevelParent(self)
         self.Bind(wx.EVT_LISTBOX, self._style_picker_handler, self._style_picker)
-        self.Bind(wx.EVT_TEXT_URL, self.url_in_text_click_handler, self)
-        self.Bind(wx.EVT_MENU, self.on_insert_tool, self._main_frame.insert_img_tool)
-        self.Bind(wx.EVT_MENU, self.on_insert_tool, self._main_frame.insert_video_tool)
+        self.Bind(wx.EVT_TEXT_URL, self._url_in_text_click_handler, self)
+        self.Bind(wx.EVT_MENU, self._on_insert_tool, self._main_frame.insert_img_tool)
+        self.Bind(wx.EVT_MENU, self._on_insert_tool, self._main_frame.insert_video_tool)
         self.Bind(wx.EVT_MENU, self._change_bold, self._main_frame.bold_tool)
 
         self.Bind(wx.EVT_LEFT_UP, self._on_mouse_left)
@@ -697,10 +697,10 @@ class CustomRichText(rt.RichTextCtrl):
         if not p.GetTextForRange(p.GetRange()) and paragraph_style == Strings.style_paragraph \
                 and not isinstance(p.GetChild(0), rt.RichTextField):
             # Only allow inserting images on an empty paragraph line with no other images.
-            self._main_frame.tool_bar.EnableTool(self.img_tool_id, True)
+            self._main_frame.tool_bar.EnableTool(self._img_tool_id, True)
             self._main_frame.tool_bar.EnableTool(self.video_tool_id, True)
         else:
-            self._main_frame.tool_bar.EnableTool(self.img_tool_id, False)
+            self._main_frame.tool_bar.EnableTool(self._img_tool_id, False)
             self._main_frame.tool_bar.EnableTool(self.video_tool_id, False)
         if paragraph_style == Strings.style_image:
             self._style_picker.Disable()
@@ -913,7 +913,7 @@ class CustomRichText(rt.RichTextCtrl):
         self.EndURL()
         self.EndStyle()
 
-    def url_in_text_click_handler(self, evt: wx.TextUrlEvent) -> None:
+    def _url_in_text_click_handler(self, evt: wx.TextUrlEvent) -> None:
         """
         Handles click on url links inside text.
         :param evt: Not used
@@ -978,7 +978,7 @@ class CustomRichText(rt.RichTextCtrl):
         color_evt.SetEventObject(self)
         wx.PostEvent(self.GetEventHandler(), color_evt)
 
-    def on_insert_tool(self, evt: wx.CommandEvent) -> None:
+    def _on_insert_tool(self, evt: wx.CommandEvent) -> None:
         """
         Insert a new image or video in the current location in the text field.
         :param evt: Used to get tool id.
@@ -986,7 +986,7 @@ class CustomRichText(rt.RichTextCtrl):
         """
         self._main_frame.tool_bar.EnableTool(evt.GetId(), False)
         # Create a new placeholder text image or video
-        if evt.GetId() == self.img_tool_id:
+        if evt.GetId() == self._img_tool_id:
             new_element = ImageInText(self._doc.get_menu_section().get_section_name(), '', '', '', '',
                                       Strings.status_none, Strings.status_none)
         else:
@@ -994,14 +994,14 @@ class CustomRichText(rt.RichTextCtrl):
         # This will set the image internal state to missing image placeholder.
         new_element.seo_test_self()
         # Open edit dialog.
-        if evt.GetId() == self.img_tool_id:
+        if evt.GetId() == self._img_tool_id:
             edit_dialog = EditTextImageDialog(self._parent, new_element, self._doc.get_working_directory())
         else:
             edit_dialog = EditVideoDialog(self._parent, new_element)
         result = edit_dialog.ShowModal()
         if result == wx.ID_OK:
             # Send an event to the main gui to signal document color change
-            if evt.GetId() == self.img_tool_id:
+            if evt.GetId() == self._img_tool_id:
                 self._doc.add_image(new_element)
             else:
                 self._doc.add_video(new_element)

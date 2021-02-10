@@ -30,9 +30,9 @@ class DirectoryLoader:
         self._index_document = None
         self._css_document = None
         # Prepare xml schemas
-        self.xmlschema_index = etree.XMLSchema(etree.parse(Fetch.get_resource_path('schema_index.xsd')))
-        self.xmlschema_article = etree.XMLSchema(etree.parse(Fetch.get_resource_path('schema_article.xsd')))
-        self.xmlschema_menu = etree.XMLSchema(etree.parse(Fetch.get_resource_path('schema_menu.xsd')))
+        self._xmlschema_index = etree.XMLSchema(etree.parse(Fetch.get_resource_path('schema_index.xsd')))
+        self._xmlschema_article = etree.XMLSchema(etree.parse(Fetch.get_resource_path('schema_article.xsd')))
+        self._xmlschema_menu = etree.XMLSchema(etree.parse(Fetch.get_resource_path('schema_menu.xsd')))
 
     def get_directory(self) -> str:
         """
@@ -98,8 +98,8 @@ class DirectoryLoader:
         else:
             try:
                 xml_doc = html.parse(os.path.join(path, 'index.html'))
-                if not self.xmlschema_index.validate(xml_doc):
-                    raise IndexError(Strings.exception_not_white_bear + '\n' + str(self.xmlschema_index.error_log))
+                if not self._xmlschema_index.validate(xml_doc):
+                    raise IndexError(Strings.exception_not_white_bear + '\n' + str(self._xmlschema_index.error_log))
             except XMLSyntaxError as e:
                 raise IndexError(Strings.exception_html_syntax_error + '\n' + str(e))
         return True
@@ -137,14 +137,14 @@ class DirectoryLoader:
                     file_path: str = os.path.realpath(file)
                     try:
                         xml_doc = html.parse(os.path.join(path, file))
-                        if self.xmlschema_article.validate(xml_doc):
+                        if self._xmlschema_article.validate(xml_doc):
                             self._article_documents[filename] = WhitebearDocumentArticle(filename, file_path,
                                                                                          self._menu_documents,
                                                                                          self._article_documents,
                                                                                          self._css_document)
-                        elif self.xmlschema_menu.validate(xml_doc):
+                        elif self._xmlschema_menu.validate(xml_doc):
                             self._menu_documents[filename] = WhitebearDocumentMenu(filename, file_path)
-                        elif self.xmlschema_index.validate(xml_doc):
+                        elif self._xmlschema_index.validate(xml_doc):
                             self._index_document = WhitebearDocumentIndex(filename, file_path)
                         else:
                             # Skip known non editable files

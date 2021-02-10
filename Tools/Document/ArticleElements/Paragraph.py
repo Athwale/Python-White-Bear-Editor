@@ -11,7 +11,7 @@ class Paragraph:
         """
         Constructor for paragraph.
         """
-        self.elements_list = []
+        self._elements_list = []
 
     def add_element(self, text_element) -> None:
         """
@@ -19,18 +19,18 @@ class Paragraph:
         :param text_element: The element to add.
         :return: None
         """
-        self.elements_list.append(text_element)
+        self._elements_list.append(text_element)
 
     def get_elements(self) -> List:
         """
         Returns the list of elements of this paragraph.
         :return: the list of elements of this paragraph.
         """
-        return self.elements_list
+        return self._elements_list
 
     def clear(self) -> None:
         """
         Clear all elements from this paragraph.
         :return: None
         """
-        self.elements_list.clear()
+        self._elements_list.clear()

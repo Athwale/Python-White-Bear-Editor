@@ -17,7 +17,7 @@ class LoadingDialog(wx.Dialog):
         self._image = wx.Bitmap(Fetch.get_resource_path('splashscreen.png'), wx.BITMAP_TYPE_PNG)
         self._bitmap = wx.StaticBitmap(self, -1, self._image)
 
-        self.main_vertical_sizer = wx.BoxSizer(wx.VERTICAL)
+        self._main_vertical_sizer = wx.BoxSizer(wx.VERTICAL)
 
-        self.main_vertical_sizer.Add(self._bitmap, flag=wx.EXPAND)
-        self.SetSizer(self.main_vertical_sizer)
+        self._main_vertical_sizer.Add(self._bitmap, flag=wx.EXPAND)
+        self.SetSizer(self._main_vertical_sizer)

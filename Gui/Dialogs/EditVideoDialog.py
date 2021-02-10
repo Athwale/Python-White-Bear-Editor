@@ -13,71 +13,70 @@ class EditVideoDialog(wx.Dialog):
         :param parent: Parent frame.
         :param video: Video instance being edited by tis dialog.
         """
-        # TODO make interactive when the user edits it.
         wx.Dialog.__init__(self, parent, title=Strings.label_dialog_edit_video, size=(Numbers.edit_video_dialog_width,
                                                                                       Numbers.edit_video_dialog_height),
                            style=wx.DEFAULT_DIALOG_STYLE)
         self._video = video
 
-        self.main_vertical_sizer = wx.BoxSizer(wx.VERTICAL)
-        self.horizontal_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.vertical_sizer = wx.BoxSizer(wx.VERTICAL)
-        self.information_sizer = wx.BoxSizer(wx.VERTICAL)
+        self._main_vertical_sizer = wx.BoxSizer(wx.VERTICAL)
+        self._horizontal_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self._vertical_sizer = wx.BoxSizer(wx.VERTICAL)
+        self._information_sizer = wx.BoxSizer(wx.VERTICAL)
 
         # Title sub sizer
-        self.title_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.label_video_title = wx.StaticText(self, -1, Strings.label_link_title + ': ')
-        self.field_video_link_title = wx.TextCtrl(self, -1)
-        self.title_sub_sizer.Add(self.label_video_title, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
-        self.title_sub_sizer.Add((5, -1))
-        self.title_sub_sizer.Add(self.field_video_link_title, proportion=1)
-        self.information_sizer.Add(self.title_sub_sizer, flag=wx.EXPAND | wx.TOP, border=Numbers.widget_border_size)
-        self.field_video_link_title_tip = Tools.get_warning_tip(self.field_video_link_title,
-                                                                Strings.label_video_link_title)
+        self._title_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self._label_video_title = wx.StaticText(self, -1, Strings.label_link_title + ': ')
+        self._field_video_link_title = wx.TextCtrl(self, -1)
+        self._title_sub_sizer.Add(self._label_video_title, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
+        self._title_sub_sizer.Add((5, -1))
+        self._title_sub_sizer.Add(self._field_video_link_title, proportion=1)
+        self._information_sizer.Add(self._title_sub_sizer, flag=wx.EXPAND | wx.TOP, border=Numbers.widget_border_size)
+        self._field_video_link_title_tip = Tools.get_warning_tip(self._field_video_link_title,
+                                                                 Strings.label_video_link_title)
 
         # Url sub sizer
-        self.url_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.label_video_url = wx.StaticText(self, -1, Strings.label_url + ': ')
-        self.field_video_url = wx.TextCtrl(self, -1)
-        self.url_sub_sizer.Add(self.label_video_url, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
-        self.url_sub_sizer.Add((34, -1))
-        self.url_sub_sizer.Add(self.field_video_url, proportion=1)
-        self.information_sizer.Add(self.url_sub_sizer, flag=wx.EXPAND | wx.TOP, border=Numbers.widget_border_size)
-        self.field_video_url_tip = Tools.get_warning_tip(self.field_video_url, Strings.label_url)
+        self._url_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self._label_video_url = wx.StaticText(self, -1, Strings.label_url + ': ')
+        self._field_video_url = wx.TextCtrl(self, -1)
+        self._url_sub_sizer.Add(self._label_video_url, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
+        self._url_sub_sizer.Add((34, -1))
+        self._url_sub_sizer.Add(self._field_video_url, proportion=1)
+        self._information_sizer.Add(self._url_sub_sizer, flag=wx.EXPAND | wx.TOP, border=Numbers.widget_border_size)
+        self._field_video_url_tip = Tools.get_warning_tip(self._field_video_url, Strings.label_url)
 
         # Size
-        self.video_size_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.label_video_size = wx.StaticText(self, -1, Strings.label_video_size + ': ')
-        self.content_video_size = wx.StaticText(self, -1, Strings.label_none)
-        self.video_size_sub_sizer.Add(self.label_video_size, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
-        self.video_size_sub_sizer.Add(self.content_video_size, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
-        self.information_sizer.Add(self.video_size_sub_sizer, flag=wx.EXPAND | wx.TOP,
-                                   border=Numbers.widget_border_size)
+        self._video_size_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self._label_video_size = wx.StaticText(self, -1, Strings.label_video_size + ': ')
+        self._content_video_size = wx.StaticText(self, -1, Strings.label_none)
+        self._video_size_sub_sizer.Add(self._label_video_size, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
+        self._video_size_sub_sizer.Add(self._content_video_size, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
+        self._information_sizer.Add(self._video_size_sub_sizer, flag=wx.EXPAND | wx.TOP,
+                                    border=Numbers.widget_border_size)
 
         # Buttons
-        self.button_sizer = wx.BoxSizer(wx.VERTICAL)
+        self._button_sizer = wx.BoxSizer(wx.VERTICAL)
         grouping_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.cancel_button = wx.Button(self, wx.ID_CANCEL, Strings.button_cancel)
-        self.ok_button = wx.Button(self, wx.ID_OK, Strings.button_ok)
-        self.ok_button.SetDefault()
-        grouping_sizer.Add(self.ok_button)
+        self._cancel_button = wx.Button(self, wx.ID_CANCEL, Strings.button_cancel)
+        self._ok_button = wx.Button(self, wx.ID_OK, Strings.button_ok)
+        self._ok_button.SetDefault()
+        grouping_sizer.Add(self._ok_button)
         grouping_sizer.Add((Numbers.widget_border_size, Numbers.widget_border_size))
-        grouping_sizer.Add(self.cancel_button)
-        self.button_sizer.Add(grouping_sizer, flag=wx.ALIGN_CENTER_HORIZONTAL)
+        grouping_sizer.Add(self._cancel_button)
+        self._button_sizer.Add(grouping_sizer, flag=wx.ALIGN_CENTER_HORIZONTAL)
 
         # Putting the sizers together
-        self.vertical_sizer.Add(self.information_sizer, 0, flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP,
-                                border=Numbers.widget_border_size)
-        self.horizontal_sizer.Add(self.vertical_sizer, 1)
-        self.main_vertical_sizer.Add(self.horizontal_sizer, 1, flag=wx.EXPAND)
-        self.main_vertical_sizer.Add(self.button_sizer, 0, flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM,
-                                     border=Numbers.widget_border_size)
-        self.SetSizer(self.main_vertical_sizer)
+        self._vertical_sizer.Add(self._information_sizer, 0, flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP,
+                                 border=Numbers.widget_border_size)
+        self._horizontal_sizer.Add(self._vertical_sizer, 1)
+        self._main_vertical_sizer.Add(self._horizontal_sizer, 1, flag=wx.EXPAND)
+        self._main_vertical_sizer.Add(self._button_sizer, 0, flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM,
+                                      border=Numbers.widget_border_size)
+        self.SetSizer(self._main_vertical_sizer)
         self._display_dialog_contents()
 
         # Bind handlers
-        self.Bind(wx.EVT_BUTTON, self._handle_buttons, self.ok_button)
-        self.Bind(wx.EVT_BUTTON, self._handle_buttons, self.cancel_button)
+        self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._ok_button)
+        self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._cancel_button)
 
         self._original_url = self._video.get_url()[0]
         self._original_title = self._video.get_title()[0]
@@ -90,8 +89,8 @@ class EditVideoDialog(wx.Dialog):
         """
         if event.GetId() == wx.ID_OK:
             # Save new information into image and rerun seo test.
-            self._video.set_title(self.field_video_link_title.GetValue())
-            self._video.set_url(self.field_video_url.GetValue())
+            self._video.set_title(self._field_video_link_title.GetValue())
+            self._video.set_url(self._field_video_url.GetValue())
 
             if self._video.seo_test_self():
                 event.Skip()
@@ -113,8 +112,8 @@ class EditVideoDialog(wx.Dialog):
         """
         self.Disable()
         # Set image data
-        field_to_value = {self.field_video_link_title: (self._video.get_title(), self.field_video_link_title_tip),
-                          self.field_video_url: (self._video.get_url(), self.field_video_url_tip)}
+        field_to_value = {self._field_video_link_title: (self._video.get_title(), self._field_video_link_title_tip),
+                          self._field_video_url: (self._video.get_url(), self._field_video_url_tip)}
         for field, value in field_to_value.items():
             tip = value[1]
             if value[0][1]:
@@ -129,7 +128,7 @@ class EditVideoDialog(wx.Dialog):
         # Set size
         size = self._video.get_size()
         if size:
-            self.content_video_size.SetLabelText(str(size[0]) + ' / ' + str(size[1]) + 'px')
+            self._content_video_size.SetLabelText(str(size[0]) + ' / ' + str(size[1]) + 'px')
         else:
-            self.content_video_size.SetLabelText(Strings.status_error)
+            self._content_video_size.SetLabelText(Strings.status_error)
         self.Enable()

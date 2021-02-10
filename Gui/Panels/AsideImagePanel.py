@@ -25,10 +25,10 @@ class AsideImagePanel(wx.lib.scrolledpanel.ScrolledPanel):
         self._images: List[AsideImage] = []
         self._sizer = wx.BoxSizer(wx.VERTICAL)
         self.SetSizer(self._sizer)
-        self.Bind(wx.EVT_MENU, self.on_image_modify)
-        self.Bind(wx.EVT_BUTTON, self.on_image_modify)
+        self.Bind(wx.EVT_MENU, self._on_image_modify)
+        self.Bind(wx.EVT_BUTTON, self._on_image_modify)
 
-    def on_image_modify(self, event: wx.CommandEvent):
+    def _on_image_modify(self, event: wx.CommandEvent):
         """
         Move image up one position.
         :param event: Used to distinguish between up/down buttons. And contains reference to the image that is being
