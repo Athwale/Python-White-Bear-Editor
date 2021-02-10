@@ -1,12 +1,12 @@
 import math
 import os
-from fractions import Fraction
 
 import wx
 
 from Constants.Constants import Strings, Numbers
 from Tools.Document.WhitebearDocumentArticle import WhitebearDocumentArticle
 from Tools.Tools import Tools
+
 
 class AddImageDialog(wx.Dialog):
 
