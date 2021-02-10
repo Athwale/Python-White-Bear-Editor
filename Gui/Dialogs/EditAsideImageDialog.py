@@ -1,3 +1,4 @@
+import math
 import os
 from fractions import Fraction
 
@@ -167,7 +168,8 @@ class EditAsideImageDialog(wx.Dialog):
                 return
 
             image = wx.Image(new_path, wx.BITMAP_TYPE_ANY)
-            if Numbers.photo_ratio != Fraction(image.GetWidth(), image.GetHeight()):
+            if not math.isclose(Numbers.photo_ratio, (image.GetWidth() / image.GetHeight()),
+                                abs_tol=Numbers.photo_ratio_tolerance):
                 # Test correct aspect ratio
                 wx.MessageBox(Strings.warning_aside_impossible, Strings.status_error, wx.OK | wx.ICON_ERROR)
                 return

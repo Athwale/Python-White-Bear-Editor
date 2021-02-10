@@ -138,8 +138,9 @@ class AddLogoDialog(wx.Dialog):
             self._save_button.Disable()
             self._image_path, self._image_name = self._ask_for_image()
             if self._image_path and self._image_name:
-                self._save_button.Enable()
                 self._load_image()
+            if self._menu_image:
+                self._save_button.Enable()
         elif event.GetId() == wx.ID_OK:
             if self._save():
                 event.Skip()
@@ -175,10 +176,10 @@ class AddLogoDialog(wx.Dialog):
                                              Strings.folder_logos, self._menu_section.lower())
         logo_file: str = os.path.join(self._logos_path, new_name)
         if os.path.exists(logo_file + Strings.extension_jpg):
-            wx.MessageBox(Strings.warning_file_exists + ': ' + logo_file, Strings.status_error,
-                          wx.OK | wx.ICON_ERROR)
-            return False
-
+            result = wx.MessageBox(Strings.warning_file_exists + ': \n' + logo_file, Strings.status_error,
+                                   wx.YES_NO | wx.ICON_ERROR)
+            if result == wx.NO:
+                return False
         self._menu_image.SaveFile(logo_file + Strings.extension_jpg, wx.BITMAP_TYPE_JPEG)
         # Exceptions from here are caught automatically
         return True

@@ -10,7 +10,8 @@ class Numbers:
     BLUE_COLOR = Colour(145, 207, 255)
 
     three_click_timeout: int = 400
-    photo_ratio: (int, int) = (4, 3)
+    photo_ratio: float = 4 / 3
+    photo_ratio_tolerance: float = 0.01
 
     minimal_window_size_width: int = 1200
     minimal_window_size_height: int = 700

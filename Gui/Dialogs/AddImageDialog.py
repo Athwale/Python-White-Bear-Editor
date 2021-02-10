@@ -1,12 +1,12 @@
+import math
 import os
+from fractions import Fraction
 
 import wx
-import whratio
 
 from Constants.Constants import Strings, Numbers
 from Tools.Document.WhitebearDocumentArticle import WhitebearDocumentArticle
 from Tools.Tools import Tools
-
 
 class AddImageDialog(wx.Dialog):
 
@@ -171,6 +171,7 @@ class AddImageDialog(wx.Dialog):
             self._image_path, self._image_name = self._ask_for_image()
             if self._image_path and self._image_name:
                 self._load_image()
+            if self._full_image:
                 self._save_button.Enable()
         elif event.GetId() == wx.ID_OK:
             if self._save():
@@ -217,14 +218,14 @@ class AddImageDialog(wx.Dialog):
             img_type = wx.BITMAP_TYPE_PNG
 
         if os.path.exists(thumbnail_file + file_extension):
-            result = wx.MessageBox(Strings.warning_file_exists + ': ' + thumbnail_file + file_extension,
+            result = wx.MessageBox(Strings.warning_file_exists + ': \n' + thumbnail_file + file_extension,
                                    Strings.status_error, wx.YES_NO | wx.ICON_ERROR)
             if result == wx.NO:
                 return False
         self._thumbnail.SaveFile(thumbnail_file + file_extension, img_type)
 
         if os.path.exists(full_file + file_extension):
-            result = wx.MessageBox(Strings.warning_file_exists + ': ' + full_file + file_extension,
+            result = wx.MessageBox(Strings.warning_file_exists + ': \n' + full_file + file_extension,
                                    Strings.status_error, wx.YES_NO | wx.ICON_ERROR)
             if result == wx.NO:
                 return False
@@ -253,7 +254,8 @@ class AddImageDialog(wx.Dialog):
         # Create the base image for resizing.
         self._full_image = wx.Image(self._image_path, wx.BITMAP_TYPE_ANY)
         # Check aspect ratio of the image and disable the aside image option if 300x225 resize is impossible.
-        if Numbers.photo_ratio != whratio.as_int(self._full_image.GetWidth(), self._full_image.GetHeight()):
+        if not math.isclose(Numbers.photo_ratio, (self._full_image.GetWidth() / self._full_image.GetHeight()),
+                            abs_tol=Numbers.photo_ratio_tolerance):
             self._radio_aside.Disable()
             self._radio_text.SetValue(True)
             self._label_warning.Show(True)
