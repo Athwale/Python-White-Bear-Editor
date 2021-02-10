@@ -129,10 +129,11 @@ class EditLinkDialog(wx.Dialog):
             self._link.seo_test_self()
             event.Skip()
 
+    # noinspection PyUnusedLocal
     def _combobox_handler(self, event: wx.CommandEvent) -> None:
         """
         Handle actions made in the combobox control.
-        :param event:
+        :param event: Not used.
         :return: None
         """
         if self.field_url.GetValue() in self._link.get_loaded_pages():

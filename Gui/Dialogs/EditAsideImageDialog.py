@@ -1,6 +1,5 @@
 import math
 import os
-from fractions import Fraction
 
 import wx
 

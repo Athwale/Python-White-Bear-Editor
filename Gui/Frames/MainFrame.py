@@ -41,14 +41,14 @@ class MainFrame(wx.Frame):
         self.menu_text_field_font = wx.Font(Numbers.text_field_font_size, wx.FONTFAMILY_DEFAULT,
                                             wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, False)
         # Prepare data objects
-        self.config_manager = ConfigManager()
-        self.tool_ids = []
-        self.disableable_menu_items = []
-        self.document_dictionary = {}
-        self.current_document_name = None
-        self.current_document_instance = None
-        self.css_colors = None
-        self.loading_dlg = None
+        self._config_manager = ConfigManager()
+        self._tool_ids = []
+        self._disableable_menu_items = []
+        self._document_dictionary = {}
+        self._current_document_name = None
+        self._current_document_instance = None
+        self._css_colors = None
+        self._loading_dlg = None
         self._ignore_change = False
         self._no_save = False
 
@@ -69,11 +69,11 @@ class MainFrame(wx.Frame):
         # Prepare frame contents
         # Load last working directory
         self._set_status_text(Strings.status_loading, 3)
-        self._load_working_directory(self.config_manager.get_working_dir())
+        self._load_working_directory(self._config_manager.get_working_dir())
 
         # Load last window position and size
-        self.SetPosition((self.config_manager.get_window_position()))
-        size = self.config_manager.get_window_size()
+        self.SetPosition((self._config_manager.get_window_position()))
+        size = self._config_manager.get_window_size()
         if size == (-1, -1):
             self.Maximize()
         else:
@@ -86,101 +86,102 @@ class MainFrame(wx.Frame):
         """
         # Create menu bar and the menu itself
         # All class instance variables have to be specified during the constructor
-        self.menu_bar = wx.MenuBar()
-        self.file_menu = wx.Menu(style=wx.MENU_TEAROFF)
-        self.help_menu = wx.Menu(style=wx.MENU_TEAROFF)
-        self.edit_menu = wx.Menu(style=wx.MENU_TEAROFF)
-        self.add_menu = wx.Menu(style=wx.MENU_TEAROFF)
+        self._menu_bar = wx.MenuBar()
+        self._file_menu = wx.Menu(style=wx.MENU_TEAROFF)
+        self._help_menu = wx.Menu(style=wx.MENU_TEAROFF)
+        self._edit_menu = wx.Menu(style=wx.MENU_TEAROFF)
+        self._add_menu = wx.Menu(style=wx.MENU_TEAROFF)
 
         # Add the file menu into the menu bar.
-        self.menu_bar.Append(self.file_menu, Strings.label_menu_file)
-        self.menu_bar.Append(self.edit_menu, Strings.label_menu_edit)
-        self.menu_bar.Append(self.add_menu, Strings.label_menu_add)
-        self.menu_bar.Append(self.help_menu, Strings.label_menu_help)
+        self._menu_bar.Append(self._file_menu, Strings.label_menu_file)
+        self._menu_bar.Append(self._edit_menu, Strings.label_menu_edit)
+        self._menu_bar.Append(self._add_menu, Strings.label_menu_add)
+        self._menu_bar.Append(self._help_menu, Strings.label_menu_help)
 
         # File menu ----------------------------------------------------------------------------------------------------
         # Create a menu item for open
-        self.file_menu_item_new = wx.MenuItem(self.file_menu, wx.ID_NEW, Strings.label_menu_item_new,
-                                              Strings.label_menu_item_new_hint)
+        self._file_menu_item_new = wx.MenuItem(self._file_menu, wx.ID_NEW, Strings.label_menu_item_new,
+                                               Strings.label_menu_item_new_hint)
 
-        self.file_menu_item_open = wx.MenuItem(self.file_menu, wx.ID_OPEN, Strings.label_menu_item_open,
-                                               Strings.label_menu_item_open_hint)
+        self._file_menu_item_open = wx.MenuItem(self._file_menu, wx.ID_OPEN, Strings.label_menu_item_open,
+                                                Strings.label_menu_item_open_hint)
 
-        self.file_menu_item_save = wx.MenuItem(self.file_menu, wx.ID_SAVE, Strings.label_menu_item_save,
-                                               Strings.label_menu_item_save_hint)
-        self.disableable_menu_items.append(self.file_menu_item_save)
+        self._file_menu_item_save = wx.MenuItem(self._file_menu, wx.ID_SAVE, Strings.label_menu_item_save,
+                                                Strings.label_menu_item_save_hint)
+        self._disableable_menu_items.append(self._file_menu_item_save)
 
-        self.file_menu_item_reload = wx.MenuItem(self.file_menu, wx.ID_REFRESH, Strings.label_menu_item_reload,
-                                                 Strings.label_menu_item_reload_hint)
-        self.disableable_menu_items.append(self.file_menu_item_reload)
+        self._file_menu_item_reload = wx.MenuItem(self._file_menu, wx.ID_REFRESH, Strings.label_menu_item_reload,
+                                                  Strings.label_menu_item_reload_hint)
+        self._disableable_menu_items.append(self._file_menu_item_reload)
 
-        self.file_menu_item_quit = wx.MenuItem(self.file_menu, wx.ID_CLOSE, Strings.label_menu_item_quit,
-                                               Strings.label_menu_item_quit_hint)
+        self._file_menu_item_quit = wx.MenuItem(self._file_menu, wx.ID_CLOSE, Strings.label_menu_item_quit,
+                                                Strings.label_menu_item_quit_hint)
 
-        self.file_menu_item_upload = wx.MenuItem(self.file_menu, wx.ID_EXECUTE, Strings.label_menu_item_upload,
-                                                 Strings.label_menu_item_upload_hint)
-        self.disableable_menu_items.append(self.file_menu_item_upload)
+        self._file_menu_item_upload = wx.MenuItem(self._file_menu, wx.ID_EXECUTE, Strings.label_menu_item_upload,
+                                                  Strings.label_menu_item_upload_hint)
+        self._disableable_menu_items.append(self._file_menu_item_upload)
 
         # Put menu items into the menu buttons
-        self.file_menu.Append(self.file_menu_item_new)
-        self.file_menu.Append(self.file_menu_item_open)
-        self.file_menu.Append(self.file_menu_item_save)
-        self.file_menu.AppendSeparator()
-        self.file_menu.Append(self.file_menu_item_reload)
-        self.file_menu.Append(self.file_menu_item_upload)
-        self.file_menu.Append(self.file_menu_item_quit)
+        self._file_menu.Append(self._file_menu_item_new)
+        self._file_menu.Append(self._file_menu_item_open)
+        self._file_menu.Append(self._file_menu_item_save)
+        self._file_menu.AppendSeparator()
+        self._file_menu.Append(self._file_menu_item_reload)
+        self._file_menu.Append(self._file_menu_item_upload)
+        self._file_menu.Append(self._file_menu_item_quit)
 
         # Edit menu ----------------------------------------------------------------------------------------------------
-        self.edit_menu_item_undo = wx.MenuItem(self.edit_menu, wx.ID_UNDO, Strings.label_menu_item_undo,
-                                               Strings.label_menu_item_undo_hint)
-        self.disableable_menu_items.append(self.edit_menu_item_undo)
-        self.edit_menu_item_redo = wx.MenuItem(self.edit_menu, wx.ID_REDO, Strings.label_menu_item_redo,
-                                               Strings.label_menu_item_redo_hint)
-        self.disableable_menu_items.append(self.edit_menu_item_redo)
-        self.edit_menu_item_paste = wx.MenuItem(self.edit_menu, wx.ID_PASTE, Strings.label_menu_item_paste,
-                                                Strings.label_menu_item_paste_hint)
-        self.disableable_menu_items.append(self.edit_menu_item_paste)
-        self.edit_menu_item_copy = wx.MenuItem(self.edit_menu, wx.ID_COPY, Strings.label_menu_item_copy,
-                                               Strings.label_menu_item_copy_hint)
-        self.disableable_menu_items.append(self.edit_menu_item_copy)
-        self.edit_menu_item_cut = wx.MenuItem(self.edit_menu, wx.ID_CUT, Strings.label_menu_item_cut,
-                                              Strings.label_menu_item_cut_hint)
-        self.disableable_menu_items.append(self.edit_menu_item_cut)
-        self.edit_menu_item_select_all = wx.MenuItem(self.edit_menu, wx.ID_SELECTALL,
-                                                     Strings.label_menu_item_select_all,
-                                                     Strings.label_menu_item_select_all_hint)
-        self.disableable_menu_items.append(self.edit_menu_item_select_all)
+        self._edit_menu_item_undo = wx.MenuItem(self._edit_menu, wx.ID_UNDO, Strings.label_menu_item_undo,
+                                                Strings.label_menu_item_undo_hint)
+        self._disableable_menu_items.append(self._edit_menu_item_undo)
+        self._edit_menu_item_redo = wx.MenuItem(self._edit_menu, wx.ID_REDO, Strings.label_menu_item_redo,
+                                                Strings.label_menu_item_redo_hint)
+        self._disableable_menu_items.append(self._edit_menu_item_redo)
+        self._edit_menu_item_paste = wx.MenuItem(self._edit_menu, wx.ID_PASTE, Strings.label_menu_item_paste,
+                                                 Strings.label_menu_item_paste_hint)
+        self._disableable_menu_items.append(self._edit_menu_item_paste)
+        self._edit_menu_item_copy = wx.MenuItem(self._edit_menu, wx.ID_COPY, Strings.label_menu_item_copy,
+                                                Strings.label_menu_item_copy_hint)
+        self._disableable_menu_items.append(self._edit_menu_item_copy)
+        self._edit_menu_item_cut = wx.MenuItem(self._edit_menu, wx.ID_CUT, Strings.label_menu_item_cut,
+                                               Strings.label_menu_item_cut_hint)
+        self._disableable_menu_items.append(self._edit_menu_item_cut)
+        self._edit_menu_item_select_all = wx.MenuItem(self._edit_menu, wx.ID_SELECTALL,
+                                                      Strings.label_menu_item_select_all,
+                                                      Strings.label_menu_item_select_all_hint)
+        self._disableable_menu_items.append(self._edit_menu_item_select_all)
 
-        self.edit_menu.Append(self.edit_menu_item_undo)
-        self.edit_menu.Append(self.edit_menu_item_redo)
-        self.edit_menu.Append(self.edit_menu_item_copy)
-        self.edit_menu.Append(self.edit_menu_item_cut)
-        self.edit_menu.Append(self.edit_menu_item_paste)
-        self.edit_menu.Append(self.edit_menu_item_select_all)
+        self._edit_menu.Append(self._edit_menu_item_undo)
+        self._edit_menu.Append(self._edit_menu_item_redo)
+        self._edit_menu.Append(self._edit_menu_item_copy)
+        self._edit_menu.Append(self._edit_menu_item_cut)
+        self._edit_menu.Append(self._edit_menu_item_paste)
+        self._edit_menu.Append(self._edit_menu_item_select_all)
 
         # Add menu ---------------------------------------------------------------------------------------------------
-        self.add_menu_item_add_image = wx.MenuItem(self.add_menu, wx.ID_ADD, Strings.label_menu_item_add_text_image,
-                                                   Strings.label_menu_item_add_text_image_hint)
-        self.disableable_menu_items.append(self.add_menu_item_add_image)
-        self.add_menu_item_add_logo = wx.MenuItem(self.add_menu, wx.ID_FILE1, Strings.label_menu_item_add_logo,
-                                                  Strings.label_menu_item_add_logo_hint)
-        self.disableable_menu_items.append(self.add_menu_item_add_logo)
-        self.add_menu_item_side_image = wx.MenuItem(self.add_menu, wx.ID_FILE2, Strings.label_menu_item_add_side_image,
-                                                    Strings.label_menu_item_add_side_image_hint)
-        self.disableable_menu_items.append(self.add_menu_item_side_image)
+        self._add_menu_item_add_image = wx.MenuItem(self._add_menu, wx.ID_ADD, Strings.label_menu_item_add_text_image,
+                                                    Strings.label_menu_item_add_text_image_hint)
+        self._disableable_menu_items.append(self._add_menu_item_add_image)
+        self._add_menu_item_add_logo = wx.MenuItem(self._add_menu, wx.ID_FILE1, Strings.label_menu_item_add_logo,
+                                                   Strings.label_menu_item_add_logo_hint)
+        self._disableable_menu_items.append(self._add_menu_item_add_logo)
+        self._add_menu_item_side_image = wx.MenuItem(self._add_menu, wx.ID_FILE2,
+                                                     Strings.label_menu_item_add_side_image,
+                                                     Strings.label_menu_item_add_side_image_hint)
+        self._disableable_menu_items.append(self._add_menu_item_side_image)
 
-        self.add_menu.Append(self.add_menu_item_side_image)
-        self.add_menu.AppendSeparator()
-        self.add_menu.Append(self.add_menu_item_add_image)
-        self.add_menu.Append(self.add_menu_item_add_logo)
+        self._add_menu.Append(self._add_menu_item_side_image)
+        self._add_menu.AppendSeparator()
+        self._add_menu.Append(self._add_menu_item_add_image)
+        self._add_menu.Append(self._add_menu_item_add_logo)
 
         # About menu ---------------------------------------------------------------------------------------------------
-        self.help_menu_item_about = wx.MenuItem(self.help_menu, wx.ID_ABOUT, Strings.label_menu_item_about,
-                                                Strings.label_menu_item_about_hint)
-        self.disableable_menu_items.append(self.help_menu_item_about)
-        self.help_menu.Append(self.help_menu_item_about)
+        self._help_menu_item_about = wx.MenuItem(self._help_menu, wx.ID_ABOUT, Strings.label_menu_item_about,
+                                                 Strings.label_menu_item_about_hint)
+        self._disableable_menu_items.append(self._help_menu_item_about)
+        self._help_menu.Append(self._help_menu_item_about)
 
-        self.SetMenuBar(self.menu_bar)
+        self.SetMenuBar(self._menu_bar)
 
     def _add_tool_id(self) -> wx.NewId():
         """
@@ -189,7 +190,7 @@ class MainFrame(wx.Frame):
         :return: New wx ID.
         """
         new_id = wx.NewId()
-        self.tool_ids.append(new_id)
+        self._tool_ids.append(new_id)
         return new_id
 
     def _init_top_tool_bar(self) -> None:
@@ -206,12 +207,12 @@ class MainFrame(wx.Frame):
 
         self.tool_bar: wx.ToolBar = self.CreateToolBar(style=wx.TB_DEFAULT_STYLE)
         # Add toolbar tools
-        self.new_file_tool = self.tool_bar.AddTool(self._add_tool_id(), Strings.toolbar_new_file,
-                                                   scale_icon('new-file.png'),
-                                                   Strings.toolbar_new_file)
-        self.save_tool = self.tool_bar.AddTool(self._add_tool_id(), Strings.toolbar_save,
-                                               scale_icon('save.png'),
-                                               Strings.toolbar_save)
+        self._new_file_tool = self.tool_bar.AddTool(self._add_tool_id(), Strings.toolbar_new_file,
+                                                    scale_icon('new-file.png'),
+                                                    Strings.toolbar_new_file)
+        self._save_tool = self.tool_bar.AddTool(self._add_tool_id(), Strings.toolbar_save,
+                                                scale_icon('save.png'),
+                                                Strings.toolbar_save)
         self._image_tool_id = self._add_tool_id()
         self.insert_img_tool = self.tool_bar.AddTool(self._image_tool_id, Strings.toolbar_insert_img,
                                                      scale_icon('insert-image.png'),
@@ -223,10 +224,10 @@ class MainFrame(wx.Frame):
         self.bold_tool = self.tool_bar.AddTool(self._add_tool_id(), Strings.toolbar_bold,
                                                scale_icon('bold.png'),
                                                Strings.toolbar_bold)
-        self.Bind(wx.EVT_MENU, self.forward_event, self.insert_img_tool)
-        self.Bind(wx.EVT_MENU, self.forward_event, self.insert_video_tool)
-        self.Bind(wx.EVT_MENU, self.forward_event, self.bold_tool)
-        self.Bind(wx.EVT_MENU, self.save_document_handler, self.save_tool)
+        self.Bind(wx.EVT_MENU, self._forward_event, self.insert_img_tool)
+        self.Bind(wx.EVT_MENU, self._forward_event, self.insert_video_tool)
+        self.Bind(wx.EVT_MENU, self._forward_event, self.bold_tool)
+        self.Bind(wx.EVT_MENU, self._save_document_handler, self._save_tool)
         self.tool_bar.Realize()
 
     def _create_color_tool(self, name: str, toolbar: wx.ToolBar, color: wx.Colour) -> None:
@@ -237,7 +238,7 @@ class MainFrame(wx.Frame):
         :param color: The color to use.
         :return: None
         """
-        for tool_id in self.tool_ids:
+        for tool_id in self._tool_ids:
             tool: wx.ToolBarToolBase = self.tool_bar.FindById(tool_id)
             if tool.GetShortHelp() == name:
                 # Do not recreate tools on working directory reload, only create potential new color tools.
@@ -267,8 +268,8 @@ class MainFrame(wx.Frame):
         :return: None
         """
         # Create a status bar with 3 fields
-        self.status_bar = self.CreateStatusBar(4)
-        self.status_bar.SetStatusWidths([-6, -7, -2, -2])
+        self._status_bar = self.CreateStatusBar(4)
+        self._status_bar.SetStatusWidths([-6, -7, -2, -2])
         # Initialize status bar
         self._set_status_text('', 0)
         self._set_status_text('', 1)
@@ -289,50 +290,51 @@ class MainFrame(wx.Frame):
         self._split_screen.SplitVertically(self._left_panel, self._right_panel, Numbers.initial_panel_size)
 
         # Create a global sizer that contains the splitter window which contains the rest.
-        self.main_horizontal_sizer = wx.BoxSizer(wx.VERTICAL)
-        self.main_horizontal_sizer.Add(self._split_screen, 1, wx.EXPAND)
+        self._main_horizontal_sizer = wx.BoxSizer(wx.VERTICAL)
+        self._main_horizontal_sizer.Add(self._split_screen, 1, wx.EXPAND)
 
         # Create sizers that go into the panels.
         # Contains file list of pages
-        self.filelist_column_sizer = wx.BoxSizer(wx.VERTICAL)
-        self.style_sizer = wx.StaticBoxSizer(wx.VERTICAL, self._left_panel, label=Strings.label_styles)
+        self._filelist_column_sizer = wx.BoxSizer(wx.VERTICAL)
+        self._style_sizer = wx.StaticBoxSizer(wx.VERTICAL, self._left_panel, label=Strings.label_styles)
 
-        self.right_main_vertical_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.middle_top_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.right_vertical_sizer = wx.BoxSizer(wx.VERTICAL)
+        self._right_main_vertical_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self._middle_top_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self._right_vertical_sizer = wx.BoxSizer(wx.VERTICAL)
         # Contains main article image
-        self.article_image_static_sizer = wx.StaticBoxSizer(wx.VERTICAL, self._right_panel,
-                                                            label=Strings.label_article_image)
+        self._article_image_static_sizer = wx.StaticBoxSizer(wx.VERTICAL, self._right_panel,
+                                                             label=Strings.label_article_image)
         # Contains article metadata controls
-        self.article_data_static_sizer = wx.StaticBoxSizer(wx.VERTICAL, self._right_panel,
-                                                           label=Strings.label_article_info)
+        self._article_data_static_sizer = wx.StaticBoxSizer(wx.VERTICAL, self._right_panel,
+                                                            label=Strings.label_article_info)
         # Contains menu logo controls
-        self.menu_logo_static_sizer = wx.StaticBoxSizer(wx.VERTICAL, self._right_panel,
-                                                        label=Strings.label_article_menu_logo)
+        self._menu_logo_static_sizer = wx.StaticBoxSizer(wx.VERTICAL, self._right_panel,
+                                                         label=Strings.label_article_menu_logo)
         # Contains main text area, middle top sizer
-        self.middle_vertical_sizer = wx.BoxSizer(wx.VERTICAL)
+        self._middle_vertical_sizer = wx.BoxSizer(wx.VERTICAL)
 
         # Contains article photos
-        self.side_photo_column_sizer = wx.StaticBoxSizer(wx.VERTICAL, self._right_panel,
-                                                         label=Strings.label_article_photo_column)
-        self.side_photo_column_sizer.SetMinSize((Numbers.photo_column_width, -1))
-        self.right_vertical_sizer.Add(self.article_image_static_sizer, flag=wx.ALIGN_LEFT | wx.RIGHT, border=0)
-        self.right_vertical_sizer.Add(self.side_photo_column_sizer, flag=wx.EXPAND, proportion=1,
-                                      border=Numbers.widget_border_size)
+        self._side_photo_column_sizer = wx.StaticBoxSizer(wx.VERTICAL, self._right_panel,
+                                                          label=Strings.label_article_photo_column)
+        self._side_photo_column_sizer.SetMinSize((Numbers.photo_column_width, -1))
+        self._right_vertical_sizer.Add(self._article_image_static_sizer, flag=wx.ALIGN_LEFT | wx.RIGHT, border=0)
+        self._right_vertical_sizer.Add(self._side_photo_column_sizer, flag=wx.EXPAND, proportion=1,
+                                       border=Numbers.widget_border_size)
         # The | is a bitwise or and flags is a bit mask of constants
-        self.middle_vertical_sizer.Add(self.middle_top_sizer, flag=wx.RIGHT | wx.ALIGN_LEFT | wx.EXPAND,
-                                       border=Numbers.widget_border_size, proportion=0)
-        self.right_main_vertical_sizer.Add(self.middle_vertical_sizer, border=Numbers.widget_border_size, proportion=1,
-                                           flag=wx.RIGHT | wx.LEFT | wx.ALIGN_LEFT | wx.EXPAND)
-        self.right_main_vertical_sizer.Add(self.right_vertical_sizer, flag=wx.EXPAND | wx.RIGHT, proportion=0,
-                                           border=Numbers.widget_border_size)
-        self.middle_top_sizer.Add(self.menu_logo_static_sizer, 0, flag=wx.EXPAND, border=Numbers.widget_border_size)
-        self.middle_top_sizer.Add(self.article_data_static_sizer, 1, flag=wx.EXPAND | wx.LEFT,
-                                  border=Numbers.widget_border_size)
+        self._middle_vertical_sizer.Add(self._middle_top_sizer, flag=wx.RIGHT | wx.ALIGN_LEFT | wx.EXPAND,
+                                        border=Numbers.widget_border_size, proportion=0)
+        self._right_main_vertical_sizer.Add(self._middle_vertical_sizer, border=Numbers.widget_border_size,
+                                            proportion=1,
+                                            flag=wx.RIGHT | wx.LEFT | wx.ALIGN_LEFT | wx.EXPAND)
+        self._right_main_vertical_sizer.Add(self._right_vertical_sizer, flag=wx.EXPAND | wx.RIGHT, proportion=0,
+                                            border=Numbers.widget_border_size)
+        self._middle_top_sizer.Add(self._menu_logo_static_sizer, 0, flag=wx.EXPAND, border=Numbers.widget_border_size)
+        self._middle_top_sizer.Add(self._article_data_static_sizer, 1, flag=wx.EXPAND | wx.LEFT,
+                                   border=Numbers.widget_border_size)
         # Insert sizers with GUI into the respective panels, these are inserted into the splitter windows.s
-        self._left_panel.SetSizer(self.filelist_column_sizer)
-        self._right_panel.SetSizer(self.right_main_vertical_sizer)
-        self.SetSizer(self.main_horizontal_sizer)
+        self._left_panel.SetSizer(self._filelist_column_sizer)
+        self._right_panel.SetSizer(self._right_main_vertical_sizer)
+        self.SetSizer(self._main_horizontal_sizer)
 
     def _inflate_sizers(self) -> None:
         """
@@ -348,25 +350,26 @@ class MainFrame(wx.Frame):
         self._menu_logo_button.SetBitmap(wx.Bitmap(placeholder_logo_image))
         # self._menu_logo_name = wx.StaticText(self.right_panel, -1, Strings.label_article_image_caption)
         # Set border to the image
-        self.menu_logo_static_sizer.Add(self._menu_logo_button, flag=wx.LEFT | wx.BOTTOM | wx.RIGHT,
-                                        border=Numbers.widget_border_size)
+        self._menu_logo_static_sizer.Add(self._menu_logo_button, flag=wx.LEFT | wx.BOTTOM | wx.RIGHT,
+                                         border=Numbers.widget_border_size)
         # Create menu logo name text box
         self._text_menu_item_name = wx.StaticText(self._right_panel, -1,
                                                   Strings.label_article_menu_logo_name_placeholder,
                                                   style=wx.ALIGN_CENTRE_HORIZONTAL)
         self._text_menu_item_name.SetFont(self.menu_text_field_font)
         self._text_menu_item_name.SetMaxSize((Numbers.menu_logo_image_size, 30))
-        self.menu_logo_static_sizer.Add(self._text_menu_item_name, flag=wx.CENTER)
+        self._menu_logo_static_sizer.Add(self._text_menu_item_name, flag=wx.CENTER)
         # --------------------------------------------------------------------------------------------------------------
 
         # File list section --------------------------------------------------------------------------------------------
         self._style_picker = wx.ListBox(self._left_panel, -1, size=(-1, 160))
-        self.style_sizer.Add(self._style_picker, 1, flag=wx.EXPAND)
+        self._style_sizer.Add(self._style_picker, 1, flag=wx.EXPAND)
         self._file_list = wx.ListCtrl(self._left_panel, -1, style=wx.LC_REPORT | wx.LC_SINGLE_SEL)
         self._file_list.SetFont(self.menu_text_field_font)
-        self.filelist_column_sizer.Add(self.style_sizer, flag=wx.EXPAND, border=Numbers.widget_border_size)
+        self._filelist_column_sizer.Add(self._style_sizer, flag=wx.EXPAND, border=Numbers.widget_border_size)
         # Add the list into the bottom sizer, give it a sizing weight and let it expand vertically
-        self.filelist_column_sizer.Add(self._file_list, flag=wx.EXPAND, border=Numbers.widget_border_size, proportion=1)
+        self._filelist_column_sizer.Add(self._file_list, flag=wx.EXPAND, border=Numbers.widget_border_size,
+                                        proportion=1)
         # --------------------------------------------------------------------------------------------------------------
 
         # Article metadata section -------------------------------------------------------------------------------------
@@ -378,45 +381,45 @@ class MainFrame(wx.Frame):
         self._text_main_image_caption = wx.StaticText(self._right_panel, -1, Strings.label_article_image_caption,
                                                       style=wx.ST_ELLIPSIZE_END)
         self._text_main_image_caption.SetMaxSize((Numbers.main_image_width - 5, -1))
-        self.article_image_static_sizer.Add(self._main_image_button, flag=wx.LEFT | wx.BOTTOM | wx.RIGHT,
-                                            border=Numbers.widget_border_size)
-        self.article_image_static_sizer.Add(self._text_main_image_caption, flag=wx.LEFT | wx.BOTTOM | wx.RIGHT,
-                                            border=Numbers.widget_border_size)
+        self._article_image_static_sizer.Add(self._main_image_button, flag=wx.LEFT | wx.BOTTOM | wx.RIGHT,
+                                             border=Numbers.widget_border_size)
+        self._article_image_static_sizer.Add(self._text_main_image_caption, flag=wx.LEFT | wx.BOTTOM | wx.RIGHT,
+                                             border=Numbers.widget_border_size)
 
         # Add text boxes
-        self.field_article_date = wx.TextCtrl(self._right_panel, -1, value=Strings.label_article_date,
-                                              size=wx.Size(160, 30))
-        self.field_article_date_tip = Tools.get_warning_tip(self.field_article_date, Strings.label_article_date)
+        self._field_article_date = wx.TextCtrl(self._right_panel, -1, value=Strings.label_article_date,
+                                               size=wx.Size(160, 30))
+        self._field_article_date_tip = Tools.get_warning_tip(self._field_article_date, Strings.label_article_date)
 
-        self.field_article_name = wx.TextCtrl(self._right_panel, -1, value=Strings.label_article_title,
-                                              size=wx.Size(-1, 43))
-        font: wx.Font = self.field_article_name.GetFont()
+        self._field_article_name = wx.TextCtrl(self._right_panel, -1, value=Strings.label_article_title,
+                                               size=wx.Size(-1, 43))
+        font: wx.Font = self._field_article_name.GetFont()
         font.SetWeight(wx.FONTWEIGHT_BOLD)
         font.SetPointSize(Numbers.main_heading_size)
-        self.field_article_name.SetFont(font)
-        self.field_article_name_tip = Tools.get_warning_tip(self.field_article_name, Strings.label_article_title)
+        self._field_article_name.SetFont(font)
+        self._field_article_name_tip = Tools.get_warning_tip(self._field_article_name, Strings.label_article_title)
 
-        self.field_article_keywords = wx.TextCtrl(self._right_panel, -1, value=Strings.label_article_keywords,
-                                                  size=wx.Size(-1, 30))
-        self.field_article_keywords_tip = Tools.get_warning_tip(self.field_article_keywords,
-                                                                Strings.label_article_keywords)
+        self._field_article_keywords = wx.TextCtrl(self._right_panel, -1, value=Strings.label_article_keywords,
+                                                   size=wx.Size(-1, 30))
+        self._field_article_keywords_tip = Tools.get_warning_tip(self._field_article_keywords,
+                                                                 Strings.label_article_keywords)
 
-        self.field_article_description = wx.TextCtrl(self._right_panel, -1, value=Strings.label_article_description,
-                                                     size=wx.Size(-1, 60), style=wx.TE_MULTILINE)
-        self.field_article_description_tip = Tools.get_warning_tip(self.field_article_description,
-                                                                   Strings.label_article_description)
+        self._field_article_description = wx.TextCtrl(self._right_panel, -1, value=Strings.label_article_description,
+                                                      size=wx.Size(-1, 60), style=wx.TE_MULTILINE)
+        self._field_article_description_tip = Tools.get_warning_tip(self._field_article_description,
+                                                                    Strings.label_article_description)
 
         date_keywords_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        date_keywords_sizer.Add(self.field_article_keywords, 1, flag=wx.EXPAND)
-        date_keywords_sizer.Add(self.field_article_date)
-        self.article_data_static_sizer.Add(date_keywords_sizer, flag=wx.EXPAND)
-        self.article_data_static_sizer.Add(self.field_article_description, flag=wx.EXPAND)
-        self.article_data_static_sizer.Add(self.field_article_name, 1, flag=wx.EXPAND)
+        date_keywords_sizer.Add(self._field_article_keywords, 1, flag=wx.EXPAND)
+        date_keywords_sizer.Add(self._field_article_date)
+        self._article_data_static_sizer.Add(date_keywords_sizer, flag=wx.EXPAND)
+        self._article_data_static_sizer.Add(self._field_article_description, flag=wx.EXPAND)
+        self._article_data_static_sizer.Add(self._field_article_name, 1, flag=wx.EXPAND)
         # --------------------------------------------------------------------------------------------------------------
 
         # Aside images section -----------------------------------------------------------------------------------------
-        self.side_photo_panel = AsideImagePanel(self._right_panel)
-        self.side_photo_column_sizer.Add(self.side_photo_panel, 1, flag=wx.EXPAND)
+        self._side_photo_panel = AsideImagePanel(self._right_panel)
+        self._side_photo_column_sizer.Add(self._side_photo_panel, 1, flag=wx.EXPAND)
         self.Fit()
 
     def _setup_main_text_area(self) -> None:
@@ -427,8 +430,8 @@ class MainFrame(wx.Frame):
         # Main text area section ---------------------------------------------------------------------------------------
         self._main_text_area = CustomRichText(self._image_tool_id, self._video_tool_id, self._style_picker,
                                               self._right_panel, style=wx.VSCROLL)
-        self.middle_vertical_sizer.Add(self._main_text_area, flag=wx.EXPAND | wx.TOP, proportion=1,
-                                       border=Numbers.widget_border_size)
+        self._middle_vertical_sizer.Add(self._main_text_area, flag=wx.EXPAND | wx.TOP, proportion=1,
+                                        border=Numbers.widget_border_size)
         # --------------------------------------------------------------------------------------------------------------
 
     def _bind_handlers(self) -> None:
@@ -440,38 +443,38 @@ class MainFrame(wx.Frame):
         # example buttons, all buttons will create EVT_BUTTON and we will not know which handler to use unless
         # the source is set.
         # Bind window close events, X button and emergency quit
-        self.Bind(wx.EVT_CLOSE, self.close_button_handler, self)
+        self.Bind(wx.EVT_CLOSE, self._close_button_handler, self)
         # This calls the quit method if the user logs off the computer
-        self.Bind(wx.EVT_QUERY_END_SESSION, self.close_button_handler)
+        self.Bind(wx.EVT_QUERY_END_SESSION, self._close_button_handler)
 
         # Bind a handler that changes selected document color if an edit happens in other controls.
-        self.Bind(wx.EVT_COLOUR_CHANGED, self.text_area_edit_handler)
+        self.Bind(wx.EVT_COLOUR_CHANGED, self._text_area_edit_handler)
 
         # Bind menu item clicks
-        self.Bind(wx.EVT_MENU, self.about_button_handler, self.help_menu_item_about)
-        self.Bind(wx.EVT_MENU, self.open_button_handler, self.file_menu_item_open)
-        self.Bind(wx.EVT_MENU, self.quit_button_handler, self.file_menu_item_quit)
-        self.Bind(wx.EVT_MENU, self.reload_button_handler, self.file_menu_item_reload)
-        self.Bind(wx.EVT_MENU, self.forward_event, self.edit_menu_item_cut)
-        self.Bind(wx.EVT_MENU, self.forward_event, self.edit_menu_item_copy)
-        self.Bind(wx.EVT_MENU, self.forward_event, self.edit_menu_item_paste)
-        self.Bind(wx.EVT_MENU, self.forward_event, self.edit_menu_item_undo)
-        self.Bind(wx.EVT_MENU, self.forward_event, self.edit_menu_item_redo)
-        self.Bind(wx.EVT_MENU, self.forward_event, self.edit_menu_item_select_all)
-        self.Bind(wx.EVT_MENU, self.add_image_handler, self.add_menu_item_add_image)
-        self.Bind(wx.EVT_MENU, self.insert_aside_image_handler, self.add_menu_item_side_image)
-        self.Bind(wx.EVT_MENU, self.add_menu_logo_handler, self.add_menu_item_add_logo)
+        self.Bind(wx.EVT_MENU, self._about_button_handler, self._help_menu_item_about)
+        self.Bind(wx.EVT_MENU, self._open_button_handler, self._file_menu_item_open)
+        self.Bind(wx.EVT_MENU, self._quit_button_handler, self._file_menu_item_quit)
+        self.Bind(wx.EVT_MENU, self._reload_button_handler, self._file_menu_item_reload)
+        self.Bind(wx.EVT_MENU, self._forward_event, self._edit_menu_item_cut)
+        self.Bind(wx.EVT_MENU, self._forward_event, self._edit_menu_item_copy)
+        self.Bind(wx.EVT_MENU, self._forward_event, self._edit_menu_item_paste)
+        self.Bind(wx.EVT_MENU, self._forward_event, self._edit_menu_item_undo)
+        self.Bind(wx.EVT_MENU, self._forward_event, self._edit_menu_item_redo)
+        self.Bind(wx.EVT_MENU, self._forward_event, self._edit_menu_item_select_all)
+        self.Bind(wx.EVT_MENU, self._add_image_handler, self._add_menu_item_add_image)
+        self.Bind(wx.EVT_MENU, self._insert_aside_image_handler, self._add_menu_item_side_image)
+        self.Bind(wx.EVT_MENU, self._add_menu_logo_handler, self._add_menu_item_add_logo)
 
         # Bind other controls clicks
-        self.Bind(wx.EVT_LIST_ITEM_SELECTED, self.list_item_click_handler, self._file_list)
-        self.Bind(wx.EVT_SPLITTER_SASH_POS_CHANGING, self.splitter_size_change_handler, self._split_screen)
-        self.Bind(wx.EVT_BUTTON, self.main_image_handler, self._main_image_button)
-        self.Bind(wx.EVT_BUTTON, self.menu_logo_handler, self._menu_logo_button)
-        self.Bind(wx.EVT_TEXT, self._handle_name_change, self.field_article_name)
-        self.Bind(wx.EVT_TEXT, self._handle_date_change, self.field_article_date)
-        self.Bind(wx.EVT_TEXT, self._handle_keywords_change, self.field_article_keywords)
-        self.Bind(wx.EVT_TEXT, self._handle_description_change, self.field_article_description)
-        self.Bind(wx.EVT_LISTBOX, self.forward_event, self._style_picker)
+        self.Bind(wx.EVT_LIST_ITEM_SELECTED, self._list_item_click_handler, self._file_list)
+        self.Bind(wx.EVT_SPLITTER_SASH_POS_CHANGING, self._splitter_size_change_handler, self._split_screen)
+        self.Bind(wx.EVT_BUTTON, self._main_image_handler, self._main_image_button)
+        self.Bind(wx.EVT_BUTTON, self._menu_logo_handler, self._menu_logo_button)
+        self.Bind(wx.EVT_TEXT, self._handle_name_change, self._field_article_name)
+        self.Bind(wx.EVT_TEXT, self._handle_date_change, self._field_article_date)
+        self.Bind(wx.EVT_TEXT, self._handle_keywords_change, self._field_article_keywords)
+        self.Bind(wx.EVT_TEXT, self._handle_description_change, self._field_article_description)
+        self.Bind(wx.EVT_LISTBOX, self._forward_event, self._style_picker)
 
     def _set_status_text(self, text: str, position=0) -> None:
         """
@@ -481,7 +484,7 @@ class MainFrame(wx.Frame):
         :return: None
         """
         to_set = '| ' + text
-        self.status_bar.SetStatusText(to_set, position)
+        self._status_bar.SetStatusText(to_set, position)
 
     def _disable_editor(self, state, leave_files: bool = False) -> None:
         """
@@ -509,10 +512,10 @@ class MainFrame(wx.Frame):
             self._file_list.SetBackgroundColour(wx.WHITE)
             self._file_list.SetForegroundColour(wx.BLACK)
         # Disable toolbar buttons
-        for tool_id in self.tool_ids:
+        for tool_id in self._tool_ids:
             self.tool_bar.EnableTool(tool_id, (not state))
         # Disable menu items
-        for menu_item in self.disableable_menu_items:
+        for menu_item in self._disableable_menu_items:
             menu_item.Enable(not state)
 
     def _load_working_directory(self, path: str) -> None:
@@ -521,8 +524,8 @@ class MainFrame(wx.Frame):
         :param path: str, path to the working directory
         :return: None
         """
-        self.loading_dlg = LoadingDialog(None)
-        self.loading_dlg.Show()
+        self._loading_dlg = LoadingDialog(None)
+        self._loading_dlg.Show()
         # Disable the gui until load is done
         self.Disable()
         self._set_status_text(Strings.status_loading, 3)
@@ -547,7 +550,7 @@ class MainFrame(wx.Frame):
         :param e: Exception that caused the call of this method.
         :return: None
         """
-        self.loading_dlg.Destroy()
+        self._loading_dlg.Destroy()
         self._show_error_dialog(str(e))
         self._disable_editor(True)
         self._clear_editor()
@@ -558,8 +561,8 @@ class MainFrame(wx.Frame):
         :param css: The parsed css file.
         :return: None
         """
-        self.css_colors = css.get_colors()
-        for name, color in self.css_colors.items():
+        self._css_colors = css.get_colors()
+        for name, color in self._css_colors.items():
             self._create_color_tool(name, self.tool_bar, color)
 
     def on_filelist_loaded(self, documents: Dict[str, WhitebearDocumentArticle]) -> None:
@@ -569,29 +572,29 @@ class MainFrame(wx.Frame):
         :return: None
         """
         self._disable_editor(True, leave_files=True)
-        self.document_dictionary = documents
+        self._document_dictionary = documents
         MainFrame.LOADED_PAGES = list(documents.keys())
         self._file_list.ClearAll()
         self._file_list.InsertColumn(0, Strings.label_filelist, format=wx.LIST_FORMAT_LEFT)
         self._file_list.SetColumnWidth(0, self._left_panel.GetSize()[0])
-        for document_name in sorted(list(self.document_dictionary.keys()), reverse=True):
-            status_color = self.document_dictionary[document_name].get_status_color()
+        for document_name in sorted(list(self._document_dictionary.keys()), reverse=True):
+            status_color = self._document_dictionary[document_name].get_status_color()
             self._file_list.InsertItem(0, document_name)
             self._file_list.SetItemBackgroundColour(0, status_color)
 
         # Select last used document
-        last_document = self.config_manager.get_last_document()
+        last_document = self._config_manager.get_last_document()
         if last_document:
             self._file_list.Select(self._file_list.FindItem(0, last_document))
 
-        os.chdir(self.config_manager.get_working_dir())
+        os.chdir(self._config_manager.get_working_dir())
         # Enable GUI when the load is done
         self._set_status_text(Strings.status_ready, 3)
-        self._set_status_text(Strings.status_articles + ' ' + str(len(self.document_dictionary)), 2)
+        self._set_status_text(Strings.status_articles + ' ' + str(len(self._document_dictionary)), 2)
         # Only enable the file list the rest is disabled until a document is selected.
-        self.loading_dlg.Destroy()
+        self._loading_dlg.Destroy()
 
-    def forward_event(self, evt) -> None:
+    def _forward_event(self, evt) -> None:
         """
         The RichTextCtrl can handle menu and update events for undo, redo, cut, copy, paste, delete, and select all,
         so just forward the event to it.
@@ -607,7 +610,7 @@ class MainFrame(wx.Frame):
         :return:
         """
         tool: wx.ToolBarToolBase = self.tool_bar.FindById(evt.GetId())
-        color = self.css_colors[tool.GetShortHelp()]
+        color = self._css_colors[tool.GetShortHelp()]
         if self._main_text_area.HasSelection():
             self._main_text_area.BeginBatchUndo(Strings.undo_bold)
             color_range = self._main_text_area.GetSelectionRange()
@@ -628,11 +631,11 @@ class MainFrame(wx.Frame):
         else:
             self._main_text_area.BeginTextColour(color)
 
-    def save(self, confirm=False) -> bool:
+    def _save(self, confirm=False) -> bool:
         """
         Save current document onto disk.
         :param confirm: Require user confirmation.
-        :return: True if saved sucessfully.
+        :return: True if saved successfully.
         """
         # Force save current document.
         if confirm:
@@ -657,27 +660,29 @@ class MainFrame(wx.Frame):
             dlg.Destroy()
             return False
 
-    def main_image_handler(self, event: wx.CommandEvent) -> None:
+    # noinspection PyUnusedLocal
+    def _main_image_handler(self, event: wx.CommandEvent) -> None:
         """
         Handle click on the main image button,
         :param event: Not used
         :return: None
         """
-        main_image: AsideImage = self.current_document_instance.get_article_image()
-        edit_dialog = EditAsideImageDialog(self, main_image, self.config_manager.get_working_dir())
+        main_image: AsideImage = self._current_document_instance.get_article_image()
+        edit_dialog = EditAsideImageDialog(self, main_image, self._config_manager.get_working_dir())
         edit_dialog.ShowModal()
         self._update_article_image_sizer(main_image)
         self._update_file_color()
         edit_dialog.Destroy()
 
-    def menu_logo_handler(self, event: wx.CommandEvent) -> None:
+    # noinspection PyUnusedLocal
+    def _menu_logo_handler(self, event: wx.CommandEvent) -> None:
         """
         Handle click on the menu logo button,
         :param event: Not used
         :return: None
         """
-        menu_item: MenuItem = self.current_document_instance.get_menu_item()
-        edit_dialog = EditMenuItemDialog(self, menu_item, self.config_manager.get_working_dir())
+        menu_item: MenuItem = self._current_document_instance.get_menu_item()
+        edit_dialog = EditMenuItemDialog(self, menu_item, self._config_manager.get_working_dir())
         # We first need to show the dialog so that the name label can calculate it's size and then switch to modal.
         edit_dialog.Show()
         edit_dialog.display_dialog_contents()
@@ -686,7 +691,8 @@ class MainFrame(wx.Frame):
         self._update_file_color()
         edit_dialog.Destroy()
 
-    def quit_button_handler(self, event) -> None:
+    # noinspection PyUnusedLocal
+    def _quit_button_handler(self, event) -> None:
         """
         Handles clicks to the Quit button in File menu. Calls Close function which sends EVT_CLOSE and triggers
         close_button_handler() which does all the saving work.
@@ -695,7 +701,7 @@ class MainFrame(wx.Frame):
         """
         self.Close(True)
 
-    def close_button_handler(self, event):
+    def _close_button_handler(self, event):
         """
         Handle user exit from the editor. Save last known window position, size and last opened document.
         :param event: CloseEvent, if CanVeto is False the window must be destroyed the system is forcing it.
@@ -703,23 +709,24 @@ class MainFrame(wx.Frame):
         """
         if event.CanVeto():
             # Save window position
-            self.config_manager.store_window_position(self.GetScreenPosition())
+            self._config_manager.store_window_position(self.GetScreenPosition())
             # Save window size
             if self.IsMaximized():
                 # Special value to indicate maximized window
-                self.config_manager.store_window_size((-1, -1))
+                self._config_manager.store_window_size((-1, -1))
             else:
-                self.config_manager.store_window_size(self.GetSize())
+                self._config_manager.store_window_size(self.GetSize())
             # Store last selected document
             selected_page = self._file_list.GetFirstSelected()
             if selected_page != wx.NOT_FOUND:
-                self.config_manager.store_last_open_document(self._file_list.GetItemText(selected_page, 0))
+                self._config_manager.store_last_open_document(self._file_list.GetItemText(selected_page, 0))
             # TODO Save currently worked on document on disk
         # If the built in close function is not called, destroy must be called explicitly, calling Close runs the close
         # handler.
         self.Destroy()
 
-    def open_button_handler(self, event):
+    # noinspection PyUnusedLocal
+    def _open_button_handler(self, event):
         """
         Handle opening a new working directory. Show a selection dialog, store the new directory and load it into
         editor.
@@ -730,13 +737,14 @@ class MainFrame(wx.Frame):
                            wx.DD_DIR_MUST_EXIST | wx.DD_CHANGE_DIR)
         # Modal means the user is locked into this dialog an can not use the rest of the application
         if dlg.ShowModal() == wx.ID_OK:
-            self.config_manager.store_working_dir(dlg.GetPath())
-            self.current_document_instance = None
-            self._load_working_directory(self.config_manager.get_working_dir())
+            self._config_manager.store_working_dir(dlg.GetPath())
+            self._current_document_instance = None
+            self._load_working_directory(self._config_manager.get_working_dir())
         # This must be called, the dialog stays in memory so you can retrieve data and would not be destroyed.
         dlg.Destroy()
 
-    def about_button_handler(self, event):
+    # noinspection PyUnusedLocal
+    def _about_button_handler(self, event):
         """
         Handles clicks onto the About button. Displays a short message in another window.
         :param event: Not used.
@@ -744,7 +752,8 @@ class MainFrame(wx.Frame):
         """
         AboutDialog(self)
 
-    def splitter_size_change_handler(self, event):
+    # noinspection PyUnusedLocal
+    def _splitter_size_change_handler(self, event):
         """
         Triggered when the splitter window is being resized. This is used to change column size of the page list.
         :param event: Not used
@@ -768,41 +777,42 @@ class MainFrame(wx.Frame):
         placeholder_main_image.Replace(0, 0, 0, 245, 255, 255)
         self._main_image_button.SetBitmap(wx.Bitmap(placeholder_main_image))
         self._file_list.ClearAll()
-        self.side_photo_panel.clear_panel()
+        self._side_photo_panel.clear_panel()
         self._main_text_area.clear_self()
         self._text_menu_item_name.SetLabelText('')
         self._text_main_image_caption.SetLabelText('')
-        self.field_article_name.SetValue(Strings.label_article_title)
-        self.field_article_date.SetValue(Strings.label_article_date)
-        self.field_article_description.SetValue(Strings.label_article_description)
-        self.field_article_keywords.SetValue(Strings.label_article_keywords)
+        self._field_article_name.SetValue(Strings.label_article_title)
+        self._field_article_date.SetValue(Strings.label_article_date)
+        self._field_article_description.SetValue(Strings.label_article_description)
+        self._field_article_keywords.SetValue(Strings.label_article_keywords)
         self._set_status_text(Strings.status_error, 0)
         self._set_status_text(Strings.status_error, 3)
         self._ignore_change = False
         pass
 
-    def list_item_click_handler(self, event):
+    def _list_item_click_handler(self, event):
         """
         Handler function for clicking a page name in the web page list. Revalidates the document against schema. If
         errors are discovered, disables editor and shows a message.
         :param event: wx event, brings the selected string from the menu.
         :return: None
         """
-        if self.current_document_instance and event.GetClientData() != Strings.flag_no_save:
+        if self._current_document_instance and event.GetClientData() != Strings.flag_no_save:
             # Only ask to save if there is a document already opened in the editor and saving is allowed.
             # TODO save into current file, do not show file dialog
             # TODO save a backup copy
-            self.save(confirm=True)
+            self._save(confirm=True)
 
         self._disable_editor(True)
-        self.current_document_name = event.GetText()
-        self.current_document_instance: WhitebearDocumentArticle = self.document_dictionary[self.current_document_name]
+        self._current_document_name = event.GetText()
+        self._current_document_instance: WhitebearDocumentArticle = self._document_dictionary[
+            self._current_document_name]
         try:
-            result = self.current_document_instance.validate_self()
+            result = self._current_document_instance.validate_self()
             if not result[0]:
-                self._set_status_text(Strings.status_invalid + ' ' + self.current_document_name)
+                self._set_status_text(Strings.status_invalid + ' ' + self._current_document_name)
                 # Prepare error string from all validation errors
-                error_string = Strings.exception_html_syntax_error + ': ' + self.current_document_name + '\n'
+                error_string = Strings.exception_html_syntax_error + ': ' + self._current_document_name + '\n'
                 for message in result[1]:
                     error_string = error_string + message + '\n'
                 self._show_error_dialog(error_string)
@@ -819,9 +829,10 @@ class MainFrame(wx.Frame):
             self._clear_editor()
             return
         # If the document is correct, now we can show it.
-        self._fill_editor(self.current_document_instance)
+        self._fill_editor(self._current_document_instance)
 
-    def reload_button_handler(self, event):
+    # noinspection PyUnusedLocal
+    def _reload_button_handler(self, event):
         """
         Reparse the selected file from disk. Used in case the user has to fix something in html or images.
         :param event: wx event, not used.
@@ -832,14 +843,14 @@ class MainFrame(wx.Frame):
         result = reload_dialog.ShowModal()
         if result == wx.ID_YES:
             reload_dialog.Destroy()
-            self.save(confirm=True)
+            self._save(confirm=True)
             selected_item = self._file_list.GetItem(self._file_list.GetFirstSelected())
-            self.current_document_instance.get_menu_section().parse_self()
-            self.current_document_instance.parse_self()
+            self._current_document_instance.get_menu_section().parse_self()
+            self._current_document_instance.parse_self()
             event = wx.ListEvent()
             event.SetItem(selected_item)
             event.SetClientData(Strings.flag_no_save)
-            self.list_item_click_handler(event)
+            self._list_item_click_handler(event)
         reload_dialog.Destroy()
 
     def _fill_editor(self, doc: WhitebearDocumentArticle) -> None:
@@ -859,10 +870,10 @@ class MainFrame(wx.Frame):
 
         self.SetTitle(doc.get_filename())
         # Set article data
-        field_to_value = {self.field_article_date: (doc.get_date(), self.field_article_date_tip),
-                          self.field_article_name: (doc.get_page_name(), self.field_article_name_tip),
-                          self.field_article_keywords: (doc.get_keywords_string(), self.field_article_keywords_tip),
-                          self.field_article_description: (doc.get_description(), self.field_article_description_tip)}
+        field_to_value = {self._field_article_date: (doc.get_date(), self._field_article_date_tip),
+                          self._field_article_name: (doc.get_page_name(), self._field_article_name_tip),
+                          self._field_article_keywords: (doc.get_keywords_string(), self._field_article_keywords_tip),
+                          self._field_article_description: (doc.get_description(), self._field_article_description_tip)}
         for field, value in field_to_value.items():
             tip = value[1]
             if value[0][1]:
@@ -878,8 +889,8 @@ class MainFrame(wx.Frame):
         self._menu_logo_button.SetBitmap(wx.Bitmap(doc.get_menu_item().get_image()))
 
         # Set aside images
-        self.side_photo_panel.load_document_images(doc)
-        self.side_photo_panel.Refresh()
+        self._side_photo_panel.load_document_images(doc)
+        self._side_photo_panel.Refresh()
         self._main_text_area.set_content(doc)
 
         # Set main image caption
@@ -890,6 +901,7 @@ class MainFrame(wx.Frame):
 
         self._disable_editor(False)
 
+    # noinspection PyUnusedLocal
     def _handle_name_change(self, event: wx.CommandEvent) -> None:
         """
         Handle changes to the article name field real time.
@@ -897,12 +909,13 @@ class MainFrame(wx.Frame):
         :return: None
         """
         if not self._ignore_change:
-            correct, message, color = self.current_document_instance.seo_test_name(self.field_article_name.GetValue())
-            self.field_article_name.SetBackgroundColour(color)
-            self.field_article_name_tip.SetMessage(Strings.seo_check + '\n' + message)
-            self.current_document_instance.set_page_name(self.field_article_name.GetValue())
+            correct, message, color = self._current_document_instance.seo_test_name(self._field_article_name.GetValue())
+            self._field_article_name.SetBackgroundColour(color)
+            self._field_article_name_tip.SetMessage(Strings.seo_check + '\n' + message)
+            self._current_document_instance.set_page_name(self._field_article_name.GetValue())
             self._update_file_color()
 
+    # noinspection PyUnusedLocal
     def _handle_date_change(self, event: wx.CommandEvent) -> None:
         """
         Handle changes to the article date field real time.
@@ -910,12 +923,13 @@ class MainFrame(wx.Frame):
         :return: None
         """
         if not self._ignore_change:
-            correct, message, color = self.current_document_instance.seo_test_date(self.field_article_date.GetValue())
-            self.field_article_date.SetBackgroundColour(color)
-            self.field_article_date_tip.SetMessage(Strings.seo_check + '\n' + message)
-            self.current_document_instance.set_date(self.field_article_date.GetValue())
+            correct, message, color = self._current_document_instance.seo_test_date(self._field_article_date.GetValue())
+            self._field_article_date.SetBackgroundColour(color)
+            self._field_article_date_tip.SetMessage(Strings.seo_check + '\n' + message)
+            self._current_document_instance.set_date(self._field_article_date.GetValue())
             self._update_file_color()
 
+    # noinspection PyUnusedLocal
     def _handle_keywords_change(self, event: wx.CommandEvent) -> None:
         """
         Handle changes to the article keywords field real time.
@@ -923,13 +937,14 @@ class MainFrame(wx.Frame):
         :return: None
         """
         if not self._ignore_change:
-            keyword_list = [word.strip() for word in self.field_article_keywords.GetValue().split(',')]
-            correct, message, color = self.current_document_instance.seo_test_keywords(keyword_list)
-            self.field_article_keywords.SetBackgroundColour(color)
-            self.field_article_keywords_tip.SetMessage(Strings.seo_check + '\n' + message)
-            self.current_document_instance.set_keywords(keyword_list)
+            keyword_list = [word.strip() for word in self._field_article_keywords.GetValue().split(',')]
+            correct, message, color = self._current_document_instance.seo_test_keywords(keyword_list)
+            self._field_article_keywords.SetBackgroundColour(color)
+            self._field_article_keywords_tip.SetMessage(Strings.seo_check + '\n' + message)
+            self._current_document_instance.set_keywords(keyword_list)
             self._update_file_color()
 
+    # noinspection PyUnusedLocal
     def _handle_description_change(self, event: wx.CommandEvent) -> None:
         """
         Handle changes to the article description field real time.
@@ -937,20 +952,20 @@ class MainFrame(wx.Frame):
         :return: None
         """
         if not self._ignore_change:
-            correct, message, color = self.current_document_instance.seo_test_description(
-                self.field_article_description.GetValue())
+            correct, message, color = self._current_document_instance.seo_test_description(
+                self._field_article_description.GetValue())
 
             # Set color
-            self.field_article_description.SetBackgroundColour(color)
+            self._field_article_description.SetBackgroundColour(color)
             style_carrier = wx.TextAttr()
 
             # Set color for the current text separately, it does not work with just background color
-            self.field_article_description.GetStyle(0, style_carrier)
+            self._field_article_description.GetStyle(0, style_carrier)
             style_carrier.SetBackgroundColour(color)
-            self.field_article_description.SetStyle(0, len(self.field_article_description.GetValue()), style_carrier)
+            self._field_article_description.SetStyle(0, len(self._field_article_description.GetValue()), style_carrier)
 
-            self.field_article_description_tip.SetMessage(Strings.seo_check + '\n' + message)
-            self.current_document_instance.set_description(self.field_article_description.GetValue())
+            self._field_article_description_tip.SetMessage(Strings.seo_check + '\n' + message)
+            self._current_document_instance.set_description(self._field_article_description.GetValue())
             self._update_file_color()
 
     def _update_file_color(self) -> None:
@@ -958,7 +973,7 @@ class MainFrame(wx.Frame):
         Change the color of the currently selected file in the filelist according to the document's state.
         :return: None
         """
-        document_instance = self.document_dictionary[self.current_document_name]
+        document_instance = self._document_dictionary[self._current_document_name]
         document_instance.is_modified()
         new_color = document_instance.get_status_color()
         selected_item = self._file_list.GetFirstSelected()
@@ -973,7 +988,7 @@ class MainFrame(wx.Frame):
         self._menu_logo_button.SetBitmap(wx.Bitmap(menu_item.get_image()))
         self._text_menu_item_name.SetLabelText(menu_item.get_article_name()[0])
         self._text_menu_item_name.Wrap(Numbers.menu_logo_image_size)
-        self.menu_logo_static_sizer.Layout()
+        self._menu_logo_static_sizer.Layout()
 
     def _update_article_image_sizer(self, image: AsideImage) -> None:
         """
@@ -984,7 +999,8 @@ class MainFrame(wx.Frame):
         self._main_image_button.SetBitmap(wx.Bitmap(image.get_image()))
         self._text_main_image_caption.SetLabelText(image.get_caption()[0])
 
-    def text_area_edit_handler(self, event: wx.CommandEvent) -> None:
+    # noinspection PyUnusedLocal
+    def _text_area_edit_handler(self, event: wx.CommandEvent) -> None:
         """
         Handle special events that signal that the color of the selected item in the filelist should be updated.
         This happens when an edit has been made to the document.
@@ -993,53 +1009,57 @@ class MainFrame(wx.Frame):
         """
         self._update_file_color()
 
-    def add_image_handler(self, event: wx.CommandEvent) -> None:
+    # noinspection PyUnusedLocal
+    def _add_image_handler(self, event: wx.CommandEvent) -> None:
         """
         Handle adding a new image into the image folder structure.
         :param event: Not used
         :return: None
         """
-        dlg = AddImageDialog(self, self.current_document_instance)
+        dlg = AddImageDialog(self, self._current_document_instance)
         dlg.ShowModal()
         dlg.Destroy()
 
-    def insert_aside_image_handler(self, event: wx.CommandEvent) -> None:
+    def _insert_aside_image_handler(self, event: wx.CommandEvent) -> None:
         """
         Handle adding a new image into the document's aside images.
         :param event: Not used
         :return: None
         """
         # Create a new placeholder text image or video
-        new_image = AsideImage(self.current_document_instance.get_menu_section().get_section_name(), '', '', '', '', '',
+        new_image = AsideImage(self._current_document_instance.get_menu_section().get_section_name(), '', '', '', '',
+                               '',
                                Strings.status_none, Strings.status_none)
         # This will set the image internal state to missing image placeholder.
         new_image.seo_test_self()
         # Open edit dialog.
-        edit_dialog = EditAsideImageDialog(self, new_image, self.current_document_instance.get_working_directory())
+        edit_dialog = EditAsideImageDialog(self, new_image, self._current_document_instance.get_working_directory())
         result = edit_dialog.ShowModal()
         if result == wx.ID_OK:
-            self.current_document_instance.add_aside_image(new_image)
-            self.side_photo_panel.load_document_images(self.current_document_instance)
+            self._current_document_instance.add_aside_image(new_image)
+            self._side_photo_panel.load_document_images(self._current_document_instance)
             self._update_file_color()
         edit_dialog.Destroy()
         event.Skip()
         # Return focus to the text area.
         wx.CallLater(100, self.SetFocus)
 
-    def add_menu_logo_handler(self, event: wx.CommandEvent) -> None:
+    # noinspection PyUnusedLocal
+    def _add_menu_logo_handler(self, event: wx.CommandEvent) -> None:
         """
         Handle adding a new image into the image folder structure.
         :param event: Not used
         :return: None
         """
-        dlg = AddLogoDialog(self, self.current_document_instance)
+        dlg = AddLogoDialog(self, self._current_document_instance)
         dlg.ShowModal()
         dlg.Destroy()
 
-    def save_document_handler(self, event: wx.CommandEvent) -> None:
+    # noinspection PyUnusedLocal
+    def _save_document_handler(self, event: wx.CommandEvent) -> None:
         """
         Handles save button clicks.
         :param event: Not used.
         :return: None
         """
-        self.save()
+        self._save()

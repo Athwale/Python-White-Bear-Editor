@@ -858,7 +858,7 @@ class RichTextFrame(wx.Frame):
         """
         video = Video('test video', 534, 534, 'http://www.google.com')
         video.seo_test_self()
-        field_type = ImageTextField(video)
+        field_type = ImageTextField(video, '.')
         rt.RichTextBuffer.AddFieldType(field_type)
         return field_type
 

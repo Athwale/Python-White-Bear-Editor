@@ -111,9 +111,8 @@ class CustomRichText(rt.RichTextCtrl):
         stl_paragraph.SetParagraphStyleName(Strings.style_paragraph)
         # Used to identify text object children of paragraphs
         stl_paragraph.SetFontFaceName(Strings.style_paragraph)
-
-        stl_paragraph.SetBackgroundColour(wx.YELLOW)
-
+        # Debug
+        # stl_paragraph.SetBackgroundColour(wx.YELLOW)
         style_paragraph: rt.RichTextParagraphStyleDefinition = rt.RichTextParagraphStyleDefinition(
             Strings.style_paragraph)
         style_paragraph.SetStyle(stl_paragraph)
@@ -129,9 +128,8 @@ class CustomRichText(rt.RichTextCtrl):
         stl_heading_3.SetParagraphSpacingAfter(Numbers.paragraph_spacing)
         stl_heading_3.SetParagraphStyleName(Strings.style_heading_3)
         stl_heading_3.SetFontFaceName(Strings.style_heading_3)
-
-        stl_heading_3.SetBackgroundColour(wx.RED)
-
+        # Debug
+        # stl_heading_3.SetBackgroundColour(wx.RED)
         style_h3: rt.RichTextParagraphStyleDefinition = rt.RichTextParagraphStyleDefinition(Strings.style_heading_3)
         style_h3.SetStyle(stl_heading_3)
         style_h3.SetNextStyle(Strings.style_paragraph)
@@ -146,9 +144,8 @@ class CustomRichText(rt.RichTextCtrl):
         stl_heading_4.SetParagraphSpacingAfter(Numbers.paragraph_spacing / 2)
         stl_heading_4.SetParagraphStyleName(Strings.style_heading_4)
         stl_heading_4.SetFontFaceName(Strings.style_heading_4)
-
-        stl_heading_4.SetBackgroundColour(wx.BLUE)
-
+        # Debug
+        # stl_heading_4.SetBackgroundColour(wx.BLUE)
         style_h4: rt.RichTextParagraphStyleDefinition = rt.RichTextParagraphStyleDefinition(Strings.style_heading_4)
         style_h4.SetStyle(stl_heading_4)
         style_h4.SetNextStyle(Strings.style_paragraph)
@@ -163,9 +160,8 @@ class CustomRichText(rt.RichTextCtrl):
         stl_list.SetParagraphSpacingAfter(Numbers.list_spacing)
         stl_list.SetListStyleName(Strings.style_list)
         stl_list.SetFontFaceName(Strings.style_list)
-
-        stl_list.SetBackgroundColour(wx.GREEN)
-
+        # Debug
+        # stl_list.SetBackgroundColour(wx.GREEN)
         stl_list_1: rt.RichTextAttr = rt.RichTextAttr()
         stl_list_1.SetFontSize(Numbers.paragraph_font_size)
         stl_list_1.SetAlignment(wx.TEXT_ALIGNMENT_LEFT)
@@ -288,7 +284,7 @@ class CustomRichText(rt.RichTextCtrl):
             self.BeginBatchUndo(Strings.undo_last_action)
             end_batch = True
         self.SetStyleEx(p_range, style, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_PARAGRAPHS_ONLY
-                                              | rt.RICHTEXT_SETSTYLE_RESET)
+                        | rt.RICHTEXT_SETSTYLE_RESET)
         if end_batch:
             self.EndBatchUndo()
 
@@ -344,7 +340,7 @@ class CustomRichText(rt.RichTextCtrl):
             self.BeginBatchUndo(Strings.undo_last_action)
             end_batch = True
         self.SetStyleEx(p_range, style, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_PARAGRAPHS_ONLY
-                                              | rt.RICHTEXT_SETSTYLE_RESET)
+                        | rt.RICHTEXT_SETSTYLE_RESET)
         if end_batch:
             self.EndBatchUndo()
 
@@ -395,9 +391,9 @@ class CustomRichText(rt.RichTextCtrl):
             self.BeginBatchUndo(Strings.undo_last_action)
             end_batch = True
         self.SetStyleEx(p_range, style, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_PARAGRAPHS_ONLY
-                                              | rt.RICHTEXT_SETSTYLE_RESET)
+                        | rt.RICHTEXT_SETSTYLE_RESET)
         self.SetListStyle(p_range, style_def, specifiedLevel=0, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO
-                                                                      | rt.RICHTEXT_SETSTYLE_SPECIFY_LEVEL)
+                          | rt.RICHTEXT_SETSTYLE_SPECIFY_LEVEL)
         if end_batch:
             self.EndBatchUndo()
 
@@ -654,7 +650,8 @@ class CustomRichText(rt.RichTextCtrl):
         self._click_counter = self._click_counter + 1
         event.Skip()
 
-    def _on_click_timer(self, event) -> None:
+    # noinspection PyUnusedLocal
+    def _on_click_timer(self, event: wx.CommandEvent) -> None:
         """
         When the timer runs out and if three left click were made, select whole current paragraph.
         :param event: Not used.
@@ -1016,10 +1013,11 @@ class CustomRichText(rt.RichTextCtrl):
         # Return focus to the text area.
         wx.CallLater(100, self.SetFocus)
 
-    def _change_bold(self, evt: wx.CommandEvent) -> None:
+    # noinspection PyUnusedLocal
+    def _change_bold(self, event: wx.CommandEvent) -> None:
         """
         Make text bold and vice versa.
-        :param evt: Not used
+        :param event: Not used
         :return: None
         """
         if self.HasSelection():

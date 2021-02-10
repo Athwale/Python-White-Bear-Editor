@@ -86,7 +86,7 @@ class Strings:
          'Prosince'])
     extension_jpg: str = '.jpg'
     extension_png: str = '.png'
-    image_extensions: str = 'JPG files (*' + extension_jpg + ')|*' + extension_jpg +\
+    image_extensions: str = 'JPG files (*' + extension_jpg + ')|*' + extension_jpg + \
                             '|PNG files (*' + extension_png + ')|*' + extension_jpg + ''
     image_jpg_only: str = 'JPG files (*' + extension_jpg + ')|*' + extension_jpg
     home_directory: str = os.path.expanduser('~')
@@ -250,7 +250,7 @@ class Strings:
     label_select_image: str = 'Select image'
     label_target_section: str = 'Section'
     label_text_image: str = 'Text image (width ' + str(Numbers.text_image_max_size) + 'px)'
-    label_aside_image: str = 'Aside/Main image (' + str(Numbers.main_image_width) + 'x' +\
+    label_aside_image: str = 'Aside/Main image (' + str(Numbers.main_image_width) + 'x' + \
                              str(Numbers.main_image_height) + 'px)'
     label_image_name: str = 'Image name'
 

@@ -234,6 +234,7 @@ class AddImageDialog(wx.Dialog):
         # Exceptions from here are caught automatically
         return True
 
+    # noinspection PyUnusedLocal
     def _handle_radio_buttons(self, event: wx.CommandEvent) -> None:
         """
         Simply remake the thumbnail based on selected option.
