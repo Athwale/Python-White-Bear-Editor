@@ -1,7 +1,10 @@
+from typing import List
+
 import wx
 import wx.richtext as rt
 
 from Constants.Constants import Strings, Numbers
+from Exceptions.BugException import BugException
 from Gui.Dialogs.EditLinkDialog import EditLinkDialog
 from Gui.Dialogs.EditTextImageDialog import EditTextImageDialog
 from Gui.Dialogs.EditVideoDialog import EditVideoDialog
@@ -833,8 +836,17 @@ class CustomRichText(rt.RichTextCtrl):
         self.BeginBatchUndo(Strings.undo_last_action)
         if from_button:
             self.SetStyleEx(p_range, style, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_RESET)
-        buffer.InsertFieldWithUndo(self.GetBuffer(), position, new_field.GetName(), rt.RichTextProperties(),
-                                   self, rt.RICHTEXT_INSERT_NONE, rt.RichTextAttr())
+        field: rt.RichTextField = buffer.InsertFieldWithUndo(self.GetBuffer(), position, new_field.GetName(),
+                                                             rt.RichTextProperties(), self, rt.RICHTEXT_INSERT_NONE,
+                                                             rt.RichTextAttr())
+
+        # Set property of the field to distinguish between image and video.
+        if isinstance(element, Video):
+            field_type = Strings.field_video
+        else:
+            field_type = Strings.field_image
+        properties: rt.RichTextProperties = field.GetProperties()
+        properties.SetProperty(Strings.field_type, field_type)
         self.EndBatchUndo()
 
     def _register_field(self, element) -> ImageTextField:
@@ -1051,3 +1063,27 @@ class CustomRichText(rt.RichTextCtrl):
                 self.BeginBold()
             else:
                 self.EndBold()
+
+    def convert_document(self) -> None:
+        """
+        Create an internal representation of the document using the article elements classes.
+        :return: None
+        """
+        buffer: rt.RichTextBuffer = self.GetFocusObject()
+        paragraphs: List[rt.RichTextParagraph] = buffer.GetChildren()
+        for p in paragraphs:
+            for child in p.GetChildren():
+                if isinstance(child, rt.RichTextPlainText):
+                    print(child.GetText())
+                    pass
+                elif isinstance(child, rt.RichTextField):
+                    print(child.GetFieldType())
+                    field_type: str = child.GetProperties().GetProperty(Strings.field_type)
+                    if field_type == Strings.field_image:
+                        print('image')
+                    else:
+                        print('video')
+                else:
+                    raise BugException('BUG: unexpected text element found in richtextctrl.')
+
+

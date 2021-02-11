@@ -9,6 +9,9 @@ class Numbers:
     YELLOW_COLOR = Colour(250, 255, 196)
     BLUE_COLOR = Colour(145, 207, 255)
 
+    # Turn link sanity check on/off.
+    online_seo_test: bool = False
+
     three_click_timeout: int = 400
     photo_ratio: float = 4 / 3
     photo_ratio_tolerance: float = 0.01
@@ -291,3 +294,6 @@ class Strings:
     undo_bold: str = 'Undo bold text'
 
     flag_no_save: str = 'dont_save'
+    field_type: str = 'type'
+    field_video: str = 'video'
+    field_image: str = 'image'

@@ -652,8 +652,11 @@ class MainFrame(wx.Frame):
             result = wx.MessageBox(Strings.label_menu_item_save_hint, Strings.toolbar_save, wx.YES_NO | wx.ICON_WARNING)
             if result == wx.NO:
                 return False
-
+        self._main_text_area.Disable()
+        self._main_text_area.convert_document()
+        self._main_text_area.Enable()
         # TODO this
+        '''
         wildcard, types = rt.RichTextBuffer.GetExtWildcard(save=True)
         dlg = wx.FileDialog(self, "Choose a filename", wildcard=wildcard, style=wx.FD_SAVE)
         if dlg.ShowModal() == wx.ID_OK:
@@ -669,6 +672,8 @@ class MainFrame(wx.Frame):
         else:
             dlg.Destroy()
             return False
+        '''
+        return True
 
     # noinspection PyUnusedLocal
     def _main_image_handler(self, event: wx.CommandEvent) -> None:
