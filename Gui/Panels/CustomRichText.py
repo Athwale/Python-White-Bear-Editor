@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Dict
 
 import wx
 import wx.richtext as rt
@@ -16,6 +16,7 @@ from Tools.Document.ArticleElements.Text import Text, Break
 from Tools.Document.ArticleElements.UnorderedList import UnorderedList
 from Tools.Document.ArticleElements.Video import Video
 from Tools.Document.WhitebearDocumentArticle import WhitebearDocumentArticle
+from Tools.Document.WhitebearDocumentCSS import WhitebearDocumentCSS
 from Tools.ImageTextField import ImageTextField
 
 
@@ -36,6 +37,7 @@ class CustomRichText(rt.RichTextCtrl):
         super().__init__(parent, -1, style=style)
         self._parent = parent
         self._doc = None
+        self._css_document = None
         self._img_tool_id = img_tool_id
         self.video_tool_id = video_tool_id
         # Used to prevent over-calling methods on keypress.
@@ -756,13 +758,15 @@ class CustomRichText(rt.RichTextCtrl):
         self.SetStyleEx(rt.RichTextRange(0, 1), self._stylesheet.FindListStyle(Strings.style_list).GetStyle(),
                         flags=rt.RICHTEXT_SETSTYLE_REMOVE)
 
-    def set_content(self, doc: WhitebearDocumentArticle) -> None:
+    def set_content(self, doc: WhitebearDocumentArticle, css: WhitebearDocumentCSS) -> None:
         """
         Set the document this text area is displaying.
         :param doc: The white bear article.
+        :param css: The parsed css document for color codes.
         :return: None
         """
         self._doc = doc
+        self._css_document = css
         self.BeginSuppressUndo()
         self.clear_self()
 
@@ -1075,6 +1079,9 @@ class CustomRichText(rt.RichTextCtrl):
             for child in p.GetChildren():
                 if isinstance(child, rt.RichTextPlainText):
                     print(child.GetText())
+                    attrs: rt.RichTextAttr = child.GetAttributes()
+                    print(attrs.GetFontFaceName())
+                    print(self._css_document.translate_color_str(attrs.GetTextColour()))
                     pass
                 elif isinstance(child, rt.RichTextField):
                     print(child.GetFieldType())

@@ -47,7 +47,7 @@ class MainFrame(wx.Frame):
         self._document_dictionary = {}
         self._current_document_name = None
         self._current_document_instance = None
-        self._css_colors = None
+        self._css_document = None
         self._loading_dlg = None
         self._ignore_change = False
         self._no_save = False
@@ -572,8 +572,9 @@ class MainFrame(wx.Frame):
         :param css: The parsed css file.
         :return: None
         """
-        self._css_colors = css.get_colors()
-        for name, color in self._css_colors.items():
+        self._css_document = css
+        css_colors = css.get_colors()
+        for name, color in css_colors.items():
             self._create_color_tool(name, self.tool_bar, color)
 
     def on_filelist_loaded(self, documents: Dict[str, WhitebearDocumentArticle]) -> None:
@@ -620,7 +621,7 @@ class MainFrame(wx.Frame):
         :return:
         """
         tool: wx.ToolBarToolBase = self.tool_bar.FindById(evt.GetId())
-        color = self._css_colors[tool.GetShortHelp()]
+        color = self._css_document.get_colors[tool.GetShortHelp()]
         if self._main_text_area.HasSelection():
             self._main_text_area.BeginBatchUndo(Strings.undo_bold)
             color_range = self._main_text_area.GetSelectionRange()
@@ -905,8 +906,11 @@ class MainFrame(wx.Frame):
 
         # Set aside images
         self._side_photo_panel.load_document_images(doc)
-        # TODO side panel has wrong borders on first load.
-        self._main_text_area.set_content(doc)
+        while not self._css_document:
+            # Busy wait for css, should not take more than a second in fact this should never run because css method is
+            # set to run before loading documents.
+            pass
+        self._main_text_area.set_content(doc, self._css_document)
 
         # Set main image caption
         self._text_main_image_caption.SetLabelText(doc.get_article_image().get_caption()[0])
