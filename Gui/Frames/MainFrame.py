@@ -446,6 +446,7 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_CLOSE, self._close_button_handler, self)
         # This calls the quit method if the user logs off the computer
         self.Bind(wx.EVT_QUERY_END_SESSION, self._close_button_handler)
+        self.Bind(wx.EVT_ACTIVATE, self._refresh_aside_images)
 
         # Bind a handler that changes selected document color if an edit happens in other controls.
         self.Bind(wx.EVT_COLOUR_CHANGED, self._text_area_edit_handler)
@@ -475,6 +476,16 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_TEXT, self._handle_keywords_change, self._field_article_keywords)
         self.Bind(wx.EVT_TEXT, self._handle_description_change, self._field_article_description)
         self.Bind(wx.EVT_LISTBOX, self._forward_event, self._style_picker)
+
+    def _refresh_aside_images(self, event: wx.ActivateEvent) -> None:
+        """
+        Refresh the side image panel to fix wrong borders if the window started minimized.
+        :param event: Used to detect when the window is being activated.
+        :return: None
+        """
+        if self._side_photo_panel:
+            if event.GetActive():
+                self._side_photo_panel.show_images()
 
     def _set_status_text(self, text: str, position=0) -> None:
         """
@@ -591,7 +602,6 @@ class MainFrame(wx.Frame):
         # Enable GUI when the load is done
         self._set_status_text(Strings.status_ready, 3)
         self._set_status_text(Strings.status_articles + ' ' + str(len(self._document_dictionary)), 2)
-        # Only enable the file list the rest is disabled until a document is selected.
         self._loading_dlg.Destroy()
 
     def _forward_event(self, evt) -> None:
@@ -890,7 +900,7 @@ class MainFrame(wx.Frame):
 
         # Set aside images
         self._side_photo_panel.load_document_images(doc)
-        self._side_photo_panel.Refresh()
+        # TODO side panel has wrong borders on first load.
         self._main_text_area.set_content(doc)
 
         # Set main image caption

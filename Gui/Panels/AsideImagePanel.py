@@ -58,7 +58,7 @@ class AsideImagePanel(wx.lib.scrolledpanel.ScrolledPanel):
             edit_dialog = EditAsideImageDialog(self, self._images[img_index], self._document.get_working_directory())
             _ = edit_dialog.ShowModal()
             edit_dialog.Destroy()
-        self._show_images()
+        self.show_images()
         # Pass the event into the main frame to change document color in the file list to blue.
         if self._document.is_modified():
             # Send an event to the main gui to signal document color change
@@ -75,7 +75,7 @@ class AsideImagePanel(wx.lib.scrolledpanel.ScrolledPanel):
         self._document = doc
         self.clear_panel()
         self._images = self._document.get_aside_images()
-        self._show_images()
+        self.show_images()
 
     def clear_panel(self) -> None:
         """
@@ -85,7 +85,7 @@ class AsideImagePanel(wx.lib.scrolledpanel.ScrolledPanel):
         for child in self.GetChildren():
             child.Destroy()
 
-    def _show_images(self) -> None:
+    def show_images(self) -> None:
         """
         Show the list of images on the panel.
         :return: None

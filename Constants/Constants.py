@@ -44,10 +44,10 @@ class Numbers:
     heading_4_size: int = 14
     paragraph_spacing: int = 20
     paragraph_font_size: int = 11
-    image_spacing: int = 5
+    image_spacing: int = 10
     list_spacing: int = 10
-    list_left_indent: int = 20
-    list_left_sub_indent: int = 25
+    list_left_indent: int = 50
+    list_left_sub_indent: int = 45
 
     # SEO values
     year_min: int = 2000

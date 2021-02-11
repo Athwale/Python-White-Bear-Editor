@@ -45,7 +45,7 @@ class ImagePanel(wx.Panel):
         self.Bind(wx.EVT_BUTTON, self._on_menu_click, self._bitmap_button)
 
         self.SetSizer(self._sizer)
-        self.Layout()
+        self._sizer.Layout()
 
     def _on_menu_click(self, event: wx.CommandEvent) -> None:
         """
