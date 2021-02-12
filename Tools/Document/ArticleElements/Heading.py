@@ -31,3 +31,6 @@ class Heading:
         :return: The size of this Heading.
         """
         return self._size
+
+    def __str__(self) -> str:
+        return 'Heading: ' + str(self._text) + ', size: ' + str(self._size)

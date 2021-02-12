@@ -6,12 +6,12 @@ class Text:
     This class represents a piece of text which can be colored and bold.
     """
 
-    def __init__(self, text: str, bold: bool = False, color: Colour = 'black'):
+    def __init__(self, text: str, bold: bool = False, color: str = 'black'):
         """
         Constructor for a new text piece.
         :param text: The text of this Text.
         :param bold: True if the text is bold.
-        :param color: The string color defined in css of this text default 'black'.
+        :param color: The color defined in css of this text default 'black'.
         """
         self._text = text
         self._bold = bold
@@ -24,7 +24,7 @@ class Text:
         """
         return self._text
 
-    def get_color(self) -> Colour:
+    def get_color(self) -> str:
         """
         Get the text color.
         :return: The text color of this Text
@@ -37,6 +37,9 @@ class Text:
         :return: The text boldness of this Text
         """
         return self._bold
+
+    def __str__(self) -> str:
+        return 'Text: ' + self._text + ', bold: ' + str(self._bold) + ', color: ' + self._color
 
 
 class Break:

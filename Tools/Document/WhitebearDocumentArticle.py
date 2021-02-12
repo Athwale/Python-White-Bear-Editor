@@ -330,7 +330,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
         elif parent_element.name == 'span':
             # These can contain br
             return_value = True
-            color = self._css_document.translate_str_color(parent_element.attrs['class'][0])
+            color = parent_element.attrs['class'][0]
             for child in parent_element.children:
                 if child.name == 'br':
                     paragraph.add_element(Break())

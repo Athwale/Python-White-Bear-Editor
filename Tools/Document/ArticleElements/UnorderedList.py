@@ -28,3 +28,6 @@ class UnorderedList:
         :return: the list of Paragraphs that this UnorderedList holds.
         """
         return self._items
+
+    def __str__(self) -> str:
+        return 'Unordered list: ' + str(self._items)

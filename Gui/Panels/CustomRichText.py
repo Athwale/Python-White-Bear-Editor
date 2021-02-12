@@ -1,4 +1,4 @@
-from typing import List, Dict
+from typing import List
 
 import wx
 import wx.richtext as rt
@@ -899,7 +899,7 @@ class CustomRichText(rt.RichTextCtrl):
         if isinstance(element, Text):
             if element.is_bold():
                 self.BeginBold()
-            self.BeginTextColour(element.get_color())
+            self.BeginTextColour(self._css_document.translate_str_color(element.get_color()))
             self.WriteText(element.get_text())
             self.EndTextColour()
             if element.is_bold():
@@ -1073,24 +1073,54 @@ class CustomRichText(rt.RichTextCtrl):
         Create an internal representation of the document using the article elements classes.
         :return: None
         """
+        new_text_elements: List = []
         buffer: rt.RichTextBuffer = self.GetFocusObject()
         paragraphs: List[rt.RichTextParagraph] = buffer.GetChildren()
         for p in paragraphs:
+            p: rt.RichTextParagraph
+            par_style: str = p.GetAttributes().GetFontFaceName()
+            #print('par style ' + par_style)
             for child in p.GetChildren():
                 if isinstance(child, rt.RichTextPlainText):
-                    print(child.GetText())
                     attrs: rt.RichTextAttr = child.GetAttributes()
-                    print(attrs.GetFontFaceName())
-                    print(self._css_document.translate_color_str(attrs.GetTextColour()))
+                    style = attrs.GetFontFaceName()
+                    # TODO this has to be in two methods and run recursively on lists.
+                    if style == Strings.style_heading_3 or style == Strings.style_heading_4:
+                        new_text_elements.append(self._convert_heading(child))
+                    elif style == Strings.style_paragraph:
+                        print('par')
+                        pass
+                    elif style == Strings.style_list:
+                        print('par in list')
+                        pass
+                    elif style == Strings.style_url:
+                        print('url')
+                        pass
+                    print(child.GetText(), attrs.GetTextColour())
                     pass
                 elif isinstance(child, rt.RichTextField):
-                    print(child.GetFieldType())
                     field_type: str = child.GetProperties().GetProperty(Strings.field_type)
                     if field_type == Strings.field_image:
                         print('image')
                     else:
                         print('video')
+                    print(child.GetFieldType())
                 else:
                     raise BugException('BUG: unexpected text element found in richtextctrl.')
+        print(new_text_elements)
 
-
+    def _convert_heading(self, child: rt.RichTextPlainText) -> Heading:
+        """
+        Create a heading instance from a paragraph child.
+        :param child: The RichTextPlainText paragraph child containing the Heading.
+        :return: A heading instance.
+        """
+        attrs: rt.RichTextAttr = child.GetAttributes()
+        text: str = child.GetText()
+        color: str = self._css_document.translate_color_str(attrs.GetTextColour())
+        size: int = Heading.SIZE_H3 if attrs.GetFontFaceName() == Strings.style_heading_3 else Heading.SIZE_H4
+        # Create the Heading instance.
+        # Headings are never explicitly bold.
+        # TODO color may need to be translated to string.
+        print(Heading(Text(text=text, bold=False, color=color), size))
+        return Heading(Text(text=text, bold=False, color=color), size)

@@ -202,3 +202,6 @@ class Link:
         :return: None
         """
         self._modified = modified
+
+    def __str__(self) -> str:
+        return 'Link: text: ' + self._text + ', url: ' + self._url + ', title: ' + self._link_title

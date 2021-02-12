@@ -34,3 +34,6 @@ class Paragraph:
         :return: None
         """
         self._elements_list.clear()
+
+    def __str__(self) -> str:
+        return 'Paragraph: ' + str(self._elements_list)
