@@ -4,7 +4,6 @@ import wx
 import wx.richtext as rt
 
 from Constants.Constants import Strings, Numbers
-from Exceptions.BugException import BugException
 from Gui.Dialogs.EditLinkDialog import EditLinkDialog
 from Gui.Dialogs.EditTextImageDialog import EditTextImageDialog
 from Gui.Dialogs.EditVideoDialog import EditVideoDialog
@@ -774,9 +773,9 @@ class CustomRichText(rt.RichTextCtrl):
         for element in doc.get_main_text_elements():
             if isinstance(element, Paragraph):
                 if last_was_paragraph:
-                    # Empty paragraph substitutes shift-enter line break.
+                    # Insert empty line.
                     self.BeginParagraphStyle(Strings.style_paragraph)
-                    self.WriteText('')
+                    self.Newline()
                     self.EndParagraphStyle()
                 self._write_paragraph(element)
                 last_was_paragraph = True
@@ -1073,6 +1072,7 @@ class CustomRichText(rt.RichTextCtrl):
         Create an internal representation of the document using the article elements classes.
         :return: None
         """
+        last_was_paragraph = False
         new_text_elements: List = []
         buffer: rt.RichTextBuffer = self.GetFocusObject()
         paragraphs: List[rt.RichTextParagraph] = buffer.GetChildren()
@@ -1080,29 +1080,36 @@ class CustomRichText(rt.RichTextCtrl):
             p: rt.RichTextParagraph
             par_style: str = p.GetAttributes().GetFontFaceName()
             if par_style == Strings.style_paragraph:
-                new_text_elements.append(self._convert_paragraph(p))
+                if last_was_paragraph and new_text_elements[-1]:
+                    # Reuse last Paragraph instance and join it together with a Break.
+                    last_p: Paragraph = new_text_elements[-1]
+                    next_p: Paragraph = self._convert_paragraph(p)
+                    if next_p:
+                        last_p.add_element(Break())
+                        last_p.extend_elements(next_p)
+                        last_was_paragraph = True
+                    else:
+                        last_was_paragraph = False
+                else:
+                    new_text_elements.append(self._convert_paragraph(p))
+                    last_was_paragraph = True
             elif par_style == Strings.style_heading_3 or par_style == Strings.style_heading_4:
+                last_was_paragraph = False
                 new_text_elements.append(self._convert_heading(p))
+            elif par_style == Strings.style_list:
+                print('list')
             for child in p.GetChildren():
-                if isinstance(child, rt.RichTextPlainText):
-                    attrs: rt.RichTextAttr = child.GetAttributes()
-                    style = attrs.GetFontFaceName()
-                    if style == Strings.style_list:
-                        #print('par in list')
-                        pass
-                    elif style == Strings.style_url:
-                        #print('url')
-                        pass
-                    pass
-                elif isinstance(child, rt.RichTextField):
+                if isinstance(child, rt.RichTextField):
+                    last_was_paragraph = False
                     field_type: str = child.GetProperties().GetProperty(Strings.field_type)
                     if field_type == Strings.field_image:
                         print('image')
                     else:
                         print('video')
                     print(child.GetFieldType())
-                else:
-                    raise BugException('BUG: unexpected text element found in richtextctrl.')
+
+        for par in new_text_elements:
+            print(par)
         self._doc.set_text_elements(new_text_elements)
 
     def _convert_heading(self, p: rt.RichTextParagraph) -> Heading:
@@ -1120,10 +1127,38 @@ class CustomRichText(rt.RichTextCtrl):
         # Headings are never explicitly bold.
         return Heading(Text(text=text, bold=False, color=color), size)
 
-    def _convert_paragraph(self, p: rt.RichTextParagraph) -> Paragraph:
+    def _convert_paragraph(self, p: rt.RichTextParagraph):
         """
         Create a paragraph instance from a RichTextParagraph.
         :param p: The RichTextParagraph.
         :return: A heading instance.
         """
-        print(p)
+        if p.GetChildCount() == 1:
+            if not p.GetChild(0).GetText():
+                # Empty paragraphs are considered empty lines and html paragraph ends. Return None as a special
+                # delimiter which marks where to join paragraphs.
+                return None
+
+        # A paragraph consists of a list of instances of Text, Break and Link. Breaks are added above when paragraphs
+        # are joined together.
+        new_paragraph = Paragraph()
+        for child in p.GetChildren():
+            child: rt.RichTextPlainText
+            attrs: rt.RichTextAttr = child.GetAttributes()
+
+            text: str = child.GetText()
+            bold: bool = False
+            if attrs.GetFontWeight() == wx.FONTWEIGHT_BOLD:
+                bold = True
+            color = None
+            # Color is irrelevant for links.
+            if not attrs.HasURL():
+                color = self._css_document.translate_color_str(attrs.GetTextColour())
+
+            if attrs.HasURL():
+                # This will be a link
+                new_paragraph.add_element(self._doc.find_link(attrs.GetURL()))
+            else:
+                # Ordinary text
+                new_paragraph.add_element(Text(text, bold, color))
+        return new_paragraph

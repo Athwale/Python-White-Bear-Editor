@@ -3,6 +3,7 @@ from typing import Dict
 import tinycss
 import webcolors
 from wx import Colour
+from wx import NullColour
 
 from Constants.Constants import Strings
 from Exceptions.WrongFormatException import WrongFormatException
@@ -24,7 +25,7 @@ class WhitebearDocumentCSS:
         self._filename = name
         self._file_path = path
         # Prepare the color dictionary with a black color which is always the default text color.
-        self._str_to_color_dict = {'black': Colour(0, 0, 0)}
+        self._str_to_color_dict = {Strings.color_black: Colour(0, 0, 0)}
         self._parse_self()
 
     def _parse_self(self) -> None:
@@ -73,6 +74,9 @@ class WhitebearDocumentCSS:
         :param color: the wx.Colour to translate.
         :return: The css name of the color.
         """
+        if color == NullColour:
+            # Special case of empty paragraph which should by default be black.
+            return Strings.color_black
         # wx.Colour can not be used as a key, so we have to find it this way.
         for name, rgb in self._str_to_color_dict.items():
             if rgb == color:

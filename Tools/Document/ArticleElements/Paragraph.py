@@ -21,6 +21,14 @@ class Paragraph:
         """
         self._elements_list.append(text_element)
 
+    def extend_elements(self, paragraph) -> None:
+        """
+        Add all elements from another paragraph to the end of this paragraph
+        :param paragraph: The paragraph to add.
+        :return: None
+        """
+        self._elements_list.extend(paragraph.get_elements())
+
     def get_elements(self) -> List:
         """
         Returns the list of elements of this paragraph.
