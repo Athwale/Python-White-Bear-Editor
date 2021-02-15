@@ -621,10 +621,28 @@ class MainFrame(wx.Frame):
         :return:
         """
         tool: wx.ToolBarToolBase = self.tool_bar.FindById(evt.GetId())
-        color = self._css_document.get_colors[tool.GetShortHelp()]
+        color = self._css_document.translate_str_color(tool.GetShortHelp())
         if self._main_text_area.HasSelection():
-            self._main_text_area.BeginBatchUndo(Strings.undo_bold)
-            color_range = self._main_text_area.GetSelectionRange()
+            self._main_text_area.BeginBatchUndo(Strings.undo_last_action)
+            color_range: rt.RichTextRange = self._main_text_area.GetSelectionRange()
+            p1: rt.RichTextParagraph = self._main_text_area.GetFocusObject().GetParagraphAtPosition(color_range[0])
+            p2: rt.RichTextParagraph = self._main_text_area.GetFocusObject().GetParagraphAtPosition(color_range[1])
+
+            # Check the beginning of the selection.
+            if p1.GetAttributes().GetFontFaceName() == Strings.style_heading_3 or \
+                    p1.GetAttributes().GetFontFaceName() == Strings.style_heading_4:
+                p_range: rt.RichTextRange = p1.GetRange()
+                # Extend the beginning of the selected range.
+                color_range.SetStart(p_range.GetStart())
+
+            # Check the end of the selection.
+            if p2.GetAttributes().GetFontFaceName() == Strings.style_heading_3 or \
+                    p2.GetAttributes().GetFontFaceName() == Strings.style_heading_4:
+                p_range: rt.RichTextRange = p2.GetRange()
+                # Extend the beginning of the selected range.
+                color_range.SetEnd(p_range.GetEnd())
+
+            # Change the color of the complete selection.
             for char in range(color_range[0], color_range[1]):
                 if char + 1 > color_range[1] + 1:
                     break

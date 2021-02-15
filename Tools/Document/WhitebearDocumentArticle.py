@@ -562,3 +562,14 @@ class WhitebearDocumentArticle(WhitebearDocument):
         if date != self._date:
             self._date = date
             self.set_modified(True)
+
+    def set_text_elements(self, elements: List) -> None:
+        """
+        Set the new article text elements list.
+        Change modified attribute to True.
+        :param elements: New article elements list.
+        :return: None
+        """
+        if elements != self._main_text_elements:
+            self._main_text_elements = elements
+            self.set_modified(True)
