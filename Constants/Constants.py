@@ -125,6 +125,7 @@ class Strings:
     exception_menu_item_missing: str = 'Menu item missing'
     exception_unrecognized_color: str = 'Unrecognized CSS color'
     exception_wrong_style: str = 'Unrecognized style'
+    exception_incorrect_url: str = 'Incorrect url'
 
     seo_error_keywords_length: str = 'Length must be: ' + str(Numbers.keywords_min_length) + ' - ' + str(
         Numbers.keywords_max_length) + ' characters long'
@@ -257,6 +258,8 @@ class Strings:
     label_aside_image: str = 'Aside/Main image (' + str(Numbers.main_image_width) + 'x' + \
                              str(Numbers.main_image_height) + 'px)'
     label_image_name: str = 'Image name'
+    label_url_error: str = 'URL Error'
+    label_red_url_warning: str = 'Document contains incorrect URL'
 
     status_loading: str = 'Loading and testing'
     status_ready: str = 'Ready'

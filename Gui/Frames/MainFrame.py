@@ -7,6 +7,7 @@ import wx.richtext as rt
 from Constants.Constants import Numbers
 from Constants.Constants import Strings
 from Exceptions.UnrecognizedFileException import UnrecognizedFileException
+from Exceptions.WrongFormatException import WrongFormatException
 from Gui.Dialogs.AboutDialog import AboutDialog
 from Gui.Dialogs.AddImageDialog import AddImageDialog
 from Gui.Dialogs.AddLogoDialog import AddLogoDialog
@@ -673,6 +674,9 @@ class MainFrame(wx.Frame):
                 return False
         self._main_text_area.Disable()
         self._main_text_area.convert_document()
+        # TODO seo test the new document and display color
+        self._current_document_instance.seo_test_self()
+        self._update_file_color()
         self._main_text_area.Enable()
         # TODO this
         '''

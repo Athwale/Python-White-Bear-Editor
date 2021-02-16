@@ -743,20 +743,33 @@ class CustomRichText(rt.RichTextCtrl):
         Clears all styles and prepares the control for a new article.
         :return: None
         """
-        # Ensure we always end with a consistent paragraph style, this is needed because for some reason the last style
-        # survives clearing.
-        self.BeginParagraphStyle(Strings.style_paragraph)
-        self.WriteText(' ')
-        self.EndParagraphStyle()
-        self._modify_text()
-        self.Clear()
-        self.GetBuffer().CleanUpFieldTypes()
+        # Set default attributes. Copied from wxPython source code.
+        self.SetFont(wx.SystemSettings.GetFont(wx.SYS_DEFAULT_GUI_FONT))
+        attrs: rt.RichTextAttr = rt.RichTextAttr()
+        attrs.SetFont(self.GetFont())
+        attrs.SetTextColour(wx.SystemSettings.GetColour(wx.SYS_COLOUR_WINDOWTEXT))
+        attrs.SetAlignment(wx.TEXT_ALIGNMENT_LEFT)
+        attrs.SetLineSpacing(10)
+        attrs.SetParagraphSpacingAfter(10)
+        attrs.SetParagraphSpacingBefore(0)
+        self.SetBasicStyle(attrs)
 
-        self.SetStyleEx(rt.RichTextRange(0, 1), self._stylesheet.FindParagraphStyle(Strings.style_paragraph).GetStyle(),
-                        flags=rt.RICHTEXT_SETSTYLE_REMOVE)
-        # List for some reason does not get replaced by paragraph above.
-        self.SetStyleEx(rt.RichTextRange(0, 1), self._stylesheet.FindListStyle(Strings.style_list).GetStyle(),
-                        flags=rt.RICHTEXT_SETSTYLE_REMOVE)
+        self.SetMargins(5, 5)
+
+        # The default attributes will be merged with base attributes, so can be empty to begin with.
+        self.SetDefaultStyle(rt.RichTextAttr())
+
+        self.SetBackgroundColour(wx.SystemSettings.GetColour(wx.SYS_COLOUR_WINDOW))
+        self.SetBackgroundStyle(wx.BG_STYLE_PAINT)
+
+        self.GetBuffer().Reset()
+        self.GetBuffer().SetRichTextCtrl(self)
+        self.GetBuffer().CleanUpFieldTypes()
+        self.GetBuffer().ResetAndClearCommands()
+        self.GetBuffer().Invalidate(rt.RICHTEXT_ALL)
+
+        self.Clear()
+        self.SetModified(False)
 
     def set_content(self, doc: WhitebearDocumentArticle, css: WhitebearDocumentCSS) -> None:
         """
@@ -959,8 +972,6 @@ class CustomRichText(rt.RichTextCtrl):
         inserted into the current position.
         :return: None
         """
-        # TODO catch any red incorrect links when doing seo when switching to a different document/save and turn doc red
-        # TODO reconcile links, images and video lists on save and discard unused items.s
         # Deleted links are not removed from the document to make undo work.
         if not self.BatchingUndo():
             self.BeginBatchUndo(Strings.undo_last_action)
@@ -1078,7 +1089,7 @@ class CustomRichText(rt.RichTextCtrl):
         last_was_paragraph = False
         last_was_list = False
         new_text_elements: List = []
-        buffer: rt.RichTextBuffer = self.GetFocusObject()
+        buffer: rt.RichTextBuffer = self.GetBuffer()
         paragraphs: List[rt.RichTextParagraph] = buffer.GetChildren()
         for p in paragraphs:
             p: rt.RichTextParagraph
@@ -1126,10 +1137,9 @@ class CustomRichText(rt.RichTextCtrl):
                         new_text_elements.append(self._doc.find_in_text_image(child.GetFieldType()))
                     else:
                         new_text_elements.append(self._doc.find_video(child.GetFieldType()))
-
-        for par in new_text_elements:
-            print(par)
         self._doc.set_text_elements(new_text_elements)
+        # TODO reconcile links, images and video lists on save and discard unused items
+        # TODO switching document while caret is in a red link breaks the styles.
 
     def _convert_heading(self, p: rt.RichTextParagraph) -> Heading:
         """
@@ -1176,7 +1186,15 @@ class CustomRichText(rt.RichTextCtrl):
 
             if attrs.HasURL():
                 # This will be a link
-                new_paragraph.add_element(self._doc.find_link(attrs.GetURL()))
+                stored_link: Link = self._doc.find_link(attrs.GetURL())
+                if not stored_link:
+                    # There is a red unfinished link in the document, save it but keep it incorrect and turn the
+                    # document red.
+                    stored_link = Link(text, attrs.GetURL(), text, self._doc.get_other_articles(),
+                                       self._doc.get_working_directory())
+                    stored_link.seo_test_self()
+                    self._doc.add_link(stored_link)
+                new_paragraph.add_element(stored_link)
             else:
                 # Ordinary text
                 new_paragraph.add_element(Text(text, bold, color))
