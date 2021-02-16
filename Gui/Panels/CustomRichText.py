@@ -960,7 +960,8 @@ class CustomRichText(rt.RichTextCtrl):
         :return: None
         """
         # TODO catch any red incorrect links when doing seo when switching to a different document/save and turn doc red
-        # TODO Deleted links are not removed from the document to make undo work, reconcile links and images on save.
+        # TODO reconcile links, images and video lists on save and discard unused items.s
+        # Deleted links are not removed from the document to make undo work.
         if not self.BatchingUndo():
             self.BeginBatchUndo(Strings.undo_last_action)
         stored_link = self._doc.find_link(link.get_id())
@@ -1073,6 +1074,7 @@ class CustomRichText(rt.RichTextCtrl):
         Create an internal representation of the document using the article elements classes.
         :return: None
         """
+        self._doc: WhitebearDocumentArticle
         last_was_paragraph = False
         last_was_list = False
         new_text_elements: List = []
@@ -1083,10 +1085,10 @@ class CustomRichText(rt.RichTextCtrl):
             par_style: str = p.GetAttributes().GetFontFaceName()
             if par_style == Strings.style_paragraph:
                 last_was_list = False
+                next_p: Paragraph = self._convert_paragraph(p)
                 if last_was_paragraph and new_text_elements[-1]:
                     # Reuse last Paragraph instance and join it together with a Break.
                     last_p: Paragraph = new_text_elements[-1]
-                    next_p: Paragraph = self._convert_paragraph(p)
                     if next_p:
                         last_p.add_element(Break())
                         last_p.extend_elements(next_p)
@@ -1094,7 +1096,9 @@ class CustomRichText(rt.RichTextCtrl):
                     else:
                         last_was_paragraph = False
                 else:
-                    new_text_elements.append(self._convert_paragraph(p))
+                    if next_p:
+                        # Do not append empty paragraphs.
+                        new_text_elements.append(next_p)
                     last_was_paragraph = True
             elif par_style == Strings.style_heading_3 or par_style == Strings.style_heading_4:
                 last_was_paragraph = False
@@ -1119,10 +1123,9 @@ class CustomRichText(rt.RichTextCtrl):
                     last_was_list = False
                     field_type: str = child.GetProperties().GetProperty(Strings.field_type)
                     if field_type == Strings.field_image:
-                        print('image')
+                        new_text_elements.append(self._doc.find_in_text_image(child.GetFieldType()))
                     else:
-                        print('video')
-                    print(child.GetFieldType())
+                        new_text_elements.append(self._doc.find_video(child.GetFieldType()))
 
         for par in new_text_elements:
             print(par)
