@@ -22,6 +22,8 @@ from Tools.ImageTextField import ImageTextField
 class CustomRichText(rt.RichTextCtrl):
     """
     Custom rich text control
+    # TODO copy paste does not keep color or other attributes.
+    # TODO find, replace
     """
 
     def __init__(self, img_tool_id: int, video_tool_id: int, style_control: wx.ListBox, parent, style):
@@ -307,7 +309,6 @@ class CustomRichText(rt.RichTextCtrl):
             # Only links can be underlined, it is safe to remove it here.
             attrs.SetFontUnderlined(style.GetFontUnderlined())
             if attrs.HasURL():
-                # TODO try save, this might still appear in xml if we use it. How is other url remove going to work?
                 # If any child has a url flag, remove it and set font color to normal.
                 attrs.SetURL('')
                 attrs.SetFlags(attrs.GetFlags() ^ wx.TEXT_ATTR_URL)
@@ -1073,6 +1074,7 @@ class CustomRichText(rt.RichTextCtrl):
         :return: None
         """
         last_was_paragraph = False
+        last_was_list = False
         new_text_elements: List = []
         buffer: rt.RichTextBuffer = self.GetFocusObject()
         paragraphs: List[rt.RichTextParagraph] = buffer.GetChildren()
@@ -1080,6 +1082,7 @@ class CustomRichText(rt.RichTextCtrl):
             p: rt.RichTextParagraph
             par_style: str = p.GetAttributes().GetFontFaceName()
             if par_style == Strings.style_paragraph:
+                last_was_list = False
                 if last_was_paragraph and new_text_elements[-1]:
                     # Reuse last Paragraph instance and join it together with a Break.
                     last_p: Paragraph = new_text_elements[-1]
@@ -1095,12 +1098,25 @@ class CustomRichText(rt.RichTextCtrl):
                     last_was_paragraph = True
             elif par_style == Strings.style_heading_3 or par_style == Strings.style_heading_4:
                 last_was_paragraph = False
+                last_was_list = False
                 new_text_elements.append(self._convert_heading(p))
             elif par_style == Strings.style_list:
-                print('list')
+                new_p: Paragraph = self._convert_paragraph(p)
+                if last_was_list:
+                    current_list: UnorderedList = new_text_elements[-1]
+                    if new_p:
+                        # Ignore empty list items.
+                        current_list.append_paragraph(new_p)
+                else:
+                    unordered_list: UnorderedList = UnorderedList()
+                    if new_p:
+                        unordered_list.append_paragraph(new_p)
+                    new_text_elements.append(unordered_list)
+                last_was_list = True
             for child in p.GetChildren():
                 if isinstance(child, rt.RichTextField):
                     last_was_paragraph = False
+                    last_was_list = False
                     field_type: str = child.GetProperties().GetProperty(Strings.field_type)
                     if field_type == Strings.field_image:
                         print('image')
@@ -1116,7 +1132,7 @@ class CustomRichText(rt.RichTextCtrl):
         """
         Create a heading instance from a RichTextParagraph.
         :param p: The RichTextParagraph.
-        :return: A heading instance.
+        :return: A Heading instance.
         """
         child: rt.RichTextPlainText = p.GetChild(0)
         attrs: rt.RichTextAttr = child.GetAttributes()
@@ -1131,7 +1147,7 @@ class CustomRichText(rt.RichTextCtrl):
         """
         Create a paragraph instance from a RichTextParagraph.
         :param p: The RichTextParagraph.
-        :return: A heading instance.
+        :return: A Paragraph instance.
         """
         if p.GetChildCount() == 1:
             if not p.GetChild(0).GetText():

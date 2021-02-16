@@ -12,7 +12,7 @@ class UnorderedList:
         """
         Constructor for a new UnorderedList.
         """
-        self._items = []
+        self._items: List[Paragraph] = []
 
     def append_paragraph(self, item: Paragraph) -> None:
         """
