@@ -1116,6 +1116,7 @@ class CustomRichText(rt.RichTextCtrl):
                 last_was_list = False
                 new_text_elements.append(self._convert_heading(p))
             elif par_style == Strings.style_list:
+                last_was_paragraph = False
                 new_p: Paragraph = self._convert_paragraph(p)
                 if last_was_list:
                     current_list: UnorderedList = new_text_elements[-1]
@@ -1138,8 +1139,6 @@ class CustomRichText(rt.RichTextCtrl):
                     else:
                         new_text_elements.append(self._doc.find_video(child.GetFieldType()))
         self._doc.set_text_elements(new_text_elements)
-        # TODO reconcile links, images and video lists on save and discard unused items
-        # TODO switching document while caret is in a red link breaks the styles.
 
     def _convert_heading(self, p: rt.RichTextParagraph) -> Heading:
         """

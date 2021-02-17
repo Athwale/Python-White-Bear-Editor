@@ -1,5 +1,7 @@
 from typing import List
 
+from Tools.Document.ArticleElements.Link import Link
+
 
 class Paragraph:
     """
@@ -35,6 +37,17 @@ class Paragraph:
         :return: the list of elements of this paragraph.
         """
         return self._elements_list
+
+    def get_links(self) -> List[Link]:
+        """
+        Returns a list of Links inside this paragraph.
+        :return: Returns a list of Links inside this paragraph.
+        """
+        link_list = []
+        for element in self._elements_list:
+            if isinstance(element, Link):
+                link_list.append(element)
+        return link_list
 
     def clear(self) -> None:
         """

@@ -7,7 +7,6 @@ import wx.richtext as rt
 from Constants.Constants import Numbers
 from Constants.Constants import Strings
 from Exceptions.UnrecognizedFileException import UnrecognizedFileException
-from Exceptions.WrongFormatException import WrongFormatException
 from Gui.Dialogs.AboutDialog import AboutDialog
 from Gui.Dialogs.AddImageDialog import AddImageDialog
 from Gui.Dialogs.AddLogoDialog import AddLogoDialog
@@ -674,9 +673,10 @@ class MainFrame(wx.Frame):
                 return False
         self._main_text_area.Disable()
         self._main_text_area.convert_document()
-        # TODO seo test the new document and display color
+        # We know here that the document is modified because we are saving it.
+        self._current_document_instance.set_status_color(Numbers.BLUE_COLOR)
         self._current_document_instance.seo_test_self()
-        self._update_file_color()
+        self._update_file_color(self._file_list.FindItem(-1, self._current_document_instance.get_filename()))
         self._main_text_area.Enable()
         # TODO this
         '''
@@ -1009,16 +1009,17 @@ class MainFrame(wx.Frame):
             self._current_document_instance.set_description(self._field_article_description.GetValue())
             self._update_file_color()
 
-    def _update_file_color(self) -> None:
+    def _update_file_color(self, index: int = -1) -> None:
         """
         Change the color of the currently selected file in the filelist according to the document's state.
+        :param index: The index of the file in the list that should be updated, -1 if current file.
         :return: None
         """
-        document_instance = self._document_dictionary[self._current_document_name]
-        document_instance.is_modified()
-        new_color = document_instance.get_status_color()
-        selected_item = self._file_list.GetFirstSelected()
-        self._file_list.SetItemBackgroundColour(selected_item, new_color)
+        self._current_document_instance.is_modified()
+        new_color = self._current_document_instance.get_status_color()
+        if index == -1:
+            index = self._file_list.GetFirstSelected()
+        self._file_list.SetItemBackgroundColour(index, new_color)
 
     def _update_menu_sizer(self, menu_item: MenuItem) -> None:
         """

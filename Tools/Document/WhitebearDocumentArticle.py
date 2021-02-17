@@ -57,7 +57,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
         self._aside_images = []
         self._main_text_elements = []
         self._links = []
-        self._images = set()
+        self._text_images = set()
         self._videos = set()
 
         self._date = None
@@ -136,7 +136,6 @@ class WhitebearDocumentArticle(WhitebearDocument):
         Perform a SEO test on this document.
         :return: None
         """
-        # TODO backup color in case it is blue
         # Check meta keywords and description
         super(WhitebearDocumentArticle, self).seo_test_self_basic()
         # Clear all errors on every new test
@@ -173,7 +172,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
                 self.set_status_color(Numbers.RED_COLOR)
 
         # Test in text images
-        for image in self._images:
+        for image in self._text_images:
             if not image.seo_test_self():
                 self.set_status_color(Numbers.RED_COLOR)
 
@@ -202,7 +201,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
         :return: None
         """
         self._main_text_elements.clear()
-        self._images.clear()
+        self._text_images.clear()
         self._links.clear()
         self._videos.clear()
         text_section = self._parsed_html.find(name='section', attrs={'class': 'mainText'})
@@ -219,7 +218,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
             elif child.name == 'div':
                 if child.next.name == 'a':
                     image = self._process_img(child)
-                    self._images.add(image)
+                    self._text_images.add(image)
                     self._main_text_elements.append(image)
                 elif child.next.name == 'iframe':
                     video = self._process_iframe(child)
@@ -457,7 +456,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
         :return: True if this file was modified in the editor.
         """
         # Check links, videos and images
-        for list_var in [self._aside_images, self._images, self._links, self._videos]:
+        for list_var in [self._aside_images, self._text_images, self._links, self._videos]:
             for content in list_var:
                 if content.is_modified():
                     self.set_modified(True)
@@ -509,7 +508,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
         :param path: The path to the image thumbnail on disk.
         :return: A ImageInText instance.
         """
-        for img in self._images:
+        for img in self._text_images:
             if img.get_thumbnail_image_path() == path:
                 return img
 
@@ -529,7 +528,6 @@ class WhitebearDocumentArticle(WhitebearDocument):
         :param link: The new link
         :return: None
         """
-        # TODO use the link list when regenerating elements list
         self._links.append(link)
         self.set_modified(True)
 
@@ -550,7 +548,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
         :param image: The new image.
         :return: None
         """
-        self._images.add(image)
+        self._text_images.add(image)
         self.set_modified(True)
 
     def add_video(self, video: Video) -> None:
@@ -591,5 +589,19 @@ class WhitebearDocumentArticle(WhitebearDocument):
         :return: None
         """
         if elements != self._main_text_elements:
+            # Refill internal lists of text elements with what is actually used in the document and throw away the rest.
+            self._links.clear()
+            self._text_images.clear()
+            self._videos.clear()
+            for element in elements:
+                if isinstance(element, Video):
+                    self._videos.add(element)
+                elif isinstance(element, ImageInText):
+                    self._text_images.add(element)
+                elif isinstance(element, Paragraph):
+                    self._links.extend(element.get_links())
+                elif isinstance(element, UnorderedList):
+                    for paragraph in element.get_paragraphs():
+                        self._links.extend(paragraph.get_links())
             self._main_text_elements = elements
             self.set_modified(True)
