@@ -169,7 +169,7 @@ class Strings:
     label_menu_item_save_hint: str = 'Save current document'
     label_menu_item_reload: str = 'Reload file from disk'
     label_menu_item_reload_hint: str = 'Parse file again from disk'
-    label_menu_item_upload: str = 'Upload all changes...\tctrl+f'
+    label_menu_item_upload: str = 'Upload all changes...'
     label_menu_item_upload_hint: str = 'Upload all modified documents'
 
     label_menu_item_quit: str = 'Quit\tctrl+q'
@@ -192,6 +192,8 @@ class Strings:
     label_menu_item_paste_hint: str = 'Paste'
     label_menu_item_select_all: str = 'Select all\tctrl+a'
     label_menu_item_select_all_hint: str = 'Select all'
+    label_menu_item_find: str = 'Find'
+    label_menu_item_find_hint: str = 'Find\tctrl+f'
 
     label_menu_add: str = 'Add'
     label_menu_item_add_text_image: str = 'Add image to collection\tctrl+i'
@@ -286,6 +288,8 @@ class Strings:
     toolbar_insert_link: str = 'Insert link'
     toolbar_save: str = 'Save'
     toolbar_color: str = 'Color text'
+    toolbar_next: str = 'Find next'
+    toolbar_previous: str = 'Find previous'
 
     button_close: str = 'Close'
     button_cancel: str = 'Cancel'

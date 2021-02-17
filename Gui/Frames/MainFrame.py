@@ -1,5 +1,5 @@
 import os
-from typing import Dict
+from typing import Dict, List
 
 import wx
 import wx.richtext as rt
@@ -150,6 +150,9 @@ class MainFrame(wx.Frame):
                                                       Strings.label_menu_item_select_all,
                                                       Strings.label_menu_item_select_all_hint)
         self._disableable_menu_items.append(self._edit_menu_item_select_all)
+        self.edit_menu_item_find = wx.MenuItem(self._edit_menu, wx.ID_FIND, Strings.label_menu_item_find,
+                                               Strings.label_menu_item_find_hint)
+        self._disableable_menu_items.append(self.edit_menu_item_find)
 
         self._edit_menu.Append(self._edit_menu_item_undo)
         self._edit_menu.Append(self._edit_menu_item_redo)
@@ -157,6 +160,7 @@ class MainFrame(wx.Frame):
         self._edit_menu.Append(self._edit_menu_item_cut)
         self._edit_menu.Append(self._edit_menu_item_paste)
         self._edit_menu.Append(self._edit_menu_item_select_all)
+        self._edit_menu.Append(self.edit_menu_item_find)
 
         # Add menu ---------------------------------------------------------------------------------------------------
         self._add_menu_item_add_image = wx.MenuItem(self._add_menu, wx.ID_ADD, Strings.label_menu_item_add_text_image,
@@ -193,42 +197,63 @@ class MainFrame(wx.Frame):
         self._tool_ids.append(new_id)
         return new_id
 
+    def _scale_icon(self, name: str) -> wx.Bitmap:
+        """
+        Helper method to prepare icons for toolbar.
+        :return: The icon bitmap
+        """
+        path = Fetch.get_resource_path(name)
+        image = wx.Image(path, wx.BITMAP_TYPE_ANY)
+        image = image.Scale(Numbers.icon_width, Numbers.icon_height, wx.IMAGE_QUALITY_HIGH)
+        return wx.Bitmap(image)
+
     def _init_top_tool_bar(self) -> None:
         """
         Set up top tool bar for the frame.
         :return: None
         """
-
-        def scale_icon(name: str) -> wx.Bitmap:
-            path = Fetch.get_resource_path(name)
-            image = wx.Image(path, wx.BITMAP_TYPE_ANY)
-            image = image.Scale(Numbers.icon_width, Numbers.icon_height, wx.IMAGE_QUALITY_HIGH)
-            return wx.Bitmap(image)
-
         self.tool_bar: wx.ToolBar = self.CreateToolBar(style=wx.TB_DEFAULT_STYLE)
         # Add toolbar tools
         self._new_file_tool = self.tool_bar.AddTool(self._add_tool_id(), Strings.toolbar_new_file,
-                                                    scale_icon('new-file.png'),
+                                                    self._scale_icon('new-file.png'),
                                                     Strings.toolbar_new_file)
         self._save_tool = self.tool_bar.AddTool(self._add_tool_id(), Strings.toolbar_save,
-                                                scale_icon('save.png'),
+                                                self._scale_icon('save.png'),
                                                 Strings.toolbar_save)
         self._image_tool_id = self._add_tool_id()
         self.insert_img_tool = self.tool_bar.AddTool(self._image_tool_id, Strings.toolbar_insert_img,
-                                                     scale_icon('insert-image.png'),
+                                                     self._scale_icon('insert-image.png'),
                                                      Strings.toolbar_insert_img)
         self._video_tool_id = self._add_tool_id()
         self.insert_video_tool = self.tool_bar.AddTool(self._video_tool_id, Strings.toolbar_insert_video,
-                                                       scale_icon('insert-video.png'),
+                                                       self._scale_icon('insert-video.png'),
                                                        Strings.toolbar_insert_video)
         self.bold_tool = self.tool_bar.AddTool(self._add_tool_id(), Strings.toolbar_bold,
-                                               scale_icon('bold.png'),
+                                               self._scale_icon('bold.png'),
                                                Strings.toolbar_bold)
         self.Bind(wx.EVT_MENU, self._forward_event, self.insert_img_tool)
         self.Bind(wx.EVT_MENU, self._forward_event, self.insert_video_tool)
         self.Bind(wx.EVT_MENU, self._forward_event, self.bold_tool)
         self.Bind(wx.EVT_MENU, self._save_document_handler, self._save_tool)
+
+        self._search_box = wx.TextCtrl(self.tool_bar, wx.ID_FIND, style=wx.TE_PROCESS_ENTER)
+
         self.tool_bar.Realize()
+
+    def _init_search_box(self) -> None:
+        """
+        Add search box into the top tool bar.
+        :return: None
+        """
+        if not self.tool_bar.FindById(wx.ID_FIND):
+            # Only add the search box once and not when a new directory is loaded again.
+            self.tool_bar.AddSeparator()
+            self.tool_bar.AddControl(self._search_box)
+            self.find_previous_tool = self.tool_bar.AddTool(self._add_tool_id(), Strings.toolbar_previous,
+                                                            self._scale_icon('arrow-left.png'),
+                                                            Strings.toolbar_previous)
+            self.find_next_tool = self.tool_bar.AddTool(self._add_tool_id(), Strings.toolbar_next,
+                                                        self._scale_icon('arrow-right.png'), Strings.toolbar_next)
 
     def _create_color_tool(self, name: str, toolbar: wx.ToolBar, color: wx.Colour) -> None:
         """
@@ -462,6 +487,7 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self._forward_event, self._edit_menu_item_undo)
         self.Bind(wx.EVT_MENU, self._forward_event, self._edit_menu_item_redo)
         self.Bind(wx.EVT_MENU, self._forward_event, self._edit_menu_item_select_all)
+        self.Bind(wx.EVT_MENU, self._find, self.edit_menu_item_find)
         self.Bind(wx.EVT_MENU, self._add_image_handler, self._add_menu_item_add_image)
         self.Bind(wx.EVT_MENU, self._insert_aside_image_handler, self._add_menu_item_side_image)
         self.Bind(wx.EVT_MENU, self._add_menu_logo_handler, self._add_menu_item_add_logo)
@@ -576,6 +602,7 @@ class MainFrame(wx.Frame):
         css_colors = css.get_colors()
         for name, color in css_colors.items():
             self._create_color_tool(name, self.tool_bar, color)
+        self._init_search_box()
 
     def on_filelist_loaded(self, documents: Dict[str, WhitebearDocumentArticle]) -> None:
         """
@@ -758,7 +785,7 @@ class MainFrame(wx.Frame):
             selected_page = self._file_list.GetFirstSelected()
             if selected_page != wx.NOT_FOUND:
                 self._config_manager.store_last_open_document(self._file_list.GetItemText(selected_page, 0))
-            # TODO Save currently worked on document on disk
+            self._save(confirm=True)
         # If the built in close function is not called, destroy must be called explicitly, calling Close runs the close
         # handler.
         self.Destroy()
@@ -1105,3 +1132,20 @@ class MainFrame(wx.Frame):
         :return: None
         """
         self._save()
+
+    def _find(self, string: str) -> List[int]:
+        """
+        Find a string in the document and select it.
+        :param string: The string to find
+        :return: List of indexes where the found strings begin.
+        """
+        text_content: str = self._main_text_area.GetValue()
+        text_indexes: List[int] = []
+        start_index: int = text_content.find(string, 0)
+        while start_index != -1:
+            text_indexes.append(start_index)
+            start_index = text_content.find(string, start_index + len(string))
+        return text_indexes
+
+
+

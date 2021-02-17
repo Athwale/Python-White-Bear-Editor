@@ -22,8 +22,8 @@ from Tools.ImageTextField import ImageTextField
 class CustomRichText(rt.RichTextCtrl):
     """
     Custom rich text control
-    # TODO copy paste does not keep color or other attributes.
     # TODO find, replace
+    # TODO Shotrcuts not working from inside the richtextctrl
     """
 
     def __init__(self, img_tool_id: int, video_tool_id: int, style_control: wx.ListBox, parent, style):
