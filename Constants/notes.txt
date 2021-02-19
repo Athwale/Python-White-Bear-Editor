@@ -3,7 +3,6 @@ Nastavit na default text pokud je prazdny nedovolit presahnout 2 radky
 Automaticky generovat datum
 Zkontrolovat nastaveni spatnyho adresare
 
-TODO:
 add methods for reruning seo check on field edits
 Sanity check the richtext output for errors like image inside a heading and ignore blank lines if they are not followed
 by a paragraph.
@@ -59,37 +58,12 @@ autodoplňovat nbsp
 Validovat na konci vsechny stranky
 mozna pouzit i online w3s validator
 
-
 Prace s datumem https://www.linkedin.com/learning/learning-python-2/using-timedelta-objects?u=2056732
 if file.mode == 'r'
 beautifulsoup.'jmenotagu' vraci Tag se ktetym lze pracovat, pouze prvni vyskyt tagu
 del tag['id']
 soup.body.div.p ...
 .select podporuje css selectory
-
-styledTextCtrl, syntax highlighting Scintilla
-
-    def on_keypress(self, event):
-        """
-        :param event:
-        :return:
-        """
-        current_style = self._stylesheet.FindParagraphStyle(Strings.style_paragraph).GetStyle().GetParagraphStyleName()
-        current_position = self.GetCaretPosition()
-        print('pos: ' + str(current_position))
-        print('previous: ' + str(
-            str(self._get_style_at_pos(current_position - 1)) + ' ' + self.GetRange(current_position - 1,
-                                                                                    current_position)))
-        print('current: ' + str(
-            str(self._get_style_at_pos(current_position + 1)) + ' ' + self.GetRange(current_position,
-                                                                                    current_position + 1)))
-        print('next: ' + str(
-            str(self._get_style_at_pos(current_position + 2)) + ' ' + self.GetRange(current_position + 1,
-                                                                                    current_position + 2)))
-        event.Skip()
-
-
-
 
 
 

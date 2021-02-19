@@ -34,7 +34,6 @@ class WhitebearDocumentIndex(WhitebearDocument):
         :raises WrongFormatException: if there is a problem with parsing the document.
         """
         # Only parse if not parsed already and only if the document is valid.
-        # TODO create the wx image instances after seo check passed and the images have correct size
         if not self._parsed_html and self.is_valid():
             pass
 
