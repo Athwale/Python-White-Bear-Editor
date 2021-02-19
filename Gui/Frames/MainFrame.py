@@ -499,6 +499,21 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_TEXT, self._handle_description_change, self._field_article_description)
         self.Bind(wx.EVT_LISTBOX, self._forward_event, self._style_picker)
 
+        # Initialize search shortcut into accelerator table
+        new_id = wx.NewId()
+        self.Bind(wx.EVT_MENU, self._focus_to_search, id=new_id)
+        accel_tbl = wx.AcceleratorTable([(wx.ACCEL_CTRL, ord('F'), new_id)])
+        self.SetAcceleratorTable(accel_tbl)
+
+    # noinspection PyUnusedLocal
+    def _focus_to_search(self, event: wx.CommandEvent) -> None:
+        """
+        Handles Ctrl+F shortcut to set focus into the search box.
+        :param event: Not used
+        :return: None
+        """
+        self._search_box.SetFocus()
+
     def _refresh_aside_images(self, event: wx.ActivateEvent) -> None:
         """
         Refresh the side image panel to fix wrong borders if the window started minimized.
