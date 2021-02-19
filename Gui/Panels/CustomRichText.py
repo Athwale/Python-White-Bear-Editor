@@ -22,8 +22,6 @@ from Tools.ImageTextField import ImageTextField
 class CustomRichText(rt.RichTextCtrl):
     """
     Custom rich text control
-    # TODO update links on save from the child in case it was not changed in dialog
-    # TODO Shotrcuts not working from inside the richtextctrl
     """
 
     def __init__(self, img_tool_id: int, video_tool_id: int, style_control: wx.ListBox, parent, style):
@@ -564,6 +562,8 @@ class CustomRichText(rt.RichTextCtrl):
 
         # Do not run this method when we pressed ctrl. Events for ctrl-z are EVT_MENU.
         if event.ControlDown():
+            # Skip is needed for keyboard menu shortcuts to work.
+            event.Skip()
             return
 
         if not self.BatchingUndo():
@@ -1193,6 +1193,8 @@ class CustomRichText(rt.RichTextCtrl):
                                        self._doc.get_working_directory())
                     stored_link.seo_test_self()
                     self._doc.add_link(stored_link)
+                # Update the text of the link from the current document.
+                stored_link.set_text(text)
                 new_paragraph.add_element(stored_link)
             else:
                 # Ordinary text
