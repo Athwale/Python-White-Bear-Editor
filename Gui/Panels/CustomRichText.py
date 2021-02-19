@@ -22,7 +22,7 @@ from Tools.ImageTextField import ImageTextField
 class CustomRichText(rt.RichTextCtrl):
     """
     Custom rich text control
-    # TODO find, replace
+    # TODO update links on save from the child in case it was not changed in dialog
     # TODO Shotrcuts not working from inside the richtextctrl
     """
 

@@ -29,6 +29,8 @@ class MainFrame(wx.Frame):
     """
     Main GUI controlling class. The Frame is actually the on screen window.
     """
+    VIDEO_TOOL_ID: int = wx.NewId()
+    IMAGE_TOOL_ID: int = wx.NewId()
 
     def __init__(self):
         """
@@ -52,8 +54,10 @@ class MainFrame(wx.Frame):
         self._ignore_change = False
         self._no_save = False
 
-        # Special tool ids.
-        self._image_tool_id = None
+        self._search_term = None
+        self._search_results: List[int] = []
+        self._search_index: int = 0
+        self._text_changed: bool = False
 
         self._init_status_bar()
         self._init_menu()
@@ -150,9 +154,6 @@ class MainFrame(wx.Frame):
                                                       Strings.label_menu_item_select_all,
                                                       Strings.label_menu_item_select_all_hint)
         self._disableable_menu_items.append(self._edit_menu_item_select_all)
-        self.edit_menu_item_find = wx.MenuItem(self._edit_menu, wx.ID_FIND, Strings.label_menu_item_find,
-                                               Strings.label_menu_item_find_hint)
-        self._disableable_menu_items.append(self.edit_menu_item_find)
 
         self._edit_menu.Append(self._edit_menu_item_undo)
         self._edit_menu.Append(self._edit_menu_item_redo)
@@ -160,7 +161,6 @@ class MainFrame(wx.Frame):
         self._edit_menu.Append(self._edit_menu_item_cut)
         self._edit_menu.Append(self._edit_menu_item_paste)
         self._edit_menu.Append(self._edit_menu_item_select_all)
-        self._edit_menu.Append(self.edit_menu_item_find)
 
         # Add menu ---------------------------------------------------------------------------------------------------
         self._add_menu_item_add_image = wx.MenuItem(self._add_menu, wx.ID_ADD, Strings.label_menu_item_add_text_image,
@@ -197,7 +197,8 @@ class MainFrame(wx.Frame):
         self._tool_ids.append(new_id)
         return new_id
 
-    def _scale_icon(self, name: str) -> wx.Bitmap:
+    @staticmethod
+    def _scale_icon(name: str) -> wx.Bitmap:
         """
         Helper method to prepare icons for toolbar.
         :return: The icon bitmap
@@ -220,12 +221,10 @@ class MainFrame(wx.Frame):
         self._save_tool = self.tool_bar.AddTool(self._add_tool_id(), Strings.toolbar_save,
                                                 self._scale_icon('save.png'),
                                                 Strings.toolbar_save)
-        self._image_tool_id = self._add_tool_id()
-        self.insert_img_tool = self.tool_bar.AddTool(self._image_tool_id, Strings.toolbar_insert_img,
+        self.insert_img_tool = self.tool_bar.AddTool(MainFrame.IMAGE_TOOL_ID, Strings.toolbar_insert_img,
                                                      self._scale_icon('insert-image.png'),
                                                      Strings.toolbar_insert_img)
-        self._video_tool_id = self._add_tool_id()
-        self.insert_video_tool = self.tool_bar.AddTool(self._video_tool_id, Strings.toolbar_insert_video,
+        self.insert_video_tool = self.tool_bar.AddTool(MainFrame.VIDEO_TOOL_ID, Strings.toolbar_insert_video,
                                                        self._scale_icon('insert-video.png'),
                                                        Strings.toolbar_insert_video)
         self.bold_tool = self.tool_bar.AddTool(self._add_tool_id(), Strings.toolbar_bold,
@@ -237,6 +236,8 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self._save_document_handler, self._save_tool)
 
         self._search_box = wx.TextCtrl(self.tool_bar, wx.ID_FIND, style=wx.TE_PROCESS_ENTER)
+        self.Bind(wx.EVT_TEXT, self._search_box_handler, self._search_box)
+        self.Bind(wx.EVT_TEXT_ENTER, self._search_tools_handler, self._search_box)
 
         self.tool_bar.Realize()
 
@@ -249,11 +250,6 @@ class MainFrame(wx.Frame):
             # Only add the search box once and not when a new directory is loaded again.
             self.tool_bar.AddSeparator()
             self.tool_bar.AddControl(self._search_box)
-            self.find_previous_tool = self.tool_bar.AddTool(self._add_tool_id(), Strings.toolbar_previous,
-                                                            self._scale_icon('arrow-left.png'),
-                                                            Strings.toolbar_previous)
-            self.find_next_tool = self.tool_bar.AddTool(self._add_tool_id(), Strings.toolbar_next,
-                                                        self._scale_icon('arrow-right.png'), Strings.toolbar_next)
 
     def _create_color_tool(self, name: str, toolbar: wx.ToolBar, color: wx.Colour) -> None:
         """
@@ -453,10 +449,11 @@ class MainFrame(wx.Frame):
         :return: None
         """
         # Main text area section ---------------------------------------------------------------------------------------
-        self._main_text_area = CustomRichText(self._image_tool_id, self._video_tool_id, self._style_picker,
+        self._main_text_area = CustomRichText(MainFrame.IMAGE_TOOL_ID, MainFrame.VIDEO_TOOL_ID, self._style_picker,
                                               self._right_panel, style=wx.VSCROLL)
         self._middle_vertical_sizer.Add(self._main_text_area, flag=wx.EXPAND | wx.TOP, proportion=1,
                                         border=Numbers.widget_border_size)
+        self.Bind(wx.EVT_TEXT, self._repeat_search, self._main_text_area)
         # --------------------------------------------------------------------------------------------------------------
 
     def _bind_handlers(self) -> None:
@@ -487,7 +484,6 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self._forward_event, self._edit_menu_item_undo)
         self.Bind(wx.EVT_MENU, self._forward_event, self._edit_menu_item_redo)
         self.Bind(wx.EVT_MENU, self._forward_event, self._edit_menu_item_select_all)
-        self.Bind(wx.EVT_MENU, self._find, self.edit_menu_item_find)
         self.Bind(wx.EVT_MENU, self._add_image_handler, self._add_menu_item_add_image)
         self.Bind(wx.EVT_MENU, self._insert_aside_image_handler, self._add_menu_item_side_image)
         self.Bind(wx.EVT_MENU, self._add_menu_logo_handler, self._add_menu_item_add_logo)
@@ -1133,19 +1129,82 @@ class MainFrame(wx.Frame):
         """
         self._save()
 
-    def _find(self, string: str) -> List[int]:
+    # noinspection PyUnusedLocal
+    def _repeat_search(self, event: wx.CommandEvent) -> None:
         """
-        Find a string in the document and select it.
-        :param string: The string to find
-        :return: List of indexes where the found strings begin.
+        Force repeating search on arrow press because the text has changed and indexes would no longer match.
+        :param event: Not used.
+        :return: None
         """
+        self._text_changed = True
+
+    def _search_box_handler(self, event: wx.CommandEvent) -> None:
+        """
+        Forward the string we are searching for into the search method. Fires as text is being typed.
+        :param event: Carries the string from search box.
+        :return: None
+        """
+        self._search_string(event.GetString())
+
+    def _search_string(self, text: str) -> bool:
+        """
+        Find all occurrences of a string typed in the search box and store the starting positions in internal list.
+        Select the first found string in the text area.
+        :param text: The string to search for.
+        :return: True if something was found.
+        """
+        self._search_term = text
+        self._search_results.clear()
+        if not self._search_term:
+            # Searching for an empty line.
+            self._main_text_area.SelectNone()
+            self._search_term = None
+            self._set_status_text(Strings.status_ready, 3)
+            return False
+
         text_content: str = self._main_text_area.GetValue()
-        text_indexes: List[int] = []
-        start_index: int = text_content.find(string, 0)
+        start_index: int = text_content.find(self._search_term, 0)
         while start_index != -1:
-            text_indexes.append(start_index)
-            start_index = text_content.find(string, start_index + len(string))
-        return text_indexes
+            # At least one was found
+            self._search_results.append(start_index)
+            # Find the next one after the current match.
+            start_index = text_content.find(self._search_term, start_index + len(self._search_term))
+        self._set_status_text(Strings.status_found + ': ' + str(len(self._search_results)), 3)
 
+        if len(self._search_results) == 0:
+            # Nothing has been found
+            self._main_text_area.SelectNone()
+            return False
 
+        # Select first found string.
+        self._main_text_area.SetSelection(self._search_results[0], (self._search_results[0] + len(self._search_term)))
+        return True
 
+    # noinspection PyUnusedLocal
+    def _search_tools_handler(self, event: wx.CommandEvent) -> None:
+        """
+        Handles the arrows that switch between found strings. Fires on pressing the enter key.
+        :param event: Used to get the tool id.
+        :return: None
+        """
+        if self._text_changed:
+            # Repeat search when the text has changed.
+            # Back up current selected position for later comparison.
+            self._text_changed = False
+            # When the text changes, restart search from beginning.
+            self._search_index = 0
+            if not self._search_string(self._search_box.GetValue()):
+                # If there are no results then, do nothing.
+                return
+
+        if not self._search_results:
+            return
+
+        # Cycle over the results.
+        if self._search_index == len(self._search_results) - 1:
+            self._search_index = 0
+        else:
+            self._search_index = self._search_index + 1
+
+        position: int = self._search_results[self._search_index]
+        self._main_text_area.SetSelection(position, (position + len(self._search_term)))
