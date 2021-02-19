@@ -3,6 +3,7 @@ import re
 from typing import List, Dict
 
 import wx
+from bs4 import BeautifulSoup
 from bs4.element import NavigableString, Tag
 from lxml import etree
 from lxml import html
@@ -410,16 +411,60 @@ class WhitebearDocumentArticle(WhitebearDocument):
         :return: Tuple of boolean validation result and optional list of error messages.
         :raise UnrecognizedFileException if html parse fails
         """
+        self._valid, errors = self._validate(self.get_path(), 'schema_article.xsd')
+        return self._valid, errors
+
+    @staticmethod
+    def _validate(path: str, schema: str) -> (bool, List[str]):
+        """
+        Validate a document against an xml schema.
+        :param path: Path to the document.
+        :param schema: The name of the schema to use.
+        :return: Tuple of boolean validation result and optional list of error messages.
+        :raise UnrecognizedFileException if html parse fails.
+        """
         errors = []
         try:
-            xmlschema = etree.XMLSchema(etree.parse(Fetch.get_resource_path('schema_article.xsd')))
-            xml_doc = html.parse(self.get_path())
-            self._valid = xmlschema.validate(xml_doc)
+            xmlschema = etree.XMLSchema(etree.parse(Fetch.get_resource_path(schema)))
+            xml_doc = html.parse(path)
+            is_valid = xmlschema.validate(xml_doc)
         except XMLSyntaxError as e:
             raise UnrecognizedFileException(Strings.exception_html_syntax_error + '\n' + str(e))
         for error in xmlschema.error_log:
             errors.append(error.message)
-        return self._valid, errors
+        return is_valid, errors
+
+    def convert_to_html(self) -> None:
+        """
+        Converts this document into a html white bear article page.
+        :return: TODO Something probably the html document to save.
+        :raise UnrecognizedFileException if template file can not be validated.
+        :raise UnrecognizedFileException if html parse fails.
+        """
+        # Parse an empty template and place the new parts in.
+        # Activate correct menu id="active"
+        # Put together a title + section + wb...
+        # Put in nbsp
+        # Minimize after conversion.
+        # TODO test syntax error in the xsd schema.
+        result, errors = self._validate(Fetch.get_resource_path('article_template.html'), 'schema_article_template.xsd')
+        if not result:
+            raise UnrecognizedFileException(Strings.exception_html_syntax_error + '\n' + 'article_template.html ' +
+                                            str(errors))
+
+        with open(Fetch.get_resource_path('article_template.html'), 'r') as document:
+            contents = document.read()
+            parsed_template = BeautifulSoup(contents, 'html5lib')
+        # Fill title
+        title: Tag = parsed_template.find(name='title')
+        title.string = self._page_name + ' - ' + self._menu_section.get_section_name() + ' | ' + Strings.page_name
+        # Fill description
+        description = parsed_template.find_all(name='meta', attrs={'name': 'description', 'content': True})[0]
+        description['content'] = self._meta_description
+        # Fill keywords
+        keywords = parsed_template.find_all(name='meta', attrs={'name': 'keywords', 'content': True})[0]
+        keywords['content'] = self._meta_keywords
+
 
     # Getters ----------------------------------------------------------------------------------------------------------
     def get_date(self) -> (str, str):

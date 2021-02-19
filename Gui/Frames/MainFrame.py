@@ -562,6 +562,8 @@ class MainFrame(wx.Frame):
         # Disable toolbar buttons
         for tool_id in self._tool_ids:
             self.tool_bar.EnableTool(tool_id, (not state))
+        self.tool_bar.EnableTool(MainFrame.IMAGE_TOOL_ID, (not state))
+        self.tool_bar.EnableTool(MainFrame.VIDEO_TOOL_ID, (not state))
         # Disable menu items
         for menu_item in self._disableable_menu_items:
             menu_item.Enable(not state)
@@ -709,31 +711,16 @@ class MainFrame(wx.Frame):
             result = wx.MessageBox(Strings.label_menu_item_save_hint, Strings.toolbar_save, wx.YES_NO | wx.ICON_WARNING)
             if result == wx.NO:
                 return False
-        self._main_text_area.Disable()
+        self._disable_editor(True)
         self._main_text_area.convert_document()
         # We know here that the document is modified because we are saving it.
         self._current_document_instance.set_status_color(Numbers.BLUE_COLOR)
         self._current_document_instance.seo_test_self()
         self._update_file_color(self._file_list.FindItem(-1, self._current_document_instance.get_filename()))
-        self._main_text_area.Enable()
-        # TODO this
-        '''
-        wildcard, types = rt.RichTextBuffer.GetExtWildcard(save=True)
-        dlg = wx.FileDialog(self, "Choose a filename", wildcard=wildcard, style=wx.FD_SAVE)
-        if dlg.ShowModal() == wx.ID_OK:
-            path = dlg.GetPath()
-            if path:
-                file_type = types[dlg.GetFilterIndex()]
-                ext = rt.RichTextBuffer.FindHandlerByType(file_type).GetExtension()
-                if not path.endswith(ext):
-                    path += '.' + ext
-                self._main_text_area.SaveFile(path, file_type)
-            dlg.Destroy()
-            return True
-        else:
-            dlg.Destroy()
-            return False
-        '''
+        # TODO convert document into html. Do this in a separate thread.
+        self._current_document_instance.convert_to_html()
+        # TODO convert corresponding menu page.
+        self._disable_editor(False)
         return True
 
     # noinspection PyUnusedLocal
@@ -884,6 +871,7 @@ class MainFrame(wx.Frame):
         self._current_document_instance: WhitebearDocumentArticle = self._document_dictionary[
             self._current_document_name]
         try:
+            # TODO use this for convert schema validation
             result = self._current_document_instance.validate_self()
             if not result[0]:
                 self._set_status_text(Strings.status_invalid + ' ' + self._current_document_name)

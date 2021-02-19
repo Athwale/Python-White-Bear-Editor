@@ -264,7 +264,7 @@ class AddImageDialog(wx.Dialog):
             self._radio_aside.Enable()
             self._label_warning.Show(False)
         if self._full_image.GetWidth() > Numbers.original_image_max_width:
-            # Resize the original image to 50% if too bit.
+            # Resize the original image to 50% if too big.
             self._full_image.Rescale(self._full_image.GetWidth() / 2, self._full_image.GetHeight() / 2,
                                      wx.IMAGE_QUALITY_HIGH)
         # Display the originals image width

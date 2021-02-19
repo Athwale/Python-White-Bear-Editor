@@ -97,6 +97,7 @@ class Strings:
     editor_config_file: str = os.path.join(home_directory, '.whitebearEditor.conf')
     editor_output_debug_file: str = os.path.join(home_directory, 'whitebearEditor.log')
     editor_name: str = 'Whitebear editor'
+    page_name: str = 'white-bear'
     editor_version: str = '0.1'
     url_stub: str = 'https://www.'
     folder_images: str = 'images'

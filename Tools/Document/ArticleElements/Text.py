@@ -1,6 +1,3 @@
-from wx import Colour
-
-
 class Text:
     """
     This class represents a piece of text which can be colored and bold.
