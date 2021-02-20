@@ -85,6 +85,7 @@ class Strings:
     This class holds string variables which are used in the program. This simplifies changes.
     """
     color_black: str = 'black'
+    blank: str = '_blank'
     cz_months = '|'.join(
         ['Ledna', 'Února', 'Března', 'Dubna', 'Května', 'Června', 'Července', 'Srpna', 'Září', 'Října', 'Listopadu',
          'Prosince'])

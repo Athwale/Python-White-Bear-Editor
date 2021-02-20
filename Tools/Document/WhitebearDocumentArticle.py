@@ -511,16 +511,93 @@ class WhitebearDocumentArticle(WhitebearDocument):
                     new_h['class'] = color
                 text_section.append(new_h)
             elif isinstance(element, ImageInText):
-                pass
+                new_div = parsed_template.new_tag('div', attrs={'class': 'center'})
+                href = element.get_full_filename()
+                title = element.get_link_title()[0]
+                src = element.get_thumbnail_filename()
+                alt = element.get_image_alt()[0]
+                width = element.get_thumbnail_size()[0]
+                height = element.get_thumbnail_size()[1]
+                new_a = parsed_template.new_tag('a', attrs={'href': href, 'target': Strings.blank, 'title': title})
+                new_img = parsed_template.new_tag('img', attrs={'src': src, 'alt': alt, 'width': width,
+                                                                'height': height})
+                new_a.append(new_img)
+                new_div.append(new_a)
+                text_section.append(new_div)
             elif isinstance(element, Video):
-                pass
+                new_div = parsed_template.new_tag('div', attrs={'class': 'center'})
+                title = element.get_title()[0]
+                width = element.get_size()[0]
+                height = element.get_size()[1]
+                src = element.get_url()[0]
+                new_iframe = parsed_template.new_tag('iframe', attrs={'title': title, 'height': height,
+                                                                      'width': width, 'src': src,
+                                                                      'allowfullscreen': None})
+                new_div.append(new_iframe)
+                text_section.append(new_div)
             elif isinstance(element, Paragraph):
-                pass
+                new_p = parsed_template.new_tag('p')
+                new_p = self._convert_text_contents(new_p, element, parsed_template)
+                text_section.append(new_p)
             elif isinstance(element, UnorderedList):
-                pass
+                new_ul = parsed_template.new_tag('ul')
+                for par in element.get_paragraphs():
+                    new_li = parsed_template.new_tag('li')
+                    self._convert_text_contents(new_li, par, parsed_template)
+                    new_ul.append(new_li)
+                text_section.append(new_ul)
 
         # Fill aside images.
         print(parsed_template)
+
+    @staticmethod
+    def _convert_text_contents(container: Tag, par: Paragraph, soup: BeautifulSoup) -> Tag:
+        """
+        Converts a Paragraph instance into the contents of either <p> or <li>.
+        :param container: The containing parent either <p> or <li>
+        :param par: The Paragraph instance to convert.
+        :param soup: The parsed template for creating new tags.
+        :return: The filled container.
+        """
+        new_strong = None
+        new_span = None
+        for element in par.get_elements():
+            # List of instances of Text, Break and Link.
+            if isinstance(element, Text):
+                bold = element.is_bold()
+                color = element.get_color()
+                text = element.get_text()
+                if bold:
+                    new_strong = soup.new_tag('strong')
+                if color != Strings.color_black:
+                    new_span = soup.new_tag('span', attrs={'class': color})
+                # Four possibilities: Bold, normal, colored, bold colored.
+                if not bold and color == Strings.color_black:
+                    # Ordinary text content.
+                    container.append(text)
+                if bold and color == Strings.color_black:
+                    # Normal black bold text.
+                    new_strong.string = text
+                    container.append(new_strong)
+                if not bold and color != Strings.color_black:
+                    # Colored thin text.
+                    new_span.string = text
+                    container.append(new_span)
+                if bold and color != Strings.color_black:
+                    # Colored bold text.
+                    new_span.string = text
+                    new_strong.append(new_span)
+                    container.append(new_strong)
+            elif isinstance(element, Link):
+                href = element.get_url()
+                title = element.get_title()[0]
+                text = element.get_text()[0]
+                new_a = soup.new_tag('a', attrs={'href': href, 'title': title, 'target': Strings.blank})
+                new_a.string = text
+                container.append(new_a)
+            elif isinstance(element, Break):
+                container.append(soup.new_tag('br'))
+        return container
 
     # Getters ----------------------------------------------------------------------------------------------------------
     def get_date(self) -> (str, str):
