@@ -1,9 +1,12 @@
+from Constants.Constants import Strings
+
+
 class Text:
     """
     This class represents a piece of text which can be colored and bold.
     """
 
-    def __init__(self, text: str, bold: bool = False, color: str = 'black'):
+    def __init__(self, text: str, bold: bool = False, color: str = Strings.color_black):
         """
         Constructor for a new text piece.
         :param text: The text of this Text.

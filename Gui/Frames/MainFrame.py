@@ -706,6 +706,7 @@ class MainFrame(wx.Frame):
         :param confirm: Require user confirmation.
         :return: True if saved successfully.
         """
+        # todo Save as
         # Force save current document.
         if confirm:
             result = wx.MessageBox(Strings.label_menu_item_save_hint, Strings.toolbar_save, wx.YES_NO | wx.ICON_WARNING)

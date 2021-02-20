@@ -441,12 +441,10 @@ class WhitebearDocumentArticle(WhitebearDocument):
         :raise UnrecognizedFileException if template file can not be validated.
         :raise UnrecognizedFileException if html parse fails.
         """
-        # Parse an empty template and place the new parts in.
-        # Activate correct menu id="active"
-        # Put together a title + section + wb...
         # Put in nbsp
         # Minimize after conversion.
         # TODO test syntax error in the xsd schema.
+        # Validate the template in case it was changed on disk.
         result, errors = self._validate(Fetch.get_resource_path('article_template.html'), 'schema_article_template.xsd')
         if not result:
             raise UnrecognizedFileException(Strings.exception_html_syntax_error + '\n' + 'article_template.html ' +
@@ -455,16 +453,74 @@ class WhitebearDocumentArticle(WhitebearDocument):
         with open(Fetch.get_resource_path('article_template.html'), 'r') as document:
             contents = document.read()
             parsed_template = BeautifulSoup(contents, 'html5lib')
-        # Fill title
+
+        # Fill title.
         title: Tag = parsed_template.find(name='title')
         title.string = self._page_name + ' - ' + self._menu_section.get_section_name() + ' | ' + Strings.page_name
-        # Fill description
-        description = parsed_template.find_all(name='meta', attrs={'name': 'description', 'content': True})[0]
-        description['content'] = self._meta_description
-        # Fill keywords
-        keywords = parsed_template.find_all(name='meta', attrs={'name': 'keywords', 'content': True})[0]
-        keywords['content'] = self._meta_keywords
 
+        # Fill description.
+        description = parsed_template.find_all(name='meta', attrs={'name': 'description', 'content': True})
+        if len(description) == 1:
+            description[0]['content'] = self._meta_description
+        else:
+            raise WrongFormatException(Strings.exception_parse_multiple_descriptions)
+
+        # Fill keywords.
+        keywords = parsed_template.find_all(name='meta', attrs={'name': 'keywords', 'content': True})
+        if len(keywords) == 1:
+            keywords[0]['content'] = self._meta_keywords
+        else:
+            raise WrongFormatException(Strings.exception_parse_multiple_descriptions)
+
+        # Activate correct menu, generate menu items according to menus.
+        menu_container = parsed_template.find(name='nav')
+        for menu, instance in self._menus.items():
+            new_item = parsed_template.new_tag('a', attrs={'class': 'menu', 'href': instance.get_filename(),
+                                               'title': instance.get_page_name()[0]})
+            new_item.string = instance.get_page_name()[0]
+            if instance.get_filename() == self._menu_section.get_filename():
+                new_item['id'] = 'active'
+            menu_container.append(new_item)
+
+        # Fill main page title.
+        article = parsed_template.find(name='article', attrs={'class': 'textPage'})
+        article.h2.string = self._page_name
+
+        # Fill date.
+        parsed_template.find(name='p', attrs={'id': 'date'}).string = self._date
+
+        # Fill main image.
+        main_image_figure = parsed_template.find(name='figure', attrs={'id': 'articleImg'})
+        main_image_figure.a['href'] = self.get_article_image().get_full_filename()
+        main_image_figure.a['title'] = self.get_article_image().get_link_title()[0]
+        main_image_figure.img['src'] = self.get_article_image().get_thumbnail_filename()
+        main_image_figure.img['alt'] = self.get_article_image().get_image_alt()[0]
+        main_image_figure.figcaption.string = self.get_article_image().get_caption()[0]
+
+        # Fill main text.
+        text_section = parsed_template.find(name='section', attrs={'class': 'mainText'})
+        for element in self.get_main_text_elements():
+            if isinstance(element, Heading):
+                size = 'h3' if element.get_size() == Heading.SIZE_H3 else 'h4'
+                text = element.get_text().get_text()
+                color = element.get_text().get_color()
+                new_h = parsed_template.new_tag(size)
+                new_h.string = text
+                if color != Strings.color_black:
+                    # Black text is default, so ignore it.
+                    new_h['class'] = color
+                text_section.append(new_h)
+            elif isinstance(element, ImageInText):
+                pass
+            elif isinstance(element, Video):
+                pass
+            elif isinstance(element, Paragraph):
+                pass
+            elif isinstance(element, UnorderedList):
+                pass
+
+        # Fill aside images.
+        print(parsed_template)
 
     # Getters ----------------------------------------------------------------------------------------------------------
     def get_date(self) -> (str, str):
