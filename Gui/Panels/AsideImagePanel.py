@@ -85,6 +85,14 @@ class AsideImagePanel(wx.lib.scrolledpanel.ScrolledPanel):
         for child in self.GetChildren():
             child.Destroy()
 
+    def reset(self) -> None:
+        """
+        Clear the panel and show nothing.
+        :return: None
+        """
+        self._images.clear()
+        self.show_images()
+
     def show_images(self) -> None:
         """
         Show the list of images on the panel.

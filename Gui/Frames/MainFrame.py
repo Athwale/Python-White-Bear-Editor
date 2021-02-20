@@ -603,6 +603,7 @@ class MainFrame(wx.Frame):
         self._loading_dlg.Destroy()
         self._show_error_dialog(str(e))
         self._disable_editor(True)
+        self._side_photo_panel.reset()
         self._clear_editor()
 
     def on_css_parsed(self, css: WhitebearDocumentCSS) -> None:
@@ -784,7 +785,8 @@ class MainFrame(wx.Frame):
             selected_page = self._file_list.GetFirstSelected()
             if selected_page != wx.NOT_FOUND:
                 self._config_manager.store_last_open_document(self._file_list.GetItemText(selected_page, 0))
-            self._save(confirm=True)
+            if self._current_document_instance:
+                self._save(confirm=True)
         # If the built in close function is not called, destroy must be called explicitly, calling Close runs the close
         # handler.
         self.Destroy()

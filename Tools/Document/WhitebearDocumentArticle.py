@@ -2,6 +2,7 @@ import os
 import re
 from typing import List, Dict
 
+import htmlmin
 import wx
 from bs4 import BeautifulSoup
 from bs4.element import NavigableString, Tag
@@ -434,10 +435,10 @@ class WhitebearDocumentArticle(WhitebearDocument):
             errors.append(error.message)
         return is_valid, errors
 
-    def convert_to_html(self) -> None:
+    def convert_to_html(self) -> str:
         """
         Converts this document into a html white bear article page.
-        :return: TODO Something probably the html document to save.
+        :return: The converted html in a string.
         :raise UnrecognizedFileException if template file can not be validated.
         :raise UnrecognizedFileException if html parse fails.
         """
@@ -548,7 +549,34 @@ class WhitebearDocumentArticle(WhitebearDocument):
                 text_section.append(new_ul)
 
         # Fill aside images.
-        print(parsed_template)
+        aside = parsed_template.find(name='aside')
+        for img in self._aside_images:
+            new_figure = parsed_template.new_tag('figure')
+            new_figcaption = parsed_template.new_tag('figcaption')
+            href = img.get_full_filename()
+            title = img.get_link_title()[0]
+            src = img.get_thumbnail_filename()
+            alt = img.get_image_alt()[0]
+            text = img.get_caption()[0]
+            new_figcaption.string = text
+            new_a = parsed_template.new_tag('a', attrs={'href': href, 'target': Strings.blank, 'title': title})
+            # Width and height are different from the thumbnail here because the image expands in the page.
+            new_img = parsed_template.new_tag('img', attrs={'src': src, 'alt': alt,
+                                                            'width': Numbers.aside_thumbnail_width,
+                                                            'height': Numbers.aside_thumbnail_height,
+                                                            'class': 'imgAside'})
+            new_a.append(new_img)
+            new_figure.append(new_a)
+            new_figure.append(new_figcaption)
+            aside.append(new_figure)
+
+        # Minimize output.
+        output = str(parsed_template)
+        # Use &nbsp in front of all single letter s, k, v, z.
+        for word in Strings.nbsp_words:
+            output = output.replace((' ' + word + ' '), (' ' + word + '&nbsp'))
+
+        return output
 
     @staticmethod
     def _convert_text_contents(container: Tag, par: Paragraph, soup: BeautifulSoup) -> Tag:
@@ -589,7 +617,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
                     new_strong.append(new_span)
                     container.append(new_strong)
             elif isinstance(element, Link):
-                href = element.get_url()
+                href = element.get_url()[0]
                 title = element.get_title()[0]
                 text = element.get_text()[0]
                 new_a = soup.new_tag('a', attrs={'href': href, 'title': title, 'target': Strings.blank})

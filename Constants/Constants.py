@@ -1,4 +1,5 @@
 import os.path
+from typing import List
 
 from wx import Colour
 
@@ -75,6 +76,8 @@ class Numbers:
     article_image_title_max: int = 512
     article_image_alt_min: int = 5
     article_image_alt_max: int = 125
+    aside_thumbnail_width: int = 211
+    aside_thumbnail_height: int = 158
     video_width: int = 534
     video_height: int = 405
     original_image_max_width: int = 2000
@@ -89,6 +92,7 @@ class Strings:
     cz_months = '|'.join(
         ['Ledna', 'Února', 'Března', 'Dubna', 'Května', 'Června', 'Července', 'Srpna', 'Září', 'Října', 'Listopadu',
          'Prosince'])
+    nbsp_words: List[str] = ['s', 'k', 'v', 'z']
     extension_jpg: str = '.jpg'
     extension_png: str = '.png'
     image_extensions: str = 'JPG files (*' + extension_jpg + ')|*' + extension_jpg + \
