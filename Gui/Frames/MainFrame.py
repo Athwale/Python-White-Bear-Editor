@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 from typing import Dict, List
 
 import wx
@@ -16,6 +17,7 @@ from Gui.Dialogs.LoadingDialog import LoadingDialog
 from Gui.Panels.AsideImagePanel import AsideImagePanel
 from Gui.Panels.CustomRichText import CustomRichText
 from Resources.Fetch import Fetch
+from Threads.ConvertorThread import ConvertorThread
 from Threads.FileListThread import FileListThread
 from Tools.ConfigManager import ConfigManager
 from Tools.Document.AsideImage import AsideImage
@@ -215,21 +217,28 @@ class MainFrame(wx.Frame):
         """
         self.tool_bar: wx.ToolBar = self.CreateToolBar(style=wx.TB_DEFAULT_STYLE)
         # Add toolbar tools
-        self._new_file_tool = self.tool_bar.AddTool(self._add_tool_id(), Strings.toolbar_new_file,
-                                                    self._scale_icon('new-file.png'),
-                                                    Strings.toolbar_new_file)
-        self._save_tool = self.tool_bar.AddTool(self._add_tool_id(), Strings.toolbar_save,
-                                                self._scale_icon('save.png'),
-                                                Strings.toolbar_save)
-        self.insert_img_tool = self.tool_bar.AddTool(MainFrame.IMAGE_TOOL_ID, Strings.toolbar_insert_img,
-                                                     self._scale_icon('insert-image.png'),
-                                                     Strings.toolbar_insert_img)
-        self.insert_video_tool = self.tool_bar.AddTool(MainFrame.VIDEO_TOOL_ID, Strings.toolbar_insert_video,
-                                                       self._scale_icon('insert-video.png'),
-                                                       Strings.toolbar_insert_video)
-        self.bold_tool = self.tool_bar.AddTool(self._add_tool_id(), Strings.toolbar_bold,
-                                               self._scale_icon('bold.png'),
-                                               Strings.toolbar_bold)
+        self._new_file_tool: wx.ToolBarToolBase = self.tool_bar.AddTool(self._add_tool_id(), Strings.toolbar_new_file,
+                                                                        self._scale_icon('new-file.png'),
+                                                                        Strings.toolbar_new_file)
+        self._new_file_tool.SetLongHelp(Strings.toolbar_new_file)
+        self._save_tool: wx.ToolBarToolBase = self.tool_bar.AddTool(self._add_tool_id(), Strings.toolbar_save,
+                                                                    self._scale_icon('save.png'),
+                                                                    Strings.toolbar_save)
+        self._save_tool.SetLongHelp(Strings.toolbar_save)
+        self.insert_img_tool: wx.ToolBarToolBase = self.tool_bar.AddTool(MainFrame.IMAGE_TOOL_ID,
+                                                                         Strings.toolbar_insert_img,
+                                                                         self._scale_icon('insert-image.png'),
+                                                                         Strings.toolbar_insert_img)
+        self.insert_img_tool.SetLongHelp(Strings.toolbar_insert_img)
+        self.insert_video_tool: wx.ToolBarToolBase = self.tool_bar.AddTool(MainFrame.VIDEO_TOOL_ID,
+                                                                           Strings.toolbar_insert_video,
+                                                                           self._scale_icon('insert-video.png'),
+                                                                           Strings.toolbar_insert_video)
+        self.insert_video_tool.SetLongHelp(Strings.toolbar_insert_video)
+        self.bold_tool: wx.ToolBarToolBase = self.tool_bar.AddTool(self._add_tool_id(), Strings.toolbar_bold,
+                                                                   self._scale_icon('bold.png'),
+                                                                   Strings.toolbar_bold)
+        self.bold_tool.SetLongHelp(Strings.toolbar_bold)
         self.Bind(wx.EVT_MENU, self._forward_event, self.insert_img_tool)
         self.Bind(wx.EVT_MENU, self._forward_event, self.insert_video_tool)
         self.Bind(wx.EVT_MENU, self._forward_event, self.bold_tool)
@@ -265,7 +274,8 @@ class MainFrame(wx.Frame):
                 # Do not recreate tools on working directory reload, only create potential new color tools.
                 return
         bmp = self._make_bitmap(color)
-        tool = toolbar.AddTool(self._add_tool_id(), Strings.toolbar_color, bmp, name)
+        tool: wx.ToolBarToolBase = toolbar.AddTool(self._add_tool_id(), Strings.toolbar_color, bmp, name)
+        tool.SetLongHelp(Strings.toolbar_color + ': ' + name)
         self.Bind(wx.EVT_MENU, self._change_color, tool)
 
     @staticmethod
@@ -701,30 +711,42 @@ class MainFrame(wx.Frame):
         else:
             self._main_text_area.BeginTextColour(color)
 
-    def _save(self, confirm=False) -> bool:
+    def _save(self, confirm=False) -> None:
         """
         Save current document onto disk.
         :param confirm: Require user confirmation.
-        :return: True if saved successfully.
+        :return: None
         """
         # todo Save as
         # Force save current document.
         if confirm:
             result = wx.MessageBox(Strings.label_menu_item_save_hint, Strings.toolbar_save, wx.YES_NO | wx.ICON_WARNING)
             if result == wx.NO:
-                return False
+                return
+        # Editor will be enabled when the thread finishes.
         self._disable_editor(True)
         self._main_text_area.convert_document()
-        # We know here that the document is modified because we are saving it.
-        self._current_document_instance.set_status_color(Numbers.BLUE_COLOR)
-        self._current_document_instance.seo_test_self()
+        convertor_thread = ConvertorThread(self, self._current_document_instance)
+        convertor_thread.start()
+
+    def on_conversion_done(self, article_html: str, menu_html: str) -> None:
+        """
+        Called when ConvertorThread finishes converting documents to html.
+        :param article_html: The html code of the article to save.
+        :param menu_html: The html code of the corresponding menu to save.
+        :return: None
+        """
+        last_save = datetime.now().strftime("%H:%M:%S")
         self._update_file_color(self._file_list.FindItem(-1, self._current_document_instance.get_filename()))
-        # TODO convert document into html. Do this in a separate thread.
-        self._current_document_instance.convert_to_html()
-        self._current_document_instance.get_menu_section().convert_to_html()
-        # TODO convert corresponding menu page.
+        self._set_status_text(Strings.status_saved + ': ' + last_save, 3)
         self._disable_editor(False)
-        return True
+
+    def on_conversion_fail(self, e: Exception) -> None:
+        """
+        # TODO this
+        :return: None
+        """
+        print(e)
 
     # noinspection PyUnusedLocal
     def _main_image_handler(self, event: wx.CommandEvent) -> None:

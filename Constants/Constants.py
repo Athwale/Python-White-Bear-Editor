@@ -278,6 +278,7 @@ class Strings:
     status_ok: str = 'Ok'
     status_none: str = 'None'
     status_found: str = 'Found'
+    status_saved: str = 'Saved'
 
     style_paragraph: str = 'Paragraph'
     style_heading_3: str = 'Title 3'
@@ -293,7 +294,7 @@ class Strings:
     toolbar_insert_video: str = 'Insert video'
     toolbar_insert_link: str = 'Insert link'
     toolbar_save: str = 'Save'
-    toolbar_color: str = 'Color text'
+    toolbar_color: str = 'Change color'
 
     button_close: str = 'Close'
     button_cancel: str = 'Cancel'
