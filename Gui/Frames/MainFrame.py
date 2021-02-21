@@ -22,7 +22,6 @@ from Threads.FileListThread import FileListThread
 from Tools.ConfigManager import ConfigManager
 from Tools.Document.AsideImage import AsideImage
 from Tools.Document.MenuItem import MenuItem
-from Tools.Document.WhitebearDocument import WhitebearDocument
 from Tools.Document.WhitebearDocumentArticle import WhitebearDocumentArticle
 from Tools.Document.WhitebearDocumentCSS import WhitebearDocumentCSS
 from Tools.Tools import Tools
@@ -1126,10 +1125,11 @@ class MainFrame(wx.Frame):
         :param index: The index of the file in the list that should be updated, -1 if current file.
         :return: None
         """
-        self._current_document_instance.is_modified()
-        new_color = self._current_document_instance.get_status_color()
         if index == -1:
             index = self._file_list.GetFirstSelected()
+        doc = self._document_dictionary[self._file_list.GetItemText(index)]
+        doc.is_modified()
+        new_color = doc.get_status_color()
         self._file_list.SetItemBackgroundColour(index, new_color)
 
     def _update_menu_sizer(self, menu_item: MenuItem) -> None:
