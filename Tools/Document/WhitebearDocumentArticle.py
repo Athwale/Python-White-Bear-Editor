@@ -2,7 +2,6 @@ import os
 import re
 from typing import List, Dict
 
-import htmlmin
 import wx
 from bs4 import BeautifulSoup
 from bs4.element import NavigableString, Tag
@@ -412,14 +411,16 @@ class WhitebearDocumentArticle(WhitebearDocument):
         :return: Tuple of boolean validation result and optional list of error messages.
         :raise UnrecognizedFileException if html parse fails
         """
-        self._valid, errors = self._validate(self.get_path(), 'schema_article.xsd')
+        with open(self.get_path(), 'r') as file:
+            html_string = file.read()
+        self._valid, errors = self._validate(html_string, 'schema_article.xsd')
         return self._valid, errors
 
     @staticmethod
-    def _validate(path: str, schema: str) -> (bool, List[str]):
+    def _validate(html_string: str, schema: str) -> (bool, List[str]):
         """
         Validate a document against an xml schema.
-        :param path: Path to the document.
+        :param html_string: Html document as string.
         :param schema: The name of the schema to use.
         :return: Tuple of boolean validation result and optional list of error messages.
         :raise UnrecognizedFileException if html parse fails.
@@ -427,7 +428,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
         errors = []
         try:
             xmlschema = etree.XMLSchema(etree.parse(Fetch.get_resource_path(schema)))
-            xml_doc = html.parse(path)
+            xml_doc = html.fromstring(html_string)
             is_valid = xmlschema.validate(xml_doc)
         except XMLSyntaxError as e:
             raise UnrecognizedFileException(Strings.exception_html_syntax_error + '\n' + str(e))
@@ -441,13 +442,16 @@ class WhitebearDocumentArticle(WhitebearDocument):
         :return: The converted html in a string.
         :raise UnrecognizedFileException if template file can not be validated.
         :raise UnrecognizedFileException if html parse fails.
+        :raise UnrecognizedFileException if generated html fails validation.
         """
         # Put in nbsp
         # Minimize after conversion.
         # TODO test syntax error in the xsd schema.
         # Validate the template in case it was changed on disk.
-        result, errors = self._validate(Fetch.get_resource_path('article_template.html'), 'schema_article_template.xsd')
-        if not result:
+        with open(Fetch.get_resource_path('article_template.html'), 'r') as template:
+            template_string = template.read()
+        is_valid, errors = self._validate(template_string, 'schema_article_template.xsd')
+        if not is_valid:
             raise UnrecognizedFileException(Strings.exception_html_syntax_error + '\n' + 'article_template.html ' +
                                             str(errors))
 
@@ -552,7 +556,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
         aside = parsed_template.find(name='aside')
         for img in self._aside_images:
             new_figure = parsed_template.new_tag('figure')
-            new_figcaption = parsed_template.new_tag('figcaption')
+            new_figcaption = parsed_template.new_tag('figcaption', attrs={'class': 'photoCaption'})
             href = img.get_full_filename()
             title = img.get_link_title()[0]
             src = img.get_thumbnail_filename()
@@ -575,6 +579,10 @@ class WhitebearDocumentArticle(WhitebearDocument):
         # Use &nbsp in front of all single letter s, k, v, z.
         for word in Strings.nbsp_words:
             output = output.replace((' ' + word + ' '), (' ' + word + '&nbsp'))
+
+        is_valid, errors = self._validate(output, 'schema_article.xsd')
+        if not is_valid:
+            raise UnrecognizedFileException(Strings.exception_bug + '\n' + self.get_filename() + ' ' + str(errors))
 
         return output
 
