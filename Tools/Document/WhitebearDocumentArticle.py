@@ -5,9 +5,6 @@ from typing import List, Dict
 import wx
 from bs4 import BeautifulSoup
 from bs4.element import NavigableString, Tag
-from lxml import etree
-from lxml import html
-from lxml.etree import XMLSyntaxError
 
 from Constants.Constants import Numbers
 from Constants.Constants import Strings
@@ -26,6 +23,7 @@ from Tools.Document.MenuItem import MenuItem
 from Tools.Document.WhitebearDocument import WhitebearDocument
 from Tools.Document.WhitebearDocumentCSS import WhitebearDocumentCSS
 from Tools.Document.WhitebearDocumentMenu import WhitebearDocumentMenu
+from Tools.Tools import Tools
 
 
 class WhitebearDocumentArticle(WhitebearDocument):
@@ -413,28 +411,8 @@ class WhitebearDocumentArticle(WhitebearDocument):
         """
         with open(self.get_path(), 'r') as file:
             html_string = file.read()
-        self._valid, errors = self._validate(html_string, 'schema_article.xsd')
+        self._valid, errors = Tools.validate(html_string, 'schema_article.xsd')
         return self._valid, errors
-
-    @staticmethod
-    def _validate(html_string: str, schema: str) -> (bool, List[str]):
-        """
-        Validate a document against an xml schema.
-        :param html_string: Html document as string.
-        :param schema: The name of the schema to use.
-        :return: Tuple of boolean validation result and optional list of error messages.
-        :raise UnrecognizedFileException if html parse fails.
-        """
-        errors = []
-        try:
-            xmlschema = etree.XMLSchema(etree.parse(Fetch.get_resource_path(schema)))
-            xml_doc = html.fromstring(html_string)
-            is_valid = xmlschema.validate(xml_doc)
-        except XMLSyntaxError as e:
-            raise UnrecognizedFileException(Strings.exception_html_syntax_error + '\n' + str(e))
-        for error in xmlschema.error_log:
-            errors.append(error.message)
-        return is_valid, errors
 
     def convert_to_html(self) -> str:
         """
@@ -444,20 +422,15 @@ class WhitebearDocumentArticle(WhitebearDocument):
         :raise UnrecognizedFileException if html parse fails.
         :raise UnrecognizedFileException if generated html fails validation.
         """
-        # Put in nbsp
-        # Minimize after conversion.
         # TODO test syntax error in the xsd schema.
-        # Validate the template in case it was changed on disk.
         with open(Fetch.get_resource_path('article_template.html'), 'r') as template:
             template_string = template.read()
-        is_valid, errors = self._validate(template_string, 'schema_article_template.xsd')
+        is_valid, errors = Tools.validate(template_string, 'schema_article_template.xsd')
         if not is_valid:
             raise UnrecognizedFileException(Strings.exception_html_syntax_error + '\n' + 'article_template.html ' +
                                             str(errors))
 
-        with open(Fetch.get_resource_path('article_template.html'), 'r') as document:
-            contents = document.read()
-            parsed_template = BeautifulSoup(contents, 'html5lib')
+        parsed_template = BeautifulSoup(template_string, 'html5lib')
 
         # Fill title.
         title: Tag = parsed_template.find(name='title')
@@ -580,7 +553,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
         for word in Strings.nbsp_words:
             output = output.replace((' ' + word + ' '), (' ' + word + '&nbsp'))
 
-        is_valid, errors = self._validate(output, 'schema_article.xsd')
+        is_valid, errors = Tools.validate(output, 'schema_article.xsd')
         if not is_valid:
             raise UnrecognizedFileException(Strings.exception_bug + '\n' + self.get_filename() + ' ' + str(errors))
 

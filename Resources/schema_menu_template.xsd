@@ -1,0 +1,51 @@
+<?xml version="1.0"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+
+    <xs:include schemaLocation="schema_common_definitions.xsd"/>
+
+    <xs:complexType name="menuArticleType">
+        <xs:choice maxOccurs="unbounded">
+            <xs:element name="h2" type="xs:string"/>
+            <xs:element name="div">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="nav">
+                            <xs:complexType>
+                                <xs:attribute name="class" type="xs:string" fixed="sixItems" use="required"/>
+                            </xs:complexType>
+                        </xs:element>
+                    </xs:sequence>
+                    <xs:attribute name="class" type="xs:string" fixed="center" use="required"/>
+                </xs:complexType>
+            </xs:element>
+        </xs:choice>
+        <xs:attribute name="class" type="xs:string" fixed="menuPage" use="required"/>
+    </xs:complexType>
+
+    <xs:complexType name="menuBodyType">
+        <xs:sequence>
+            <xs:element name="a" type="accessibilityLinkType"/>
+            <xs:element name="header" type="headerType"/>
+            <xs:element name="nav" type="navType"/>
+            <xs:element name="main">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="article" type="menuArticleType"/>
+                    </xs:sequence>
+                    <xs:attribute name="id" type="xs:string" fixed="top" use="required"/>
+                </xs:complexType>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:element name="html">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="head" type="headType"/>
+                <xs:element name="body" type="menuBodyType"/>
+            </xs:sequence>
+            <xs:attribute name="lang" type="xs:string" fixed="cs" use="required"/>
+        </xs:complexType>
+    </xs:element>
+
+</xs:schema>

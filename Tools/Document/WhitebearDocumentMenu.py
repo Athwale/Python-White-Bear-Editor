@@ -1,6 +1,7 @@
 import os
 from typing import List
 
+from bs4 import BeautifulSoup
 from lxml import etree
 from lxml import html
 from lxml.etree import XMLSyntaxError
@@ -10,6 +11,7 @@ from Exceptions.UnrecognizedFileException import UnrecognizedFileException
 from Resources.Fetch import Fetch
 from Tools.Document.MenuItem import MenuItem
 from Tools.Document.WhitebearDocument import WhitebearDocument
+from Tools.Tools import Tools
 
 
 class WhitebearDocumentMenu(WhitebearDocument):
@@ -75,20 +77,32 @@ class WhitebearDocumentMenu(WhitebearDocument):
 
     def validate_self(self) -> (bool, List[str]):
         """
-        Validate this document against the menu xml schema.
+        Validate this document against the article xml schema.
         :return: Tuple of boolean validation result and optional list of error messages.
         :raise UnrecognizedFileException if html parse fails
         """
-        errors = []
-        try:
-            xmlschema = etree.XMLSchema(etree.parse(Fetch.get_resource_path('schema_menu.xsd')))
-            xml_doc = html.parse(self.get_path())
-            self._valid = xmlschema.validate(xml_doc)
-        except XMLSyntaxError as e:
-            raise UnrecognizedFileException(Strings.exception_html_syntax_error + '\n' + str(e))
-        for error in xmlschema.error_log:
-            errors.append(error.message)
+        with open(self.get_path(), 'r') as file:
+            html_string = file.read()
+        self._valid, errors = Tools.validate(html_string, 'schema_menu.xsd')
         return self._valid, errors
+
+    def convert_to_html(self) -> str:
+        """
+        Converts this document into a html white bear menu page.
+        :return: The converted html in a string.
+        :raise UnrecognizedFileException if template file can not be validated.
+        :raise UnrecognizedFileException if html parse fails.
+        :raise UnrecognizedFileException if generated html fails validation.
+        """
+        with open(Fetch.get_resource_path('menu_template.html'), 'r') as template:
+            template_string = template.read()
+        is_valid, errors = Tools.validate(template_string, 'schema_menu_template.xsd')
+        if not is_valid:
+            raise UnrecognizedFileException(Strings.exception_html_syntax_error + '\n' + 'menu_template.html ' +
+                                            str(errors))
+
+        parsed_template = BeautifulSoup(template_string, 'html5lib')
+        print('c')
 
     # Getters ----------------------------------------------------------------------------------------------------------
     def get_menu_items(self) -> List[MenuItem]:

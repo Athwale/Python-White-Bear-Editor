@@ -721,6 +721,7 @@ class MainFrame(wx.Frame):
         self._update_file_color(self._file_list.FindItem(-1, self._current_document_instance.get_filename()))
         # TODO convert document into html. Do this in a separate thread.
         self._current_document_instance.convert_to_html()
+        self._current_document_instance.get_menu_section().convert_to_html()
         # TODO convert corresponding menu page.
         self._disable_editor(False)
         return True
