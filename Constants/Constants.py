@@ -1,5 +1,4 @@
 import os.path
-from typing import List
 
 from wx import Colour
 
@@ -95,9 +94,12 @@ class Strings:
     menu_title_stump: str = 'Menu'
     extension_jpg: str = '.jpg'
     extension_png: str = '.png'
+    extension_html: str = '.html'
     image_extensions: str = 'JPG files (*' + extension_jpg + ')|*' + extension_jpg + \
                             '|PNG files (*' + extension_png + ')|*' + extension_jpg + ''
     image_jpg_only: str = 'JPG files (*' + extension_jpg + ')|*' + extension_jpg
+    html_wildcard: str = 'HTML files (*' + extension_html + ')|*' + extension_html
+    default_file: str = 'untitled'
     home_directory: str = os.path.expanduser('~')
     editor_config_file: str = os.path.join(home_directory, '.whitebearEditor.conf')
     editor_output_debug_file: str = os.path.join(home_directory, 'whitebearEditor.log')
@@ -109,6 +111,9 @@ class Strings:
     folder_logos: str = 'logos'
     folder_originals: str = 'original'
     folder_thumbnails: str = 'thumbnails'
+    article: str = 'article'
+    menu: str = 'menu'
+    index: str = 'index'
 
     text_about_contents: str = '<p>Unfinished whitebear web editor.<br>' \
                                '<i>https://github.com/Athwale/Python-White-Bear-Editor</i><br>' \
@@ -166,6 +171,7 @@ class Strings:
     warning_wrong_logo_size: str = 'Menu image must be ' + str(Numbers.menu_logo_image_size) + 'x' + \
                                    str(Numbers.menu_logo_image_size) + 'px'
     warning_not_square: str = 'Menu image must be square'
+    warning_can_not_save: str = 'Can not save to disk.'
 
     label_menu_file: str = 'File'
     label_menu_item_new: str = 'New document...\tctrl+n'
@@ -178,6 +184,8 @@ class Strings:
     label_menu_item_reload_hint: str = 'Parse file again from disk'
     label_menu_item_upload: str = 'Upload all changes...'
     label_menu_item_upload_hint: str = 'Upload all modified documents'
+    label_menu_item_save_as: str = 'Save as...'
+    label_menu_item_save_as_hint: str = 'Save as new file'
 
     label_menu_item_quit: str = 'Quit\tctrl+q'
     label_menu_item_quit_hint: str = 'Quit editor'
@@ -221,6 +229,7 @@ class Strings:
     label_dialog_edit_menu_item: str = 'Edit menu item'
     label_dialog_add_image: str = 'Add image'
     label_dialog_add_logo: str = 'Add menu logo'
+    label_dialog_save_file: str = 'Save file'
 
     label_article_menu_logo: str = 'Menu logo'
     label_article_menu_logo_name_placeholder: str = 'Menu item name'

@@ -12,16 +12,20 @@ class ConvertorThread(threading.Thread):
     Generates html contents from the internal document representation.
     """
 
-    def __init__(self, parent, doc: WhitebearDocumentArticle):
+    def __init__(self, parent, doc: WhitebearDocumentArticle, quit_after_done: bool, save_as: bool):
         """
         Filelist thread constructor. This thread parses a supposed WhiteBear web directory and passes a list of
         websites back into the GUI.
-        @param parent: The gui object that should receive the result.
-        @param doc: The document to convert.
+        :param parent: The gui object that should receive the result.
+        :param doc: The document to convert.
+        :param quit_after_done: Instructs the callback method to close the editor after save.
+        :param save_as: Instructs the callback method to open a file dialog for the files.
         """
         threading.Thread.__init__(self)
         self._parent = parent
         self._doc = doc
+        self._quit_after_done = quit_after_done
+        self._save_as = save_as
 
     def run(self):
         """
@@ -34,8 +38,8 @@ class ConvertorThread(threading.Thread):
         # upload.
         self._doc.seo_test_self()
         try:
-            article: str = self._doc.convert_to_html()
-            menu: str = self._doc.get_menu_section().convert_to_html()
-            wx.CallAfter(self._parent.on_conversion_done, article, menu)
+            self._doc.convert_to_html()
+            self._doc.get_menu_section().convert_to_html()
+            wx.CallAfter(self._parent.on_conversion_done, self._doc, self._quit_after_done, self._save_as)
         except UnrecognizedFileException as e:
             wx.CallAfter(self._parent.on_conversion_fail, e)

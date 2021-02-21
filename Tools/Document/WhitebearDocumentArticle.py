@@ -64,6 +64,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
         self._main_text = None
 
         self._article_image = None
+        self._html = None
 
     def parse_self(self) -> None:
         """
@@ -414,10 +415,10 @@ class WhitebearDocumentArticle(WhitebearDocument):
         self._valid, errors = Tools.validate(html_string, 'schema_article.xsd')
         return self._valid, errors
 
-    def convert_to_html(self) -> str:
+    def convert_to_html(self) -> None:
         """
         Converts this document into a html white bear article page.
-        :return: The converted html in a string.
+        :return: None
         :raise UnrecognizedFileException if template file can not be validated.
         :raise UnrecognizedFileException if html parse fails.
         :raise UnrecognizedFileException if generated html fails validation.
@@ -550,9 +551,9 @@ class WhitebearDocumentArticle(WhitebearDocument):
         output = str(parsed_template)
         is_valid, errors = Tools.validate(output, 'schema_article.xsd')
         if not is_valid:
-            raise UnrecognizedFileException(Strings.exception_bug + '\n' + self.get_filename() + ' ' + str(errors))
+            raise UnrecognizedFileException(Strings.exception_bug + '\n' + self.get_filename() + ' \n' + str(errors))
 
-        return output
+        self._html = output
 
     @staticmethod
     def _convert_text_contents(container: Tag, par: Paragraph, soup: BeautifulSoup) -> Tag:
@@ -604,6 +605,13 @@ class WhitebearDocumentArticle(WhitebearDocument):
         return container
 
     # Getters ----------------------------------------------------------------------------------------------------------
+    def get_html_to_save(self) -> str:
+        """
+        Returns the last converted string HTML code of this article. Run convert_to_html() before calling this method.
+        :return: String HTML of the article or none if the document was not converted yet.
+        """
+        return self._html
+
     def get_date(self) -> (str, str):
         """
         Return the article creation date and error to display in gui if there is one.

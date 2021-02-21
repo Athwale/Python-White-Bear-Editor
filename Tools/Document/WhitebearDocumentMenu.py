@@ -31,6 +31,7 @@ class WhitebearDocumentMenu(WhitebearDocument):
         super().__init__(name, path)
         self._menu_items = []
         self._menus = menus
+        self._html = None
         self.parse_self()
 
     def parse_self(self) -> None:
@@ -87,10 +88,10 @@ class WhitebearDocumentMenu(WhitebearDocument):
         self._valid, errors = Tools.validate(html_string, 'schema_menu.xsd')
         return self._valid, errors
 
-    def convert_to_html(self) -> str:
+    def convert_to_html(self) -> None:
         """
         Converts this document into a html white bear menu page.
-        :return: The converted html in a string.
+        :return: None
         :raise UnrecognizedFileException if template file can not be validated.
         :raise UnrecognizedFileException if html parse fails.
         :raise UnrecognizedFileException if generated html fails validation.
@@ -161,11 +162,18 @@ class WhitebearDocumentMenu(WhitebearDocument):
         output = str(parsed_template)
         is_valid, errors = Tools.validate(output, 'schema_menu.xsd')
         if not is_valid:
-            raise UnrecognizedFileException(Strings.exception_bug + '\n' + self.get_filename() + ' ' + str(errors))
+            raise UnrecognizedFileException(Strings.exception_bug + '\n' + self.get_filename() + ' \n' + str(errors))
 
-        return output
+        self._html = output
 
     # Getters ----------------------------------------------------------------------------------------------------------
+    def get_html_to_save(self) -> str:
+        """
+        Returns the last converted string HTML code of this article. Run convert_to_html() before calling this method.
+        :return: String HTML of the article or none if the document was not converted yet.
+        """
+        return self._html
+
     def get_menu_items(self) -> List[MenuItem]:
         """
         Return a list of MenuItem of all menu items of this menu.

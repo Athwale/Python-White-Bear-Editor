@@ -18,8 +18,8 @@ class FileListThread(threading.Thread):
         """
         Filelist thread constructor. This thread parses a supposed WhiteBear web directory and passes a list of
         websites back into the GUI.
-        @param parent: The gui object that should receive the result.
-        @param path: The path to whitebear web directory on disk.
+        :param parent: The gui object that should receive the result.
+        :param path: The path to whitebear web directory on disk.
         """
         threading.Thread.__init__(self)
         self._parent = parent

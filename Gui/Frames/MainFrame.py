@@ -22,6 +22,7 @@ from Threads.FileListThread import FileListThread
 from Tools.ConfigManager import ConfigManager
 from Tools.Document.AsideImage import AsideImage
 from Tools.Document.MenuItem import MenuItem
+from Tools.Document.WhitebearDocument import WhitebearDocument
 from Tools.Document.WhitebearDocumentArticle import WhitebearDocumentArticle
 from Tools.Document.WhitebearDocumentCSS import WhitebearDocumentCSS
 from Tools.Tools import Tools
@@ -116,6 +117,10 @@ class MainFrame(wx.Frame):
                                                 Strings.label_menu_item_save_hint)
         self._disableable_menu_items.append(self._file_menu_item_save)
 
+        self._file_menu_item_save_as = wx.MenuItem(self._file_menu, wx.ID_SAVEAS, Strings.label_menu_item_save_as,
+                                                   Strings.label_menu_item_save_as_hint)
+        self._disableable_menu_items.append(self._file_menu_item_save_as)
+
         self._file_menu_item_reload = wx.MenuItem(self._file_menu, wx.ID_REFRESH, Strings.label_menu_item_reload,
                                                   Strings.label_menu_item_reload_hint)
         self._disableable_menu_items.append(self._file_menu_item_reload)
@@ -131,6 +136,7 @@ class MainFrame(wx.Frame):
         self._file_menu.Append(self._file_menu_item_new)
         self._file_menu.Append(self._file_menu_item_open)
         self._file_menu.Append(self._file_menu_item_save)
+        self._file_menu.Append(self._file_menu_item_save_as)
         self._file_menu.AppendSeparator()
         self._file_menu.Append(self._file_menu_item_reload)
         self._file_menu.Append(self._file_menu_item_upload)
@@ -497,6 +503,8 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self._add_image_handler, self._add_menu_item_add_image)
         self.Bind(wx.EVT_MENU, self._insert_aside_image_handler, self._add_menu_item_side_image)
         self.Bind(wx.EVT_MENU, self._add_menu_logo_handler, self._add_menu_item_add_logo)
+        self.Bind(wx.EVT_MENU, self._save_document_handler, self._file_menu_item_save)
+        self.Bind(wx.EVT_MENU, self._save_document_handler, self._file_menu_item_save_as)
 
         # Bind other controls clicks
         self.Bind(wx.EVT_LIST_ITEM_SELECTED, self._list_item_click_handler, self._file_list)
@@ -553,6 +561,8 @@ class MainFrame(wx.Frame):
         """
         self.Enable()
         if state:
+            # Disabling the editor (disable editor True)
+            self._main_text_area.SetBackgroundColour(wx.LIGHT_GREY)
             if not leave_files:
                 self._split_screen.Disable()
                 self._file_list.SetBackgroundColour(wx.LIGHT_GREY)
@@ -564,6 +574,7 @@ class MainFrame(wx.Frame):
                 self._file_list.SetBackgroundColour(wx.WHITE)
                 self._file_list.SetForegroundColour(wx.BLACK)
         else:
+            self._main_text_area.SetBackgroundColour(wx.WHITE)
             self._split_screen.Enable()
             self._left_panel.Enable()
             self._right_panel.Enable()
@@ -711,42 +722,89 @@ class MainFrame(wx.Frame):
         else:
             self._main_text_area.BeginTextColour(color)
 
-    def _save(self, confirm=False) -> None:
+    def _save(self, confirm: bool = False, quit_editor: bool = False, save_as: bool = False) -> bool:
         """
         Save current document onto disk.
         :param confirm: Require user confirmation.
-        :return: None
+        :param quit_editor: If true, quit the editor on successful save.
+        :return: False if save canceled.
         """
-        # todo Save as
         # Force save current document.
         if confirm:
             result = wx.MessageBox(Strings.label_menu_item_save_hint, Strings.toolbar_save, wx.YES_NO | wx.ICON_WARNING)
             if result == wx.NO:
-                return
+                return False
         # Editor will be enabled when the thread finishes.
         self._disable_editor(True)
         self._main_text_area.convert_document()
-        convertor_thread = ConvertorThread(self, self._current_document_instance)
+        convertor_thread = ConvertorThread(self, self._current_document_instance, quit_editor, save_as)
         convertor_thread.start()
+        return True
 
-    def on_conversion_done(self, article_html: str, menu_html: str) -> None:
+    def on_conversion_done(self, doc, quit_editor: bool, save_as: bool) -> None:
         """
         Called when ConvertorThread finishes converting documents to html.
-        :param article_html: The html code of the article to save.
-        :param menu_html: The html code of the corresponding menu to save.
+        :param doc: The document that was processed by the thread.
+        :param quit_editor: If true, close the window after save.
+        :param save_as: Open file dialog for the article and menu, otherwise save into the current filename.
         :return: None
         """
         last_save = datetime.now().strftime("%H:%M:%S")
-        self._update_file_color(self._file_list.FindItem(-1, self._current_document_instance.get_filename()))
-        self._set_status_text(Strings.status_saved + ': ' + last_save, 3)
+        self._update_file_color(self._file_list.FindItem(-1, doc.get_filename()))
+
+        # Save article, menu and index.
+        article_path = doc.get_path()
+        menu_path = doc.get_menu_section().get_path()
+        # todo add index path before menu.
+        for file_path, suffix, html_string in [(article_path, Strings.article, doc.get_html_to_save()),
+                                               (menu_path, Strings.menu, doc.get_menu_section().get_html_to_save())]:
+            if os.path.exists(file_path):
+                if not os.access(file_path, os.R_OK) or not os.access(file_path, os.W_OK):
+                    self._show_error_dialog(Strings.warning_can_not_save + '\n' + Strings.exception_access_html)
+                    self._disable_editor(False)
+                    return
+            if save_as:
+                file_path = self._get_new_file_path(suffix)
+            if file_path:
+                try:
+                    with open(file_path, 'w', encoding='utf8') as file:
+                        file.write(html_string)
+                        self._set_status_text(Strings.status_saved + ': ' + last_save, 3)
+                except IOError:
+                    self._show_error_dialog(Strings.warning_can_not_save + '\n' + Strings.exception_access_html)
+                    quit_editor = False
+
+        if quit_editor:
+            self.Destroy()
         self._disable_editor(False)
+
+    def _get_new_file_path(self, suffix: str) -> str:
+        """
+        Gets a new disk path from the user.
+        :param suffix: A suffix to add after 'untitled' in default file name.
+        :return: The path or None if the operation is canceled.
+        """
+        with wx.FileDialog(self, Strings.label_dialog_save_file, wildcard=Strings.html_wildcard,
+                           style=wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT,
+                           defaultDir=self._current_document_instance.get_working_directory(),
+                           defaultFile=Strings.default_file + '-' + suffix) as fileDialog:
+            if fileDialog.ShowModal() == wx.ID_OK:
+                new_path = fileDialog.GetPath()
+                # Add .html if necessary.
+                if not new_path.endswith(Strings.extension_html):
+                    new_path = new_path + Strings.extension_html
+            else:
+                # Signal we do not want to save.
+                new_path = None
+        return new_path
 
     def on_conversion_fail(self, e: Exception) -> None:
         """
-        # TODO this
+        Shows an error message with the conversion problem.
         :return: None
         """
-        print(e)
+        self._show_error_dialog(Strings.warning_can_not_save + '\n\n' + str(e))
+        self._disable_editor(False)
 
     # noinspection PyUnusedLocal
     def _main_image_handler(self, event: wx.CommandEvent) -> None:
@@ -787,7 +845,7 @@ class MainFrame(wx.Frame):
         :param event: Not used
         :return: None
         """
-        self.Close(True)
+        self.Close(force=False)
 
     def _close_button_handler(self, event):
         """
@@ -809,10 +867,13 @@ class MainFrame(wx.Frame):
             if selected_page != wx.NOT_FOUND:
                 self._config_manager.store_last_open_document(self._file_list.GetItemText(selected_page, 0))
             if self._current_document_instance:
-                self._save(confirm=True)
-        # If the built in close function is not called, destroy must be called explicitly, calling Close runs the close
-        # handler.
-        self.Destroy()
+                do_save = self._save(confirm=True, quit_editor=True)
+                if not do_save:
+                    self.Destroy()
+            else:
+                # If the built in close function is not called, destroy must be called explicitly, calling Close runs
+                # the close handler.
+                self.Destroy()
 
     # noinspection PyUnusedLocal
     def _open_button_handler(self, event):
@@ -888,7 +949,6 @@ class MainFrame(wx.Frame):
         """
         if self._current_document_instance and event.GetClientData() != Strings.flag_no_save:
             # Only ask to save if there is a document already opened in the editor and saving is allowed.
-            # TODO save into current file, do not show file dialog
             # TODO save a backup copy
             self._save(confirm=True)
 
@@ -897,7 +957,6 @@ class MainFrame(wx.Frame):
         self._current_document_instance: WhitebearDocumentArticle = self._document_dictionary[
             self._current_document_name]
         try:
-            # TODO use this for convert schema validation
             result = self._current_document_instance.validate_self()
             if not result[0]:
                 self._set_status_text(Strings.status_invalid + ' ' + self._current_document_name)
@@ -1156,7 +1215,10 @@ class MainFrame(wx.Frame):
         :param event: Not used.
         :return: None
         """
-        self._save()
+        if event.GetId() == wx.ID_SAVEAS:
+            self._save(save_as=True)
+        else:
+            self._save()
 
     # noinspection PyUnusedLocal
     def _repeat_search(self, event: wx.CommandEvent) -> None:
