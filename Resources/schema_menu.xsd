@@ -45,9 +45,9 @@
             </xs:element>
             <xs:element name="p">
                 <xs:complexType mixed="true">
-                    <xs:choice minOccurs="0" maxOccurs="unbounded">
-                        <xs:element name="br"/>
-                    </xs:choice>
+                    <xs:simpleContent>
+                        <xs:extension base="xs:string"/>
+                    </xs:simpleContent>
                 </xs:complexType>
             </xs:element>
         </xs:sequence>

@@ -92,7 +92,7 @@ class Strings:
     cz_months = '|'.join(
         ['Ledna', 'Února', 'Března', 'Dubna', 'Května', 'Června', 'Července', 'Srpna', 'Září', 'Října', 'Listopadu',
          'Prosince'])
-    nbsp_words: List[str] = ['s', 'k', 'v', 'z']
+    menu_title_stump: str = 'Menu'
     extension_jpg: str = '.jpg'
     extension_png: str = '.png'
     image_extensions: str = 'JPG files (*' + extension_jpg + ')|*' + extension_jpg + \

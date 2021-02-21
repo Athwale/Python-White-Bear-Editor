@@ -2,12 +2,11 @@ import os
 from typing import List
 
 from bs4 import BeautifulSoup
-from lxml import etree
-from lxml import html
-from lxml.etree import XMLSyntaxError
+from bs4.element import Tag
 
 from Constants.Constants import Strings
 from Exceptions.UnrecognizedFileException import UnrecognizedFileException
+from Exceptions.WrongFormatException import WrongFormatException
 from Resources.Fetch import Fetch
 from Tools.Document.MenuItem import MenuItem
 from Tools.Document.WhitebearDocument import WhitebearDocument
@@ -21,15 +20,17 @@ class WhitebearDocumentMenu(WhitebearDocument):
     This is just a container for easy manipulation.
     """
 
-    def __init__(self, name: str, path: str):
+    def __init__(self, name: str, path: str, menus):
         """
         Create a new WhitebearDocumentMenuIndex object.
         :param name: Name of the file.
-        :param path: Full path on disk to the file
+        :param path: Full path on disk to the file.
+        :param menus: A dictionary of page_name: WhitebearDocumentMenu containing all parsed menus.
         """
         # File properties are in base class
         super().__init__(name, path)
         self._menu_items = []
+        self._menus = menus
         self.parse_self()
 
     def parse_self(self) -> None:
@@ -64,7 +65,7 @@ class WhitebearDocumentMenu(WhitebearDocument):
                     full_image_path, os.W_OK):
                 full_image_path = None
 
-            self._menu_items.append(MenuItem(name.lower(), name, title, image_alt, href, full_image_path,
+            self._menu_items.append(MenuItem(self.get_section_name(), name, title, image_alt, href, full_image_path,
                                              div.img['src']))
 
     def _parse_page_name(self) -> None:
@@ -102,7 +103,67 @@ class WhitebearDocumentMenu(WhitebearDocument):
                                             str(errors))
 
         parsed_template = BeautifulSoup(template_string, 'html5lib')
-        print('c')
+
+        # Fill title.
+        title: Tag = parsed_template.find(name='title')
+        title.string = Strings.menu_title_stump + ' ' + self._page_name + ' | ' + Strings.page_name
+
+        # Fill description.
+        description = parsed_template.find_all(name='meta', attrs={'name': 'description', 'content': True})
+        if len(description) == 1:
+            description[0]['content'] = self._meta_description
+        else:
+            raise WrongFormatException(Strings.exception_parse_multiple_descriptions)
+
+        # Fill keywords.
+        keywords = parsed_template.find_all(name='meta', attrs={'name': 'keywords', 'content': True})
+        if len(keywords) == 1:
+            keywords[0]['content'] = self._meta_keywords
+        else:
+            raise WrongFormatException(Strings.exception_parse_multiple_descriptions)
+
+        # Activate correct menu, generate menu items according to menus.
+        menu_container = parsed_template.find(name='nav')
+        for menu, instance in self._menus.items():
+            new_item = parsed_template.new_tag('a', attrs={'class': 'menu', 'href': instance.get_filename(),
+                                                           'title': instance.get_page_name()[0]})
+            new_item.string = instance.get_page_name()[0]
+            if instance.get_filename() == self._file_name:
+                new_item['id'] = 'active'
+            menu_container.append(new_item)
+
+        # Fill main page title.
+        article = parsed_template.find(name='article', attrs={'class': 'menuPage'})
+        article.h2.string = self._page_name
+
+        # Fill menu items.
+        menu_container = parsed_template.find(name='nav', attrs={'class': 'sixItems'})
+        for item in self._menu_items:
+            item: MenuItem
+            new_div = parsed_template.new_tag('div', attrs={'class': 'link'})
+            href = item.get_link_href()
+            title = item.get_link_title()[0]
+            width = item.get_image_size()[0]
+            height = item.get_image_size()[1]
+            src = item.get_filename()
+            alt = item.get_image_alt()[0]
+            text = item.get_article_name()[0]
+            new_a = parsed_template.new_tag('a', attrs={'href': href, 'title': title})
+            new_img = parsed_template.new_tag('img', attrs={'width': width, 'height': height, 'src': src, 'alt': alt})
+            new_p = parsed_template.new_tag('p')
+            new_p.string = text
+
+            new_a.append(new_img)
+            new_div.append(new_a)
+            new_div.append(new_p)
+            menu_container.append(new_div)
+
+        output = str(parsed_template)
+        is_valid, errors = Tools.validate(output, 'schema_menu.xsd')
+        if not is_valid:
+            raise UnrecognizedFileException(Strings.exception_bug + '\n' + self.get_filename() + ' ' + str(errors))
+
+        return output
 
     # Getters ----------------------------------------------------------------------------------------------------------
     def get_menu_items(self) -> List[MenuItem]:

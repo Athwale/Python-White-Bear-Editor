@@ -98,7 +98,6 @@ class MenuItem:
         if self._image_alt == Strings.label_article_image_alt:
             self._image_alt_error_message = Strings.seo_error_default_value
             result = False
-
         if not result:
             self._status_color = wx.RED
         return result

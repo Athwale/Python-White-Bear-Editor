@@ -547,12 +547,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
             new_figure.append(new_figcaption)
             aside.append(new_figure)
 
-        # Minimize output.
         output = str(parsed_template)
-        # Use &nbsp in front of all single letter s, k, v, z.
-        for word in Strings.nbsp_words:
-            output = output.replace((' ' + word + ' '), (' ' + word + '&nbsp'))
-
         is_valid, errors = Tools.validate(output, 'schema_article.xsd')
         if not is_valid:
             raise UnrecognizedFileException(Strings.exception_bug + '\n' + self.get_filename() + ' ' + str(errors))
