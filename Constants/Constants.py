@@ -30,11 +30,14 @@ class Numbers:
     edit_text_image_dialog_height: int = 300
     edit_video_dialog_width: int = 600
     edit_video_dialog_height: int = 210
+    edit_link_dialog_width: int = 900
     edit_link_dialog_height: int = 255
     edit_menu_item_dialog_height: int = 300
     add_image_dialog_width: int = 1000
     add_logo_dialog_width: int = 500
     add_logo_dialog_height: int = 220
+    page_setup_dialog_width: int = 900
+    page_setup_dialog_height: int = 830
     icon_width: int = 30
     icon_height: int = 30
     color_icon_width: int = 15
@@ -187,6 +190,8 @@ class Strings:
     label_menu_item_upload_hint: str = 'Upload all modified documents'
     label_menu_item_save_as: str = 'Save as...'
     label_menu_item_save_as_hint: str = 'Save as new file'
+    label_menu_item_page_setup: str = 'Page setup'
+    label_menu_item_page_setup_hint: str = 'Edit main page and default values'
 
     label_menu_item_quit: str = 'Quit\tctrl+q'
     label_menu_item_quit_hint: str = 'Quit editor'
@@ -231,6 +236,7 @@ class Strings:
     label_dialog_add_image: str = 'Add image'
     label_dialog_add_logo: str = 'Add menu logo'
     label_dialog_save_file: str = 'Save file'
+    label_dialog_page_setup: str = 'Page setup and default values'
 
     label_article_menu_logo: str = 'Menu logo'
     label_article_menu_logo_name_placeholder: str = 'Menu item name'
@@ -277,6 +283,22 @@ class Strings:
     label_image_name: str = 'Image name'
     label_url_error: str = 'URL Error'
     label_red_url_warning: str = 'Document contains incorrect URL'
+    label_main_title: str = 'Main title'
+    label_main_title_tip: str = 'Title text for the\nwhite-bear page logo'
+    label_author: str = 'Author'
+    label_author_tip: str = 'Contents of meta author tag'
+    label_contact: str = 'Contact'
+    label_contact_tip: str = 'Will be displayed as\nimage on home page'
+    label_default_keywords: str = 'Keywords'
+    label_default_keywords_tip: str = 'Default meta keywords'
+    label_main_meta_description: str = 'Home page meta description'
+    label_main_description_tip: str = 'Home page meta description'
+    label_script: str = 'Script'
+    label_script_tip: str = 'Contents of script tag in head\nGoogle analytics script'
+    label_main_page_text: str = 'Home page text'
+    label_main_page_text_tip: str = 'Home page black text'
+    label_main_page_warning: str = 'Home page warning text'
+    label_main_page_warning_tip: str = 'Home page red text'
 
     status_loading: str = 'Loading and testing'
     status_ready: str = 'Ready'

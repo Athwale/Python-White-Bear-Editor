@@ -12,6 +12,7 @@ from Gui.Dialogs.AboutDialog import AboutDialog
 from Gui.Dialogs.AddImageDialog import AddImageDialog
 from Gui.Dialogs.AddLogoDialog import AddLogoDialog
 from Gui.Dialogs.EditAsideImageDialog import EditAsideImageDialog
+from Gui.Dialogs.EditDefaultValuesDialog import EditDefaultValuesDialog
 from Gui.Dialogs.EditMenuItemDialog import EditMenuItemDialog
 from Gui.Dialogs.LoadingDialog import LoadingDialog
 from Gui.Panels.AsideImagePanel import AsideImagePanel
@@ -131,12 +132,17 @@ class MainFrame(wx.Frame):
                                                   Strings.label_menu_item_upload_hint)
         self._disableable_menu_items.append(self._file_menu_item_upload)
 
+        self._file_menu_item_setup = wx.MenuItem(self._file_menu, wx.ID_SETUP, Strings.label_menu_item_page_setup,
+                                                 Strings.label_menu_item_page_setup_hint)
+        self._disableable_menu_items.append(self._file_menu_item_setup)
+
         # Put menu items into the menu buttons
         self._file_menu.Append(self._file_menu_item_new)
         self._file_menu.Append(self._file_menu_item_open)
         self._file_menu.Append(self._file_menu_item_save)
         self._file_menu.Append(self._file_menu_item_save_as)
         self._file_menu.AppendSeparator()
+        self._file_menu.Append(self._file_menu_item_setup)
         self._file_menu.Append(self._file_menu_item_reload)
         self._file_menu.Append(self._file_menu_item_upload)
         self._file_menu.Append(self._file_menu_item_quit)
@@ -504,6 +510,7 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self._add_menu_logo_handler, self._add_menu_item_add_logo)
         self.Bind(wx.EVT_MENU, self._save_document_handler, self._file_menu_item_save)
         self.Bind(wx.EVT_MENU, self._save_document_handler, self._file_menu_item_save_as)
+        self.Bind(wx.EVT_MENU, self._page_setup_handler, self._file_menu_item_setup)
 
         # Bind other controls clicks
         self.Bind(wx.EVT_LIST_ITEM_SELECTED, self._list_item_click_handler, self._file_list)
@@ -1270,6 +1277,17 @@ class MainFrame(wx.Frame):
         # Select first found string.
         self._main_text_area.SetSelection(self._search_results[0], (self._search_results[0] + len(self._search_term)))
         return True
+
+    # noinspection PyUnusedLocal
+    def _page_setup_handler(self, event: wx.CommandEvent) -> None:
+        """
+        Open page setup dialog.
+        :param event: Not used.
+        :return: None
+        """
+        dlg = EditDefaultValuesDialog(self, self._config_manager)
+        dlg.ShowModal()
+        dlg.Destroy()
 
     # noinspection PyUnusedLocal
     def _search_tools_handler(self, event: wx.CommandEvent) -> None:
