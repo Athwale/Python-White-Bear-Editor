@@ -8,6 +8,7 @@ from Constants.Constants import Strings
 from Exceptions.UnrecognizedFileException import UnrecognizedFileException
 from Resources.Fetch import Fetch
 from Tools.Document.WhitebearDocument import WhitebearDocument
+from Tools.Tools import Tools
 
 
 class WhitebearDocumentIndex(WhitebearDocument):
@@ -33,9 +34,7 @@ class WhitebearDocumentIndex(WhitebearDocument):
         :return: None
         :raises WrongFormatException: if there is a problem with parsing the document.
         """
-        # Only parse if not parsed already and only if the document is valid.
-        if not self._parsed_html and self.is_valid():
-            pass
+        super(WhitebearDocumentIndex, self).parse_self()
 
     def validate_self(self) -> (bool, List[str]):
         """
@@ -43,15 +42,9 @@ class WhitebearDocumentIndex(WhitebearDocument):
         :return: Tuple of boolean validation result and optional list of error messages.
         :raise UnrecognizedFileException if html parse fails
         """
-        errors = []
-        try:
-            xmlschema = etree.XMLSchema(etree.parse(Fetch.get_resource_path('schema_index.xsd')))
-            xml_doc = html.parse(self.get_path())
-            self._valid = xmlschema.validate(xml_doc)
-        except XMLSyntaxError as e:
-            raise UnrecognizedFileException(Strings.exception_html_syntax_error + '\n' + str(e))
-        for error in xmlschema.error_log:
-            errors.append(error.message)
+        with open(self.get_path(), 'r') as file:
+            html_string = file.read()
+        self._valid, errors = Tools.validate(html_string, 'schema_index.xsd')
         return self._valid, errors
 
     # Getters ----------------------------------------------------------------------------------------------------------
