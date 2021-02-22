@@ -24,7 +24,7 @@ class FileListThread(threading.Thread):
         threading.Thread.__init__(self)
         self._parent = parent
         self._path = path
-        self._directory_loader = DirectoryLoader()
+        self._directory_loader = None
 
     def run(self):
         """
@@ -32,6 +32,7 @@ class FileListThread(threading.Thread):
         :return: None, this method calls the wx.CallAfter to pass a list of website names back into GUI.s
         """
         try:
+            self._directory_loader = DirectoryLoader()
             self._directory_loader.load_directory(self._path)
             # The CallAfter method functions as a carrier between threads, the callable function passed into the method
             # will be called in the main GUI thread. This passes an event into the main thread in background which is

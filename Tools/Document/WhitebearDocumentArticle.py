@@ -422,8 +422,8 @@ class WhitebearDocumentArticle(WhitebearDocument):
         :raise UnrecognizedFileException if template file can not be validated.
         :raise UnrecognizedFileException if html parse fails.
         :raise UnrecognizedFileException if generated html fails validation.
+        :raises UnrecognizedFileException if xml schema is incorrect.
         """
-        # TODO test syntax error in the xsd schema.
         with open(Fetch.get_resource_path('article_template.html'), 'r') as template:
             template_string = template.read()
         is_valid, errors = Tools.validate(template_string, 'schema_article_template.xsd')

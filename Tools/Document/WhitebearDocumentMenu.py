@@ -95,6 +95,7 @@ class WhitebearDocumentMenu(WhitebearDocument):
         :raise UnrecognizedFileException if template file can not be validated.
         :raise UnrecognizedFileException if html parse fails.
         :raise UnrecognizedFileException if generated html fails validation.
+        :raises UnrecognizedFileException if xml schema is incorrect.
         """
         with open(Fetch.get_resource_path('menu_template.html'), 'r') as template:
             template_string = template.read()

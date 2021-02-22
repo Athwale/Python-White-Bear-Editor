@@ -6,7 +6,7 @@ from wx.lib.agw.supertooltip import SuperToolTip
 from Constants.Constants import Numbers
 from lxml import etree
 from lxml import html
-from lxml.etree import XMLSyntaxError
+from lxml.etree import XMLSyntaxError, XMLSchemaParseError
 
 from Constants.Constants import Strings
 from Exceptions.UnrecognizedFileException import UnrecognizedFileException
@@ -39,15 +39,18 @@ class Tools:
         :param html_string: Html document as string.
         :param schema: The name of the schema to use.
         :return: Tuple of boolean validation result and optional list of error messages.
-        :raise UnrecognizedFileException if html parse fails.
+        :raises UnrecognizedFileException if html parse fails.
+        :raises UnrecognizedFileException if xml schema is incorrect.
         """
         errors = []
         try:
             xmlschema = etree.XMLSchema(etree.parse(Fetch.get_resource_path(schema)))
             xml_doc = html.fromstring(html_string)
             is_valid = xmlschema.validate(xml_doc)
+        except XMLSchemaParseError as e:
+            raise UnrecognizedFileException(Strings.exception_schema_syntax_error + ':\n' + str(e))
         except XMLSyntaxError as e:
-            raise UnrecognizedFileException(Strings.exception_html_syntax_error + '\n' + str(e))
+            raise UnrecognizedFileException(Strings.exception_html_syntax_error + ':\n' + str(e))
         for error in xmlschema.error_log:
             errors.append(error.message)
         return is_valid, errors

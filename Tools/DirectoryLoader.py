@@ -4,7 +4,7 @@ from typing import Dict
 
 from lxml import etree
 from lxml import html
-from lxml.etree import XMLSyntaxError
+from lxml.etree import XMLSyntaxError, XMLSchemaParseError
 
 from Constants.Constants import Strings
 from Exceptions.AccessException import AccessException
@@ -30,9 +30,12 @@ class DirectoryLoader:
         self._index_document = None
         self._css_document = None
         # Prepare xml schemas
-        self._xmlschema_index = etree.XMLSchema(etree.parse(Fetch.get_resource_path('schema_index.xsd')))
-        self._xmlschema_article = etree.XMLSchema(etree.parse(Fetch.get_resource_path('schema_article.xsd')))
-        self._xmlschema_menu = etree.XMLSchema(etree.parse(Fetch.get_resource_path('schema_menu.xsd')))
+        try:
+            self._xmlschema_index = etree.XMLSchema(etree.parse(Fetch.get_resource_path('schema_index.xsd')))
+            self._xmlschema_article = etree.XMLSchema(etree.parse(Fetch.get_resource_path('schema_article.xsd')))
+            self._xmlschema_menu = etree.XMLSchema(etree.parse(Fetch.get_resource_path('schema_menu.xsd')))
+        except XMLSchemaParseError as ex:
+            raise UnrecognizedFileException(Strings.exception_schema_syntax_error + ':\n' + str(ex))
 
     def get_directory(self) -> str:
         """
