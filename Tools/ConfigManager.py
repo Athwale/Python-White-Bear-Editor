@@ -8,6 +8,7 @@ from Exceptions.AccessException import AccessException
 
 class ConfigManager:
     """
+    Singleton class.
     This class works with the persistent config file stored on disk which is used to remember last used values like
     last open directory and window position on the screen between editor uses.
     working directory - wd
@@ -15,7 +16,7 @@ class ConfigManager:
     window size
     last open document
     """
-
+    __instance = None
     CONF_WORKING_DIR: str = 'wd'
     CONF_LAST: str = 'last'
     CONF_POSITION: str = 'pos'
@@ -30,10 +31,21 @@ class ConfigManager:
     CONF_BLACK_TXT: str = 'blackTxt'
     CONF_RED_TXT: str = 'redTxt'
 
+    @staticmethod
+    def get_instance():
+        """ Static access method. """
+        if ConfigManager.__instance is None:
+            ConfigManager()
+        return ConfigManager.__instance
+
     def __init__(self):
         """
         Constructor for config manager.
         """
+        if ConfigManager.__instance is not None:
+            raise Exception("This class is a singleton!")
+        else:
+            ConfigManager.__instance = self
         self._conf_dict = {}
         # If config file does not exist, create a new one
         self._conf_file_path = Strings.editor_config_file
@@ -99,6 +111,20 @@ class ConfigManager:
                                 self.CONF_KEYWORDS, self.CONF_DESCRIPTION, self.CONF_SCRIPT, self.CONF_BLACK_TXT,
                                 self.CONF_RED_TXT]:
                         self._conf_dict[name] = value
+
+    def save_config_file(self) -> None:
+        """
+        Save the configuration stored in _conf_dict on disk drive in user's home.
+        :return: None
+        """
+        # At this point after constructor, the config file exists and is full or empty but it is writeable.
+        # This clears the file and writes new contents.
+        with open(self._conf_file_path, 'w') as conf_file:
+            for name, value in self._conf_dict.items():
+                if name == self.CONF_POSITION or name == self.CONF_SIZE:
+                    conf_file.write(name + ' = ' + str(value[0]) + ',' + str(value[1]) + '\n')
+                else:
+                    conf_file.write(name + ' = ' + str(value) + '\n')
 
     def get_working_dir(self) -> str:
         """
@@ -185,20 +211,6 @@ class ConfigManager:
         :return: The text.
         """
         return self._conf_dict[self.CONF_RED_TXT]
-
-    def save_config_file(self) -> None:
-        """
-        Save the configuration stored in _conf_dict on disk drive in user's home.
-        :return: None
-        """
-        # At this point after constructor, the config file exists and is full or empty but it is writeable.
-        # This clears the file and writes new contents.
-        with open(self._conf_file_path, 'w') as conf_file:
-            for name, value in self._conf_dict.items():
-                if name == self.CONF_POSITION or name == self.CONF_SIZE:
-                    conf_file.write(name + ' = ' + str(value[0]) + ',' + str(value[1]) + '\n')
-                else:
-                    conf_file.write(name + ' = ' + str(value) + '\n')
 
     def store_working_dir(self, path: str) -> None:
         """

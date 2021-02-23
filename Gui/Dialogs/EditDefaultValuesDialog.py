@@ -171,22 +171,5 @@ class EditDefaultValuesDialog(wx.Dialog):
         # TODO seo test description and keywords, prevent ok if wrong.
         # TODO load/save data with config manager.
         self.Disable()
-        # Set image data
-        field_to_value = {self._field_url: (self._link.get_url(), self._field_url_tip),
-                          self._field_main_title: (self._link.get_title(), self._field_main_title_tip),
-                          self._field_author: (self._link.get_text(), self._field_author_tip)}
-        for field, value in field_to_value.items():
-            tip = value[1]
-            if value[0][1]:
-                tip.SetMessage(Strings.seo_check + '\n' + value[0][1])
-                tip.EnableTip(True)
-                field.SetBackgroundColour(Numbers.RED_COLOR)
-            else:
-                tip.SetMessage(Strings.seo_check + '\n' + Strings.status_ok)
-                tip.DoHideNow()
-                field.SetBackgroundColour(Numbers.GREEN_COLOR)
-            field.SetValue(value[0][0])
 
-        # Set checkbox local state
-        self._checkbox_local.SetValue(self._link.is_local())
         self.Enable()
