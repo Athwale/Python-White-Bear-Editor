@@ -8,20 +8,20 @@ from Tools.Tools import Tools
 
 class EditDefaultValuesDialog(wx.Dialog):
 
-    def __init__(self, parent):
+    def __init__(self, parent, no_cancel: bool = False):
         """
         Display a dialog that allows editing additional data used in html generation.
         Default main title, author, contact, keywords, main page meta description. script, main page red/black text
         :param parent: The parent frame.
+        :param no_cancel: Do not display cancel button. Used to force page setup completion.
         """
         wx.Dialog.__init__(self, parent, title=Strings.label_dialog_page_setup,
                            size=(Numbers.page_setup_dialog_width, Numbers.page_setup_dialog_height),
-                           style=wx.DEFAULT_DIALOG_STYLE)
+                           style=wx.CAPTION)
 
         self._config_manager: ConfigManager = ConfigManager.get_instance()
         # This is used just for seo testing keywords and description.
         self.test_doc: WhitebearDocument = WhitebearDocument('seo_test', '')
-
 
         self._main_vertical_sizer = wx.BoxSizer(wx.VERTICAL)
         self._horizontal_sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -136,6 +136,8 @@ class EditDefaultValuesDialog(wx.Dialog):
         grouping_sizer.Add(self._cancel_button)
         grouping_sizer.Add((Numbers.widget_border_size, Numbers.widget_border_size))
         self._button_sizer.Add(grouping_sizer, flag=wx.ALIGN_CENTER_HORIZONTAL)
+        if no_cancel:
+            self._cancel_button.Hide()
 
         # Putting the sizers together
         self._vertical_sizer.Add(self._information_sizer, 0, flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP,
@@ -149,8 +151,10 @@ class EditDefaultValuesDialog(wx.Dialog):
         # Bind handlers
         self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._ok_button)
         self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._cancel_button)
-        self.Bind(wx.EVT_TEXT, self._text_handler, self._field_meta_keywords)
-        self.Bind(wx.EVT_TEXT, self._text_handler, self._field_meta_description)
+        for field in [self._field_global_title, self._field_author, self._field_contact, self._field_script,
+                      self._field_black_text, self._field_red_text, self._field_meta_keywords,
+                      self._field_meta_description]:
+            self.Bind(wx.EVT_TEXT, self._text_handler, field)
 
         self._display_dialog_contents()
 
@@ -163,8 +167,10 @@ class EditDefaultValuesDialog(wx.Dialog):
         """
         if not self._seo_test():
             self._ok_button.Disable()
+            self._cancel_button.Disable()
         else:
             self._ok_button.Enable()
+            self._cancel_button.Enable()
 
     def _handle_buttons(self, event: wx.CommandEvent) -> None:
         """
@@ -216,13 +222,31 @@ class EditDefaultValuesDialog(wx.Dialog):
         # Description test.
         correct, message, color = self.test_doc.seo_test_description(self._field_meta_description.GetValue())
         result = result and correct
-        # Set color
-        self._field_meta_description.SetBackgroundColour(color)
-        style_carrier = wx.TextAttr()
-        # Set color for the current text separately, it does not work with just background color
-        self._field_meta_description.GetStyle(0, style_carrier)
-        style_carrier.SetBackgroundColour(color)
-        self._field_meta_description.SetStyle(0, len(self._field_meta_description.GetValue()), style_carrier)
+        self._set_field_background(self._field_meta_description, color)
         self._field_description_tip.SetMessage(Strings.label_main_description_tip + '\n\n' +
                                                Strings.seo_check + '\n' + message)
+
+        for field in [self._field_global_title, self._field_author, self._field_contact, self._field_script,
+                      self._field_black_text, self._field_red_text]:
+            if not field.GetValue():
+                result = False
+                self._set_field_background(field, Numbers.RED_COLOR)
+            else:
+                self._set_field_background(field, Numbers.GREEN_COLOR)
+
         return result
+
+    @staticmethod
+    def _set_field_background(field: wx.TextCtrl, color: wx.Colour) -> None:
+        """
+        Set background color for a field.
+        :param field: wx.TextCtrl.
+        :param color: The wx.Color to set.
+        :return: None
+        """
+        field.SetBackgroundColour(color)
+        style_carrier = wx.TextAttr()
+        # Set color for the current text separately, it does not work with just background color
+        field.GetStyle(0, style_carrier)
+        style_carrier.SetBackgroundColour(color)
+        field.SetStyle(0, len(field.GetValue()), style_carrier)

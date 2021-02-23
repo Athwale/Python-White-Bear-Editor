@@ -4,6 +4,7 @@ from typing import List, Tuple
 from Constants.Constants import Numbers
 from Constants.Constants import Strings
 from Exceptions.AccessException import AccessException
+from Exceptions.WrongFormatException import WrongFormatException
 
 
 class ConfigManager:
@@ -125,6 +126,16 @@ class ConfigManager:
                     conf_file.write(name + ' = ' + str(value[0]) + ',' + str(value[1]) + '\n')
                 else:
                     conf_file.write(name + ' = ' + str(value) + '\n')
+
+    def check_config(self) -> bool:
+        """
+        Check the loaded config for missing values.
+        :return: False if any value is missing.
+        """
+        for name, value in self._conf_dict.items():
+            if not value:
+                return False
+        return True
 
     def get_working_dir(self) -> str:
         """

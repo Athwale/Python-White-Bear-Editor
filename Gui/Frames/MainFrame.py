@@ -46,7 +46,7 @@ class MainFrame(wx.Frame):
         self.menu_text_field_font = wx.Font(Numbers.text_field_font_size, wx.FONTFAMILY_DEFAULT,
                                             wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, False)
         # Prepare data objects
-        self._config_manager = ConfigManager.get_instance()
+        self._config_manager: ConfigManager = ConfigManager.get_instance()
         self._tool_ids = []
         self._disableable_menu_items = []
         self._document_dictionary = {}
@@ -673,6 +673,14 @@ class MainFrame(wx.Frame):
         self._set_status_text(Strings.status_ready, 3)
         self._set_status_text(Strings.status_articles + ' ' + str(len(self._document_dictionary)), 2)
         self._loading_dlg.Destroy()
+
+        if not self._config_manager.check_config():
+            # Check that no default values are missing.
+            self._show_error_dialog(Strings.exception_default_value_not_set)
+            # Open defaults dialog if anything is missing.
+            dlg = EditDefaultValuesDialog(self, no_cancel=True)
+            dlg.ShowModal()
+            dlg.Destroy()
 
     def _forward_event(self, evt) -> None:
         """

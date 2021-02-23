@@ -143,6 +143,7 @@ class Strings:
     exception_unrecognized_color: str = 'Unrecognized CSS color'
     exception_wrong_style: str = 'Unrecognized style'
     exception_incorrect_url: str = 'Incorrect url'
+    exception_default_value_not_set: str = 'Page setup is incomplete'
     exception_bug: str = 'BUG Generated html failed validation'
 
     seo_error_keywords_length: str = 'Length must be: ' + str(Numbers.keywords_min_length) + ' - ' + str(
