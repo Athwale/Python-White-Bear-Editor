@@ -2,22 +2,26 @@ import wx
 
 from Constants.Constants import Strings, Numbers
 from Tools.ConfigManager import ConfigManager
+from Tools.Document.WhitebearDocument import WhitebearDocument
 from Tools.Tools import Tools
 
 
 class EditDefaultValuesDialog(wx.Dialog):
 
-    def __init__(self, parent, config_manager: ConfigManager):
+    def __init__(self, parent):
         """
         Display a dialog that allows editing additional data used in html generation.
         Default main title, author, contact, keywords, main page meta description. script, main page red/black text
-        :param config_manager: An instance of configuration manager able to save defaults into a file.
+        :param parent: The parent frame.
         """
         wx.Dialog.__init__(self, parent, title=Strings.label_dialog_page_setup,
                            size=(Numbers.page_setup_dialog_width, Numbers.page_setup_dialog_height),
                            style=wx.DEFAULT_DIALOG_STYLE)
 
-        self._config_manager: ConfigManager = config_manager
+        self._config_manager: ConfigManager = ConfigManager.get_instance()
+        # This is used just for seo testing keywords and description.
+        self.test_doc: WhitebearDocument = WhitebearDocument('seo_test', '')
+
 
         self._main_vertical_sizer = wx.BoxSizer(wx.VERTICAL)
         self._horizontal_sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -28,12 +32,12 @@ class EditDefaultValuesDialog(wx.Dialog):
         # TODO maybe limit this somehow.
         self._title_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self._label_main_title = wx.StaticText(self, -1, Strings.label_main_title + ': ')
-        self._field_main_title = wx.TextCtrl(self, -1)
+        self._field_global_title = wx.TextCtrl(self, -1)
         self._title_sub_sizer.Add(self._label_main_title, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
         self._title_sub_sizer.Add((2, -1))
-        self._title_sub_sizer.Add(self._field_main_title, proportion=1)
+        self._title_sub_sizer.Add(self._field_global_title, proportion=1)
         self._information_sizer.Add(self._title_sub_sizer, flag=wx.EXPAND | wx.TOP, border=Numbers.widget_border_size)
-        self._field_main_title_tip = Tools.get_warning_tip(self._field_main_title, Strings.label_main_title)
+        self._field_main_title_tip = Tools.get_warning_tip(self._field_global_title, Strings.label_main_title)
         self._field_main_title_tip.SetMessage(Strings.label_main_title_tip)
 
         # Author sub sizer
@@ -66,8 +70,8 @@ class EditDefaultValuesDialog(wx.Dialog):
         self._meta_keywords_sub_sizer.Add(self._field_meta_keywords, proportion=1)
         self._information_sizer.Add(self._meta_keywords_sub_sizer, flag=wx.EXPAND | wx.TOP,
                                     border=Numbers.widget_border_size)
-        self._field_contact_tip = Tools.get_warning_tip(self._field_meta_keywords, Strings.label_article_keywords)
-        self._field_contact_tip.SetMessage(Strings.label_default_keywords_tip)
+        self._field_keywords_tip = Tools.get_warning_tip(self._field_meta_keywords, Strings.label_article_keywords)
+        self._field_keywords_tip.SetMessage(Strings.label_default_keywords_tip)
 
         # --------------------------------------------------------------------------------------------------------------
         # Description sub sizer
@@ -79,9 +83,9 @@ class EditDefaultValuesDialog(wx.Dialog):
         self._meta_description_sub_sizer.Add(self._field_meta_description, proportion=1, flag=wx.EXPAND)
         self._information_sizer.Add(self._meta_description_sub_sizer, flag=wx.EXPAND | wx.TOP,
                                     border=Numbers.widget_border_size)
-        self._field_contact_tip = Tools.get_warning_tip(self._field_meta_description,
-                                                        Strings.label_main_meta_description)
-        self._field_contact_tip.SetMessage(Strings.label_main_description_tip)
+        self._field_description_tip = Tools.get_warning_tip(self._field_meta_description,
+                                                            Strings.label_main_meta_description)
+        self._field_description_tip.SetMessage(Strings.label_main_description_tip)
 
         # Script sub sizer
         self._script_sub_sizer = wx.BoxSizer(wx.VERTICAL)
@@ -92,8 +96,8 @@ class EditDefaultValuesDialog(wx.Dialog):
         self._script_sub_sizer.Add(self._field_script, proportion=1, flag=wx.EXPAND)
         self._information_sizer.Add(self._script_sub_sizer, flag=wx.EXPAND | wx.TOP,
                                     border=Numbers.widget_border_size)
-        self._field_contact_tip = Tools.get_warning_tip(self._field_script, Strings.label_script)
-        self._field_contact_tip.SetMessage(Strings.label_script_tip)
+        self._field_script_tip = Tools.get_warning_tip(self._field_script, Strings.label_script)
+        self._field_script_tip.SetMessage(Strings.label_script_tip)
 
         # Black text sub sizer
         self._black_text_sub_sizer = wx.BoxSizer(wx.VERTICAL)
@@ -104,8 +108,8 @@ class EditDefaultValuesDialog(wx.Dialog):
         self._black_text_sub_sizer.Add(self._field_black_text, proportion=1, flag=wx.EXPAND)
         self._information_sizer.Add(self._black_text_sub_sizer, flag=wx.EXPAND | wx.TOP,
                                     border=Numbers.widget_border_size)
-        self._field_contact_tip = Tools.get_warning_tip(self._field_black_text, Strings.label_main_page_text)
-        self._field_contact_tip.SetMessage(Strings.label_main_page_text_tip)
+        self._field_black_text_tip = Tools.get_warning_tip(self._field_black_text, Strings.label_main_page_text)
+        self._field_black_text_tip.SetMessage(Strings.label_main_page_text_tip)
 
         # Red text sub sizer
         self._red_text_sub_sizer = wx.BoxSizer(wx.VERTICAL)
@@ -118,8 +122,8 @@ class EditDefaultValuesDialog(wx.Dialog):
         self._red_text_sub_sizer.Add(self._field_red_text, proportion=1, flag=wx.EXPAND)
         self._information_sizer.Add(self._red_text_sub_sizer, flag=wx.EXPAND | wx.TOP,
                                     border=Numbers.widget_border_size)
-        self._field_contact_tip = Tools.get_warning_tip(self._field_red_text, Strings.label_main_page_warning)
-        self._field_contact_tip.SetMessage(Strings.label_main_page_warning_tip)
+        self._field_red_text_tip = Tools.get_warning_tip(self._field_red_text, Strings.label_main_page_warning)
+        self._field_red_text_tip.SetMessage(Strings.label_main_page_warning_tip)
 
         # Buttons
         self._button_sizer = wx.BoxSizer(wx.VERTICAL)
@@ -145,8 +149,22 @@ class EditDefaultValuesDialog(wx.Dialog):
         # Bind handlers
         self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._ok_button)
         self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._cancel_button)
+        self.Bind(wx.EVT_TEXT, self._text_handler, self._field_meta_keywords)
+        self.Bind(wx.EVT_TEXT, self._text_handler, self._field_meta_description)
 
         self._display_dialog_contents()
+
+    # noinspection PyUnusedLocal
+    def _text_handler(self, event: wx.CommandEvent) -> None:
+        """
+        Run seo test on keywords and description when the text changes and prevent saving the values if seo fails.
+        :param event: Not used.
+        :return: None
+        """
+        if not self._seo_test():
+            self._ok_button.Disable()
+        else:
+            self._ok_button.Enable()
 
     def _handle_buttons(self, event: wx.CommandEvent) -> None:
         """
@@ -154,22 +172,57 @@ class EditDefaultValuesDialog(wx.Dialog):
         :param event: The button event
         :return: None
         """
+        event.Skip()
         if event.GetId() == wx.ID_OK:
-            if self._link.seo_test_self():
-                event.Skip()
-                return
-            else:
-                self._display_dialog_contents()
-        else:
-            event.Skip()
+            self._config_manager.store_global_title(self._field_global_title.GetValue())
+            self._config_manager.store_author(self._field_author.GetValue())
+            self._config_manager.store_contact(self._field_contact.GetValue())
+            self._config_manager.store_global_keywords(self._field_meta_keywords.GetValue())
+            self._config_manager.store_main_page_description(self._field_meta_description.GetValue())
+            self._config_manager.store_script(self._field_script.GetValue())
+            self._config_manager.store_black_text(self._field_black_text.GetValue())
+            self._config_manager.store_red_text(self._field_red_text.GetValue())
 
     def _display_dialog_contents(self) -> None:
         """
         Display the image that this dialog edits in the gui.
         :return: None
         """
-        # TODO seo test description and keywords, prevent ok if wrong.
-        # TODO load/save data with config manager.
         self.Disable()
-
+        self._field_global_title.SetValue(self._config_manager.get_global_title())
+        self._field_author.SetValue(self._config_manager.get_author())
+        self._field_contact.SetValue(self._config_manager.get_contact())
+        self._field_meta_keywords.SetValue(self._config_manager.get_global_keywords())
+        self._field_meta_description.SetValue(self._config_manager.get_main_meta_description())
+        self._field_script.SetValue(self._config_manager.get_script())
+        self._field_black_text.SetValue(self._config_manager.get_main_page_black_text())
+        self._field_red_text.SetValue(self._config_manager.get_main_page_red_text())
+        self._seo_test()
         self.Enable()
+
+    def _seo_test(self) -> bool:
+        """
+        SEO test meta keywords and meta description.
+        :return: True if seo is ok.
+        """
+        result = True
+        # Keywords test.
+        correct, message, color = self.test_doc.seo_test_keywords(self._field_meta_keywords.GetValue())
+        result = result and correct
+        self._field_meta_keywords.SetBackgroundColour(color)
+        self._field_keywords_tip.SetMessage(Strings.label_default_keywords_tip + '\n\n' +
+                                            Strings.seo_check + '\n' + message)
+
+        # Description test.
+        correct, message, color = self.test_doc.seo_test_description(self._field_meta_description.GetValue())
+        result = result and correct
+        # Set color
+        self._field_meta_description.SetBackgroundColour(color)
+        style_carrier = wx.TextAttr()
+        # Set color for the current text separately, it does not work with just background color
+        self._field_meta_description.GetStyle(0, style_carrier)
+        style_carrier.SetBackgroundColour(color)
+        self._field_meta_description.SetStyle(0, len(self._field_meta_description.GetValue()), style_carrier)
+        self._field_description_tip.SetMessage(Strings.label_main_description_tip + '\n\n' +
+                                               Strings.seo_check + '\n' + message)
+        return result

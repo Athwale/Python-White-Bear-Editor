@@ -46,7 +46,7 @@ class MainFrame(wx.Frame):
         self.menu_text_field_font = wx.Font(Numbers.text_field_font_size, wx.FONTFAMILY_DEFAULT,
                                             wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, False)
         # Prepare data objects
-        self._config_manager = ConfigManager()
+        self._config_manager = ConfigManager.get_instance()
         self._tool_ids = []
         self._disableable_menu_items = []
         self._document_dictionary = {}
@@ -1096,11 +1096,12 @@ class MainFrame(wx.Frame):
         :return: None
         """
         if not self._ignore_change:
-            keyword_list = [word.strip() for word in self._field_article_keywords.GetValue().split(',')]
-            correct, message, color = self._current_document_instance.seo_test_keywords(keyword_list)
+            keywords = self._field_article_keywords.GetValue()
+            correct, message, color = self._current_document_instance.seo_test_keywords(keywords)
             self._field_article_keywords.SetBackgroundColour(color)
             self._field_article_keywords_tip.SetMessage(Strings.seo_check + '\n' + message)
-            self._current_document_instance.set_keywords(keyword_list)
+            keywords_list = [word.strip() for word in self._field_article_keywords.GetValue().split(',')]
+            self._current_document_instance.set_keywords(keywords_list)
             self._update_file_color()
 
     # noinspection PyUnusedLocal
@@ -1286,7 +1287,7 @@ class MainFrame(wx.Frame):
         :param event: Not used.
         :return: None
         """
-        dlg = EditDefaultValuesDialog(self, self._config_manager)
+        dlg = EditDefaultValuesDialog(self)
         dlg.ShowModal()
         dlg.Destroy()
 

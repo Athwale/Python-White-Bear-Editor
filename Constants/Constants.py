@@ -16,6 +16,7 @@ class Numbers:
     photo_ratio: float = 4 / 3
     photo_ratio_tolerance: float = 0.01
 
+    min_keywords: int = 3
     minimal_window_size_width: int = 1200
     minimal_window_size_height: int = 700
     initial_panel_size: int = 220
@@ -146,6 +147,8 @@ class Strings:
 
     seo_error_keywords_length: str = 'Length must be: ' + str(Numbers.keywords_min_length) + ' - ' + str(
         Numbers.keywords_max_length) + ' characters long'
+    seo_error_keywords_format: str = 'Must be a comma separated list'
+    seo_error_keywords_amount: str = 'Too few keywords'
     seo_error_description_length: str = 'Length must be: ' + str(
         Numbers.description_min_length) + ' - ' + str(Numbers.description_max_length) + ' characters long'
     seo_error_name_length: str = 'Length must be: ' + str(Numbers.article_name_min_length) + ' - ' + str(
@@ -291,7 +294,7 @@ class Strings:
     label_contact: str = 'Contact'
     label_contact_tip: str = 'Will be displayed as\nimage on home page'
     label_default_keywords: str = 'Keywords'
-    label_default_keywords_tip: str = 'Default meta keywords'
+    label_default_keywords_tip: str = 'Default global meta keywords'
     label_main_meta_description: str = 'Home page meta description'
     label_main_description_tip: str = 'Home page meta description'
     label_script: str = 'Script'

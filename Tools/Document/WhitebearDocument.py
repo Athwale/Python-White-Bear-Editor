@@ -93,21 +93,30 @@ class WhitebearDocument:
             self._parsed_html = BeautifulSoup(minimized, 'html5lib')
 
     @staticmethod
-    def seo_test_keywords(keywords: [str]) -> (bool, str, wx.Colour):
+    def seo_test_keywords(keywords: str) -> (bool, str, wx.Colour):
         """
         SEO test keywords and return False, error string and new status color if incorrect.
-        :param keywords: The keyword list to check
+        :param keywords: The keywords to check.
         :return: Return False, error string and new status color if incorrect.
         """
         keywords_error_message = Strings.status_ok
         result = True
         color = Numbers.GREEN_COLOR
         keywords_length = 0
-        for word in keywords:
-            keywords_length += len(word)
-        if keywords_length < Numbers.keywords_min_length or keywords_length > Numbers.keywords_max_length:
-            keywords_error_message = Strings.seo_error_keywords_length
+        if ',' not in keywords:
+            keywords_error_message = Strings.seo_error_keywords_format
             result = False
+        else:
+            keywords_list = [word.strip() for word in keywords.split(',')]
+            if len(keywords_list) < Numbers.min_keywords:
+                keywords_error_message = Strings.seo_error_keywords_amount
+                result = False
+            else:
+                for word in keywords_list:
+                    keywords_length += len(word)
+                if keywords_length < Numbers.keywords_min_length or keywords_length > Numbers.keywords_max_length:
+                    keywords_error_message = Strings.seo_error_keywords_length
+                    result = False
 
         if not result:
             color = Numbers.RED_COLOR
@@ -150,7 +159,7 @@ class WhitebearDocument:
             self._status_color = wx.WHITE
 
         # Check meta keywords
-        keywords_result, error, color = self.seo_test_keywords(self._meta_keywords)
+        keywords_result, error, color = self.seo_test_keywords(', '.join(self._meta_keywords))
         if not keywords_result:
             self._keywords_error_message = error
             self.set_status_color(color)
