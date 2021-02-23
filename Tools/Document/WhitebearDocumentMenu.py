@@ -142,6 +142,10 @@ class WhitebearDocumentMenu(WhitebearDocument):
         menu_container = parsed_template.find(name='nav', attrs={'class': 'sixItems'})
         for item in self._menu_items:
             item: MenuItem
+            if not os.path.exists(os.path.join(self.get_working_directory(), item.get_link_href())):
+                # Ignore items that point to a deleted article. New pages are immediately saved to disk, so this should
+                # not cause any problems.
+                continue
             new_div = parsed_template.new_tag('div', attrs={'class': 'link'})
             href = item.get_link_href()
             title = item.get_link_title()[0]

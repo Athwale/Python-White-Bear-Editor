@@ -21,6 +21,15 @@ class ConfigManager:
     CONF_POSITION: str = 'pos'
     CONF_SIZE: str = 'size'
 
+    CONF_GLOBAL_TITLE: str = 'title'
+    CONF_AUTHOR: str = 'author'
+    CONF_CONTACT: str = 'contact'
+    CONF_KEYWORDS: str = 'keywords'
+    CONF_DESCRIPTION: str = 'mainDescription'
+    CONF_SCRIPT: str = 'script'
+    CONF_BLACK_TXT: str = 'blackTxt'
+    CONF_RED_TXT: str = 'redTxt'
+
     def __init__(self):
         """
         Constructor for config manager.
@@ -44,6 +53,13 @@ class ConfigManager:
         self.store_working_dir(Strings.home_directory)
         self.store_window_position((0, 0))
         self.store_window_size((Numbers.minimal_window_size_width, Numbers.minimal_window_size_height))
+        self.store_global_title('')
+        self.store_author(Strings.author)
+        self.store_global_keywords('')
+        self.store_main_page_description('')
+        self.store_script('')
+        self.store_black_text('')
+        self.store_red_text('')
 
     def _read_config(self) -> None:
         """
@@ -77,11 +93,12 @@ class ConfigManager:
                         # In case the position/size is damaged and can not be decoded, default to top left corner
                     except ValueError:
                         self._conf_dict[name] = (0, 0)
-                elif name == self.CONF_LAST:
-                    self._conf_dict[self.CONF_LAST] = value
                 else:
-                    # Ignore unknown options
-                    continue
+                    # Ignores unknown options.
+                    if name in [self.CONF_LAST, self.CONF_GLOBAL_TITLE, self.CONF_AUTHOR, self.CONF_CONTACT,
+                                self.CONF_KEYWORDS, self.CONF_DESCRIPTION, self.CONF_SCRIPT, self.CONF_BLACK_TXT,
+                                self.CONF_RED_TXT]:
+                        self._conf_dict[name] = value
 
     def get_working_dir(self) -> str:
         """
@@ -113,7 +130,63 @@ class ConfigManager:
             return None
         return self._conf_dict[self.CONF_LAST]
 
-    def save_config_file(self):
+    def get_global_title(self) -> str:
+        """
+        Get the global white-bear logo title.
+        :return: The title.
+        """
+        return self._conf_dict[self.CONF_GLOBAL_TITLE]
+
+    def get_author(self) -> str:
+        """
+        Get the author.
+        :return: The author's signature.
+        """
+        return self._conf_dict[self.CONF_AUTHOR]
+
+    def get_contact(self) -> str:
+        """
+        Get the contact string.
+        :return: The contact string.
+        """
+        return self._conf_dict[self.CONF_CONTACT]
+
+    def get_global_keywords(self) -> str:
+        """
+        Get the global meta keywords.
+        :return: The global meta keywords.
+        """
+        return self._conf_dict[self.CONF_KEYWORDS]
+
+    def get_main_meta_description(self) -> str:
+        """
+        Get the home page meta description.
+        :return: The home page meta description.
+        """
+        return self._conf_dict[self.CONF_DESCRIPTION]
+
+    def get_script(self) -> str:
+        """
+        Get the global script.
+        :return: The script.
+        """
+        return self._conf_dict[self.CONF_SCRIPT]
+
+    def get_main_page_black_text(self) -> str:
+        """
+        Get the main page black text.
+        :return: The text.
+        """
+        return self._conf_dict[self.CONF_BLACK_TXT]
+
+    def get_main_page_red_text(self) -> str:
+        """
+        Get the main page red text.
+        :return: The text.
+        """
+        return self._conf_dict[self.CONF_RED_TXT]
+
+    def save_config_file(self) -> None:
         """
         Save the configuration stored in _conf_dict on disk drive in user's home.
         :return: None
@@ -136,7 +209,7 @@ class ConfigManager:
         self._conf_dict[self.CONF_WORKING_DIR] = path
         self.save_config_file()
 
-    def store_window_position(self, pos1_pos2: Tuple[int, int]):
+    def store_window_position(self, pos1_pos2: Tuple[int, int]) -> None:
         """
         Save the last window position on screen into the dictionary.
         :param pos1_pos2: Tuple (x, y) of the left top corner of the window.
@@ -146,7 +219,7 @@ class ConfigManager:
         self._conf_dict[self.CONF_POSITION] = (x, y)
         self.save_config_file()
 
-    def store_window_size(self, size1_size2: Tuple[int, int]):
+    def store_window_size(self, size1_size2: Tuple[int, int]) -> None:
         """
         Save the last window size on screen into the dictionary.
         :param size1_size2: Tuple (x, y) of the size of the window.
@@ -156,11 +229,83 @@ class ConfigManager:
         self._conf_dict[self.CONF_SIZE] = (x, y)
         self.save_config_file()
 
-    def store_last_open_document(self, name: str):
+    def store_last_open_document(self, name: str) -> None:
         """
         Save the last opened document from editor into the dictionary.
         :param name: Name of the last opened website.
         :return: None
         """
         self._conf_dict[self.CONF_LAST] = name
+        self.save_config_file()
+
+    def store_global_title(self, title: str) -> None:
+        """
+        Save the default white-bear logo title into the dictionary.
+        :param title: The global title.
+        :return: None
+        """
+        self._conf_dict[self.CONF_GLOBAL_TITLE] = title
+        self.save_config_file()
+
+    def store_author(self, author: str) -> None:
+        """
+        Save the author signature into the dictionary.
+        :param author: The author signature.
+        :return: None
+        """
+        self._conf_dict[self.CONF_AUTHOR] = author
+        self.save_config_file()
+
+    def store_contact(self, contact: str) -> None:
+        """
+        Save the contact into the dictionary.
+        :param contact: The contact.
+        :return: None
+        """
+        self._conf_dict[self.CONF_CONTACT] = contact
+        self.save_config_file()
+
+    def store_global_keywords(self, keywords: str) -> None:
+        """
+        Save the global default meta keywords into the dictionary.
+        :param keywords: The global default meta keywords.
+        :return: None
+        """
+        self._conf_dict[self.CONF_KEYWORDS] = keywords
+        self.save_config_file()
+
+    def store_main_page_description(self, description: str) -> None:
+        """
+        Save the main page meta description into the dictionary.
+        :param description: The meta description.
+        :return: None
+        """
+        self._conf_dict[self.CONF_DESCRIPTION] = description
+        self.save_config_file()
+
+    def store_script(self, script: str) -> None:
+        """
+        Save the script into the dictionary.
+        :param script: The script.
+        :return: None
+        """
+        self._conf_dict[self.CONF_SCRIPT] = script
+        self.save_config_file()
+
+    def store_black_text(self, text: str) -> None:
+        """
+        Save the main page black text portion into the dictionary.
+        :param text: The text.
+        :return: None
+        """
+        self._conf_dict[self.CONF_BLACK_TXT] = text
+        self.save_config_file()
+
+    def store_red_text(self, text: str) -> None:
+        """
+        Save the main page red text portion into the dictionary.
+        :param text: The text.
+        :return: None
+        """
+        self._conf_dict[self.CONF_RED_TXT] = text
         self.save_config_file()

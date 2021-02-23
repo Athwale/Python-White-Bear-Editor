@@ -95,6 +95,7 @@ class Strings:
         ['Ledna', 'Února', 'Března', 'Dubna', 'Května', 'Června', 'Července', 'Srpna', 'Září', 'Října', 'Listopadu',
          'Prosince'])
     menu_title_stump: str = 'Menu'
+    author: str = 'Whitebear'
     extension_jpg: str = '.jpg'
     extension_png: str = '.png'
     extension_html: str = '.html'

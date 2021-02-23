@@ -141,11 +141,12 @@ class EditDefaultValuesDialog(wx.Dialog):
         self._main_vertical_sizer.Add(self._button_sizer, 0, flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM,
                                       border=Numbers.widget_border_size)
         self.SetSizer(self._main_vertical_sizer)
-        #self._display_dialog_contents()
 
         # Bind handlers
         self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._ok_button)
         self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._cancel_button)
+
+        self._display_dialog_contents()
 
     def _handle_buttons(self, event: wx.CommandEvent) -> None:
         """
@@ -167,6 +168,8 @@ class EditDefaultValuesDialog(wx.Dialog):
         Display the image that this dialog edits in the gui.
         :return: None
         """
+        # TODO seo test description and keywords, prevent ok if wrong.
+        # TODO load/save data with config manager.
         self.Disable()
         # Set image data
         field_to_value = {self._field_url: (self._link.get_url(), self._field_url_tip),

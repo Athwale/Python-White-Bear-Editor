@@ -137,14 +137,15 @@ class MainFrame(wx.Frame):
         self._disableable_menu_items.append(self._file_menu_item_setup)
 
         # Put menu items into the menu buttons
-        self._file_menu.Append(self._file_menu_item_new)
         self._file_menu.Append(self._file_menu_item_open)
+        self._file_menu.Append(self._file_menu_item_new)
         self._file_menu.Append(self._file_menu_item_save)
         self._file_menu.Append(self._file_menu_item_save_as)
+        self._file_menu.Append(self._file_menu_item_upload)
         self._file_menu.AppendSeparator()
         self._file_menu.Append(self._file_menu_item_setup)
+        self._file_menu.AppendSeparator()
         self._file_menu.Append(self._file_menu_item_reload)
-        self._file_menu.Append(self._file_menu_item_upload)
         self._file_menu.Append(self._file_menu_item_quit)
 
         # Edit menu ----------------------------------------------------------------------------------------------------
