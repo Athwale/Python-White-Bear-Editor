@@ -1,5 +1,4 @@
 import os
-import sys
 from datetime import datetime
 from typing import Dict, List
 
@@ -113,6 +112,7 @@ class MainFrame(wx.Frame):
         # Create a menu item for open
         self._file_menu_item_new = wx.MenuItem(self._file_menu, wx.ID_NEW, Strings.label_menu_item_new,
                                                Strings.label_menu_item_new_hint)
+        self._disableable_menu_items.append(self._file_menu_item_new)
 
         self._file_menu_item_open = wx.MenuItem(self._file_menu, wx.ID_OPEN, Strings.label_menu_item_open,
                                                 Strings.label_menu_item_open_hint)

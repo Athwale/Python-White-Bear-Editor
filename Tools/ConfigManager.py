@@ -10,12 +10,7 @@ from Constants.Constants import Strings
 class ConfigManager:
     """
     Singleton class.
-    This class works with the persistent config file stored on disk which is used to remember last used values like
-    last open directory and window position on the screen between editor uses.
-    working directory - wd
-    window position
-    window size
-    last open document
+    This class works with the persistent config file stored on disk which is used to remember last used values.
     """
     __instance = None
     CONF_WORKING_DIR: str = 'wd'
@@ -60,7 +55,7 @@ class ConfigManager:
                 self.CONF_SIZE: str(Numbers.minimal_window_size_width) + ',' +
                 str(Numbers.minimal_window_size_height),
                 self.CONF_GLOBAL_TITLE: '',
-                self.CONF_AUTHOR: '',
+                self.CONF_AUTHOR: Strings.author,
                 self.CONF_CONTACT: '',
                 self.CONF_KEYWORDS: '',
                 self.CONF_DESCRIPTION: '',
