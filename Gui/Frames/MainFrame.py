@@ -1,4 +1,5 @@
 import os
+import sys
 from datetime import datetime
 from typing import Dict, List
 
@@ -46,7 +47,10 @@ class MainFrame(wx.Frame):
         self.menu_text_field_font = wx.Font(Numbers.text_field_font_size, wx.FONTFAMILY_DEFAULT,
                                             wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, False)
         # Prepare data objects
-        self._config_manager: ConfigManager = ConfigManager.get_instance()
+        try:
+            self._config_manager: ConfigManager = ConfigManager.get_instance()
+        except PermissionError as e:
+            self._show_error_dialog(Strings.exception_conf_inaccessible + '\n' + str(e))
         self._tool_ids = []
         self._disableable_menu_items = []
         self._document_dictionary = {}

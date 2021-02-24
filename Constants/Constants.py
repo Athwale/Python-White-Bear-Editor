@@ -106,7 +106,7 @@ class Strings:
     html_wildcard: str = 'HTML files (*' + extension_html + ')|*' + extension_html
     default_file: str = 'untitled'
     home_directory: str = os.path.expanduser('~')
-    editor_config_file: str = os.path.join(home_directory, '.whitebearEditor.conf')
+    editor_config_file: str = os.path.join(home_directory, '.whitebearEditor.yml')
     editor_output_debug_file: str = os.path.join(home_directory, 'whitebearEditor.log')
     editor_name: str = 'Whitebear editor'
     page_name: str = 'white-bear'
@@ -132,7 +132,7 @@ class Strings:
     exception_index: str = 'index.html is not in directory'
     exception_not_white_bear: str = 'Not a white Bear web directory'
     exception_file_unrecognized: str = 'Unrecognized or malformed white-bear html file:'
-    exception_conf_inaccessible: str = '.whitebearEditor.conf inaccessible'
+    exception_conf_inaccessible: str = 'Configuration file is inaccessible'
     exception_resource_not_found: str = 'Resource not found'
     exception_html_syntax_error: str = 'Syntax error in html file'
     exception_schema_syntax_error: str = 'Syntax error in xsd file'
