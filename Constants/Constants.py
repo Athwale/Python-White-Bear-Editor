@@ -84,6 +84,9 @@ class Numbers:
     video_width: int = 534
     video_height: int = 405
     original_image_max_width: int = 2000
+    min_news: int = 0
+    max_news: int = 30
+    default_news: int = 3
 
 
 class Strings:
@@ -138,6 +141,7 @@ class Strings:
     exception_schema_syntax_error: str = 'Syntax error in xsd file'
     exception_parse_multiple_descriptions: str = 'Only one meta description tag is allowed'
     exception_parse_multiple_keywords: str = 'Only one meta keywords tag is allowed'
+    exception_parse_multiple_authors: str = 'Only one meta author tag is allowed'
     exception_last_document_missing: str = 'Last open document not found'
     exception_menu_item_missing: str = 'Menu item missing'
     exception_unrecognized_color: str = 'Unrecognized CSS color'
@@ -304,6 +308,7 @@ class Strings:
     label_main_page_text_tip: str = 'Home page black text'
     label_main_page_warning: str = 'Home page warning text'
     label_main_page_warning_tip: str = 'Home page red text'
+    label_number_of_news: str = 'Show news'
 
     status_loading: str = 'Loading and testing'
     status_ready: str = 'Ready'

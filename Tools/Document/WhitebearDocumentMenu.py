@@ -6,7 +6,6 @@ from bs4.element import Tag
 
 from Constants.Constants import Strings
 from Exceptions.UnrecognizedFileException import UnrecognizedFileException
-from Exceptions.WrongFormatException import WrongFormatException
 from Resources.Fetch import Fetch
 from Tools.ConfigManager import ConfigManager
 from Tools.Document.MenuItem import MenuItem
@@ -117,21 +116,21 @@ class WhitebearDocumentMenu(WhitebearDocument):
         if len(description) == 1:
             description[0]['content'] = self._meta_description
         else:
-            raise WrongFormatException(Strings.exception_parse_multiple_descriptions)
+            raise UnrecognizedFileException(Strings.exception_parse_multiple_descriptions)
 
         # Fill keywords.
         keywords = parsed_template.find_all(name='meta', attrs={'name': 'keywords', 'content': True})
         if len(keywords) == 1:
             keywords[0]['content'] = ', '.join(self._meta_keywords)
         else:
-            raise WrongFormatException(Strings.exception_parse_multiple_descriptions)
+            raise UnrecognizedFileException(Strings.exception_parse_multiple_keywords)
 
         # Fill author.
         author = parsed_template.find_all(name='meta', attrs={'name': 'author', 'content': True})
         if len(author) == 1:
             author[0]['content'] = config_manager.get_author()
         else:
-            raise WrongFormatException(Strings.exception_parse_multiple_descriptions)
+            raise UnrecognizedFileException(Strings.exception_parse_multiple_authors)
 
         # Fill script.
         script = parsed_template.find(name='script')

@@ -44,9 +44,16 @@ class EditDefaultValuesDialog(wx.Dialog):
         self._author_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self._label_author = wx.StaticText(self, -1, Strings.label_author + ': ')
         self._field_author = wx.TextCtrl(self, -1)
+        self._label_news = wx.StaticText(self, -1, Strings.label_number_of_news + ': ')
+        self._news_spinner = wx.SpinCtrl(self, -1, style=wx.SP_ARROW_KEYS, min=Numbers.min_news, max=Numbers.max_news,
+                                         initial=Numbers.default_news)
         self._author_sub_sizer.Add(self._label_author, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
         self._author_sub_sizer.Add((20, -1))
         self._author_sub_sizer.Add(self._field_author, proportion=1)
+        self._author_sub_sizer.Add(Numbers.widget_border_size, Numbers.widget_border_size)
+        self._author_sub_sizer.Add(self._label_news, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
+        self._author_sub_sizer.Add(Numbers.widget_border_size, Numbers.widget_border_size)
+        self._author_sub_sizer.Add(self._news_spinner, proportion=0.3)
         self._information_sizer.Add(self._author_sub_sizer, flag=wx.EXPAND | wx.TOP, border=Numbers.widget_border_size)
         self._field_author_tip = Tools.get_warning_tip(self._field_author, Strings.label_author)
         self._field_author_tip.SetMessage(Strings.label_author_tip)
@@ -188,6 +195,7 @@ class EditDefaultValuesDialog(wx.Dialog):
             self._config_manager.store_script(self._field_script.GetValue())
             self._config_manager.store_black_text(self._field_black_text.GetValue())
             self._config_manager.store_red_text(self._field_red_text.GetValue())
+            self._config_manager.store_number_of_news(self._news_spinner.GetValue())
 
     def _display_dialog_contents(self) -> None:
         """
@@ -203,6 +211,7 @@ class EditDefaultValuesDialog(wx.Dialog):
         self._field_script.SetValue(self._config_manager.get_script())
         self._field_black_text.SetValue(self._config_manager.get_main_page_black_text())
         self._field_red_text.SetValue(self._config_manager.get_main_page_red_text())
+        self._news_spinner.SetValue(self._config_manager.get_number_of_news())
         self._seo_test()
         self.Enable()
 

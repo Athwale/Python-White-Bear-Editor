@@ -1062,7 +1062,7 @@ class MainFrame(wx.Frame):
             # Busy wait for css, should not take more than a second in fact this should never run because css method is
             # set to run before loading documents.
             pass
-        self._main_text_area.set_content(doc, self._css_document)
+        self._main_text_area.set_content(doc)
 
         # Set main image caption
         self._text_main_image_caption.SetLabelText(doc.get_article_image().get_caption()[0])

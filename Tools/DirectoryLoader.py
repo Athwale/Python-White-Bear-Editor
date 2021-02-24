@@ -144,12 +144,14 @@ class DirectoryLoader:
                             self._article_documents[filename] = WhitebearDocumentArticle(filename, file_path,
                                                                                          self._menu_documents,
                                                                                          self._article_documents,
-                                                                                         self._css_document)
+                                                                                         self._css_document,
+                                                                                         self._index_document)
                         elif self._xmlschema_menu.validate(xml_doc):
                             self._menu_documents[filename] = WhitebearDocumentMenu(filename, file_path,
                                                                                    self._menu_documents)
                         elif self._xmlschema_index.validate(xml_doc):
-                            self._index_document = WhitebearDocumentIndex(filename, file_path)
+                            self._index_document = WhitebearDocumentIndex(filename, file_path, self._menu_documents,
+                                                                          self._article_documents)
                         else:
                             # Skip known non editable files
                             if 'google' in filename or '404' in filename:
@@ -162,3 +164,5 @@ class DirectoryLoader:
         # Parse all articles after we have recognized and parsed all menu pages.
         for article in self._article_documents.values():
             article.parse_self()
+        # Parse index.
+        self._index_document.parse_self()

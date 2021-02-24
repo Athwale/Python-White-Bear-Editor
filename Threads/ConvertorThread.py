@@ -40,6 +40,7 @@ class ConvertorThread(threading.Thread):
         try:
             self._doc.convert_to_html()
             self._doc.get_menu_section().convert_to_html()
+            self._doc.get_index_document().convert_to_html()
             wx.CallAfter(self._parent.on_conversion_done, self._doc, self._quit_after_done, self._save_as)
         except UnrecognizedFileException as e:
             wx.CallAfter(self._parent.on_conversion_fail, e)

@@ -26,6 +26,7 @@ class ConfigManager:
     CONF_SCRIPT: str = 'global_script'
     CONF_BLACK_TXT: str = 'blackTxt'
     CONF_RED_TXT: str = 'redTxt'
+    CONF_NEWS: str = 'news'
 
     @staticmethod
     def get_instance():
@@ -61,7 +62,8 @@ class ConfigManager:
                 self.CONF_DESCRIPTION: '',
                 self.CONF_SCRIPT: '',
                 self.CONF_BLACK_TXT: '',
-                self.CONF_RED_TXT: ''}
+                self.CONF_RED_TXT: '',
+                self.CONF_NEWS: str(Numbers.default_news)}
 
     def _load(self) -> None:
         """
@@ -185,6 +187,17 @@ class ConfigManager:
         """
         return self._yaml_conf[self.CONF_RED_TXT]
 
+    def get_number_of_news(self) -> int:
+        """
+        Return how many latest articles to display on home page.
+        :return: How many latest articles to display on home page.
+        """
+        try:
+            return int(self._yaml_conf[self.CONF_NEWS])
+        except ValueError as _:
+            self._yaml_conf[self.CONF_NEWS] = str(Numbers.default_news)
+            return Numbers.default_news
+
     def store_working_dir(self, path: str) -> None:
         """
         Save a new working directory into the dictionary
@@ -293,4 +306,13 @@ class ConfigManager:
         :return: None
         """
         self._yaml_conf[self.CONF_RED_TXT] = text
+        self.save_config_file()
+
+    def store_number_of_news(self, news: int) -> None:
+        """
+        Save the the number of latest articles to display into the dictionary.
+        :param news: The number of articles.
+        :return: None
+        """
+        self._yaml_conf[self.CONF_NEWS] = str(news)
         self.save_config_file()

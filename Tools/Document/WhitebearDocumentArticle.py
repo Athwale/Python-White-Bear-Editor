@@ -1,5 +1,7 @@
 import os
 import re
+import time
+import datetime
 from typing import List, Dict
 
 import wx
@@ -23,6 +25,7 @@ from Tools.Document.AsideImage import AsideImage
 from Tools.Document.MenuItem import MenuItem
 from Tools.Document.WhitebearDocument import WhitebearDocument
 from Tools.Document.WhitebearDocumentCSS import WhitebearDocumentCSS
+from Tools.Document.WhitebearDocumentIndex import WhitebearDocumentIndex
 from Tools.Document.WhitebearDocumentMenu import WhitebearDocumentMenu
 from Tools.Tools import Tools
 
@@ -35,7 +38,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
     """
 
     def __init__(self, name: str, path: str, menus: Dict[str, WhitebearDocumentMenu], articles,
-                 css: WhitebearDocumentCSS):
+                 css: WhitebearDocumentCSS, index: WhitebearDocumentIndex):
         """
         Create a new WhitebearDocumentArticle object.
         :param name: Name of the file.
@@ -50,6 +53,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
         self._menus = menus
         self._articles = articles
         self._css_document = css
+        self._index_document = index
 
         # Article data
         self._menu_section = None
@@ -444,21 +448,21 @@ class WhitebearDocumentArticle(WhitebearDocument):
         if len(description) == 1:
             description[0]['content'] = self._meta_description
         else:
-            raise WrongFormatException(Strings.exception_parse_multiple_descriptions)
+            raise UnrecognizedFileException(Strings.exception_parse_multiple_descriptions)
 
         # Fill keywords.
         keywords = parsed_template.find_all(name='meta', attrs={'name': 'keywords', 'content': True})
         if len(keywords) == 1:
             keywords[0]['content'] = ', '.join(self._meta_keywords)
         else:
-            raise WrongFormatException(Strings.exception_parse_multiple_descriptions)
+            raise UnrecognizedFileException(Strings.exception_parse_multiple_keywords)
 
         # Fill author.
         author = parsed_template.find_all(name='meta', attrs={'name': 'author', 'content': True})
         if len(author) == 1:
             author[0]['content'] = config_manager.get_author()
         else:
-            raise WrongFormatException(Strings.exception_parse_multiple_descriptions)
+            raise UnrecognizedFileException(Strings.exception_parse_multiple_authors)
 
         # Fill script.
         script = parsed_template.find(name='script')
@@ -638,6 +642,22 @@ class WhitebearDocumentArticle(WhitebearDocument):
         """
         return self._date, self._date_error_message
 
+    def get_computable_date(self) -> float:
+        """
+        Convert article date into a flot timestamp.
+        :return: Date as float timestamp.
+        """
+        month_dict = {k: v for k, v in zip(Strings.cz_months.split('|'), range(1, 13))}
+        day = self._date.split('.', 1)[0]
+        try:
+            month = month_dict[self._date.split(' ', 2)[1]]
+        except KeyError as _:
+            # Return a value in case the date is wrong, the user will have to correct it when uploading anyway.
+            return 1
+        year = self._date.split(' ', 2)[2]
+        return time.mktime(datetime.datetime.
+                           strptime(str(day) + '/' + str(month) + '/' + str(year), "%d/%m/%Y").timetuple())
+
     def get_article_image(self) -> AsideImage:
         """
         Return the article image AsideImage instance.
@@ -700,6 +720,20 @@ class WhitebearDocumentArticle(WhitebearDocument):
         :return: A dictionary of WhitebearDocuments representing other loaded articles
         """
         return self._articles
+
+    def get_css_document(self) -> WhitebearDocumentCSS:
+        """
+        Return the css document instance.
+        :return: The WhitebearDocumentCSS instance.
+        """
+        return self._css_document
+
+    def get_index_document(self) -> WhitebearDocumentIndex:
+        """
+        Return the index document instance.
+        :return: The WhitebearDocumentIndex instance.
+        """
+        return self._index_document
 
     def find_link(self, link_id: str) -> Link:
         """

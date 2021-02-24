@@ -771,15 +771,14 @@ class CustomRichText(rt.RichTextCtrl):
         self.Clear()
         self.SetModified(False)
 
-    def set_content(self, doc: WhitebearDocumentArticle, css: WhitebearDocumentCSS) -> None:
+    def set_content(self, doc: WhitebearDocumentArticle) -> None:
         """
         Set the document this text area is displaying.
         :param doc: The white bear article.
-        :param css: The parsed css document for color codes.
         :return: None
         """
         self._doc = doc
-        self._css_document = css
+        self._css_document = doc.get_css_document()
         self.BeginSuppressUndo()
         self.clear_self()
 
