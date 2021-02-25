@@ -3,24 +3,26 @@ import os
 import wx
 
 from Constants.Constants import Strings, Numbers
+from Gui.Dialogs.AddLogoDialog import AddLogoDialog
 from Tools.Document.MenuItem import MenuItem
+from Tools.Document.WhitebearDocumentArticle import WhitebearDocumentArticle
 from Tools.Tools import Tools
 
 
 class EditMenuItemDialog(wx.Dialog):
 
-    def __init__(self, parent, item: MenuItem, working_dir: str):
+    def __init__(self, parent, item: MenuItem, doc: WhitebearDocumentArticle):
         """
         Display a dialog with information about the image where the user can edit it.
         :param parent: Parent frame.
         :param item: MenuItem instance being edited by tis dialog.
-        :param working_dir: Working directory of the editor.
+        :param doc: The document this image belongs to.
         """
         wx.Dialog.__init__(self, parent, title=Strings.label_dialog_edit_menu_item,
                            size=(Numbers.edit_aside_image_dialog_width, Numbers.edit_menu_item_dialog_height),
                            style=wx.DEFAULT_DIALOG_STYLE)
 
-        self._work_dir = working_dir
+        self._doc = doc
         self._original_item: MenuItem = item
         self._item_copy: MenuItem = self._original_item.copy()
         self._item_copy.seo_test_self()
@@ -118,11 +120,14 @@ class EditMenuItemDialog(wx.Dialog):
         self._ok_button = wx.Button(self, wx.ID_OK, Strings.button_ok)
         self._ok_button.SetDefault()
         self._browse_button = wx.Button(self, wx.ID_OPEN, Strings.button_browse)
+        self._add_button = wx.Button(self, wx.ID_ADD, Strings.button_add)
         grouping_sizer.Add(self._ok_button)
         grouping_sizer.Add((Numbers.widget_border_size, Numbers.widget_border_size))
         grouping_sizer.Add(self._cancel_button)
         grouping_sizer.Add((Numbers.widget_border_size, Numbers.widget_border_size))
         grouping_sizer.Add(self._browse_button)
+        grouping_sizer.Add((Numbers.widget_border_size, Numbers.widget_border_size))
+        grouping_sizer.Add(self._add_button)
         self._button_sizer.Add(grouping_sizer, flag=wx.ALIGN_CENTER_HORIZONTAL)
 
         # Putting the sizers together
@@ -141,6 +146,7 @@ class EditMenuItemDialog(wx.Dialog):
         self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._cancel_button)
         self.Bind(wx.EVT_TEXT, self._handle_name_change, self._field_item_name)
         self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._browse_button)
+        self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._add_button)
 
     # noinspection PyUnusedLocal
     def _handle_name_change(self, event: wx.CommandEvent) -> None:
@@ -184,7 +190,7 @@ class EditMenuItemDialog(wx.Dialog):
         """
         if event.GetId() == wx.ID_OPEN:
             new_path, new_name = self._ask_for_image()
-            img_dir: str = os.path.join(self._work_dir, Strings.folder_images, Strings.folder_logos)
+            img_dir: str = os.path.join(self._doc.get_working_directory(), Strings.folder_images, Strings.folder_logos)
             if not new_path:
                 # No image was selected
                 event.Skip()
@@ -229,6 +235,10 @@ class EditMenuItemDialog(wx.Dialog):
                 return
             else:
                 self.display_dialog_contents()
+        elif event.GetId() == wx.ID_ADD:
+            dlg = AddLogoDialog(self, self._doc)
+            dlg.ShowModal()
+            dlg.Destroy()
         else:
             # Leave the original item as it is.
             event.Skip()

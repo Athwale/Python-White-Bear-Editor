@@ -4,24 +4,26 @@ import os
 import wx
 
 from Constants.Constants import Strings, Numbers
+from Gui.Dialogs.AddImageDialog import AddImageDialog
 from Tools.Document.AsideImage import AsideImage
+from Tools.Document.WhitebearDocumentArticle import WhitebearDocumentArticle
 from Tools.Tools import Tools
 
 
 class EditAsideImageDialog(wx.Dialog):
 
-    def __init__(self, parent, image: AsideImage, working_dir: str):
+    def __init__(self, parent, image: AsideImage, doc: WhitebearDocumentArticle):
         """
         Display a dialog with information about the image where the user can edit it.
         :param parent: Parent frame.
         :param image: AsideImage instance being edited by tis dialog.
-        :param working_dir: Working directory of the editor.
+        :param doc: The document this image belongs to.
         """
         wx.Dialog.__init__(self, parent, title=Strings.label_dialog_edit_image,
                            size=(Numbers.edit_aside_image_dialog_width, Numbers.edit_aside_image_dialog_height),
                            style=wx.DEFAULT_DIALOG_STYLE)
 
-        self._work_dir = working_dir
+        self._doc = doc
         self._original_image: AsideImage = image
         self._image_copy: AsideImage = self._original_image.copy()
         self._image_copy.seo_test_self()
@@ -127,11 +129,14 @@ class EditAsideImageDialog(wx.Dialog):
         self._ok_button = wx.Button(self, wx.ID_OK, Strings.button_ok)
         self._ok_button.SetDefault()
         self._browse_button = wx.Button(self, wx.ID_OPEN, Strings.button_browse)
+        self._add_button = wx.Button(self, wx.ID_ADD, Strings.button_add)
         grouping_sizer.Add(self._ok_button)
         grouping_sizer.Add((Numbers.widget_border_size, Numbers.widget_border_size))
         grouping_sizer.Add(self._cancel_button)
         grouping_sizer.Add((Numbers.widget_border_size, Numbers.widget_border_size))
         grouping_sizer.Add(self._browse_button)
+        grouping_sizer.Add((Numbers.widget_border_size, Numbers.widget_border_size))
+        grouping_sizer.Add(self._add_button)
         self._button_sizer.Add(grouping_sizer, flag=wx.ALIGN_CENTER_HORIZONTAL)
 
         # Putting the sizers together
@@ -149,6 +154,7 @@ class EditAsideImageDialog(wx.Dialog):
         self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._ok_button)
         self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._cancel_button)
         self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._browse_button)
+        self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._add_button)
 
     def _handle_buttons(self, event: wx.CommandEvent) -> None:
         """
@@ -158,7 +164,8 @@ class EditAsideImageDialog(wx.Dialog):
         """
         if event.GetId() == wx.ID_OPEN:
             new_path, new_name = self._ask_for_image()
-            img_dir: str = os.path.join(self._work_dir, Strings.folder_images, Strings.folder_thumbnails)
+            img_dir: str = os.path.join(self._doc.get_working_directory(), Strings.folder_images,
+                                        Strings.folder_thumbnails)
             if not new_path:
                 # No image was selected
                 event.Skip()
@@ -209,6 +216,10 @@ class EditAsideImageDialog(wx.Dialog):
                 return
             else:
                 self._display_dialog_contents()
+        elif event.GetId() == wx.ID_ADD:
+            dlg = AddImageDialog(self, self._doc)
+            dlg.ShowModal()
+            dlg.Destroy()
         else:
             # Leave the old image as it is and do not do anything.
             event.Skip()
@@ -220,7 +231,7 @@ class EditAsideImageDialog(wx.Dialog):
         """
         path = os.path.dirname(self._image_copy.get_thumbnail_image_path())
         if not path:
-            path = os.path.join(self._work_dir, Strings.folder_images, Strings.folder_thumbnails,
+            path = os.path.join(self._doc.get_working_directory(), Strings.folder_images, Strings.folder_thumbnails,
                                 self._image_copy.get_section())
         with wx.FileDialog(self, Strings.label_select_image, path, wildcard=Strings.image_extensions,
                            style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST | wx.FD_PREVIEW) as dlg:

@@ -22,10 +22,13 @@ from Resources.Fetch import Fetch
 from Threads.ConvertorThread import ConvertorThread
 from Threads.FileListThread import FileListThread
 from Tools.ConfigManager import ConfigManager
+from Tools.Document.ArticleElements.Paragraph import Paragraph
+from Tools.Document.ArticleElements.Text import Text
 from Tools.Document.AsideImage import AsideImage
 from Tools.Document.MenuItem import MenuItem
 from Tools.Document.WhitebearDocumentArticle import WhitebearDocumentArticle
 from Tools.Document.WhitebearDocumentCSS import WhitebearDocumentCSS
+from Tools.Document.WhitebearDocumentIndex import WhitebearDocumentIndex
 from Tools.Document.WhitebearDocumentMenu import WhitebearDocumentMenu
 from Tools.Tools import Tools
 
@@ -57,6 +60,7 @@ class MainFrame(wx.Frame):
         self._disableable_menu_items = []
         self._document_dictionary = {}
         self._menus = None
+        self._index_document = None
         self._current_document_name = None
         self._current_document_instance = None
         self._css_document = None
@@ -656,16 +660,18 @@ class MainFrame(wx.Frame):
         self._init_search_box()
 
     def on_filelist_loaded(self, documents: Dict[str, WhitebearDocumentArticle],
-                           menus: Dict[str, WhitebearDocumentMenu]) -> None:
+                           menus: Dict[str, WhitebearDocumentMenu], index: WhitebearDocumentIndex) -> None:
         """
         This method fills up the left side page file list and is called when the FileListThread finishes.
         :param documents: Dictionary of file names and documents of article pages {file name, WhitebearDocument, ...}
         :param menus: Dictionary of file names and documents of article pages {file name, WhitebearDocumentMenu, ...}
+        :param index: WhitebearDocumentIndex instance.
         :return: None
         """
         self._disable_editor(True, leave_files=True)
         self._document_dictionary = documents
         self._menus = menus
+        self._index_document = index
         MainFrame.LOADED_PAGES = list(documents.keys())
         self._file_list.ClearAll()
         self._file_list.InsertColumn(0, Strings.label_filelist, format=wx.LIST_FORMAT_LEFT)
@@ -749,9 +755,21 @@ class MainFrame(wx.Frame):
         else:
             self._main_text_area.BeginTextColour(color)
 
-    def _save(self, confirm: bool = False, quit_editor: bool = False, save_as: bool = False) -> bool:
+    def _save_current_doc(self, confirm: bool = False, quit_editor: bool = False, save_as: bool = False) -> bool:
         """
         Save current document onto disk.
+        :param confirm: Require user confirmation.
+        :param quit_editor: If true, quit the editor on successful save.
+        :return: False if save canceled.
+        """
+        self._main_text_area.convert_document()
+        return self._save(self._current_document_instance, confirm, quit_editor, save_as)
+
+    def _save(self, doc: WhitebearDocumentArticle, confirm: bool = False, quit_editor: bool = False,
+              save_as: bool = False) -> bool:
+        """
+        Save current document onto disk.
+        :param doc: The document to save.
         :param confirm: Require user confirmation.
         :param quit_editor: If true, quit the editor on successful save.
         :return: False if save canceled.
@@ -763,8 +781,7 @@ class MainFrame(wx.Frame):
                 return False
         # Editor will be enabled when the thread finishes.
         self._disable_editor(True)
-        self._main_text_area.convert_document()
-        convertor_thread = ConvertorThread(self, self._current_document_instance, quit_editor, save_as)
+        convertor_thread = ConvertorThread(self, doc, quit_editor, save_as)
         convertor_thread.start()
         return True
 
@@ -842,7 +859,7 @@ class MainFrame(wx.Frame):
         :return: None
         """
         main_image: AsideImage = self._current_document_instance.get_article_image()
-        edit_dialog = EditAsideImageDialog(self, main_image, self._config_manager.get_working_dir())
+        edit_dialog = EditAsideImageDialog(self, main_image, self._current_document_instance)
         edit_dialog.ShowModal()
         self._update_article_image_sizer(main_image)
         self._update_file_color()
@@ -856,7 +873,7 @@ class MainFrame(wx.Frame):
         :return: None
         """
         menu_item: MenuItem = self._current_document_instance.get_menu_item()
-        edit_dialog = EditMenuItemDialog(self, menu_item, self._config_manager.get_working_dir())
+        edit_dialog = EditMenuItemDialog(self, menu_item, self._current_document_instance)
         # We first need to show the dialog so that the name label can calculate it's size and then switch to modal.
         edit_dialog.Show()
         edit_dialog.display_dialog_contents()
@@ -895,7 +912,7 @@ class MainFrame(wx.Frame):
             if selected_page != wx.NOT_FOUND:
                 self._config_manager.store_last_open_document(self._file_list.GetItemText(selected_page, 0))
             if self._current_document_instance:
-                do_save = self._save(confirm=True, quit_editor=True)
+                do_save = self._save_current_doc(confirm=True, quit_editor=True)
                 if not do_save:
                     self.Destroy()
             else:
@@ -977,7 +994,7 @@ class MainFrame(wx.Frame):
         """
         if self._current_document_instance and event.GetClientData() != Strings.flag_no_save:
             # Only ask to save if there is a document already opened in the editor and saving is allowed.
-            self._save(confirm=True)
+            self._save_current_doc(confirm=True)
 
         self._disable_editor(True)
         self._current_document_name = event.GetText()
@@ -1019,7 +1036,7 @@ class MainFrame(wx.Frame):
         result = reload_dialog.ShowModal()
         if result == wx.ID_YES:
             reload_dialog.Destroy()
-            self._save(confirm=True)
+            self._save_current_doc(confirm=True)
             selected_item = self._file_list.GetItem(self._file_list.GetFirstSelected())
             self._current_document_instance.get_menu_section().parse_self()
             self._current_document_instance.parse_self()
@@ -1245,9 +1262,9 @@ class MainFrame(wx.Frame):
         :return: None
         """
         if event.GetId() == wx.ID_SAVEAS:
-            self._save(save_as=True)
+            self._save_current_doc(save_as=True)
         else:
-            self._save()
+            self._save_current_doc()
 
     # noinspection PyUnusedLocal
     def _repeat_search(self, event: wx.CommandEvent) -> None:
@@ -1318,10 +1335,44 @@ class MainFrame(wx.Frame):
         :param event: Not used.
         :return: None
         """
-        # TODO ensure a new file is immediately written to disk. Prevents problems with stray menu items.
+
+        def get_current_date() -> str:
+            """
+            Return czech date string formatted for the article.
+            :return: Czech date string formatted for the article.
+            """
+            # TODO this
+            return '10. Ledna 2020'
+
         dlg = NewFileDialog(self, self._menus)
         if dlg.ShowModal() == wx.ID_OK:
-            new_document = WhitebearDocumentArticle()
+            new_document = WhitebearDocumentArticle(dlg.get_path(), self._menus, self._document_dictionary,
+                                                    self._css_document)
+            new_document.set_index_document(self._index_document)
+            # Add new menu item into the selected menu.
+            menu = dlg.get_section()
+            menu_item = MenuItem(menu.get_section_name(), '', '', '', new_document.get_page_name()[0],
+                                 '', '')
+            menu.add_item(menu_item)
+            new_document.set_menu_item(menu_item, menu)
+            # Set article image to a new empty image.
+            new_document.set_article_image(AsideImage(menu.get_section_name(), '', '', '', '', '', Strings.status_none,
+                                                      Strings.status_none))
+            empty_paragraph = Paragraph()
+            # TODO this text
+            empty_paragraph.add_element(Text('text'))
+            new_document.set_text_elements([empty_paragraph])
+            new_document.set_date(get_current_date())
+            new_document.set_keywords(self._config_manager.get_global_keywords().split(','))
+            new_document.seo_test_self()
+            self._document_dictionary[new_document.get_filename()] = new_document
+            new_document.convert_to_html()
+            # TODO force making a new menu item.
+            self._save(new_document, confirm=False, quit_editor=False, save_as=False)
+
+            # Add to list
+            self._file_list.InsertItem(0, new_document.get_filename())
+            self._update_file_color(0)
         dlg.Destroy()
 
     # noinspection PyUnusedLocal

@@ -127,16 +127,18 @@ class NewFileDialog(wx.Dialog):
             self._field_name.SetBackgroundColour(Numbers.GREEN_COLOR)
             self._ok_button.Enable()
 
-    def get_path(self) -> (str, str):
+    def get_path(self) -> str:
         """
         Returns the disk path for a new document. Call this before destroying the dialog and only if OK is pressed.
         :return: The disk path for a new document.
         """
         return self._doc_path
 
-    def get_section(self) -> (str, str):
+    def get_section(self) -> WhitebearDocumentMenu:
         """
         Returns menu section for a new document. Call this before destroying the dialog and only if OK is pressed.
         :return: The menu section for a new document.
         """
-        return self._field_name.GetValue()
+        for menu in self._menus.values():
+            if menu.get_section_name() == self._box_menu.GetValue():
+                return menu

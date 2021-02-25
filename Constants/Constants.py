@@ -351,6 +351,7 @@ class Strings:
     button_remove_link: str = 'Remove link'
     button_browse: str = 'Browse'
     button_save: str = 'Save'
+    button_add: str = 'Add'
 
     undo_last_action: str = 'Last action'
     undo_bold: str = 'Undo bold text'

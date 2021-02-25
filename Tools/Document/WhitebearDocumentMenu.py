@@ -222,3 +222,11 @@ class WhitebearDocumentMenu(WhitebearDocument):
         return None
 
     # Setters ----------------------------------------------------------------------------------------------------------
+    def add_item(self, item: MenuItem) -> None:
+        """
+        Add a new item into the menu,
+        :param item: The new item.
+        :return: None
+        """
+        self._menu_items.append(item)
+        self.set_modified(True)

@@ -32,11 +32,11 @@ class WhitebearDocument:
 
         # Page data
         self._parsed_html = None
-        self._page_name = None
+        self._page_name: str = ''
         self._page_name_error_message: str = ''
-        self._meta_keywords = None
+        self._meta_keywords: str = ''
         self._keywords_error_message: str = ''
-        self._meta_description = None
+        self._meta_description: str = ''
         self._description_error_message: str = ''
 
     def parse_self(self) -> None:

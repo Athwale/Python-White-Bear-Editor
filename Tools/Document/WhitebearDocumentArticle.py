@@ -63,7 +63,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
         self._text_images = set()
         self._videos = set()
 
-        self._date = None
+        self._date = ''
         self._date_error_message: str = ''
         self._main_text = None
 
@@ -829,6 +829,30 @@ class WhitebearDocumentArticle(WhitebearDocument):
         """
         if date != self._date:
             self._date = date
+            self.set_modified(True)
+
+    def set_menu_item(self, item: MenuItem, section: WhitebearDocumentMenu) -> None:
+        """
+        Set the new menu item.
+        Change modified attribute to True.
+        :param item: New menu item.
+        :param section: The menu the item belongs to.
+        :return: None
+        """
+        if item != self._menu_item:
+            self._menu_item = item
+            self._menu_section = section
+            self.set_modified(True)
+
+    def set_article_image(self, img: AsideImage) -> None:
+        """
+        Set the new article image.
+        Change modified attribute to True.
+        :param img: New image.
+        :return: None
+        """
+        if img != self._article_image:
+            self._article_image = img
             self.set_modified(True)
 
     def set_text_elements(self, elements: List) -> None:

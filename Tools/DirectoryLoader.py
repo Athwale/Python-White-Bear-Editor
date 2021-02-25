@@ -104,7 +104,9 @@ class DirectoryLoader:
                 if not self._xmlschema_index.validate(xml_doc):
                     raise IndexError(Strings.exception_not_white_bear + '\n' + str(self._xmlschema_index.error_log))
             except XMLSyntaxError as e:
-                raise IndexError(Strings.exception_html_syntax_error + '\n' + str(e))
+                raise IndexError(Strings.exception_html_syntax_error + '\n' + str(e) + ': index.html')
+            except ValueError as _:
+                raise IndexError(Strings.exception_html_syntax_error + ':\n' + 'index.html')
         return True
 
     def _prepare_documents(self, path: str) -> None:
