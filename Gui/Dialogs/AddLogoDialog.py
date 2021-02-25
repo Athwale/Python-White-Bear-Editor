@@ -165,6 +165,7 @@ class AddLogoDialog(wx.Dialog):
             self._field_image_name.SetBackgroundColour(Numbers.RED_COLOR)
             self._field_image_name_tip.SetMessage(Strings.warning_name_incorrect)
             self._field_image_name_tip.EnableTip(True)
+            self._field_image_name_tip.Show(True)
             return False
         else:
             self._field_image_name_tip.SetMessage(Strings.status_ok)
@@ -176,7 +177,7 @@ class AddLogoDialog(wx.Dialog):
                                              Strings.folder_logos, self._menu_section.lower())
         logo_file: str = os.path.join(self._logos_path, new_name)
         if os.path.exists(logo_file + Strings.extension_jpg):
-            result = wx.MessageBox(Strings.warning_file_exists + ': \n' + logo_file, Strings.status_error,
+            result = wx.MessageBox(Strings.warning_file_exists_overwrite + ': \n' + logo_file, Strings.status_error,
                                    wx.YES_NO | wx.ICON_ERROR)
             if result == wx.NO:
                 return False

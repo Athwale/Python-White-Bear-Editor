@@ -197,6 +197,7 @@ class AddImageDialog(wx.Dialog):
             self._field_image_name.SetBackgroundColour(Numbers.RED_COLOR)
             self._field_image_name_tip.SetMessage(Strings.warning_name_incorrect)
             self._field_image_name_tip.EnableTip(True)
+            self._field_image_name_tip.Show(True)
             return False
         else:
             self._field_image_name_tip.SetMessage(Strings.status_ok)
@@ -218,14 +219,14 @@ class AddImageDialog(wx.Dialog):
             img_type = wx.BITMAP_TYPE_PNG
 
         if os.path.exists(thumbnail_file + file_extension):
-            result = wx.MessageBox(Strings.warning_file_exists + ': \n' + thumbnail_file + file_extension,
+            result = wx.MessageBox(Strings.warning_file_exists_overwrite + ': \n' + thumbnail_file + file_extension,
                                    Strings.status_error, wx.YES_NO | wx.ICON_ERROR)
             if result == wx.NO:
                 return False
         self._thumbnail.SaveFile(thumbnail_file + file_extension, img_type)
 
         if os.path.exists(full_file + file_extension):
-            result = wx.MessageBox(Strings.warning_file_exists + ': \n' + full_file + file_extension,
+            result = wx.MessageBox(Strings.warning_file_exists_overwrite + ': \n' + full_file + file_extension,
                                    Strings.status_error, wx.YES_NO | wx.ICON_ERROR)
             if result == wx.NO:
                 return False

@@ -38,6 +38,7 @@ class FileListThread(threading.Thread):
             # will be called in the main GUI thread. This passes an event into the main thread in background which is
             # processed normally in the wx main thread queue.
             wx.CallAfter(self._parent.on_css_parsed, self._directory_loader.get_css_file())
-            wx.CallAfter(self._parent.on_filelist_loaded, self._directory_loader.get_articles())
+            wx.CallAfter(self._parent.on_filelist_loaded, self._directory_loader.get_articles(),
+                         self._directory_loader.get_menus())
         except (AccessException, IndexError, FileNotFoundError, UnrecognizedFileException, WrongFormatException) as e:
             wx.CallAfter(self._parent.on_filelist_load_fail, e)

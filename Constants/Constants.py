@@ -39,6 +39,8 @@ class Numbers:
     add_logo_dialog_height: int = 220
     page_setup_dialog_width: int = 900
     page_setup_dialog_height: int = 830
+    new_file_dialog_width: int = 500
+    new_file_dialog_height: int = 200
     icon_width: int = 30
     icon_height: int = 30
     color_icon_width: int = 15
@@ -180,7 +182,8 @@ class Strings:
     seo_check: str = 'SEO Check:'
 
     warning_name_incorrect: str = 'Incorrect name\nDo not use file extension\nDo not use special characters'
-    warning_file_exists: str = 'File already exists. Overwrite?'
+    warning_file_exists_overwrite: str = 'File already exists. Overwrite?'
+    warning_file_exists: str = 'File already exists'
     warning_aside_impossible: str = 'Aspect ratio must be 4/3 for aside or main image'
     warning_wrong_image_folder: str = 'Images must come from whitebear thumbnails folder'
     warning_wrong_logo_folder: str = 'Menu image must come from whitebear logos folder'
@@ -249,6 +252,7 @@ class Strings:
     label_dialog_add_logo: str = 'Add menu logo'
     label_dialog_save_file: str = 'Save file'
     label_dialog_page_setup: str = 'Page setup and default values'
+    label_dialog_new_document: str = 'New document'
 
     label_article_menu_logo: str = 'Menu logo'
     label_article_menu_logo_name_placeholder: str = 'Menu item name'

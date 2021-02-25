@@ -15,6 +15,7 @@ class EditDefaultValuesDialog(wx.Dialog):
         :param parent: The parent frame.
         :param no_cancel: Do not display cancel button. Used to force page setup completion.
         """
+        # TODO use this in tabbed mode to have ftp settings.
         wx.Dialog.__init__(self, parent, title=Strings.label_dialog_page_setup,
                            size=(Numbers.page_setup_dialog_width, Numbers.page_setup_dialog_height),
                            style=wx.CAPTION)

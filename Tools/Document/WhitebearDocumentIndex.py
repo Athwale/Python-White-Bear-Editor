@@ -177,7 +177,7 @@ class WhitebearDocumentIndex(WhitebearDocument):
 
         # Fill design.
         new_p = parsed_template.new_tag('p')
-        new_p.string = 'Web design: ' + Strings.author
+        new_p.string = 'Web design: ' + config_manager.get_author()
         new_img.insert_after(new_p)
 
         # Fill aside images from the newest articles.

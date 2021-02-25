@@ -15,6 +15,7 @@ from Gui.Dialogs.EditAsideImageDialog import EditAsideImageDialog
 from Gui.Dialogs.EditDefaultValuesDialog import EditDefaultValuesDialog
 from Gui.Dialogs.EditMenuItemDialog import EditMenuItemDialog
 from Gui.Dialogs.LoadingDialog import LoadingDialog
+from Gui.Dialogs.NewFileDialog import NewFileDialog
 from Gui.Panels.AsideImagePanel import AsideImagePanel
 from Gui.Panels.CustomRichText import CustomRichText
 from Resources.Fetch import Fetch
@@ -25,6 +26,7 @@ from Tools.Document.AsideImage import AsideImage
 from Tools.Document.MenuItem import MenuItem
 from Tools.Document.WhitebearDocumentArticle import WhitebearDocumentArticle
 from Tools.Document.WhitebearDocumentCSS import WhitebearDocumentCSS
+from Tools.Document.WhitebearDocumentMenu import WhitebearDocumentMenu
 from Tools.Tools import Tools
 
 
@@ -37,6 +39,7 @@ class MainFrame(wx.Frame):
 
     def __init__(self):
         """
+        # TODO corner cases, no menus, no articles, no index,...
         Constructor for the GUI of the editor. This is the main frame so we pass None as the parent.
         """
         # -1 is a special ID which generates a random wx ID
@@ -53,6 +56,7 @@ class MainFrame(wx.Frame):
         self._tool_ids = []
         self._disableable_menu_items = []
         self._document_dictionary = {}
+        self._menus = None
         self._current_document_name = None
         self._current_document_instance = None
         self._css_document = None
@@ -233,10 +237,9 @@ class MainFrame(wx.Frame):
         """
         self.tool_bar: wx.ToolBar = self.CreateToolBar(style=wx.TB_DEFAULT_STYLE)
         # Add toolbar tools
-        self._new_file_tool: wx.ToolBarToolBase = self.tool_bar.AddTool(self._add_tool_id(), Strings.toolbar_new_file,
+        self._new_file_tool: wx.ToolBarToolBase = self.tool_bar.AddTool(wx.ID_NEW, Strings.toolbar_new_file,
                                                                         self._scale_icon('new-file.png'),
                                                                         Strings.toolbar_new_file)
-        self._new_file_tool.SetLongHelp(Strings.toolbar_new_file)
         self._save_tool: wx.ToolBarToolBase = self.tool_bar.AddTool(self._add_tool_id(), Strings.toolbar_save,
                                                                     self._scale_icon('save.png'),
                                                                     Strings.toolbar_save)
@@ -516,6 +519,7 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self._save_document_handler, self._file_menu_item_save)
         self.Bind(wx.EVT_MENU, self._save_document_handler, self._file_menu_item_save_as)
         self.Bind(wx.EVT_MENU, self._page_setup_handler, self._file_menu_item_setup)
+        self.Bind(wx.EVT_MENU, self._new_file_handler, self._file_menu_item_new)
 
         # Bind other controls clicks
         self.Bind(wx.EVT_LIST_ITEM_SELECTED, self._list_item_click_handler, self._file_list)
@@ -596,6 +600,7 @@ class MainFrame(wx.Frame):
             self.tool_bar.EnableTool(tool_id, (not state))
         self.tool_bar.EnableTool(MainFrame.IMAGE_TOOL_ID, (not state))
         self.tool_bar.EnableTool(MainFrame.VIDEO_TOOL_ID, (not state))
+        self.tool_bar.EnableTool(wx.ID_NEW, (not state))
         # Disable menu items
         for menu_item in self._disableable_menu_items:
             menu_item.Enable(not state)
@@ -650,14 +655,17 @@ class MainFrame(wx.Frame):
             self._create_color_tool(name, self.tool_bar, color)
         self._init_search_box()
 
-    def on_filelist_loaded(self, documents: Dict[str, WhitebearDocumentArticle]) -> None:
+    def on_filelist_loaded(self, documents: Dict[str, WhitebearDocumentArticle],
+                           menus: Dict[str, WhitebearDocumentMenu]) -> None:
         """
         This method fills up the left side page file list and is called when the FileListThread finishes.
         :param documents: Dictionary of file names and documents of article pages {file name, WhitebearDocument, ...}
+        :param menus: Dictionary of file names and documents of article pages {file name, WhitebearDocumentMenu, ...}
         :return: None
         """
         self._disable_editor(True, leave_files=True)
         self._document_dictionary = documents
+        self._menus = menus
         MainFrame.LOADED_PAGES = list(documents.keys())
         self._file_list.ClearAll()
         self._file_list.InsertColumn(0, Strings.label_filelist, format=wx.LIST_FORMAT_LEFT)
@@ -1301,6 +1309,19 @@ class MainFrame(wx.Frame):
         """
         dlg = EditDefaultValuesDialog(self)
         dlg.ShowModal()
+        dlg.Destroy()
+
+    # noinspection PyUnusedLocal
+    def _new_file_handler(self, event: wx.CommandEvent) -> None:
+        """
+        Open new file dialog.
+        :param event: Not used.
+        :return: None
+        """
+        # TODO ensure a new file is immediately written to disk. Prevents problems with stray menu items.
+        dlg = NewFileDialog(self, self._menus)
+        if dlg.ShowModal() == wx.ID_OK:
+            print(dlg.get_path_section())
         dlg.Destroy()
 
     # noinspection PyUnusedLocal
