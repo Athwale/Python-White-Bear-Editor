@@ -11,7 +11,6 @@
                     <xs:attribute name="id" type="xs:string" use="required" fixed="news"/>
                 </xs:complexType>
             </xs:element>
-            <xs:element name="ul"/>
             <xs:sequence>
                 <xs:element name="h3">
                     <xs:complexType mixed="true">

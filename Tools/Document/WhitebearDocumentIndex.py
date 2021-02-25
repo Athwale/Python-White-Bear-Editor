@@ -1,5 +1,7 @@
+import os
 from typing import List, Dict
 
+import wx
 from bs4 import BeautifulSoup
 from bs4.element import Tag
 
@@ -135,7 +137,9 @@ class WhitebearDocumentIndex(WhitebearDocument):
         new_black_p.string = config_manager.get_main_page_black_text()
 
         new_red_p = parsed_template.new_tag('p')
-        new_red_p.string = config_manager.get_main_page_red_text()
+        new_strong = parsed_template.new_tag('strong', attrs={'class': 'red'})
+        new_strong.string = config_manager.get_main_page_red_text()
+        new_red_p.append(new_strong)
 
         article.h2.insert_after(new_red_p)
         article.h2.insert_after(new_black_p)
@@ -144,14 +148,47 @@ class WhitebearDocumentIndex(WhitebearDocument):
         news = parsed_template.find(name='h3', attrs={'id': 'news'})
         # Sort all articles by date.
         sorted_articles = sorted(self._articles.values(), key=lambda x: x.get_computable_date(), reverse=True)
-        for a in sorted_articles:
-            print(a)
+        new_ul = parsed_template.new_tag('ul')
+        for index, item in enumerate(sorted_articles):
+            if index == config_manager.get_number_of_news():
+                break
+            new_li = parsed_template.new_tag('li')
+            href = item.get_filename()
+            title = item.get_page_name()[0]
+            date = item.get_date()[0] + ' '
+            new_a = parsed_template.new_tag('a', attrs={'href': href, 'title': title})
+            new_a.string = title
 
-        print(parsed_template)
+            new_li.string = date
+            new_li.append(new_a)
+            new_ul.append(new_li)
+        news.insert_after(new_ul)
 
-        # Fill aside images.
+        # Fill contact.
+        contact = parsed_template.find(name='h3', attrs={'id': 'contact'})
+        # Insert the author's contact as an image.
+        image: wx.Bitmap = Tools.create_image(config_manager.get_contact())
+        image_path = os.path.join(self._working_directory, Strings.folder_images, Strings.contact_file)
+        image.SaveFile(image_path, wx.BITMAP_TYPE_PNG)
+        src = os.path.join(Strings.folder_images, Strings.contact_file)
+        new_img = parsed_template.new_tag('img', attrs={'width': image.GetWidth(), 'height': image.GetHeight(),
+                                                        'src': src, 'alt': Strings.contact_default_alt})
+        contact.insert_after(new_img)
+
+        # Fill design.
+        new_p = parsed_template.new_tag('p')
+        new_p.string = 'Web design: ' + Strings.author
+        new_img.insert_after(new_p)
+
+        # Fill aside images from the newest articles.
+        latest_images = []
+        for article in sorted_articles:
+            latest_images.append(article.get_aside_images()[0])
+            if len(latest_images) >= Numbers.max_index_images:
+                break
+
         aside = parsed_template.find(name='aside')
-        for img in self._aside_images:
+        for img in latest_images:
             new_figure = parsed_template.new_tag('figure')
             new_figcaption = parsed_template.new_tag('figcaption', attrs={'class': 'photoCaption'})
             href = img.get_full_filename()
@@ -179,5 +216,11 @@ class WhitebearDocumentIndex(WhitebearDocument):
         self._html = output
 
     # Getters ----------------------------------------------------------------------------------------------------------
+    def get_html_to_save(self) -> str:
+        """
+        Returns the last converted string HTML code of this page. Run convert_to_html() before calling this method.
+        :return: String HTML of the page or none if the document was not converted yet.
+        """
+        return self._html
 
     # Setters ----------------------------------------------------------------------------------------------------------

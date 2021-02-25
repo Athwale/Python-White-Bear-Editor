@@ -774,8 +774,9 @@ class MainFrame(wx.Frame):
         # Save article, menu and index.
         article_path = doc.get_path()
         menu_path = doc.get_menu_section().get_path()
-        # todo add index path before menu.
+        index_path = doc.get_index_document().get_path()
         for file_path, suffix, html_string in [(article_path, Strings.article, doc.get_html_to_save()),
+                                               (index_path, Strings.index, doc.get_index_document().get_html_to_save()),
                                                (menu_path, Strings.menu, doc.get_menu_section().get_html_to_save())]:
             if os.path.exists(file_path):
                 if not os.access(file_path, os.R_OK) or not os.access(file_path, os.W_OK):

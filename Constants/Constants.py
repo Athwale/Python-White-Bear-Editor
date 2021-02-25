@@ -87,6 +87,7 @@ class Numbers:
     min_news: int = 0
     max_news: int = 30
     default_news: int = 3
+    max_index_images: int = 4
 
 
 class Strings:
@@ -103,6 +104,8 @@ class Strings:
     extension_jpg: str = '.jpg'
     extension_png: str = '.png'
     extension_html: str = '.html'
+    contact_file: str = 'contact.png'
+    contact_default_alt: str = 'kontakt'
     image_extensions: str = 'JPG files (*' + extension_jpg + ')|*' + extension_jpg + \
                             '|PNG files (*' + extension_png + ')|*' + extension_jpg + ''
     image_jpg_only: str = 'JPG files (*' + extension_jpg + ')|*' + extension_jpg

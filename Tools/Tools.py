@@ -54,3 +54,25 @@ class Tools:
         for error in xmlschema.error_log:
             errors.append(error.message)
         return is_valid, errors
+
+    @staticmethod
+    def create_image(text: str) -> wx.Bitmap:
+        """
+        Create an image containing the text.
+        :param text: The text to put into the image.
+        :return: The image with the text.
+        """
+        dc = wx.MemoryDC()
+        font: wx.Font = dc.GetFont()
+        font.SetPointSize(Numbers.heading_3_size)
+        dc.SetFont(font)
+        size = dc.GetTextExtent(text)
+
+        bitmap = wx.Bitmap(width=size[0] + 10, height=size[1] + 10)
+        dc.SelectObject(bitmap)
+        dc.Clear()
+        dc.SetTextForeground(wx.BLACK)
+
+        dc.DrawText(text, 5, 5)
+
+        return bitmap
