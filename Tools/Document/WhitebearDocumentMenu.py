@@ -144,7 +144,7 @@ class WhitebearDocumentMenu(WhitebearDocument):
 
         # Activate correct menu, generate menu items according to menus.
         menu_container = parsed_template.find(name='nav')
-        for menu, instance in self._menus.items():
+        for instance in sorted(self._menus.values(), key=lambda x: x.get_section_name(), reverse=True):
             new_item = parsed_template.new_tag('a', attrs={'class': 'menu', 'href': instance.get_filename(),
                                                            'title': instance.get_page_name()[0]})
             new_item.string = instance.get_page_name()[0]

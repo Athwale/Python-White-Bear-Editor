@@ -38,7 +38,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
     """
 
     def __init__(self, name: str, path: str, menus: Dict[str, WhitebearDocumentMenu], articles,
-                 css: WhitebearDocumentCSS, index: WhitebearDocumentIndex):
+                 css: WhitebearDocumentCSS):
         """
         Create a new WhitebearDocumentArticle object.
         :param name: Name of the file.
@@ -53,7 +53,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
         self._menus = menus
         self._articles = articles
         self._css_document = css
-        self._index_document = index
+        self._index_document = None
 
         # Article data
         self._menu_section = None
@@ -476,7 +476,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
 
         # Activate correct menu, generate menu items according to menus.
         menu_container = parsed_template.find(name='nav')
-        for menu, instance in self._menus.items():
+        for instance in sorted(self._menus.values(), key=lambda x: x.get_section_name(), reverse=True):
             new_item = parsed_template.new_tag('a', attrs={'class': 'menu', 'href': instance.get_filename(),
                                                'title': instance.get_page_name()[0]})
             new_item.string = instance.get_page_name()[0]
@@ -813,6 +813,14 @@ class WhitebearDocumentArticle(WhitebearDocument):
         self.set_modified(True)
 
     # Setters ----------------------------------------------------------------------------------------------------------
+    def set_index_document(self, index: WhitebearDocumentIndex) -> None:
+        """
+        Set the index document instance.
+        :param index: The index document.
+        :return: None
+        """
+        self._index_document = index
+
     def set_date(self, date: str) -> None:
         """
         Set the new article date.

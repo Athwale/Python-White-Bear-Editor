@@ -969,7 +969,6 @@ class MainFrame(wx.Frame):
         """
         if self._current_document_instance and event.GetClientData() != Strings.flag_no_save:
             # Only ask to save if there is a document already opened in the editor and saving is allowed.
-            # TODO save a backup copy
             self._save(confirm=True)
 
         self._disable_editor(True)
