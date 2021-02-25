@@ -22,7 +22,7 @@ class EditDefaultValuesDialog(wx.Dialog):
 
         self._config_manager: ConfigManager = ConfigManager.get_instance()
         # This is used just for seo testing keywords and description.
-        self.test_doc: WhitebearDocument = WhitebearDocument('seo_test', '')
+        self.test_doc: WhitebearDocument = WhitebearDocument('')
 
         self._main_vertical_sizer = wx.BoxSizer(wx.VERTICAL)
         self._horizontal_sizer = wx.BoxSizer(wx.HORIZONTAL)

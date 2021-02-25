@@ -1321,7 +1321,7 @@ class MainFrame(wx.Frame):
         # TODO ensure a new file is immediately written to disk. Prevents problems with stray menu items.
         dlg = NewFileDialog(self, self._menus)
         if dlg.ShowModal() == wx.ID_OK:
-            print(dlg.get_path_section())
+            new_document = WhitebearDocumentArticle()
         dlg.Destroy()
 
     # noinspection PyUnusedLocal

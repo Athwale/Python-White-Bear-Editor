@@ -16,14 +16,13 @@ class WhitebearDocument:
     This is just a container for easy manipulation. This is a base class with only the common information for all pages.
     """
 
-    def __init__(self, name: str, path: str):
+    def __init__(self, path: str):
         """
         Create a new WhitebearDocument object.
-        :param name: Name of the file.
         :param path: Full path on disk to the file
         """
         # File properties
-        self._file_name = name
+        self._file_name = os.path.basename(path)
         self._path = path
         self._working_directory = os.path.dirname(path)
         self._modified = False

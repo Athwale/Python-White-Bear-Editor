@@ -15,7 +15,6 @@ from Tools.Document.ArticleElements.Text import Text, Break
 from Tools.Document.ArticleElements.UnorderedList import UnorderedList
 from Tools.Document.ArticleElements.Video import Video
 from Tools.Document.WhitebearDocumentArticle import WhitebearDocumentArticle
-from Tools.Document.WhitebearDocumentCSS import WhitebearDocumentCSS
 from Tools.ImageTextField import ImageTextField
 
 

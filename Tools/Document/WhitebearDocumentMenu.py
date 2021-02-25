@@ -20,15 +20,14 @@ class WhitebearDocumentMenu(WhitebearDocument):
     This is just a container for easy manipulation.
     """
 
-    def __init__(self, name: str, path: str, menus):
+    def __init__(self, path: str, menus):
         """
         Create a new WhitebearDocumentMenuIndex object.
-        :param name: Name of the file.
         :param path: Full path on disk to the file.
         :param menus: A dictionary of page_name: WhitebearDocumentMenu containing all parsed menus.
         """
         # File properties are in base class
-        super().__init__(name, path)
+        super().__init__(path)
         self._menu_items = []
         self._menus = menus
         self._html = None

@@ -21,16 +21,15 @@ class WhitebearDocumentIndex(WhitebearDocument):
     This is just a container for easy manipulation.
     """
 
-    def __init__(self, name: str, path: str, menus: Dict[str, WhitebearDocumentMenu], articles):
+    def __init__(self, path: str, menus: Dict[str, WhitebearDocumentMenu], articles):
         """
         Create a new WhitebearDocument object.
-        :param name: Name of the file.
         :param path: Full path on disk to the file.
         :param menus: A dictionary of WhitebearDocuments representing menus.
         :param articles: A dictionary of WhitebearDocuments representing other loaded articles.
         """
         # File properties are in base class
-        super().__init__(name, path)
+        super().__init__(path)
         self._menus = menus
         self._articles = articles
         self._html = None
