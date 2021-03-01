@@ -262,7 +262,6 @@ class EditMenuItemDialog(wx.Dialog):
         Must be called after the dialog is constructed for label size measuring to work correctly.
         :return: None
         """
-        self.Disable()
         # Set image data
         field_to_value = {self._field_item_name: (self._item_copy.get_article_name(), self._field_item_name_tip),
                           self._field_image_link_title: (self._item_copy.get_link_title(),
@@ -304,4 +303,3 @@ class EditMenuItemDialog(wx.Dialog):
             self.content_image_full_path.SetLabelText(full_path)
         else:
             self.content_image_full_path.SetLabelText(self._item_copy.get_filename())
-        self.Enable()

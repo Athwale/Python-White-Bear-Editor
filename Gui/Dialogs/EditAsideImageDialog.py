@@ -245,7 +245,6 @@ class EditAsideImageDialog(wx.Dialog):
         Display the image that this dialog edits in the gui along with field values and errors.
         :return: None
         """
-        self.Disable()
         # Set image data
         field_to_value = {self._field_image_caption: (self._image_copy.get_caption(), self._field_image_caption_tip),
                           self._field_image_link_title: (self._image_copy.get_link_title(),
@@ -295,4 +294,3 @@ class EditAsideImageDialog(wx.Dialog):
             self._content_image_thumbnail_path.SetLabelText(thumb_path)
         else:
             self._content_image_thumbnail_path.SetLabelText(self._image_copy.get_thumbnail_filename())
-        self.Enable()

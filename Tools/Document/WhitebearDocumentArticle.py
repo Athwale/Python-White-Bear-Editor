@@ -720,6 +720,13 @@ class WhitebearDocumentArticle(WhitebearDocument):
         """
         return self._articles
 
+    def get_other_menus(self) -> Dict[str, WhitebearDocumentMenu]:
+        """
+        Returns other parsed menus.
+        :return: Returns other parsed menus.
+        """
+        return self._menus
+
     def get_css_document(self) -> WhitebearDocumentCSS:
         """
         Return the css document instance.

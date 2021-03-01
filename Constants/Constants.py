@@ -39,8 +39,8 @@ class Numbers:
     add_logo_dialog_height: int = 220
     page_setup_dialog_width: int = 900
     page_setup_dialog_height: int = 830
-    new_file_dialog_width: int = 500
-    new_file_dialog_height: int = 200
+    new_file_dialog_width: int = 600
+    new_file_dialog_height: int = 420
     icon_width: int = 30
     icon_height: int = 30
     color_icon_width: int = 15
@@ -191,6 +191,7 @@ class Strings:
                                    str(Numbers.menu_logo_image_size) + 'px'
     warning_not_square: str = 'Menu image must be square'
     warning_can_not_save: str = 'Can not save to disk.'
+    warning_empty: str = 'Name can not be empty'
 
     label_menu_file: str = 'File'
     label_menu_item_new: str = 'New document...\tctrl+n'

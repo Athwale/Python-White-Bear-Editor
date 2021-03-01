@@ -58,7 +58,7 @@ class MainFrame(wx.Frame):
             self._show_error_dialog(Strings.exception_conf_inaccessible + '\n' + str(e))
         self._tool_ids = []
         self._disableable_menu_items = []
-        self._document_dictionary = {}
+        self._article_dictionary = {}
         self._menus = None
         self._index_document = None
         self._current_document_name = None
@@ -402,7 +402,6 @@ class MainFrame(wx.Frame):
         placeholder_logo_image.Replace(0, 0, 0, 245, 255, 255)
         self._menu_logo_button = wx.Button(self._right_panel, -1, style=wx.BU_EXACTFIT | wx.BORDER_NONE)
         self._menu_logo_button.SetBitmap(wx.Bitmap(placeholder_logo_image))
-        # self._menu_logo_name = wx.StaticText(self.right_panel, -1, Strings.label_article_image_caption)
         # Set border to the image
         self._menu_logo_static_sizer.Add(self._menu_logo_button, flag=wx.LEFT | wx.BOTTOM | wx.RIGHT,
                                          border=Numbers.widget_border_size)
@@ -669,15 +668,15 @@ class MainFrame(wx.Frame):
         :return: None
         """
         self._disable_editor(True, leave_files=True)
-        self._document_dictionary = documents
+        self._article_dictionary = documents
         self._menus = menus
         self._index_document = index
         MainFrame.LOADED_PAGES = list(documents.keys())
         self._file_list.ClearAll()
         self._file_list.InsertColumn(0, Strings.label_filelist, format=wx.LIST_FORMAT_LEFT)
         self._file_list.SetColumnWidth(0, self._left_panel.GetSize()[0])
-        for document_name in sorted(list(self._document_dictionary.keys()), reverse=True):
-            status_color = self._document_dictionary[document_name].get_status_color()
+        for document_name in sorted(list(self._article_dictionary.keys()), reverse=True):
+            status_color = self._article_dictionary[document_name].get_status_color()
             self._file_list.InsertItem(0, document_name)
             self._file_list.SetItemBackgroundColour(0, status_color)
 
@@ -689,7 +688,7 @@ class MainFrame(wx.Frame):
         os.chdir(self._config_manager.get_working_dir())
         # Enable GUI when the load is done
         self._set_status_text(Strings.status_ready, 3)
-        self._set_status_text(Strings.status_articles + ' ' + str(len(self._document_dictionary)), 2)
+        self._set_status_text(Strings.status_articles + ' ' + str(len(self._article_dictionary)), 2)
         self._loading_dlg.Destroy()
 
         if not self._config_manager.check_config():
@@ -998,7 +997,7 @@ class MainFrame(wx.Frame):
 
         self._disable_editor(True)
         self._current_document_name = event.GetText()
-        self._current_document_instance: WhitebearDocumentArticle = self._document_dictionary[
+        self._current_document_instance: WhitebearDocumentArticle = self._article_dictionary[
             self._current_document_name]
         try:
             result = self._current_document_instance.validate_self()
@@ -1173,7 +1172,7 @@ class MainFrame(wx.Frame):
         """
         if index == -1:
             index = self._file_list.GetFirstSelected()
-        doc = self._document_dictionary[self._file_list.GetItemText(index)]
+        doc = self._article_dictionary[self._file_list.GetItemText(index)]
         doc.is_modified()
         new_color = doc.get_status_color()
         self._file_list.SetItemBackgroundColour(index, new_color)
@@ -1344,10 +1343,9 @@ class MainFrame(wx.Frame):
             # TODO this
             return '10. Ledna 2020'
 
-        dlg = NewFileDialog(self, self._menus)
+
+        dlg = NewFileDialog(self, self._menus, self._article_dictionary, self._css_document, self._index_document)
         if dlg.ShowModal() == wx.ID_OK:
-            new_document = WhitebearDocumentArticle(dlg.get_path(), self._menus, self._document_dictionary,
-                                                    self._css_document)
             new_document.set_index_document(self._index_document)
             # Add new menu item into the selected menu.
             menu = dlg.get_section()
@@ -1365,9 +1363,9 @@ class MainFrame(wx.Frame):
             new_document.set_date(get_current_date())
             new_document.set_keywords(self._config_manager.get_global_keywords().split(','))
             new_document.seo_test_self()
-            self._document_dictionary[new_document.get_filename()] = new_document
+            self._article_dictionary[new_document.get_filename()] = new_document
             new_document.convert_to_html()
-            # TODO force making a new menu item.
+            # TODO force making a new menu item and image.
             self._save(new_document, confirm=False, quit_editor=False, save_as=False)
 
             # Add to list
