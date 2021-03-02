@@ -5,8 +5,10 @@ import wx
 
 from Constants.Constants import Strings, Numbers
 from Gui.Dialogs.EditAsideImageDialog import EditAsideImageDialog
+from Gui.Dialogs.EditMenuItemDialog import EditMenuItemDialog
 from Tools.ConfigManager import ConfigManager
 from Tools.Document.AsideImage import AsideImage
+from Tools.Document.MenuItem import MenuItem
 from Tools.Document.WhitebearDocumentArticle import WhitebearDocumentArticle
 from Tools.Document.WhitebearDocumentCSS import WhitebearDocumentCSS
 from Tools.Document.WhitebearDocumentIndex import WhitebearDocumentIndex
@@ -40,6 +42,7 @@ class NewFileDialog(wx.Dialog):
         self._index = index
         self._article_image = None
         self._menu_logo = None
+        self._document_path = None
 
         self._main_vertical_sizer = wx.BoxSizer(wx.VERTICAL)
         self._horizontal_sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -58,7 +61,7 @@ class NewFileDialog(wx.Dialog):
         self._field_name.SetBackgroundColour(Numbers.RED_COLOR)
         self._field_name_tip.SetMessage(Strings.warning_empty)
 
-        choices: List[str] = [menu.get_section_name() for menu in self._menus.values()]
+        choices: List[str] = [menu.get_page_name()[0] for menu in self._menus.values()]
         # Category sub sizer
         self._category_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self._label_category = wx.StaticText(self, -1, Strings.label_target_section + ': ')
@@ -126,13 +129,16 @@ class NewFileDialog(wx.Dialog):
         """
         event.Skip()
         if event.GetId() == wx.ID_OK:
-            # TODO this.
-            pass
+            # Add the new menu item into the correct menu document instance.
 
-    def _get_document_path(self) -> str:
+            # TODO create the document once all is set. Add item into menu, let document determine section.
+            self._doc = WhitebearDocumentArticle(self._document_path, self._menus, self._articles, self._css_document)
+            self._doc.set_index_document(self._index)
+
+    def _get_document_path(self) -> bool:
         """
-        Get the disk path for the new html file. Show error dialog if path is incorrect.
-        :return: Disk path for the new html file or empty string if path is unusable.
+        Get the disk path for the new html file.
+        :return: True if path is acceptable. False if target already exists.
         """
         # Check for file existence.
         # We must have at least one parsed menu which has a working directory at this point, otherwise we would
@@ -142,9 +148,10 @@ class NewFileDialog(wx.Dialog):
 
         path = os.path.join(working_dir, file_name)
         if os.path.exists(path):
-            return ''
+            return False
         else:
-            return path
+            self._document_path = path
+            return True
 
     def _handle_image_buttons(self, event: wx.CommandEvent) -> None:
         """
@@ -153,30 +160,54 @@ class NewFileDialog(wx.Dialog):
         :return: None
         """
         event.Skip()
-        path = self._get_document_path()
-        if path:
-            self._doc = WhitebearDocumentArticle(path, self._menus, self._articles, self._css_document)
-            self._doc.set_index_document(self._index)
-        else:
-            return
-
-        if event.GetId() == wx.ID_FILE2:
-            # TODO block section if image is chosen.
-            # TODO first menu item then article image.
-            image = AsideImage(self._box_menu.GetValue(),
-                               caption='',
-                               title='',
-                               image_alt='',
-                               original_image_path='',
-                               thumbnail_path='', full_filename=Strings.status_none,
-                               thumbnail_filename=Strings.status_none)
-            image.seo_test_self()
-            # TODO The dialog stops responding when you press ok.
-            edit_dialog = EditAsideImageDialog(self, image, self._doc)
-            edit_dialog.ShowModal()
+        if event.GetId() == wx.ID_FILE1:
+            # Create menu item.
+            if not self._menu_logo:
+                menu_item: MenuItem = MenuItem(self._box_menu.GetValue(),
+                                               name='',
+                                               title='',
+                                               image_alt='',
+                                               href=self._field_name.GetValue() + Strings.extension_html,
+                                               disk_path='',
+                                               img_filename=Strings.status_none)
+                menu_item.seo_test_self()
+            else:
+                menu_item = self._menu_logo
+            edit_dialog = EditMenuItemDialog(self, menu_item, self._config_manager.get_working_dir(),
+                                             self._box_menu.GetValue())
+            # We first need to show the dialog so that the name label can calculate it's size and then switch to modal.
+            edit_dialog.Show()
+            edit_dialog.display_dialog_contents()
+            result = edit_dialog.ShowModal()
             edit_dialog.Destroy()
-        elif event.GetId() == wx.ID_FILE1:
-            pass
+            if result == wx.ID_OK:
+                # Display the image. Disable section and name fields and enable main image button.
+                self._menu_logo_button.SetBitmap(wx.Bitmap(menu_item.get_image()))
+                self._field_name.Disable()
+                self._box_menu.Disable()
+                self._main_image_button.Enable()
+                self._menu_logo = menu_item
+        elif event.GetId() == wx.ID_FILE2:
+            # Create article image.
+            if not self._article_image:
+                image = AsideImage(self._box_menu.GetValue(),
+                                   caption='',
+                                   title='',
+                                   image_alt='',
+                                   original_image_path='',
+                                   thumbnail_path='', full_filename=Strings.status_none,
+                                   thumbnail_filename=Strings.status_none)
+                image.seo_test_self()
+            else:
+                image = self._article_image
+            edit_dialog = EditAsideImageDialog(self, image, self._config_manager.get_working_dir(),
+                                               self._box_menu.GetValue())
+            result = edit_dialog.ShowModal()
+            edit_dialog.Destroy()
+            if result == wx.ID_OK:
+                self._main_image_button.SetBitmap(wx.Bitmap(image.get_image()))
+                self._ok_button.Enable()
+                self._article_image = image
 
     # noinspection PyUnusedLocal
     def _handle_name_change(self, event: wx.CommandEvent) -> None:
@@ -209,5 +240,4 @@ class NewFileDialog(wx.Dialog):
             self._field_name_tip.SetMessage(Strings.status_ok)
             self._field_name_tip.DoHideNow()
             self._field_name.SetBackgroundColour(Numbers.GREEN_COLOR)
-            self._main_image_button.Enable()
             self._menu_logo_button.Enable()

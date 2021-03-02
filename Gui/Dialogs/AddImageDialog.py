@@ -1,20 +1,19 @@
 import math
 import os
-
 import wx
 
 from Constants.Constants import Strings, Numbers
-from Tools.Document.WhitebearDocumentArticle import WhitebearDocumentArticle
 from Tools.Tools import Tools
 
 
 class AddImageDialog(wx.Dialog):
 
-    def __init__(self, parent, doc: WhitebearDocumentArticle):
+    def __init__(self, parent, work_dir: str, section: str):
         """
         Display a dialog with information about the image where the user can edit it.
         :param parent: Parent frame.
-        :param doc: The currently opened document.
+        :param work_dir: The working directory of the editor.
+        :param section: Menu section name.
         """
         wx.Dialog.__init__(self, parent, title=Strings.label_dialog_add_image,
                            size=(Numbers.add_image_dialog_width, Numbers.edit_text_image_dialog_height),
@@ -24,7 +23,6 @@ class AddImageDialog(wx.Dialog):
         self._horizontal_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self._vertical_sizer = wx.BoxSizer(wx.VERTICAL)
         self._information_sizer = wx.BoxSizer(wx.VERTICAL)
-        self._doc = doc
         self._image_path = None
         self._image_name = None
         self._menu_section = None
@@ -32,7 +30,8 @@ class AddImageDialog(wx.Dialog):
         self._thumbnail = None
         self._originals_path = None
         self._thumbnails_path = None
-        self._working_directory = self._doc.get_working_directory()
+        self._working_directory = work_dir
+        self._section = section
 
         # Disk location
         self._original_disk_location_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -145,7 +144,7 @@ class AddImageDialog(wx.Dialog):
         self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._browse_button)
         self.Bind(wx.EVT_RADIOBUTTON, self._handle_radio_buttons)
 
-        self._menu_section = self._doc.get_menu_section().get_page_name()[0]
+        self._menu_section = self._section
         self._content_target_section.SetLabelText(self._menu_section)
 
     def _ask_for_image(self) -> (str, str):

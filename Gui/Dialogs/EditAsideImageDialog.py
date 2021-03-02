@@ -6,24 +6,25 @@ import wx
 from Constants.Constants import Strings, Numbers
 from Gui.Dialogs.AddImageDialog import AddImageDialog
 from Tools.Document.AsideImage import AsideImage
-from Tools.Document.WhitebearDocumentArticle import WhitebearDocumentArticle
 from Tools.Tools import Tools
 
 
 class EditAsideImageDialog(wx.Dialog):
 
-    def __init__(self, parent, image: AsideImage, doc: WhitebearDocumentArticle):
+    def __init__(self, parent, image: AsideImage, work_dir: str, section: str):
         """
         Display a dialog with information about the image where the user can edit it.
         :param parent: Parent frame.
         :param image: AsideImage instance being edited by tis dialog.
-        :param doc: The document this image belongs to.
+        :param work_dir: The working directory of the editor.
+        :param section: Menu section name.
         """
         wx.Dialog.__init__(self, parent, title=Strings.label_dialog_edit_image,
                            size=(Numbers.edit_aside_image_dialog_width, Numbers.edit_aside_image_dialog_height),
                            style=wx.DEFAULT_DIALOG_STYLE)
 
-        self._doc = doc
+        self._work_dir = work_dir
+        self._section = section
         self._original_image: AsideImage = image
         self._image_copy: AsideImage = self._original_image.copy()
         self._image_copy.seo_test_self()
@@ -164,8 +165,7 @@ class EditAsideImageDialog(wx.Dialog):
         """
         if event.GetId() == wx.ID_OPEN:
             new_path, new_name = self._ask_for_image()
-            img_dir: str = os.path.join(self._doc.get_working_directory(), Strings.folder_images,
-                                        Strings.folder_thumbnails)
+            img_dir: str = os.path.join(self._work_dir, Strings.folder_images, Strings.folder_thumbnails)
             if not new_path:
                 # No image was selected
                 event.Skip()
@@ -217,7 +217,7 @@ class EditAsideImageDialog(wx.Dialog):
             else:
                 self._display_dialog_contents()
         elif event.GetId() == wx.ID_ADD:
-            dlg = AddImageDialog(self, self._doc)
+            dlg = AddImageDialog(self, self._work_dir, self._section)
             dlg.ShowModal()
             dlg.Destroy()
         else:
@@ -231,8 +231,8 @@ class EditAsideImageDialog(wx.Dialog):
         """
         path = os.path.dirname(self._image_copy.get_thumbnail_image_path())
         if not path:
-            path = os.path.join(self._doc.get_working_directory(), Strings.folder_images, Strings.folder_thumbnails,
-                                self._image_copy.get_section())
+            path = os.path.join(self._work_dir, Strings.folder_images, Strings.folder_thumbnails,
+                                self._image_copy.get_section().lower())
         with wx.FileDialog(self, Strings.label_select_image, path, wildcard=Strings.image_extensions,
                            style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST | wx.FD_PREVIEW) as dlg:
             if dlg.ShowModal() == wx.ID_OK:

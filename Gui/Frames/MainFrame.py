@@ -858,7 +858,8 @@ class MainFrame(wx.Frame):
         :return: None
         """
         main_image: AsideImage = self._current_document_instance.get_article_image()
-        edit_dialog = EditAsideImageDialog(self, main_image, self._current_document_instance)
+        edit_dialog = EditAsideImageDialog(self, main_image, self._current_document_instance.get_working_directory(),
+                                           self._current_document_instance.get_menu_section().get_page_name()[0])
         edit_dialog.ShowModal()
         self._update_article_image_sizer(main_image)
         self._update_file_color()
@@ -872,7 +873,8 @@ class MainFrame(wx.Frame):
         :return: None
         """
         menu_item: MenuItem = self._current_document_instance.get_menu_item()
-        edit_dialog = EditMenuItemDialog(self, menu_item, self._current_document_instance)
+        edit_dialog = EditMenuItemDialog(self, menu_item, self._current_document_instance.get_working_directory(),
+                                         self._current_document_instance.get_menu_section().get_page_name()[0])
         # We first need to show the dialog so that the name label can calculate it's size and then switch to modal.
         edit_dialog.Show()
         edit_dialog.display_dialog_contents()
@@ -1214,7 +1216,8 @@ class MainFrame(wx.Frame):
         :param event: Not used
         :return: None
         """
-        dlg = AddImageDialog(self, self._current_document_instance)
+        dlg = AddImageDialog(self, self._current_document_instance,
+                             self._current_document_instance.get_menu_section().get_page_name()[0])
         dlg.ShowModal()
         dlg.Destroy()
 
@@ -1231,7 +1234,8 @@ class MainFrame(wx.Frame):
         # This will set the image internal state to missing image placeholder.
         new_image.seo_test_self()
         # Open edit dialog.
-        edit_dialog = EditAsideImageDialog(self, new_image, self._current_document_instance.get_working_directory())
+        edit_dialog = EditAsideImageDialog(self, new_image, self._current_document_instance.get_working_directory(),
+                                           self._current_document_instance.get_menu_section().get_page_name()[0])
         result = edit_dialog.ShowModal()
         if result == wx.ID_OK:
             self._current_document_instance.add_aside_image(new_image)
@@ -1249,7 +1253,8 @@ class MainFrame(wx.Frame):
         :param event: Not used
         :return: None
         """
-        dlg = AddLogoDialog(self, self._current_document_instance)
+        dlg = AddLogoDialog(self, self._current_document_instance.get_working_directory(),
+                            self._current_document_instance.get_menu_section().get_page_name()[0])
         dlg.ShowModal()
         dlg.Destroy()
 

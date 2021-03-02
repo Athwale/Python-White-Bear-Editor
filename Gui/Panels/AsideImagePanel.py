@@ -21,7 +21,7 @@ class AsideImagePanel(wx.lib.scrolledpanel.ScrolledPanel):
         :param parent: The main window of the editor.
         """
         wx.lib.scrolledpanel.ScrolledPanel.__init__(self, parent, -1)
-        self._document = None
+        self._doc = None
         self._images: List[AsideImage] = []
         self._sizer = wx.BoxSizer(wx.VERTICAL)
         self.SetSizer(self._sizer)
@@ -41,26 +41,27 @@ class AsideImagePanel(wx.lib.scrolledpanel.ScrolledPanel):
             if img_index == 0:
                 return
             self._images[img_index], self._images[img_index - 1] = self._images[img_index - 1], self._images[img_index]
-            self._document.set_modified(True)
+            self._doc.set_modified(True)
         elif event.GetId() == wx.ID_DOWN:
             if img_index + 1 == len(self._images):
                 return
             self._images[img_index], self._images[img_index + 1] = self._images[img_index + 1], self._images[img_index]
-            self._document.set_modified(True)
+            self._doc.set_modified(True)
         # Remove image from list
         elif event.GetId() == wx.ID_DELETE:
             result = wx.MessageBox(Strings.text_remove_image, Strings.status_warning, wx.YES_NO | wx.ICON_WARNING)
             if result == wx.YES:
                 del self._images[img_index]
-            self._document.set_modified(True)
+            self._doc.set_modified(True)
         else:
             # Modify image data
-            edit_dialog = EditAsideImageDialog(self, self._images[img_index], self._document.get_working_directory())
+            edit_dialog = EditAsideImageDialog(self, self._images[img_index], self._doc.get_working_directory(),
+                                               self._doc.get_menu_section().get_page_name()[0])
             _ = edit_dialog.ShowModal()
             edit_dialog.Destroy()
         self.show_images()
         # Pass the event into the main frame to change document color in the file list to blue.
-        if self._document.is_modified():
+        if self._doc.is_modified():
             # Send an event to the main gui to signal document color change
             color_evt = wx.CommandEvent(wx.wxEVT_COLOUR_CHANGED, self.GetId())
             color_evt.SetEventObject(self)
@@ -72,9 +73,9 @@ class AsideImagePanel(wx.lib.scrolledpanel.ScrolledPanel):
         :param doc: The document to show images from.
         :return: None
         """
-        self._document = doc
+        self._doc = doc
         self.clear_panel()
-        self._images = self._document.get_aside_images()
+        self._images = self._doc.get_aside_images()
         self.show_images()
 
     def clear_panel(self) -> None:
