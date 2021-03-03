@@ -241,7 +241,7 @@ class MenuItem:
         :return: None
         """
         if self._filename != filename:
-            self._href = filename
+            self._filename = filename
             self._modified = True
 
     def set_section(self, section: str) -> None:
