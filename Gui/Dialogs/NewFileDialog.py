@@ -7,6 +7,7 @@ import wx
 from Constants.Constants import Strings, Numbers
 from Gui.Dialogs.EditAsideImageDialog import EditAsideImageDialog
 from Gui.Dialogs.EditMenuItemDialog import EditMenuItemDialog
+from Resources.Fetch import Fetch
 from Tools.ConfigManager import ConfigManager
 from Tools.Document.AsideImage import AsideImage
 from Tools.Document.MenuItem import MenuItem
@@ -74,18 +75,15 @@ class NewFileDialog(wx.Dialog):
 
         # Image buttons
         self._image_buttons_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        placeholder_logo_image = wx.Image(Numbers.menu_logo_image_size, Numbers.menu_logo_image_size)
-        placeholder_logo_image.Replace(0, 0, 0, 245, 255, 255)
         self._menu_logo_button = wx.Button(self, wx.ID_FILE1, style=wx.BU_EXACTFIT | wx.BORDER_NONE,
                                            size=wx.Size(Numbers.menu_logo_image_size, Numbers.menu_logo_image_size))
         self._menu_logo_button.Disable()
-        self._menu_logo_button.SetBitmap(wx.Bitmap(placeholder_logo_image))
-        placeholder_main_image = wx.Image(Numbers.main_image_width, Numbers.main_image_height)
-        placeholder_main_image.Replace(0, 0, 0, 245, 255, 255)
+        self._menu_logo_button.SetBitmap(wx.Bitmap(wx.Image(Fetch.get_resource_path('menu_image.png'),
+                                                            wx.BITMAP_TYPE_PNG)))
         self._main_image_button = wx.Button(self, wx.ID_FILE2, style=wx.BU_EXACTFIT | wx.BORDER_NONE)
         self._main_image_button.Disable()
-        # TODO show image missing.
-        self._main_image_button.SetBitmap(wx.Bitmap(placeholder_main_image))
+        self._main_image_button.SetBitmap(wx.Bitmap(wx.Image(Fetch.get_resource_path('article_image.png'),
+                                                             wx.BITMAP_TYPE_PNG)))
         self._image_buttons_sub_sizer.Add(self._main_image_button, 1, flag=wx.EXPAND)
         self._image_buttons_sub_sizer.Add(Numbers.widget_border_size, Numbers.widget_border_size)
         self._image_buttons_sub_sizer.Add(self._menu_logo_button, 1, flag=wx.EXPAND)
@@ -142,7 +140,8 @@ class NewFileDialog(wx.Dialog):
             self._doc.set_keywords(self._config_manager.get_global_keywords().split(','))
             self._doc.seo_test_self()
 
-    def _get_current_date(self) -> str:
+    @staticmethod
+    def _get_current_date() -> str:
         """
         Return czech date string formatted for the article.
         :return: Czech date string formatted for the article.
