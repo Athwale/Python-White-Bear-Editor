@@ -96,6 +96,7 @@ class WhitebearDocumentMenu(WhitebearDocument):
         :raise UnrecognizedFileException if generated html fails validation.
         :raises UnrecognizedFileException if xml schema is incorrect.
         """
+        # TODO hide items for articles that do not validate with css.
         config_manager: ConfigManager = ConfigManager.get_instance()
         with open(Fetch.get_resource_path('menu_template.html'), 'r') as template:
             template_string = template.read()

@@ -1,5 +1,6 @@
 import os
-from typing import List, Dict, Text
+from typing import List, Dict
+from datetime import date
 
 import wx
 
@@ -7,7 +8,6 @@ from Constants.Constants import Strings, Numbers
 from Gui.Dialogs.EditAsideImageDialog import EditAsideImageDialog
 from Gui.Dialogs.EditMenuItemDialog import EditMenuItemDialog
 from Tools.ConfigManager import ConfigManager
-from Tools.Document.ArticleElements.Paragraph import Paragraph
 from Tools.Document.AsideImage import AsideImage
 from Tools.Document.MenuItem import MenuItem
 from Tools.Document.WhitebearDocumentArticle import WhitebearDocumentArticle
@@ -22,7 +22,6 @@ class NewFileDialog(wx.Dialog):
     def __init__(self, parent, menus: Dict[str, WhitebearDocumentMenu], articles: Dict[str, WhitebearDocumentArticle],
                  css: WhitebearDocumentCSS, index: WhitebearDocumentIndex):
         """
-        # TODO force the user to pick a menu item and main image.
         Display a dialog that allows editing additional data used in html generation.
         Default main title, author, contact, keywords, main page meta description. script, main page red/black text
         :param parent: The parent frame.
@@ -134,16 +133,11 @@ class NewFileDialog(wx.Dialog):
             for menu in self._menus.values():
                 if menu.get_page_name()[0] == self._box_menu.GetValue():
                     menu.add_item(self._menu_item)
-                    print(menu)
-            # TODO create the document once all is set. Add item into menu, let document determine section.
+            # Create the document once all is set. Add item into menu, let document determine section.
             self._doc = WhitebearDocumentArticle(self._document_path, self._menus, self._articles, self._css_document)
             self._doc.set_index_document(self._index)
             self._doc.determine_menu_section_and_menu_item()
             self._doc.set_article_image(self._article_image)
-            empty_paragraph = Paragraph()
-            # TODO this text
-            empty_paragraph.add_element(Text('text'))
-            self._doc.set_text_elements([empty_paragraph])
             self._doc.set_date(self._get_current_date())
             self._doc.set_keywords(self._config_manager.get_global_keywords().split(','))
             self._doc.seo_test_self()
@@ -153,8 +147,12 @@ class NewFileDialog(wx.Dialog):
         Return czech date string formatted for the article.
         :return: Czech date string formatted for the article.
         """
-        # TODO this
-        return '10. Ledna 2020'
+        month_dict = {k: v for k, v in zip(range(1, 13), Strings.cz_months.split('|'))}
+        today = date.today()
+        day = today.strftime("%-d")
+        month = today.strftime("%-m")
+        year = today.strftime("%Y")
+        return day + '. ' + month_dict[int(month)] + ' ' + year
 
     def _get_document_path(self) -> bool:
         """

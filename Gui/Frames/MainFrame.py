@@ -1342,10 +1342,7 @@ class MainFrame(wx.Frame):
             new_document = dlg.get_new_document()
             self._article_dictionary[new_document.get_filename()] = new_document
             new_document.convert_to_html()
-
-            # TODO this.
-            # self._save(new_document, confirm=False, quit_editor=False, save_as=False)
-
+            self._save(new_document, confirm=False, quit_editor=False, save_as=False)
             # Add to list
             self._file_list.InsertItem(0, new_document.get_filename())
             self._update_file_color(0)

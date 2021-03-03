@@ -45,7 +45,7 @@
 
             <xs:element name="section">
                 <xs:complexType>
-                    <xs:choice maxOccurs="unbounded">
+                    <xs:choice minOccurs="0" maxOccurs="unbounded">
                         <xs:element name="h3">
                             <xs:complexType mixed="true">
                                 <xs:attribute name="class" type="xs:string"/>
