@@ -35,6 +35,7 @@ class MenuItem:
         self._modified = False
         self._status_color = None
         self._filename = img_filename
+        self._article = None
 
     def copy(self):
         """
@@ -176,6 +177,13 @@ class MenuItem:
         """
         return self._filename
 
+    def get_article(self):
+        """
+        Return the document this item belongs to.
+        :return: The document this item belongs to.
+        """
+        return self._article
+
     def is_modified(self) -> bool:
         """
         Return true if this instance was modified.
@@ -184,6 +192,16 @@ class MenuItem:
         return self._modified
 
     # Setters ----------------------------------------------------------------------------------------------------------
+    def set_article(self, article) -> None:
+        """
+        Set a which article this item belongs to.
+        :param article: The article
+        :return: None
+        """
+        if self._article != article:
+            self._article = article
+            self._modified = True
+
     def set_article_name(self, new_name: str) -> None:
         """
         Set a new name for this menu item. The name is displayed under the image.

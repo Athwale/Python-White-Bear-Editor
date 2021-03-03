@@ -51,8 +51,15 @@
                 </xs:complexType>
             </xs:element>
         </xs:sequence>
-        <xs:attribute name="class" type="xs:string" fixed="link" use="required"/>
+        <xs:attribute name="class" type="linkClass" use="required"/>
     </xs:complexType>
+
+    <xs:simpleType name="linkClass">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="link" />
+            <xs:enumeration value="link hidden" />
+        </xs:restriction>
+    </xs:simpleType>
 
     <xs:complexType name="menuBodyType">
         <xs:sequence>

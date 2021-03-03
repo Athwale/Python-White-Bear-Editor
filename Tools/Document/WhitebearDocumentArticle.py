@@ -135,10 +135,10 @@ class WhitebearDocumentArticle(WhitebearDocument):
             color = Numbers.RED_COLOR
         return result, date_error_message, color
 
-    def seo_test_self(self) -> None:
+    def seo_test_self(self) -> bool:
         """
         Perform a SEO test on this document.
-        :return: None
+        :return: True if seo test passed.
         """
         # Check meta keywords and description
         super(WhitebearDocumentArticle, self).seo_test_self_basic()
@@ -185,6 +185,10 @@ class WhitebearDocumentArticle(WhitebearDocument):
             if not link.seo_test_self():
                 self.set_status_color(Numbers.RED_COLOR)
 
+        if self.get_status_color() == Numbers.RED_COLOR:
+            return False
+        return True
+
     def determine_menu_section_and_menu_item(self) -> None:
         """
         Find out which menu this article belongs in.
@@ -194,6 +198,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
         for menu in self._menus.values():
             self._menu_item = menu.find_item_by_file_name(self.get_filename())
             if self._menu_item:
+                self._menu_item.set_article(self)
                 self._menu_section = menu
                 break
         if not self._menu_item:
@@ -355,7 +360,8 @@ class WhitebearDocumentArticle(WhitebearDocument):
         :return: None
         """
         article = self._parsed_html.find(name='article', attrs={'class': 'textPage'})
-        self._page_name = article.h2.string
+        name = article.h2.string
+        self._page_name = name if name else ''
 
     def _parse_date(self) -> None:
         """

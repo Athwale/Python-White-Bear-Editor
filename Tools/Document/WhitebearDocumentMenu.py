@@ -96,7 +96,6 @@ class WhitebearDocumentMenu(WhitebearDocument):
         :raise UnrecognizedFileException if generated html fails validation.
         :raises UnrecognizedFileException if xml schema is incorrect.
         """
-        # TODO hide items for articles that do not validate with css.
         config_manager: ConfigManager = ConfigManager.get_instance()
         with open(Fetch.get_resource_path('menu_template.html'), 'r') as template:
             template_string = template.read()
@@ -164,7 +163,12 @@ class WhitebearDocumentMenu(WhitebearDocument):
                 # Ignore items that point to a deleted article. New pages are immediately saved to disk, so this should
                 # not cause any problems.
                 continue
-            new_div = parsed_template.new_tag('div', attrs={'class': 'link'})
+            attrs = {'class': 'link'}
+            if not item.get_article().seo_test_self():
+                # Hide this menu item because this article is not yet finished. The item will be available for future
+                # parsing though so the editor will load the menu item correctly for the unfinished article.
+                attrs['class'] = 'link hidden'
+            new_div = parsed_template.new_tag('div', attrs=attrs)
             href = item.get_link_href()
             title = item.get_link_title()[0]
             width = item.get_image_size()[0]
