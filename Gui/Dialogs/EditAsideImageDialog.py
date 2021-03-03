@@ -182,7 +182,7 @@ class EditAsideImageDialog(wx.Dialog):
                 return
             else:
                 # Display the new image
-                new_section: str = os.path.dirname(new_path)
+                new_section: str = os.path.basename(os.path.dirname(new_path))
                 html_thumbnail_filename: str = os.path.join(Strings.folder_images, Strings.folder_thumbnails,
                                                             new_section, new_name)
                 self._image_copy = AsideImage(new_section, self._field_image_caption.GetValue(),

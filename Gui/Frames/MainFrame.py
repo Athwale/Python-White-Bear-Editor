@@ -22,8 +22,6 @@ from Resources.Fetch import Fetch
 from Threads.ConvertorThread import ConvertorThread
 from Threads.FileListThread import FileListThread
 from Tools.ConfigManager import ConfigManager
-from Tools.Document.ArticleElements.Paragraph import Paragraph
-from Tools.Document.ArticleElements.Text import Text
 from Tools.Document.AsideImage import AsideImage
 from Tools.Document.MenuItem import MenuItem
 from Tools.Document.WhitebearDocumentArticle import WhitebearDocumentArticle
@@ -1339,39 +1337,14 @@ class MainFrame(wx.Frame):
         :param event: Not used.
         :return: None
         """
-
-        def get_current_date() -> str:
-            """
-            Return czech date string formatted for the article.
-            :return: Czech date string formatted for the article.
-            """
-            # TODO this
-            return '10. Ledna 2020'
-
-
         dlg = NewFileDialog(self, self._menus, self._article_dictionary, self._css_document, self._index_document)
         if dlg.ShowModal() == wx.ID_OK:
-            new_document.set_index_document(self._index_document)
-            # Add new menu item into the selected menu.
-            menu = dlg.get_section()
-            menu_item = MenuItem(menu.get_section_name(), '', '', '', new_document.get_page_name()[0],
-                                 '', '')
-            menu.add_item(menu_item)
-            new_document.set_menu_item(menu_item, menu)
-            # Set article image to a new empty image.
-            new_document.set_article_image(AsideImage(menu.get_section_name(), '', '', '', '', '', Strings.status_none,
-                                                      Strings.status_none))
-            empty_paragraph = Paragraph()
-            # TODO this text
-            empty_paragraph.add_element(Text('text'))
-            new_document.set_text_elements([empty_paragraph])
-            new_document.set_date(get_current_date())
-            new_document.set_keywords(self._config_manager.get_global_keywords().split(','))
-            new_document.seo_test_self()
+            new_document = dlg.get_new_document()
             self._article_dictionary[new_document.get_filename()] = new_document
             new_document.convert_to_html()
-            # TODO force making a new menu item and image.
-            self._save(new_document, confirm=False, quit_editor=False, save_as=False)
+
+            # TODO this.
+            # self._save(new_document, confirm=False, quit_editor=False, save_as=False)
 
             # Add to list
             self._file_list.InsertItem(0, new_document.get_filename())

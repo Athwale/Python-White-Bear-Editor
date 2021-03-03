@@ -80,7 +80,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
         super(WhitebearDocumentArticle, self).parse_self()
         self._parse_page_name()
         self._parse_date()
-        self._determine_menu_section_and_menu_item()
+        self.determine_menu_section_and_menu_item()
         self._parse_main_article_image()
         self._parse_aside_images()
         self._parse_main_text()
@@ -185,7 +185,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
             if not link.seo_test_self():
                 self.set_status_color(Numbers.RED_COLOR)
 
-    def _determine_menu_section_and_menu_item(self) -> None:
+    def determine_menu_section_and_menu_item(self) -> None:
         """
         Find out which menu this article belongs in.
         :return: None
@@ -836,19 +836,6 @@ class WhitebearDocumentArticle(WhitebearDocument):
         """
         if date != self._date:
             self._date = date
-            self.set_modified(True)
-
-    def set_menu_item(self, item: MenuItem, section: WhitebearDocumentMenu) -> None:
-        """
-        Set the new menu item.
-        Change modified attribute to True.
-        :param item: New menu item.
-        :param section: The menu the item belongs to.
-        :return: None
-        """
-        if item != self._menu_item:
-            self._menu_item = item
-            self._menu_section = section
             self.set_modified(True)
 
     def set_article_image(self, img: AsideImage) -> None:

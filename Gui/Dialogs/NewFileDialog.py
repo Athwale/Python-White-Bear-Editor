@@ -1,5 +1,5 @@
 import os
-from typing import List, Dict
+from typing import List, Dict, Text
 
 import wx
 
@@ -7,6 +7,7 @@ from Constants.Constants import Strings, Numbers
 from Gui.Dialogs.EditAsideImageDialog import EditAsideImageDialog
 from Gui.Dialogs.EditMenuItemDialog import EditMenuItemDialog
 from Tools.ConfigManager import ConfigManager
+from Tools.Document.ArticleElements.Paragraph import Paragraph
 from Tools.Document.AsideImage import AsideImage
 from Tools.Document.MenuItem import MenuItem
 from Tools.Document.WhitebearDocumentArticle import WhitebearDocumentArticle
@@ -41,7 +42,7 @@ class NewFileDialog(wx.Dialog):
         self._css_document = css
         self._index = index
         self._article_image = None
-        self._menu_logo = None
+        self._menu_item = None
         self._document_path = None
 
         self._main_vertical_sizer = wx.BoxSizer(wx.VERTICAL)
@@ -130,10 +131,30 @@ class NewFileDialog(wx.Dialog):
         event.Skip()
         if event.GetId() == wx.ID_OK:
             # Add the new menu item into the correct menu document instance.
-
+            for menu in self._menus.values():
+                if menu.get_page_name()[0] == self._box_menu.GetValue():
+                    menu.add_item(self._menu_item)
+                    print(menu)
             # TODO create the document once all is set. Add item into menu, let document determine section.
             self._doc = WhitebearDocumentArticle(self._document_path, self._menus, self._articles, self._css_document)
             self._doc.set_index_document(self._index)
+            self._doc.determine_menu_section_and_menu_item()
+            self._doc.set_article_image(self._article_image)
+            empty_paragraph = Paragraph()
+            # TODO this text
+            empty_paragraph.add_element(Text('text'))
+            self._doc.set_text_elements([empty_paragraph])
+            self._doc.set_date(self._get_current_date())
+            self._doc.set_keywords(self._config_manager.get_global_keywords().split(','))
+            self._doc.seo_test_self()
+
+    def _get_current_date(self) -> str:
+        """
+        Return czech date string formatted for the article.
+        :return: Czech date string formatted for the article.
+        """
+        # TODO this
+        return '10. Ledna 2020'
 
     def _get_document_path(self) -> bool:
         """
@@ -162,7 +183,7 @@ class NewFileDialog(wx.Dialog):
         event.Skip()
         if event.GetId() == wx.ID_FILE1:
             # Create menu item.
-            if not self._menu_logo:
+            if not self._menu_item:
                 menu_item: MenuItem = MenuItem(self._box_menu.GetValue(),
                                                name='',
                                                title='',
@@ -172,7 +193,7 @@ class NewFileDialog(wx.Dialog):
                                                img_filename=Strings.status_none)
                 menu_item.seo_test_self()
             else:
-                menu_item = self._menu_logo
+                menu_item = self._menu_item
             edit_dialog = EditMenuItemDialog(self, menu_item, self._config_manager.get_working_dir(),
                                              self._box_menu.GetValue())
             # We first need to show the dialog so that the name label can calculate it's size and then switch to modal.
@@ -186,7 +207,7 @@ class NewFileDialog(wx.Dialog):
                 self._field_name.Disable()
                 self._box_menu.Disable()
                 self._main_image_button.Enable()
-                self._menu_logo = menu_item
+                self._menu_item = menu_item
         elif event.GetId() == wx.ID_FILE2:
             # Create article image.
             if not self._article_image:
@@ -241,3 +262,10 @@ class NewFileDialog(wx.Dialog):
             self._field_name_tip.DoHideNow()
             self._field_name.SetBackgroundColour(Numbers.GREEN_COLOR)
             self._menu_logo_button.Enable()
+
+    def get_new_document(self) -> WhitebearDocumentArticle:
+        """
+        Return the new document created in this dialog.
+        :return: The new document created in this dialog.
+        """
+        return self._doc
