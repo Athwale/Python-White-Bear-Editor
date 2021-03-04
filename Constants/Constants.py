@@ -41,6 +41,8 @@ class Numbers:
     page_setup_dialog_height: int = 830
     new_file_dialog_width: int = 600
     new_file_dialog_height: int = 420
+    edit_menu_dialog_width: int = 600
+    edit_menu_dialog_height: int = 300
     icon_width: int = 30
     icon_height: int = 30
     color_icon_width: int = 15
@@ -206,8 +208,10 @@ class Strings:
     label_menu_item_upload_hint: str = 'Upload all modified documents'
     label_menu_item_save_as: str = 'Save as...'
     label_menu_item_save_as_hint: str = 'Save as new file'
-    label_menu_item_page_setup: str = 'Page setup'
+    label_menu_item_page_setup: str = 'Page setup...'
     label_menu_item_page_setup_hint: str = 'Edit main page and default values'
+    label_menu_item_edit_menu: str = 'Edit menu...'
+    label_menu_item_edit_menu_hint: str = 'Edit menu pages'
 
     label_menu_item_quit: str = 'Quit\tctrl+q'
     label_menu_item_quit_hint: str = 'Quit editor'
@@ -254,6 +258,7 @@ class Strings:
     label_dialog_save_file: str = 'Save file'
     label_dialog_page_setup: str = 'Page setup and default values'
     label_dialog_new_document: str = 'New document'
+    label_dialog_edit_menu: str = 'Edit menu'
 
     label_article_menu_logo: str = 'Menu logo'
     label_article_menu_logo_name_placeholder: str = 'Menu item name'
@@ -310,6 +315,7 @@ class Strings:
     label_default_keywords_tip: str = 'Default global meta keywords'
     label_main_meta_description: str = 'Home page meta description'
     label_main_description_tip: str = 'Home page meta description'
+    label_meta_description: str = 'Meta description'
     label_script: str = 'Script'
     label_script_tip: str = 'Contents of script tag in head\nGoogle analytics script'
     label_main_page_text: str = 'Home page text'
@@ -317,6 +323,7 @@ class Strings:
     label_main_page_warning: str = 'Home page warning text'
     label_main_page_warning_tip: str = 'Home page red text'
     label_number_of_news: str = 'Show news'
+    label_menu_name: str = 'Menu name'
 
     status_loading: str = 'Loading and testing'
     status_ready: str = 'Ready'

@@ -13,6 +13,7 @@ from Gui.Dialogs.AddImageDialog import AddImageDialog
 from Gui.Dialogs.AddLogoDialog import AddLogoDialog
 from Gui.Dialogs.EditAsideImageDialog import EditAsideImageDialog
 from Gui.Dialogs.EditDefaultValuesDialog import EditDefaultValuesDialog
+from Gui.Dialogs.EditMenuDialog import EditMenuDialog
 from Gui.Dialogs.EditMenuItemDialog import EditMenuItemDialog
 from Gui.Dialogs.LoadingDialog import LoadingDialog
 from Gui.Dialogs.NewFileDialog import NewFileDialog
@@ -145,6 +146,9 @@ class MainFrame(wx.Frame):
         self._file_menu_item_setup = wx.MenuItem(self._file_menu, wx.ID_SETUP, Strings.label_menu_item_page_setup,
                                                  Strings.label_menu_item_page_setup_hint)
         self._disableable_menu_items.append(self._file_menu_item_setup)
+        self._file_menu_item_edit_menu = wx.MenuItem(self._file_menu, wx.ID_FILE9, Strings.label_menu_item_edit_menu,
+                                                     Strings.label_menu_item_edit_menu_hint)
+        self._disableable_menu_items.append(self._file_menu_item_edit_menu)
 
         # Put menu items into the menu buttons
         self._file_menu.Append(self._file_menu_item_open)
@@ -154,6 +158,7 @@ class MainFrame(wx.Frame):
         self._file_menu.Append(self._file_menu_item_upload)
         self._file_menu.AppendSeparator()
         self._file_menu.Append(self._file_menu_item_setup)
+        self._file_menu.Append(self._file_menu_item_edit_menu)
         self._file_menu.AppendSeparator()
         self._file_menu.Append(self._file_menu_item_reload)
         self._file_menu.Append(self._file_menu_item_quit)
@@ -519,6 +524,7 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self._save_document_handler, self._file_menu_item_save_as)
         self.Bind(wx.EVT_MENU, self._page_setup_handler, self._file_menu_item_setup)
         self.Bind(wx.EVT_MENU, self._new_file_handler, self._file_menu_item_new)
+        self.Bind(wx.EVT_MENU, self._edit_menu_handler, self._file_menu_item_edit_menu)
 
         # Bind other controls clicks
         self.Bind(wx.EVT_LIST_ITEM_SELECTED, self._list_item_click_handler, self._file_list)
@@ -1077,7 +1083,6 @@ class MainFrame(wx.Frame):
         self._main_text_area.set_content(doc)
 
         # Set main image caption
-        # todo use extent to measure menu label text.
         self._text_main_image_caption.SetLabelText(doc.get_article_image().get_caption()[0])
 
         # Set menu item name
@@ -1335,6 +1340,17 @@ class MainFrame(wx.Frame):
             # Add to list
             self._file_list.InsertItem(0, new_document.get_filename())
             self._update_file_color(0)
+        dlg.Destroy()
+
+    # noinspection PyUnusedLocal
+    def _edit_menu_handler(self, event: wx.CommandEvent) -> None:
+        """
+        Open new file dialog.
+        :param event: Not used.
+        :return: None
+        """
+        dlg = EditMenuDialog(self, self._menus)
+        dlg.ShowModal()
         dlg.Destroy()
 
     # noinspection PyUnusedLocal
