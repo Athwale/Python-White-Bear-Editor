@@ -22,7 +22,7 @@ class EditDefaultValuesDialog(wx.Dialog):
 
         self._config_manager: ConfigManager = ConfigManager.get_instance()
         # This is used just for seo testing keywords and description.
-        self.test_doc: WhitebearDocument = WhitebearDocument('')
+        self._test_doc: WhitebearDocument = WhitebearDocument('')
 
         self._main_vertical_sizer = wx.BoxSizer(wx.VERTICAL)
         self._horizontal_sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -223,14 +223,14 @@ class EditDefaultValuesDialog(wx.Dialog):
         """
         result = True
         # Keywords test.
-        correct, message, color = self.test_doc.seo_test_keywords(self._field_meta_keywords.GetValue())
+        correct, message, color = self._test_doc.seo_test_keywords(self._field_meta_keywords.GetValue())
         result = result and correct
         self._field_meta_keywords.SetBackgroundColour(color)
         self._field_keywords_tip.SetMessage(Strings.label_default_keywords_tip + '\n\n' +
                                             Strings.seo_check + '\n' + message)
 
         # Description test.
-        correct, message, color = self.test_doc.seo_test_description(self._field_meta_description.GetValue())
+        correct, message, color = self._test_doc.seo_test_description(self._field_meta_description.GetValue())
         result = result and correct
         self._set_field_background(self._field_meta_description, color)
         self._field_description_tip.SetMessage(Strings.label_main_description_tip + '\n\n' +

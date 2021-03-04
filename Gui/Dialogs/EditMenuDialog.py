@@ -22,6 +22,7 @@ class EditMenuDialog(wx.Dialog):
 
         self._config_manager: ConfigManager = ConfigManager.get_instance()
         self._menus = menus
+        self._menu = None
 
         self._main_horizontal_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self._left_vertical_sizer = wx.BoxSizer(wx.VERTICAL)
@@ -30,8 +31,9 @@ class EditMenuDialog(wx.Dialog):
 
         # Menu list
         choices = list(self._menus.keys())
-        self._menu_list = wx.ListBox(self, -1, size=(Numbers.minimal_panel_size, -1), choices=choices)
-        if choices:
+        self._menu_list = wx.ListBox(self, -1, size=(Numbers.minimal_panel_size, -1), choices=choices,
+                                     style=wx.LB_SORT | wx.LB_SINGLE)
+        if self._menus:
             self._menu_list.SetSelection(0)
         self._add_button = wx.Button(self, wx.ID_ADD, Strings.button_add)
         self._left_vertical_sizer.Add(self._menu_list, 1, flag=wx.TOP | wx.LEFT, border=Numbers.widget_border_size)
@@ -48,6 +50,7 @@ class EditMenuDialog(wx.Dialog):
         self._information_sizer.Add(self._page_name_sub_sizer, flag=wx.EXPAND | wx.TOP,
                                     border=Numbers.widget_border_size)
         self._field_page_name_tip = Tools.get_warning_tip(self._field_page_name, Strings.label_menu_name)
+        self._field_page_name_tip.SetMessage(Strings.label_menu_name)
 
         # Keywords sub sizer
         self._meta_keywords_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -59,7 +62,7 @@ class EditMenuDialog(wx.Dialog):
         self._information_sizer.Add(self._meta_keywords_sub_sizer, flag=wx.EXPAND | wx.TOP,
                                     border=Numbers.widget_border_size)
         self._field_keywords_tip = Tools.get_warning_tip(self._field_meta_keywords, Strings.label_article_keywords)
-        self._field_keywords_tip.SetMessage(Strings.label_default_keywords_tip)
+        self._field_keywords_tip.SetMessage(Strings.label_menu_meta_keywords)
 
         # --------------------------------------------------------------------------------------------------------------
         # Description sub sizer
@@ -72,8 +75,8 @@ class EditMenuDialog(wx.Dialog):
         self._information_sizer.Add(self._meta_description_sub_sizer, 1, flag=wx.EXPAND | wx.TOP | wx.BOTTOM,
                                     border=Numbers.widget_border_size)
         self._field_description_tip = Tools.get_warning_tip(self._field_meta_description,
-                                                            Strings.label_main_meta_description)
-        self._field_description_tip.SetMessage(Strings.label_main_description_tip)
+                                                            Strings.label_meta_description)
+        self._field_description_tip.SetMessage(Strings.label_menu_meta_description)
 
         # Buttons
         self._button_sizer = wx.BoxSizer(wx.VERTICAL)
@@ -99,10 +102,11 @@ class EditMenuDialog(wx.Dialog):
         # Bind handlers
         self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._ok_button)
         self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._cancel_button)
+        self.Bind(wx.EVT_LISTBOX, self._menu_list_handler, self._menu_list)
         for field in [self._field_page_name, self._field_meta_keywords, self._field_meta_description]:
             self.Bind(wx.EVT_TEXT, self._text_handler, field)
 
-        #self._display_dialog_contents()
+        self._display_dialog_contents()
 
     # noinspection PyUnusedLocal
     def _text_handler(self, event: wx.CommandEvent) -> None:
@@ -113,10 +117,8 @@ class EditMenuDialog(wx.Dialog):
         """
         if not self._seo_test():
             self._ok_button.Disable()
-            self._cancel_button.Disable()
         else:
             self._ok_button.Enable()
-            self._cancel_button.Enable()
 
     def _handle_buttons(self, event: wx.CommandEvent) -> None:
         """
@@ -124,21 +126,41 @@ class EditMenuDialog(wx.Dialog):
         :param event: The button event
         :return: None
         """
-        event.Skip()
         if event.GetId() == wx.ID_OK:
-            return
+            self._menu: WhitebearDocumentMenu
+            self._menu.set_page_name(self._field_page_name.GetValue())
+            keywords_list = [word.strip() for word in self._field_meta_keywords.GetValue().split(',')]
+            self._menu.set_keywords(keywords_list)
+            self._menu.set_description(self._field_meta_description.GetValue())
+            if not self._menu.seo_test_self_basic():
+                # This should never happen since all is tested before the OK button is enabled.
+                return
+            event.Skip()
+        else:
+            event.Skip()
+
+    # noinspection PyUnusedLocal
+    def _menu_list_handler(self, event: wx.CommandEvent) -> None:
+        """
+        Handles clicks onto menu names in the list box.
+        :param event: Not used.
+        :return: None
+        """
+        self._display_dialog_contents()
 
     def _display_dialog_contents(self) -> None:
         """
         Display the image that this dialog edits in the gui.
         :return: None
         """
-        self.Disable()
-        self._field_page_name.SetValue(self._config_manager.get_global_title())
-        self._field_meta_keywords.SetValue(self._config_manager.get_global_keywords())
-        self._field_meta_description.SetValue(self._config_manager.get_main_meta_description())
-        self._seo_test()
-        self.Enable()
+        if self._menus:
+            self.Disable()
+            self._menu: WhitebearDocumentMenu = self._menus[self._menu_list.GetString(self._menu_list.GetSelection())]
+            self._field_page_name.SetValue(self._menu.get_page_name()[0])
+            self._field_meta_keywords.SetValue(self._menu.get_keywords_string()[0])
+            self._field_meta_description.SetValue(self._menu.get_description()[0])
+            self._seo_test()
+            self.Enable()
 
     def _seo_test(self) -> bool:
         """
@@ -147,25 +169,22 @@ class EditMenuDialog(wx.Dialog):
         """
         result = True
         # Keywords test.
-        correct, message, color = self.test_doc.seo_test_keywords(self._field_meta_keywords.GetValue())
+        correct, message, color = self._menu.seo_test_keywords(self._field_meta_keywords.GetValue())
         result = result and correct
         self._field_meta_keywords.SetBackgroundColour(color)
-        self._field_keywords_tip.SetMessage(Strings.label_default_keywords_tip + '\n\n' +
-                                            Strings.seo_check + '\n' + message)
+        self._field_keywords_tip.SetMessage(Strings.seo_check + '\n' + message)
 
         # Description test.
-        correct, message, color = self.test_doc.seo_test_description(self._field_meta_description.GetValue())
+        correct, message, color = self._menu.seo_test_description(self._field_meta_description.GetValue())
         result = result and correct
         self._set_field_background(self._field_meta_description, color)
-        self._field_description_tip.SetMessage(Strings.label_main_description_tip + '\n\n' +
-                                               Strings.seo_check + '\n' + message)
+        self._field_description_tip.SetMessage(Strings.seo_check + '\n' + message)
 
-        for field in [self._field_page_name]:
-            if not field.GetValue():
-                result = False
-                self._set_field_background(field, Numbers.RED_COLOR)
-            else:
-                self._set_field_background(field, Numbers.GREEN_COLOR)
+        # Test name
+        correct, message, color = self._menu.seo_test_name(self._field_page_name.GetValue())
+        result = result and correct
+        self._field_page_name.SetBackgroundColour(color)
+        self._field_page_name_tip.SetMessage(Strings.seo_check + '\n' + message)
 
         return result
 
@@ -183,3 +202,5 @@ class EditMenuDialog(wx.Dialog):
         field.GetStyle(0, style_carrier)
         style_carrier.SetBackgroundColour(color)
         field.SetStyle(0, len(field.GetValue()), style_carrier)
+
+    # TODO new menu button.

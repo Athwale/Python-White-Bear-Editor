@@ -143,12 +143,33 @@ class WhitebearDocument:
             color = Numbers.RED_COLOR
         return result, description_error_message, color
 
-    def seo_test_self_basic(self) -> None:
+    @staticmethod
+    def seo_test_name(name: str) -> (bool, str, wx.Colour):
+        """
+        SEO test article name and return False, error string and new status color if incorrect.
+        :param name: The name to check
+        :return: Return False, error string and new status color if incorrect.
+        """
+        page_name_error_message = Strings.status_ok
+        result = True
+        color = Numbers.GREEN_COLOR
+        if len(name) < Numbers.article_name_min_length or len(name) > Numbers.article_name_max_length:
+            page_name_error_message = Strings.seo_error_name_length
+            result = False
+        if name == Strings.label_article_title:
+            page_name_error_message = Strings.seo_error_default_value
+            result = False
+
+        if not result:
+            color = Numbers.RED_COLOR
+        return result, page_name_error_message, color
+
+    def seo_test_self_basic(self) -> bool:
         """
         Perform basic SEO self test and change internal instance state accordingly. If description or
         keywords are incorrect, change valid to False and the color of the file list item to red.
         Errors found in the validation are saved are then returned along with the data by getter methods.
-        :return: None
+        :return: False if seo test failed.
         """
         # Clear all error on each retest
         self._page_name_error_message: str = ''
@@ -168,6 +189,10 @@ class WhitebearDocument:
         if not description_result:
             self._description_error_message = error
             self.set_status_color(color)
+
+        if self.get_status_color() == Numbers.RED_COLOR:
+            return False
+        return True
 
     # Boolean functions ------------------------------------------------------------------------------------------------
     def is_valid(self) -> bool:

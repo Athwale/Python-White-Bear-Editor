@@ -904,7 +904,7 @@ class MainFrame(wx.Frame):
             selected_page = self._file_list.GetFirstSelected()
             if selected_page != wx.NOT_FOUND:
                 self._config_manager.store_last_open_document(self._file_list.GetItemText(selected_page, 0))
-            if self._current_document_instance:
+            if self._current_document_instance and self._current_document_instance.is_modified():
                 do_save = self._save_current_doc(confirm=True, quit_editor=True)
                 if not do_save:
                     self.Destroy()

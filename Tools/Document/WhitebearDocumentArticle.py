@@ -86,27 +86,6 @@ class WhitebearDocumentArticle(WhitebearDocument):
         self._parse_main_text()
         self.seo_test_self()
 
-    @staticmethod
-    def seo_test_name(name: str) -> (bool, str, wx.Colour):
-        """
-        SEO test article name and return False, error string and new status color if incorrect.
-        :param name: The name to check
-        :return: Return False, error string and new status color if incorrect.
-        """
-        page_name_error_message = Strings.status_ok
-        result = True
-        color = Numbers.GREEN_COLOR
-        if len(name) < Numbers.article_name_min_length or len(name) > Numbers.article_name_max_length:
-            page_name_error_message = Strings.seo_error_name_length
-            result = False
-        if name == Strings.label_article_title:
-            page_name_error_message = Strings.seo_error_default_value
-            result = False
-
-        if not result:
-            color = Numbers.RED_COLOR
-        return result, page_name_error_message, color
-
     def seo_test_date(self, date: str) -> (bool, str, wx.Colour):
         """
         SEO test date and return False, error string and new status color if incorrect.
