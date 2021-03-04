@@ -106,6 +106,6 @@ class AsideImagePanel(wx.lib.scrolledpanel.ScrolledPanel):
         for img in self._images:
             image_panel = ImagePanel(self)
             image_panel.set_image(img)
-            self._sizer.Add(image_panel, flag=wx.ALL, border=Numbers.widget_border_size)
+            self._sizer.Add(image_panel, 1, flag=wx.EXPAND | wx.ALIGN_LEFT)
 
         self.SetupScrolling(scroll_x=False, scrollIntoView=True)

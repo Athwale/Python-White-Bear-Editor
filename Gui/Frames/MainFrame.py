@@ -368,7 +368,6 @@ class MainFrame(wx.Frame):
         # Contains article photos
         self._side_photo_column_sizer = wx.StaticBoxSizer(wx.VERTICAL, self._right_panel,
                                                           label=Strings.label_article_photo_column)
-        self._side_photo_column_sizer.SetMinSize((Numbers.photo_column_width, -1))
         self._right_vertical_sizer.Add(self._article_image_static_sizer, flag=wx.ALIGN_LEFT | wx.RIGHT, border=0)
         self._right_vertical_sizer.Add(self._side_photo_column_sizer, flag=wx.EXPAND, proportion=1,
                                        border=Numbers.widget_border_size)
@@ -470,7 +469,7 @@ class MainFrame(wx.Frame):
 
         # Aside images section -----------------------------------------------------------------------------------------
         self._side_photo_panel = AsideImagePanel(self._right_panel)
-        self._side_photo_column_sizer.Add(self._side_photo_panel, 1, flag=wx.EXPAND)
+        self._side_photo_column_sizer.Add(self._side_photo_panel, 1, flag=wx.EXPAND | wx.ALIGN_LEFT)
         self.Fit()
 
     def _setup_main_text_area(self) -> None:
@@ -498,7 +497,6 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_CLOSE, self._close_button_handler, self)
         # This calls the quit method if the user logs off the computer
         self.Bind(wx.EVT_QUERY_END_SESSION, self._close_button_handler)
-        self.Bind(wx.EVT_ACTIVATE, self._refresh_aside_images)
 
         # Bind a handler that changes selected document color if an edit happens in other controls.
         self.Bind(wx.EVT_COLOUR_CHANGED, self._text_area_edit_handler)
@@ -547,16 +545,6 @@ class MainFrame(wx.Frame):
         :return: None
         """
         self._search_box.SetFocus()
-
-    def _refresh_aside_images(self, event: wx.ActivateEvent) -> None:
-        """
-        Refresh the side image panel to fix wrong borders if the window started minimized.
-        :param event: Used to detect when the window is being activated.
-        :return: None
-        """
-        if self._side_photo_panel:
-            if event.GetActive():
-                self._side_photo_panel.show_images()
 
     def _set_status_text(self, text: str, position=0) -> None:
         """
@@ -1089,6 +1077,7 @@ class MainFrame(wx.Frame):
         self._main_text_area.set_content(doc)
 
         # Set main image caption
+        # todo use extent to measure menu label text.
         self._text_main_image_caption.SetLabelText(doc.get_article_image().get_caption()[0])
 
         # Set menu item name
