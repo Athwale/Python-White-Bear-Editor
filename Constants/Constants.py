@@ -326,6 +326,8 @@ class Strings:
     label_main_page_warning_tip: str = 'Home page red text'
     label_number_of_news: str = 'Show news'
     label_menu_name: str = 'Menu name'
+    label_file_name: str = 'File name'
+    label_menu_file_name: str = 'Menu file name'
 
     status_loading: str = 'Loading and testing'
     status_ready: str = 'Ready'

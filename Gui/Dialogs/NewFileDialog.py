@@ -137,7 +137,7 @@ class NewFileDialog(wx.Dialog):
             self._doc.determine_menu_section_and_menu_item()
             self._doc.set_article_image(self._article_image)
             self._doc.set_date(self._get_current_date())
-            self._doc.set_keywords(self._config_manager.get_global_keywords().split(','))
+            self._doc.set_keywords(self._config_manager.get_global_keywords().split(', '))
             self._doc.seo_test_self()
 
     @staticmethod

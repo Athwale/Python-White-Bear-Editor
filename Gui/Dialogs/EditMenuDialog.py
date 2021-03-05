@@ -1,3 +1,4 @@
+import os
 from typing import Dict
 
 import wx
@@ -32,7 +33,7 @@ class EditMenuDialog(wx.Dialog):
         # Menu list
         choices = list(self._menus.keys())
         self._menu_list = wx.ListBox(self, -1, size=(Numbers.minimal_panel_size, -1), choices=choices,
-                                     style=wx.LB_SORT | wx.LB_SINGLE)
+                                     style=wx.LB_SINGLE)
         if self._menus:
             self._menu_list.SetSelection(0)
         self._add_button = wx.Button(self, wx.ID_ADD, Strings.button_add)
@@ -102,6 +103,7 @@ class EditMenuDialog(wx.Dialog):
         # Bind handlers
         self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._ok_button)
         self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._cancel_button)
+        self.Bind(wx.EVT_BUTTON, self._handle_new_menu_button, self._add_button)
         self.Bind(wx.EVT_LISTBOX, self._menu_list_handler, self._menu_list)
         for field in [self._field_page_name, self._field_meta_keywords, self._field_meta_description]:
             self.Bind(wx.EVT_TEXT, self._text_handler, field)
@@ -203,4 +205,40 @@ class EditMenuDialog(wx.Dialog):
         style_carrier.SetBackgroundColour(color)
         field.SetStyle(0, len(field.GetValue()), style_carrier)
 
-    # TODO new menu button.
+    # noinspection PyUnusedLocal
+    def _handle_new_menu_button(self, event: wx.CommandEvent) -> None:
+        """
+        Create a new menu and allow editing it.
+        :param event: Not used
+        :return: None
+        """
+        name_dialog = wx.TextEntryDialog(self, Strings.label_file_name + ':', caption=Strings.label_menu_file_name,
+                                         value="")
+        if name_dialog.ShowModal() == wx.ID_OK:
+            file_name = name_dialog.GetValue()
+            # Test file name format.
+            wrong_name: bool = False
+            for c in file_name:
+                if not c.isalnum():
+                    wrong_name = True
+                if c == '-':
+                    wrong_name = False
+            if wrong_name:
+                wx.MessageBox(Strings.warning_name_incorrect, Strings.status_error, wx.OK | wx.ICON_ERROR)
+                return
+            # Test whether file already exists
+            working_dir: str = self._menu.get_working_directory()
+            file_name = file_name + Strings.extension_html
+            path = os.path.join(working_dir, file_name)
+            if os.path.exists(path):
+                wx.MessageBox(Strings.warning_file_exists, Strings.status_error, wx.OK | wx.ICON_ERROR)
+                return
+
+            # Create new menu document
+            new_menu = WhitebearDocumentMenu(path, self._menus)
+            new_menu.set_keywords(self._config_manager.get_global_keywords().split(', '))
+            self._menus[file_name] = new_menu
+            # TODO new menu has double spaces between keywords.
+            self._menu_list.Insert(file_name, self._menu_list.GetCount())
+            # TODO save after this to export the new menu.
+        name_dialog.Destroy()

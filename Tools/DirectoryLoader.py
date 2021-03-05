@@ -148,8 +148,9 @@ class DirectoryLoader:
                                                                                          self._article_documents,
                                                                                          self._css_document)
                         elif self._xmlschema_menu.validate(xml_doc):
-                            self._menu_documents[filename] = WhitebearDocumentMenu(file_path,
-                                                                                   self._menu_documents)
+                            menu = WhitebearDocumentMenu(file_path, self._menu_documents)
+                            menu.parse_self()
+                            self._menu_documents[filename] = menu
                         elif self._xmlschema_index.validate(xml_doc):
                             self._index_document = WhitebearDocumentIndex(file_path, self._menu_documents,
                                                                           self._article_documents)
