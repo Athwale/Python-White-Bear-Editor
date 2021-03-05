@@ -194,6 +194,7 @@ class Strings:
     warning_not_square: str = 'Menu image must be square'
     warning_can_not_save: str = 'Can not save to disk.'
     warning_empty: str = 'Name can not be empty'
+    warning_last_document_not_found: str = 'Last document not found'
 
     label_menu_file: str = 'File'
     label_menu_item_new: str = 'New document...\tctrl+n'
@@ -202,8 +203,6 @@ class Strings:
     label_menu_item_open_hint: str = 'Open a whitebear web directory'
     label_menu_item_save: str = 'Save document\tctrl+s'
     label_menu_item_save_hint: str = 'Save current document'
-    label_menu_item_reload: str = 'Reload file from disk'
-    label_menu_item_reload_hint: str = 'Parse file again from disk'
     label_menu_item_upload: str = 'Upload all changes...'
     label_menu_item_upload_hint: str = 'Upload all modified documents'
     label_menu_item_save_as: str = 'Save as...'

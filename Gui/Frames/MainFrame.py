@@ -132,10 +132,6 @@ class MainFrame(wx.Frame):
                                                    Strings.label_menu_item_save_as_hint)
         self._disableable_menu_items.append(self._file_menu_item_save_as)
 
-        self._file_menu_item_reload = wx.MenuItem(self._file_menu, wx.ID_REFRESH, Strings.label_menu_item_reload,
-                                                  Strings.label_menu_item_reload_hint)
-        self._disableable_menu_items.append(self._file_menu_item_reload)
-
         self._file_menu_item_quit = wx.MenuItem(self._file_menu, wx.ID_CLOSE, Strings.label_menu_item_quit,
                                                 Strings.label_menu_item_quit_hint)
 
@@ -160,7 +156,6 @@ class MainFrame(wx.Frame):
         self._file_menu.Append(self._file_menu_item_setup)
         self._file_menu.Append(self._file_menu_item_edit_menu)
         self._file_menu.AppendSeparator()
-        self._file_menu.Append(self._file_menu_item_reload)
         self._file_menu.Append(self._file_menu_item_quit)
 
         # Edit menu ----------------------------------------------------------------------------------------------------
@@ -211,7 +206,6 @@ class MainFrame(wx.Frame):
         # About menu ---------------------------------------------------------------------------------------------------
         self._help_menu_item_about = wx.MenuItem(self._help_menu, wx.ID_ABOUT, Strings.label_menu_item_about,
                                                  Strings.label_menu_item_about_hint)
-        self._disableable_menu_items.append(self._help_menu_item_about)
         self._help_menu.Append(self._help_menu_item_about)
 
         self.SetMenuBar(self._menu_bar)
@@ -510,7 +504,6 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self._about_button_handler, self._help_menu_item_about)
         self.Bind(wx.EVT_MENU, self._open_button_handler, self._file_menu_item_open)
         self.Bind(wx.EVT_MENU, self._quit_button_handler, self._file_menu_item_quit)
-        self.Bind(wx.EVT_MENU, self._reload_button_handler, self._file_menu_item_reload)
         self.Bind(wx.EVT_MENU, self._forward_event, self._edit_menu_item_cut)
         self.Bind(wx.EVT_MENU, self._forward_event, self._edit_menu_item_copy)
         self.Bind(wx.EVT_MENU, self._forward_event, self._edit_menu_item_paste)
@@ -675,13 +668,19 @@ class MainFrame(wx.Frame):
         # Select last used document
         last_document = self._config_manager.get_last_document()
         if last_document:
-            self._file_list.Select(self._file_list.FindItem(0, last_document))
+            index = self._file_list.FindItem(0, last_document)
+            if index > -1:
+                self._file_list.Select(index)
+            else:
+                self._loading_dlg.Destroy()
+                self._show_error_dialog(Strings.warning_last_document_not_found + ':' + '\n' + str(last_document))
 
         os.chdir(self._config_manager.get_working_dir())
         # Enable GUI when the load is done
         self._set_status_text(Strings.status_ready, 3)
         self._set_status_text(Strings.status_articles + ' ' + str(len(self._article_dictionary)), 2)
-        self._loading_dlg.Destroy()
+        if self._loading_dlg:
+            self._loading_dlg.Destroy()
 
         if not self._config_manager.check_config():
             # Check that no default values are missing.
@@ -1016,28 +1015,6 @@ class MainFrame(wx.Frame):
             return
         # If the document is correct, now we can show it.
         self._fill_editor(self._current_document_instance)
-
-    # noinspection PyUnusedLocal
-    def _reload_button_handler(self, event):
-        """
-        Reparse the selected file from disk. Used in case the user has to fix something in html or images.
-        :param event: wx event, not used.
-        :return: None
-        """
-        reload_dialog = wx.MessageDialog(self, Strings.text_reload_from_disk, Strings.status_warning,
-                                         wx.YES_NO | wx.ICON_WARNING)
-        result = reload_dialog.ShowModal()
-        if result == wx.ID_YES:
-            reload_dialog.Destroy()
-            self._save_current_doc(confirm=True)
-            selected_item = self._file_list.GetItem(self._file_list.GetFirstSelected())
-            self._current_document_instance.get_menu_section().parse_self()
-            self._current_document_instance.parse_self()
-            event = wx.ListEvent()
-            event.SetItem(selected_item)
-            event.SetClientData(Strings.flag_no_save)
-            self._list_item_click_handler(event)
-        reload_dialog.Destroy()
 
     def _fill_editor(self, doc: WhitebearDocumentArticle) -> None:
         """

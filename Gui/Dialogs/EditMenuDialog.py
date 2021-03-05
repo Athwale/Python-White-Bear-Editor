@@ -19,7 +19,7 @@ class EditMenuDialog(wx.Dialog):
         """
         wx.Dialog.__init__(self, parent, title=Strings.label_dialog_edit_menu,
                            size=(Numbers.edit_menu_dialog_width, Numbers.edit_menu_dialog_height),
-                           style=wx.DEFAULT_DIALOG_STYLE)
+                           style=wx.CAPTION)
 
         self._config_manager: ConfigManager = ConfigManager.get_instance()
         self._menus = menus
@@ -82,13 +82,9 @@ class EditMenuDialog(wx.Dialog):
         # Buttons
         self._button_sizer = wx.BoxSizer(wx.VERTICAL)
         grouping_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self._cancel_button = wx.Button(self, wx.ID_CANCEL, Strings.button_close)
         self._ok_button = wx.Button(self, wx.ID_OK, Strings.button_save)
         self._ok_button.SetDefault()
         grouping_sizer.Add(self._ok_button)
-        grouping_sizer.Add((Numbers.widget_border_size, Numbers.widget_border_size))
-        grouping_sizer.Add(self._cancel_button)
-        grouping_sizer.Add((Numbers.widget_border_size, Numbers.widget_border_size))
         self._button_sizer.Add(grouping_sizer, flag=wx.ALIGN_CENTER_HORIZONTAL)
 
         # Putting the sizers together
@@ -102,7 +98,6 @@ class EditMenuDialog(wx.Dialog):
 
         # Bind handlers
         self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._ok_button)
-        self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._cancel_button)
         self.Bind(wx.EVT_BUTTON, self._handle_new_menu_button, self._add_button)
         self.Bind(wx.EVT_LISTBOX, self._menu_list_handler, self._menu_list)
         for field in [self._field_page_name, self._field_meta_keywords, self._field_meta_description]:
@@ -119,8 +114,12 @@ class EditMenuDialog(wx.Dialog):
         """
         if not self._seo_test():
             self._ok_button.Disable()
+            self._menu_list.Disable()
+            self._add_button.Disable()
         else:
             self._ok_button.Enable()
+            self._menu_list.Enable()
+            self._add_button.Enable()
 
     def _handle_buttons(self, event: wx.CommandEvent) -> None:
         """
@@ -128,18 +127,20 @@ class EditMenuDialog(wx.Dialog):
         :param event: The button event
         :return: None
         """
+        event.Skip()
         if event.GetId() == wx.ID_OK:
-            self._menu: WhitebearDocumentMenu
-            self._menu.set_page_name(self._field_page_name.GetValue())
-            keywords_list = [word.strip() for word in self._field_meta_keywords.GetValue().split(',')]
-            self._menu.set_keywords(keywords_list)
-            self._menu.set_description(self._field_meta_description.GetValue())
-            if not self._menu.seo_test_self_basic():
-                # This should never happen since all is tested before the OK button is enabled.
-                return
-            event.Skip()
-        else:
-            event.Skip()
+            self._save()
+
+    def _save(self) -> None:
+        """
+        Save the changed data into the menu instance.
+        :return: None
+        """
+        self._menu: WhitebearDocumentMenu
+        self._menu.set_page_name(self._field_page_name.GetValue())
+        keywords_list = [word.strip() for word in self._field_meta_keywords.GetValue().split(',')]
+        self._menu.set_keywords(keywords_list)
+        self._menu.set_description(self._field_meta_description.GetValue())
 
     # noinspection PyUnusedLocal
     def _menu_list_handler(self, event: wx.CommandEvent) -> None:
@@ -148,6 +149,7 @@ class EditMenuDialog(wx.Dialog):
         :param event: Not used.
         :return: None
         """
+        self._save()
         self._display_dialog_contents()
 
     def _display_dialog_contents(self) -> None:
@@ -238,7 +240,10 @@ class EditMenuDialog(wx.Dialog):
             new_menu = WhitebearDocumentMenu(path, self._menus)
             new_menu.set_keywords(self._config_manager.get_global_keywords().split(', '))
             self._menus[file_name] = new_menu
-            # TODO new menu has double spaces between keywords.
             self._menu_list.Insert(file_name, self._menu_list.GetCount())
-            # TODO save after this to export the new menu.
+            self._menu_list.SetSelection(self._menu_list.GetCount() - 1)
+            self._display_dialog_contents()
+            # TODO Document not saved on save. Only menu from the current article is saved.
+            # TODO resave all documents to include new menu everywhere. On menu change the name might changed, regenerate all.
+            # TOTO save menu separately it is not saved unless a document contains it.
         name_dialog.Destroy()

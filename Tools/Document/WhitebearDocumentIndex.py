@@ -148,19 +148,24 @@ class WhitebearDocumentIndex(WhitebearDocument):
         # Sort all articles by date.
         sorted_articles = sorted(self._articles.values(), key=lambda x: x.get_computable_date(), reverse=True)
         new_ul = parsed_template.new_tag('ul')
+        limit = config_manager.get_number_of_news()
         for index, item in enumerate(sorted_articles):
-            if index == config_manager.get_number_of_news():
+            if index >= limit:
                 break
-            new_li = parsed_template.new_tag('li')
-            href = item.get_filename()
-            title = item.get_page_name()[0]
-            date = item.get_date()[0] + ' '
-            new_a = parsed_template.new_tag('a', attrs={'href': href, 'title': title})
-            new_a.string = title
+            if item.seo_test_self():
+                new_li = parsed_template.new_tag('li')
+                href = item.get_filename()
+                title = item.get_page_name()[0]
+                date = item.get_date()[0] + ' '
+                new_a = parsed_template.new_tag('a', attrs={'href': href, 'title': title})
+                new_a.string = title
 
-            new_li.string = date
-            new_li.append(new_a)
-            new_ul.append(new_li)
+                new_li.string = date
+                new_li.append(new_a)
+                new_ul.append(new_li)
+            else:
+                # Add the next article to news.
+                limit = limit + 1
         news.insert_after(new_ul)
 
         # Fill contact.
