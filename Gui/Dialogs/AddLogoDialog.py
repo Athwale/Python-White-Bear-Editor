@@ -1,4 +1,5 @@
 import os
+
 import wx
 
 from Constants.Constants import Strings, Numbers

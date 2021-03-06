@@ -1,6 +1,6 @@
 import os
-from typing import List, Dict
 from datetime import date
+from typing import List, Dict
 
 import wx
 

@@ -995,7 +995,8 @@ class MainFrame(wx.Frame):
         :param event: wx event, brings the selected string from the menu.
         :return: None
         """
-        if self._current_document_instance and event.GetClientData() != Strings.flag_no_save:
+        if self._current_document_instance and event.GetClientData() != Strings.flag_no_save and \
+                self._current_document_instance.is_modified():
             # Only ask to save if there is a document already opened in the editor and saving is allowed.
             self._save_current_doc(confirm=True)
 

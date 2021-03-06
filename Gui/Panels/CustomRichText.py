@@ -41,6 +41,8 @@ class CustomRichText(rt.RichTextCtrl):
         # Used to prevent over-calling methods on keypress.
         self._disable_input = False
         self._click_counter = 0
+        # Is set to true when a document is fully loaded, prevents setting document to modified before it is loaded.
+        self._load_indicator = False
 
         self._stylesheet = rt.RichTextStyleSheet()
         self._stylesheet.SetName('Stylesheet')
@@ -55,6 +57,7 @@ class CustomRichText(rt.RichTextCtrl):
         self._main_frame = wx.GetTopLevelParent(self)
         self.Bind(wx.EVT_LISTBOX, self._style_picker_handler, self._style_picker)
         self.Bind(wx.EVT_TEXT_URL, self._url_in_text_click_handler, self)
+        self.Bind(wx.EVT_TEXT, self._modification_handler, self)
         self.Bind(wx.EVT_MENU, self._on_insert_tool, self._main_frame.insert_img_tool)
         self.Bind(wx.EVT_MENU, self._on_insert_tool, self._main_frame.insert_video_tool)
         self.Bind(wx.EVT_MENU, self._change_bold, self._main_frame.bold_tool)
@@ -77,6 +80,16 @@ class CustomRichText(rt.RichTextCtrl):
         self._add_text_handlers()
         self._create_styles()
         self._fill_style_picker()
+
+    # noinspection PyUnusedLocal
+    def _modification_handler(self, event: wx.CommandEvent) -> None:
+        """
+        Set document to modified state when anything is written.
+        :param event: Not used
+        :return: None
+        """
+        if self._load_indicator:
+            self._doc.set_modified(True)
 
     def _refresh(self, evt: wx.CommandEvent) -> None:
         """
@@ -287,7 +300,7 @@ class CustomRichText(rt.RichTextCtrl):
             self.BeginBatchUndo(Strings.undo_last_action)
             end_batch = True
         self.SetStyleEx(p_range, style, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_PARAGRAPHS_ONLY
-                        | rt.RICHTEXT_SETSTYLE_RESET)
+                                              | rt.RICHTEXT_SETSTYLE_RESET)
         if end_batch:
             self.EndBatchUndo()
 
@@ -342,7 +355,7 @@ class CustomRichText(rt.RichTextCtrl):
             self.BeginBatchUndo(Strings.undo_last_action)
             end_batch = True
         self.SetStyleEx(p_range, style, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_PARAGRAPHS_ONLY
-                        | rt.RICHTEXT_SETSTYLE_RESET)
+                                              | rt.RICHTEXT_SETSTYLE_RESET)
         if end_batch:
             self.EndBatchUndo()
 
@@ -393,9 +406,9 @@ class CustomRichText(rt.RichTextCtrl):
             self.BeginBatchUndo(Strings.undo_last_action)
             end_batch = True
         self.SetStyleEx(p_range, style, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_PARAGRAPHS_ONLY
-                        | rt.RICHTEXT_SETSTYLE_RESET)
+                                              | rt.RICHTEXT_SETSTYLE_RESET)
         self.SetListStyle(p_range, style_def, specifiedLevel=0, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO
-                          | rt.RICHTEXT_SETSTYLE_SPECIFY_LEVEL)
+                                                                      | rt.RICHTEXT_SETSTYLE_SPECIFY_LEVEL)
         if end_batch:
             self.EndBatchUndo()
 
@@ -776,6 +789,7 @@ class CustomRichText(rt.RichTextCtrl):
         :param doc: The white bear article.
         :return: None
         """
+        self._load_indicator = False
         self._doc = doc
         self._css_document = doc.get_css_document()
         self.BeginSuppressUndo()
@@ -807,6 +821,7 @@ class CustomRichText(rt.RichTextCtrl):
         self.LayoutContent()
         self.EndSuppressUndo()
         self._modify_text()
+        self._load_indicator = True
 
     def _write_list(self, ul: UnorderedList) -> None:
         """

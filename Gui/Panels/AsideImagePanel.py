@@ -3,7 +3,7 @@ from typing import List
 import wx
 import wx.lib.scrolledpanel
 
-from Constants.Constants import Strings, Numbers
+from Constants.Constants import Strings
 from Gui.Dialogs.EditAsideImageDialog import EditAsideImageDialog
 from Gui.Panels.ImagePanel import ImagePanel
 from Tools.Document.AsideImage import AsideImage
