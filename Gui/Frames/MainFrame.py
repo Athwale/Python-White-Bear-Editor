@@ -66,6 +66,7 @@ class MainFrame(wx.Frame):
         self._loading_dlg = None
         self._ignore_change = False
         self._no_save = False
+        self._quit = False
 
         self._search_term = None
         self._search_results: List[int] = []
@@ -745,23 +746,20 @@ class MainFrame(wx.Frame):
         else:
             self._main_text_area.BeginTextColour(color)
 
-    def _save_current_doc(self, confirm: bool = False, quit_editor: bool = False, save_as: bool = False) -> bool:
+    def _save_current_doc(self, confirm: bool = False, save_as: bool = False) -> bool:
         """
         Save current document onto disk.
         :param confirm: Require user confirmation.
-        :param quit_editor: If true, quit the editor on successful save.
         :return: False if save canceled.
         """
         self._main_text_area.convert_document()
-        return self._save(self._current_document_instance, confirm, quit_editor, save_as)
+        return self._save(self._current_document_instance, confirm, save_as)
 
-    def _save(self, doc: WhitebearDocumentArticle, confirm: bool = False, quit_editor: bool = False,
-              save_as: bool = False) -> bool:
+    def _save(self, doc, confirm: bool = False, save_as: bool = False) -> bool:
         """
         Save current document onto disk.
         :param doc: The document to save.
         :param confirm: Require user confirmation.
-        :param quit_editor: If true, quit the editor on successful save.
         :return: False if save canceled.
         """
         # Force save current document.
@@ -771,45 +769,57 @@ class MainFrame(wx.Frame):
                 return False
         # Editor will be enabled when the thread finishes.
         self._disable_editor(True)
-        convertor_thread = ConvertorThread(self, doc, quit_editor, save_as)
-        convertor_thread.start()
+        if isinstance(doc, WhitebearDocumentArticle):
+            # Convert all parts, article, document and index.
+            convertor_thread = ConvertorThread(self, doc, save_as)
+            convertor_thread.start()
+            convertor_thread = ConvertorThread(self, doc.get_menu_section(), save_as)
+            convertor_thread.start()
+            convertor_thread = ConvertorThread(self, doc.get_index_document(), save_as)
+            convertor_thread.start()
+        elif isinstance(doc, WhitebearDocumentMenu):
+            # Only convert the menu
+            convertor_thread = ConvertorThread(self, doc, save_as)
+            convertor_thread.start()
         return True
 
-    def on_conversion_done(self, doc, quit_editor: bool, save_as: bool) -> None:
+    def on_conversion_done(self, doc, save_as: bool) -> None:
         """
         Called when ConvertorThread finishes converting documents to html.
         :param doc: The document that was processed by the thread.
-        :param quit_editor: If true, close the window after save.
         :param save_as: Open file dialog for the article and menu, otherwise save into the current filename.
         :return: None
         """
         last_save = datetime.now().strftime("%H:%M:%S")
-        self._update_file_color(self._file_list.FindItem(-1, doc.get_filename()))
+        if isinstance(doc, WhitebearDocumentArticle):
+            self._update_file_color(self._file_list.FindItem(-1, doc.get_filename()))
 
-        # Save article, menu and index.
-        article_path = doc.get_path()
-        menu_path = doc.get_menu_section().get_path()
-        index_path = doc.get_index_document().get_path()
-        for file_path, suffix, html_string in [(article_path, Strings.article, doc.get_html_to_save()),
-                                               (index_path, Strings.index, doc.get_index_document().get_html_to_save()),
-                                               (menu_path, Strings.menu, doc.get_menu_section().get_html_to_save())]:
-            if os.path.exists(file_path):
-                if not os.access(file_path, os.R_OK) or not os.access(file_path, os.W_OK):
-                    self._show_error_dialog(Strings.warning_can_not_save + '\n' + Strings.exception_access_html)
-                    self._disable_editor(False)
-                    return
-            if save_as:
-                file_path = self._get_new_file_path(suffix)
-            if file_path:
-                try:
-                    with open(file_path, 'w', encoding='utf8') as file:
-                        file.write(html_string)
-                        self._set_status_text(Strings.status_saved + ': ' + last_save, 3)
-                except IOError:
-                    self._show_error_dialog(Strings.warning_can_not_save + '\n' + Strings.exception_access_html)
-                    quit_editor = False
+        file_path = doc.get_path()
+        if isinstance(doc, WhitebearDocumentArticle):
+            suffix = Strings.article
+        elif isinstance(doc, WhitebearDocumentMenu):
+            suffix = Strings.menu
+        else:
+            suffix = Strings.index
+        html_string = doc.get_html_to_save()
 
-        if quit_editor:
+        if os.path.exists(file_path):
+            if not os.access(file_path, os.R_OK) or not os.access(file_path, os.W_OK):
+                self._show_error_dialog(Strings.warning_can_not_save + '\n' + Strings.exception_access_html)
+                self._disable_editor(False)
+                return
+        if save_as:
+            file_path = self._get_new_file_path(suffix)
+        if file_path:
+            try:
+                with open(file_path, 'w', encoding='utf8') as file:
+                    file.write(html_string)
+                    self._set_status_text(Strings.status_saved + ': ' + last_save, 3)
+            except IOError:
+                self._show_error_dialog(Strings.warning_can_not_save + '\n' + Strings.exception_access_html)
+                self._quit = False
+
+        if self._quit:
             self.Destroy()
         self._disable_editor(False)
 
@@ -904,7 +914,8 @@ class MainFrame(wx.Frame):
             if selected_page != wx.NOT_FOUND:
                 self._config_manager.store_last_open_document(self._file_list.GetItemText(selected_page, 0))
             if self._current_document_instance and self._current_document_instance.is_modified():
-                do_save = self._save_current_doc(confirm=True, quit_editor=True)
+                do_save = self._save_current_doc(confirm=True)
+                self._quit = True
                 if not do_save:
                     self.Destroy()
             else:
@@ -1313,7 +1324,7 @@ class MainFrame(wx.Frame):
             new_document = dlg.get_new_document()
             self._article_dictionary[new_document.get_filename()] = new_document
             new_document.convert_to_html()
-            self._save(new_document, confirm=False, quit_editor=False, save_as=False)
+            self._save(new_document, confirm=False, save_as=False)
             # Add to list
             self._file_list.InsertItem(0, new_document.get_filename())
             self._update_file_color(0)
@@ -1326,6 +1337,8 @@ class MainFrame(wx.Frame):
         :param event: Not used.
         :return: None
         """
+        # Save current document because menu change might require re-saving all documents.
+        self._save_current_doc()
         dlg = EditMenuDialog(self, self._menus)
         dlg.ShowModal()
         dlg.Destroy()
