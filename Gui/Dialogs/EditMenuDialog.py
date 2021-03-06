@@ -24,6 +24,7 @@ class EditMenuDialog(wx.Dialog):
         self._config_manager: ConfigManager = ConfigManager.get_instance()
         self._menus = menus
         self._menu = None
+        self._save_all = False
 
         self._main_horizontal_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self._left_vertical_sizer = wx.BoxSizer(wx.VERTICAL)
@@ -137,7 +138,9 @@ class EditMenuDialog(wx.Dialog):
         :return: None
         """
         self._menu: WhitebearDocumentMenu
-        self._menu.set_page_name(self._field_page_name.GetValue())
+        # Must be separate, it is not run if used directly in the expression.
+        result = self._menu.set_page_name(self._field_page_name.GetValue())
+        self._save_all = self._save_all or result
         keywords_list = [word.strip() for word in self._field_meta_keywords.GetValue().split(',')]
         self._menu.set_keywords(keywords_list)
         self._menu.set_description(self._field_meta_description.GetValue())
@@ -243,7 +246,13 @@ class EditMenuDialog(wx.Dialog):
             self._menu_list.Insert(file_name, self._menu_list.GetCount())
             self._menu_list.SetSelection(self._menu_list.GetCount() - 1)
             self._display_dialog_contents()
-            # TODO Document not saved on save. Only menu from the current article is saved.
-            # TODO resave all documents to include new menu everywhere. On menu change the name might changed, regenerate all.
-            # TOTO save menu separately it is not saved unless a document contains it.
+            self._save_all = True
         name_dialog.Destroy()
+
+    def save_all(self) -> bool:
+        """
+        Returns True if menu name was changed or new menu created, in that case all documents must be re-exported to
+        reflect the new change.
+        :return: True if re-export of all document is needed.
+        """
+        return self._save_all

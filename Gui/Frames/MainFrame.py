@@ -57,7 +57,7 @@ class MainFrame(wx.Frame):
             self._show_error_dialog(Strings.exception_conf_inaccessible + '\n' + str(e))
         self._tool_ids = []
         self._disableable_menu_items = []
-        self._article_dictionary = {}
+        self._document_dictionary = {}
         self._menus = None
         self._index_document = None
         self._current_document_name = None
@@ -654,15 +654,15 @@ class MainFrame(wx.Frame):
         :return: None
         """
         self._disable_editor(True, leave_files=True)
-        self._article_dictionary = documents
+        self._document_dictionary = documents
         self._menus = menus
         self._index_document = index
         MainFrame.LOADED_PAGES = list(documents.keys())
         self._file_list.ClearAll()
         self._file_list.InsertColumn(0, Strings.label_filelist, format=wx.LIST_FORMAT_LEFT)
         self._file_list.SetColumnWidth(0, self._left_panel.GetSize()[0])
-        for document_name in sorted(list(self._article_dictionary.keys()), reverse=True):
-            status_color = self._article_dictionary[document_name].get_status_color()
+        for document_name in sorted(list(self._document_dictionary.keys()), reverse=True):
+            status_color = self._document_dictionary[document_name].get_status_color()
             self._file_list.InsertItem(0, document_name)
             self._file_list.SetItemBackgroundColour(0, status_color)
 
@@ -679,7 +679,7 @@ class MainFrame(wx.Frame):
         os.chdir(self._config_manager.get_working_dir())
         # Enable GUI when the load is done
         self._set_status_text(Strings.status_ready, 3)
-        self._set_status_text(Strings.status_articles + ' ' + str(len(self._article_dictionary)), 2)
+        self._set_status_text(Strings.status_articles + ' ' + str(len(self._document_dictionary)), 2)
         if self._loading_dlg:
             self._loading_dlg.Destroy()
 
@@ -757,6 +757,7 @@ class MainFrame(wx.Frame):
 
     def _save(self, doc, confirm: bool = False, save_as: bool = False) -> bool:
         """
+        # TODO save individually in order to not save index and menu multiple times.
         Save current document onto disk.
         :param doc: The document to save.
         :param confirm: Require user confirmation.
@@ -1002,7 +1003,7 @@ class MainFrame(wx.Frame):
 
         self._disable_editor(True)
         self._current_document_name = event.GetText()
-        self._current_document_instance: WhitebearDocumentArticle = self._article_dictionary[
+        self._current_document_instance: WhitebearDocumentArticle = self._document_dictionary[
             self._current_document_name]
         try:
             result = self._current_document_instance.validate_self()
@@ -1155,7 +1156,7 @@ class MainFrame(wx.Frame):
         """
         if index == -1:
             index = self._file_list.GetFirstSelected()
-        doc = self._article_dictionary[self._file_list.GetItemText(index)]
+        doc = self._document_dictionary[self._file_list.GetItemText(index)]
         doc.is_modified()
         new_color = doc.get_status_color()
         self._file_list.SetItemBackgroundColour(index, new_color)
@@ -1320,10 +1321,10 @@ class MainFrame(wx.Frame):
         :param event: Not used.
         :return: None
         """
-        dlg = NewFileDialog(self, self._menus, self._article_dictionary, self._css_document, self._index_document)
+        dlg = NewFileDialog(self, self._menus, self._document_dictionary, self._css_document, self._index_document)
         if dlg.ShowModal() == wx.ID_OK:
             new_document = dlg.get_new_document()
-            self._article_dictionary[new_document.get_filename()] = new_document
+            self._document_dictionary[new_document.get_filename()] = new_document
             new_document.convert_to_html()
             self._save(new_document, confirm=False, save_as=False)
             # Add to list
@@ -1342,6 +1343,15 @@ class MainFrame(wx.Frame):
         self._save_current_doc()
         dlg = EditMenuDialog(self, self._menus)
         dlg.ShowModal()
+        if dlg.save_all():
+            for doc in self._document_dictionary.values():
+                self._save(doc, confirm=False, save_as=False)
+            for menu in self._menus.values():
+                self._save(menu, confirm=False, save_as=False)
+            self._save(self._index_document, confirm=False, save_as=False)
+        else:
+            for menu in self._menus.values():
+                self._save(menu, confirm=False, save_as=False)
         dlg.Destroy()
 
     # noinspection PyUnusedLocal

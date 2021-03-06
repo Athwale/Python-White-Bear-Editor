@@ -12,7 +12,7 @@
                         <xs:element name="nav">
                             <xs:complexType>
                                 <xs:sequence>
-                                    <xs:element name="div" type="menuItemType" maxOccurs="unbounded"/>
+                                    <xs:element name="div" type="menuItemType" maxOccurs="unbounded" minOccurs="0"/>
                                 </xs:sequence>
                                 <xs:attribute name="class" type="xs:string" fixed="sixItems" use="required"/>
                             </xs:complexType>

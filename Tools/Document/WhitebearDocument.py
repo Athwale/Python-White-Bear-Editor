@@ -274,16 +274,18 @@ class WhitebearDocument:
         return self._status_color
 
     # Setters ----------------------------------------------------------------------------------------------------------
-    def set_page_name(self, name: str) -> None:
+    def set_page_name(self, name: str) -> bool:
         """
         Set the new article name on the web page.
         Change modified attribute to True.
         :param name: New article name for the web page.
-        :return: None
+        :return: True if name was changed.
         """
         if name != self._page_name:
             self._page_name = name
             self.set_modified(True)
+            return True
+        return False
 
     def set_description(self, description: str) -> None:
         """
