@@ -211,6 +211,8 @@ class Strings:
     label_menu_item_page_setup_hint: str = 'Edit main page and default values'
     label_menu_item_edit_menu: str = 'Edit menu...'
     label_menu_item_edit_menu_hint: str = 'Edit menu pages'
+    label_menu_item_export_all: str = 'Export all...'
+    label_menu_item_export_all_hint: str = 'Export all document into html'
 
     label_menu_item_quit: str = 'Quit\tctrl+q'
     label_menu_item_quit_hint: str = 'Quit editor'
@@ -327,6 +329,7 @@ class Strings:
     label_menu_name: str = 'Menu name'
     label_file_name: str = 'File name'
     label_menu_file_name: str = 'Menu file name'
+    label_export_all: str = 'Export all documents to html'
 
     status_loading: str = 'Loading and testing'
     status_ready: str = 'Ready'

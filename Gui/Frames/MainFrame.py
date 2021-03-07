@@ -67,6 +67,7 @@ class MainFrame(wx.Frame):
         self._ignore_change = False
         self._no_save = False
         self._quit = False
+        self._enabled = True
 
         self._search_term = None
         self._search_results: List[int] = []
@@ -146,6 +147,9 @@ class MainFrame(wx.Frame):
         self._file_menu_item_edit_menu = wx.MenuItem(self._file_menu, wx.ID_FILE9, Strings.label_menu_item_edit_menu,
                                                      Strings.label_menu_item_edit_menu_hint)
         self._disableable_menu_items.append(self._file_menu_item_edit_menu)
+        self._file_menu_item_export_all = wx.MenuItem(self._file_menu, wx.ID_FILE8, Strings.label_menu_item_export_all,
+                                                      Strings.label_menu_item_export_all_hint)
+        self._disableable_menu_items.append(self._file_menu_item_export_all)
 
         # Put menu items into the menu buttons
         self._file_menu.Append(self._file_menu_item_open)
@@ -153,6 +157,7 @@ class MainFrame(wx.Frame):
         self._file_menu.Append(self._file_menu_item_save)
         self._file_menu.Append(self._file_menu_item_save_as)
         self._file_menu.Append(self._file_menu_item_upload)
+        self._file_menu.Append(self._file_menu_item_export_all)
         self._file_menu.AppendSeparator()
         self._file_menu.Append(self._file_menu_item_setup)
         self._file_menu.Append(self._file_menu_item_edit_menu)
@@ -519,6 +524,7 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self._page_setup_handler, self._file_menu_item_setup)
         self.Bind(wx.EVT_MENU, self._new_file_handler, self._file_menu_item_new)
         self.Bind(wx.EVT_MENU, self._edit_menu_handler, self._file_menu_item_edit_menu)
+        self.Bind(wx.EVT_MENU, self._export_all_handler, self._file_menu_item_export_all)
 
         # Bind other controls clicks
         self.Bind(wx.EVT_LIST_ITEM_SELECTED, self._list_item_click_handler, self._file_list)
@@ -563,6 +569,7 @@ class MainFrame(wx.Frame):
         :param leave_files: If True the file list will not be disabled.
         :return: None
         """
+        self._enabled = not state
         self.Enable()
         if state:
             # Disabling the editor (disable editor True)
@@ -753,36 +760,42 @@ class MainFrame(wx.Frame):
         :return: False if save canceled.
         """
         self._main_text_area.convert_document()
-        return self._save(self._current_document_instance, confirm, save_as)
-
-    def _save(self, doc, confirm: bool = False, save_as: bool = False) -> bool:
-        """
-        # TODO save individually in order to not save index and menu multiple times.
-        Save current document onto disk.
-        :param doc: The document to save.
-        :param confirm: Require user confirmation.
-        :return: False if save canceled.
-        """
         # Force save current document.
         if confirm:
             result = wx.MessageBox(Strings.label_menu_item_save_hint, Strings.toolbar_save, wx.YES_NO | wx.ICON_WARNING)
             if result == wx.NO:
                 return False
-        # Editor will be enabled when the thread finishes.
-        self._disable_editor(True)
-        if isinstance(doc, WhitebearDocumentArticle):
-            # Convert all parts, article, document and index.
-            convertor_thread = ConvertorThread(self, doc, save_as)
-            convertor_thread.start()
-            convertor_thread = ConvertorThread(self, doc.get_menu_section(), save_as)
-            convertor_thread.start()
-            convertor_thread = ConvertorThread(self, doc.get_index_document(), save_as)
-            convertor_thread.start()
-        elif isinstance(doc, WhitebearDocumentMenu):
-            # Only convert the menu
-            convertor_thread = ConvertorThread(self, doc, save_as)
-            convertor_thread.start()
+        # Save article, corresponding menu and index.
+        self._save(self._current_document_instance, save_as)
+        self._save(self._current_document_instance.get_menu_section(), save_as)
+        self._save(self._current_document_instance.get_index_document(), save_as)
         return True
+
+    def _save_all(self) -> None:
+        """
+        Save all articles, menus and index.
+        :return: None
+        """
+        for doc in self._document_dictionary.values():
+            # Save all articles.
+            self._save(doc, save_as=False)
+        for menu in self._menus.values():
+            # Save all menus.
+            self._save(menu, save_as=False)
+        # Save index.
+        self._save(self._index_document, save_as=False)
+
+    def _save(self, doc, save_as: bool = False) -> None:
+        """
+        Save current document onto disk.
+        :param doc: The document to save.
+        :return: None.
+        """
+        # Editor will be enabled when the thread finishes.
+        if self._enabled:
+            self._disable_editor(True)
+        convertor_thread = ConvertorThread(self, doc, save_as)
+        convertor_thread.start()
 
     def on_conversion_done(self, doc, save_as: bool) -> None:
         """
@@ -1326,11 +1339,22 @@ class MainFrame(wx.Frame):
             new_document = dlg.get_new_document()
             self._document_dictionary[new_document.get_filename()] = new_document
             new_document.convert_to_html()
-            self._save(new_document, confirm=False, save_as=False)
+            self._save(new_document, save_as=False)
             # Add to list
             self._file_list.InsertItem(0, new_document.get_filename())
             self._update_file_color(0)
         dlg.Destroy()
+
+    # noinspection PyUnusedLocal
+    def _export_all_handler(self, event: wx.CommandEvent) -> None:
+        """
+        Export all documents to html regardless of their state.
+        :param event: Not used
+        :return: None
+        """
+        result = wx.MessageBox(Strings.label_export_all, Strings.toolbar_save, wx.YES_NO | wx.ICON_WARNING)
+        if result == wx.YES:
+            self._save_all()
 
     # noinspection PyUnusedLocal
     def _edit_menu_handler(self, event: wx.CommandEvent) -> None:
@@ -1344,14 +1368,12 @@ class MainFrame(wx.Frame):
         dlg = EditMenuDialog(self, self._menus)
         dlg.ShowModal()
         if dlg.save_all():
-            for doc in self._document_dictionary.values():
-                self._save(doc, confirm=False, save_as=False)
-            for menu in self._menus.values():
-                self._save(menu, confirm=False, save_as=False)
-            self._save(self._index_document, confirm=False, save_as=False)
+            self._save_all()
         else:
             for menu in self._menus.values():
-                self._save(menu, confirm=False, save_as=False)
+                # In case just menu description or keywords were changed, the rest of the documents do not need to be
+                # saved again.
+                self._save(menu, save_as=False)
         dlg.Destroy()
 
     # noinspection PyUnusedLocal
