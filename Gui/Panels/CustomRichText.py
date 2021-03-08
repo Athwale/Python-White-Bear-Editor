@@ -88,6 +88,7 @@ class CustomRichText(rt.RichTextCtrl):
         :param event: Not used
         :return: None
         """
+        event.Skip()
         if self._load_indicator:
             self._doc.set_modified(True)
 

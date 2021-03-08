@@ -47,9 +47,11 @@ class MainFrame(wx.Frame):
         # -1 is a special ID which generates a random wx ID
         super(MainFrame, self).__init__(None, -1, title=Strings.editor_name, style=wx.DEFAULT_FRAME_STYLE)
 
-        # Create font for text fields
-        self.menu_text_field_font = wx.Font(Numbers.text_field_font_size, wx.FONTFAMILY_DEFAULT,
-                                            wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, False)
+        # Create fonts for text fields
+        self.small_font = wx.Font(Numbers.text_field_font_size, wx.FONTFAMILY_DEFAULT,
+                                  wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, False)
+        self.bold_small_font = wx.Font(Numbers.text_field_font_size, wx.FONTFAMILY_DEFAULT,
+                                  wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD, False)
         # Prepare data objects
         try:
             self._config_manager: ConfigManager = ConfigManager.get_instance()
@@ -411,7 +413,7 @@ class MainFrame(wx.Frame):
         self._text_menu_item_name = wx.StaticText(self._right_panel, -1,
                                                   Strings.label_article_menu_logo_name_placeholder,
                                                   style=wx.ALIGN_CENTRE_HORIZONTAL)
-        self._text_menu_item_name.SetFont(self.menu_text_field_font)
+        self._text_menu_item_name.SetFont(self.small_font)
         self._text_menu_item_name.SetMaxSize((Numbers.menu_logo_image_size, 30))
         self._menu_logo_static_sizer.Add(self._text_menu_item_name, flag=wx.CENTER)
         # --------------------------------------------------------------------------------------------------------------
@@ -420,7 +422,7 @@ class MainFrame(wx.Frame):
         self._style_picker = wx.ListBox(self._left_panel, -1, size=(-1, 160))
         self._style_sizer.Add(self._style_picker, 1, flag=wx.EXPAND)
         self._file_list = wx.ListCtrl(self._left_panel, -1, style=wx.LC_REPORT | wx.LC_SINGLE_SEL)
-        self._file_list.SetFont(self.menu_text_field_font)
+        self._file_list.SetFont(self.small_font)
         self._filelist_column_sizer.Add(self._style_sizer, flag=wx.EXPAND, border=Numbers.widget_border_size)
         # Add the list into the bottom sizer, give it a sizing weight and let it expand vertically
         self._filelist_column_sizer.Add(self._file_list, flag=wx.EXPAND, border=Numbers.widget_border_size,
@@ -488,6 +490,8 @@ class MainFrame(wx.Frame):
         self._middle_vertical_sizer.Add(self._main_text_area, flag=wx.EXPAND | wx.TOP, proportion=1,
                                         border=Numbers.widget_border_size)
         self.Bind(wx.EVT_TEXT, self._repeat_search, self._main_text_area)
+        # Update file color on change.
+        self.Bind(wx.EVT_TEXT, self._text_area_edit_handler, self._main_text_area)
         # --------------------------------------------------------------------------------------------------------------
 
     def _bind_handlers(self) -> None:
@@ -1009,6 +1013,8 @@ class MainFrame(wx.Frame):
         :param event: wx event, brings the selected string from the menu.
         :return: None
         """
+        # todo save current document only works on documents that have been manually saved.
+        # todo indicate modified unsaved document by non bold text
         if self._current_document_instance and event.GetClientData() != Strings.flag_no_save and \
                 self._current_document_instance.is_modified():
             # Only ask to save if there is a document already opened in the editor and saving is allowed.
@@ -1172,6 +1178,14 @@ class MainFrame(wx.Frame):
         doc = self._document_dictionary[self._file_list.GetItemText(index)]
         doc.is_modified()
         new_color = doc.get_status_color()
+        # TODO this
+        # If any edit is made, indicate that the document is not saved.
+        doc.clear_converted_html()
+        if doc.get_html_to_save():
+            # Only exported documents have this.
+            self._file_list.SetItemFont(index, self.bold_small_font)
+        else:
+            self._file_list.SetItemFont(index, self.small_font)
         self._file_list.SetItemBackgroundColour(index, new_color)
 
     def _update_menu_sizer(self, menu_item: MenuItem) -> None:

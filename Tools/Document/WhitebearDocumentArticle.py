@@ -68,7 +68,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
         self._main_text = None
 
         self._article_image = None
-        self._html = None
+        self._html = ''
 
     def parse_self(self) -> None:
         """
@@ -675,6 +675,8 @@ class WhitebearDocumentArticle(WhitebearDocument):
                     self.set_modified(True)
         if self._article_image.is_modified():
             self.set_modified(True)
+        if self._menu_item.is_modified():
+            self.set_modified(True)
         return self._modified
 
     def get_menu_section(self) -> WhitebearDocumentMenu:
@@ -804,6 +806,13 @@ class WhitebearDocumentArticle(WhitebearDocument):
         self.set_modified(True)
 
     # Setters ----------------------------------------------------------------------------------------------------------
+    def clear_converted_html(self) -> None:
+        """
+        Set converted html string to None.
+        :return: None
+        """
+        self._html = ''
+
     def set_index_document(self, index: WhitebearDocumentIndex) -> None:
         """
         Set the index document instance.
