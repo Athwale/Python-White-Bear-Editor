@@ -301,7 +301,7 @@ class CustomRichText(rt.RichTextCtrl):
             self.BeginBatchUndo(Strings.undo_last_action)
             end_batch = True
         self.SetStyleEx(p_range, style, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_PARAGRAPHS_ONLY
-                                              | rt.RICHTEXT_SETSTYLE_RESET)
+                        | rt.RICHTEXT_SETSTYLE_RESET)
         if end_batch:
             self.EndBatchUndo()
 
@@ -356,7 +356,7 @@ class CustomRichText(rt.RichTextCtrl):
             self.BeginBatchUndo(Strings.undo_last_action)
             end_batch = True
         self.SetStyleEx(p_range, style, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_PARAGRAPHS_ONLY
-                                              | rt.RICHTEXT_SETSTYLE_RESET)
+                        | rt.RICHTEXT_SETSTYLE_RESET)
         if end_batch:
             self.EndBatchUndo()
 
@@ -407,9 +407,9 @@ class CustomRichText(rt.RichTextCtrl):
             self.BeginBatchUndo(Strings.undo_last_action)
             end_batch = True
         self.SetStyleEx(p_range, style, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_PARAGRAPHS_ONLY
-                                              | rt.RICHTEXT_SETSTYLE_RESET)
+                        | rt.RICHTEXT_SETSTYLE_RESET)
         self.SetListStyle(p_range, style_def, specifiedLevel=0, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO
-                                                                      | rt.RICHTEXT_SETSTYLE_SPECIFY_LEVEL)
+                          | rt.RICHTEXT_SETSTYLE_SPECIFY_LEVEL)
         if end_batch:
             self.EndBatchUndo()
 

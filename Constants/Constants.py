@@ -92,6 +92,7 @@ class Numbers:
     max_news: int = 30
     default_news: int = 3
     max_index_images: int = 4
+    default_max_length: int = 256
 
 
 class Strings:
@@ -157,6 +158,7 @@ class Strings:
     exception_default_value_not_set: str = 'Page setup is incomplete'
     exception_bug: str = 'BUG Generated html failed validation'
 
+    seo_error_length: str = 'Required length'
     seo_error_keywords_length: str = 'Length must be: ' + str(Numbers.keywords_min_length) + ' - ' + str(
         Numbers.keywords_max_length) + ' characters long'
     seo_error_keywords_format: str = 'Must be a comma separated list'
@@ -303,7 +305,7 @@ class Strings:
     label_image_name: str = 'Image name'
     label_url_error: str = 'URL Error'
     label_red_url_warning: str = 'Document contains incorrect URL'
-    label_main_title: str = 'Main title'
+    label_global_title: str = 'Main title'
     label_main_title_tip: str = 'Title text for the\nwhite-bear page logo'
     label_author: str = 'Author'
     label_author_tip: str = 'Contents of meta author tag'

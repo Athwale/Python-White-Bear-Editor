@@ -54,8 +54,7 @@ class ConfigManager:
         """
         return {self.CONF_WORKING_DIR: Strings.home_directory,
                 self.CONF_POSITION: '0,0',
-                self.CONF_SIZE: str(Numbers.minimal_window_size_width) + ',' +
-                                str(Numbers.minimal_window_size_height),
+                self.CONF_SIZE: str(Numbers.minimal_window_size_width) + ',' + str(Numbers.minimal_window_size_height),
                 self.CONF_GLOBAL_TITLE: '',
                 self.CONF_AUTHOR: Strings.author,
                 self.CONF_CONTACT: '',
@@ -237,23 +236,29 @@ class ConfigManager:
         self._yaml_conf[self.CONF_LAST] = name
         self.save_config_file()
 
-    def store_global_title(self, title: str) -> None:
+    def store_global_title(self, title: str) -> bool:
         """
         Save the default white-bear logo title into the dictionary.
         :param title: The global title.
-        :return: None
+        :return: True if stored value was changed.
         """
-        self._yaml_conf[self.CONF_GLOBAL_TITLE] = title
-        self.save_config_file()
+        if self._yaml_conf[self.CONF_GLOBAL_TITLE] != title:
+            self._yaml_conf[self.CONF_GLOBAL_TITLE] = title
+            self.save_config_file()
+            return True
+        return False
 
-    def store_author(self, author: str) -> None:
+    def store_author(self, author: str) -> bool:
         """
         Save the author signature into the dictionary.
         :param author: The author signature.
-        :return: None
+        :return: True if stored value was changed.
         """
-        self._yaml_conf[self.CONF_AUTHOR] = author
-        self.save_config_file()
+        if self._yaml_conf[self.CONF_AUTHOR] != author:
+            self._yaml_conf[self.CONF_AUTHOR] = author
+            self.save_config_file()
+            return True
+        return False
 
     def store_contact(self, contact: str) -> None:
         """
@@ -264,14 +269,17 @@ class ConfigManager:
         self._yaml_conf[self.CONF_CONTACT] = contact
         self.save_config_file()
 
-    def store_global_keywords(self, keywords: str) -> None:
+    def store_global_keywords(self, keywords: str) -> bool:
         """
         Save the global default meta keywords into the dictionary.
         :param keywords: The global default meta keywords.
-        :return: None
+        :return: True if stored value was changed,
         """
-        self._yaml_conf[self.CONF_KEYWORDS] = keywords
-        self.save_config_file()
+        if self._yaml_conf[self.CONF_KEYWORDS] != keywords:
+            self._yaml_conf[self.CONF_KEYWORDS] = keywords
+            self.save_config_file()
+            return True
+        return False
 
     def store_main_page_description(self, description: str) -> None:
         """
@@ -282,14 +290,17 @@ class ConfigManager:
         self._yaml_conf[self.CONF_DESCRIPTION] = description
         self.save_config_file()
 
-    def store_script(self, script: str) -> None:
+    def store_script(self, script: str) -> bool:
         """
         Save the script into the dictionary.
         :param script: The script.
-        :return: None
+        :return: True if stored value was changed,
         """
-        self._yaml_conf[self.CONF_SCRIPT] = script
-        self.save_config_file()
+        if self._yaml_conf[self.CONF_SCRIPT] != script:
+            self._yaml_conf[self.CONF_SCRIPT] = script
+            self.save_config_file()
+            return True
+        return False
 
     def store_black_text(self, text: str) -> None:
         """

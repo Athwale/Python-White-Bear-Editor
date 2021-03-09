@@ -23,6 +23,7 @@ class EditDefaultValuesDialog(wx.Dialog):
         self._config_manager: ConfigManager = ConfigManager.get_instance()
         # This is used just for seo testing keywords and description.
         self._test_doc: WhitebearDocument = WhitebearDocument('')
+        self._save_all = False
 
         self._main_vertical_sizer = wx.BoxSizer(wx.VERTICAL)
         self._horizontal_sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -30,16 +31,15 @@ class EditDefaultValuesDialog(wx.Dialog):
         self._information_sizer = wx.BoxSizer(wx.VERTICAL)
 
         # Title sub sizer
-        # TODO maybe limit this somehow.
         self._title_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self._label_main_title = wx.StaticText(self, -1, Strings.label_main_title + ': ')
+        self._label_main_title = wx.StaticText(self, -1, Strings.label_global_title + ': ')
         self._field_global_title = wx.TextCtrl(self, -1)
         self._title_sub_sizer.Add(self._label_main_title, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
         self._title_sub_sizer.Add((2, -1))
         self._title_sub_sizer.Add(self._field_global_title, proportion=1)
         self._information_sizer.Add(self._title_sub_sizer, flag=wx.EXPAND | wx.TOP, border=Numbers.widget_border_size)
-        self._field_main_title_tip = Tools.get_warning_tip(self._field_global_title, Strings.label_main_title)
-        self._field_main_title_tip.SetMessage(Strings.label_main_title_tip)
+        self._field_global_title_tip = Tools.get_warning_tip(self._field_global_title, Strings.label_global_title)
+        self._field_global_title_tip.SetMessage(Strings.label_main_title_tip)
 
         # Author sub sizer
         self._author_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -188,12 +188,18 @@ class EditDefaultValuesDialog(wx.Dialog):
         """
         event.Skip()
         if event.GetId() == wx.ID_OK:
-            self._config_manager.store_global_title(self._field_global_title.GetValue())
-            self._config_manager.store_author(self._field_author.GetValue())
+            # In these cases all documents must be re-exported to reflect the change.
+            result = self._config_manager.store_global_title(self._field_global_title.GetValue())
+            self._save_all = self._save_all or result
+            result = self._config_manager.store_author(self._field_author.GetValue())
+            self._save_all = self._save_all or result
+            result = self._config_manager.store_global_keywords(self._field_meta_keywords.GetValue())
+            self._save_all = self._save_all or result
+            result = self._config_manager.store_script(self._field_script.GetValue())
+            self._save_all = self._save_all or result
+
             self._config_manager.store_contact(self._field_contact.GetValue())
-            self._config_manager.store_global_keywords(self._field_meta_keywords.GetValue())
             self._config_manager.store_main_page_description(self._field_meta_description.GetValue())
-            self._config_manager.store_script(self._field_script.GetValue())
             self._config_manager.store_black_text(self._field_black_text.GetValue())
             self._config_manager.store_red_text(self._field_red_text.GetValue())
             self._config_manager.store_number_of_news(self._news_spinner.GetValue())
@@ -236,12 +242,33 @@ class EditDefaultValuesDialog(wx.Dialog):
         self._field_description_tip.SetMessage(Strings.label_main_description_tip + '\n\n' +
                                                Strings.seo_check + '\n' + message)
 
-        for field in [self._field_global_title, self._field_author, self._field_contact, self._field_script,
-                      self._field_black_text, self._field_red_text]:
+        # Check emptiness.
+        for field in [self._field_script, self._field_black_text, self._field_red_text]:
             if not field.GetValue():
                 result = False
                 Tools.set_field_background(field, Numbers.RED_COLOR)
             else:
                 Tools.set_field_background(field, Numbers.GREEN_COLOR)
 
+        # Check length
+        for field, tip, msg in [(self._field_global_title, self._field_global_title_tip, Strings.label_global_title),
+                                (self._field_author, self._field_author_tip, Strings.label_author_tip),
+                                (self._field_contact, self._field_contact_tip, Strings.label_contact_tip)]:
+            if len(field.GetValue()) > Numbers.default_max_length or len(field.GetValue()) < 1:
+                result = False
+                Tools.set_field_background(field, Numbers.RED_COLOR)
+                tip.SetMessage(msg + '\n\n' + Strings.seo_check + '\n' + Strings.seo_error_length + ': 1-' +
+                               str(Numbers.default_max_length))
+            else:
+                Tools.set_field_background(field, Numbers.GREEN_COLOR)
+                tip.SetMessage(msg + '\n\n' + Strings.seo_check + '\n' + Strings.status_ok)
+
         return result
+
+    def save_all(self) -> bool:
+        """
+        Returns True if main title, author, script or keywords changed in that case all documents must be re-exported to
+        reflect the new change.
+        :return: True if re-export of all document is needed.
+        """
+        return self._save_all

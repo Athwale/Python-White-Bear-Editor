@@ -1329,17 +1329,6 @@ class MainFrame(wx.Frame):
         return True
 
     # noinspection PyUnusedLocal
-    def _page_setup_handler(self, event: wx.CommandEvent) -> None:
-        """
-        Open page setup dialog.
-        :param event: Not used.
-        :return: None
-        """
-        dlg = EditDefaultValuesDialog(self)
-        dlg.ShowModal()
-        dlg.Destroy()
-
-    # noinspection PyUnusedLocal
     def _new_file_handler(self, event: wx.CommandEvent) -> None:
         """
         Open new file dialog.
@@ -1386,6 +1375,22 @@ class MainFrame(wx.Frame):
                 # In case just menu description or keywords were changed, the rest of the documents do not need to be
                 # saved again.
                 self._save(menu, save_as=False)
+        dlg.Destroy()
+
+    # noinspection PyUnusedLocal
+    def _page_setup_handler(self, event: wx.CommandEvent) -> None:
+        """
+        Open page setup dialog.
+        :param event: Not used.
+        :return: None
+        """
+        dlg = EditDefaultValuesDialog(self)
+        dlg.ShowModal()
+        if dlg.save_all():
+            self._save_all()
+        else:
+            # Index might have changed so re-export it.
+            self._save(self._index_document)
         dlg.Destroy()
 
     # noinspection PyUnusedLocal
