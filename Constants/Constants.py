@@ -214,9 +214,6 @@ class Strings:
     label_menu_item_export_all: str = 'Export all...'
     label_menu_item_export_all_hint: str = 'Export all document into html'
 
-    label_menu_item_quit: str = 'Quit\tctrl+q'
-    label_menu_item_quit_hint: str = 'Quit editor'
-
     label_menu_help: str = 'Help'
     label_menu_item_about: str = 'About'
     label_menu_item_about_hint: str = 'About whitebear editor'
@@ -330,6 +327,7 @@ class Strings:
     label_file_name: str = 'File name'
     label_menu_file_name: str = 'Menu file name'
     label_export_all: str = 'Export all documents to html'
+    label_unsaved: str = 'At least one document is not saved.\nQuit anyway?'
 
     status_loading: str = 'Loading and testing'
     status_ready: str = 'Ready'

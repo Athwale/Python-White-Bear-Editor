@@ -1,7 +1,7 @@
+import datetime
 import os
 import re
 import time
-import datetime
 from typing import List, Dict
 
 import wx
@@ -125,15 +125,16 @@ class WhitebearDocumentArticle(WhitebearDocument):
         self._date_error_message: str = ''
 
         # Check page name length must be at least 3 and must not be default
-        name_result, error, color = self.seo_test_name(self._page_name)
+        name_result, message, color = self.seo_test_name(self._page_name)
+        # Message may contain OK if seo passed.
+        self._page_name_error_message = message
         if not name_result:
-            self._page_name_error_message = error
             self.set_status_color(color)
 
         # Check date format
-        date_result, error, color = self.seo_test_date(self._date)
+        date_result, message, color = self.seo_test_date(self._date)
+        self._date_error_message = message
         if not date_result:
-            self._date_error_message = error
             self.set_status_color(color)
 
         # Test main image
@@ -178,6 +179,8 @@ class WhitebearDocumentArticle(WhitebearDocument):
             self._menu_item = menu.find_item_by_file_name(self.get_filename())
             if self._menu_item:
                 self._menu_item.set_article(self)
+                # We do not want the items to start as modified when the document is loaded.
+                self._menu_item.set_modified(False)
                 self._menu_section = menu
                 break
         if not self._menu_item:
@@ -462,7 +465,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
         menu_container = parsed_template.find(name='nav')
         for instance in sorted(self._menus.values(), key=lambda x: x.get_section_name(), reverse=True):
             new_item = parsed_template.new_tag('a', attrs={'class': 'menu', 'href': instance.get_filename(),
-                                               'title': instance.get_page_name()[0]})
+                                                           'title': instance.get_page_name()[0]})
             new_item.string = instance.get_page_name()[0]
             if instance.get_filename() == self._menu_section.get_filename():
                 new_item['id'] = 'active'
@@ -842,6 +845,20 @@ class WhitebearDocumentArticle(WhitebearDocument):
         if img != self._article_image:
             self._article_image = img
             self.set_modified(True)
+
+    def set_modified(self, modified: bool) -> None:
+        """
+        Set modification status for the document. If false then all parts of the document are set to not be modified.
+        :param modified: The new state.
+        :return: None
+        """
+        super(WhitebearDocumentArticle, self).set_modified(modified)
+        if not modified:
+            for list_var in [self._aside_images, self._text_images, self._links, self._videos]:
+                for content in list_var:
+                    content.set_modified(False)
+            self._article_image.set_modified(False)
+            self._menu_item.set_modified(False)
 
     def set_text_elements(self, elements: List) -> None:
         """

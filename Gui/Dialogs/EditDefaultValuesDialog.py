@@ -232,7 +232,7 @@ class EditDefaultValuesDialog(wx.Dialog):
         # Description test.
         correct, message, color = self._test_doc.seo_test_description(self._field_meta_description.GetValue())
         result = result and correct
-        self._set_field_background(self._field_meta_description, color)
+        Tools.set_field_background(self._field_meta_description, color)
         self._field_description_tip.SetMessage(Strings.label_main_description_tip + '\n\n' +
                                                Strings.seo_check + '\n' + message)
 
@@ -240,23 +240,8 @@ class EditDefaultValuesDialog(wx.Dialog):
                       self._field_black_text, self._field_red_text]:
             if not field.GetValue():
                 result = False
-                self._set_field_background(field, Numbers.RED_COLOR)
+                Tools.set_field_background(field, Numbers.RED_COLOR)
             else:
-                self._set_field_background(field, Numbers.GREEN_COLOR)
+                Tools.set_field_background(field, Numbers.GREEN_COLOR)
 
         return result
-
-    @staticmethod
-    def _set_field_background(field: wx.TextCtrl, color: wx.Colour) -> None:
-        """
-        Set background color for a field.
-        :param field: wx.TextCtrl.
-        :param color: The wx.Color to set.
-        :return: None
-        """
-        field.SetBackgroundColour(color)
-        style_carrier = wx.TextAttr()
-        # Set color for the current text separately, it does not work with just background color
-        field.GetStyle(0, style_carrier)
-        style_carrier.SetBackgroundColour(color)
-        field.SetStyle(0, len(field.GetValue()), style_carrier)

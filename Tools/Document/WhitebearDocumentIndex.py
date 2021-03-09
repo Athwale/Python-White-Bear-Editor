@@ -121,7 +121,7 @@ class WhitebearDocumentIndex(WhitebearDocument):
         menu_container = parsed_template.find(name='nav')
         for instance in sorted(self._menus.values(), key=lambda x: x.get_section_name(), reverse=True):
             new_item = parsed_template.new_tag('a', attrs={'class': 'menu', 'href': instance.get_filename(),
-                                               'title': instance.get_page_name()[0]})
+                                                           'title': instance.get_page_name()[0]})
             new_item.string = instance.get_page_name()[0]
             if instance.get_filename() == self.get_filename():
                 new_item['id'] = 'active'

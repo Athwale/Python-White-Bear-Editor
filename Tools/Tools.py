@@ -1,13 +1,12 @@
 from typing import List
 
 import wx
-from wx.lib.agw.supertooltip import SuperToolTip
-
-from Constants.Constants import Numbers
 from lxml import etree
 from lxml import html
 from lxml.etree import XMLSyntaxError, XMLSchemaParseError
+from wx.lib.agw.supertooltip import SuperToolTip
 
+from Constants.Constants import Numbers
 from Constants.Constants import Strings
 from Exceptions.UnrecognizedFileException import UnrecognizedFileException
 from Resources.Fetch import Fetch
@@ -76,3 +75,18 @@ class Tools:
         dc.DrawText(text, 5, 5)
 
         return bitmap
+
+    @staticmethod
+    def set_field_background(field: wx.TextCtrl, color: wx.Colour) -> None:
+        """
+        Set background color for a field.
+        :param field: wx.TextCtrl.
+        :param color: The wx.Color to set.
+        :return: None
+        """
+        field.SetBackgroundColour(color)
+        style_carrier = wx.TextAttr()
+        # Set color for the current text separately, it does not work with just background color
+        field.GetStyle(0, style_carrier)
+        style_carrier.SetBackgroundColour(color)
+        field.SetStyle(0, len(field.GetValue()), style_carrier)

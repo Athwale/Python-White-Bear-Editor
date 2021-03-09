@@ -179,15 +179,15 @@ class WhitebearDocument:
             self._status_color = wx.WHITE
 
         # Check meta keywords
-        keywords_result, error, color = self.seo_test_keywords(', '.join(self._meta_keywords))
+        keywords_result, message, color = self.seo_test_keywords(', '.join(self._meta_keywords))
+        self._keywords_error_message = message
         if not keywords_result:
-            self._keywords_error_message = error
             self.set_status_color(color)
 
         # Check meta description
-        description_result, error, color = self.seo_test_description(self._meta_description)
+        description_result, message, color = self.seo_test_description(self._meta_description)
+        self._description_error_message = message
         if not description_result:
-            self._description_error_message = error
             self.set_status_color(color)
 
         if self.get_status_color() == Numbers.RED_COLOR:

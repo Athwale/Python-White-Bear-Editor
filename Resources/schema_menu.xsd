@@ -56,8 +56,8 @@
 
     <xs:simpleType name="linkClass">
         <xs:restriction base="xs:string">
-            <xs:enumeration value="link" />
-            <xs:enumeration value="link hidden" />
+            <xs:enumeration value="link"/>
+            <xs:enumeration value="link hidden"/>
         </xs:restriction>
     </xs:simpleType>
 

@@ -1,5 +1,6 @@
-import yaml
 from typing import Tuple, Dict
+
+import yaml
 from yaml.parser import ParserError
 from yaml.scanner import ScannerError
 
@@ -54,7 +55,7 @@ class ConfigManager:
         return {self.CONF_WORKING_DIR: Strings.home_directory,
                 self.CONF_POSITION: '0,0',
                 self.CONF_SIZE: str(Numbers.minimal_window_size_width) + ',' +
-                str(Numbers.minimal_window_size_height),
+                                str(Numbers.minimal_window_size_height),
                 self.CONF_GLOBAL_TITLE: '',
                 self.CONF_AUTHOR: Strings.author,
                 self.CONF_CONTACT: '',

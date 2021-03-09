@@ -51,7 +51,7 @@ class MainFrame(wx.Frame):
         self.small_font = wx.Font(Numbers.text_field_font_size, wx.FONTFAMILY_DEFAULT,
                                   wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, False)
         self.bold_small_font = wx.Font(Numbers.text_field_font_size, wx.FONTFAMILY_DEFAULT,
-                                  wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD, False)
+                                       wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD, False)
         # Prepare data objects
         try:
             self._config_manager: ConfigManager = ConfigManager.get_instance()
@@ -68,7 +68,6 @@ class MainFrame(wx.Frame):
         self._loading_dlg = None
         self._ignore_change = False
         self._no_save = False
-        self._quit = False
         self._enabled = True
 
         self._search_term = None
@@ -136,9 +135,6 @@ class MainFrame(wx.Frame):
                                                    Strings.label_menu_item_save_as_hint)
         self._disableable_menu_items.append(self._file_menu_item_save_as)
 
-        self._file_menu_item_quit = wx.MenuItem(self._file_menu, wx.ID_CLOSE, Strings.label_menu_item_quit,
-                                                Strings.label_menu_item_quit_hint)
-
         self._file_menu_item_upload = wx.MenuItem(self._file_menu, wx.ID_EXECUTE, Strings.label_menu_item_upload,
                                                   Strings.label_menu_item_upload_hint)
         self._disableable_menu_items.append(self._file_menu_item_upload)
@@ -163,8 +159,6 @@ class MainFrame(wx.Frame):
         self._file_menu.AppendSeparator()
         self._file_menu.Append(self._file_menu_item_setup)
         self._file_menu.Append(self._file_menu_item_edit_menu)
-        self._file_menu.AppendSeparator()
-        self._file_menu.Append(self._file_menu_item_quit)
 
         # Edit menu ----------------------------------------------------------------------------------------------------
         self._edit_menu_item_undo = wx.MenuItem(self._edit_menu, wx.ID_UNDO, Strings.label_menu_item_undo,
@@ -513,7 +507,6 @@ class MainFrame(wx.Frame):
         # Bind menu item clicks
         self.Bind(wx.EVT_MENU, self._about_button_handler, self._help_menu_item_about)
         self.Bind(wx.EVT_MENU, self._open_button_handler, self._file_menu_item_open)
-        self.Bind(wx.EVT_MENU, self._quit_button_handler, self._file_menu_item_quit)
         self.Bind(wx.EVT_MENU, self._forward_event, self._edit_menu_item_cut)
         self.Bind(wx.EVT_MENU, self._forward_event, self._edit_menu_item_copy)
         self.Bind(wx.EVT_MENU, self._forward_event, self._edit_menu_item_paste)
@@ -835,10 +828,8 @@ class MainFrame(wx.Frame):
                     self._set_status_text(Strings.status_saved + ': ' + last_save, 3)
             except IOError:
                 self._show_error_dialog(Strings.warning_can_not_save + '\n' + Strings.exception_access_html)
-                self._quit = False
-
-        if self._quit:
-            self.Destroy()
+        # Set modified false for all document parts it was saved and does not need to be asked for save until changed.
+        doc.set_modified(False)
         self._disable_editor(False)
 
     def _get_new_file_path(self, suffix: str) -> str:
@@ -881,6 +872,7 @@ class MainFrame(wx.Frame):
                                            self._current_document_instance.get_menu_section().get_page_name()[0])
         edit_dialog.ShowModal()
         self._update_article_image_sizer(main_image)
+        self._current_document_instance.clear_converted_html()
         self._update_file_color()
         edit_dialog.Destroy()
 
@@ -899,6 +891,7 @@ class MainFrame(wx.Frame):
         edit_dialog.display_dialog_contents()
         edit_dialog.ShowModal()
         self._update_menu_sizer(menu_item)
+        self._current_document_instance.clear_converted_html()
         self._update_file_color()
         edit_dialog.Destroy()
 
@@ -931,11 +924,13 @@ class MainFrame(wx.Frame):
             selected_page = self._file_list.GetFirstSelected()
             if selected_page != wx.NOT_FOUND:
                 self._config_manager.store_last_open_document(self._file_list.GetItemText(selected_page, 0))
-            if self._current_document_instance and self._current_document_instance.is_modified():
-                do_save = self._save_current_doc(confirm=True)
-                self._quit = True
-                if not do_save:
-                    self.Destroy()
+            for doc in self._document_dictionary.values():
+                if doc.is_modified() and not doc.get_html_to_save():
+                    result = wx.MessageBox(Strings.label_unsaved, Strings.status_warning, wx.YES_NO | wx.ICON_WARNING)
+                    if result == wx.YES:
+                        self.Destroy()
+                    else:
+                        return
             else:
                 # If the built in close function is not called, destroy must be called explicitly, calling Close runs
                 # the close handler.
@@ -1013,8 +1008,6 @@ class MainFrame(wx.Frame):
         :param event: wx event, brings the selected string from the menu.
         :return: None
         """
-        # todo save current document only works on documents that have been manually saved.
-        # todo indicate modified unsaved document by non bold text
         if self._current_document_instance and event.GetClientData() != Strings.flag_no_save and \
                 self._current_document_instance.is_modified():
             # Only ask to save if there is a document already opened in the editor and saving is allowed.
@@ -1046,6 +1039,7 @@ class MainFrame(wx.Frame):
             self._clear_editor()
             return
         # If the document is correct, now we can show it.
+        self._current_document_instance.seo_test_self()
         self._fill_editor(self._current_document_instance)
 
     def _fill_editor(self, doc: WhitebearDocumentArticle) -> None:
@@ -1055,6 +1049,7 @@ class MainFrame(wx.Frame):
         :return: None
         """
         self._disable_editor(True)
+        self._ignore_change = True
         self._update_file_color()
         if doc.get_status_color() == Numbers.RED_COLOR:
             self._set_status_text(
@@ -1072,11 +1067,12 @@ class MainFrame(wx.Frame):
         for field, value in field_to_value.items():
             tip = value[1]
             if value[0][1]:
+                if value[0][1] == Strings.status_ok:
+                    Tools.set_field_background(field, Numbers.GREEN_COLOR)
+                else:
+                    Tools.set_field_background(field, Numbers.RED_COLOR)
                 tip.SetMessage(Strings.seo_check + '\n' + value[0][1])
                 tip.EnableTip(True)
-                tip.DoShowNow()
-            else:
-                tip.DoHideNow()
             field.SetValue(value[0][0])
 
         # Set main image
@@ -1097,6 +1093,7 @@ class MainFrame(wx.Frame):
         # Set menu item name
         self._update_menu_sizer(doc.get_menu_item())
 
+        self._ignore_change = False
         self._disable_editor(False)
 
     # noinspection PyUnusedLocal
@@ -1111,6 +1108,7 @@ class MainFrame(wx.Frame):
             self._field_article_name.SetBackgroundColour(color)
             self._field_article_name_tip.SetMessage(Strings.seo_check + '\n' + message)
             self._current_document_instance.set_page_name(self._field_article_name.GetValue())
+            self._current_document_instance.clear_converted_html()
             self._update_file_color()
 
     # noinspection PyUnusedLocal
@@ -1125,6 +1123,7 @@ class MainFrame(wx.Frame):
             self._field_article_date.SetBackgroundColour(color)
             self._field_article_date_tip.SetMessage(Strings.seo_check + '\n' + message)
             self._current_document_instance.set_date(self._field_article_date.GetValue())
+            self._current_document_instance.clear_converted_html()
             self._update_file_color()
 
     # noinspection PyUnusedLocal
@@ -1141,6 +1140,7 @@ class MainFrame(wx.Frame):
             self._field_article_keywords_tip.SetMessage(Strings.seo_check + '\n' + message)
             keywords_list = [word.strip() for word in self._field_article_keywords.GetValue().split(',')]
             self._current_document_instance.set_keywords(keywords_list)
+            self._current_document_instance.clear_converted_html()
             self._update_file_color()
 
     # noinspection PyUnusedLocal
@@ -1159,13 +1159,23 @@ class MainFrame(wx.Frame):
             style_carrier = wx.TextAttr()
 
             # Set color for the current text separately, it does not work with just background color
-            self._field_article_description.GetStyle(0, style_carrier)
-            style_carrier.SetBackgroundColour(color)
-            self._field_article_description.SetStyle(0, len(self._field_article_description.GetValue()), style_carrier)
+            Tools.set_field_background(self._field_article_description, color)
 
             self._field_article_description_tip.SetMessage(Strings.seo_check + '\n' + message)
             self._current_document_instance.set_description(self._field_article_description.GetValue())
+            self._current_document_instance.clear_converted_html()
             self._update_file_color()
+
+    # noinspection PyUnusedLocal
+    def _text_area_edit_handler(self, event: wx.CommandEvent) -> None:
+        """
+        Handle special events that signal that the color of the selected item in the filelist should be updated.
+        This happens when an edit has been made to the document.
+        :param event: Not used.
+        :return: None
+        """
+        self._current_document_instance.clear_converted_html()
+        self._update_file_color()
 
     def _update_file_color(self, index: int = -1) -> None:
         """
@@ -1178,9 +1188,6 @@ class MainFrame(wx.Frame):
         doc = self._document_dictionary[self._file_list.GetItemText(index)]
         doc.is_modified()
         new_color = doc.get_status_color()
-        # TODO this
-        # If any edit is made, indicate that the document is not saved.
-        doc.clear_converted_html()
         if doc.get_html_to_save():
             # Only exported documents have this.
             self._file_list.SetItemFont(index, self.bold_small_font)
@@ -1207,16 +1214,6 @@ class MainFrame(wx.Frame):
         """
         self._main_image_button.SetBitmap(wx.Bitmap(image.get_image()))
         self._text_main_image_caption.SetLabelText(image.get_caption()[0])
-
-    # noinspection PyUnusedLocal
-    def _text_area_edit_handler(self, event: wx.CommandEvent) -> None:
-        """
-        Handle special events that signal that the color of the selected item in the filelist should be updated.
-        This happens when an edit has been made to the document.
-        :param event: Not used.
-        :return: None
-        """
-        self._update_file_color()
 
     # noinspection PyUnusedLocal
     def _add_image_handler(self, event: wx.CommandEvent) -> None:
@@ -1249,6 +1246,7 @@ class MainFrame(wx.Frame):
         if result == wx.ID_OK:
             self._current_document_instance.add_aside_image(new_image)
             self._side_photo_panel.load_document_images(self._current_document_instance)
+            self._current_document_instance.clear_converted_html()
             self._update_file_color()
         edit_dialog.Destroy()
         event.Skip()
