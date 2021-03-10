@@ -41,7 +41,8 @@ class MainFrame(wx.Frame):
 
     def __init__(self):
         """
-        # TODO corner cases, no menus, no articles, no index,...
+        # TODO delete
+        # TODO new directory
         Constructor for the GUI of the editor. This is the main frame so we pass None as the parent.
         """
         # -1 is a special ID which generates a random wx ID
@@ -59,6 +60,7 @@ class MainFrame(wx.Frame):
             self._show_error_dialog(Strings.exception_conf_inaccessible + '\n' + str(e))
         self._tool_ids = []
         self._disableable_menu_items = []
+        self._thread_queue = []
         self._document_dictionary = {}
         self._menus = None
         self._index_document = None
@@ -145,9 +147,14 @@ class MainFrame(wx.Frame):
         self._file_menu_item_edit_menu = wx.MenuItem(self._file_menu, wx.ID_FILE9, Strings.label_menu_item_edit_menu,
                                                      Strings.label_menu_item_edit_menu_hint)
         self._disableable_menu_items.append(self._file_menu_item_edit_menu)
+
         self._file_menu_item_export_all = wx.MenuItem(self._file_menu, wx.ID_FILE8, Strings.label_menu_item_export_all,
                                                       Strings.label_menu_item_export_all_hint)
         self._disableable_menu_items.append(self._file_menu_item_export_all)
+
+        self._file_menu_item_delete = wx.MenuItem(self._file_menu, wx.ID_DELETE, Strings.label_menu_item_delete,
+                                                  Strings.label_menu_item_delete_hint)
+        self._disableable_menu_items.append(self._file_menu_item_delete)
 
         # Put menu items into the menu buttons
         self._file_menu.Append(self._file_menu_item_open)
@@ -156,6 +163,8 @@ class MainFrame(wx.Frame):
         self._file_menu.Append(self._file_menu_item_save_as)
         self._file_menu.Append(self._file_menu_item_upload)
         self._file_menu.Append(self._file_menu_item_export_all)
+        self._file_menu.AppendSeparator()
+        self._file_menu.Append(self._file_menu_item_delete)
         self._file_menu.AppendSeparator()
         self._file_menu.Append(self._file_menu_item_setup)
         self._file_menu.Append(self._file_menu_item_edit_menu)
@@ -522,6 +531,7 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self._new_file_handler, self._file_menu_item_new)
         self.Bind(wx.EVT_MENU, self._edit_menu_handler, self._file_menu_item_edit_menu)
         self.Bind(wx.EVT_MENU, self._export_all_handler, self._file_menu_item_export_all)
+        self.Bind(wx.EVT_MENU, self._delete_article_handler, self._file_menu_item_delete)
 
         # Bind other controls clicks
         self.Bind(wx.EVT_LIST_ITEM_SELECTED, self._list_item_click_handler, self._file_list)
@@ -597,6 +607,10 @@ class MainFrame(wx.Frame):
         # Disable menu items
         for menu_item in self._disableable_menu_items:
             menu_item.Enable(not state)
+        if leave_files:
+            # Files are left enabled in white bear directories only.
+            self._file_menu_item_new.Enable(True)
+            self.tool_bar.EnableTool(wx.ID_NEW, True)
 
     def _load_working_directory(self, path: str) -> None:
         """
@@ -750,10 +764,11 @@ class MainFrame(wx.Frame):
         else:
             self._main_text_area.BeginTextColour(color)
 
-    def _save_current_doc(self, confirm: bool = False, save_as: bool = False) -> bool:
+    def _save_current_doc(self, confirm: bool = False, save_as: bool = False, disable: bool = False) -> bool:
         """
         Save current document onto disk.
         :param confirm: Require user confirmation.
+        :param disable: Leave the editor disabled after threads finish.
         :return: False if save canceled.
         """
         self._main_text_area.convert_document()
@@ -763,42 +778,46 @@ class MainFrame(wx.Frame):
             if result == wx.NO:
                 return False
         # Save article, corresponding menu and index.
-        self._save(self._current_document_instance, save_as)
-        self._save(self._current_document_instance.get_menu_section(), save_as)
-        self._save(self._current_document_instance.get_index_document(), save_as)
+        self._save(self._current_document_instance, save_as, disable)
+        self._save(self._current_document_instance.get_menu_section(), save_as, disable)
+        self._save(self._current_document_instance.get_index_document(), save_as, disable)
         return True
 
-    def _save_all(self) -> None:
+    def _save_all(self, disable: bool = False) -> None:
         """
         Save all articles, menus and index.
+        :param disable: Leave the editor disabled after threads finish.
         :return: None
         """
         for doc in self._document_dictionary.values():
             # Save all articles.
-            self._save(doc, save_as=False)
+            self._save(doc, False, disable)
         for menu in self._menus.values():
             # Save all menus.
-            self._save(menu, save_as=False)
+            self._save(menu, False, disable)
         # Save index.
-        self._save(self._index_document, save_as=False)
+        self._save(self._index_document, False, disable)
 
-    def _save(self, doc, save_as: bool = False) -> None:
+    def _save(self, doc, save_as: bool = False, disable: bool = False) -> None:
         """
         Save current document onto disk.
         :param doc: The document to save.
+        :param disable: Leave the editor disabled after threads finish.
         :return: None.
         """
         # Editor will be enabled when the thread finishes.
         if self._enabled:
             self._disable_editor(True)
-        convertor_thread = ConvertorThread(self, doc, save_as)
+        convertor_thread = ConvertorThread(self, doc, save_as, disable)
+        self._thread_queue.append(convertor_thread)
         convertor_thread.start()
 
-    def on_conversion_done(self, doc, save_as: bool) -> None:
+    def on_conversion_done(self, doc, save_as: bool, disable: bool) -> None:
         """
         Called when ConvertorThread finishes converting documents to html.
         :param doc: The document that was processed by the thread.
         :param save_as: Open file dialog for the article and menu, otherwise save into the current filename.
+        :param disable: Leave the editor disabled after threads finish.
         :return: None
         """
         last_save = datetime.now().strftime("%H:%M:%S")
@@ -830,7 +849,11 @@ class MainFrame(wx.Frame):
                 self._show_error_dialog(Strings.warning_can_not_save + '\n' + Strings.exception_access_html)
         # Set modified false for all document parts it was saved and does not need to be asked for save until changed.
         doc.set_modified(False)
-        self._disable_editor(False)
+        # Clean thread list off stopped threads.
+        self._thread_queue = [thread for thread in self._thread_queue if thread.is_alive()]
+        if not self._thread_queue and not disable:
+            # Enable only when all threads have finished.
+            self._disable_editor(False)
 
     def _get_new_file_path(self, suffix: str) -> str:
         """
@@ -999,7 +1022,6 @@ class MainFrame(wx.Frame):
         self._set_status_text(Strings.status_error, 0)
         self._set_status_text(Strings.status_error, 3)
         self._ignore_change = False
-        pass
 
     def _list_item_click_handler(self, event):
         """
@@ -1038,6 +1060,7 @@ class MainFrame(wx.Frame):
             self._show_error_dialog(Strings.exception_last_document_missing)
             self._clear_editor()
             return
+        self._file_menu_item_delete.Enable(True)
         # If the document is correct, now we can show it.
         self._current_document_instance.seo_test_self()
         self._fill_editor(self._current_document_instance)
@@ -1174,8 +1197,9 @@ class MainFrame(wx.Frame):
         :param event: Not used.
         :return: None
         """
-        self._current_document_instance.clear_converted_html()
-        self._update_file_color()
+        if not self._ignore_change:
+            self._current_document_instance.clear_converted_html()
+            self._update_file_color()
 
     def _update_file_color(self, index: int = -1) -> None:
         """
@@ -1185,6 +1209,9 @@ class MainFrame(wx.Frame):
         """
         if index == -1:
             index = self._file_list.GetFirstSelected()
+        if index == -1:
+            # Nothing is selected nor give as index to update.
+            return
         doc = self._document_dictionary[self._file_list.GetItemText(index)]
         doc.is_modified()
         new_color = doc.get_status_color()
@@ -1392,6 +1419,34 @@ class MainFrame(wx.Frame):
             # Index might have changed so re-export it.
             self._save(self._index_document)
         dlg.Destroy()
+
+    # noinspection PyUnusedLocal
+    def _delete_article_handler(self, event: wx.CommandEvent) -> None:
+        """
+        Delete currently opened article html file from the drive and re-save all documents to reflect the change.
+        :param event: Not used.
+        :return: None
+        """
+        result = wx.MessageBox(Strings.warning_delete_document + '\n' + self._current_document_name + '?',
+                               Strings.toolbar_save, wx.YES_NO | wx.ICON_WARNING)
+        if result == wx.YES:
+            path = self._current_document_instance.get_path()
+            if os.path.exists(path) and os.access(path, os.R_OK) and os.access(path, os.W_OK):
+                os.remove(path)
+                self._document_dictionary.pop(self._current_document_name)
+                self._file_list.DeleteItem(self._file_list.GetFirstSelected())
+                self._save_all(disable=True)
+                if self._file_list.GetItemCount() == 0:
+                    self._current_document_instance = None
+                    self._current_document_name = ''
+                    self._clear_editor()
+                    self._file_menu_item_delete.Enable(False)
+                    return
+                # If there are any other documents enable the editor and continue with the next document.
+                self._file_list.Select(0)
+                self._disable_editor(False)
+            else:
+                self._show_error_dialog(Strings.warning_can_not_delete + ':\n' + path)
 
     # noinspection PyUnusedLocal
     def _search_tools_handler(self, event: wx.CommandEvent) -> None:

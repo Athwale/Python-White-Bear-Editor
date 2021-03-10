@@ -193,11 +193,11 @@ class EditDefaultValuesDialog(wx.Dialog):
             self._save_all = self._save_all or result
             result = self._config_manager.store_author(self._field_author.GetValue())
             self._save_all = self._save_all or result
-            result = self._config_manager.store_global_keywords(self._field_meta_keywords.GetValue())
-            self._save_all = self._save_all or result
             result = self._config_manager.store_script(self._field_script.GetValue())
             self._save_all = self._save_all or result
 
+            # Keywords can be individual for each page. The global value is for new articles.
+            self._config_manager.store_global_keywords(self._field_meta_keywords.GetValue())
             self._config_manager.store_contact(self._field_contact.GetValue())
             self._config_manager.store_main_page_description(self._field_meta_description.GetValue())
             self._config_manager.store_black_text(self._field_black_text.GetValue())
@@ -267,7 +267,7 @@ class EditDefaultValuesDialog(wx.Dialog):
 
     def save_all(self) -> bool:
         """
-        Returns True if main title, author, script or keywords changed in that case all documents must be re-exported to
+        Returns True if main title, author or script changed in that case all documents must be re-exported to
         reflect the new change.
         :return: True if re-export of all document is needed.
         """

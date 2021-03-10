@@ -197,6 +197,8 @@ class Strings:
     warning_can_not_save: str = 'Can not save to disk.'
     warning_empty: str = 'Name can not be empty'
     warning_last_document_not_found: str = 'Last document not found'
+    warning_delete_document: str = 'Delete file'
+    warning_can_not_delete: str = 'Unable to delete'
 
     label_menu_file: str = 'File'
     label_menu_item_new: str = 'New document...\tctrl+n'
@@ -215,6 +217,8 @@ class Strings:
     label_menu_item_edit_menu_hint: str = 'Edit menu pages'
     label_menu_item_export_all: str = 'Export all...'
     label_menu_item_export_all_hint: str = 'Export all document into html'
+    label_menu_item_delete: str = 'Delete article...'
+    label_menu_item_delete_hint: str = 'Delete article and regenerate directory'
 
     label_menu_help: str = 'Help'
     label_menu_item_about: str = 'About'

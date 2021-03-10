@@ -87,7 +87,7 @@ class Link:
                 except KeyError as _:
                     self._url_error_message = Strings.seo_error_url_malformed
                     result = False
-                except httplib2.ServerNotFoundError as _:
+                except (httplib2.ServerNotFoundError, httplib2.RelativeURIError) as _:
                     self._url_error_message = Strings.seo_error_url_nonexistent
                     result = False
                 except ConnectionResetError as _:

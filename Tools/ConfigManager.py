@@ -269,17 +269,14 @@ class ConfigManager:
         self._yaml_conf[self.CONF_CONTACT] = contact
         self.save_config_file()
 
-    def store_global_keywords(self, keywords: str) -> bool:
+    def store_global_keywords(self, keywords: str) -> None:
         """
         Save the global default meta keywords into the dictionary.
         :param keywords: The global default meta keywords.
-        :return: True if stored value was changed,
+        :return: None
         """
-        if self._yaml_conf[self.CONF_KEYWORDS] != keywords:
-            self._yaml_conf[self.CONF_KEYWORDS] = keywords
-            self.save_config_file()
-            return True
-        return False
+        self._yaml_conf[self.CONF_KEYWORDS] = keywords
+        self.save_config_file()
 
     def store_main_page_description(self, description: str) -> None:
         """

@@ -19,7 +19,7 @@
                 </xs:element>
                 <xs:element name="ul">
                     <xs:complexType>
-                        <xs:sequence maxOccurs="unbounded">
+                        <xs:sequence maxOccurs="unbounded" minOccurs="0">
                             <xs:element name="li">
                                 <xs:complexType mixed="true">
                                     <xs:choice minOccurs="0" maxOccurs="unbounded">
