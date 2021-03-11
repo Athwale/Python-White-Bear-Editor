@@ -84,7 +84,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
         self._parse_main_article_image()
         self._parse_aside_images()
         self._parse_main_text()
-        self.seo_test_self()
+        self.seo_test_self(online=True)
 
     def seo_test_date(self, date: str) -> (bool, str, wx.Colour):
         """
@@ -114,9 +114,10 @@ class WhitebearDocumentArticle(WhitebearDocument):
             color = Numbers.RED_COLOR
         return result, date_error_message, color
 
-    def seo_test_self(self) -> bool:
+    def seo_test_self(self, online: bool) -> bool:
         """
         Perform a SEO test on this document.
+        :param online: Do online test of urls.
         :return: True if seo test passed.
         """
         # Check meta keywords and description
@@ -152,7 +153,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
 
         # Test videos
         for video in self._videos:
-            if not video.seo_test_self():
+            if not video.seo_test_self(online):
                 self.set_status_color(Numbers.RED_COLOR)
 
         # Test in text images
@@ -162,7 +163,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
 
         # Test links
         for link in self._links:
-            if not link.seo_test_self():
+            if not link.seo_test_self(online):
                 self.set_status_color(Numbers.RED_COLOR)
 
         if self.get_status_color() == Numbers.RED_COLOR:

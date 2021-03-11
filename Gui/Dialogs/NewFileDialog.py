@@ -138,7 +138,7 @@ class NewFileDialog(wx.Dialog):
             self._doc.set_article_image(self._article_image)
             self._doc.set_date(self._get_current_date())
             self._doc.set_keywords(self._config_manager.get_global_keywords().split(', '))
-            self._doc.seo_test_self()
+            self._doc.seo_test_self(online=False)
 
     @staticmethod
     def _get_current_date() -> str:

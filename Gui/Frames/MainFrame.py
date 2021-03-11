@@ -41,7 +41,7 @@ class MainFrame(wx.Frame):
 
     def __init__(self):
         """
-        # TODO delete
+        # TODO online link test only on dir load and upload.
         # TODO new directory
         Constructor for the GUI of the editor. This is the main frame so we pass None as the parent.
         """
@@ -1066,7 +1066,7 @@ class MainFrame(wx.Frame):
             return
         self._file_menu_item_delete.Enable(True)
         # If the document is correct, now we can show it.
-        self._current_document_instance.seo_test_self()
+        self._current_document_instance.seo_test_self(online=False)
         self._fill_editor(self._current_document_instance)
 
     def _fill_editor(self, doc: WhitebearDocumentArticle) -> None:

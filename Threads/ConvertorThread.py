@@ -37,7 +37,7 @@ class ConvertorThread(threading.Thread):
         # This would turn the document red if something is wrong, but seo fail should not prevent save to disk, only
         # upload.
         if isinstance(self._doc, WhitebearDocumentArticle):
-            self._doc.seo_test_self()
+            self._doc.seo_test_self(online=True)
         try:
             self._doc.convert_to_html()
             wx.CallAfter(self._parent.on_conversion_done, self._doc, self._save_as, self._disable)

@@ -116,7 +116,7 @@ class EditLinkDialog(wx.Dialog):
             self._link.set_title(self._field_link_title.GetValue())
             self._link.set_url(self._field_url.GetValue())
 
-            if self._link.seo_test_self():
+            if self._link.seo_test_self(online=True):
                 event.Skip()
                 return
             else:
@@ -127,7 +127,7 @@ class EditLinkDialog(wx.Dialog):
             self._link.set_title(self._original_title)
             self._link.set_text(self._original_text)
             self._link.set_modified(False)
-            self._link.seo_test_self()
+            self._link.seo_test_self(online=False)
             event.Skip()
 
     # noinspection PyUnusedLocal

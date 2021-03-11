@@ -969,7 +969,7 @@ class CustomRichText(rt.RichTextCtrl):
             # Create a new link
             link = Link(link_text, url, link_text, self._doc.get_other_articles(),
                         self._doc.get_working_directory())
-            link.seo_test_self()
+            link.seo_test_self(online=True)
 
         link.set_text(link_text)
         edit_dialog = EditLinkDialog(self, link)
@@ -1205,7 +1205,7 @@ class CustomRichText(rt.RichTextCtrl):
                     # document red.
                     stored_link = Link(text, attrs.GetURL(), text, self._doc.get_other_articles(),
                                        self._doc.get_working_directory())
-                    stored_link.seo_test_self()
+                    stored_link.seo_test_self(online=True)
                     self._doc.add_link(stored_link)
                 # Update the text of the link from the current document.
                 stored_link.set_text(text)

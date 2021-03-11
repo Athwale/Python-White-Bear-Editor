@@ -42,9 +42,10 @@ class Link:
         self._link_id = str(Link.count)
         Link.count = Link.count + 1
 
-    def seo_test_self(self):
+    def seo_test_self(self, online: bool):
         """
         SEO check self for correct title, url and text.
+        :param online: Do online url test.
         :return: True if no error is found.
         """
         # Disk paths have to be checked by the sub classes.
@@ -77,7 +78,7 @@ class Link:
                 result = False
         else:
             self._is_local = False
-            if Numbers.online_seo_test:
+            if online:
                 try:
                     h = httplib2.Http()
                     resp = h.request(self._url, 'HEAD')

@@ -29,9 +29,10 @@ class Video:
         self._image = None
         self._modified = False
 
-    def seo_test_self(self) -> bool:
+    def seo_test_self(self, online: bool) -> bool:
         """
         SEO check self for correct title, url and dimensions.
+        :param online: Do online url test.
         :return: True if no error is found.
         """
         # Disk paths have to be checked by the sub classes.
@@ -57,7 +58,7 @@ class Video:
             result = False
 
         # Check url
-        if Numbers.online_seo_test:
+        if online:
             try:
                 h = httplib2.Http()
                 resp = h.request(self._url, 'HEAD')
