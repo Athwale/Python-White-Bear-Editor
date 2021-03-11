@@ -1019,6 +1019,10 @@ class MainFrame(wx.Frame):
         self._field_article_date.SetValue(Strings.label_article_date)
         self._field_article_description.SetValue(Strings.label_article_description)
         self._field_article_keywords.SetValue(Strings.label_article_keywords)
+        self._field_article_name.SetBackgroundColour(wx.WHITE)
+        self._field_article_date.SetBackgroundColour(wx.WHITE)
+        Tools.set_field_background(self._field_article_description, wx.WHITE)
+        self._field_article_keywords.SetBackgroundColour(wx.WHITE)
         self._set_status_text(Strings.status_error, 0)
         self._set_status_text(Strings.status_error, 3)
         self._ignore_change = False
@@ -1367,10 +1371,13 @@ class MainFrame(wx.Frame):
             new_document = dlg.get_new_document()
             self._document_dictionary[new_document.get_filename()] = new_document
             new_document.convert_to_html()
-            self._save(new_document, save_as=False)
+            if self._file_list.GetItemCount() == 0:
+                # When there are no other documents, require the user to select the new one.
+                self._save(new_document, save_as=False, disable=True)
+            else:
+                self._save(new_document, save_as=False)
             # Add to list
             self._file_list.InsertItem(0, new_document.get_filename())
-            self._update_file_color(0)
         dlg.Destroy()
 
     # noinspection PyUnusedLocal
@@ -1441,6 +1448,8 @@ class MainFrame(wx.Frame):
                     self._current_document_name = ''
                     self._clear_editor()
                     self._file_menu_item_delete.Enable(False)
+                    # If nothing is left there will be no threads and so we can enable the files and new file here.
+                    self._disable_editor(True, True)
                     return
                 # If there are any other documents enable the editor and continue with the next document.
                 self._file_list.Select(0)
