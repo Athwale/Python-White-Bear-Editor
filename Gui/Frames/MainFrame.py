@@ -822,9 +822,10 @@ class MainFrame(wx.Frame):
         self._thread_queue.append(convertor_thread)
         convertor_thread.start()
 
-    def on_conversion_done(self, doc, save_as: bool, disable: bool) -> None:
+    def on_conversion_done(self, thread: ConvertorThread, doc, save_as: bool, disable: bool) -> None:
         """
         Called when ConvertorThread finishes converting documents to html.
+        :param thread: The thread that calls this method.
         :param doc: The document that was processed by the thread.
         :param save_as: Open file dialog for the article and menu, otherwise save into the current filename.
         :param disable: Leave the editor disabled after threads finish.
@@ -860,7 +861,7 @@ class MainFrame(wx.Frame):
         # Set modified false for all document parts it was saved and does not need to be asked for save until changed.
         doc.set_modified(False)
         # Clean thread list off stopped threads.
-        self._thread_queue = [thread for thread in self._thread_queue if thread.is_alive()]
+        self._thread_queue.remove(thread)
         if not self._thread_queue and not disable:
             # Enable only when all threads have finished.
             self._disable_editor(False)
@@ -1418,7 +1419,9 @@ class MainFrame(wx.Frame):
         dlg = EditMenuDialog(self, self._menus, self._config_manager.get_working_dir())
         dlg.ShowModal()
         if dlg.save_all():
-            self._save_all()
+            self._save_all(disable=(not bool(self._current_document_instance)))
+            self._file_menu_item_new.Enable(True)
+            self.tool_bar.EnableTool(wx.ID_NEW, True)
         else:
             for menu in self._menus.values():
                 # In case just menu description or keywords were changed, the rest of the documents do not need to be
@@ -1481,6 +1484,8 @@ class MainFrame(wx.Frame):
         """
         # todo have a config in the dir and a main config with just the dir.
         # todo generate robots and sitemap.
+        # todo empty editor not disabled on new menu create in new dir.
+        # todo edit menu not enabled on loaded empty dir
         dlg = wx.DirDialog(self, Strings.label_dialog_choose_wb_dir, Strings.home_directory, wx.DD_DEFAULT_STYLE)
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()

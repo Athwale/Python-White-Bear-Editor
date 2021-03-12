@@ -141,7 +141,7 @@ class Strings:
     text_reload_from_disk: str = 'Reload file from disk?\nThis will discard all unsaved changes.'
     text_remove_image: str = 'Remove image from side panel?'
 
-    exception_access: str = 'Main directory not readable'
+    exception_access: str = 'Working directory not accessible'
     exception_access_html: str = 'File can not be accessed'
     exception_access_css: str = 'File styles.css missing'
     exception_index: str = 'index.html is not in directory'
@@ -192,6 +192,7 @@ class Strings:
     warning_name_incorrect: str = 'Incorrect name\nDo not use file extension\nDo not use special characters'
     warning_file_exists_overwrite: str = 'File already exists. Overwrite?'
     warning_file_exists: str = 'File already exists'
+    warning_dir_exists: str = 'Directory already exists'
     warning_aside_impossible: str = 'Aspect ratio must be 4/3 for aside or main image'
     warning_wrong_image_folder: str = 'Images must come from whitebear thumbnails folder'
     warning_wrong_logo_folder: str = 'Menu image must come from whitebear logos folder'

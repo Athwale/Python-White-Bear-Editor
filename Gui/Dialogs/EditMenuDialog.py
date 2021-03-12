@@ -87,8 +87,11 @@ class EditMenuDialog(wx.Dialog):
         self._button_sizer = wx.BoxSizer(wx.VERTICAL)
         grouping_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self._ok_button = wx.Button(self, wx.ID_OK, Strings.button_save)
+        self._cancel_button = wx.Button(self, wx.ID_CANCEL, Strings.button_cancel)
         self._ok_button.SetDefault()
         grouping_sizer.Add(self._ok_button)
+        grouping_sizer.Add((Numbers.widget_border_size, Numbers.widget_border_size))
+        grouping_sizer.Add(self._cancel_button)
         self._button_sizer.Add(grouping_sizer, flag=wx.ALIGN_CENTER_HORIZONTAL)
 
         # Putting the sizers together
@@ -102,6 +105,7 @@ class EditMenuDialog(wx.Dialog):
 
         # Bind handlers
         self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._ok_button)
+        self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._cancel_button)
         self.Bind(wx.EVT_BUTTON, self._handle_new_menu_button, self._add_button)
         self.Bind(wx.EVT_LISTBOX, self._menu_list_handler, self._menu_list)
         for field in [self._field_page_name, self._field_meta_keywords, self._field_meta_description]:
@@ -249,12 +253,16 @@ class EditMenuDialog(wx.Dialog):
                 return
 
             # Create a folder under logos, thumbnails and originals.
-            # todo test what happens if dir exists
-            os.mkdir(os.path.join(self._work_dir, Strings.folder_images, Strings.folder_logos, name_dialog.GetValue()))
-            os.mkdir(os.path.join(self._work_dir, Strings.folder_images, Strings.folder_originals,
-                                  name_dialog.GetValue()))
-            os.mkdir(os.path.join(self._work_dir, Strings.folder_images, Strings.folder_thumbnails,
-                                  name_dialog.GetValue()))
+            try:
+                os.mkdir(os.path.join(self._work_dir, Strings.folder_images, Strings.folder_logos, name_dialog.GetValue()))
+                os.mkdir(os.path.join(self._work_dir, Strings.folder_images, Strings.folder_originals,
+                                      name_dialog.GetValue()))
+                os.mkdir(os.path.join(self._work_dir, Strings.folder_images, Strings.folder_thumbnails,
+                                      name_dialog.GetValue()))
+            except FileExistsError as e:
+                wx.MessageBox(Strings.warning_dir_exists + ':\n' + str(e.filename),
+                              Strings.status_error, wx.OK | wx.ICON_ERROR)
+                return
 
             # Create new menu document
             new_menu = WhitebearDocumentMenu(path, self._menus)

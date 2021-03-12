@@ -40,6 +40,6 @@ class ConvertorThread(threading.Thread):
             self._doc.seo_test_self(online=True)
         try:
             self._doc.convert_to_html()
-            wx.CallAfter(self._parent.on_conversion_done, self._doc, self._save_as, self._disable)
+            wx.CallAfter(self._parent.on_conversion_done, self, self._doc, self._save_as, self._disable)
         except UnrecognizedFileException as e:
             wx.CallAfter(self._parent.on_conversion_fail, e)
