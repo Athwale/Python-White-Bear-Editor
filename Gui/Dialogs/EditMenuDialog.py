@@ -11,11 +11,13 @@ from Tools.Tools import Tools
 
 class EditMenuDialog(wx.Dialog):
 
-    def __init__(self, parent, menus: Dict[str, WhitebearDocumentMenu]):
+    def __init__(self, parent, menus: Dict[str, WhitebearDocumentMenu], work_dir: str):
         """
         Display a dialog that allows editing additional data used in html generation.
         Default main title, author, contact, keywords, main page meta description. script, main page red/black text
         :param parent: The parent frame.
+        :param menus: A dictionary of filename.html, WhitebearDocumentMenu
+        :param work_dir: Working directory of the editor.
         """
         wx.Dialog.__init__(self, parent, title=Strings.label_dialog_edit_menu,
                            size=(Numbers.edit_menu_dialog_width, Numbers.edit_menu_dialog_height),
@@ -25,6 +27,7 @@ class EditMenuDialog(wx.Dialog):
         self._menus = menus
         self._menu = None
         self._save_all = False
+        self._work_dir = work_dir
 
         self._main_horizontal_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self._left_vertical_sizer = wx.BoxSizer(wx.VERTICAL)
@@ -103,6 +106,13 @@ class EditMenuDialog(wx.Dialog):
         self.Bind(wx.EVT_LISTBOX, self._menu_list_handler, self._menu_list)
         for field in [self._field_page_name, self._field_meta_keywords, self._field_meta_description]:
             self.Bind(wx.EVT_TEXT, self._text_handler, field)
+
+        if not self._menus:
+            # Disable all but the new menu button.
+            self._field_page_name.Disable()
+            self._field_meta_keywords.Disable()
+            self._field_meta_description.Disable()
+            self._ok_button.Disable()
 
         self._display_dialog_contents()
 
@@ -232,12 +242,19 @@ class EditMenuDialog(wx.Dialog):
                 wx.MessageBox(Strings.warning_name_incorrect, Strings.status_error, wx.OK | wx.ICON_ERROR)
                 return
             # Test whether file already exists
-            working_dir: str = self._menu.get_working_directory()
             file_name = file_name + Strings.extension_html
-            path = os.path.join(working_dir, file_name)
+            path = os.path.join(self._work_dir, file_name)
             if os.path.exists(path):
                 wx.MessageBox(Strings.warning_file_exists, Strings.status_error, wx.OK | wx.ICON_ERROR)
                 return
+
+            # Create a folder under logos, thumbnails and originals.
+            # todo test what happens if dir exists
+            os.mkdir(os.path.join(self._work_dir, Strings.folder_images, Strings.folder_logos, name_dialog.GetValue()))
+            os.mkdir(os.path.join(self._work_dir, Strings.folder_images, Strings.folder_originals,
+                                  name_dialog.GetValue()))
+            os.mkdir(os.path.join(self._work_dir, Strings.folder_images, Strings.folder_thumbnails,
+                                  name_dialog.GetValue()))
 
             # Create new menu document
             new_menu = WhitebearDocumentMenu(path, self._menus)
@@ -247,6 +264,10 @@ class EditMenuDialog(wx.Dialog):
             self._menu_list.SetSelection(self._menu_list.GetCount() - 1)
             self._display_dialog_contents()
             self._save_all = True
+            # At this point at least one menu exists and the controls can be enabled.
+            self._field_page_name.Enable()
+            self._field_meta_keywords.Enable()
+            self._field_meta_description.Enable()
         name_dialog.Destroy()
 
     def save_all(self) -> bool:

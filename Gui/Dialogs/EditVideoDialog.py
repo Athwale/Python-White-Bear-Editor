@@ -102,7 +102,7 @@ class EditVideoDialog(wx.Dialog):
             self._video.set_url(self._original_url)
             self._video.set_title(self._original_title)
             self._video.set_modified(False)
-            self._video.seo_test_self()
+            self._video.seo_test_self(False)
             event.Skip()
 
     def _display_dialog_contents(self) -> None:

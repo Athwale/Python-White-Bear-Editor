@@ -84,7 +84,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
         self._parse_main_article_image()
         self._parse_aside_images()
         self._parse_main_text()
-        self.seo_test_self(online=True)
+        self.seo_test_self(Numbers.online_seo_test)
 
     def seo_test_date(self, date: str) -> (bool, str, wx.Colour):
         """

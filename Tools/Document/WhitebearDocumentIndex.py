@@ -152,7 +152,7 @@ class WhitebearDocumentIndex(WhitebearDocument):
         for index, item in enumerate(sorted_articles):
             if index >= limit:
                 break
-            if item.seo_test_self():
+            if item.seo_test_self(online=True):
                 new_li = parsed_template.new_tag('li')
                 href = item.get_filename()
                 title = item.get_page_name()[0]

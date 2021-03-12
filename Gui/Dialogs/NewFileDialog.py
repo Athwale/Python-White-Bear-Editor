@@ -119,6 +119,11 @@ class NewFileDialog(wx.Dialog):
         self.Bind(wx.EVT_BUTTON, self._handle_image_buttons, self._main_image_button)
         self.Bind(wx.EVT_BUTTON, self._handle_image_buttons, self._menu_logo_button)
 
+        # If there are no menus, disable the dialog.
+        if not choices:
+            self._field_name.Disable()
+            self._box_menu.Disable()
+
     def _handle_buttons(self, event: wx.CommandEvent) -> None:
         """
         Handle button clicks, check if target file exists and prevent overwriting it.

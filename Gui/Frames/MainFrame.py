@@ -1,6 +1,7 @@
 import os
 from datetime import datetime
 from typing import Dict, List
+from shutil import copyfile
 
 import wx
 import wx.richtext as rt
@@ -41,8 +42,8 @@ class MainFrame(wx.Frame):
 
     def __init__(self):
         """
-        # TODO online link test only on dir load and upload.
         # TODO new directory
+        # todo configurable online seo test.
         Constructor for the GUI of the editor. This is the main frame so we pass None as the parent.
         """
         # -1 is a special ID which generates a random wx ID
@@ -126,6 +127,9 @@ class MainFrame(wx.Frame):
                                                Strings.label_menu_item_new_hint)
         self._disableable_menu_items.append(self._file_menu_item_new)
 
+        self._file_menu_item_new_dir = wx.MenuItem(self._file_menu, wx.ID_FILE7, Strings.label_menu_item_new_dir,
+                                                   Strings.label_menu_item_new_dir_hint)
+
         self._file_menu_item_open = wx.MenuItem(self._file_menu, wx.ID_OPEN, Strings.label_menu_item_open,
                                                 Strings.label_menu_item_open_hint)
 
@@ -165,6 +169,7 @@ class MainFrame(wx.Frame):
         self._file_menu.Append(self._file_menu_item_export_all)
         self._file_menu.AppendSeparator()
         self._file_menu.Append(self._file_menu_item_delete)
+        self._file_menu.Append(self._file_menu_item_new_dir)
         self._file_menu.AppendSeparator()
         self._file_menu.Append(self._file_menu_item_setup)
         self._file_menu.Append(self._file_menu_item_edit_menu)
@@ -532,6 +537,7 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self._edit_menu_handler, self._file_menu_item_edit_menu)
         self.Bind(wx.EVT_MENU, self._export_all_handler, self._file_menu_item_export_all)
         self.Bind(wx.EVT_MENU, self._delete_article_handler, self._file_menu_item_delete)
+        self.Bind(wx.EVT_MENU, self._new_dir_handler, self._file_menu_item_new_dir)
 
         # Bind other controls clicks
         self.Bind(wx.EVT_LIST_ITEM_SELECTED, self._list_item_click_handler, self._file_list)
@@ -648,7 +654,7 @@ class MainFrame(wx.Frame):
         self._show_error_dialog(str(e))
         self._disable_editor(True)
         self._side_photo_panel.reset()
-        self._clear_editor()
+        self._clear_editor(leave_files=False)
 
     def on_css_parsed(self, css: WhitebearDocumentCSS) -> None:
         """
@@ -674,8 +680,11 @@ class MainFrame(wx.Frame):
         self._disable_editor(True, leave_files=True)
         self._document_dictionary = documents
         self._menus = menus
+        if not menus:
+            self._file_menu_item_new.Enable(False)
+            self.tool_bar.EnableTool(wx.ID_NEW, False)
+            self._file_menu_item_edit_menu.Enable(True)
         self._index_document = index
-        MainFrame.LOADED_PAGES = list(documents.keys())
         self._file_list.ClearAll()
         self._file_list.InsertColumn(0, Strings.label_filelist, format=wx.LIST_FORMAT_LEFT)
         self._file_list.SetColumnWidth(0, self._left_panel.GetSize()[0])
@@ -693,6 +702,7 @@ class MainFrame(wx.Frame):
             else:
                 self._loading_dlg.Destroy()
                 self._show_error_dialog(Strings.warning_last_document_not_found + ':' + '\n' + str(last_document))
+                self._clear_editor(leave_files=True)
 
         os.chdir(self._config_manager.get_working_dir())
         # Enable GUI when the load is done
@@ -949,7 +959,7 @@ class MainFrame(wx.Frame):
                 self._config_manager.store_last_open_document(self._file_list.GetItemText(selected_page, 0))
             for doc in self._document_dictionary.values():
                 if doc.is_modified() and not doc.get_html_to_save():
-                    result = wx.MessageBox(Strings.label_unsaved, Strings.status_warning, wx.YES_NO | wx.ICON_WARNING)
+                    result = wx.MessageBox(Strings.warning_unsaved, Strings.status_warning, wx.YES_NO | wx.ICON_WARNING)
                     if result == wx.YES:
                         self.Destroy()
                     else:
@@ -996,9 +1006,10 @@ class MainFrame(wx.Frame):
         new_size = self._left_panel.GetSize()[0]
         self._file_list.SetColumnWidth(0, new_size)
 
-    def _clear_editor(self) -> None:
+    def _clear_editor(self, leave_files: bool) -> None:
         """
         Clear all controls.
+        :param leave_files: Leave the filelist uncleared.
         :return: None
         """
         # Ignore changes to article metadata so it is not saved into the file.
@@ -1010,7 +1021,10 @@ class MainFrame(wx.Frame):
         placeholder_main_image = wx.Image(Numbers.main_image_width, Numbers.main_image_height)
         placeholder_main_image.Replace(0, 0, 0, 245, 255, 255)
         self._main_image_button.SetBitmap(wx.Bitmap(placeholder_main_image))
-        self._file_list.ClearAll()
+        if not leave_files:
+            self._file_list.ClearAll()
+            self._file_list.InsertColumn(0, Strings.label_filelist, format=wx.LIST_FORMAT_LEFT)
+            self._file_list.SetColumnWidth(0, self._left_panel.GetSize()[0])
         self._side_photo_panel.clear_panel()
         self._main_text_area.clear_self()
         self._text_menu_item_name.SetLabelText('')
@@ -1053,16 +1067,16 @@ class MainFrame(wx.Frame):
                     error_string = error_string + message + '\n'
                 self._show_error_dialog(error_string)
                 self._disable_editor(True)
-                self._clear_editor()
+                self._clear_editor(leave_files=False)
                 return
         except UnrecognizedFileException as e:
             self._show_error_dialog(str(e))
             self._disable_editor(True)
-            self._clear_editor()
+            self._clear_editor(leave_files=False)
             return
         except KeyError as _:
             self._show_error_dialog(Strings.exception_last_document_missing)
-            self._clear_editor()
+            self._clear_editor(leave_files=False)
             return
         self._file_menu_item_delete.Enable(True)
         # If the document is correct, now we can show it.
@@ -1399,8 +1413,9 @@ class MainFrame(wx.Frame):
         :return: None
         """
         # Save current document because menu change might require re-saving all documents.
-        self._save_current_doc()
-        dlg = EditMenuDialog(self, self._menus)
+        if self._current_document_instance:
+            self._save_current_doc()
+        dlg = EditMenuDialog(self, self._menus, self._config_manager.get_working_dir())
         dlg.ShowModal()
         if dlg.save_all():
             self._save_all()
@@ -1446,7 +1461,7 @@ class MainFrame(wx.Frame):
                 if self._file_list.GetItemCount() == 0:
                     self._current_document_instance = None
                     self._current_document_name = ''
-                    self._clear_editor()
+                    self._clear_editor(leave_files=False)
                     self._file_menu_item_delete.Enable(False)
                     # If nothing is left there will be no threads and so we can enable the files and new file here.
                     self._disable_editor(True, True)
@@ -1456,6 +1471,44 @@ class MainFrame(wx.Frame):
                 self._disable_editor(False)
             else:
                 self._show_error_dialog(Strings.warning_can_not_delete + ':\n' + path)
+
+    # noinspection PyUnusedLocal
+    def _new_dir_handler(self, event: wx.CommandEvent) -> None:
+        """
+        Create a new minimal whitebear directory.
+        :param event: Not used.
+        :return: None
+        """
+        # todo have a config in the dir and a main config with just the dir.
+        # todo generate robots and sitemap.
+        dlg = wx.DirDialog(self, Strings.label_dialog_choose_wb_dir, Strings.home_directory, wx.DD_DEFAULT_STYLE)
+        if dlg.ShowModal() == wx.ID_OK:
+            path = dlg.GetPath()
+            if not os.listdir(path):
+                # Directory must be empty.
+                # Populate the directory with minimal files and folder structure.
+                os.makedirs(os.path.join(path, Strings.folder_images, Strings.folder_thumbnails))
+                os.mkdir(os.path.join(path, Strings.folder_images, Strings.folder_originals))
+                os.mkdir(os.path.join(path, Strings.folder_images, Strings.folder_logos))
+                os.mkdir(os.path.join(path, Strings.folder_files))
+                # Create sample background image.
+                image: wx.Bitmap = Tools.create_image('')
+                image_path = os.path.join(path, Strings.folder_images, Strings.file_background)
+                image.SaveFile(image_path, wx.BITMAP_TYPE_JPEG)
+                # Create sample header image.
+                image: wx.Bitmap = Tools.create_image(Strings.page_name)
+                image_path = os.path.join(path, Strings.folder_images, Strings.file_header)
+                image.SaveFile(image_path, wx.BITMAP_TYPE_PNG)
+                # Copy over sample styles.
+                copyfile(Fetch.get_resource_path('styles.css'), os.path.join(path, 'styles.css'))
+                # Save index into it.
+                new_index = WhitebearDocumentIndex(os.path.join(path, 'index.html'), {}, {})
+                new_index.set_page_name(Strings.home_page)
+                # Disable only if editor empty.
+                self._save(new_index, disable=(not bool(self._current_document_instance)))
+                wx.MessageBox(Strings.warning_new_dir_created, Strings.status_warning, wx.OK | wx.ICON_WARNING)
+            else:
+                wx.MessageBox(Strings.warning_must_be_empty, Strings.status_error, wx.OK | wx.ICON_ERROR)
 
     # noinspection PyUnusedLocal
     def _search_tools_handler(self, event: wx.CommandEvent) -> None:

@@ -163,7 +163,7 @@ class WhitebearDocumentMenu(WhitebearDocument):
                 # not cause any problems.
                 continue
             attrs = {'class': 'link'}
-            if not item.get_article().seo_test_self():
+            if not item.get_article().seo_test_self(online=True):
                 # Hide this menu item because this article is not yet finished. The item will be available for future
                 # parsing though so the editor will load the menu item correctly for the unfinished article.
                 attrs['class'] = 'link hidden'

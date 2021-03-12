@@ -111,6 +111,7 @@ class Strings:
     extension_html: str = '.html'
     contact_file: str = 'contact.png'
     contact_default_alt: str = 'kontakt'
+    home_page: str = 'Hlavní strana'
     image_extensions: str = 'JPG files (*' + extension_jpg + ')|*' + extension_jpg + \
                             '|PNG files (*' + extension_png + ')|*' + extension_jpg + ''
     image_jpg_only: str = 'JPG files (*' + extension_jpg + ')|*' + extension_jpg
@@ -127,9 +128,12 @@ class Strings:
     folder_logos: str = 'logos'
     folder_originals: str = 'original'
     folder_thumbnails: str = 'thumbnails'
+    folder_files: str = 'files'
     article: str = 'article'
     menu: str = 'menu'
     index: str = 'index'
+    file_background: str = 'background.jpg'
+    file_header: str = 'logo-nadpis.png'
 
     text_about_contents: str = '<p>Unfinished whitebear web editor.<br>' \
                                '<i>https://github.com/Athwale/Python-White-Bear-Editor</i><br>' \
@@ -199,6 +203,12 @@ class Strings:
     warning_last_document_not_found: str = 'Last document not found'
     warning_delete_document: str = 'Delete file'
     warning_can_not_delete: str = 'Unable to delete'
+    warning_must_be_empty: str = 'New directory must be empty'
+    warning_new_dir_created: str = 'New directory created.\n' \
+                                   'Please add custom files.\n' \
+                                   'robots.txt, favicon.ico, 404.html, google tracking page.'
+    warning_unsaved: str = 'At least one document is not saved.\nQuit anyway?'
+    warning_new_dir_unsaved: str = 'At least one document is not saved.\nContinue?'
 
     label_menu_file: str = 'File'
     label_menu_item_new: str = 'New document...\tctrl+n'
@@ -219,6 +229,8 @@ class Strings:
     label_menu_item_export_all_hint: str = 'Export all document into html'
     label_menu_item_delete: str = 'Delete article...'
     label_menu_item_delete_hint: str = 'Delete article and regenerate directory'
+    label_menu_item_new_dir: str = 'New WhiteBear directory...'
+    label_menu_item_new_dir_hint: str = 'Create a new WhiteBear directory'
 
     label_menu_help: str = 'Help'
     label_menu_item_about: str = 'About'
@@ -333,7 +345,6 @@ class Strings:
     label_file_name: str = 'File name'
     label_menu_file_name: str = 'Menu file name'
     label_export_all: str = 'Export all documents to html'
-    label_unsaved: str = 'At least one document is not saved.\nQuit anyway?'
 
     status_loading: str = 'Loading and testing'
     status_ready: str = 'Ready'
