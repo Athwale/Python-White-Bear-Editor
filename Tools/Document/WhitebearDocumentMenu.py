@@ -158,14 +158,13 @@ class WhitebearDocumentMenu(WhitebearDocument):
         menu_container = parsed_template.find(name='nav', attrs={'class': 'sixItems'})
         for item in self._menu_items:
             item: MenuItem
-            if not os.path.exists(os.path.join(self.get_working_directory(), item.get_link_href())):
-                # Ignore items that point to a deleted article. New pages are immediately saved to disk, so this should
-                # not cause any problems.
-                continue
             attrs = {'class': 'link'}
+            if not item.get_article():
+                # Skip deleted articles.
+                continue
             if not item.get_article().seo_test_self(online=True):
-                # Hide this menu item because this article is not yet finished. The item will be available for future
-                # parsing though so the editor will load the menu item correctly for the unfinished article.
+                # Hide this menu item because this article is not yet finished or is deleted. The item will be available
+                # for future parsing though so the editor will load the menu item correctly for the unfinished article.
                 attrs['class'] = 'link hidden'
             new_div = parsed_template.new_tag('div', attrs=attrs)
             href = item.get_link_href()

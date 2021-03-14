@@ -3,6 +3,7 @@ import os
 import wx
 
 from Constants.Constants import Strings, Numbers
+from Resources.Fetch import Fetch
 from Tools.Tools import Tools
 
 
@@ -79,9 +80,8 @@ class AddLogoDialog(wx.Dialog):
 
         # Image preview
         self._image_sizer = wx.BoxSizer(wx.VERTICAL)
-        placeholder_image: wx.Image = wx.Image(Numbers.menu_logo_image_size, Numbers.menu_logo_image_size)
-        placeholder_image.Replace(0, 0, 0, 245, 255, 255)
-        self._bitmap = wx.StaticBitmap(self, -1, wx.Bitmap(placeholder_image))
+        self._bitmap = wx.StaticBitmap(self, -1, wx.Bitmap(wx.Image(Fetch.get_resource_path('menu_image_missing.png'),
+                                       wx.BITMAP_TYPE_PNG)))
         self._image_sizer.Add(self._bitmap, flag=wx.ALL, border=1)
 
         # Buttons

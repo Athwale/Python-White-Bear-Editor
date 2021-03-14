@@ -35,6 +35,7 @@ class Numbers:
     edit_link_dialog_height: int = 255
     edit_menu_item_dialog_height: int = 300
     add_image_dialog_width: int = 1000
+    add_image_dialog_height: int = 340
     add_logo_dialog_width: int = 500
     add_logo_dialog_height: int = 220
     page_setup_dialog_width: int = 900
@@ -192,7 +193,6 @@ class Strings:
     warning_name_incorrect: str = 'Incorrect name\nDo not use file extension\nDo not use special characters'
     warning_file_exists_overwrite: str = 'File already exists. Overwrite?'
     warning_file_exists: str = 'File already exists'
-    warning_dir_exists: str = 'Directory already exists'
     warning_aside_impossible: str = 'Aspect ratio must be 4/3 for aside or main image'
     warning_wrong_image_folder: str = 'Images must come from whitebear thumbnails folder'
     warning_wrong_logo_folder: str = 'Menu image must come from whitebear logos folder'

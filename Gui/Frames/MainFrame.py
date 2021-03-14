@@ -661,7 +661,9 @@ class MainFrame(wx.Frame):
         self._disable_editor(True)
         self._side_photo_panel.reset()
         self._clear_editor(leave_files=False)
-        self._config_manager.remove_config_dir(path)
+        # Only remove config if index is missing.
+        if path:
+            self._config_manager.remove_config_dir(path)
 
     def on_css_parsed(self, css: WhitebearDocumentCSS) -> None:
         """
@@ -692,9 +694,7 @@ class MainFrame(wx.Frame):
             self.tool_bar.EnableTool(wx.ID_NEW, False)
             self._file_menu_item_edit_menu.Enable(True)
         self._index_document = index
-        self._file_list.ClearAll()
-        self._file_list.InsertColumn(0, Strings.label_filelist, format=wx.LIST_FORMAT_LEFT)
-        self._file_list.SetColumnWidth(0, self._left_panel.GetSize()[0])
+        self._clear_editor(leave_files=False)
         for document_name in sorted(list(self._document_dictionary.keys()), reverse=True):
             status_color = self._document_dictionary[document_name].get_status_color()
             self._file_list.InsertItem(0, document_name)
@@ -855,7 +855,8 @@ class MainFrame(wx.Frame):
 
         if os.path.exists(file_path):
             if not os.access(file_path, os.R_OK) or not os.access(file_path, os.W_OK):
-                self._show_error_dialog(Strings.warning_can_not_save + '\n' + Strings.exception_access_html)
+                self._show_error_dialog(Strings.warning_can_not_save + '\n' + Strings.exception_access_html + '\n' +
+                                        file_path)
                 self._disable_editor(False)
                 return
         if save_as:
@@ -866,7 +867,8 @@ class MainFrame(wx.Frame):
                     file.write(html_string)
                     self._set_status_text(Strings.status_saved + ': ' + last_save, 3)
             except IOError:
-                self._show_error_dialog(Strings.warning_can_not_save + '\n' + Strings.exception_access_html)
+                self._show_error_dialog(Strings.warning_can_not_save + '\n' + Strings.exception_access_html + '\n' +
+                                        file_path)
         # Set modified false for all document parts it was saved and does not need to be asked for save until changed.
         doc.set_modified(False)
         # Clean thread list off stopped threads.
@@ -1397,11 +1399,15 @@ class MainFrame(wx.Frame):
             new_document = dlg.get_new_document()
             self._document_dictionary[new_document.get_filename()] = new_document
             new_document.convert_to_html()
-            if self._file_list.GetItemCount() == 0:
-                # When there are no other documents, require the user to select the new one.
+            if self._file_list.GetFirstSelected() == -1:
+                # When no document is selected leave editor disabled after save.
                 self._save(new_document, save_as=False, disable=True)
+                self._save(new_document.get_menu_section(), save_as=False, disable=True)
+                self._save(new_document.get_index_document(), save_as=False, disable=True)
             else:
                 self._save(new_document, save_as=False)
+                self._save(new_document.get_menu_section(), save_as=False)
+                self._save(new_document.get_index_document(), save_as=False)
             # Add to list
             self._file_list.InsertItem(0, new_document.get_filename())
         dlg.Destroy()
@@ -1470,7 +1476,7 @@ class MainFrame(wx.Frame):
             if os.path.exists(path) and os.access(path, os.R_OK) and os.access(path, os.W_OK):
                 os.remove(path)
                 self._document_dictionary.pop(self._current_document_name)
-                self._file_list.DeleteItem(self._file_list.GetFirstSelected())
+                self._file_list.DeleteItem(self._file_list.FindItem(-1, self._current_document_instance.get_filename()))
                 self._save_all(disable=True)
                 if self._file_list.GetItemCount() == 0:
                     self._current_document_instance = None
@@ -1494,7 +1500,6 @@ class MainFrame(wx.Frame):
         :return: None
         """
         # todo generate robots and sitemap.
-        # todo editor not cleared on new empty dir load.
         dlg = wx.DirDialog(self, Strings.label_dialog_choose_wb_dir, Strings.home_directory, wx.DD_DEFAULT_STYLE)
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()

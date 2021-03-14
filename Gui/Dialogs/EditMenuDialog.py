@@ -176,6 +176,8 @@ class EditMenuDialog(wx.Dialog):
         """
         if self._menus:
             self.Disable()
+            # Cancel is only available if we have no menus, otherwise force the user to fill it up correctly.
+            self._cancel_button.Disable()
             self._menu: WhitebearDocumentMenu = self._menus[self._menu_list.GetString(self._menu_list.GetSelection())]
             self._field_page_name.SetValue(self._menu.get_page_name()[0])
             self._field_meta_keywords.SetValue(self._menu.get_keywords_string()[0])
@@ -253,16 +255,15 @@ class EditMenuDialog(wx.Dialog):
                 return
 
             # Create a folder under logos, thumbnails and originals.
-            try:
-                os.mkdir(os.path.join(self._work_dir, Strings.folder_images, Strings.folder_logos, name_dialog.GetValue()))
-                os.mkdir(os.path.join(self._work_dir, Strings.folder_images, Strings.folder_originals,
-                                      name_dialog.GetValue()))
-                os.mkdir(os.path.join(self._work_dir, Strings.folder_images, Strings.folder_thumbnails,
-                                      name_dialog.GetValue()))
-            except FileExistsError as e:
-                wx.MessageBox(Strings.warning_dir_exists + ':\n' + str(e.filename),
-                              Strings.status_error, wx.OK | wx.ICON_ERROR)
-                return
+            # todo problem with folders named by sections, when name changes folders remain the same, create and rename
+            # todo folders according to the name field.
+            for directory in [os.path.join(Strings.folder_images, Strings.folder_logos, name_dialog.GetValue()),
+                              os.path.join(Strings.folder_images, Strings.folder_originals, name_dialog.GetValue()),
+                              os.path.join(Strings.folder_images, Strings.folder_thumbnails, name_dialog.GetValue())]:
+                dir_path = os.path.join(self._work_dir, directory)
+            if not os.path.exists(dir_path):
+                # Create those directories that are missing.
+                os.mkdir(dir_path)
 
             # Create new menu document
             new_menu = WhitebearDocumentMenu(path, self._menus)
@@ -273,6 +274,7 @@ class EditMenuDialog(wx.Dialog):
             self._display_dialog_contents()
             self._save_all = True
             # At this point at least one menu exists and the controls can be enabled.
+            self._field_page_name.SetValue(name_dialog.GetValue())
             self._field_page_name.Enable()
             self._field_meta_keywords.Enable()
             self._field_meta_description.Enable()

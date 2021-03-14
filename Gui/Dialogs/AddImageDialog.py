@@ -4,6 +4,7 @@ import os
 import wx
 
 from Constants.Constants import Strings, Numbers
+from Resources.Fetch import Fetch
 from Tools.Tools import Tools
 
 
@@ -19,7 +20,7 @@ class AddImageDialog(wx.Dialog):
         :param section: Menu section name.
         """
         wx.Dialog.__init__(self, parent, title=Strings.label_dialog_add_image,
-                           size=(Numbers.add_image_dialog_width, Numbers.edit_text_image_dialog_height),
+                           size=(Numbers.add_image_dialog_width, Numbers.add_image_dialog_height),
                            style=wx.DEFAULT_DIALOG_STYLE)
 
         self._main_vertical_sizer = wx.BoxSizer(wx.VERTICAL)
@@ -112,9 +113,8 @@ class AddImageDialog(wx.Dialog):
 
         # Image preview
         self._image_sizer = wx.BoxSizer(wx.VERTICAL)
-        placeholder_image: wx.Image = wx.Image(Numbers.main_image_width, Numbers.main_image_height)
-        placeholder_image.Replace(0, 0, 0, 245, 255, 255)
-        self._bitmap = wx.StaticBitmap(self, -1, wx.Bitmap(placeholder_image))
+        self._bitmap = wx.StaticBitmap(self, -1, wx.Bitmap(wx.Image(Fetch.get_resource_path('main_image_missing.png'),
+                                       wx.BITMAP_TYPE_PNG)))
         self._image_sizer.Add(self._bitmap, flag=wx.ALL, border=1)
 
         # Buttons

@@ -318,6 +318,11 @@ iframe
     padding-bottom: 25px;
 }
 
+.hidden
+{
+    display:none
+}
+
 a.skip
 {
     position: absolute;
