@@ -69,6 +69,7 @@ class AddLogoDialog(wx.Dialog):
         self._name_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self._label_image_name = wx.StaticText(self, -1, Strings.label_name + ': ')
         self._field_image_name = wx.TextCtrl(self, -1)
+        self._field_image_name.Disable()
         self._name_sub_sizer.Add(self._label_image_name, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
         self._name_sub_sizer.Add((5, -1))
         self._name_sub_sizer.Add(self._field_image_name, proportion=1)
@@ -201,6 +202,7 @@ class AddLogoDialog(wx.Dialog):
         self._content_image_original_path.SetLabelText(self._image_path)
         image_name: str = os.path.splitext(self._image_name)[0]
         self._field_image_name.SetValue(Strings.label_logo + image_name.capitalize())
+        self._field_image_name.Enable()
 
         if self._menu_image.GetSize() != (Numbers.menu_logo_image_size, Numbers.menu_logo_image_size):
             self._menu_image.Rescale(Numbers.menu_logo_image_size, Numbers.menu_logo_image_size, wx.IMAGE_QUALITY_HIGH)

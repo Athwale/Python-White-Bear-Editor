@@ -92,7 +92,11 @@ class MainFrame(wx.Frame):
         # Prepare frame contents
         # Load last working directory
         self._set_status_text(Strings.status_loading, 3)
-        self._load_working_directory(self._config_manager.get_working_dir())
+        # Find the last opened whitebear directory, switch config manager to it and load it.
+        if self._config_manager.set_active_dir(self._config_manager.get_last_directory()):
+            self._load_working_directory(self._config_manager.get_working_dir())
+        else:
+            self._disable_editor(True)
 
         # Load last window position and size
         self.SetPosition((self._config_manager.get_window_position()))
@@ -616,6 +620,7 @@ class MainFrame(wx.Frame):
         if leave_files:
             # Files are left enabled in white bear directories only.
             self._file_menu_item_new.Enable(True)
+            self._file_menu_item_edit_menu.Enable(True)
             self.tool_bar.EnableTool(wx.ID_NEW, True)
 
     def _load_working_directory(self, path: str) -> None:
@@ -643,10 +648,11 @@ class MainFrame(wx.Frame):
         wx.MessageBox(error, Strings.status_error, wx.OK | wx.ICON_ERROR)
         self._set_status_text(Strings.status_error, 2)
 
-    def on_filelist_load_fail(self, e: Exception) -> None:
+    def on_filelist_load_fail(self, path: str, e: Exception) -> None:
         """
         If the loading of a supposed whitebear directory fails, this method is called, it shows the error and disables
         all editor functionality except the load new directory button.
+        :param path: The failed path.
         :param e: Exception that caused the call of this method.
         :return: None
         """
@@ -655,6 +661,7 @@ class MainFrame(wx.Frame):
         self._disable_editor(True)
         self._side_photo_panel.reset()
         self._clear_editor(leave_files=False)
+        self._config_manager.remove_config_dir(path)
 
     def on_css_parsed(self, css: WhitebearDocumentCSS) -> None:
         """
@@ -711,6 +718,8 @@ class MainFrame(wx.Frame):
         if self._loading_dlg:
             self._loading_dlg.Destroy()
 
+        # Store this as last known open directory.
+        self._config_manager.store_working_dir(self._index_document.get_working_directory())
         if not self._config_manager.check_config():
             # Check that no default values are missing.
             self._show_error_dialog(Strings.exception_default_value_not_set)
@@ -982,7 +991,9 @@ class MainFrame(wx.Frame):
                            wx.DD_DIR_MUST_EXIST | wx.DD_CHANGE_DIR)
         # Modal means the user is locked into this dialog an can not use the rest of the application
         if dlg.ShowModal() == wx.ID_OK:
-            self._config_manager.store_working_dir(dlg.GetPath())
+            if not self._config_manager.set_active_dir(dlg.GetPath()):
+                self._config_manager.add_directory(dlg.GetPath())
+                self._config_manager.set_active_dir(dlg.GetPath())
             self._current_document_instance = None
             self._load_working_directory(self._config_manager.get_working_dir())
         # This must be called, the dialog stays in memory so you can retrieve data and would not be destroyed.
@@ -1426,7 +1437,7 @@ class MainFrame(wx.Frame):
             for menu in self._menus.values():
                 # In case just menu description or keywords were changed, the rest of the documents do not need to be
                 # saved again.
-                self._save(menu, save_as=False)
+                self._save(menu, save_as=False, disable=(not bool(self._current_document_instance)))
         dlg.Destroy()
 
     # noinspection PyUnusedLocal
@@ -1482,15 +1493,15 @@ class MainFrame(wx.Frame):
         :param event: Not used.
         :return: None
         """
-        # todo have a config in the dir and a main config with just the dir.
         # todo generate robots and sitemap.
-        # todo empty editor not disabled on new menu create in new dir.
-        # todo edit menu not enabled on loaded empty dir
+        # todo editor not cleared on new empty dir load.
         dlg = wx.DirDialog(self, Strings.label_dialog_choose_wb_dir, Strings.home_directory, wx.DD_DEFAULT_STYLE)
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()
             if not os.listdir(path):
                 # Directory must be empty.
+                # Create new config block in yaml.
+                self._config_manager.add_directory(path)
                 # Populate the directory with minimal files and folder structure.
                 os.makedirs(os.path.join(path, Strings.folder_images, Strings.folder_thumbnails))
                 os.mkdir(os.path.join(path, Strings.folder_images, Strings.folder_originals))

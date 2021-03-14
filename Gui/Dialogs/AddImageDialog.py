@@ -11,6 +11,8 @@ class AddImageDialog(wx.Dialog):
 
     def __init__(self, parent, work_dir: str, section: str):
         """
+        # todo suggest aside by default if aspect is correct
+        # todo in edit turn label red if thumbnail size wrong.
         Display a dialog with information about the image where the user can edit it.
         :param parent: Parent frame.
         :param work_dir: The working directory of the editor.
@@ -83,6 +85,7 @@ class AddImageDialog(wx.Dialog):
         self._name_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self._label_image_name = wx.StaticText(self, -1, Strings.label_name + ': ')
         self._field_image_name = wx.TextCtrl(self, -1)
+        self._field_image_name.Disable()
         self._name_sub_sizer.Add(self._label_image_name, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
         self._name_sub_sizer.Add((5, -1))
         self._name_sub_sizer.Add(self._field_image_name, proportion=1)
@@ -252,6 +255,7 @@ class AddImageDialog(wx.Dialog):
         self._content_image_original_path.SetLabelText(self._image_path)
         image_name: str = os.path.splitext(self._image_name)[0]
         self._field_image_name.SetValue(image_name)
+        self._field_image_name.Enable()
 
         # Create the base image for resizing.
         self._full_image = wx.Image(self._image_path, wx.BITMAP_TYPE_ANY)

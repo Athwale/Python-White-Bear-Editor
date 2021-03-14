@@ -41,4 +41,4 @@ class FileListThread(threading.Thread):
             wx.CallAfter(self._parent.on_filelist_loaded, self._directory_loader.get_articles(),
                          self._directory_loader.get_menus(), self._directory_loader.get_index_page())
         except (AccessException, IndexError, FileNotFoundError, UnrecognizedFileException, WrongFormatException) as e:
-            wx.CallAfter(self._parent.on_filelist_load_fail, e)
+            wx.CallAfter(self._parent.on_filelist_load_fail, self._path, e)
