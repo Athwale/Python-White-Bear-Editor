@@ -1281,7 +1281,7 @@ class MainFrame(wx.Frame):
         :param event: Not used
         :return: None
         """
-        dlg = AddImageDialog(self, self._current_document_instance,
+        dlg = AddImageDialog(self, self._current_document_instance.get_working_directory(),
                              self._current_document_instance.get_menu_section().get_page_name()[0])
         dlg.ShowModal()
         dlg.Destroy()
