@@ -160,7 +160,7 @@ class MenuItem:
         if normal:
             return self._menu_image
         if self._status_color == wx.RED:
-            return self._menu_image.AdjustChannels(1, 0, 0)
+            return self._menu_image.AdjustChannels(0.9, 0.5, 0.5)
         return self._menu_image
 
     def get_image_size(self) -> (int, int):

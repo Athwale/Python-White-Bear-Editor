@@ -166,7 +166,6 @@ class EditMenuDialog(wx.Dialog):
                 # Create those directories that are missing.
                 os.mkdir(dir_path)
 
-
         # Must be separate, it is not run if used directly in the expression.
         result = self._menu.set_page_name(self._field_page_name.GetValue())
         self._save_all = self._save_all or result
