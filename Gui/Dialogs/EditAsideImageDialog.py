@@ -229,7 +229,7 @@ class EditAsideImageDialog(wx.Dialog):
         Show a file picker dialog to get an image from the user.
         :return: (file path, file name) or None, None if canceled
         """
-        path = os.path.dirname(self._image_copy.get_thumbnail_image_path())
+        path = os.path.join(self._work_dir, Strings.folder_images, Strings.folder_thumbnails, self._section.lower())
         if not path:
             path = os.path.join(self._work_dir, Strings.folder_images, Strings.folder_thumbnails,
                                 self._image_copy.get_section().lower())
