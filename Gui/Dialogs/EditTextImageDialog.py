@@ -155,10 +155,8 @@ class EditTextImageDialog(wx.Dialog):
                 return
             else:
                 # Display the new image
-                new_section: str = os.path.dirname(new_path)
-                html_thumbnail_filename: str = os.path.join(Strings.folder_images, Strings.folder_thumbnails,
-                                                            new_section, new_name)
-                self._image_copy = ImageInText(new_section, self._field_image_link_title.GetValue(),
+                html_thumbnail_filename: str = os.path.join(Strings.folder_images, Strings.folder_thumbnails, new_name)
+                self._image_copy = ImageInText(self._field_image_link_title.GetValue(),
                                                self._field_image_alt.GetValue(),
                                                new_path.replace(Strings.folder_thumbnails, Strings.folder_originals),
                                                new_path, html_thumbnail_filename.replace(Strings.folder_thumbnails,
@@ -174,7 +172,6 @@ class EditTextImageDialog(wx.Dialog):
 
             if self._image_copy.seo_test_self():
                 # If the seo test is good, transfer all information into the original image.
-                self._original_image.set_section(self._image_copy.get_section())
                 self._original_image.set_link_title(self._image_copy.get_link_title()[0])
                 self._original_image.set_alt(self._image_copy.get_image_alt()[0])
                 self._original_image.set_original_image_path(self._image_copy.get_original_image_path())
@@ -198,8 +195,7 @@ class EditTextImageDialog(wx.Dialog):
         """
         path = os.path.dirname(self._image_copy.get_thumbnail_image_path())
         if not path:
-            path = os.path.join(self._work_dir, Strings.folder_images, Strings.folder_thumbnails,
-                                self._image_copy.get_section())
+            path = os.path.join(self._work_dir, Strings.folder_images, Strings.folder_thumbnails)
         with wx.FileDialog(self, Strings.label_select_image, path, wildcard=Strings.image_extensions,
                            style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST | wx.FD_PREVIEW) as dlg:
             if dlg.ShowModal() == wx.ID_OK:

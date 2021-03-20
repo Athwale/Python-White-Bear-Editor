@@ -12,11 +12,10 @@ class ImageInText(BaseImage):
     Carrier class for a parsed in text image.
     """
 
-    def __init__(self, section: str, title: str, image_alt: str, original_image_path: str, thumbnail_path: str,
+    def __init__(self, title: str, image_alt: str, original_image_path: str, thumbnail_path: str,
                  full_filename: str, thumbnail_filename: str):
         """
         Constructor for an image that is inside text.
-        :param section: The website section the image belongs to (elektronika,...)
         :param title: html title of the link element.
         :param image_alt: html alt description of the img element.
         :param original_image_path: full disk path to the original size image.
@@ -24,17 +23,15 @@ class ImageInText(BaseImage):
         :param full_filename: file name of the full image
         :param thumbnail_filename: file name of the thumbnail image
         """
-        super().__init__(section, title, image_alt, original_image_path, thumbnail_path, full_filename,
-                         thumbnail_filename)
+        super().__init__(title, image_alt, original_image_path, thumbnail_path, full_filename, thumbnail_filename)
 
     def copy(self):
         """
         Returns a copy of this image.
         :return: A copy of this image.
         """
-        return ImageInText(self.get_section(), self.get_link_title()[0], self.get_image_alt()[0],
-                           self.get_original_image_path(), self.get_thumbnail_image_path(), self.get_full_filename(),
-                           self.get_thumbnail_filename())
+        return ImageInText(self.get_link_title()[0], self.get_image_alt()[0], self.get_original_image_path(),
+                           self.get_thumbnail_image_path(), self.get_full_filename(), self.get_thumbnail_filename())
 
     def seo_test_self(self) -> bool:
         """

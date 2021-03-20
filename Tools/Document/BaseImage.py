@@ -12,11 +12,10 @@ class BaseImage:
     Base class for AsideImage and ImageInText.
     """
 
-    def __init__(self, section: str, title: str, image_alt: str, original_image_path: str, thumbnail_path: str,
+    def __init__(self, title: str, image_alt: str, original_image_path: str, thumbnail_path: str,
                  full_filename: str, thumbnail_filename: str):
         """
         Constructor for a base image instance.
-        :param section: The website section the image belongs to (elektronika,...)
         :param title: html title of the link element.
         :param image_alt: html alt description of the img element.
         :param original_image_path: full disk path to the original size image.
@@ -24,7 +23,6 @@ class BaseImage:
         :param full_filename: file name of the full image
         :param thumbnail_filename: file name of the thumbnail image
         """
-        self._section = section
         self._link_title = title
         self._link_title_error_message: str = ''
         self._image_alt = image_alt
@@ -83,13 +81,6 @@ class BaseImage:
         :return: Return true if this instance was modified.
         """
         return self._modified
-
-    def get_section(self) -> str:
-        """
-        Return the menu section this image belongs to.
-        :return: Return menu section this image belongs to.
-        """
-        return self._section
 
     def get_link_title(self) -> (str, str):
         """
@@ -173,16 +164,6 @@ class BaseImage:
         return self._original_size
 
     # Setters ----------------------------------------------------------------------------------------------------------
-    def set_section(self, section: str) -> None:
-        """
-        Set new section
-        :param section: The new section
-        :return: None
-        """
-        if self._section != section:
-            self._section = section
-            self._modified = True
-
     def set_link_title(self, title: str) -> None:
         """
         Set new title

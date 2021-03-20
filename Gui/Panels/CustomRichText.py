@@ -1029,8 +1029,7 @@ class CustomRichText(rt.RichTextCtrl):
         self._main_frame.tool_bar.EnableTool(evt.GetId(), False)
         # Create a new placeholder text image or video
         if evt.GetId() == self._img_tool_id:
-            new_element = ImageInText(self._doc.get_menu_section().get_section_name(), '', '', '', '',
-                                      Strings.status_none, Strings.status_none)
+            new_element = ImageInText('', '', '', '', Strings.status_none, Strings.status_none)
         else:
             new_element = Video('', Numbers.video_width, Numbers.video_height, Strings.url_stub)
         # This will set the image internal state to missing image placeholder.

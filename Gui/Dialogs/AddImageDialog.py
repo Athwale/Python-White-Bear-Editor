@@ -10,14 +10,12 @@ from Tools.Tools import Tools
 
 class AddImageDialog(wx.Dialog):
 
-    def __init__(self, parent, work_dir: str, section: str):
+    def __init__(self, parent, work_dir: str):
         """
-        # todo suggest aside by default if aspect is correct
         # todo in edit turn label red if thumbnail size wrong.
         Display a dialog with information about the image where the user can edit it.
         :param parent: Parent frame.
         :param work_dir: The working directory of the editor.
-        :param section: Menu section name.
         """
         wx.Dialog.__init__(self, parent, title=Strings.label_dialog_add_image,
                            size=(Numbers.add_image_dialog_width, Numbers.add_image_dialog_height),
@@ -29,13 +27,11 @@ class AddImageDialog(wx.Dialog):
         self._information_sizer = wx.BoxSizer(wx.VERTICAL)
         self._image_path = None
         self._image_name = None
-        self._menu_section = None
         self._full_image = None
         self._thumbnail = None
         self._originals_path = None
         self._thumbnails_path = None
         self._working_directory = work_dir
-        self._section = section
 
         # Disk location
         self._original_disk_location_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -47,16 +43,6 @@ class AddImageDialog(wx.Dialog):
         self._original_disk_location_sub_sizer.Add((7, -1))
         self._original_disk_location_sub_sizer.Add(self._content_image_original_path, 1, flag=wx.EXPAND)
         self._information_sizer.Add(self._original_disk_location_sub_sizer, flag=wx.EXPAND | wx.TOP,
-                                    border=Numbers.widget_border_size)
-
-        # Target section
-        self._target_section_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self._label_target_section = wx.StaticText(self, -1, Strings.label_target_section + ': ')
-        self._content_target_section = wx.StaticText(self, -1, Strings.label_none,
-                                                     style=wx.ST_ELLIPSIZE_MIDDLE | wx.ST_NO_AUTORESIZE)
-        self._target_section_sub_sizer.Add(self._label_target_section, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
-        self._target_section_sub_sizer.Add(self._content_target_section, 1, flag=wx.EXPAND)
-        self._information_sizer.Add(self._target_section_sub_sizer, flag=wx.EXPAND | wx.TOP,
                                     border=Numbers.widget_border_size)
 
         # Original size
@@ -148,9 +134,6 @@ class AddImageDialog(wx.Dialog):
         self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._browse_button)
         self.Bind(wx.EVT_RADIOBUTTON, self._handle_radio_buttons)
 
-        self._menu_section = self._section
-        self._content_target_section.SetLabelText(self._menu_section)
-
     def _ask_for_image(self) -> (str, str):
         """
         Show a file picker dialog to get an image from the user.
@@ -209,9 +192,9 @@ class AddImageDialog(wx.Dialog):
 
         # Attempt to save the files
         self._originals_path: str = os.path.join(self._working_directory, Strings.folder_images,
-                                                 Strings.folder_originals, self._menu_section.lower())
+                                                 Strings.folder_originals)
         self._thumbnails_path: str = os.path.join(self._working_directory, Strings.folder_images,
-                                                  Strings.folder_thumbnails, self._menu_section.lower())
+                                                  Strings.folder_thumbnails)
         thumbnail_file: str = os.path.join(self._thumbnails_path, new_name)
         full_file: str = os.path.join(self._originals_path, new_name)
         # Determine the file type, we can only open jpg and png files in the browse dialog.
@@ -267,6 +250,7 @@ class AddImageDialog(wx.Dialog):
             self._label_warning.Show(True)
         else:
             self._radio_aside.Enable()
+            self._radio_aside.SetValue(True)
             self._label_warning.Show(False)
         if self._full_image.GetWidth() > Numbers.original_image_max_width:
             # Resize the original image to 50% if too big.

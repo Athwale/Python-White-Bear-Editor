@@ -9,12 +9,11 @@ from Tools.Tools import Tools
 
 class AddLogoDialog(wx.Dialog):
 
-    def __init__(self, parent, work_dir: str, section: str):
+    def __init__(self, parent, work_dir: str):
         """
         Display a dialog with information about the image where the user can edit it.
         :param parent: Parent frame.
         :param work_dir: The working directory of the editor.
-        :param section: The menu section name.
         """
         wx.Dialog.__init__(self, parent, title=Strings.label_dialog_add_logo,
                            size=(Numbers.add_logo_dialog_width, Numbers.add_logo_dialog_height),
@@ -24,10 +23,8 @@ class AddLogoDialog(wx.Dialog):
         self._horizontal_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self._vertical_sizer = wx.BoxSizer(wx.VERTICAL)
         self._information_sizer = wx.BoxSizer(wx.VERTICAL)
-        self._section = section
         self._image_path = None
         self._image_name = None
-        self._menu_section = None
         self._menu_image = None
         self._logos_path = None
         self._working_directory = work_dir
@@ -42,16 +39,6 @@ class AddLogoDialog(wx.Dialog):
         self._original_disk_location_sub_sizer.Add((7, -1))
         self._original_disk_location_sub_sizer.Add(self._content_image_original_path, 1, flag=wx.EXPAND)
         self._information_sizer.Add(self._original_disk_location_sub_sizer, flag=wx.EXPAND | wx.TOP,
-                                    border=Numbers.widget_border_size)
-
-        # Target section
-        self._target_section_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self._label_target_section = wx.StaticText(self, -1, Strings.label_target_section + ': ')
-        self._content_target_section = wx.StaticText(self, -1, Strings.label_none,
-                                                     style=wx.ST_ELLIPSIZE_MIDDLE | wx.ST_NO_AUTORESIZE)
-        self._target_section_sub_sizer.Add(self._label_target_section, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
-        self._target_section_sub_sizer.Add(self._content_target_section, 1, flag=wx.EXPAND)
-        self._information_sizer.Add(self._target_section_sub_sizer, flag=wx.EXPAND | wx.TOP,
                                     border=Numbers.widget_border_size)
 
         # Original size
@@ -114,9 +101,6 @@ class AddLogoDialog(wx.Dialog):
         self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._cancel_button)
         self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._browse_button)
 
-        self._menu_section = self._section
-        self._content_target_section.SetLabelText(self._menu_section)
-
     def _ask_for_image(self) -> (str, str):
         """
         Show a file picker dialog to get an image from the user.
@@ -174,8 +158,7 @@ class AddLogoDialog(wx.Dialog):
             self._field_image_name.SetBackgroundColour(Numbers.GREEN_COLOR)
 
         # Attempt to save the files
-        self._logos_path: str = os.path.join(self._working_directory, Strings.folder_images,
-                                             Strings.folder_logos, self._menu_section.lower())
+        self._logos_path: str = os.path.join(self._working_directory, Strings.folder_images, Strings.folder_logos)
         logo_file: str = os.path.join(self._logos_path, new_name)
         if os.path.exists(logo_file + Strings.extension_jpg):
             result = wx.MessageBox(Strings.warning_file_exists_overwrite + ': \n' + logo_file, Strings.status_error,

@@ -152,15 +152,6 @@ class EditMenuDialog(wx.Dialog):
         :return: None
         """
         self._menu: WhitebearDocumentMenu
-        # New menu does not have page name set yet, so create the folders.
-        for img_dir in [os.path.join(Strings.folder_images, Strings.folder_logos),
-                        os.path.join(Strings.folder_images, Strings.folder_originals),
-                        os.path.join(Strings.folder_images, Strings.folder_thumbnails)]:
-            dir_path = os.path.join(self._work_dir, img_dir, self._field_page_name.GetValue().lower())
-            if not os.path.exists(dir_path):
-                # Create those directories that are missing.
-                os.mkdir(dir_path)
-
         # Must be separate, it is not run if used directly in the expression.
         result = self._menu.set_page_name(self._field_page_name.GetValue())
         self._save_all = self._save_all or result

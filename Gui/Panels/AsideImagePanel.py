@@ -55,8 +55,7 @@ class AsideImagePanel(wx.lib.scrolledpanel.ScrolledPanel):
             self._doc.set_modified(True)
         else:
             # Modify image data
-            edit_dialog = EditAsideImageDialog(self, self._images[img_index], self._doc.get_working_directory(),
-                                               self._doc.get_menu_section().get_page_name()[0])
+            edit_dialog = EditAsideImageDialog(self, self._images[img_index], self._doc.get_working_directory())
             _ = edit_dialog.ShowModal()
             edit_dialog.Destroy()
         self.show_images()

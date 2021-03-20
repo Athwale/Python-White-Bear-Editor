@@ -186,8 +186,7 @@ class NewFileDialog(wx.Dialog):
         if event.GetId() == wx.ID_FILE1:
             # Create menu item.
             if not self._menu_item:
-                menu_item: MenuItem = MenuItem(self._box_menu.GetValue(),
-                                               name='',
+                menu_item: MenuItem = MenuItem(name='',
                                                title='',
                                                image_alt='',
                                                href=self._field_name.GetValue() + Strings.extension_html,
@@ -196,8 +195,7 @@ class NewFileDialog(wx.Dialog):
                 menu_item.seo_test_self()
             else:
                 menu_item = self._menu_item
-            edit_dialog = EditMenuItemDialog(self, menu_item, self._config_manager.get_working_dir(),
-                                             self._box_menu.GetValue())
+            edit_dialog = EditMenuItemDialog(self, menu_item, self._config_manager.get_working_dir())
             # We first need to show the dialog so that the name label can calculate it's size and then switch to modal.
             edit_dialog.Show()
             edit_dialog.display_dialog_contents()
@@ -213,8 +211,7 @@ class NewFileDialog(wx.Dialog):
         elif event.GetId() == wx.ID_FILE2:
             # Create article image.
             if not self._article_image:
-                image = AsideImage(self._box_menu.GetValue(),
-                                   caption='',
+                image = AsideImage(caption='',
                                    title='',
                                    image_alt='',
                                    original_image_path='',
@@ -223,8 +220,7 @@ class NewFileDialog(wx.Dialog):
                 image.seo_test_self()
             else:
                 image = self._article_image
-            edit_dialog = EditAsideImageDialog(self, image, self._config_manager.get_working_dir(),
-                                               self._box_menu.GetValue())
+            edit_dialog = EditAsideImageDialog(self, image, self._config_manager.get_working_dir())
             result = edit_dialog.ShowModal()
             edit_dialog.Destroy()
             if result == wx.ID_OK:

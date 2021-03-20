@@ -10,11 +10,10 @@ class MenuItem:
     Carrier class for a parsed menu item.
     """
 
-    def __init__(self, section: str, name: str, title: str, image_alt: str, href: str, disk_path: str,
+    def __init__(self, name: str, title: str, image_alt: str, href: str, disk_path: str,
                  img_filename: str):
         """
         Constructor for a menu item.
-        :param section: The website section the image belongs to (elektronika,...)
         :param name: Name of the article in the menu.
         :param title: html title of the link element.
         :param image_alt: html alt description of the img element.
@@ -22,7 +21,6 @@ class MenuItem:
         :param disk_path: path to the menu image.
         :param img_filename: The filename of the menu image
         """
-        self._section = section
         self._article_name = name
         self._article_name_error_message: str = ''
         self._link_title = title
@@ -42,8 +40,8 @@ class MenuItem:
         Returns a copy of this menu item.
         :return: A copy of this menu item.
         """
-        return MenuItem(self.get_section(), self.get_article_name()[0], self.get_link_title()[0],
-                        self.get_image_alt()[0], self.get_link_href(), self.get_image_path(), self.get_filename())
+        return MenuItem(self.get_article_name()[0], self.get_link_title()[0], self.get_image_alt()[0],
+                        self.get_link_href(), self.get_image_path(), self.get_filename())
 
     def seo_test_self(self) -> bool:
         """
@@ -136,13 +134,6 @@ class MenuItem:
         :return: Return the link href of the menu item.
         """
         return self._href
-
-    def get_section(self) -> str:
-        """
-        Return the menu section this item belongs to.
-        :return: Return menu section this item belongs to.
-        """
-        return self._section
 
     def get_image_path(self) -> str:
         """
@@ -260,16 +251,6 @@ class MenuItem:
         """
         if self._filename != filename:
             self._filename = filename
-            self._modified = True
-
-    def set_section(self, section: str) -> None:
-        """
-        Set new section
-        :param section: The new section
-        :return: None
-        """
-        if self._section != section:
-            self._section = section
             self._modified = True
 
     def set_modified(self, modified: bool) -> None:

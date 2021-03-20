@@ -11,20 +11,18 @@ from Tools.Tools import Tools
 
 class EditAsideImageDialog(wx.Dialog):
 
-    def __init__(self, parent, image: AsideImage, work_dir: str, section: str):
+    def __init__(self, parent, image: AsideImage, work_dir: str):
         """
         Display a dialog with information about the image where the user can edit it.
         :param parent: Parent frame.
         :param image: AsideImage instance being edited by tis dialog.
         :param work_dir: The working directory of the editor.
-        :param section: Menu section name.
         """
         wx.Dialog.__init__(self, parent, title=Strings.label_dialog_edit_image,
                            size=(Numbers.edit_aside_image_dialog_width, Numbers.edit_aside_image_dialog_height),
                            style=wx.DEFAULT_DIALOG_STYLE)
 
         self._work_dir = work_dir
-        self._section = section
         self._original_image: AsideImage = image
         self._image_copy: AsideImage = self._original_image.copy()
         self._image_copy.seo_test_self()
@@ -182,10 +180,8 @@ class EditAsideImageDialog(wx.Dialog):
                 return
             else:
                 # Display the new image
-                new_section: str = os.path.basename(os.path.dirname(new_path))
-                html_thumbnail_filename: str = os.path.join(Strings.folder_images, Strings.folder_thumbnails,
-                                                            new_section, new_name)
-                self._image_copy = AsideImage(new_section, self._field_image_caption.GetValue(),
+                html_thumbnail_filename: str = os.path.join(Strings.folder_images, Strings.folder_thumbnails, new_name)
+                self._image_copy = AsideImage(self._field_image_caption.GetValue(),
                                               self._field_image_link_title.GetValue(),
                                               self._field_image_alt.GetValue(),
                                               new_path.replace(Strings.folder_thumbnails, Strings.folder_originals),
@@ -203,7 +199,6 @@ class EditAsideImageDialog(wx.Dialog):
 
             if self._image_copy.seo_test_self():
                 # If the seo test is good, transfer all information into the original image.
-                self._original_image.set_section(self._image_copy.get_section())
                 self._original_image.set_caption(self._image_copy.get_caption()[0])
                 self._original_image.set_link_title(self._image_copy.get_link_title()[0])
                 self._original_image.set_alt(self._image_copy.get_image_alt()[0])
@@ -217,7 +212,7 @@ class EditAsideImageDialog(wx.Dialog):
             else:
                 self._display_dialog_contents()
         elif event.GetId() == wx.ID_ADD:
-            dlg = AddImageDialog(self, self._work_dir, self._section)
+            dlg = AddImageDialog(self, self._work_dir)
             dlg.ShowModal()
             dlg.Destroy()
         else:
@@ -229,10 +224,9 @@ class EditAsideImageDialog(wx.Dialog):
         Show a file picker dialog to get an image from the user.
         :return: (file path, file name) or None, None if canceled
         """
-        path = os.path.join(self._work_dir, Strings.folder_images, Strings.folder_thumbnails, self._section.lower())
+        path = os.path.join(self._work_dir, Strings.folder_images, Strings.folder_thumbnails)
         if not path:
-            path = os.path.join(self._work_dir, Strings.folder_images, Strings.folder_thumbnails,
-                                self._image_copy.get_section().lower())
+            path = os.path.join(self._work_dir, Strings.folder_images, Strings.folder_thumbnails)
         with wx.FileDialog(self, Strings.label_select_image, path, wildcard=Strings.image_extensions,
                            style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST | wx.FD_PREVIEW) as dlg:
             if dlg.ShowModal() == wx.ID_OK:

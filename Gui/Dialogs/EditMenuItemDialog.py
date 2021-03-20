@@ -10,20 +10,18 @@ from Tools.Tools import Tools
 
 class EditMenuItemDialog(wx.Dialog):
 
-    def __init__(self, parent, item: MenuItem, work_dir: str, section: str):
+    def __init__(self, parent, item: MenuItem, work_dir: str):
         """
         Display a dialog with information about the image where the user can edit it.
         :param parent: Parent frame.
         :param item: MenuItem instance being edited by tis dialog.
         :param work_dir: Working directory of the editor.
-        :param section: The menu section name.
         """
         wx.Dialog.__init__(self, parent, title=Strings.label_dialog_edit_menu_item,
                            size=(Numbers.edit_aside_image_dialog_width, Numbers.edit_menu_item_dialog_height),
                            style=wx.DEFAULT_DIALOG_STYLE)
 
         self._work_dir = work_dir
-        self._section = section
         self._original_item: MenuItem = item
         self._item_copy: MenuItem = self._original_item.copy()
         self._item_copy.seo_test_self()
@@ -206,14 +204,13 @@ class EditMenuItemDialog(wx.Dialog):
                 return
             else:
                 # Display the new image
-                new_section: str = os.path.basename(os.path.dirname(new_path))
-                html_image_filename: str = os.path.join(Strings.folder_images, Strings.folder_logos, new_section,
-                                                        new_name)
-                self._item_copy = MenuItem(new_section, self._field_item_name.GetValue(),
+                html_image_filename: str = os.path.join(Strings.folder_images, Strings.folder_logos, new_name)
+                self._item_copy = MenuItem(self._field_item_name.GetValue(),
                                            self._field_image_link_title.GetValue(),
                                            self._field_image_alt.GetValue(),
                                            self._original_item.get_link_href(),
-                                           new_path, html_image_filename)
+                                           new_path,
+                                           html_image_filename)
                 # Initializes all internal variables.
                 self._item_copy.seo_test_self()
                 self.display_dialog_contents()
@@ -224,7 +221,6 @@ class EditMenuItemDialog(wx.Dialog):
             self._item_copy.set_image_alt(self._field_image_alt.GetValue())
 
             if self._item_copy.seo_test_self():
-                self._original_item.set_section(self._item_copy.get_section())
                 self._original_item.set_article_name(self._item_copy.get_article_name()[0])
                 self._original_item.set_link_title(self._item_copy.get_link_title()[0])
                 self._original_item.set_image_alt(self._item_copy.get_image_alt()[0])
@@ -237,7 +233,7 @@ class EditMenuItemDialog(wx.Dialog):
             else:
                 self.display_dialog_contents()
         elif event.GetId() == wx.ID_ADD:
-            dlg = AddLogoDialog(self, self._work_dir, self._section)
+            dlg = AddLogoDialog(self, self._work_dir)
             dlg.ShowModal()
             dlg.Destroy()
         else:
@@ -249,7 +245,7 @@ class EditMenuItemDialog(wx.Dialog):
         Show a file picker dialog to get an image from the user.
         :return: (file path, file name) or None, None if canceled
         """
-        path = os.path.join(self._work_dir, Strings.folder_images, Strings.folder_logos, self._section.lower())
+        path = os.path.join(self._work_dir, Strings.folder_images, Strings.folder_logos)
         with wx.FileDialog(self, Strings.label_select_image, path, wildcard=Strings.image_extensions,
                            style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST | wx.FD_PREVIEW) as dlg:
             if dlg.ShowModal() == wx.ID_OK:

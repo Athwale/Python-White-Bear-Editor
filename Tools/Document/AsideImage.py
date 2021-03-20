@@ -13,11 +13,10 @@ class AsideImage(BaseImage):
     Carrier class for a parsed aside image.
     """
 
-    def __init__(self, section: str, caption: str, title: str, image_alt: str, original_image_path: str,
+    def __init__(self, caption: str, title: str, image_alt: str, original_image_path: str,
                  thumbnail_path: str, full_filename: str, thumbnail_filename: str):
         """
         Constructor for an aside image.
-        :param section: The website section the image belongs to (elektronika,...)
         :param caption: Figcaption of the aside image.
         :param title: html title of the link element.
         :param image_alt: html alt description of the img element.
@@ -26,7 +25,7 @@ class AsideImage(BaseImage):
         :param full_filename: file name of the full image
         :param thumbnail_filename: file name of the thumbnail image
         """
-        super().__init__(section, title, image_alt, original_image_path, thumbnail_path, full_filename,
+        super().__init__(title, image_alt, original_image_path, thumbnail_path, full_filename,
                          thumbnail_filename)
         self._caption = caption
         self._caption_error_message: str = ''
@@ -36,7 +35,7 @@ class AsideImage(BaseImage):
         Returns a copy of this image.
         :return: A copy of this image.
         """
-        return AsideImage(self.get_section(), self.get_caption()[0], self.get_link_title()[0], self.get_image_alt()[0],
+        return AsideImage(self.get_caption()[0], self.get_link_title()[0], self.get_image_alt()[0],
                           self.get_original_image_path(), self.get_thumbnail_image_path(), self.get_full_filename(),
                           self.get_thumbnail_filename())
 
@@ -66,7 +65,7 @@ class AsideImage(BaseImage):
         if not self._thumbnail_path or not os.path.exists(self._thumbnail_path):
             # The image has the same dimensions as the main image
             self._image = wx.Image(Fetch.get_resource_path('main_image_thumbnail_missing.png'), wx.BITMAP_TYPE_PNG)
-            self._thumbnail_size = self._image.GetSize()
+            self._thumbnail_size = (0, 0)
             result = False
         else:
             image = wx.Image(Fetch.get_resource_path(self._thumbnail_path), wx.BITMAP_TYPE_ANY)
@@ -75,7 +74,7 @@ class AsideImage(BaseImage):
                 self._image = image
             else:
                 self._image = wx.Image(Fetch.get_resource_path('main_image_thumbnail_wrong.png'), wx.BITMAP_TYPE_PNG)
-                self._thumbnail_size = self._image.GetSize()
+                self._thumbnail_size = image.GetSize()
                 result = False
 
             # Check full image disk path, size can be whatever the user likes

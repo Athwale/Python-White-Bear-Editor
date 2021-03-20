@@ -251,8 +251,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
                 or not os.access(full_thumbnail_path, os.W_OK):
             full_thumbnail_path = None
 
-        return ImageInText(self.get_menu_section().get_section_name(), title, alt, full_original_image_path,
-                           full_thumbnail_path, div.a['href'], div.img['src'])
+        return ImageInText(title, alt, full_original_image_path, full_thumbnail_path, div.a['href'], div.img['src'])
 
     @staticmethod
     def _process_h(h: Tag) -> Heading:
@@ -394,8 +393,8 @@ class WhitebearDocumentArticle(WhitebearDocument):
                 or not os.access(full_thumbnail_path, os.W_OK):
             full_thumbnail_path = None
 
-        return AsideImage(self.get_menu_section().get_section_name(), figcaption, title, alt,
-                          full_original_image_path, full_thumbnail_path, figure.a['href'], figure.img['src'])
+        return AsideImage(figcaption, title, alt, full_original_image_path, full_thumbnail_path, figure.a['href'],
+                          figure.img['src'])
 
     def validate_self(self) -> (bool, List[str]):
         """
