@@ -28,6 +28,7 @@ class AddLogoDialog(wx.Dialog):
         self._menu_image = None
         self._logos_path = None
         self._working_directory = work_dir
+        self._file_path = None
 
         # Disk location
         self._original_disk_location_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -165,6 +166,7 @@ class AddLogoDialog(wx.Dialog):
             if result == wx.NO:
                 return False
         self._menu_image.SaveFile(logo_file + Strings.extension_jpg, wx.BITMAP_TYPE_JPEG)
+        self._file_path = logo_file + Strings.extension_jpg
         # Exceptions from here are caught automatically
         return True
 
@@ -194,3 +196,10 @@ class AddLogoDialog(wx.Dialog):
         # Show the image.
         self._bitmap.SetBitmap(wx.Bitmap(self._menu_image))
         self.Layout()
+
+    def get_logo_location(self) -> (str, str):
+        """
+        Return logo image disk path and filename. Use this only after the dialog was confirmed.
+        :return: Image disk path and filename.
+        """
+        return self._file_path, os.path.basename(self._file_path)

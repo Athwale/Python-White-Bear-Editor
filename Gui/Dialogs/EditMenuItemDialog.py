@@ -17,7 +17,7 @@ class EditMenuItemDialog(wx.Dialog):
         :param item: MenuItem instance being edited by tis dialog.
         :param work_dir: Working directory of the editor.
         """
-        # todo ask to load newly added image
+        # todo ask to load newly added image, do the same thing for aside image.
         wx.Dialog.__init__(self, parent, title=Strings.label_dialog_edit_menu_item,
                            size=(Numbers.edit_aside_image_dialog_width, Numbers.edit_menu_item_dialog_height),
                            style=wx.DEFAULT_DIALOG_STYLE)
@@ -190,31 +190,11 @@ class EditMenuItemDialog(wx.Dialog):
         """
         if event.GetId() == wx.ID_OPEN:
             new_path, new_name = self._ask_for_image()
-            img_dir: str = os.path.join(self._work_dir, Strings.folder_images, Strings.folder_logos)
             if not new_path:
                 # No image was selected
                 event.Skip()
-                return
-            if img_dir not in new_path:
-                wx.MessageBox(Strings.warning_wrong_logo_folder, Strings.status_error, wx.OK | wx.ICON_ERROR)
-                return
-
-            image = wx.Image(new_path, wx.BITMAP_TYPE_ANY)
-            if image.GetSize() != (Numbers.menu_logo_image_size, Numbers.menu_logo_image_size):
-                wx.MessageBox(Strings.warning_wrong_logo_size, Strings.status_error, wx.OK | wx.ICON_ERROR)
-                return
             else:
-                # Display the new image
-                html_image_filename: str = os.path.join(Strings.folder_images, Strings.folder_logos, new_name)
-                self._item_copy = MenuItem(self._field_item_name.GetValue(),
-                                           self._field_image_link_title.GetValue(),
-                                           self._field_image_alt.GetValue(),
-                                           self._original_item.get_link_href(),
-                                           new_path,
-                                           html_image_filename)
-                # Initializes all internal variables.
-                self._item_copy.seo_test_self()
-                self.display_dialog_contents()
+                self._change_image(new_path, new_name)
         elif event.GetId() == wx.ID_OK:
             # Save new information into image and rerun seo test.
             self._item_copy.set_article_name(self._field_item_name.GetValue())
@@ -235,7 +215,13 @@ class EditMenuItemDialog(wx.Dialog):
                 self.display_dialog_contents()
         elif event.GetId() == wx.ID_ADD:
             dlg = AddLogoDialog(self, self._work_dir)
-            dlg.ShowModal()
+            saved = dlg.ShowModal()
+            if saved == wx.ID_OK:
+                result = wx.MessageBox(Strings.label_use_image, Strings.label_image, wx.YES_NO | wx.ICON_QUESTION)
+                if result == wx.YES:
+                    # This function must be used only when the add image dialog is confirmed.
+                    # Parameter expansion, expands tuple into the two arguments needed by the function.
+                    self._change_image(*dlg.get_logo_location())
             dlg.Destroy()
         else:
             # Leave the original item as it is.
@@ -253,6 +239,37 @@ class EditMenuItemDialog(wx.Dialog):
                 dlg: wx.FileDialog
                 return dlg.GetPath(), dlg.GetFilename()
             return None, None
+
+    def _change_image(self, path: str, name: str) -> None:
+        """
+        Change image displayed in the dialog to a new image selected form disk.
+        :param path: Disk path.
+        :param name: File name
+        :return: None
+        """
+        img_dir: str = os.path.join(self._work_dir, Strings.folder_images, Strings.folder_logos)
+        if not path:
+            return
+        if img_dir not in path:
+            wx.MessageBox(Strings.warning_wrong_logo_folder, Strings.status_error, wx.OK | wx.ICON_ERROR)
+            return
+
+        image = wx.Image(path, wx.BITMAP_TYPE_ANY)
+        if image.GetSize() != (Numbers.menu_logo_image_size, Numbers.menu_logo_image_size):
+            wx.MessageBox(Strings.warning_wrong_logo_size, Strings.status_error, wx.OK | wx.ICON_ERROR)
+            return
+        else:
+            # Display the new image
+            html_image_filename: str = os.path.join(Strings.folder_images, Strings.folder_logos, name)
+            self._item_copy = MenuItem(self._field_item_name.GetValue(),
+                                       self._field_image_link_title.GetValue(),
+                                       self._field_image_alt.GetValue(),
+                                       self._original_item.get_link_href(),
+                                       path,
+                                       html_image_filename)
+            # Initializes all internal variables.
+            self._item_copy.seo_test_self()
+            self.display_dialog_contents()
 
     def display_dialog_contents(self) -> None:
         """
