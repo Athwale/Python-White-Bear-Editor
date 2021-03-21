@@ -193,6 +193,7 @@ class EditMenuItemDialog(wx.Dialog):
             if not new_path:
                 # No image was selected
                 event.Skip()
+                return
             else:
                 self._change_image(new_path, new_name)
         elif event.GetId() == wx.ID_OK:

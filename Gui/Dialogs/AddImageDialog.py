@@ -30,6 +30,7 @@ class AddImageDialog(wx.Dialog):
         self._thumbnail = None
         self._originals_path = None
         self._thumbnails_path = None
+        self._thumbnail_path = None
         self._working_directory = work_dir
 
         # Disk location
@@ -193,7 +194,7 @@ class AddImageDialog(wx.Dialog):
                                                  Strings.folder_originals)
         self._thumbnails_path: str = os.path.join(self._working_directory, Strings.folder_images,
                                                   Strings.folder_thumbnails)
-        thumbnail_file: str = os.path.join(self._thumbnails_path, new_name)
+        self._thumbnail_path: str = os.path.join(self._thumbnails_path, new_name)
         full_file: str = os.path.join(self._originals_path, new_name)
         # Determine the file type, we can only open jpg and png files in the browse dialog.
         _, file_extension = os.path.splitext(os.path.join(self._image_path, self._image_name))
@@ -202,19 +203,21 @@ class AddImageDialog(wx.Dialog):
         else:
             img_type = wx.BITMAP_TYPE_PNG
 
-        if os.path.exists(thumbnail_file + file_extension):
-            result = wx.MessageBox(Strings.warning_file_exists_overwrite + ': \n' + thumbnail_file + file_extension,
+        self._thumbnail_path = self._thumbnail_path + file_extension
+        full_file = full_file + file_extension
+        if os.path.exists(self._thumbnail_path):
+            result = wx.MessageBox(Strings.warning_file_exists_overwrite + ': \n' + self._thumbnail_path,
                                    Strings.status_error, wx.YES_NO | wx.ICON_ERROR)
             if result == wx.NO:
                 return False
-        self._thumbnail.SaveFile(thumbnail_file + file_extension, img_type)
+        self._thumbnail.SaveFile(self._thumbnail_path, img_type)
 
-        if os.path.exists(full_file + file_extension):
-            result = wx.MessageBox(Strings.warning_file_exists_overwrite + ': \n' + full_file + file_extension,
+        if os.path.exists(full_file):
+            result = wx.MessageBox(Strings.warning_file_exists_overwrite + ': \n' + full_file,
                                    Strings.status_error, wx.YES_NO | wx.ICON_ERROR)
             if result == wx.NO:
                 return False
-        self._full_image.SaveFile(full_file + file_extension, img_type)
+        self._full_image.SaveFile(full_file, img_type)
 
         # Exceptions from here are caught automatically
         return True
@@ -280,3 +283,10 @@ class AddImageDialog(wx.Dialog):
         self._bitmap.SetBitmap(wx.Bitmap(self._thumbnail))
         self.SetSize(Numbers.add_image_dialog_width, self._thumbnail.GetHeight() + 120)
         self.Layout()
+
+    def get_thumbnail_location(self) -> (str, str):
+        """
+        Return thumbnail image disk path and filename. Use this only after the dialog was confirmed.
+        :return: Image disk path and filename.
+        """
+        return self._thumbnail_path, os.path.basename(self._thumbnail_path)

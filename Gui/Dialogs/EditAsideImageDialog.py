@@ -163,34 +163,12 @@ class EditAsideImageDialog(wx.Dialog):
         """
         if event.GetId() == wx.ID_OPEN:
             new_path, new_name = self._ask_for_image()
-            img_dir: str = os.path.join(self._work_dir, Strings.folder_images, Strings.folder_thumbnails)
             if not new_path:
                 # No image was selected
                 event.Skip()
                 return
-            if img_dir not in new_path:
-                wx.MessageBox(Strings.warning_wrong_image_folder, Strings.status_error, wx.OK | wx.ICON_ERROR)
-                return
-
-            image = wx.Image(new_path, wx.BITMAP_TYPE_ANY)
-            if not math.isclose(Numbers.photo_ratio, (image.GetWidth() / image.GetHeight()),
-                                abs_tol=Numbers.photo_ratio_tolerance):
-                # Test correct aspect ratio
-                wx.MessageBox(Strings.warning_aside_impossible, Strings.status_error, wx.OK | wx.ICON_ERROR)
-                return
             else:
-                # Display the new image
-                html_thumbnail_filename: str = os.path.join(Strings.folder_images, Strings.folder_thumbnails, new_name)
-                self._image_copy = AsideImage(self._field_image_caption.GetValue(),
-                                              self._field_image_link_title.GetValue(),
-                                              self._field_image_alt.GetValue(),
-                                              new_path.replace(Strings.folder_thumbnails, Strings.folder_originals),
-                                              new_path, html_thumbnail_filename.replace(Strings.folder_thumbnails,
-                                                                                        Strings.folder_originals),
-                                              html_thumbnail_filename)
-                # Initializes all internal variables.
-                self._image_copy.seo_test_self()
-                self._display_dialog_contents()
+                self._change_image(new_path, new_name)
         elif event.GetId() == wx.ID_OK:
             # Save new information into image and rerun seo test.
             self._image_copy.set_caption(self._field_image_caption.GetValue())
@@ -213,7 +191,13 @@ class EditAsideImageDialog(wx.Dialog):
                 self._display_dialog_contents()
         elif event.GetId() == wx.ID_ADD:
             dlg = AddImageDialog(self, self._work_dir)
-            dlg.ShowModal()
+            saved = dlg.ShowModal()
+            if saved == wx.ID_OK:
+                result = wx.MessageBox(Strings.label_use_image, Strings.label_image, wx.YES_NO | wx.ICON_QUESTION)
+                if result == wx.YES:
+                    # This function must be used only when the add image dialog is confirmed.
+                    # Parameter expansion, expands tuple into the two arguments needed by the function.
+                    self._change_image(*dlg.get_thumbnail_location())
             dlg.Destroy()
         else:
             # Leave the old image as it is and do not do anything.
@@ -233,6 +217,41 @@ class EditAsideImageDialog(wx.Dialog):
                 dlg: wx.FileDialog
                 return dlg.GetPath(), dlg.GetFilename()
             return None, None
+
+    def _change_image(self, path: str, name: str) -> None:
+        """
+        Change image displayed in the dialog to a new image selected form disk.
+        :param path: Disk path.
+        :param name: File name
+        :return: None
+        """
+        img_dir: str = os.path.join(self._work_dir, Strings.folder_images, Strings.folder_thumbnails)
+        if not path:
+            # No image was selected
+            return
+        if img_dir not in path:
+            wx.MessageBox(Strings.warning_wrong_image_folder, Strings.status_error, wx.OK | wx.ICON_ERROR)
+            return
+
+        image = wx.Image(path, wx.BITMAP_TYPE_ANY)
+        if not math.isclose(Numbers.photo_ratio, (image.GetWidth() / image.GetHeight()),
+                            abs_tol=Numbers.photo_ratio_tolerance):
+            # Test correct aspect ratio
+            wx.MessageBox(Strings.warning_aside_impossible, Strings.status_error, wx.OK | wx.ICON_ERROR)
+            return
+        else:
+            # Display the new image
+            html_thumbnail_filename: str = os.path.join(Strings.folder_images, Strings.folder_thumbnails, name)
+            self._image_copy = AsideImage(self._field_image_caption.GetValue(),
+                                          self._field_image_link_title.GetValue(),
+                                          self._field_image_alt.GetValue(),
+                                          path.replace(Strings.folder_thumbnails, Strings.folder_originals),
+                                          path, html_thumbnail_filename.replace(Strings.folder_thumbnails,
+                                                                                Strings.folder_originals),
+                                          html_thumbnail_filename)
+            # Initializes all internal variables.
+            self._image_copy.seo_test_self()
+            self._display_dialog_contents()
 
     def _display_dialog_contents(self) -> None:
         """
