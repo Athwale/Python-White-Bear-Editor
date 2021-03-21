@@ -36,7 +36,6 @@ class AddLogoDialog(wx.Dialog):
                                                           style=wx.ST_ELLIPSIZE_MIDDLE | wx.ST_NO_AUTORESIZE)
         self._original_disk_location_sub_sizer.Add(self._label_image_original_path,
                                                    flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
-        self._original_disk_location_sub_sizer.Add((7, -1))
         self._original_disk_location_sub_sizer.Add(self._content_image_original_path, 1, flag=wx.EXPAND)
         self._information_sizer.Add(self._original_disk_location_sub_sizer, flag=wx.EXPAND | wx.TOP,
                                     border=Numbers.widget_border_size)
@@ -48,7 +47,7 @@ class AddLogoDialog(wx.Dialog):
                                                  style=wx.ST_ELLIPSIZE_MIDDLE | wx.ST_NO_AUTORESIZE)
         self._image_original_size_sub_sizer.Add(self._label_image_size,
                                                 flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
-        self._image_original_size_sub_sizer.Add((1, -1))
+        self._image_original_size_sub_sizer.Add((14, -1))
         self._image_original_size_sub_sizer.Add(self._content_image_size, 1, flag=wx.EXPAND)
         self._information_sizer.Add(self._image_original_size_sub_sizer, flag=wx.EXPAND | wx.TOP,
                                     border=Numbers.widget_border_size)

@@ -12,7 +12,6 @@ class AddImageDialog(wx.Dialog):
 
     def __init__(self, parent, work_dir: str):
         """
-        # todo in edit turn label red if thumbnail size wrong.
         Display a dialog with information about the image where the user can edit it.
         :param parent: Parent frame.
         :param work_dir: The working directory of the editor.
@@ -40,7 +39,6 @@ class AddImageDialog(wx.Dialog):
                                                           style=wx.ST_ELLIPSIZE_MIDDLE | wx.ST_NO_AUTORESIZE)
         self._original_disk_location_sub_sizer.Add(self._label_image_original_path,
                                                    flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
-        self._original_disk_location_sub_sizer.Add((7, -1))
         self._original_disk_location_sub_sizer.Add(self._content_image_original_path, 1, flag=wx.EXPAND)
         self._information_sizer.Add(self._original_disk_location_sub_sizer, flag=wx.EXPAND | wx.TOP,
                                     border=Numbers.widget_border_size)

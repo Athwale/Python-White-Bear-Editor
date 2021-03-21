@@ -17,6 +17,7 @@ class EditMenuItemDialog(wx.Dialog):
         :param item: MenuItem instance being edited by tis dialog.
         :param work_dir: Working directory of the editor.
         """
+        # todo ask to load newly added image
         wx.Dialog.__init__(self, parent, title=Strings.label_dialog_edit_menu_item,
                            size=(Numbers.edit_aside_image_dialog_width, Numbers.edit_menu_item_dialog_height),
                            style=wx.DEFAULT_DIALOG_STYLE)

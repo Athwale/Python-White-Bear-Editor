@@ -1048,8 +1048,8 @@ class MainFrame(wx.Frame):
         self._field_article_date.SetBackgroundColour(wx.WHITE)
         Tools.set_field_background(self._field_article_description, wx.WHITE)
         self._field_article_keywords.SetBackgroundColour(wx.WHITE)
-        self._set_status_text(Strings.status_error, 0)
-        self._set_status_text(Strings.status_error, 3)
+        self._set_status_text(Strings.status_ready, 0)
+        self._set_status_text(Strings.status_ready, 3)
         self._ignore_change = False
 
     def _list_item_click_handler(self, event):
@@ -1281,7 +1281,6 @@ class MainFrame(wx.Frame):
         dlg = AddImageDialog(self, self._current_document_instance.get_working_directory())
         dlg.ShowModal()
         dlg.Destroy()
-        # todo fix dialog label spacings
 
     def _insert_aside_image_handler(self, event: wx.CommandEvent) -> None:
         """
@@ -1403,6 +1402,7 @@ class MainFrame(wx.Frame):
                 self._save(new_document.get_index_document(), save_as=False)
             # Add to list
             self._file_list.InsertItem(0, new_document.get_filename())
+            self._set_status_text(Strings.status_articles + ' ' + str(len(self._document_dictionary)), 2)
         dlg.Destroy()
 
     # noinspection PyUnusedLocal
@@ -1482,6 +1482,7 @@ class MainFrame(wx.Frame):
                 # If there are any other documents enable the editor and continue with the next document.
                 self._file_list.Select(0)
                 self._disable_editor(False)
+                self._set_status_text(Strings.status_articles + ' ' + str(len(self._document_dictionary)), 2)
             else:
                 self._show_error_dialog(Strings.warning_can_not_delete + ':\n' + path)
 
