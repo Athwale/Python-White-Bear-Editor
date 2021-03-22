@@ -41,6 +41,17 @@ class EditDefaultValuesDialog(wx.Dialog):
         self._field_global_title_tip = Tools.get_warning_tip(self._field_global_title, Strings.label_global_title)
         self._field_global_title_tip.SetMessage(Strings.label_main_title_tip)
 
+        # Url sub sizer
+        self._url_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self._label_url = wx.StaticText(self, -1, Strings.label_website_url + ': ')
+        self._field_url = wx.TextCtrl(self, -1)
+        self._url_sub_sizer.Add(self._label_url, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
+        self._url_sub_sizer.Add((44, -1))
+        self._url_sub_sizer.Add(self._field_url, proportion=1)
+        self._information_sizer.Add(self._url_sub_sizer, flag=wx.EXPAND | wx.TOP, border=Numbers.widget_border_size)
+        self._field_url_tip = Tools.get_warning_tip(self._field_url, Strings.label_website_url)
+        self._field_url_tip.SetMessage(Strings.label_website_url_tip)
+
         # Author sub sizer
         self._author_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self._label_author = wx.StaticText(self, -1, Strings.label_author + ': ')
@@ -161,7 +172,7 @@ class EditDefaultValuesDialog(wx.Dialog):
         self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._cancel_button)
         for field in [self._field_global_title, self._field_author, self._field_contact, self._field_script,
                       self._field_black_text, self._field_red_text, self._field_meta_keywords,
-                      self._field_meta_description]:
+                      self._field_meta_description, self._field_url]:
             self.Bind(wx.EVT_TEXT, self._text_handler, field)
 
         self._display_dialog_contents()
@@ -197,6 +208,7 @@ class EditDefaultValuesDialog(wx.Dialog):
             self._save_all = self._save_all or result
 
             # Keywords can be individual for each page. The global value is for new articles.
+            self._config_manager.store_url(self._field_url.GetValue())
             self._config_manager.store_global_keywords(self._field_meta_keywords.GetValue())
             self._config_manager.store_contact(self._field_contact.GetValue())
             self._config_manager.store_main_page_description(self._field_meta_description.GetValue())
@@ -211,6 +223,7 @@ class EditDefaultValuesDialog(wx.Dialog):
         """
         self.Disable()
         self._field_global_title.SetValue(self._config_manager.get_global_title())
+        self._field_url.SetValue(self._config_manager.get_url())
         self._field_author.SetValue(self._config_manager.get_author())
         self._field_contact.SetValue(self._config_manager.get_contact())
         self._field_meta_keywords.SetValue(self._config_manager.get_global_keywords())
@@ -253,7 +266,8 @@ class EditDefaultValuesDialog(wx.Dialog):
         # Check length
         for field, tip, msg in [(self._field_global_title, self._field_global_title_tip, Strings.label_global_title),
                                 (self._field_author, self._field_author_tip, Strings.label_author_tip),
-                                (self._field_contact, self._field_contact_tip, Strings.label_contact_tip)]:
+                                (self._field_contact, self._field_contact_tip, Strings.label_contact_tip),
+                                (self._field_url, self._field_url_tip, Strings.label_website_url_tip)]:
             if len(field.GetValue()) > Numbers.default_max_length or len(field.GetValue()) < 1:
                 result = False
                 Tools.set_field_background(field, Numbers.RED_COLOR)
@@ -262,7 +276,6 @@ class EditDefaultValuesDialog(wx.Dialog):
             else:
                 Tools.set_field_background(field, Numbers.GREEN_COLOR)
                 tip.SetMessage(msg + '\n\n' + Strings.seo_check + '\n' + Strings.status_ok)
-
         return result
 
     def save_all(self) -> bool:

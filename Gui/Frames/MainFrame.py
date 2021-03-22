@@ -1493,7 +1493,7 @@ class MainFrame(wx.Frame):
         :param event: Not used.
         :return: None
         """
-        # todo generate robots and sitemap.
+        # todo generate robots with sitemap.
         dlg = wx.DirDialog(self, Strings.label_dialog_choose_wb_dir, Strings.home_directory, wx.DD_DEFAULT_STYLE)
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()

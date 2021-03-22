@@ -29,6 +29,7 @@ class ConfigManager:
     CONF_BLACK_TXT: str = 'blackTxt'
     CONF_RED_TXT: str = 'redTxt'
     CONF_NEWS: str = 'news'
+    CONF_PAGE_URL: str = 'url'
 
     @staticmethod
     def get_instance():
@@ -65,6 +66,7 @@ class ConfigManager:
                 self.CONF_SCRIPT: '',
                 self.CONF_BLACK_TXT: '',
                 self.CONF_RED_TXT: '',
+                self.CONF_PAGE_URL: '',
                 self.CONF_NEWS: str(Numbers.default_news)}
 
     def _init_config(self) -> None:
@@ -110,7 +112,7 @@ class ConfigManager:
         correct = True
         for name in [self.CONF_WORKING_DIR, self.CONF_GLOBAL_TITLE, self.CONF_AUTHOR, self.CONF_CONTACT,
                      self.CONF_KEYWORDS, self.CONF_DESCRIPTION, self.CONF_SCRIPT, self.CONF_BLACK_TXT,
-                     self.CONF_RED_TXT, self.CONF_NEWS]:
+                     self.CONF_RED_TXT, self.CONF_NEWS, self.CONF_PAGE_URL]:
             try:
                 if not self._dir_conf[name]:
                     correct = False
@@ -155,6 +157,13 @@ class ConfigManager:
         :return: String directory path to the working directory.
         """
         return self._dir_conf[self.CONF_WORKING_DIR]
+
+    def get_url(self) -> str:
+        """
+        Get the website url e.g. http://www.white-bear.cz.
+        :return: String url of the website.
+        """
+        return self._dir_conf[self.CONF_PAGE_URL]
 
     def get_window_position(self) -> object:
         """
@@ -302,6 +311,15 @@ class ConfigManager:
         :return: None
         """
         self._dir_conf[self.CONF_LAST] = name
+        self.save_config_file()
+
+    def store_url(self, url: str) -> None:
+        """
+        Save the website url e.g. http://www.white-bear.cz into the dictionary.
+        :param url: The website url
+        :return: None
+        """
+        self._dir_conf[self.CONF_PAGE_URL] = url
         self.save_config_file()
 
     def store_global_title(self, title: str) -> bool:

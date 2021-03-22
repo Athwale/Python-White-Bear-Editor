@@ -347,6 +347,8 @@ class Strings:
     label_menu_file_name: str = 'Menu file name'
     label_export_all: str = 'Export all documents to html'
     label_use_image: str = 'Use newly added image?'
+    label_website_url: str = 'Url'
+    label_website_url_tip: str = 'Website url e.g.\nhttp://www.white-bear.cz\nUsed for sitemap generation'
 
     status_loading: str = 'Loading and testing'
     status_ready: str = 'Ready'
