@@ -30,6 +30,7 @@ from Tools.Document.WhitebearDocumentArticle import WhitebearDocumentArticle
 from Tools.Document.WhitebearDocumentCSS import WhitebearDocumentCSS
 from Tools.Document.WhitebearDocumentIndex import WhitebearDocumentIndex
 from Tools.Document.WhitebearDocumentMenu import WhitebearDocumentMenu
+from Tools.SitemapGenerator import SitemapGenerator
 from Tools.Tools import Tools
 
 
@@ -61,8 +62,8 @@ class MainFrame(wx.Frame):
         self._tool_ids = []
         self._disableable_menu_items = []
         self._thread_queue = []
-        self._document_dictionary = {}
-        self._menus = None
+        self._articles = {}
+        self._menus = {}
         self._index_document = None
         self._current_document_name = None
         self._current_document_instance = None
@@ -686,7 +687,7 @@ class MainFrame(wx.Frame):
         :return: None
         """
         self._disable_editor(True, leave_files=True)
-        self._document_dictionary = documents
+        self._articles = documents
         self._menus = menus
         if not menus:
             self._file_menu_item_new.Enable(False)
@@ -694,8 +695,8 @@ class MainFrame(wx.Frame):
             self._file_menu_item_edit_menu.Enable(True)
         self._index_document = index
         self._clear_editor(leave_files=False)
-        for document_name in sorted(list(self._document_dictionary.keys()), reverse=True):
-            status_color = self._document_dictionary[document_name].get_status_color()
+        for document_name in sorted(list(self._articles.keys()), reverse=True):
+            status_color = self._articles[document_name].get_status_color()
             self._file_list.InsertItem(0, document_name)
             self._file_list.SetItemBackgroundColour(0, status_color)
 
@@ -713,7 +714,7 @@ class MainFrame(wx.Frame):
         os.chdir(self._config_manager.get_working_dir())
         # Enable GUI when the load is done
         self._set_status_text(Strings.status_ready, 3)
-        self._set_status_text(Strings.status_articles + ' ' + str(len(self._document_dictionary)), 2)
+        self._set_status_text(Strings.status_articles + ' ' + str(len(self._articles)), 2)
         if self._loading_dlg:
             self._loading_dlg.Destroy()
 
@@ -807,7 +808,7 @@ class MainFrame(wx.Frame):
         :param disable: Leave the editor disabled after threads finish.
         :return: None
         """
-        for doc in self._document_dictionary.values():
+        for doc in self._articles.values():
             # Save all articles.
             self._save(doc, False, disable)
         for menu in self._menus.values():
@@ -823,6 +824,13 @@ class MainFrame(wx.Frame):
         :param disable: Leave the editor disabled after threads finish.
         :return: None.
         """
+        # todo run once this in a thread
+        articles = list(self._articles.keys())
+        menus = list(self._menus.keys())
+        articles.extend(menus)
+        self._sitemap_generator = SitemapGenerator(articles)
+        self._sitemap_generator.create_sitemap()
+
         # Editor will be enabled when the thread finishes.
         if self._enabled:
             self._disable_editor(True)
@@ -966,7 +974,7 @@ class MainFrame(wx.Frame):
             selected_page = self._file_list.GetFirstSelected()
             if selected_page != wx.NOT_FOUND:
                 self._config_manager.store_last_open_document(self._file_list.GetItemText(selected_page, 0))
-            for doc in self._document_dictionary.values():
+            for doc in self._articles.values():
                 if doc.is_modified() and not doc.get_html_to_save():
                     result = wx.MessageBox(Strings.warning_unsaved, Strings.status_warning, wx.YES_NO | wx.ICON_WARNING)
                     if result == wx.YES:
@@ -1066,7 +1074,7 @@ class MainFrame(wx.Frame):
 
         self._disable_editor(True)
         self._current_document_name = event.GetText()
-        self._current_document_instance: WhitebearDocumentArticle = self._document_dictionary[
+        self._current_document_instance: WhitebearDocumentArticle = self._articles[
             self._current_document_name]
         try:
             result = self._current_document_instance.validate_self()
@@ -1241,7 +1249,7 @@ class MainFrame(wx.Frame):
         if index == -1:
             # Nothing is selected nor give as index to update.
             return
-        doc = self._document_dictionary[self._file_list.GetItemText(index)]
+        doc = self._articles[self._file_list.GetItemText(index)]
         doc.is_modified()
         new_color = doc.get_status_color()
         if doc.get_html_to_save():
@@ -1386,10 +1394,10 @@ class MainFrame(wx.Frame):
         :param event: Not used.
         :return: None
         """
-        dlg = NewFileDialog(self, self._menus, self._document_dictionary, self._css_document, self._index_document)
+        dlg = NewFileDialog(self, self._menus, self._articles, self._css_document, self._index_document)
         if dlg.ShowModal() == wx.ID_OK:
             new_document = dlg.get_new_document()
-            self._document_dictionary[new_document.get_filename()] = new_document
+            self._articles[new_document.get_filename()] = new_document
             new_document.convert_to_html()
             if self._file_list.GetFirstSelected() == -1:
                 # When no document is selected leave editor disabled after save.
@@ -1402,7 +1410,7 @@ class MainFrame(wx.Frame):
                 self._save(new_document.get_index_document(), save_as=False)
             # Add to list
             self._file_list.InsertItem(0, new_document.get_filename())
-            self._set_status_text(Strings.status_articles + ' ' + str(len(self._document_dictionary)), 2)
+            self._set_status_text(Strings.status_articles + ' ' + str(len(self._articles)), 2)
         dlg.Destroy()
 
     # noinspection PyUnusedLocal
@@ -1468,7 +1476,7 @@ class MainFrame(wx.Frame):
             path = self._current_document_instance.get_path()
             if os.path.exists(path) and os.access(path, os.R_OK) and os.access(path, os.W_OK):
                 os.remove(path)
-                self._document_dictionary.pop(self._current_document_name)
+                self._articles.pop(self._current_document_name)
                 self._file_list.DeleteItem(self._file_list.FindItem(-1, self._current_document_instance.get_filename()))
                 self._save_all(disable=True)
                 if self._file_list.GetItemCount() == 0:
@@ -1482,7 +1490,7 @@ class MainFrame(wx.Frame):
                 # If there are any other documents enable the editor and continue with the next document.
                 self._file_list.Select(0)
                 self._disable_editor(False)
-                self._set_status_text(Strings.status_articles + ' ' + str(len(self._document_dictionary)), 2)
+                self._set_status_text(Strings.status_articles + ' ' + str(len(self._articles)), 2)
             else:
                 self._show_error_dialog(Strings.warning_can_not_delete + ':\n' + path)
 
@@ -1493,7 +1501,7 @@ class MainFrame(wx.Frame):
         :param event: Not used.
         :return: None
         """
-        # todo generate robots with sitemap.
+        # todo generate robots with sitemap, validate the resulting sitemap.
         dlg = wx.DirDialog(self, Strings.label_dialog_choose_wb_dir, Strings.home_directory, wx.DD_DEFAULT_STYLE)
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()

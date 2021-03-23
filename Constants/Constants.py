@@ -136,6 +136,10 @@ class Strings:
     file_background: str = 'background.jpg'
     file_header: str = 'logo-nadpis.png'
 
+    # Sitemap settings
+    sitemap_xmlns: str = 'http://www.sitemaps.org/schemas/sitemap/0.9'
+    change_frequency: str = 'monthly'
+
     text_about_contents: str = '<p>Unfinished whitebear web editor.<br>' \
                                '<i>https://github.com/Athwale/Python-White-Bear-Editor</i><br>' \
                                'version: <b>' + editor_version + '</b></p>'
