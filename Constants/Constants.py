@@ -44,6 +44,10 @@ class Numbers:
     new_file_dialog_height: int = 420
     edit_menu_dialog_width: int = 600
     edit_menu_dialog_height: int = 300
+    about_dialog_width: int = 410
+    about_dialog_height: int = 250
+    saving_dialog_width: int = 350
+    saving_dialog_height: int = 85
     icon_width: int = 30
     icon_height: int = 30
     color_icon_width: int = 15
@@ -356,6 +360,7 @@ class Strings:
     label_use_image: str = 'Use newly added image?'
     label_website_url: str = 'Url'
     label_website_url_tip: str = 'Website url e.g.\nhttp://www.white-bear.cz\nUsed for sitemap generation'
+    label_saving: str = 'Saved'
 
     status_loading: str = 'Loading and testing'
     status_ready: str = 'Ready'

@@ -44,5 +44,7 @@ class SitemapGenerator:
             changefreq_tag = self._soup.new_tag('changefreq')
             changefreq_tag.string = Strings.change_frequency
             url_tag.append(changefreq_tag)
-            self._soup.append(url_tag)
+            urlset_tag.append(url_tag)
+            
+        self._soup.append(urlset_tag)
         return str(self._soup.prettify())

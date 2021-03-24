@@ -1,7 +1,7 @@
 import wx
 import wx.html
 
-from Constants.Constants import Strings
+from Constants.Constants import Strings, Numbers
 
 
 class AboutDialog(wx.Dialog):
@@ -11,9 +11,9 @@ class AboutDialog(wx.Dialog):
         Display a modal dialog with a message with the text being selectable.
         :param parent: Parent frame.
         """
-        wx.Dialog.__init__(self, parent, title=Strings.label_dialog_about)
+        wx.Dialog.__init__(self, parent, title=Strings.label_dialog_about,
+                           size=(Numbers.about_dialog_width, Numbers.about_dialog_height))
         self._main_vertical_sizer = wx.BoxSizer(wx.VERTICAL)
-        self.SetMinSize((410, 250))
 
         self._html_window = wx.html.HtmlWindow(self, style=wx.html.HW_SCROLLBAR_NEVER)
         if 'gtk2' in wx.PlatformInfo:

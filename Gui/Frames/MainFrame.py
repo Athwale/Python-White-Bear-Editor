@@ -9,6 +9,7 @@ import wx.richtext as rt
 from Constants.Constants import Numbers
 from Constants.Constants import Strings
 from Exceptions.UnrecognizedFileException import UnrecognizedFileException
+from Gui.Dialogs.SavingDialog import SavingDialog
 from Gui.Dialogs.AboutDialog import AboutDialog
 from Gui.Dialogs.AddImageDialog import AddImageDialog
 from Gui.Dialogs.AddLogoDialog import AddLogoDialog
@@ -69,6 +70,7 @@ class MainFrame(wx.Frame):
         self._current_document_instance = None
         self._css_document = None
         self._loading_dlg = None
+        self._saving_dlg = None
         self._ignore_change = False
         self._no_save = False
         self._enabled = True
@@ -790,6 +792,8 @@ class MainFrame(wx.Frame):
         :param disable: Leave the editor disabled after threads finish.
         :return: False if save canceled.
         """
+        self._saving_dlg = SavingDialog(self)
+        self._saving_dlg.Show()
         self._main_text_area.convert_document()
         # Force save current document.
         if confirm:
@@ -809,6 +813,8 @@ class MainFrame(wx.Frame):
         :param disable: Leave the editor disabled after threads finish.
         :return: None
         """
+        self._saving_dlg = SavingDialog(self)
+        self._saving_dlg.Show()
         self._save_sitemap(disable)
         for doc in self._articles.values():
             # Save all articles.
@@ -862,6 +868,7 @@ class MainFrame(wx.Frame):
             self._update_file_color(self._file_list.FindItem(-1, doc.get_filename()))
 
         file_path = doc.get_path()
+        file_name = doc.get_filename()
         if isinstance(doc, WhitebearDocumentArticle):
             suffix = Strings.article
         elif isinstance(doc, WhitebearDocumentMenu):
@@ -888,10 +895,12 @@ class MainFrame(wx.Frame):
                                         file_path)
         # Set modified false for all document parts it was saved and does not need to be asked for save until changed.
         doc.set_modified(False)
+        self._saving_dlg.set_file(file_name)
         # Clean thread list off stopped threads.
         self._thread_queue.remove(thread)
         if not self._thread_queue and not disable:
             # Enable only when all threads have finished.
+            self._saving_dlg.Destroy()
             self._disable_editor(False)
 
     def on_sitemap_done(self, thread: SitemapThread, sitemap: str,  disable: bool) -> None:
@@ -909,11 +918,13 @@ class MainFrame(wx.Frame):
             with open(sitemap_file, 'w', encoding='utf8') as file:
                 file.write(sitemap)
                 self._set_status_text(Strings.status_saved + ': ' + last_save, 3)
+                self._saving_dlg.set_file(Strings.sitemap_file)
             # Save robots.txt if not present
             if not os.path.exists(robots_txt):
                 with open(robots_txt, 'w', encoding='utf8') as file:
                     file.write(Strings.sitemap_keyword + ' ' + self._config_manager.get_url() + '/' +
                                Strings.sitemap_file)
+                    self._saving_dlg.set_file(Strings.robots_file)
         except IOError:
             self._show_error_dialog(Strings.warning_can_not_save + '\n' + Strings.exception_access_html + '\n' +
                                     sitemap_file)
@@ -921,6 +932,7 @@ class MainFrame(wx.Frame):
         self._thread_queue.remove(thread)
         if not self._thread_queue and not disable:
             # Enable only when all threads have finished.
+            self._saving_dlg.Destroy()
             self._disable_editor(False)
 
     def _get_new_file_path(self, suffix: str) -> str:
@@ -949,6 +961,7 @@ class MainFrame(wx.Frame):
         :return: None
         """
         self._show_error_dialog(Strings.warning_can_not_save + '\n\n' + str(e))
+        self._saving_dlg.Destroy()
         self._disable_editor(False)
 
     # noinspection PyUnusedLocal
