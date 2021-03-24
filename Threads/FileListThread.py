@@ -26,7 +26,7 @@ class FileListThread(threading.Thread):
         self._path = path
         self._directory_loader = None
 
-    def run(self):
+    def run(self) -> None:
         """
         Overrides Thread.run. Don't call this directly its called internally when you call Thread.start().
         :return: None, this method calls the wx.CallAfter to pass a list of website names back into GUI.s

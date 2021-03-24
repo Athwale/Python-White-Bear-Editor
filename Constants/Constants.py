@@ -133,10 +133,13 @@ class Strings:
     article: str = 'article'
     menu: str = 'menu'
     index: str = 'index'
+    robots_file: str = 'robots.txt'
     file_background: str = 'background.jpg'
     file_header: str = 'logo-nadpis.png'
 
     # Sitemap settings
+    sitemap_file: str = 'sitemap.xml'
+    sitemap_keyword: str = 'Sitemap:'
     sitemap_xmlns: str = 'http://www.sitemaps.org/schemas/sitemap/0.9'
     change_frequency: str = 'monthly'
 
@@ -211,7 +214,7 @@ class Strings:
     warning_must_be_empty: str = 'New directory must be empty'
     warning_new_dir_created: str = 'New directory created.\n' \
                                    'Please add custom files.\n' \
-                                   'robots.txt, favicon.ico, 404.html, google tracking page.'
+                                   'favicon.ico, 404.html, google tracking page...'
     warning_unsaved: str = 'At least one document is not saved.\nQuit anyway?'
     warning_new_dir_unsaved: str = 'At least one document is not saved.\nContinue?'
 

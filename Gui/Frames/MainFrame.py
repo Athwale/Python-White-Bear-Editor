@@ -23,6 +23,7 @@ from Gui.Panels.CustomRichText import CustomRichText
 from Resources.Fetch import Fetch
 from Threads.ConvertorThread import ConvertorThread
 from Threads.FileListThread import FileListThread
+from Threads.SitemapThread import SitemapThread
 from Tools.ConfigManager import ConfigManager
 from Tools.Document.AsideImage import AsideImage
 from Tools.Document.MenuItem import MenuItem
@@ -30,7 +31,6 @@ from Tools.Document.WhitebearDocumentArticle import WhitebearDocumentArticle
 from Tools.Document.WhitebearDocumentCSS import WhitebearDocumentCSS
 from Tools.Document.WhitebearDocumentIndex import WhitebearDocumentIndex
 from Tools.Document.WhitebearDocumentMenu import WhitebearDocumentMenu
-from Tools.SitemapGenerator import SitemapGenerator
 from Tools.Tools import Tools
 
 
@@ -797,6 +797,7 @@ class MainFrame(wx.Frame):
             if result == wx.NO:
                 return False
         # Save article, corresponding menu and index.
+        self._save_sitemap(disable)
         self._save(self._current_document_instance, save_as, disable)
         self._save(self._current_document_instance.get_menu_section(), save_as, disable)
         self._save(self._current_document_instance.get_index_document(), save_as, disable)
@@ -808,6 +809,7 @@ class MainFrame(wx.Frame):
         :param disable: Leave the editor disabled after threads finish.
         :return: None
         """
+        self._save_sitemap(disable)
         for doc in self._articles.values():
             # Save all articles.
             self._save(doc, False, disable)
@@ -817,6 +819,21 @@ class MainFrame(wx.Frame):
         # Save index.
         self._save(self._index_document, False, disable)
 
+    def _save_sitemap(self, disable: bool) -> None:
+        """
+        Generate and save a sitemap of the current pages.
+        :param disable: Leave the editor disabled after threads finish.
+        :return: None
+        """
+        pages = [Strings.index + Strings.extension_html]
+        articles = list(self._articles.keys())
+        menus = list(self._menus.keys())
+        pages.extend(articles)
+        pages.extend(menus)
+        sitemap_thread = SitemapThread(self, pages, self._config_manager.get_working_dir(), disable)
+        self._thread_queue.append(sitemap_thread)
+        sitemap_thread.start()
+
     def _save(self, doc, save_as: bool = False, disable: bool = False) -> None:
         """
         Save current document onto disk.
@@ -824,13 +841,6 @@ class MainFrame(wx.Frame):
         :param disable: Leave the editor disabled after threads finish.
         :return: None.
         """
-        # todo run once this in a thread
-        articles = list(self._articles.keys())
-        menus = list(self._menus.keys())
-        articles.extend(menus)
-        self._sitemap_generator = SitemapGenerator(articles)
-        self._sitemap_generator.create_sitemap()
-
         # Editor will be enabled when the thread finishes.
         if self._enabled:
             self._disable_editor(True)
@@ -878,6 +888,35 @@ class MainFrame(wx.Frame):
                                         file_path)
         # Set modified false for all document parts it was saved and does not need to be asked for save until changed.
         doc.set_modified(False)
+        # Clean thread list off stopped threads.
+        self._thread_queue.remove(thread)
+        if not self._thread_queue and not disable:
+            # Enable only when all threads have finished.
+            self._disable_editor(False)
+
+    def on_sitemap_done(self, thread: SitemapThread, sitemap: str,  disable: bool) -> None:
+        """
+        :param thread: The thread that called this method.
+        :param sitemap: The sitemap xml as string.
+        :param disable: Leave the editor disabled after threads finish.
+        :return: None
+        """
+        sitemap_file = os.path.join(self._config_manager.get_working_dir(), Strings.sitemap_file)
+        robots_txt = os.path.join(self._config_manager.get_working_dir(), Strings.robots_file)
+        last_save = datetime.now().strftime("%H:%M:%S")
+        try:
+            # Save sitemap
+            with open(sitemap_file, 'w', encoding='utf8') as file:
+                file.write(sitemap)
+                self._set_status_text(Strings.status_saved + ': ' + last_save, 3)
+            # Save robots.txt if not present
+            if not os.path.exists(robots_txt):
+                with open(robots_txt, 'w', encoding='utf8') as file:
+                    file.write(Strings.sitemap_keyword + ' ' + self._config_manager.get_url() + '/' +
+                               Strings.sitemap_file)
+        except IOError:
+            self._show_error_dialog(Strings.warning_can_not_save + '\n' + Strings.exception_access_html + '\n' +
+                                    sitemap_file)
         # Clean thread list off stopped threads.
         self._thread_queue.remove(thread)
         if not self._thread_queue and not disable:
@@ -1501,7 +1540,6 @@ class MainFrame(wx.Frame):
         :param event: Not used.
         :return: None
         """
-        # todo generate robots with sitemap, validate the resulting sitemap.
         dlg = wx.DirDialog(self, Strings.label_dialog_choose_wb_dir, Strings.home_directory, wx.DD_DEFAULT_STYLE)
         if dlg.ShowModal() == wx.ID_OK:
             path = dlg.GetPath()

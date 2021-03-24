@@ -23,13 +23,12 @@ class SitemapGenerator:
 
     def create_sitemap(self) -> str:
         """
-        Index must be present so it is assumed implicitly.
+        Creates a string xml code of the sitemap.
         :return: xml of the sitemap as a string.
         """
         urlset_tag = self._soup.new_tag('urlset', attrs={'xmlns': Strings.sitemap_xmlns})
         self._soup.append(urlset_tag)
         page_url = self._config_manager.get_url()
-        self._pages.append('index.html')
         for page in self._pages:
             url_tag = self._soup.new_tag('url')
             # Location
@@ -46,4 +45,4 @@ class SitemapGenerator:
             changefreq_tag.string = Strings.change_frequency
             url_tag.append(changefreq_tag)
             self._soup.append(url_tag)
-        return str(self._soup)
+        return str(self._soup.prettify())

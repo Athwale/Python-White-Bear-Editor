@@ -14,8 +14,7 @@ class ConvertorThread(threading.Thread):
 
     def __init__(self, parent, doc, save_as: bool, disable: bool):
         """
-        Filelist thread constructor. This thread parses a supposed WhiteBear web directory and passes a list of
-        websites back into the GUI.
+        Convertor thread constructor. This thread converts whitebear documents into html code.
         :param parent: The gui object that should receive the result.
         :param doc: The document to convert.
         :param save_as: Instructs the callback method to open a file dialog for the files.
@@ -27,7 +26,7 @@ class ConvertorThread(threading.Thread):
         self._save_as = save_as
         self._disable = disable
 
-    def run(self):
+    def run(self) -> None:
         """
         Overrides Thread.run. Don't call this directly its called internally when you call Thread.start().
         :return: None, this method calls the wx.CallAfter to pass a list of website names back into GUI.s
