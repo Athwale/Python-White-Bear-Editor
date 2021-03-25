@@ -1,7 +1,7 @@
+from datetime import datetime
 from typing import List
 
 from bs4 import BeautifulSoup
-from datetime import datetime
 
 from Constants.Constants import Strings
 from Tools.ConfigManager import ConfigManager
@@ -45,6 +45,6 @@ class SitemapGenerator:
             changefreq_tag.string = Strings.change_frequency
             url_tag.append(changefreq_tag)
             urlset_tag.append(url_tag)
-            
+
         self._soup.append(urlset_tag)
         return str(self._soup.prettify())

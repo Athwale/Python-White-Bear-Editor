@@ -99,7 +99,7 @@ class AddImageDialog(wx.Dialog):
         # Image preview
         self._image_sizer = wx.BoxSizer(wx.VERTICAL)
         self._bitmap = wx.StaticBitmap(self, -1, wx.Bitmap(wx.Image(Fetch.get_resource_path('main_image_missing.png'),
-                                       wx.BITMAP_TYPE_PNG)))
+                                                                    wx.BITMAP_TYPE_PNG)))
         self._image_sizer.Add(self._bitmap, flag=wx.ALL, border=1)
 
         # Buttons

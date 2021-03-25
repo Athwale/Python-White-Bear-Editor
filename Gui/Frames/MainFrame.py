@@ -1,7 +1,7 @@
 import os
 from datetime import datetime
-from typing import Dict, List
 from shutil import copyfile
+from typing import Dict, List
 
 import wx
 import wx.richtext as rt
@@ -9,7 +9,6 @@ import wx.richtext as rt
 from Constants.Constants import Numbers
 from Constants.Constants import Strings
 from Exceptions.UnrecognizedFileException import UnrecognizedFileException
-from Gui.Dialogs.SavingDialog import SavingDialog
 from Gui.Dialogs.AboutDialog import AboutDialog
 from Gui.Dialogs.AddImageDialog import AddImageDialog
 from Gui.Dialogs.AddLogoDialog import AddLogoDialog
@@ -19,6 +18,8 @@ from Gui.Dialogs.EditMenuDialog import EditMenuDialog
 from Gui.Dialogs.EditMenuItemDialog import EditMenuItemDialog
 from Gui.Dialogs.LoadingDialog import LoadingDialog
 from Gui.Dialogs.NewFileDialog import NewFileDialog
+from Gui.Dialogs.SavingDialog import SavingDialog
+from Gui.Dialogs.UploadDialog import UploadDialog
 from Gui.Panels.AsideImagePanel import AsideImagePanel
 from Gui.Panels.CustomRichText import CustomRichText
 from Resources.Fetch import Fetch
@@ -544,6 +545,7 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self._export_all_handler, self._file_menu_item_export_all)
         self.Bind(wx.EVT_MENU, self._delete_article_handler, self._file_menu_item_delete)
         self.Bind(wx.EVT_MENU, self._new_dir_handler, self._file_menu_item_new_dir)
+        self.Bind(wx.EVT_MENU, self._upload_handler, self._file_menu_item_upload)
 
         # Bind other controls clicks
         self.Bind(wx.EVT_LIST_ITEM_SELECTED, self._list_item_click_handler, self._file_list)
@@ -903,7 +905,7 @@ class MainFrame(wx.Frame):
             self._saving_dlg.Destroy()
             self._disable_editor(False)
 
-    def on_sitemap_done(self, thread: SitemapThread, sitemap: str,  disable: bool) -> None:
+    def on_sitemap_done(self, thread: SitemapThread, sitemap: str, disable: bool) -> None:
         """
         :param thread: The thread that called this method.
         :param sitemap: The sitemap xml as string.
@@ -1583,6 +1585,17 @@ class MainFrame(wx.Frame):
                 wx.MessageBox(Strings.warning_new_dir_created, Strings.status_warning, wx.OK | wx.ICON_WARNING)
             else:
                 wx.MessageBox(Strings.warning_must_be_empty, Strings.status_error, wx.OK | wx.ICON_ERROR)
+
+    # noinspection PyUnusedLocal
+    def _upload_handler(self, event: wx.CommandEvent) -> None:
+        """
+        Handle uploading dialog,
+        :param event: Not used.
+        :return: None
+        """
+        dlg = UploadDialog(self)
+        dlg.ShowModal()
+        dlg.Destroy()
 
     # noinspection PyUnusedLocal
     def _search_tools_handler(self, event: wx.CommandEvent) -> None:

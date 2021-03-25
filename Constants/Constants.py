@@ -47,6 +47,8 @@ class Numbers:
     about_dialog_width: int = 410
     about_dialog_height: int = 250
     saving_dialog_width: int = 350
+    upload_dialog_height: int = 400
+    upload_dialog_width: int = 600
     saving_dialog_height: int = 85
     icon_width: int = 30
     icon_height: int = 30
@@ -229,7 +231,7 @@ class Strings:
     label_menu_item_open_hint: str = 'Open a whitebear web directory'
     label_menu_item_save: str = 'Save document\tctrl+s'
     label_menu_item_save_hint: str = 'Save current document'
-    label_menu_item_upload: str = 'Upload all changes...'
+    label_menu_item_upload: str = 'Upload all changes...\tctrl+u'
     label_menu_item_upload_hint: str = 'Upload all modified documents'
     label_menu_item_save_as: str = 'Save as...'
     label_menu_item_save_as_hint: str = 'Save as new file'
@@ -249,9 +251,9 @@ class Strings:
     label_menu_item_about_hint: str = 'About whitebear editor'
 
     label_menu_edit: str = 'Edit'
-    label_menu_item_undo: str = 'Undo\tctrl+u'
+    label_menu_item_undo: str = 'Undo\tctrl+y'
     label_menu_item_undo_hint: str = 'Undo last change'
-    label_menu_item_redo: str = 'Redo\tctrl+r'
+    label_menu_item_redo: str = 'Redo\tctrl+z'
     label_menu_item_redo_hint: str = 'Redo last change'
     label_menu_item_cut: str = 'Cut\tctrl+x'
     label_menu_item_cut_hint: str = 'Cut'
@@ -361,6 +363,8 @@ class Strings:
     label_website_url: str = 'Url'
     label_website_url_tip: str = 'Website url e.g.\nhttp://www.white-bear.cz\nUsed for sitemap generation'
     label_saving: str = 'Saved'
+    label_upload: str = 'Upload changes'
+    label_files_to_upload: str = 'Files to upload'
 
     status_loading: str = 'Loading and testing'
     status_ready: str = 'Ready'

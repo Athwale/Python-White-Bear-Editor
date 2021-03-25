@@ -3,9 +3,6 @@ from typing import List
 
 import wx
 
-from Exceptions.AccessException import AccessException
-from Exceptions.UnrecognizedFileException import UnrecognizedFileException
-from Exceptions.WrongFormatException import WrongFormatException
 from Tools.SitemapGenerator import SitemapGenerator
 
 
