@@ -71,7 +71,7 @@ class Link:
         # Check url, if it is one of whitebear pages set local to True and do not try to download it.
         if self._url in list(self._loaded_pages.keys()):
             self._is_local = True
-        elif self._url.startswith('files'):
+        elif self._url.startswith(Strings.folder_files):
             full_path = os.path.join(self._working_directory, self._url)
             if not os.path.exists(full_path) or not os.access(full_path, os.R_OK) or not os.access(full_path, os.W_OK):
                 self._url_error_message = Strings.seo_error_url_nonexistent

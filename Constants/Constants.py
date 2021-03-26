@@ -47,8 +47,9 @@ class Numbers:
     about_dialog_width: int = 410
     about_dialog_height: int = 250
     saving_dialog_width: int = 350
-    upload_dialog_height: int = 400
+    upload_dialog_height: int = 600
     upload_dialog_width: int = 600
+    upload_filelist_width: int = 300
     saving_dialog_height: int = 85
     icon_width: int = 30
     icon_height: int = 30

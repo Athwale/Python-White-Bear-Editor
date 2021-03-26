@@ -2,7 +2,7 @@ import datetime
 import os
 import re
 import time
-from typing import List, Dict
+from typing import List, Dict, Set
 
 import wx
 from bs4 import BeautifulSoup
@@ -710,7 +710,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
         """
         return self._links
 
-    def get_text_images(self) -> List[ImageInText]:
+    def get_text_images(self) -> Set[ImageInText]:
         """
         Return a list of all images in text which are in current text elements.
         :return: A list of all images in text which are in current text elements

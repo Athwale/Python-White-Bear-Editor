@@ -1,5 +1,5 @@
 import os
-from typing import Dict, List
+from typing import Dict
 
 import wx
 import wx.html
@@ -29,20 +29,44 @@ class UploadDialog(wx.Dialog):
         self._menus = menus
         self._index = index
         self._css = css
-        self._upload_list: List[str] = []
+        self._upload_dict: Dict[int, str] = {}
+        self._counter = 0
 
         self._main_horizontal_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self._filelist_sizer = wx.BoxSizer(wx.VERTICAL)
         self._file_list = wx.ListCtrl(self, -1, style=wx.LC_REPORT | wx.LC_SINGLE_SEL)
         self._file_list.SetFont(self.small_font)
         self._file_list.InsertColumn(0, Strings.label_files_to_upload, format=wx.LIST_FORMAT_LEFT)
-        self._file_list.SetColumnWidth(0, Numbers.initial_panel_size)
+        self._file_list.SetColumnWidth(0, Numbers.upload_filelist_width)
         self._file_list.EnableCheckBoxes()
 
         self._filelist_sizer.Add(self._file_list, flag=wx.EXPAND, border=Numbers.widget_border_size, proportion=1)
         self._main_horizontal_sizer.Add(self._filelist_sizer, flag=wx.EXPAND)
         self.SetSizer(self._main_horizontal_sizer)
+
+        self.Bind(wx.EVT_LIST_ITEM_CHECKED, self._check_handler, self._file_list)
+
         self._display_dialog_contents()
+        
+    def _get_id(self) -> int:
+        """
+        Return a new unique int id.
+        :return: A new unique int id.
+        """
+        self._counter = self._counter + 1
+        return self._counter
+
+    def _check_handler(self, event: wx.ListEvent) -> None:
+        """
+        Handle list item check boxes.
+        :param event: Used to identify which item is checked.
+        :return: None
+        """
+        item_id = event.GetItem().GetData()
+        print(self._upload_dict[item_id])
+
+        # todo check file existence
+        # todo uncheck and test this when you check a file.
 
     def _display_dialog_contents(self) -> None:
         """
@@ -55,28 +79,39 @@ class UploadDialog(wx.Dialog):
             # Add article files
             if document.get_html_to_save() and document.is_seo_ok():
                 # Add all that belongs to this document into the list and check it.
-                self._upload_list.append(document.get_path())
-                self._upload_list.append(document.get_article_image().get_original_image_path())
-                self._upload_list.append(document.get_article_image().get_thumbnail_image_path())
-                self._upload_list.append(document.get_menu_item().get_image_path())
+                self._upload_dict[self._get_id()] = (document.get_path())
+                self._upload_dict[self._get_id()] = (document.get_article_image().get_original_image_path())
+                self._upload_dict[self._get_id()] = (document.get_article_image().get_thumbnail_image_path())
+                self._upload_dict[self._get_id()] = (document.get_menu_item().get_image_path())
                 for image in document.get_aside_images():
                     # Add all aside images and thumbnails
-                    self._upload_list.append(image.get_original_image_path())
-                    self._upload_list.append(image.get_thumbnail_image_path())
+                    self._upload_dict[self._get_id()] = (image.get_original_image_path())
+                    self._upload_dict[self._get_id()] = (image.get_thumbnail_image_path())
+                for image in document.get_text_images():
+                    self._upload_dict[self._get_id()] = (image.get_original_image_path())
+                    self._upload_dict[self._get_id()] = (image.get_thumbnail_image_path())
                 for link in document.get_links():
                     # Add all files and images that are linked from the article
-                    print(link)
+                    if link.get_url()[0].startswith(Strings.folder_files):
+                        self._upload_dict[self._get_id()] = (os.path.join(self._config_manager.get_working_dir(),
+                                                                          link.get_url()[0]))
 
         for filename, document in self._menus.items():
             # Add menu files
             if document.get_html_to_save() and document.is_seo_ok():
-                self._upload_list.append(document.get_path())
+                self._upload_dict[self._get_id()] = (document.get_path())
 
-        if self._upload_list:
+        if self._upload_dict:
             # If any files were changed, add index, robots and sitemap.
-            self._upload_list.append(self._index.get_path())
-            self._upload_list.append(os.path.join(self._config_manager.get_working_dir(), Strings.robots_file))
-            self._upload_list.append(os.path.join(self._config_manager.get_working_dir(), Strings.sitemap_file))
-        for file in sorted(self._upload_list):
-            # todo show last folder and filename
-            self._file_list.InsertItem(self._file_list.GetItemCount(), os.path.basename(file))
+            self._upload_dict[self._get_id()] = (self._index.get_path())
+            self._upload_dict[self._get_id()] = (os.path.join(self._config_manager.get_working_dir(),
+                                                              Strings.robots_file))
+            self._upload_dict[self._get_id()] = (os.path.join(self._config_manager.get_working_dir(),
+                                                              Strings.sitemap_file))
+
+        for item_id, file in sorted(self._upload_dict.items()):
+            index = self._file_list.InsertItem(self._file_list.GetItemCount(),
+                                               os.path.join(os.path.basename(os.path.dirname(file)),
+                                               os.path.basename(file)))
+            self._file_list.SetItemData(index, item_id)
+            self._file_list.CheckItem(index, True)
