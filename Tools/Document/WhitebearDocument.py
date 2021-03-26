@@ -209,6 +209,13 @@ class WhitebearDocument:
         """
         return self._modified
 
+    def is_seo_ok(self) -> bool:
+        """
+        Returns True if the document passed last SEO check and does not have red status color.
+        :return: True if the document passed last SEO check and does not have red status color.
+        """
+        return self._status_color != Numbers.RED_COLOR
+
     # Getters ----------------------------------------------------------------------------------------------------------
     def get_filename(self) -> str:
         """

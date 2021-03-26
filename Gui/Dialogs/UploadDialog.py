@@ -1,12 +1,21 @@
+import os
+from typing import Dict, List
+
 import wx
 import wx.html
 
 from Constants.Constants import Strings, Numbers
+from Tools.ConfigManager import ConfigManager
+from Tools.Document.WhitebearDocumentArticle import WhitebearDocumentArticle
+from Tools.Document.WhitebearDocumentCSS import WhitebearDocumentCSS
+from Tools.Document.WhitebearDocumentIndex import WhitebearDocumentIndex
+from Tools.Document.WhitebearDocumentMenu import WhitebearDocumentMenu
 
 
 class UploadDialog(wx.Dialog):
 
-    def __init__(self, parent):
+    def __init__(self, parent, articles: Dict[str, WhitebearDocumentArticle],
+                 menus: Dict[str, WhitebearDocumentMenu], index: WhitebearDocumentIndex, css: WhitebearDocumentCSS):
         """
         Display a modal dialog with a message with the text being selectable.
         :param parent: Parent frame.
@@ -15,6 +24,12 @@ class UploadDialog(wx.Dialog):
                            size=(Numbers.upload_dialog_width, Numbers.upload_dialog_height))
         self.small_font = wx.Font(Numbers.text_field_font_size, wx.FONTFAMILY_DEFAULT,
                                   wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, False)
+        self._config_manager: ConfigManager = ConfigManager.get_instance()
+        self._articles = articles
+        self._menus = menus
+        self._index = index
+        self._css = css
+        self._upload_list: List[str] = []
 
         self._main_horizontal_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self._filelist_sizer = wx.BoxSizer(wx.VERTICAL)
@@ -34,5 +49,34 @@ class UploadDialog(wx.Dialog):
         Display the contents of dialog.
         :return: None
         """
-        # List all files in the directory, check those that are changed or belong to changed documents.
-        self._file_list.InsertItem(0, str(i))
+        # todo List all changed files and their images or files they point to + sitemap, robots,
+        # todo and add option to add custom. Only allow seo passed documents.
+        for filename, document in self._articles.items():
+            # Add article files
+            if document.get_html_to_save() and document.is_seo_ok():
+                # Add all that belongs to this document into the list and check it.
+                self._upload_list.append(document.get_path())
+                self._upload_list.append(document.get_article_image().get_original_image_path())
+                self._upload_list.append(document.get_article_image().get_thumbnail_image_path())
+                self._upload_list.append(document.get_menu_item().get_image_path())
+                for image in document.get_aside_images():
+                    # Add all aside images and thumbnails
+                    self._upload_list.append(image.get_original_image_path())
+                    self._upload_list.append(image.get_thumbnail_image_path())
+                for link in document.get_links():
+                    # Add all files and images that are linked from the article
+                    print(link)
+
+        for filename, document in self._menus.items():
+            # Add menu files
+            if document.get_html_to_save() and document.is_seo_ok():
+                self._upload_list.append(document.get_path())
+
+        if self._upload_list:
+            # If any files were changed, add index, robots and sitemap.
+            self._upload_list.append(self._index.get_path())
+            self._upload_list.append(os.path.join(self._config_manager.get_working_dir(), Strings.robots_file))
+            self._upload_list.append(os.path.join(self._config_manager.get_working_dir(), Strings.sitemap_file))
+        for file in sorted(self._upload_list):
+            # todo show last folder and filename
+            self._file_list.InsertItem(self._file_list.GetItemCount(), os.path.basename(file))

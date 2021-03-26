@@ -703,6 +703,20 @@ class WhitebearDocumentArticle(WhitebearDocument):
         """
         return self._main_text_elements
 
+    def get_links(self) -> List[Link]:
+        """
+        Return a list of all links which are in current text elements.
+        :return: A list of all links which are in current text elements
+        """
+        return self._links
+
+    def get_text_images(self) -> List[ImageInText]:
+        """
+        Return a list of all images in text which are in current text elements.
+        :return: A list of all images in text which are in current text elements
+        """
+        return self._text_images
+
     def get_other_articles(self) -> Dict:
         """
         Return a dictionary of WhitebearDocuments representing other loaded articles

@@ -1593,7 +1593,8 @@ class MainFrame(wx.Frame):
         :param event: Not used.
         :return: None
         """
-        dlg = UploadDialog(self)
+        # todo
+        dlg = UploadDialog(self, self._articles, self._menus, self._index_document, self._css_document)
         dlg.ShowModal()
         dlg.Destroy()
 
