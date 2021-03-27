@@ -794,8 +794,6 @@ class MainFrame(wx.Frame):
         :param disable: Leave the editor disabled after threads finish.
         :return: False if save canceled.
         """
-        self._saving_dlg = SavingDialog(self)
-        self._saving_dlg.Show()
         self._main_text_area.convert_document()
         # Force save current document.
         if confirm:
@@ -815,8 +813,6 @@ class MainFrame(wx.Frame):
         :param disable: Leave the editor disabled after threads finish.
         :return: None
         """
-        self._saving_dlg = SavingDialog(self)
-        self._saving_dlg.Show()
         self._save_sitemap(disable)
         for doc in self._articles.values():
             # Save all articles.
@@ -849,6 +845,10 @@ class MainFrame(wx.Frame):
         :param disable: Leave the editor disabled after threads finish.
         :return: None.
         """
+        if not self._saving_dlg:
+            self._saving_dlg = SavingDialog(self)
+            self._saving_dlg.set_file(doc.get_filename())
+            self._saving_dlg.Show()
         # Editor will be enabled when the thread finishes.
         if self._enabled:
             self._disable_editor(True)
@@ -1509,12 +1509,13 @@ class MainFrame(wx.Frame):
         :return: None
         """
         dlg = EditDefaultValuesDialog(self)
-        dlg.ShowModal()
-        if dlg.save_all():
-            self._save_all()
-        else:
-            # Index might have changed so re-export it.
-            self._save(self._index_document)
+        result = dlg.ShowModal()
+        if result == wx.ID_OK:
+            if dlg.save_all():
+                self._save_all()
+            else:
+                # Index might have changed so re-export it.
+                self._save(self._index_document)
         dlg.Destroy()
 
     # noinspection PyUnusedLocal

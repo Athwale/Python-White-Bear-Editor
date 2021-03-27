@@ -224,6 +224,7 @@ class Strings:
                                    'favicon.ico, 404.html, google tracking page...'
     warning_unsaved: str = 'At least one document is not saved.\nQuit anyway?'
     warning_new_dir_unsaved: str = 'At least one document is not saved.\nContinue?'
+    warning_file_inaccessible: str = 'Can not access file'
 
     label_menu_file: str = 'File'
     label_menu_item_new: str = 'New document...\tctrl+n'

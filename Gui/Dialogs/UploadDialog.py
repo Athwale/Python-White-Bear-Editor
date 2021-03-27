@@ -33,6 +33,8 @@ class UploadDialog(wx.Dialog):
         self._counter = 0
 
         self._main_horizontal_sizer = wx.BoxSizer(wx.HORIZONTAL)
+
+        # File list sizer
         self._filelist_sizer = wx.BoxSizer(wx.VERTICAL)
         self._file_list = wx.ListCtrl(self, -1, style=wx.LC_REPORT | wx.LC_SINGLE_SEL)
         self._file_list.SetFont(self.small_font)
@@ -40,8 +42,12 @@ class UploadDialog(wx.Dialog):
         self._file_list.SetColumnWidth(0, Numbers.upload_filelist_width)
         self._file_list.EnableCheckBoxes()
 
+        self._add_button = wx.Button(self, -1, Strings.button_add)
         self._filelist_sizer.Add(self._file_list, flag=wx.EXPAND, border=Numbers.widget_border_size, proportion=1)
-        self._main_horizontal_sizer.Add(self._filelist_sizer, flag=wx.EXPAND)
+        self._filelist_sizer.Add(self._add_button, flag=wx.ALIGN_CENTER_HORIZONTAL)
+
+        self._main_horizontal_sizer.Add(self._filelist_sizer, flag=wx.EXPAND | wx.ALL,
+                                        border=Numbers.widget_border_size)
         self.SetSizer(self._main_horizontal_sizer)
 
         self.Bind(wx.EVT_LIST_ITEM_CHECKED, self._check_handler, self._file_list)
@@ -63,17 +69,17 @@ class UploadDialog(wx.Dialog):
         :return: None
         """
         item_id = event.GetItem().GetData()
-        print(self._upload_dict[item_id])
-
-        # todo check file existence
-        # todo uncheck and test this when you check a file.
+        path = self._upload_dict[item_id]
+        if not os.access(path, os.R_OK) or not os.path.exists(path):
+            wx.MessageBox(Strings.warning_file_inaccessible + ':\n' + path,
+                          Strings.status_warning, wx.OK | wx.ICON_WARNING)
+            self._file_list.CheckItem(event.GetIndex(), False)
 
     def _display_dialog_contents(self) -> None:
         """
         Display the contents of dialog.
         :return: None
         """
-        # todo List all changed files and their images or files they point to + sitemap, robots,
         # todo and add option to add custom. Only allow seo passed documents.
         for filename, document in self._articles.items():
             # Add article files
