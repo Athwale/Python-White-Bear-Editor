@@ -48,7 +48,7 @@ class Numbers:
     about_dialog_height: int = 250
     saving_dialog_width: int = 350
     upload_dialog_height: int = 600
-    upload_dialog_width: int = 600
+    upload_dialog_width: int = 800
     upload_filelist_width: int = 300
     saving_dialog_height: int = 85
     icon_width: int = 30
@@ -369,6 +369,14 @@ class Strings:
     label_saving: str = 'Saved'
     label_upload: str = 'Upload changes'
     label_files_to_upload: str = 'Files to upload'
+    label_ip_port: str = 'IP:port'
+    label_sftp: str = 'SFTP - SSH file transfer protocol IPv4 configuration'
+    label_user: str = 'User'
+    label_key_file: str = 'Key file'
+    label_upload_information: str = 'Upload'
+    label_successful_uploads: str = 'Successful transfers'
+    label_failed_uploads: str = 'Failed transfers'
+    label_uploading_file: str = 'Uploading'
 
     status_loading: str = 'Loading and testing'
     status_ready: str = 'Ready'

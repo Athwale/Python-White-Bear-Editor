@@ -2,13 +2,13 @@ import os
 from typing import Dict
 
 import wx
-import wx.html
 
 from Constants.Constants import Strings, Numbers
 from Tools.ConfigManager import ConfigManager
 from Tools.Document.WhitebearDocumentArticle import WhitebearDocumentArticle
 from Tools.Document.WhitebearDocumentCSS import WhitebearDocumentCSS
 from Tools.Document.WhitebearDocumentIndex import WhitebearDocumentIndex
+from Tools.Tools import Tools
 
 
 class UploadDialog(wx.Dialog):
@@ -31,6 +31,9 @@ class UploadDialog(wx.Dialog):
         self._counter = 0
 
         self._main_horizontal_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self._right_vertical_sizer = wx.BoxSizer(wx.VERTICAL)
+        self._config_sizer = wx.StaticBoxSizer(wx.VERTICAL, self, Strings.label_sftp)
+        self._upload_info_sizer = wx.StaticBoxSizer(wx.HORIZONTAL, self, Strings.label_upload_information)
 
         # File list sizer
         self._filelist_sizer = wx.BoxSizer(wx.VERTICAL)
@@ -44,15 +47,94 @@ class UploadDialog(wx.Dialog):
         self._filelist_sizer.Add(self._add_button, flag=wx.ALIGN_CENTER_HORIZONTAL | wx.TOP,
                                  border=Numbers.widget_border_size)
 
+        # IP, port sizer
+        self._ip_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self._label_ip_port = wx.StaticText(self, -1, Strings.label_ip_port + ': ')
+        self._field_ip = wx.TextCtrl(self, -1)
+        self._ip_sub_sizer.Add(self._label_ip_port, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
+        self._ip_sub_sizer.Add(4, -1)
+        self._ip_sub_sizer.Add(self._field_ip, proportion=1)
+        self._config_sizer.Add(self._ip_sub_sizer, flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT,
+                               border=Numbers.widget_border_size)
+        self._field_ip_port_tip = Tools.get_warning_tip(self._field_ip, Strings.label_ip_port)
+        self._field_ip_port_tip.SetMessage('')
+
+        # User
+        self._user_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self._label_user = wx.StaticText(self, -1, Strings.label_user + ': ')
+        self._field_user = wx.TextCtrl(self, -1)
+        self._user_sub_sizer.Add(self._label_user, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
+        self._user_sub_sizer.Add(17, -1)
+        self._user_sub_sizer.Add(self._field_user, proportion=1)
+        self._config_sizer.Add(self._user_sub_sizer, flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT,
+                               border=Numbers.widget_border_size)
+        self._field_user_tip = Tools.get_warning_tip(self._field_user, Strings.label_user)
+        self._field_user_tip.SetMessage('')
+
+        # Key file
+        self._keyfile_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self._label_keyfile = wx.StaticText(self, -1, Strings.label_key_file + ': ')
+        self._field_keyfile = wx.TextCtrl(self, -1)
+        self._keyfile_button = wx.Button(self, wx.ID_OPEN, Strings.button_browse)
+        self._keyfile_sub_sizer.Add(self._label_keyfile, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
+        self._keyfile_sub_sizer.Add(self._field_keyfile, proportion=1)
+        self._keyfile_sub_sizer.Add(self._keyfile_button, flag=wx.LEFT, border=Numbers.widget_border_size)
+        self._config_sizer.Add(self._keyfile_sub_sizer, flag=wx.EXPAND | wx.ALL,
+                               border=Numbers.widget_border_size)
+        self._field_keyfile_tip = Tools.get_warning_tip(self._field_keyfile, Strings.label_key_file)
+        self._field_keyfile_tip.SetMessage('')
+
+        # Upload bar
+        self._gauge_sizer = wx.BoxSizer(wx.VERTICAL)
+        self._upload_gauge = wx.Gauge(self, -1, style=wx.GA_VERTICAL)
+        self._upload_gauge.SetRange(100)
+        self._upload_gauge.SetValue(1)
+        self._gauge_sizer.Add(self._upload_gauge, 1, flag=wx.EXPAND)
+
+        # Upload statistics
+        self._info_left_sizer = wx.BoxSizer(wx.VERTICAL)
+        self._info_right_sizer = wx.BoxSizer(wx.VERTICAL)
+
+        self._label_num_files = wx.StaticText(self, -1, Strings.label_files_to_upload + ':')
+        self._content_num_files = wx.StaticText(self, -1, '0')
+        self._info_left_sizer.Add(self._label_num_files, flag=wx.BOTTOM, border=Numbers.widget_border_size)
+        self._info_right_sizer.Add(self._content_num_files, flag=wx.BOTTOM, border=Numbers.widget_border_size)
+
+        self._label_successful = wx.StaticText(self, -1, Strings.label_successful_uploads + ':')
+        self._content_successful = wx.StaticText(self, -1, '0')
+        self._info_left_sizer.Add(self._label_successful, flag=wx.BOTTOM, border=Numbers.widget_border_size)
+        self._info_right_sizer.Add(self._content_successful, flag=wx.BOTTOM, border=Numbers.widget_border_size)
+
+        self._label_failed = wx.StaticText(self, -1, Strings.label_failed_uploads + ':')
+        self._content_failed = wx.StaticText(self, -1, '0')
+        self._info_left_sizer.Add(self._label_failed, flag=wx.BOTTOM, border=Numbers.widget_border_size)
+        self._info_right_sizer.Add(self._content_failed, flag=wx.BOTTOM, border=Numbers.widget_border_size)
+
+        self._label_current_file = wx.StaticText(self, -1, Strings.label_uploading_file + ':')
+        self._content_current_file = wx.StaticText(self, -1, Strings.label_none)
+        self._info_left_sizer.Add(self._label_current_file, flag=wx.BOTTOM, border=Numbers.widget_border_size)
+        self._info_right_sizer.Add(self._content_current_file, flag=wx.BOTTOM, border=Numbers.widget_border_size)
+
+        self._upload_info_sizer.Add(self._info_left_sizer, 1, flag=wx.EXPAND)
+        self._upload_info_sizer.Add(self._info_right_sizer, 2, flag=wx.EXPAND)
+
+        # Put it all together
+        self._right_vertical_sizer.Add(self._config_sizer, flag=wx.RIGHT | wx.EXPAND,
+                                       border=Numbers.widget_border_size)
+        self._right_vertical_sizer.Add(self._upload_info_sizer, flag=wx.RIGHT | wx.EXPAND,
+                                       border=Numbers.widget_border_size)
         self._main_horizontal_sizer.Add(self._filelist_sizer, flag=wx.EXPAND | wx.ALL,
                                         border=Numbers.widget_border_size)
+        self._main_horizontal_sizer.Add(self._right_vertical_sizer, 1, flag=wx.EXPAND)
+        self._main_horizontal_sizer.Add(self._gauge_sizer, flag=wx.EXPAND)
+
         self.SetSizer(self._main_horizontal_sizer)
 
         self.Bind(wx.EVT_LIST_ITEM_CHECKED, self._check_handler, self._file_list)
         self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._add_button)
 
         self._display_dialog_contents()
-        
+
     def _get_id(self) -> int:
         """
         Return a new unique int id.
@@ -70,13 +152,27 @@ class UploadDialog(wx.Dialog):
         if event.GetId() == wx.ID_ADD:
             path = self._ask_for_file()
             if path:
-                if not self._config_manager.get_working_dir() in path:
+                if not path.startswith(self._config_manager.get_working_dir()):
                     wx.MessageBox(Strings.file + ':\n' + path + '\nNot in:\n' + self._config_manager.get_working_dir(),
                                   Strings.status_error, wx.OK | wx.ICON_WARNING)
                 else:
-                    file_id = self._get_id()
-                    self._upload_dict[file_id] = path
-                    self._append_into_list(file_id, path)
+                    if path not in self._upload_dict.values():
+                        file_id = self._get_id()
+                        self._upload_dict[file_id] = path
+                        self._append_into_list(file_id, path)
+        '''
+        # todo do this on upload
+        # Set the gauge to the amount of checked items
+        counter = 0
+        item = -1
+        while 1:
+            item = self._file_list.GetNextItem(item, wx.LIST_NEXT_ALL, wx.LIST_STATE_DONTCARE)
+            if item == -1:
+                break
+            elif self._file_list.IsItemChecked(item):
+                counter = counter + 1
+        print(counter)
+        '''
 
     def _ask_for_file(self) -> str:
         """
@@ -108,7 +204,6 @@ class UploadDialog(wx.Dialog):
         Display the contents of dialog.
         :return: None
         """
-        # todo and add option to add custom. Only allow seo passed documents.
         for filename, document in self._articles.items():
             # Add article files
             if document.get_html_to_save() and document.is_seo_ok():
