@@ -1595,7 +1595,7 @@ class MainFrame(wx.Frame):
         :return: None
         """
         # todo
-        dlg = UploadDialog(self, self._articles, self._menus, self._index_document, self._css_document)
+        dlg = UploadDialog(self, self._articles, self._index_document, self._css_document)
         dlg.ShowModal()
         dlg.Destroy()
 

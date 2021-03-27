@@ -140,6 +140,7 @@ class Strings:
     article: str = 'article'
     menu: str = 'menu'
     index: str = 'index'
+    file: str = 'File'
     robots_file: str = 'robots.txt'
     file_background: str = 'background.jpg'
     file_header: str = 'logo-nadpis.png'
@@ -330,6 +331,7 @@ class Strings:
     label_styles: str = 'Styles'
     label_logo: str = 'logo'
     label_select_image: str = 'Select image'
+    label_select_file: str = 'Select file'
     label_target_section: str = 'Section'
     label_text_image: str = 'Text image (width ' + str(Numbers.text_image_max_size) + 'px)'
     label_aside_image: str = 'Aside/Main image (' + str(Numbers.main_image_width) + 'x' + \
