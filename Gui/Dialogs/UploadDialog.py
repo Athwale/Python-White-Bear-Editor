@@ -57,7 +57,7 @@ class UploadDialog(wx.Dialog):
         self._config_sizer.Add(self._ip_sub_sizer, flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT,
                                border=Numbers.widget_border_size)
         self._field_ip_port_tip = Tools.get_warning_tip(self._field_ip, Strings.label_ip_port)
-        self._field_ip_port_tip.SetMessage('')
+        self._field_ip_port_tip.SetMessage(Strings.label_ip_port_tip)
 
         # User
         self._user_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -69,12 +69,13 @@ class UploadDialog(wx.Dialog):
         self._config_sizer.Add(self._user_sub_sizer, flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT,
                                border=Numbers.widget_border_size)
         self._field_user_tip = Tools.get_warning_tip(self._field_user, Strings.label_user)
-        self._field_user_tip.SetMessage('')
+        self._field_user_tip.SetMessage(Strings.label_user_tip)
 
         # Key file
         self._keyfile_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self._label_keyfile = wx.StaticText(self, -1, Strings.label_key_file + ': ')
         self._field_keyfile = wx.TextCtrl(self, -1)
+        self._field_keyfile.Disable()
         self._keyfile_button = wx.Button(self, wx.ID_OPEN, Strings.button_browse)
         self._keyfile_sub_sizer.Add(self._label_keyfile, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
         self._keyfile_sub_sizer.Add(self._field_keyfile, proportion=1)
@@ -82,7 +83,7 @@ class UploadDialog(wx.Dialog):
         self._config_sizer.Add(self._keyfile_sub_sizer, flag=wx.EXPAND | wx.ALL,
                                border=Numbers.widget_border_size)
         self._field_keyfile_tip = Tools.get_warning_tip(self._field_keyfile, Strings.label_key_file)
-        self._field_keyfile_tip.SetMessage('')
+        self._field_keyfile_tip.SetMessage(Strings.label_key_file_tip)
 
         # Upload bar
         self._gauge_sizer = wx.BoxSizer(wx.VERTICAL)
@@ -132,6 +133,9 @@ class UploadDialog(wx.Dialog):
 
         self.Bind(wx.EVT_LIST_ITEM_CHECKED, self._check_handler, self._file_list)
         self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._add_button)
+        self.Bind(wx.EVT_TEXT, self._handle_fields, self._field_ip)
+        self.Bind(wx.EVT_TEXT, self._handle_fields, self._field_user)
+        self.Bind(wx.EVT_TEXT, self._handle_fields, self._field_keyfile)
 
         self._display_dialog_contents()
 
@@ -142,6 +146,15 @@ class UploadDialog(wx.Dialog):
         """
         self._counter = self._counter + 1
         return self._counter
+
+    # noinspection PyUnusedLocal
+    def _handle_fields(self, event: wx.ListEvent) -> None:
+        """
+        Handle fields edits.
+        :param event: Not used.
+        :return: None
+        """
+        self._validate_fields()
 
     def _handle_buttons(self, event: wx.ListEvent) -> None:
         """
@@ -204,6 +217,7 @@ class UploadDialog(wx.Dialog):
         Display the contents of dialog.
         :return: None
         """
+        self.Disable()
         for filename, document in self._articles.items():
             # Add article files
             if document.get_html_to_save() and document.is_seo_ok():
@@ -237,6 +251,76 @@ class UploadDialog(wx.Dialog):
 
         for item_id, file in sorted(self._upload_dict.items()):
             self._append_into_list(item_id, file)
+
+        # Fill SFTP config
+        self._field_ip.SetValue(self._config_manager.get_ip_port())
+        self._field_user.SetValue(self._config_manager.get_user())
+        self._field_keyfile.SetValue(self._config_manager.get_keyfile())
+        self._validate_fields()
+        self.Enable()
+        self._field_keyfile.Disable()
+
+    def _validate_fields(self) -> bool:
+        """
+        Validate configuration fields.
+        :return: True if validation passed
+        """
+        result = True
+        # Check IP:port
+        ip_port = self._field_ip.GetValue().split(':', 2)
+        try:
+            if not self._field_ip.GetValue():
+                self._field_ip_port_tip.SetMessage(Strings.label_ip_port_tip)
+                Tools.set_field_background(self._field_ip, Numbers.RED_COLOR)
+            elif len(ip_port) > 2 or len(ip_port) < 2 or not ip_port[0] or not ip_port[1]:
+                self._field_ip_port_tip.SetMessage(Strings.warning_incorrect_format)
+                Tools.set_field_background(self._field_ip, Numbers.RED_COLOR)
+                result = False
+            elif int(ip_port[1]) < 1 or int(ip_port[1]) > 65535:
+                self._field_ip_port_tip.SetMessage(Strings.warning_incorrect_port)
+                Tools.set_field_background(self._field_ip, Numbers.RED_COLOR)
+                result = False
+            ip = ip_port[0].split('.', 4)
+            if len(ip) < 4 or len(ip) > 4 or not ip:
+                self._field_ip_port_tip.SetMessage(Strings.warning_incorrect_ip_format)
+                Tools.set_field_background(self._field_ip, Numbers.RED_COLOR)
+                result = False
+            for num in ip:
+                if int(num) < 0 or int(num) > 255:
+                    self._field_ip_port_tip.SetMessage(Strings.warning_incorrect_ip_format)
+                    Tools.set_field_background(self._field_ip, Numbers.RED_COLOR)
+                    result = False
+        except ValueError as _:
+            self._field_ip_port_tip.SetMessage(Strings.warning_incorrect_format)
+            Tools.set_field_background(self._field_ip, Numbers.RED_COLOR)
+            result = False
+        if result:
+            self._field_ip_port_tip.SetMessage(Strings.label_ip_port_tip)
+            Tools.set_field_background(self._field_ip, Numbers.GREEN_COLOR)
+            self._config_manager.store_ip_port(self._field_ip.GetValue())
+
+        # Check username
+        username = self._field_user.GetValue()
+        if len(username) > Numbers.default_max_length or len(username) < 1:
+            self._field_user_tip.SetMessage(Strings.seo_error_length + ': 1-' + str(Numbers.default_max_length))
+            Tools.set_field_background(self._field_user, Numbers.RED_COLOR)
+            result = False
+        else:
+            self._field_user_tip.SetMessage(Strings.label_user_tip)
+            Tools.set_field_background(self._field_user, Numbers.GREEN_COLOR)
+            self._config_manager.store_user(self._field_user.GetValue())
+
+        # Check keyfile existence
+        if not os.path.exists(self._field_keyfile.GetValue()):
+            self._field_keyfile_tip.SetMessage(Strings.warning_keyfile_inaccessible)
+            Tools.set_field_background(self._field_keyfile, Numbers.RED_COLOR)
+            result = False
+        else:
+            self._field_keyfile_tip.SetMessage(Strings.label_key_file_tip)
+            Tools.set_field_background(self._field_keyfile, Numbers.GREEN_COLOR)
+            self._config_manager.store_keyfile(self._field_keyfile.GetValue())
+
+        return result
 
     def _append_into_list(self, item_id: int, path: str) -> None:
         """
