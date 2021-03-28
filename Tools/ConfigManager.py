@@ -30,6 +30,9 @@ class ConfigManager:
     CONF_RED_TXT: str = 'redTxt'
     CONF_NEWS: str = 'news'
     CONF_PAGE_URL: str = 'url'
+    CONF_IP: str = 'ip'
+    CONF_USER: str = 'user'
+    CONF_KEYFILE: str = 'key'
 
     @staticmethod
     def get_instance():
@@ -67,6 +70,9 @@ class ConfigManager:
                 self.CONF_BLACK_TXT: '',
                 self.CONF_RED_TXT: '',
                 self.CONF_PAGE_URL: '',
+                self.CONF_IP: '',
+                self.CONF_USER: '',
+                self.CONF_KEYFILE: '',
                 self.CONF_NEWS: str(Numbers.default_news)}
 
     def _init_config(self) -> None:
@@ -118,7 +124,12 @@ class ConfigManager:
                     correct = False
             except KeyError:
                 # Repair the config and report error.
+                # These values are necessary.
                 correct = False
+                self._dir_conf[name] = ''
+
+        for name in [self.CONF_IP, self.CONF_USER, self.CONF_KEYFILE]:
+            if name not in self._dir_conf.keys():
                 self._dir_conf[name] = ''
         return correct
 
@@ -253,6 +264,27 @@ class ConfigManager:
         :return: The text.
         """
         return self._dir_conf[self.CONF_RED_TXT]
+
+    def get_ip_port(self) -> str:
+        """
+        Get the server ip and port.
+        :return: The server ip and port.
+        """
+        return self._dir_conf[self.CONF_IP]
+
+    def get_user(self) -> str:
+        """
+        Get the server user.
+        :return: The server user.
+        """
+        return self._dir_conf[self.CONF_USER]
+
+    def get_keyfile(self) -> str:
+        """
+        Get the SFTP keyfile path.
+        :return: The server keyfile path.
+        """
+        return self._dir_conf[self.CONF_KEYFILE]
 
     def get_number_of_news(self) -> int:
         """
@@ -410,4 +442,31 @@ class ConfigManager:
         :return: None
         """
         self._dir_conf[self.CONF_NEWS] = str(news)
+        self.save_config_file()
+
+    def store_ip_port(self, ip: str) -> None:
+        """
+        Save the server IP and port into the dictionary.
+        :param ip: The server ip and port.
+        :return: None
+        """
+        self._dir_conf[self.CONF_IP] = ip
+        self.save_config_file()
+
+    def store_user(self, user: str) -> None:
+        """
+        Save the SFTP username into the dictionary.
+        :param user: The server username.
+        :return: None
+        """
+        self._dir_conf[self.CONF_USER] = user
+        self.save_config_file()
+
+    def store_keyfile(self, path: str) -> None:
+        """
+        Save the SFTP key file path into the dictionary.
+        :param path: The SFTP key file path.
+        :return: None
+        """
+        self._dir_conf[self.CONF_KEYFILE] = path
         self.save_config_file()
