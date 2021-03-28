@@ -98,22 +98,22 @@ class UploadDialog(wx.Dialog):
 
         self._label_num_files = wx.StaticText(self, -1, Strings.label_files_to_upload + ':')
         self._content_num_files = wx.StaticText(self, -1, '0')
-        self._info_left_sizer.Add(self._label_num_files, flag=wx.BOTTOM, border=Numbers.widget_border_size)
+        self._info_left_sizer.Add(self._label_num_files, flag=wx.BOTTOM | wx.LEFT, border=Numbers.widget_border_size)
         self._info_right_sizer.Add(self._content_num_files, flag=wx.BOTTOM, border=Numbers.widget_border_size)
 
         self._label_successful = wx.StaticText(self, -1, Strings.label_successful_uploads + ':')
         self._content_successful = wx.StaticText(self, -1, '0')
-        self._info_left_sizer.Add(self._label_successful, flag=wx.BOTTOM, border=Numbers.widget_border_size)
+        self._info_left_sizer.Add(self._label_successful, flag=wx.BOTTOM | wx.LEFT, border=Numbers.widget_border_size)
         self._info_right_sizer.Add(self._content_successful, flag=wx.BOTTOM, border=Numbers.widget_border_size)
 
         self._label_failed = wx.StaticText(self, -1, Strings.label_failed_uploads + ':')
         self._content_failed = wx.StaticText(self, -1, '0')
-        self._info_left_sizer.Add(self._label_failed, flag=wx.BOTTOM, border=Numbers.widget_border_size)
+        self._info_left_sizer.Add(self._label_failed, flag=wx.BOTTOM | wx.LEFT, border=Numbers.widget_border_size)
         self._info_right_sizer.Add(self._content_failed, flag=wx.BOTTOM, border=Numbers.widget_border_size)
 
         self._label_current_file = wx.StaticText(self, -1, Strings.label_uploading_file + ':')
         self._content_current_file = wx.StaticText(self, -1, Strings.label_none)
-        self._info_left_sizer.Add(self._label_current_file, flag=wx.BOTTOM, border=Numbers.widget_border_size)
+        self._info_left_sizer.Add(self._label_current_file, flag=wx.BOTTOM | wx.LEFT, border=Numbers.widget_border_size)
         self._info_right_sizer.Add(self._content_current_file, flag=wx.BOTTOM, border=Numbers.widget_border_size)
 
         self._upload_info_sizer.Add(self._info_left_sizer, 1, flag=wx.EXPAND)
@@ -133,6 +133,7 @@ class UploadDialog(wx.Dialog):
 
         self.Bind(wx.EVT_LIST_ITEM_CHECKED, self._check_handler, self._file_list)
         self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._add_button)
+        self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._keyfile_button)
         self.Bind(wx.EVT_TEXT, self._handle_fields, self._field_ip)
         self.Bind(wx.EVT_TEXT, self._handle_fields, self._field_user)
         self.Bind(wx.EVT_TEXT, self._handle_fields, self._field_keyfile)
@@ -163,7 +164,7 @@ class UploadDialog(wx.Dialog):
         :return: None
         """
         if event.GetId() == wx.ID_ADD:
-            path = self._ask_for_file()
+            path = self._ask_for_file(self._config_manager.get_working_dir())
             if path:
                 if not path.startswith(self._config_manager.get_working_dir()):
                     wx.MessageBox(Strings.file + ':\n' + path + '\nNot in:\n' + self._config_manager.get_working_dir(),
@@ -173,6 +174,11 @@ class UploadDialog(wx.Dialog):
                         file_id = self._get_id()
                         self._upload_dict[file_id] = path
                         self._append_into_list(file_id, path)
+        elif event.GetId() == wx.ID_OPEN:
+            path = self._ask_for_file(Strings.home_directory)
+            if path:
+                self._field_keyfile.SetValue(path)
+
         '''
         # todo do this on upload
         # Set the gauge to the amount of checked items
@@ -187,13 +193,14 @@ class UploadDialog(wx.Dialog):
         print(counter)
         '''
 
-    def _ask_for_file(self) -> str:
+    def _ask_for_file(self, path: str) -> str:
         """
         Show a file picker dialog to get additional files from the user.
+        :param path: The directory which the file picker opens.
         :return: File path or empty string if canceled.
         """
-        with wx.FileDialog(self, Strings.label_select_file, self._config_manager.get_working_dir(),
-                           style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST | wx.FD_PREVIEW) as dlg:
+        with wx.FileDialog(self, Strings.label_select_file, path, style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST |
+                                                                         wx.FD_PREVIEW) as dlg:
             if dlg.ShowModal() == wx.ID_OK:
                 dlg: wx.FileDialog
                 return dlg.GetPath()
@@ -259,6 +266,7 @@ class UploadDialog(wx.Dialog):
         self._validate_fields()
         self.Enable()
         self._field_keyfile.Disable()
+        self._field_keyfile.SetForegroundColour(wx.BLACK)
 
     def _validate_fields(self) -> bool:
         """
@@ -319,7 +327,6 @@ class UploadDialog(wx.Dialog):
             self._field_keyfile_tip.SetMessage(Strings.label_key_file_tip)
             Tools.set_field_background(self._field_keyfile, Numbers.GREEN_COLOR)
             self._config_manager.store_keyfile(self._field_keyfile.GetValue())
-
         return result
 
     def _append_into_list(self, item_id: int, path: str) -> None:
