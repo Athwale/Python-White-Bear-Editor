@@ -420,6 +420,7 @@ class Strings:
     button_browse: str = 'Browse'
     button_save: str = 'Save'
     button_add: str = 'Add'
+    button_upload: str = 'Upload'
 
     undo_last_action: str = 'Last action'
     undo_bold: str = 'Undo bold text'

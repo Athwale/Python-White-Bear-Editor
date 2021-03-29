@@ -4,6 +4,7 @@ from typing import Dict
 import wx
 
 from Constants.Constants import Strings, Numbers
+from Resources.Fetch import Fetch
 from Tools.ConfigManager import ConfigManager
 from Tools.Document.WhitebearDocumentArticle import WhitebearDocumentArticle
 from Tools.Document.WhitebearDocumentCSS import WhitebearDocumentCSS
@@ -108,6 +109,7 @@ class UploadDialog(wx.Dialog):
 
         self._label_failed = wx.StaticText(self, -1, Strings.label_failed_uploads + ':')
         self._content_failed = wx.StaticText(self, -1, '0')
+        self._content_failed.SetForegroundColour(wx.RED)
         self._info_left_sizer.Add(self._label_failed, flag=wx.BOTTOM | wx.LEFT, border=Numbers.widget_border_size)
         self._info_right_sizer.Add(self._content_failed, flag=wx.BOTTOM, border=Numbers.widget_border_size)
 
@@ -119,11 +121,21 @@ class UploadDialog(wx.Dialog):
         self._upload_info_sizer.Add(self._info_left_sizer, 1, flag=wx.EXPAND)
         self._upload_info_sizer.Add(self._info_right_sizer, 2, flag=wx.EXPAND)
 
+        # Upload button
+        self._upload_button_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self._upload_button = wx.Button(self, -1, Strings.button_upload, style=wx.BU_EXACTFIT)
+        self._upload_button.SetBitmap(wx.Bitmap(Fetch.get_resource_path('upload.png'), wx.BITMAP_TYPE_PNG))
+        self._upload_button.SetBitmapPosition(wx.TOP)
+        self._upload_button_sizer.AddStretchSpacer()
+        self._upload_button_sizer.Add(self._upload_button, flag=wx.ALIGN_CENTER)
+        self._upload_button_sizer.AddStretchSpacer()
+
         # Put it all together
         self._right_vertical_sizer.Add(self._config_sizer, flag=wx.RIGHT | wx.EXPAND,
                                        border=Numbers.widget_border_size)
         self._right_vertical_sizer.Add(self._upload_info_sizer, flag=wx.RIGHT | wx.EXPAND,
                                        border=Numbers.widget_border_size)
+        self._right_vertical_sizer.Add(self._upload_button_sizer, 1, flag=wx.EXPAND)
         self._main_horizontal_sizer.Add(self._filelist_sizer, flag=wx.EXPAND | wx.ALL,
                                         border=Numbers.widget_border_size)
         self._main_horizontal_sizer.Add(self._right_vertical_sizer, 1, flag=wx.EXPAND)
@@ -132,6 +144,7 @@ class UploadDialog(wx.Dialog):
         self.SetSizer(self._main_horizontal_sizer)
 
         self.Bind(wx.EVT_LIST_ITEM_CHECKED, self._check_handler, self._file_list)
+        self.Bind(wx.EVT_LIST_ITEM_UNCHECKED, self._check_handler, self._file_list)
         self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._add_button)
         self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._keyfile_button)
         self.Bind(wx.EVT_TEXT, self._handle_fields, self._field_ip)
@@ -179,19 +192,7 @@ class UploadDialog(wx.Dialog):
             if path:
                 self._field_keyfile.SetValue(path)
 
-        '''
-        # todo do this on upload
-        # Set the gauge to the amount of checked items
-        counter = 0
-        item = -1
-        while 1:
-            item = self._file_list.GetNextItem(item, wx.LIST_NEXT_ALL, wx.LIST_STATE_DONTCARE)
-            if item == -1:
-                break
-            elif self._file_list.IsItemChecked(item):
-                counter = counter + 1
-        print(counter)
-        '''
+        # TODO Set the gauge to the amount of checked items
 
     def _ask_for_file(self, path: str) -> str:
         """
@@ -212,12 +213,30 @@ class UploadDialog(wx.Dialog):
         :param event: Used to identify which item is checked.
         :return: None
         """
-        item_id = event.GetItem().GetData()
-        path = self._upload_dict[item_id]
-        if not os.access(path, os.R_OK) or not os.path.exists(path):
-            wx.MessageBox(Strings.warning_file_inaccessible + ':\n' + path,
-                          Strings.status_warning, wx.OK | wx.ICON_WARNING)
-            self._file_list.CheckItem(event.GetIndex(), False)
+        if self._file_list.IsItemChecked(event.GetIndex()):
+            item_id = event.GetItem().GetData()
+            path = self._upload_dict[item_id]
+            if not os.access(path, os.R_OK) or not os.path.exists(path):
+                wx.MessageBox(Strings.warning_file_inaccessible + ':\n' + path,
+                              Strings.status_warning, wx.OK | wx.ICON_WARNING)
+                self._file_list.CheckItem(event.GetIndex(), False)
+        self._content_num_files.SetLabelText(str(self._count_checked_files()))
+        self._validate_fields()
+
+    def _count_checked_files(self) -> int:
+        """
+        Return the number of files currently checked in the file list.
+        :return: The number of files currently checked in the file list.
+        """
+        counter: int = 0
+        item = -1
+        while 1:
+            item = self._file_list.GetNextItem(item, wx.LIST_NEXT_ALL, wx.LIST_STATE_DONTCARE)
+            if item == -1:
+                break
+            elif self._file_list.IsItemChecked(item):
+                counter = counter + 1
+        return counter
 
     def _display_dialog_contents(self) -> None:
         """
@@ -263,7 +282,11 @@ class UploadDialog(wx.Dialog):
         self._field_ip.SetValue(self._config_manager.get_ip_port())
         self._field_user.SetValue(self._config_manager.get_user())
         self._field_keyfile.SetValue(self._config_manager.get_keyfile())
-        self._validate_fields()
+        if not self._validate_fields() or self._count_checked_files() == 0:
+            self._upload_button.Disable()
+        else:
+            self._upload_button.Enable()
+
         self.Enable()
         self._field_keyfile.Disable()
         self._field_keyfile.SetForegroundColour(wx.BLACK)
@@ -327,6 +350,11 @@ class UploadDialog(wx.Dialog):
             self._field_keyfile_tip.SetMessage(Strings.label_key_file_tip)
             Tools.set_field_background(self._field_keyfile, Numbers.GREEN_COLOR)
             self._config_manager.store_keyfile(self._field_keyfile.GetValue())
+
+        if not result or self._count_checked_files() == 0:
+            self._upload_button.Disable()
+        else:
+            self._upload_button.Enable()
         return result
 
     def _append_into_list(self, item_id: int, path: str) -> None:
