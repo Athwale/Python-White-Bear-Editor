@@ -5,6 +5,7 @@ import wx
 
 from Constants.Constants import Strings, Numbers
 from Resources.Fetch import Fetch
+from Threads.SftpThread import SftpThread
 from Tools.ConfigManager import ConfigManager
 from Tools.Document.WhitebearDocumentArticle import WhitebearDocumentArticle
 from Tools.Document.WhitebearDocumentCSS import WhitebearDocumentCSS
@@ -51,13 +52,13 @@ class UploadDialog(wx.Dialog):
         # IP, port sizer
         self._ip_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self._label_ip_port = wx.StaticText(self, -1, Strings.label_ip_port + ': ')
-        self._field_ip = wx.TextCtrl(self, -1)
+        self._field_ip_port = wx.TextCtrl(self, -1)
         self._ip_sub_sizer.Add(self._label_ip_port, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
         self._ip_sub_sizer.Add(4, -1)
-        self._ip_sub_sizer.Add(self._field_ip, proportion=1)
+        self._ip_sub_sizer.Add(self._field_ip_port, proportion=1)
         self._config_sizer.Add(self._ip_sub_sizer, flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT,
                                border=Numbers.widget_border_size)
-        self._field_ip_port_tip = Tools.get_warning_tip(self._field_ip, Strings.label_ip_port)
+        self._field_ip_port_tip = Tools.get_warning_tip(self._field_ip_port, Strings.label_ip_port)
         self._field_ip_port_tip.SetMessage(Strings.label_ip_port_tip)
 
         # User
@@ -123,7 +124,7 @@ class UploadDialog(wx.Dialog):
 
         # Upload button
         self._upload_button_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self._upload_button = wx.Button(self, -1, Strings.button_upload, style=wx.BU_EXACTFIT)
+        self._upload_button = wx.Button(self, wx.ID_FILE, Strings.button_upload, style=wx.BU_EXACTFIT)
         self._upload_button.SetBitmap(wx.Bitmap(Fetch.get_resource_path('upload.png'), wx.BITMAP_TYPE_PNG))
         self._upload_button.SetBitmapPosition(wx.TOP)
         self._upload_button_sizer.AddStretchSpacer()
@@ -147,11 +148,16 @@ class UploadDialog(wx.Dialog):
         self.Bind(wx.EVT_LIST_ITEM_UNCHECKED, self._check_handler, self._file_list)
         self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._add_button)
         self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._keyfile_button)
-        self.Bind(wx.EVT_TEXT, self._handle_fields, self._field_ip)
+        self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._upload_button)
+        self.Bind(wx.EVT_TEXT, self._handle_fields, self._field_ip_port)
         self.Bind(wx.EVT_TEXT, self._handle_fields, self._field_user)
         self.Bind(wx.EVT_TEXT, self._handle_fields, self._field_keyfile)
 
         self._display_dialog_contents()
+        # todo remove this
+        ip, port = self._field_ip_port.GetValue().split(':', 2)
+        thread = SftpThread(self, ip, int(port), self._field_user.GetValue(), self._field_keyfile.GetValue())
+        thread.start()
 
     def _get_id(self) -> int:
         """
@@ -191,6 +197,10 @@ class UploadDialog(wx.Dialog):
             path = self._ask_for_file(Strings.home_directory)
             if path:
                 self._field_keyfile.SetValue(path)
+        elif event.GetId() == wx.ID_FILE:
+            # todo this
+            thread = SftpThread(self)
+            thread.start()
 
         # TODO Set the gauge to the amount of checked items
 
@@ -201,7 +211,7 @@ class UploadDialog(wx.Dialog):
         :return: File path or empty string if canceled.
         """
         with wx.FileDialog(self, Strings.label_select_file, path, style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST |
-                                                                         wx.FD_PREVIEW) as dlg:
+                           wx.FD_PREVIEW) as dlg:
             if dlg.ShowModal() == wx.ID_OK:
                 dlg: wx.FileDialog
                 return dlg.GetPath()
@@ -279,7 +289,7 @@ class UploadDialog(wx.Dialog):
             self._append_into_list(item_id, file)
 
         # Fill SFTP config
-        self._field_ip.SetValue(self._config_manager.get_ip_port())
+        self._field_ip_port.SetValue(self._config_manager.get_ip_port())
         self._field_user.SetValue(self._config_manager.get_user())
         self._field_keyfile.SetValue(self._config_manager.get_keyfile())
         if not self._validate_fields() or self._count_checked_files() == 0:
@@ -298,37 +308,37 @@ class UploadDialog(wx.Dialog):
         """
         result = True
         # Check IP:port
-        ip_port = self._field_ip.GetValue().split(':', 2)
+        ip_port = self._field_ip_port.GetValue().split(':', 2)
         try:
-            if not self._field_ip.GetValue():
+            if not self._field_ip_port.GetValue():
                 self._field_ip_port_tip.SetMessage(Strings.label_ip_port_tip)
-                Tools.set_field_background(self._field_ip, Numbers.RED_COLOR)
+                Tools.set_field_background(self._field_ip_port, Numbers.RED_COLOR)
             elif len(ip_port) > 2 or len(ip_port) < 2 or not ip_port[0] or not ip_port[1]:
                 self._field_ip_port_tip.SetMessage(Strings.warning_incorrect_format)
-                Tools.set_field_background(self._field_ip, Numbers.RED_COLOR)
+                Tools.set_field_background(self._field_ip_port, Numbers.RED_COLOR)
                 result = False
             elif int(ip_port[1]) < 1 or int(ip_port[1]) > 65535:
                 self._field_ip_port_tip.SetMessage(Strings.warning_incorrect_port)
-                Tools.set_field_background(self._field_ip, Numbers.RED_COLOR)
+                Tools.set_field_background(self._field_ip_port, Numbers.RED_COLOR)
                 result = False
             ip = ip_port[0].split('.', 4)
             if len(ip) < 4 or len(ip) > 4 or not ip:
                 self._field_ip_port_tip.SetMessage(Strings.warning_incorrect_ip_format)
-                Tools.set_field_background(self._field_ip, Numbers.RED_COLOR)
+                Tools.set_field_background(self._field_ip_port, Numbers.RED_COLOR)
                 result = False
             for num in ip:
                 if int(num) < 0 or int(num) > 255:
                     self._field_ip_port_tip.SetMessage(Strings.warning_incorrect_ip_format)
-                    Tools.set_field_background(self._field_ip, Numbers.RED_COLOR)
+                    Tools.set_field_background(self._field_ip_port, Numbers.RED_COLOR)
                     result = False
         except ValueError as _:
             self._field_ip_port_tip.SetMessage(Strings.warning_incorrect_format)
-            Tools.set_field_background(self._field_ip, Numbers.RED_COLOR)
+            Tools.set_field_background(self._field_ip_port, Numbers.RED_COLOR)
             result = False
         if result:
             self._field_ip_port_tip.SetMessage(Strings.label_ip_port_tip)
-            Tools.set_field_background(self._field_ip, Numbers.GREEN_COLOR)
-            self._config_manager.store_ip_port(self._field_ip.GetValue())
+            Tools.set_field_background(self._field_ip_port, Numbers.GREEN_COLOR)
+            self._config_manager.store_ip_port(self._field_ip_port.GetValue())
 
         # Check username
         username = self._field_user.GetValue()
