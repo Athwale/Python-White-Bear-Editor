@@ -154,9 +154,35 @@ class UploadDialog(wx.Dialog):
         self.Bind(wx.EVT_TEXT, self._handle_fields, self._field_keyfile)
 
         self._display_dialog_contents()
-        # todo remove this
+
+    def on_key_password_required(self) -> None:
+        """
+        Ask the user for private key passphrase and restart the connection.
+        :return: None
+        """
+        # todo how to treat passwords in python?
+        dlg = wx.PasswordEntryDialog(self, Strings.label_rsa_passphrase + ':', Strings.warning_rsa_passphrase)
+        result = dlg.ShowModal()
+        if result == wx.ID_OK:
+            self._upload_files(dlg.GetValue())
+        dlg.Destroy()
+
+    @staticmethod
+    def on_key_password_wrong() -> None:
+        """
+        Display an error message saying the passphrase was wrong.
+        :return: None
+        """
+        wx.MessageBox(Strings.warning_rsa_passphrase_wrong, Strings.status_error, wx.OK | wx.ICON_ERROR)
+
+    def _upload_files(self, password=None) -> None:
+        """
+        Run a SFTP thread to upload the files.
+        :param password: RSA private key password.
+        :return: None
+        """
         ip, port = self._field_ip_port.GetValue().split(':', 2)
-        thread = SftpThread(self, ip, int(port), self._field_user.GetValue(), self._field_keyfile.GetValue())
+        thread = SftpThread(self, ip, int(port), self._field_user.GetValue(), self._field_keyfile.GetValue(), password)
         thread.start()
 
     def _get_id(self) -> int:
@@ -198,9 +224,7 @@ class UploadDialog(wx.Dialog):
             if path:
                 self._field_keyfile.SetValue(path)
         elif event.GetId() == wx.ID_FILE:
-            # todo this
-            thread = SftpThread(self)
-            thread.start()
+            self._upload_files()
 
         # TODO Set the gauge to the amount of checked items
 
@@ -301,6 +325,9 @@ class UploadDialog(wx.Dialog):
         self._field_keyfile.Disable()
         self._field_keyfile.SetForegroundColour(wx.BLACK)
 
+        # todo remove
+        self._upload_button.Enable()
+
     def _validate_fields(self) -> bool:
         """
         Validate configuration fields.
@@ -352,7 +379,7 @@ class UploadDialog(wx.Dialog):
             self._config_manager.store_user(self._field_user.GetValue())
 
         # Check keyfile existence
-        if not os.path.exists(self._field_keyfile.GetValue()):
+        if not os.path.exists(self._field_keyfile.GetValue()) or not os.access(self._field_keyfile.GetValue(), os.R_OK):
             self._field_keyfile_tip.SetMessage(Strings.warning_keyfile_inaccessible)
             Tools.set_field_background(self._field_keyfile, Numbers.RED_COLOR)
             result = False

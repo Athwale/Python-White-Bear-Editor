@@ -230,6 +230,8 @@ class Strings:
     warning_incorrect_ip_format: str = 'Incorrect IP format'
     warning_incorrect_port: str = 'Incorrect port number'
     warning_keyfile_inaccessible: str = 'File inaccessible'
+    warning_rsa_passphrase: str = 'RSA passphrase'
+    warning_rsa_passphrase_wrong: str = 'Could not decrypt key'
 
     label_menu_file: str = 'File'
     label_menu_item_new: str = 'New document...\tctrl+n'
@@ -384,6 +386,7 @@ class Strings:
     label_successful_uploads: str = 'Successful transfers'
     label_failed_uploads: str = 'Failed transfers'
     label_uploading_file: str = 'Uploading'
+    label_rsa_passphrase: str = 'RSA private key passphrase'
 
     status_loading: str = 'Loading and testing'
     status_ready: str = 'Ready'
