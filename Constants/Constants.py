@@ -11,6 +11,7 @@ class Numbers:
 
     # Turn link sanity check on/off.
     online_seo_test: bool = False
+    private_key_permissions: oct = 0o600
 
     three_click_timeout: int = 400
     photo_ratio: float = 4 / 3
@@ -229,7 +230,8 @@ class Strings:
     warning_incorrect_format: str = 'Incorrect format'
     warning_incorrect_ip_format: str = 'Incorrect IP format'
     warning_incorrect_port: str = 'Incorrect port number'
-    warning_keyfile_inaccessible: str = 'File inaccessible'
+    warning_keyfile_inaccessible: str = 'Key file inaccessible'
+    warning_keyfile_permissions: str = 'Key file must have 600 permissions'
     warning_rsa_passphrase: str = 'RSA passphrase'
     warning_rsa_passphrase_wrong: str = 'Could not decrypt key'
 

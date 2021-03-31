@@ -2,6 +2,7 @@ import os
 from typing import Dict
 
 import wx
+import stat
 
 from Constants.Constants import Strings, Numbers
 from Resources.Fetch import Fetch
@@ -77,7 +78,6 @@ class UploadDialog(wx.Dialog):
         self._keyfile_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self._label_keyfile = wx.StaticText(self, -1, Strings.label_key_file + ': ')
         self._field_keyfile = wx.TextCtrl(self, -1)
-        self._field_keyfile.Disable()
         self._keyfile_button = wx.Button(self, wx.ID_OPEN, Strings.button_browse)
         self._keyfile_sub_sizer.Add(self._label_keyfile, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
         self._keyfile_sub_sizer.Add(self._field_keyfile, proportion=1)
@@ -322,8 +322,6 @@ class UploadDialog(wx.Dialog):
             self._upload_button.Enable()
 
         self.Enable()
-        self._field_keyfile.Disable()
-        self._field_keyfile.SetForegroundColour(wx.BLACK)
 
         # todo remove
         self._upload_button.Enable()
@@ -379,8 +377,13 @@ class UploadDialog(wx.Dialog):
             self._config_manager.store_user(self._field_user.GetValue())
 
         # Check keyfile existence
-        if not os.path.exists(self._field_keyfile.GetValue()) or not os.access(self._field_keyfile.GetValue(), os.R_OK):
+        key_path = self._field_keyfile.GetValue()
+        if not os.path.exists(key_path) or not os.access(key_path, os.R_OK):
             self._field_keyfile_tip.SetMessage(Strings.warning_keyfile_inaccessible)
+            Tools.set_field_background(self._field_keyfile, Numbers.RED_COLOR)
+            result = False
+        elif oct(stat.S_IMODE(os.stat(key_path).st_mode)) != oct(Numbers.private_key_permissions):
+            self._field_keyfile_tip.SetMessage(Strings.warning_keyfile_permissions)
             Tools.set_field_background(self._field_keyfile, Numbers.RED_COLOR)
             result = False
         else:
