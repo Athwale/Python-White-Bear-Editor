@@ -389,6 +389,7 @@ class Strings:
     label_failed_uploads: str = 'Failed transfers'
     label_uploading_file: str = 'Uploading'
     label_rsa_passphrase: str = 'RSA private key passphrase'
+    label_connection: str = 'Connection'
 
     status_loading: str = 'Loading and testing'
     status_ready: str = 'Ready'
@@ -401,6 +402,10 @@ class Strings:
     status_none: str = 'None'
     status_found: str = 'Found'
     status_saved: str = 'Saved'
+    status_established: str = 'Established'
+    status_failed: str = 'Failed'
+    status_connecting: str = 'Connecting...'
+    status_closed: str = 'Closed'
 
     style_paragraph: str = 'Paragraph'
     style_heading_3: str = 'Title 3'

@@ -1,5 +1,8 @@
 import threading
 import wx
+
+from Constants.Constants import Strings
+from Exceptions.AccessException import AccessException
 from Tools.Uploader import Uploader
 from paramiko.ssh_exception import PasswordRequiredException
 from paramiko.ssh_exception import SSHException
@@ -31,8 +34,13 @@ class SftpThread(threading.Thread):
         """
         try:
             self._uploader.connect()
-            #wx.CallAfter(self._parent.on_conversion_done, self, self._doc, self._save_as, self._disable)
+            wx.CallAfter(self._parent.on_update_connection, Strings.status_established)
+            self._uploader.close_all()
+            wx.CallAfter(self._parent.on_connection_closed, Strings.status_closed)
         except PasswordRequiredException as _:
             wx.CallAfter(self._parent.on_key_password_required)
-        except SSHException as _:
+        except AccessException as _:
             wx.CallAfter(self._parent.on_key_password_wrong)
+        except (SSHException, TimeoutError) as _:
+            self._uploader.close_all()
+            wx.CallAfter(self._parent.on_connection_closed, Strings.status_failed)

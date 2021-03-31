@@ -32,6 +32,7 @@ class UploadDialog(wx.Dialog):
         self._css = css
         self._upload_dict: Dict[int, str] = {}
         self._counter = 0
+        self._sftp_thread = None
 
         self._main_horizontal_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self._right_vertical_sizer = wx.BoxSizer(wx.VERTICAL)
@@ -98,6 +99,11 @@ class UploadDialog(wx.Dialog):
         self._info_left_sizer = wx.BoxSizer(wx.VERTICAL)
         self._info_right_sizer = wx.BoxSizer(wx.VERTICAL)
 
+        self._label_connection = wx.StaticText(self, -1, Strings.label_connection + ':')
+        self._content_connection = wx.StaticText(self, -1, Strings.status_none)
+        self._info_left_sizer.Add(self._label_connection, flag=wx.BOTTOM | wx.LEFT, border=Numbers.widget_border_size)
+        self._info_right_sizer.Add(self._content_connection, flag=wx.BOTTOM, border=Numbers.widget_border_size)
+
         self._label_num_files = wx.StaticText(self, -1, Strings.label_files_to_upload + ':')
         self._content_num_files = wx.StaticText(self, -1, '0')
         self._info_left_sizer.Add(self._label_num_files, flag=wx.BOTTOM | wx.LEFT, border=Numbers.widget_border_size)
@@ -125,8 +131,7 @@ class UploadDialog(wx.Dialog):
         # Upload button
         self._upload_button_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self._upload_button = wx.Button(self, wx.ID_FILE, Strings.button_upload, style=wx.BU_EXACTFIT)
-        self._upload_button.SetBitmap(wx.Bitmap(Fetch.get_resource_path('upload.png'), wx.BITMAP_TYPE_PNG))
-        self._upload_button.SetBitmapPosition(wx.TOP)
+        self._button_to_upload()
         self._upload_button_sizer.AddStretchSpacer()
         self._upload_button_sizer.Add(self._upload_button, flag=wx.ALIGN_CENTER)
         self._upload_button_sizer.AddStretchSpacer()
@@ -160,20 +165,57 @@ class UploadDialog(wx.Dialog):
         Ask the user for private key passphrase and restart the connection.
         :return: None
         """
-        # todo how to treat passwords in python?
         dlg = wx.PasswordEntryDialog(self, Strings.label_rsa_passphrase + ':', Strings.warning_rsa_passphrase)
         result = dlg.ShowModal()
         if result == wx.ID_OK:
             self._upload_files(dlg.GetValue())
         dlg.Destroy()
 
-    @staticmethod
-    def on_key_password_wrong() -> None:
+    def _button_to_upload(self) -> None:
+        """
+        Change the upload button to the default upload state.
+        :return: None
+        """
+        self._upload_button.SetBitmap(wx.Bitmap(Fetch.get_resource_path('upload.png'), wx.BITMAP_TYPE_PNG))
+        self._upload_button.SetBitmapPosition(wx.TOP)
+
+    def _button_to_cancel(self) -> None:
+        """
+        Change the upload button to the cancel upload state.
+        :return: None
+        """
+        self._upload_button.SetBitmap(wx.Bitmap(Fetch.get_resource_path('upload_cancel.png'), wx.BITMAP_TYPE_PNG))
+        self._upload_button.SetBitmapPosition(wx.TOP)
+
+    def on_key_password_wrong(self) -> None:
         """
         Display an error message saying the passphrase was wrong.
         :return: None
         """
         wx.MessageBox(Strings.warning_rsa_passphrase_wrong, Strings.status_error, wx.OK | wx.ICON_ERROR)
+        self._button_to_upload()
+        self._content_connection.SetLabelText(Strings.status_failed)
+        # Enable the upload button again if possible.
+        self._validate_fields()
+
+    def on_connection_closed(self, status: str) -> None:
+        """
+        Change the connection label in GUI to a new message and reset gui.
+        :param status: The status of the connection.
+        :return: None
+        """
+        self._content_connection.SetLabelText(status)
+        self._button_to_upload()
+        # Enable the upload button again if possible.
+        self._validate_fields()
+
+    def on_update_connection(self, status: str) -> None:
+        """
+        Change the connection label in GUI to a new message.
+        :param status: The status of the connection.
+        :return: None
+        """
+        self._content_connection.SetLabelText(status)
 
     def _upload_files(self, password=None) -> None:
         """
@@ -182,8 +224,12 @@ class UploadDialog(wx.Dialog):
         :return: None
         """
         ip, port = self._field_ip_port.GetValue().split(':', 2)
-        thread = SftpThread(self, ip, int(port), self._field_user.GetValue(), self._field_keyfile.GetValue(), password)
-        thread.start()
+        self._content_connection.SetLabelText(Strings.status_connecting)
+        self._button_to_cancel()
+        self._upload_button.Disable()
+        self._sftp_thread = SftpThread(self, ip, int(port), self._field_user.GetValue(), self._field_keyfile.GetValue(),
+                                       password)
+        self._sftp_thread.start()
 
     def _get_id(self) -> int:
         """
@@ -316,15 +362,7 @@ class UploadDialog(wx.Dialog):
         self._field_ip_port.SetValue(self._config_manager.get_ip_port())
         self._field_user.SetValue(self._config_manager.get_user())
         self._field_keyfile.SetValue(self._config_manager.get_keyfile())
-        if not self._validate_fields() or self._count_checked_files() == 0:
-            self._upload_button.Disable()
-        else:
-            self._upload_button.Enable()
-
         self.Enable()
-
-        # todo remove
-        self._upload_button.Enable()
 
     def _validate_fields(self) -> bool:
         """
