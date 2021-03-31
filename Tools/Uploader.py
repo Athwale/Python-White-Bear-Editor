@@ -1,3 +1,4 @@
+import time
 import paramiko
 
 from Constants.Constants import Strings
@@ -49,7 +50,15 @@ class Uploader:
         # Keep a reference to the SSH client in the SFTP client as to prevent the former from being garbage
         # collected and the connection from being closed.
         self._sftp_connection.sshclient = self._ssh_connection
+
+    def upload_file(self) -> None:
+        """
+        Upload one file
+        :return: Something maybe
+        """
+        # todo this
         print(self._sftp_connection.listdir('.'))
+        time.sleep(1)
 
     def close_all(self) -> None:
         """

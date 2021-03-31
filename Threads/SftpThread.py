@@ -34,7 +34,14 @@ class SftpThread(threading.Thread):
         """
         try:
             self._uploader.connect()
-            wx.CallAfter(self._parent.on_update_connection, Strings.status_established)
+            wx.CallAfter(self._parent.on_connection_established, Strings.status_established)
+
+            # todo this
+            i = 0
+            while i < 5:
+                self._uploader.upload_file()
+                i = i + 1
+
             self._uploader.close_all()
             wx.CallAfter(self._parent.on_connection_closed, Strings.status_closed)
         except PasswordRequiredException as _:

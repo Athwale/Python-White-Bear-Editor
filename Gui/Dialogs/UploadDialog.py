@@ -178,6 +178,7 @@ class UploadDialog(wx.Dialog):
         """
         self._upload_button.SetBitmap(wx.Bitmap(Fetch.get_resource_path('upload.png'), wx.BITMAP_TYPE_PNG))
         self._upload_button.SetBitmapPosition(wx.TOP)
+        self._upload_button.SetLabelText(Strings.button_upload)
 
     def _button_to_cancel(self) -> None:
         """
@@ -186,6 +187,7 @@ class UploadDialog(wx.Dialog):
         """
         self._upload_button.SetBitmap(wx.Bitmap(Fetch.get_resource_path('upload_cancel.png'), wx.BITMAP_TYPE_PNG))
         self._upload_button.SetBitmapPosition(wx.TOP)
+        self._upload_button.SetLabelText(Strings.button_cancel)
 
     def on_key_password_wrong(self) -> None:
         """
@@ -209,13 +211,15 @@ class UploadDialog(wx.Dialog):
         # Enable the upload button again if possible.
         self._validate_fields()
 
-    def on_update_connection(self, status: str) -> None:
+    def on_connection_established(self, status: str) -> None:
         """
         Change the connection label in GUI to a new message.
         :param status: The status of the connection.
         :return: None
         """
         self._content_connection.SetLabelText(status)
+        # Enable the upload button again if possible.
+        self._validate_fields()
 
     def _upload_files(self, password=None) -> None:
         """
@@ -270,7 +274,10 @@ class UploadDialog(wx.Dialog):
             if path:
                 self._field_keyfile.SetValue(path)
         elif event.GetId() == wx.ID_FILE:
-            self._upload_files()
+            if  self._upload_button.GetLabel() == Strings.button_upload:
+                self._upload_files()
+            else:
+                # todo stop thread
 
         # TODO Set the gauge to the amount of checked items
 
