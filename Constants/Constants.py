@@ -12,6 +12,7 @@ class Numbers:
     # Turn link sanity check on/off.
     online_seo_test: bool = False
     private_key_permissions: oct = 0o600
+    connection_timeout: int = 5
 
     three_click_timeout: int = 400
     photo_ratio: float = 4 / 3
@@ -234,6 +235,7 @@ class Strings:
     warning_keyfile_permissions: str = 'Key file must have 600 permissions'
     warning_rsa_passphrase: str = 'RSA passphrase'
     warning_rsa_passphrase_wrong: str = 'Could not decrypt key'
+    warning_server_folders_repaired: str = 'Server folder structure repaired'
 
     label_menu_file: str = 'File'
     label_menu_item_new: str = 'New document...\tctrl+n'
@@ -406,6 +408,7 @@ class Strings:
     status_failed: str = 'Failed'
     status_connecting: str = 'Connecting...'
     status_closed: str = 'Closed'
+    status_finished: str = 'Finished'
 
     style_paragraph: str = 'Paragraph'
     style_heading_3: str = 'Title 3'

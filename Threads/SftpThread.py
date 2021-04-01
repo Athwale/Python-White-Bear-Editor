@@ -1,4 +1,7 @@
 import threading
+import socket
+from typing import List, Tuple
+
 import wx
 
 from Constants.Constants import Strings
@@ -13,7 +16,7 @@ class SftpThread(threading.Thread):
     Connects to a SFTP server and transfers files to it.
     """
 
-    def __init__(self, parent, ip: str, port: int, user: str, key: str, password):
+    def __init__(self, parent, ip: str, port: int, user: str, key: str, password, files: List[Tuple[str, str]]):
         """
         Sftp thread constructor.
         :param parent: The gui object that should receive the result.
@@ -22,10 +25,13 @@ class SftpThread(threading.Thread):
         :param user: SFTP user name.
         :param key: RSA private SFTP key file.
         :param password: RSA passphrase.
+        :param files: List of file paths to upload
         """
         threading.Thread.__init__(self)
         self._parent = parent
         self._uploader = Uploader(ip, port, user, key, password)
+        self._stop_event = threading.Event()
+        self._files_to_upload = files
 
     def run(self) -> None:
         """
@@ -35,15 +41,25 @@ class SftpThread(threading.Thread):
         try:
             self._uploader.connect()
             wx.CallAfter(self._parent.on_connection_established, Strings.status_established)
+            result = self._uploader.check_folder_structure()
+            if not result:
+                wx.CallAfter(self._parent.on_structure_repair)
 
             # todo this
-            i = 0
-            while i < 5:
-                self._uploader.upload_file()
-                i = i + 1
+            for file in self._files_to_upload:
+                # Show which file is being uploaded.
+                wx.CallAfter(self._parent.on_file_upload_start, file[0])
+                if self._stop_event.is_set():
+                    break
+                finished_upload = self._uploader.upload_file(file)
+                wx.CallAfter(self._parent.on_file_upload_finished, finished_upload)
 
             self._uploader.close_all()
             wx.CallAfter(self._parent.on_connection_closed, Strings.status_closed)
+            wx.CallAfter(self._parent.on_file_update, Strings.status_finished)
+        except (socket.timeout, socket.error) as e:
+            self._uploader.close_all()
+            wx.CallAfter(self._parent.on_connection_closed, Strings.status_failed + ': ' + str(e))
         except PasswordRequiredException as _:
             wx.CallAfter(self._parent.on_key_password_required)
         except AccessException as _:
@@ -51,3 +67,13 @@ class SftpThread(threading.Thread):
         except (SSHException, TimeoutError) as _:
             self._uploader.close_all()
             wx.CallAfter(self._parent.on_connection_closed, Strings.status_failed)
+        except (IOError, OSError) as _:
+            # Upload failed.
+            print('a')
+
+    def stop(self) -> None:
+        """
+        Stop the execution of this thread at the end of the previous upload operation.
+        :return: None
+        """
+        self._stop_event.set()

@@ -1,7 +1,7 @@
-import time
+import os
 import paramiko
 
-from Constants.Constants import Strings
+from Constants.Constants import Strings, Numbers
 from Exceptions.AccessException import AccessException
 
 
@@ -24,10 +24,10 @@ class Uploader:
         self._sftp_connection = None
         self._ssh_connection = None
 
-    def connect(self) -> bool:
+    def connect(self) -> None:
         """
         Connect to a SFTP server using a SSH RSA key.
-        :return: True if connection was successful.
+        :return: None
         """
         # Public part of the user's RSA keys must be in the right place on the proftpd SFTP server.
         # The SFTP server has it's own RSA private and public (host) key used to authenticate it self to the client.
@@ -45,20 +45,52 @@ class Uploader:
         # Connect SSH client.
         self._ssh_connection = paramiko.SSHClient()
         self._ssh_connection.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        self._ssh_connection.connect(self._ip, self._port, self._user, pkey=key)
+        self._ssh_connection.connect(self._ip, self._port, self._user, pkey=key, timeout=Numbers.connection_timeout)
         self._sftp_connection = self._ssh_connection.open_sftp()
+        self._sftp_connection.get_channel().settimeout(Numbers.connection_timeout)
         # Keep a reference to the SSH client in the SFTP client as to prevent the former from being garbage
         # collected and the connection from being closed.
         self._sftp_connection.sshclient = self._ssh_connection
 
-    def upload_file(self) -> None:
+    def upload_file(self, paths: (str, str)) -> str:
         """
-        Upload one file
-        :return: Something maybe
+        Upload one file to the SFTP server to the same location it is in inside the whitebear web working directory.
+        :param paths: A tuple of local path and expected path on the server which is supposed to have the same folder
+        structure. ('/home/other/test_web_xml/test.html', './test.html')
+        :return: The uploaded filename if successful, exception if failed.
         """
-        # todo this
-        print(self._sftp_connection.listdir('.'))
-        time.sleep(1)
+        # todo utilize the callback method of put
+        self._sftp_connection: paramiko.SFTPClient
+        self._sftp_connection.put(paths[0], paths[1], confirm=True, callback=self.upload_callback)
+        return paths[0]
+
+    def upload_callback(self, transferred: int, total: int) -> None:
+        """
+        This method receives transferred bytes and total bytes to be transferred during upload.
+        :param transferred: Already transferred bytes.
+        :param total: Whole size.
+        :return: None
+        """
+        #print(transferred, total)
+        pass
+
+    def check_folder_structure(self) -> bool:
+        """
+        Check that the folder structure on the server is what the website expects and create any missing folders.
+        :return: True if no repairs were done.
+        """
+        result = True
+        for folder in [os.path.join('.', Strings.folder_images),
+                       os.path.join('.', Strings.folder_files),
+                       os.path.join('.', Strings.folder_images, Strings.folder_logos),
+                       os.path.join('.', Strings.folder_images, Strings.folder_originals),
+                       os.path.join('.', Strings.folder_images, Strings.folder_thumbnails)]:
+            try:
+                self._sftp_connection.listdir(folder)
+            except FileNotFoundError as _:
+                result = False
+                self._sftp_connection.mkdir(folder)
+        return result
 
     def close_all(self) -> None:
         """

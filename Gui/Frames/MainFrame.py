@@ -1301,7 +1301,7 @@ class MainFrame(wx.Frame):
         if index == -1:
             index = self._file_list.GetFirstSelected()
         if index == -1:
-            # Nothing is selected nor give as index to update.
+            # Nothing is selected nor given an index to update.
             return
         doc = self._articles[self._file_list.GetItemText(index)]
         doc.is_modified()

@@ -1,5 +1,5 @@
 import os
-from typing import Dict
+from typing import Dict, List, Tuple
 
 import wx
 import stat
@@ -30,6 +30,7 @@ class UploadDialog(wx.Dialog):
         self._articles = articles
         self._index = index
         self._css = css
+        # Contains unique id and disk path for each file in the file list even those unchecked.
         self._upload_dict: Dict[int, str] = {}
         self._counter = 0
         self._sftp_thread = None
@@ -221,6 +222,43 @@ class UploadDialog(wx.Dialog):
         # Enable the upload button again if possible.
         self._validate_fields()
 
+    @staticmethod
+    def on_structure_repair() -> None:
+        """
+        Display a message that the folder structure on server was repaired.
+        :return: None
+        """
+        wx.MessageBox(Strings.warning_server_folders_repaired, Strings.status_warning, wx.OK | wx.ICON_WARNING)
+
+    def on_file_upload_start(self, file: str) -> None:
+        """
+        Update the uploading file label.
+        :param file: The file.
+        :return: None
+        """
+        self._content_current_file.SetLabelText(os.path.relpath(file, start=self._config_manager.get_working_dir()))
+
+    def on_file_upload_finished(self, file: str) -> None:
+        """
+        Called when SFTP put finishes uploading a file. Updates the file list to indicate finished upload and updates
+        finished uploads counter.
+        :param file: The local file path.
+        :return: None
+        """
+        index = self._file_list.FindItem(0, os.path.relpath(file, start=self._config_manager.get_working_dir()))
+        if index > -1:
+            self._file_list.SetItemBackgroundColour(index, Numbers.GREEN_COLOR)
+        # Update the successful transfers counter to the number of green files.
+        item = -1
+        counter = 0
+        while 1:
+            item = self._file_list.GetNextItem(item, wx.LIST_NEXT_ALL, wx.LIST_STATE_DONTCARE)
+            if item == -1:
+                break
+            elif self._file_list.GetItemBackgroundColour(item) == Numbers.GREEN_COLOR:
+                counter = counter + 1
+        self._content_successful.SetLabelText(str(counter))
+
     def _upload_files(self, password=None) -> None:
         """
         Run a SFTP thread to upload the files.
@@ -228,12 +266,29 @@ class UploadDialog(wx.Dialog):
         :return: None
         """
         ip, port = self._field_ip_port.GetValue().split(':', 2)
+        # Contains tuples (full disk path, relative path on server)
+        files_to_upload: List[Tuple[str, str]] = []
         self._content_connection.SetLabelText(Strings.status_connecting)
         self._button_to_cancel()
         self._upload_button.Disable()
+        item = -1
+        while 1:
+            item = self._file_list.GetNextItem(item, wx.LIST_NEXT_ALL, wx.LIST_STATE_DONTCARE)
+            if item == -1:
+                break
+            elif self._file_list.IsItemChecked(item):
+                # Item data carries a key into the dictionary of all files in the list.
+                local_path = self._upload_dict[self._file_list.GetItem(item).GetData()]
+                ftp_path = os.path.join('.', os.path.relpath(local_path, start=self._config_manager.get_working_dir()))
+                files_to_upload.append((local_path, ftp_path))
+
         self._sftp_thread = SftpThread(self, ip, int(port), self._field_user.GetValue(), self._field_keyfile.GetValue(),
-                                       password)
-        self._sftp_thread.start()
+                                       password, files_to_upload)
+        # TODO Set the gauge to the amount of checked items
+        # TODO put a label in gui saying that files on server are overwritten.
+        # TODO test connection loss.
+        if files_to_upload:
+            self._sftp_thread.start()
 
     def _get_id(self) -> int:
         """
@@ -276,10 +331,8 @@ class UploadDialog(wx.Dialog):
         elif event.GetId() == wx.ID_FILE:
             if  self._upload_button.GetLabel() == Strings.button_upload:
                 self._upload_files()
-            else:
-                # todo stop thread
-
-        # TODO Set the gauge to the amount of checked items
+            elif self._sftp_thread.is_alive():
+                self._sftp_thread.stop()
 
     def _ask_for_file(self, path: str) -> str:
         """
@@ -450,7 +503,6 @@ class UploadDialog(wx.Dialog):
         :return: None
         """
         index = self._file_list.InsertItem(self._file_list.GetItemCount(),
-                                           os.path.join(os.path.basename(os.path.dirname(path)),
-                                                        os.path.basename(path)))
+                                           os.path.relpath(path, start=self._config_manager.get_working_dir()))
         self._file_list.SetItemData(index, item_id)
         self._file_list.CheckItem(index, True)
