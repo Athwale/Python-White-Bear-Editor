@@ -6,6 +6,7 @@ import wx
 
 from Constants.Constants import Strings
 from Exceptions.AccessException import AccessException
+from Exceptions.TransferException import TransferException
 from Tools.Uploader import Uploader
 from paramiko.ssh_exception import PasswordRequiredException
 from paramiko.ssh_exception import SSHException
@@ -51,12 +52,16 @@ class SftpThread(threading.Thread):
                 wx.CallAfter(self._parent.on_file_upload_start, file[0])
                 if self._stop_event.is_set():
                     break
-                finished_upload = self._uploader.upload_file(file)
-                wx.CallAfter(self._parent.on_file_upload_finished, finished_upload)
+                try:
+                    finished_upload = self._uploader.upload_file(file)
+                    wx.CallAfter(self._parent.on_file_upload_finished, finished_upload, False)
+                except TransferException as e:
+                    # Report fail and continue with other files.
+                    wx.CallAfter(self._parent.on_file_upload_finished, e.get_file(), True)
 
             self._uploader.close_all()
             wx.CallAfter(self._parent.on_connection_closed, Strings.status_closed)
-            wx.CallAfter(self._parent.on_file_update, Strings.status_finished)
+            wx.CallAfter(self._parent.on_file_upload_start, Strings.status_finished)
         except (socket.timeout, socket.error) as e:
             self._uploader.close_all()
             wx.CallAfter(self._parent.on_connection_closed, Strings.status_failed + ': ' + str(e))
@@ -67,9 +72,6 @@ class SftpThread(threading.Thread):
         except (SSHException, TimeoutError) as _:
             self._uploader.close_all()
             wx.CallAfter(self._parent.on_connection_closed, Strings.status_failed)
-        except (IOError, OSError) as _:
-            # Upload failed.
-            print('a')
 
     def stop(self) -> None:
         """

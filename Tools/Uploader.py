@@ -3,6 +3,7 @@ import paramiko
 
 from Constants.Constants import Strings, Numbers
 from Exceptions.AccessException import AccessException
+from Exceptions.TransferException import TransferException
 
 
 class Uploader:
@@ -47,7 +48,6 @@ class Uploader:
         self._ssh_connection.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         self._ssh_connection.connect(self._ip, self._port, self._user, pkey=key, timeout=Numbers.connection_timeout)
         self._sftp_connection = self._ssh_connection.open_sftp()
-        self._sftp_connection.get_channel().settimeout(Numbers.connection_timeout)
         # Keep a reference to the SSH client in the SFTP client as to prevent the former from being garbage
         # collected and the connection from being closed.
         self._sftp_connection.sshclient = self._ssh_connection
@@ -59,20 +59,19 @@ class Uploader:
         structure. ('/home/other/test_web_xml/test.html', './test.html')
         :return: The uploaded filename if successful, exception if failed.
         """
-        # todo utilize the callback method of put
         self._sftp_connection: paramiko.SFTPClient
-        self._sftp_connection.put(paths[0], paths[1], confirm=True, callback=self.upload_callback)
+        try:
+            self._sftp_connection.put(paths[0], paths[1], confirm=True)
+        except (TransferException, IOError, OSError, EOFError) as _:
+            raise TransferException(Strings.exception_sftp_fail, paths[0])
         return paths[0]
 
-    def upload_callback(self, transferred: int, total: int) -> None:
+    def fail_upload(self) -> None:
         """
-        This method receives transferred bytes and total bytes to be transferred during upload.
-        :param transferred: Already transferred bytes.
-        :param total: Whole size.
+        Raise TransferException. This is used to indicate put timeout.
         :return: None
         """
-        #print(transferred, total)
-        pass
+        raise TransferException('', '')
 
     def check_folder_structure(self) -> bool:
         """

@@ -238,26 +238,34 @@ class UploadDialog(wx.Dialog):
         """
         self._content_current_file.SetLabelText(os.path.relpath(file, start=self._config_manager.get_working_dir()))
 
-    def on_file_upload_finished(self, file: str) -> None:
+    def on_file_upload_finished(self, file: str, fail: bool) -> None:
         """
-        Called when SFTP put finishes uploading a file. Updates the file list to indicate finished upload and updates
-        finished uploads counter.
+        Called when SFTP put finishes uploading a file or finishes with fail. Updates the file list to indicate finished
+        upload and updates finished upload counters.
         :param file: The local file path.
+        :param fail: True if transfer failed.
         :return: None
         """
+        color = Numbers.GREEN_COLOR
+        if fail:
+            color = Numbers.RED_COLOR
         index = self._file_list.FindItem(0, os.path.relpath(file, start=self._config_manager.get_working_dir()))
         if index > -1:
-            self._file_list.SetItemBackgroundColour(index, Numbers.GREEN_COLOR)
-        # Update the successful transfers counter to the number of green files.
+            self._file_list.SetItemBackgroundColour(index, color)
+        # Update the transfers counters to the number of red/green files.
         item = -1
-        counter = 0
+        counter_red = 0
+        counter_green = 0
         while 1:
             item = self._file_list.GetNextItem(item, wx.LIST_NEXT_ALL, wx.LIST_STATE_DONTCARE)
             if item == -1:
                 break
             elif self._file_list.GetItemBackgroundColour(item) == Numbers.GREEN_COLOR:
-                counter = counter + 1
-        self._content_successful.SetLabelText(str(counter))
+                counter_green = counter_green + 1
+            elif self._file_list.GetItemBackgroundColour(item) == Numbers.RED_COLOR:
+                counter_red = counter_red + 1
+        self._content_successful.SetLabelText(str(counter_green))
+        self._content_failed.SetLabelText(str(counter_red))
 
     def _upload_files(self, password=None) -> None:
         """
@@ -281,6 +289,8 @@ class UploadDialog(wx.Dialog):
                 local_path = self._upload_dict[self._file_list.GetItem(item).GetData()]
                 ftp_path = os.path.join('.', os.path.relpath(local_path, start=self._config_manager.get_working_dir()))
                 files_to_upload.append((local_path, ftp_path))
+            # Reset item background color
+            self._file_list.SetItemBackgroundColour(item, wx.WHITE)
 
         self._sftp_thread = SftpThread(self, ip, int(port), self._field_user.GetValue(), self._field_keyfile.GetValue(),
                                        password, files_to_upload)
