@@ -266,6 +266,7 @@ class UploadDialog(wx.Dialog):
                 counter_red = counter_red + 1
         self._content_successful.SetLabelText(str(counter_green))
         self._content_failed.SetLabelText(str(counter_red))
+        self._upload_gauge.SetValue(counter_green)
 
     def _upload_files(self, password=None) -> None:
         """
@@ -294,9 +295,10 @@ class UploadDialog(wx.Dialog):
 
         self._sftp_thread = SftpThread(self, ip, int(port), self._field_user.GetValue(), self._field_keyfile.GetValue(),
                                        password, files_to_upload)
-        # TODO Set the gauge to the amount of checked items
+        self._upload_gauge.SetRange(len(files_to_upload))
+        self._upload_gauge.SetValue(0)
         # TODO put a label in gui saying that files on server are overwritten.
-        # TODO test connection loss.
+        # TODO test server kill.
         if files_to_upload:
             self._sftp_thread.start()
 
@@ -339,7 +341,7 @@ class UploadDialog(wx.Dialog):
             if path:
                 self._field_keyfile.SetValue(path)
         elif event.GetId() == wx.ID_FILE:
-            if  self._upload_button.GetLabel() == Strings.button_upload:
+            if self._upload_button.GetLabel() == Strings.button_upload:
                 self._upload_files()
             elif self._sftp_thread.is_alive():
                 self._sftp_thread.stop()
