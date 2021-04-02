@@ -1,4 +1,5 @@
 import os
+import wx
 import paramiko
 
 from Constants.Constants import Strings, Numbers
@@ -8,15 +9,17 @@ from Exceptions.TransferException import TransferException
 
 class Uploader:
 
-    def __init__(self, ip: str, port: int, user: str, key: str, passphrase: str):
+    def __init__(self, parent, ip: str, port: int, user: str, key: str, passphrase: str):
         """
         Constructor of the SFTP class.
+        :param parent: The gui object that should receive the results.
         :param ip: Server IPv4 address.
         :param port: SFTP port.
         :param user: SFTP user name.
         :param key: RSA private SFTP key file.
         :param passphrase: RSA key passphrase.
         """
+        self._parent = parent
         self._ip = ip
         self._port = port
         self._user = user
@@ -61,17 +64,20 @@ class Uploader:
         """
         self._sftp_connection: paramiko.SFTPClient
         try:
-            self._sftp_connection.put(paths[0], paths[1], confirm=True)
+            self._sftp_connection.put(paths[0], paths[1], confirm=True, callback=self.fail_upload)
         except (TransferException, IOError, OSError, EOFError) as _:
             raise TransferException(Strings.exception_sftp_fail, paths[0])
         return paths[0]
 
-    def fail_upload(self) -> None:
+    def fail_upload(self, transferred: int, total: int) -> None:
         """
-        Raise TransferException. This is used to indicate put timeout.
+        Calculate percentage of transferred file and post the results into the gui.
+        :param transferred: Bytes so far transferred.
+        :param total: Total size of the file in bytes.
         :return: None
         """
-        raise TransferException('', '')
+        percentage = round(((100 / total) * transferred), 1)
+        wx.CallAfter(self._parent.on_percentage_update, percentage)
 
     def check_folder_structure(self) -> bool:
         """

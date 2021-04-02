@@ -30,7 +30,7 @@ class SftpThread(threading.Thread):
         """
         threading.Thread.__init__(self)
         self._parent = parent
-        self._uploader = Uploader(ip, port, user, key, password)
+        self._uploader = Uploader(parent, ip, port, user, key, password)
         self._stop_event = threading.Event()
         self._files_to_upload = files
 
@@ -50,6 +50,7 @@ class SftpThread(threading.Thread):
             for file in self._files_to_upload:
                 # Show which file is being uploaded.
                 wx.CallAfter(self._parent.on_file_upload_start, file[0])
+                wx.CallAfter(self._parent.on_percentage_update, 0)
                 if self._stop_event.is_set():
                     break
                 try:
@@ -59,19 +60,19 @@ class SftpThread(threading.Thread):
                     # Report fail and continue with other files.
                     wx.CallAfter(self._parent.on_file_upload_finished, e.get_file(), True)
 
-            self._uploader.close_all()
             wx.CallAfter(self._parent.on_connection_closed, Strings.status_closed)
             wx.CallAfter(self._parent.on_file_upload_start, Strings.status_finished)
         except (socket.timeout, socket.error) as e:
-            self._uploader.close_all()
             wx.CallAfter(self._parent.on_connection_closed, Strings.status_failed + ': ' + str(e))
         except PasswordRequiredException as _:
             wx.CallAfter(self._parent.on_key_password_required)
         except AccessException as _:
             wx.CallAfter(self._parent.on_key_password_wrong)
         except (SSHException, TimeoutError) as _:
-            self._uploader.close_all()
+            print('a')
             wx.CallAfter(self._parent.on_connection_closed, Strings.status_failed)
+        finally:
+            self._uploader.close_all()
 
     def stop(self) -> None:
         """

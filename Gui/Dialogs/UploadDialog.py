@@ -122,9 +122,13 @@ class UploadDialog(wx.Dialog):
         self._info_right_sizer.Add(self._content_failed, flag=wx.BOTTOM, border=Numbers.widget_border_size)
 
         self._label_current_file = wx.StaticText(self, -1, Strings.label_uploading_file + ':')
-        self._content_current_file = wx.StaticText(self, -1, Strings.label_none)
+        self._content_current_file = wx.StaticText(self, -1, Strings.label_none,
+                                                   style=wx.ST_ELLIPSIZE_MIDDLE)
         self._info_left_sizer.Add(self._label_current_file, flag=wx.BOTTOM | wx.LEFT, border=Numbers.widget_border_size)
         self._info_right_sizer.Add(self._content_current_file, flag=wx.BOTTOM, border=Numbers.widget_border_size)
+
+        self._content_percentage = wx.StaticText(self, -1, '0 %')
+        self._info_right_sizer.Add(self._content_percentage, flag=wx.BOTTOM, border=Numbers.widget_border_size)
 
         self._upload_info_sizer.Add(self._info_left_sizer, 1, flag=wx.EXPAND)
         self._upload_info_sizer.Add(self._info_right_sizer, 2, flag=wx.EXPAND)
@@ -268,6 +272,15 @@ class UploadDialog(wx.Dialog):
         self._content_failed.SetLabelText(str(counter_red))
         self._upload_gauge.SetValue(counter_green)
 
+    def on_percentage_update(self, percentage: float) -> None:
+        """
+        Update the percentage of file upload.
+        :param percentage: The new value.
+        :return: None
+        """
+        formatted = "{:4.1f}".format(percentage)
+        self._content_percentage.SetLabelText(formatted + ' %')
+
     def _upload_files(self, password=None) -> None:
         """
         Run a SFTP thread to upload the files.
@@ -298,6 +311,7 @@ class UploadDialog(wx.Dialog):
         self._upload_gauge.SetRange(len(files_to_upload))
         self._upload_gauge.SetValue(0)
         # TODO put a label in gui saying that files on server are overwritten.
+        # TODO cancel on window close.
         # TODO test server kill.
         if files_to_upload:
             self._sftp_thread.start()
