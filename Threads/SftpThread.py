@@ -1,15 +1,15 @@
-import threading
 import socket
+import threading
 from typing import List, Tuple
 
 import wx
+from paramiko.ssh_exception import PasswordRequiredException
+from paramiko.ssh_exception import SSHException
 
 from Constants.Constants import Strings
 from Exceptions.AccessException import AccessException
 from Exceptions.TransferException import TransferException
 from Tools.Uploader import Uploader
-from paramiko.ssh_exception import PasswordRequiredException
-from paramiko.ssh_exception import SSHException
 
 
 class SftpThread(threading.Thread):
@@ -46,7 +46,6 @@ class SftpThread(threading.Thread):
             if not result:
                 wx.CallAfter(self._parent.on_structure_repair)
 
-            # todo this
             for file in self._files_to_upload:
                 # Show which file is being uploaded.
                 wx.CallAfter(self._parent.on_file_upload_start, file[0])
@@ -74,9 +73,16 @@ class SftpThread(threading.Thread):
         finally:
             self._uploader.close_all()
 
-    def stop(self) -> None:
+    def stop(self, force=False) -> None:
         """
         Stop the execution of this thread at the end of the previous upload operation.
+        :param force: If true the connection is closed even during transfer, this may produce EOFError. This is unsafe
+        and may leave corrupted files on the server.
         :return: None
         """
+        if force:
+            try:
+                self._uploader.close_all()
+            except EOFError as _:
+                pass
         self._stop_event.set()

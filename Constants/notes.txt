@@ -1,3 +1,0 @@
-TODO:
-Create new/edit menu page dialog.
-Settings for default parameters.

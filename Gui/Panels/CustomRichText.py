@@ -300,8 +300,8 @@ class CustomRichText(rt.RichTextCtrl):
             # Basically only if this method is called from the style picker.
             self.BeginBatchUndo(Strings.undo_last_action)
             end_batch = True
-        self.SetStyleEx(p_range, style, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_PARAGRAPHS_ONLY
-                                              | rt.RICHTEXT_SETSTYLE_RESET)
+        self.SetStyleEx(p_range, style, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_PARAGRAPHS_ONLY |
+                        rt.RICHTEXT_SETSTYLE_RESET)
         if end_batch:
             self.EndBatchUndo()
 
@@ -355,8 +355,8 @@ class CustomRichText(rt.RichTextCtrl):
         if not self.BatchingUndo():
             self.BeginBatchUndo(Strings.undo_last_action)
             end_batch = True
-        self.SetStyleEx(p_range, style, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_PARAGRAPHS_ONLY
-                                              | rt.RICHTEXT_SETSTYLE_RESET)
+        self.SetStyleEx(p_range, style, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_PARAGRAPHS_ONLY |
+                        rt.RICHTEXT_SETSTYLE_RESET)
         if end_batch:
             self.EndBatchUndo()
 
@@ -406,10 +406,10 @@ class CustomRichText(rt.RichTextCtrl):
         if not self.BatchingUndo():
             self.BeginBatchUndo(Strings.undo_last_action)
             end_batch = True
-        self.SetStyleEx(p_range, style, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_PARAGRAPHS_ONLY
-                                              | rt.RICHTEXT_SETSTYLE_RESET)
-        self.SetListStyle(p_range, style_def, specifiedLevel=0, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO
-                                                                      | rt.RICHTEXT_SETSTYLE_SPECIFY_LEVEL)
+        self.SetStyleEx(p_range, style, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_PARAGRAPHS_ONLY |
+                        rt.RICHTEXT_SETSTYLE_RESET)
+        self.SetListStyle(p_range, style_def, specifiedLevel=0,
+                          flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_SPECIFY_LEVEL)
         if end_batch:
             self.EndBatchUndo()
 

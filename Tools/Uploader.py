@@ -1,6 +1,7 @@
 import os
-import wx
+
 import paramiko
+import wx
 
 from Constants.Constants import Strings, Numbers
 from Exceptions.AccessException import AccessException
@@ -106,4 +107,3 @@ class Uploader:
             self._sftp_connection.close()
         if self._ssh_connection is not None:
             self._ssh_connection.close()
-

@@ -114,7 +114,6 @@ class ConfigManager:
         Check the loaded config for missing values.
         :return: False if any value is missing.
         """
-        # todo check all keywords present for all new params.
         correct = True
         for name in [self.CONF_WORKING_DIR, self.CONF_GLOBAL_TITLE, self.CONF_AUTHOR, self.CONF_CONTACT,
                      self.CONF_KEYWORDS, self.CONF_DESCRIPTION, self.CONF_SCRIPT, self.CONF_BLACK_TXT,

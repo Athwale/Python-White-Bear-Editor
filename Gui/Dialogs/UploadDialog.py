@@ -1,8 +1,8 @@
 import os
+import stat
 from typing import Dict, List, Tuple
 
 import wx
-import stat
 
 from Constants.Constants import Strings, Numbers
 from Resources.Fetch import Fetch
@@ -112,6 +112,7 @@ class UploadDialog(wx.Dialog):
 
         self._label_successful = wx.StaticText(self, -1, Strings.label_successful_uploads + ':')
         self._content_successful = wx.StaticText(self, -1, '0')
+        self._content_successful.SetForegroundColour(Numbers.DARK_GREEN_COLOR)
         self._info_left_sizer.Add(self._label_successful, flag=wx.BOTTOM | wx.LEFT, border=Numbers.widget_border_size)
         self._info_right_sizer.Add(self._content_successful, flag=wx.BOTTOM, border=Numbers.widget_border_size)
 
@@ -133,6 +134,9 @@ class UploadDialog(wx.Dialog):
         self._upload_info_sizer.Add(self._info_left_sizer, 1, flag=wx.EXPAND)
         self._upload_info_sizer.Add(self._info_right_sizer, 2, flag=wx.EXPAND)
 
+        self._structure_message = wx.StaticText(self, -1, Strings.label_server_structure)
+        self._overwrite_message = wx.StaticText(self, -1, Strings.label_server_overwrite)
+
         # Upload button
         self._upload_button_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self._upload_button = wx.Button(self, wx.ID_FILE, Strings.button_upload, style=wx.BU_EXACTFIT)
@@ -146,6 +150,8 @@ class UploadDialog(wx.Dialog):
                                        border=Numbers.widget_border_size)
         self._right_vertical_sizer.Add(self._upload_info_sizer, flag=wx.RIGHT | wx.EXPAND,
                                        border=Numbers.widget_border_size)
+        self._right_vertical_sizer.Add(self._structure_message)
+        self._right_vertical_sizer.Add(self._overwrite_message)
         self._right_vertical_sizer.Add(self._upload_button_sizer, 1, flag=wx.EXPAND)
         self._main_horizontal_sizer.Add(self._filelist_sizer, flag=wx.EXPAND | wx.ALL,
                                         border=Numbers.widget_border_size)
@@ -162,6 +168,7 @@ class UploadDialog(wx.Dialog):
         self.Bind(wx.EVT_TEXT, self._handle_fields, self._field_ip_port)
         self.Bind(wx.EVT_TEXT, self._handle_fields, self._field_user)
         self.Bind(wx.EVT_TEXT, self._handle_fields, self._field_keyfile)
+        self.Bind(wx.EVT_CLOSE, self._close_button_handler, self)
 
         self._display_dialog_contents()
 
@@ -310,8 +317,6 @@ class UploadDialog(wx.Dialog):
                                        password, files_to_upload)
         self._upload_gauge.SetRange(len(files_to_upload))
         self._upload_gauge.SetValue(0)
-        # TODO put a label in gui saying that files on server are overwritten.
-        # TODO cancel on window close.
         # TODO test server kill.
         if files_to_upload:
             self._sftp_thread.start()
@@ -359,6 +364,27 @@ class UploadDialog(wx.Dialog):
                 self._upload_files()
             elif self._sftp_thread.is_alive():
                 self._sftp_thread.stop()
+
+    def _close_button_handler(self, event: wx.CloseEvent) -> None:
+        """
+        Handle closing of the dialog. If the upload thread is running warn the user and offer unsafe force stop.
+        :param event: Not used
+        :return: None
+        """
+        if event.CanVeto():
+            if self._sftp_thread and self._sftp_thread.is_alive():
+                # There may be no thread if the upload was not even started.
+                result = wx.MessageBox(Strings.warning_upload_unfinished, Strings.status_warning,
+                                       wx.YES_NO | wx.ICON_WARNING)
+                if result == wx.YES:
+                    self._sftp_thread.stop(force=True)
+                    self._sftp_thread.join()
+                    event.Skip()
+                else:
+                    event.Veto()
+                    return
+            else:
+                event.Skip()
 
     def _ask_for_file(self, path: str) -> str:
         """
@@ -409,6 +435,8 @@ class UploadDialog(wx.Dialog):
         Display the contents of dialog.
         :return: None
         """
+        # todo disable all other buttons and fields during upload.
+        # todo editor tray icon.
         self.Disable()
         for filename, document in self._articles.items():
             # Add article files

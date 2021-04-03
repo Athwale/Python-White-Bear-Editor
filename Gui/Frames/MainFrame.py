@@ -1034,6 +1034,7 @@ class MainFrame(wx.Frame):
                     if result == wx.YES:
                         self.Destroy()
                     else:
+                        event.Veto()
                         return
             else:
                 # If the built in close function is not called, destroy must be called explicitly, calling Close runs
@@ -1594,7 +1595,6 @@ class MainFrame(wx.Frame):
         :param event: Not used.
         :return: None
         """
-        # todo
         dlg = UploadDialog(self, self._articles, self._index_document, self._css_document)
         dlg.ShowModal()
         dlg.Destroy()

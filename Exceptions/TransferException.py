@@ -1,6 +1,6 @@
 class TransferException(Exception):
     """
-    Exception representing an error while transfering a file.
+    Exception representing an error while transferring a file.
     """
 
     def __init__(self, message: str, file: str):

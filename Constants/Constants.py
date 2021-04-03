@@ -6,6 +6,7 @@ from wx import Colour
 class Numbers:
     RED_COLOR = Colour(242, 207, 206)
     GREEN_COLOR = Colour(201, 255, 199)
+    DARK_GREEN_COLOR = Colour(21, 112, 49)
     YELLOW_COLOR = Colour(250, 255, 196)
     BLUE_COLOR = Colour(145, 207, 255)
 
@@ -238,6 +239,8 @@ class Strings:
     warning_rsa_passphrase: str = 'RSA passphrase'
     warning_rsa_passphrase_wrong: str = 'Could not decrypt key'
     warning_server_folders_repaired: str = 'Server folder structure repaired'
+    warning_upload_unfinished: str = 'Upload has not finished.\nDo you want to force disconnect?\nThis may ' \
+                                     'leave damaged files on the server.'
 
     label_menu_file: str = 'File'
     label_menu_item_new: str = 'New document...\tctrl+n'
@@ -394,6 +397,9 @@ class Strings:
     label_uploading_file: str = 'Uploading'
     label_rsa_passphrase: str = 'RSA private key passphrase'
     label_connection: str = 'Connection'
+    label_server_structure: str = 'The editor expects the same folder structure on the server as is in the working ' \
+                                  'directory.\nExisting files on server are overwritten.'
+    label_server_overwrite: str = 'Existing files on server are overwritten.'
 
     status_loading: str = 'Loading and testing'
     status_ready: str = 'Ready'
