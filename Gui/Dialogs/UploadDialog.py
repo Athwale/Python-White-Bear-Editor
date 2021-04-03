@@ -222,6 +222,7 @@ class UploadDialog(wx.Dialog):
         self._button_to_upload()
         # Enable the upload button again if possible.
         self._validate_fields()
+        self._disable_controls(True)
 
     def on_connection_established(self, status: str) -> None:
         """
@@ -300,6 +301,7 @@ class UploadDialog(wx.Dialog):
         self._content_connection.SetLabelText(Strings.status_connecting)
         self._button_to_cancel()
         self._upload_button.Disable()
+        self._disable_controls(False)
         item = -1
         while 1:
             item = self._file_list.GetNextItem(item, wx.LIST_NEXT_ALL, wx.LIST_STATE_DONTCARE)
@@ -320,6 +322,18 @@ class UploadDialog(wx.Dialog):
         # TODO test server kill.
         if files_to_upload:
             self._sftp_thread.start()
+
+    def _disable_controls(self, enable: bool) -> None:
+        """
+        Disable all controls except the upload button.
+        :param enable: True to disable.
+        :return: None
+        """
+        self._add_button.Enable(enable)
+        self._keyfile_button.Enable(enable)
+        self._field_ip_port.Enable(enable)
+        self._field_user.Enable(enable)
+        self._field_keyfile.Enable(enable)
 
     def _get_id(self) -> int:
         """
@@ -435,7 +449,6 @@ class UploadDialog(wx.Dialog):
         Display the contents of dialog.
         :return: None
         """
-        # todo disable all other buttons and fields during upload.
         # todo editor tray icon.
         self.Disable()
         for filename, document in self._articles.items():
