@@ -1,6 +1,7 @@
 import wx
 
 from Constants.Constants import Strings, Numbers
+from Tools.ConfigManager import ConfigManager
 from Tools.Document.ArticleElements.Video import Video
 from Tools.Tools import Tools
 
@@ -17,6 +18,7 @@ class EditVideoDialog(wx.Dialog):
                                                                                       Numbers.edit_video_dialog_height),
                            style=wx.DEFAULT_DIALOG_STYLE)
         self._video = video
+        self._config_manager = ConfigManager.get_instance()
 
         self._main_vertical_sizer = wx.BoxSizer(wx.VERTICAL)
         self._horizontal_sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -102,7 +104,7 @@ class EditVideoDialog(wx.Dialog):
             self._video.set_url(self._original_url)
             self._video.set_title(self._original_title)
             self._video.set_modified(False)
-            self._video.seo_test_self(False)
+            self._video.seo_test_self(self._config_manager.get_online_test())
             event.Skip()
 
     def _display_dialog_contents(self) -> None:

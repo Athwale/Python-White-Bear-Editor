@@ -304,7 +304,7 @@ class ConfigManager:
             self._dir_conf[self.CONF_NEWS] = str(Numbers.default_news)
             return Numbers.default_news
 
-    def get_online_test(self) -> int:
+    def get_online_test(self) -> bool:
         """
         Return True when online url test is enabled. If the value is damaged, assume it is enabled.
         :return: True when online url test is enabled. If the value is damaged, assume it is enabled.

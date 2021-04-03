@@ -79,8 +79,8 @@ class Link:
         else:
             self._is_local = False
             if online:
+                h = httplib2.Http(timeout=Numbers.online_test_timeout)
                 try:
-                    h = httplib2.Http()
                     resp = h.request(self._url, 'HEAD')
                     if int(resp[0]['status']) >= 400:
                         self._url_error_message = Strings.seo_error_url_nonexistent
@@ -93,6 +93,8 @@ class Link:
                     result = False
                 except ConnectionResetError as _:
                     pass
+                finally:
+                    h.close()
 
         if not result:
             self._status_color = wx.RED

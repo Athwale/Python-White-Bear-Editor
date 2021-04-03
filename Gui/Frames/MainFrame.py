@@ -45,9 +45,9 @@ class MainFrame(wx.Frame):
 
     def __init__(self):
         """
-        # todo configurable online seo test.
         Constructor for the GUI of the editor. This is the main frame so we pass None as the parent.
         """
+        # todo show busy wait when testing url in dialogs.
         # -1 is a special ID which generates a random wx ID
         super(MainFrame, self).__init__(None, -1, title=Strings.editor_name, style=wx.DEFAULT_FRAME_STYLE)
 
@@ -571,19 +571,6 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self._focus_to_search, id=new_id)
         accel_tbl = wx.AcceleratorTable([(wx.ACCEL_CTRL, ord('F'), new_id)])
         self.SetAcceleratorTable(accel_tbl)
-
-    def _online_test_handler(self, event: wx.CommandEvent) -> None:
-        """
-        Handle changes to the check menu item for online url test. Store the value in config manager.
-        :param event: Used to get value.
-        :return: None
-        """
-        # todo check/uncheck item on start from configuration.
-        print('a')
-        if event.IsChecked():
-            self._config_manager.store_online_test(True)
-        else:
-            self._config_manager.store_online_test(False)
 
     # noinspection PyUnusedLocal
     def _focus_to_search(self, event: wx.CommandEvent) -> None:
@@ -1175,7 +1162,7 @@ class MainFrame(wx.Frame):
             return
         self._file_menu_item_delete.Enable(True)
         # If the document is correct, now we can show it.
-        self._current_document_instance.seo_test_self(online=False)
+        self._current_document_instance.seo_test_self(self._config_manager.get_online_test())
         self._fill_editor(self._current_document_instance)
 
     def _fill_editor(self, doc: WhitebearDocumentArticle) -> None:
@@ -1648,3 +1635,14 @@ class MainFrame(wx.Frame):
 
         position: int = self._search_results[self._search_index]
         self._main_text_area.SetSelection(position, (position + len(self._search_term)))
+
+    def _online_test_handler(self, event: wx.CommandEvent) -> None:
+        """
+        Handle changes to the check menu item for online url test. Store the value in config manager.
+        :param event: Used to get value.
+        :return: None
+        """
+        if event.IsChecked():
+            self._config_manager.store_online_test(True)
+        else:
+            self._config_manager.store_online_test(False)

@@ -1,6 +1,7 @@
 import wx
 
 from Constants.Constants import Strings, Numbers
+from Tools.ConfigManager import ConfigManager
 from Tools.Document.ArticleElements.Link import Link
 from Tools.Tools import Tools
 
@@ -17,6 +18,7 @@ class EditLinkDialog(wx.Dialog):
                            size=(Numbers.edit_link_dialog_width, Numbers.edit_link_dialog_height),
                            style=wx.DEFAULT_DIALOG_STYLE)
         self._link = link
+        self._config_manager = ConfigManager.get_instance()
 
         self._main_vertical_sizer = wx.BoxSizer(wx.VERTICAL)
         self._horizontal_sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -127,7 +129,7 @@ class EditLinkDialog(wx.Dialog):
             self._link.set_title(self._original_title)
             self._link.set_text(self._original_text)
             self._link.set_modified(False)
-            self._link.seo_test_self(online=False)
+            self._link.seo_test_self(self._config_manager.get_online_test())
             event.Skip()
 
     # noinspection PyUnusedLocal

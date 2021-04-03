@@ -53,6 +53,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
         self._articles = articles
         self._css_document = css
         self._index_document = None
+        self._config_manager = ConfigManager.get_instance()
 
         # Article data
         self._menu_section = None
@@ -84,7 +85,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
         self._parse_main_article_image()
         self._parse_aside_images()
         self._parse_main_text()
-        self.seo_test_self(Numbers.online_seo_test)
+        self.seo_test_self(self._config_manager.get_online_test())
 
     def seo_test_date(self, date: str) -> (bool, str, wx.Colour):
         """

@@ -11,10 +11,10 @@ class Numbers:
     BLUE_COLOR = Colour(145, 207, 255)
 
     # Turn link sanity check on/off.
-    online_seo_test: bool = False
     private_key_permissions: oct = 0o600
     connection_timeout: int = 5
     put_timeout: int = 20
+    online_test_timeout: int = 2
 
     three_click_timeout: int = 400
     photo_ratio: float = 4 / 3
