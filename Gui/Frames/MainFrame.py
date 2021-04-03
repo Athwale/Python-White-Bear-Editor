@@ -51,6 +51,7 @@ class MainFrame(wx.Frame):
         # -1 is a special ID which generates a random wx ID
         super(MainFrame, self).__init__(None, -1, title=Strings.editor_name, style=wx.DEFAULT_FRAME_STYLE)
 
+        self.SetIcon(wx.Icon(Fetch.get_resource_path('icon.ico')))
         # Create fonts for text fields
         self.small_font = wx.Font(Numbers.text_field_font_size, wx.FONTFAMILY_DEFAULT,
                                   wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, False)
