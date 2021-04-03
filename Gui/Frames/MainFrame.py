@@ -110,6 +110,9 @@ class MainFrame(wx.Frame):
         else:
             self.SetSize(size)
 
+        # Load online test state.
+        self._file_menu.Check(wx.ID_NETWORK, self._config_manager.get_online_test())
+
     def _init_menu(self) -> None:
         """
         Set up menu bar for the frame.
@@ -156,6 +159,7 @@ class MainFrame(wx.Frame):
         self._file_menu_item_setup = wx.MenuItem(self._file_menu, wx.ID_SETUP, Strings.label_menu_item_page_setup,
                                                  Strings.label_menu_item_page_setup_hint)
         self._disableable_menu_items.append(self._file_menu_item_setup)
+
         self._file_menu_item_edit_menu = wx.MenuItem(self._file_menu, wx.ID_FILE9, Strings.label_menu_item_edit_menu,
                                                      Strings.label_menu_item_edit_menu_hint)
         self._disableable_menu_items.append(self._file_menu_item_edit_menu)
@@ -180,6 +184,8 @@ class MainFrame(wx.Frame):
         self._file_menu.Append(self._file_menu_item_new_dir)
         self._file_menu.AppendSeparator()
         self._file_menu.Append(self._file_menu_item_setup)
+        self._file_menu.AppendCheckItem(wx.ID_NETWORK, Strings.label_menu_item_online_test,
+                                        Strings.label_menu_item_online_test_hint)
         self._file_menu.Append(self._file_menu_item_edit_menu)
 
         # Edit menu ----------------------------------------------------------------------------------------------------
@@ -547,6 +553,7 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self._delete_article_handler, self._file_menu_item_delete)
         self.Bind(wx.EVT_MENU, self._new_dir_handler, self._file_menu_item_new_dir)
         self.Bind(wx.EVT_MENU, self._upload_handler, self._file_menu_item_upload)
+        self.Bind(wx.EVT_MENU, self._online_test_handler, id=wx.ID_NETWORK)
 
         # Bind other controls clicks
         self.Bind(wx.EVT_LIST_ITEM_SELECTED, self._list_item_click_handler, self._file_list)
@@ -564,6 +571,19 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self._focus_to_search, id=new_id)
         accel_tbl = wx.AcceleratorTable([(wx.ACCEL_CTRL, ord('F'), new_id)])
         self.SetAcceleratorTable(accel_tbl)
+
+    def _online_test_handler(self, event: wx.CommandEvent) -> None:
+        """
+        Handle changes to the check menu item for online url test. Store the value in config manager.
+        :param event: Used to get value.
+        :return: None
+        """
+        # todo check/uncheck item on start from configuration.
+        print('a')
+        if event.IsChecked():
+            self._config_manager.store_online_test(True)
+        else:
+            self._config_manager.store_online_test(False)
 
     # noinspection PyUnusedLocal
     def _focus_to_search(self, event: wx.CommandEvent) -> None:

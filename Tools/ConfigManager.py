@@ -33,6 +33,7 @@ class ConfigManager:
     CONF_IP: str = 'ip'
     CONF_USER: str = 'user'
     CONF_KEYFILE: str = 'key'
+    CONF_ONLINE_TEST: str = 'onlineTest'
 
     @staticmethod
     def get_instance():
@@ -73,6 +74,7 @@ class ConfigManager:
                 self.CONF_IP: '',
                 self.CONF_USER: '',
                 self.CONF_KEYFILE: '',
+                self.CONF_ONLINE_TEST: '1',
                 self.CONF_NEWS: str(Numbers.default_news)}
 
     def _init_config(self) -> None:
@@ -127,9 +129,15 @@ class ConfigManager:
                 correct = False
                 self._dir_conf[name] = ''
 
+        # Repair uncritical values if missing, set to empty.
         for name in [self.CONF_IP, self.CONF_USER, self.CONF_KEYFILE]:
             if name not in self._dir_conf.keys():
                 self._dir_conf[name] = ''
+
+        # If online test value is not recognized, set to 1.
+        if self.CONF_ONLINE_TEST not in self._dir_conf.keys():
+            self._dir_conf[self.CONF_ONLINE_TEST] = '1'
+
         return correct
 
     def set_active_dir(self, path: str) -> bool:
@@ -295,6 +303,28 @@ class ConfigManager:
         except ValueError as _:
             self._dir_conf[self.CONF_NEWS] = str(Numbers.default_news)
             return Numbers.default_news
+
+    def get_online_test(self) -> int:
+        """
+        Return True when online url test is enabled. If the value is damaged, assume it is enabled.
+        :return: True when online url test is enabled. If the value is damaged, assume it is enabled.
+        """
+        try:
+            return bool(int(self._dir_conf[self.CONF_ONLINE_TEST]))
+        except ValueError as _:
+            self._dir_conf[self.CONF_ONLINE_TEST] = '1'
+            return True
+
+    def store_online_test(self, enabled: bool) -> None:
+        """
+        Save online url test preference into the dictionary
+        :param enabled: True if the test is enabled.
+        :return: None
+        """
+        if enabled:
+            self._dir_conf[self.CONF_ONLINE_TEST] = '1'
+        else:
+            self._dir_conf[self.CONF_ONLINE_TEST] = '0'
 
     def store_working_dir(self, path: str) -> None:
         """

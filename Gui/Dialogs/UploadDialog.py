@@ -449,7 +449,6 @@ class UploadDialog(wx.Dialog):
         Display the contents of dialog.
         :return: None
         """
-        # todo editor tray icon.
         self.Disable()
         for filename, document in self._articles.items():
             # Add article files

@@ -263,6 +263,8 @@ class Strings:
     label_menu_item_delete_hint: str = 'Delete article and regenerate directory'
     label_menu_item_new_dir: str = 'New WhiteBear directory...'
     label_menu_item_new_dir_hint: str = 'Create a new WhiteBear directory'
+    label_menu_item_online_test: str = 'Online link test'
+    label_menu_item_online_test_hint: str = 'Test url existence online'
 
     label_menu_help: str = 'Help'
     label_menu_item_about: str = 'About'

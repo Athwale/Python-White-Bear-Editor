@@ -14,6 +14,7 @@ class LoadingDialog(wx.Dialog):
         """
         wx.Dialog.__init__(self, parent, title=Strings.status_loading, style=wx.STAY_ON_TOP)
         self.SetSize(Numbers.splashscreen_dialog_size)
+        self.SetIcon(wx.Icon(Fetch.get_resource_path('icon.ico')))
         self._image = wx.Bitmap(Fetch.get_resource_path('splashscreen.png'), wx.BITMAP_TYPE_PNG)
         self._bitmap = wx.StaticBitmap(self, -1, self._image)
 
