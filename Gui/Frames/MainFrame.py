@@ -18,7 +18,7 @@ from Gui.Dialogs.EditMenuDialog import EditMenuDialog
 from Gui.Dialogs.EditMenuItemDialog import EditMenuItemDialog
 from Gui.Dialogs.LoadingDialog import LoadingDialog
 from Gui.Dialogs.NewFileDialog import NewFileDialog
-from Gui.Dialogs.SavingDialog import SavingDialog
+from Gui.Dialogs.WaitDialog import WaitDialog
 from Gui.Dialogs.UploadDialog import UploadDialog
 from Gui.Panels.AsideImagePanel import AsideImagePanel
 from Gui.Panels.CustomRichText import CustomRichText
@@ -853,8 +853,9 @@ class MainFrame(wx.Frame):
         :return: None.
         """
         if not self._saving_dlg:
-            self._saving_dlg = SavingDialog(self)
-            self._saving_dlg.set_file(doc.get_filename())
+            self._saving_dlg = WaitDialog(self)
+            self._saving_dlg.set_status(Strings.label_saving + ':')
+            self._saving_dlg.set_message(doc.get_filename())
             self._saving_dlg.Show()
         # Editor will be enabled when the thread finishes.
         if self._enabled:
@@ -904,7 +905,7 @@ class MainFrame(wx.Frame):
                                         file_path)
         # Set modified false for all document parts it was saved and does not need to be asked for save until changed.
         doc.set_modified(False)
-        self._saving_dlg.set_file(file_name)
+        self._saving_dlg.set_message(file_name)
         # Clean thread list off stopped threads.
         self._thread_queue.remove(thread)
         if not self._thread_queue and not disable:
@@ -927,13 +928,13 @@ class MainFrame(wx.Frame):
             with open(sitemap_file, 'w', encoding='utf8') as file:
                 file.write(sitemap)
                 self._set_status_text(Strings.status_saved + ': ' + last_save, 3)
-                self._saving_dlg.set_file(Strings.sitemap_file)
+                self._saving_dlg.set_message(Strings.sitemap_file)
             # Save robots.txt if not present
             if not os.path.exists(robots_txt):
                 with open(robots_txt, 'w', encoding='utf8') as file:
                     file.write(Strings.sitemap_keyword + ' ' + self._config_manager.get_url() + '/' +
                                Strings.sitemap_file)
-                    self._saving_dlg.set_file(Strings.robots_file)
+                    self._saving_dlg.set_message(Strings.robots_file)
         except IOError:
             self._show_error_dialog(Strings.warning_can_not_save + '\n' + Strings.exception_access_html + '\n' +
                                     sitemap_file)

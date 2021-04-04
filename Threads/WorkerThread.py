@@ -8,7 +8,7 @@ class WorkerThread(threading.Thread):
     Runs the function passed in arguments and calls the callback passed in arguments with the result of the function.
     """
 
-    def __init__(self, parent, function, args, callback):
+    def __init__(self, parent, function, args, callback, passing_arg):
         """
         Convertor thread constructor. This thread runs a function from arguments and returns the result back to gui
         using wx.CallAfter and a callback function from the arguments..
@@ -16,12 +16,14 @@ class WorkerThread(threading.Thread):
         :param function: callable function.
         :param args: function arguments.
         :param callback: callable function for wx.CallAfter.
+        :param passing_arg: A value that is simply passed as a second argument into the callback function.
         """
         threading.Thread.__init__(self)
         self._parent = parent
         self._function = function
         self._callback = callback
         self._args = args
+        self._passing_arg = passing_arg
 
     def run(self) -> None:
         """
@@ -30,4 +32,4 @@ class WorkerThread(threading.Thread):
         :return: None, this method calls the wx.CallAfter to pass the result back into GUI.
         """
         result = self._function(*self._args)
-        wx.CallAfter(self._callback, result)
+        wx.CallAfter(self._callback, result, self._passing_arg)

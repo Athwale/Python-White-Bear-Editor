@@ -1,7 +1,7 @@
 import wx
 
 from Constants.Constants import Strings, Numbers
-from Gui.Dialogs.SavingDialog import SavingDialog
+from Gui.Dialogs.WaitDialog import WaitDialog
 from Resources.Fetch import Fetch
 from Threads.WorkerThread import WorkerThread
 from Tools.ConfigManager import ConfigManager
@@ -124,38 +124,47 @@ class EditLinkDialog(wx.Dialog):
             self._link.set_url(self._field_url.GetValue())
 
             # Run seo test in thread and show a testing dialog.
-            thread = WorkerThread(self,
-                                  function=self._link.seo_test_self,
-                                  args=(self._config_manager.get_online_test(),),
-                                  callback=self.on_seo_done)
-            thread.start()
-            self.Disable()
-            self._saving_dlg = SavingDialog(self)
-            self._saving_dlg.set_file(Strings.status_testing_link)
-            self._saving_dlg.set_bitmap(wx.Bitmap(wx.Image(Fetch.get_resource_path('online.png'))))
-            self._saving_dlg.Show()
-            return
+            self._seo_test(return_value=wx.ID_OK)
         else:
             # Restore original values
             self._link.set_url(self._original_url)
             self._link.set_title(self._original_title)
             self._link.set_text(self._original_text)
             self._link.set_modified(False)
-            # todo the same thing here
-            self._link.seo_test_self(self._config_manager.get_online_test())
-            event.Skip()
+            self._seo_test(return_value=wx.ID_CANCEL)
 
-    def on_seo_done(self, result: bool) -> None:
+    def _seo_test(self, return_value: int) -> None:
+        """
+        Run a link seo test in a separate thread and wait for result from a callback method.
+        Display a waiting message.
+        :param return_value: wx return code to end this dialog with when the thread finishes.
+        :return: None
+        """
+        thread = WorkerThread(self,
+                              function=self._link.seo_test_self,
+                              args=(self._config_manager.get_online_test(),),
+                              callback=self.on_seo_done,
+                              passing_arg=return_value)
+        thread.start()
+        self.Disable()
+        self._saving_dlg = WaitDialog(self)
+        self._saving_dlg.set_status(Strings.status_seo)
+        self._saving_dlg.set_message(Strings.status_testing_link)
+        self._saving_dlg.set_bitmap(wx.Bitmap(wx.Image(Fetch.get_resource_path('online.png'))))
+        self._saving_dlg.Show()
+
+    def on_seo_done(self, result: bool, return_value: int) -> None:
         """
         Receive the result of the link's SEO test. This is used when closing the dialog.
         :param result: True or False depending on whether the link passed SEO test
+        :param return_value: Dialog wx return value.
         :return: None
         """
         self.Enable()
         if self._saving_dlg:
             self._saving_dlg.Destroy()
         if result and self._link.get_status_color() != Numbers.RED_COLOR:
-            self.Close()
+            self.EndModal(return_value)
         else:
             self._display_dialog_contents()
 

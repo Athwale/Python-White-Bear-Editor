@@ -1,6 +1,7 @@
 import httplib2
 import wx
 
+from ssl import SSLCertVerificationError
 from Constants.Constants import Numbers, Strings
 from Resources.Fetch import Fetch
 
@@ -69,7 +70,7 @@ class Video:
             except KeyError as _:
                 self._url_error_message = Strings.seo_error_url_malformed
                 result = False
-            except httplib2.ServerNotFoundError as _:
+            except (httplib2.ServerNotFoundError, httplib2.RelativeURIError, SSLCertVerificationError) as _:
                 self._url_error_message = Strings.seo_error_url_nonexistent
                 self._image = wx.Image(Fetch.get_resource_path('video_seo_error.png'), wx.BITMAP_TYPE_PNG)
                 result = False

@@ -420,6 +420,7 @@ class Strings:
     status_closed: str = 'Closed'
     status_finished: str = 'Finished'
     status_testing_link: str = 'Testing url'
+    status_seo: str = 'SEO'
 
     style_paragraph: str = 'Paragraph'
     style_heading_3: str = 'Title 3'

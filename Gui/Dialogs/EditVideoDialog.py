@@ -1,6 +1,9 @@
 import wx
 
 from Constants.Constants import Strings, Numbers
+from Gui.Dialogs.WaitDialog import WaitDialog
+from Resources.Fetch import Fetch
+from Threads.WorkerThread import WorkerThread
 from Tools.ConfigManager import ConfigManager
 from Tools.Document.ArticleElements.Video import Video
 from Tools.Tools import Tools
@@ -94,18 +97,49 @@ class EditVideoDialog(wx.Dialog):
             self._video.set_title(self._field_video_link_title.GetValue())
             self._video.set_url(self._field_video_url.GetValue())
 
-            if self._video.seo_test_self(self._config_manager.get_online_test()):
-                event.Skip()
-                return
-            else:
-                self._display_dialog_contents()
+            # Run seo test in thread and show a testing dialog.
+            self._seo_test(return_value=wx.ID_OK)
         else:
             # Restore original values
             self._video.set_url(self._original_url)
             self._video.set_title(self._original_title)
             self._video.set_modified(False)
-            self._video.seo_test_self(self._config_manager.get_online_test())
-            event.Skip()
+            self._seo_test(return_value=wx.ID_CANCEL)
+
+    def _seo_test(self, return_value: int) -> None:
+        """
+        Run a url seo test in a separate thread and wait for result from a callback method.
+        Display a waiting message.
+        :param return_value: wx return code to end this dialog with when the thread finishes.
+        :return: None
+        """
+        thread = WorkerThread(self,
+                              function=self._video.seo_test_self,
+                              args=(self._config_manager.get_online_test(),),
+                              callback=self.on_seo_done,
+                              passing_arg=return_value)
+        thread.start()
+        self.Disable()
+        self._saving_dlg = WaitDialog(self)
+        self._saving_dlg.set_status(Strings.status_seo)
+        self._saving_dlg.set_message(Strings.status_testing_link)
+        self._saving_dlg.set_bitmap(wx.Bitmap(wx.Image(Fetch.get_resource_path('online.png'))))
+        self._saving_dlg.Show()
+
+    def on_seo_done(self, result: bool, return_value: int) -> None:
+        """
+        Receive the result of the video url SEO test. This is used when closing the dialog.
+        :param result: True or False depending on whether the link passed SEO test
+        :param return_value: Dialog wx return value.
+        :return: None
+        """
+        self.Enable()
+        if self._saving_dlg:
+            self._saving_dlg.Destroy()
+        if result and self._video.get_status_color() != Numbers.RED_COLOR:
+            self.EndModal(return_value)
+        else:
+            self._display_dialog_contents()
 
     def _display_dialog_contents(self) -> None:
         """
