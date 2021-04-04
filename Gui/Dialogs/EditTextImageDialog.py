@@ -286,7 +286,10 @@ class EditTextImageDialog(wx.Dialog):
             # Show which picture is should have been.
             self._content_image_thumbnail_path.SetLabelText(self._image_copy.get_thumbnail_filename())
 
-        # Adapt dialog size to the new image
-        self.SetSize(Numbers.edit_text_image_dialog_width, self._image_copy.get_thumbnail_size()[1] + 120)
+        # Adapt dialog size to the new image, use default if missing thumbnail.
+        height = self._image_copy.get_thumbnail_size()[1]
+        if height == 0:
+            height = Numbers.main_image_height
+        self.SetSize(Numbers.edit_text_image_dialog_width, height + 120)
 
         self.Enable()

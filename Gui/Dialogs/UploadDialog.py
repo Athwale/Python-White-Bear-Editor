@@ -320,7 +320,6 @@ class UploadDialog(wx.Dialog):
         self._upload_gauge.SetRange(len(files_to_upload))
         self._upload_gauge.SetValue(0)
         # TODO test server kill.
-        # todo load large images in worker thread.
         if files_to_upload:
             self._sftp_thread.start()
 
