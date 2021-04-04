@@ -7,6 +7,7 @@ from Constants.Constants import Strings, Numbers
 from Gui.Dialogs.EditLinkDialog import EditLinkDialog
 from Gui.Dialogs.EditTextImageDialog import EditTextImageDialog
 from Gui.Dialogs.EditVideoDialog import EditVideoDialog
+from Tools.ConfigManager import ConfigManager
 from Tools.Document.ArticleElements.Heading import Heading
 from Tools.Document.ArticleElements.ImageInText import ImageInText
 from Tools.Document.ArticleElements.Link import Link
@@ -43,6 +44,7 @@ class CustomRichText(rt.RichTextCtrl):
         self._click_counter = 0
         # Is set to true when a document is fully loaded, prevents setting document to modified before it is loaded.
         self._load_indicator = False
+        self._config_manager = ConfigManager.get_instance()
 
         self._stylesheet = rt.RichTextStyleSheet()
         self._stylesheet.SetName('Stylesheet')
@@ -969,7 +971,7 @@ class CustomRichText(rt.RichTextCtrl):
             # Create a new link
             link = Link(link_text, url, link_text, self._doc.get_other_articles(),
                         self._doc.get_working_directory())
-            link.seo_test_self(online=True)
+            link.seo_test_self(self._config_manager.get_online_test())
 
         link.set_text(link_text)
         edit_dialog = EditLinkDialog(self, link)
@@ -1204,7 +1206,7 @@ class CustomRichText(rt.RichTextCtrl):
                     # document red.
                     stored_link = Link(text, attrs.GetURL(), text, self._doc.get_other_articles(),
                                        self._doc.get_working_directory())
-                    stored_link.seo_test_self(online=True)
+                    stored_link.seo_test_self(self._config_manager.get_online_test())
                     self._doc.add_link(stored_link)
                 # Update the text of the link from the current document.
                 stored_link.set_text(text)

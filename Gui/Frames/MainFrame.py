@@ -47,7 +47,6 @@ class MainFrame(wx.Frame):
         """
         Constructor for the GUI of the editor. This is the main frame so we pass None as the parent.
         """
-        # todo show busy wait when testing url in dialogs.
         # -1 is a special ID which generates a random wx ID
         super(MainFrame, self).__init__(None, -1, title=Strings.editor_name, style=wx.DEFAULT_FRAME_STYLE)
 

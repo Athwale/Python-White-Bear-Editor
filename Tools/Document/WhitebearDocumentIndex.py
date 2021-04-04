@@ -8,7 +8,6 @@ from bs4.element import Tag
 from Constants.Constants import Strings, Numbers
 from Exceptions.UnrecognizedFileException import UnrecognizedFileException
 from Resources.Fetch import Fetch
-from Tools.ConfigManager import ConfigManager
 from Tools.Document.WhitebearDocument import WhitebearDocument
 from Tools.Document.WhitebearDocumentMenu import WhitebearDocumentMenu
 from Tools.Tools import Tools
@@ -72,7 +71,6 @@ class WhitebearDocumentIndex(WhitebearDocument):
         :raise UnrecognizedFileException if generated html fails validation.
         :raises UnrecognizedFileException if xml schema is incorrect.
         """
-        config_manager: ConfigManager = ConfigManager.get_instance()
         with open(Fetch.get_resource_path('index_template.html'), 'r') as template:
             template_string = template.read()
         is_valid, errors = Tools.validate(template_string, 'schema_index_template.xsd')
@@ -84,38 +82,38 @@ class WhitebearDocumentIndex(WhitebearDocument):
 
         # Fill title.
         title: Tag = parsed_template.find(name='title')
-        title.string = self._page_name + ' | ' + config_manager.get_global_title()
+        title.string = self._page_name + ' | ' + self._config_manager.get_global_title()
 
         # Fill description.
         description = parsed_template.find_all(name='meta', attrs={'name': 'description', 'content': True})
         if len(description) == 1:
-            description[0]['content'] = config_manager.get_main_meta_description()
+            description[0]['content'] = self._config_manager.get_main_meta_description()
         else:
             raise UnrecognizedFileException(Strings.exception_parse_multiple_descriptions)
 
         # Fill keywords.
         keywords = parsed_template.find_all(name='meta', attrs={'name': 'keywords', 'content': True})
         if len(keywords) == 1:
-            keywords[0]['content'] = config_manager.get_global_keywords()
+            keywords[0]['content'] = self._config_manager.get_global_keywords()
         else:
             raise UnrecognizedFileException(Strings.exception_parse_multiple_authors)
 
         # Fill author.
         author = parsed_template.find_all(name='meta', attrs={'name': 'author', 'content': True})
         if len(author) == 1:
-            author[0]['content'] = config_manager.get_author()
+            author[0]['content'] = self._config_manager.get_author()
         else:
             raise UnrecognizedFileException(Strings.exception_parse_multiple_descriptions)
 
         # Fill script.
         script = parsed_template.find(name='script')
-        script.string = config_manager.get_script()
+        script.string = self._config_manager.get_script()
 
         # Fill global title.
         figure = parsed_template.find(name='header').figure
-        figure.figcaption.string = config_manager.get_global_title()
+        figure.figcaption.string = self._config_manager.get_global_title()
         heading = parsed_template.find(name='h1', attrs={'id': 'heading'})
-        heading.string = config_manager.get_global_title()
+        heading.string = self._config_manager.get_global_title()
 
         # Activate correct menu, generate menu items according to menus.
         menu_container = parsed_template.find(name='nav')
@@ -133,11 +131,11 @@ class WhitebearDocumentIndex(WhitebearDocument):
 
         # Fill text.
         new_black_p = parsed_template.new_tag('p')
-        new_black_p.string = config_manager.get_main_page_black_text()
+        new_black_p.string = self._config_manager.get_main_page_black_text()
 
         new_red_p = parsed_template.new_tag('p')
         new_strong = parsed_template.new_tag('strong', attrs={'class': 'red'})
-        new_strong.string = config_manager.get_main_page_red_text()
+        new_strong.string = self._config_manager.get_main_page_red_text()
         new_red_p.append(new_strong)
 
         article.h2.insert_after(new_red_p)
@@ -148,11 +146,11 @@ class WhitebearDocumentIndex(WhitebearDocument):
         # Sort all articles by date.
         sorted_articles = sorted(self._articles.values(), key=lambda x: x.get_computable_date(), reverse=True)
         new_ul = parsed_template.new_tag('ul')
-        limit = config_manager.get_number_of_news()
+        limit = self._config_manager.get_number_of_news()
         for index, item in enumerate(sorted_articles):
             if index >= limit:
                 break
-            if item.seo_test_self(online=True):
+            if item.seo_test_self(self._config_manager.get_online_test()):
                 new_li = parsed_template.new_tag('li')
                 href = item.get_filename()
                 title = item.get_page_name()[0]
@@ -171,7 +169,7 @@ class WhitebearDocumentIndex(WhitebearDocument):
         # Fill contact.
         contact = parsed_template.find(name='h3', attrs={'id': 'contact'})
         # Insert the author's contact as an image.
-        image: wx.Bitmap = Tools.create_image(config_manager.get_contact())
+        image: wx.Bitmap = Tools.create_image(self._config_manager.get_contact())
         image_path = os.path.join(self._working_directory, Strings.folder_images, Strings.contact_file)
         image.SaveFile(image_path, wx.BITMAP_TYPE_PNG)
         src = os.path.join(Strings.folder_images, Strings.contact_file)
@@ -181,7 +179,7 @@ class WhitebearDocumentIndex(WhitebearDocument):
 
         # Fill design.
         new_p = parsed_template.new_tag('p')
-        new_p.string = 'Web design: ' + config_manager.get_author()
+        new_p.string = 'Web design: ' + self._config_manager.get_author()
         new_img.insert_after(new_p)
 
         # Fill aside images from the newest articles.

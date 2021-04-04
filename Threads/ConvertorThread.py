@@ -4,6 +4,7 @@ import wx
 
 from Constants.Constants import Numbers
 from Exceptions.UnrecognizedFileException import UnrecognizedFileException
+from Tools.ConfigManager import ConfigManager
 from Tools.Document.WhitebearDocumentArticle import WhitebearDocumentArticle
 
 
@@ -21,6 +22,7 @@ class ConvertorThread(threading.Thread):
         :param disable: Leave editor disabled after thread finishes.
         """
         threading.Thread.__init__(self)
+        self._config_manager = ConfigManager.get_instance()
         self._parent = parent
         self._doc = doc
         self._save_as = save_as
@@ -29,14 +31,14 @@ class ConvertorThread(threading.Thread):
     def run(self) -> None:
         """
         Overrides Thread.run. Don't call this directly its called internally when you call Thread.start().
-        :return: None, this method calls the wx.CallAfter to pass a list of website names back into GUI.s
+        :return: None, this method calls the wx.CallAfter to pass a list of website names back into GUI.
         """
         # We know here that the document is modified because we are saving it.
         self._doc.set_status_color(Numbers.BLUE_COLOR)
         # This would turn the document red if something is wrong, but seo fail should not prevent save to disk, only
         # upload.
         if isinstance(self._doc, WhitebearDocumentArticle):
-            self._doc.seo_test_self(online=True)
+            self._doc.seo_test_self(self._config_manager.get_online_test())
         try:
             self._doc.convert_to_html()
             wx.CallAfter(self._parent.on_conversion_done, self, self._doc, self._save_as, self._disable)

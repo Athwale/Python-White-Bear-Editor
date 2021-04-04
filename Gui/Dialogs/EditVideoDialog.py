@@ -94,7 +94,7 @@ class EditVideoDialog(wx.Dialog):
             self._video.set_title(self._field_video_link_title.GetValue())
             self._video.set_url(self._field_video_url.GetValue())
 
-            if self._video.seo_test_self(online=True):
+            if self._video.seo_test_self(self._config_manager.get_online_test()):
                 event.Skip()
                 return
             else:

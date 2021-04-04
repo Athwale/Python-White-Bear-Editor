@@ -37,3 +37,11 @@ class SavingDialog(wx.Dialog):
         :return: None
         """
         self._content_file.SetLabelText(name)
+
+    def set_bitmap(self, bitmap: wx.Bitmap) -> None:
+        """
+        Set the image in the dialog.
+        :param bitmap: The bitmap.
+        :return: None
+        """
+        self._bitmap.SetBitmap(bitmap)

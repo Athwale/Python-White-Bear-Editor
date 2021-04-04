@@ -263,7 +263,7 @@ class Strings:
     label_menu_item_delete_hint: str = 'Delete article and regenerate directory'
     label_menu_item_new_dir: str = 'New WhiteBear directory...'
     label_menu_item_new_dir_hint: str = 'Create a new WhiteBear directory'
-    label_menu_item_online_test: str = 'Online link test'
+    label_menu_item_online_test: str = 'Online url test'
     label_menu_item_online_test_hint: str = 'Test url existence online'
 
     label_menu_help: str = 'Help'
@@ -419,6 +419,7 @@ class Strings:
     status_connecting: str = 'Connecting...'
     status_closed: str = 'Closed'
     status_finished: str = 'Finished'
+    status_testing_link: str = 'Testing url'
 
     style_paragraph: str = 'Paragraph'
     style_heading_3: str = 'Title 3'

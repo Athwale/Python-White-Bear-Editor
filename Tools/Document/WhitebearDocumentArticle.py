@@ -13,7 +13,6 @@ from Constants.Constants import Strings
 from Exceptions.UnrecognizedFileException import UnrecognizedFileException
 from Exceptions.WrongFormatException import WrongFormatException
 from Resources.Fetch import Fetch
-from Tools.ConfigManager import ConfigManager
 from Tools.Document.ArticleElements.Heading import Heading
 from Tools.Document.ArticleElements.ImageInText import ImageInText
 from Tools.Document.ArticleElements.Link import Link
@@ -53,7 +52,6 @@ class WhitebearDocumentArticle(WhitebearDocument):
         self._articles = articles
         self._css_document = css
         self._index_document = None
-        self._config_manager = ConfigManager.get_instance()
 
         # Article data
         self._menu_section = None
@@ -417,7 +415,6 @@ class WhitebearDocumentArticle(WhitebearDocument):
         :raise UnrecognizedFileException if generated html fails validation.
         :raises UnrecognizedFileException if xml schema is incorrect.
         """
-        config_manager: ConfigManager = ConfigManager.get_instance()
         with open(Fetch.get_resource_path('article_template.html'), 'r') as template:
             template_string = template.read()
         is_valid, errors = Tools.validate(template_string, 'schema_article_template.xsd')
@@ -448,19 +445,19 @@ class WhitebearDocumentArticle(WhitebearDocument):
         # Fill author.
         author = parsed_template.find_all(name='meta', attrs={'name': 'author', 'content': True})
         if len(author) == 1:
-            author[0]['content'] = config_manager.get_author()
+            author[0]['content'] = self._config_manager.get_author()
         else:
             raise UnrecognizedFileException(Strings.exception_parse_multiple_authors)
 
         # Fill script.
         script = parsed_template.find(name='script')
-        script.string = config_manager.get_script()
+        script.string = self._config_manager.get_script()
 
         # Fill global title.
         figure = parsed_template.find(name='header').figure
-        figure.figcaption.string = config_manager.get_global_title()
+        figure.figcaption.string = self._config_manager.get_global_title()
         heading = parsed_template.find(name='h1', attrs={'id': 'heading'})
-        heading.string = config_manager.get_global_title()
+        heading.string = self._config_manager.get_global_title()
 
         # Activate correct menu, generate menu items according to menus.
         menu_container = parsed_template.find(name='nav')

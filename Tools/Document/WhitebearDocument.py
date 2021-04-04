@@ -7,6 +7,7 @@ from bs4 import BeautifulSoup
 from Constants.Constants import Numbers
 from Constants.Constants import Strings
 from Exceptions.WrongFormatException import WrongFormatException
+from Tools.ConfigManager import ConfigManager
 
 
 class WhitebearDocument:
@@ -29,6 +30,7 @@ class WhitebearDocument:
         # We create instances of documents after validation so we already know they are valid.
         self._valid = True
         self._status_color = None
+        self._config_manager = ConfigManager.get_instance()
 
         # Page data
         self._parsed_html = None

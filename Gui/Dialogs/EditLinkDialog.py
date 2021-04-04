@@ -1,6 +1,9 @@
 import wx
 
 from Constants.Constants import Strings, Numbers
+from Gui.Dialogs.SavingDialog import SavingDialog
+from Resources.Fetch import Fetch
+from Threads.WorkerThread import WorkerThread
 from Tools.ConfigManager import ConfigManager
 from Tools.Document.ArticleElements.Link import Link
 from Tools.Tools import Tools
@@ -14,11 +17,13 @@ class EditLinkDialog(wx.Dialog):
         :param parent: Parent frame.
         :param link: the Link instance to display.
         """
+        # todo show busy wait when testing url in dialogs.
         wx.Dialog.__init__(self, parent, title=Strings.label_dialog_edit_link,
                            size=(Numbers.edit_link_dialog_width, Numbers.edit_link_dialog_height),
                            style=wx.DEFAULT_DIALOG_STYLE)
         self._link = link
         self._config_manager = ConfigManager.get_instance()
+        self._saving_dlg = None
 
         self._main_vertical_sizer = wx.BoxSizer(wx.VERTICAL)
         self._horizontal_sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -118,19 +123,41 @@ class EditLinkDialog(wx.Dialog):
             self._link.set_title(self._field_link_title.GetValue())
             self._link.set_url(self._field_url.GetValue())
 
-            if self._link.seo_test_self(online=True):
-                event.Skip()
-                return
-            else:
-                self._display_dialog_contents()
+            # Run seo test in thread and show a testing dialog.
+            thread = WorkerThread(self,
+                                  function=self._link.seo_test_self,
+                                  args=(self._config_manager.get_online_test(),),
+                                  callback=self.on_seo_done)
+            thread.start()
+            self.Disable()
+            self._saving_dlg = SavingDialog(self)
+            self._saving_dlg.set_file(Strings.status_testing_link)
+            self._saving_dlg.set_bitmap(wx.Bitmap(wx.Image(Fetch.get_resource_path('online.png'))))
+            self._saving_dlg.Show()
+            return
         else:
             # Restore original values
             self._link.set_url(self._original_url)
             self._link.set_title(self._original_title)
             self._link.set_text(self._original_text)
             self._link.set_modified(False)
+            # todo the same thing here
             self._link.seo_test_self(self._config_manager.get_online_test())
             event.Skip()
+
+    def on_seo_done(self, result: bool) -> None:
+        """
+        Receive the result of the link's SEO test. This is used when closing the dialog.
+        :param result: True or False depending on whether the link passed SEO test
+        :return: None
+        """
+        self.Enable()
+        if self._saving_dlg:
+            self._saving_dlg.Destroy()
+        if result and self._link.get_status_color() != Numbers.RED_COLOR:
+            self.Close()
+        else:
+            self._display_dialog_contents()
 
     # noinspection PyUnusedLocal
     def _combobox_handler(self, event: wx.CommandEvent) -> None:

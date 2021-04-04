@@ -7,7 +7,6 @@ from bs4.element import Tag
 from Constants.Constants import Strings
 from Exceptions.UnrecognizedFileException import UnrecognizedFileException
 from Resources.Fetch import Fetch
-from Tools.ConfigManager import ConfigManager
 from Tools.Document.MenuItem import MenuItem
 from Tools.Document.WhitebearDocument import WhitebearDocument
 from Tools.Tools import Tools
@@ -94,7 +93,6 @@ class WhitebearDocumentMenu(WhitebearDocument):
         :raise UnrecognizedFileException if generated html fails validation.
         :raises UnrecognizedFileException if xml schema is incorrect.
         """
-        config_manager: ConfigManager = ConfigManager.get_instance()
         with open(Fetch.get_resource_path('menu_template.html'), 'r') as template:
             template_string = template.read()
         is_valid, errors = Tools.validate(template_string, 'schema_menu_template.xsd')
@@ -125,19 +123,19 @@ class WhitebearDocumentMenu(WhitebearDocument):
         # Fill author.
         author = parsed_template.find_all(name='meta', attrs={'name': 'author', 'content': True})
         if len(author) == 1:
-            author[0]['content'] = config_manager.get_author()
+            author[0]['content'] = self._config_manager.get_author()
         else:
             raise UnrecognizedFileException(Strings.exception_parse_multiple_authors)
 
         # Fill script.
         script = parsed_template.find(name='script')
-        script.string = config_manager.get_script()
+        script.string = self._config_manager.get_script()
 
         # Fill global title.
         figure = parsed_template.find(name='header').figure
-        figure.figcaption.string = config_manager.get_global_title()
+        figure.figcaption.string = self._config_manager.get_global_title()
         heading = parsed_template.find(name='h1', attrs={'id': 'heading'})
-        heading.string = config_manager.get_global_title()
+        heading.string = self._config_manager.get_global_title()
 
         # Activate correct menu, generate menu items according to menus.
         menu_container = parsed_template.find(name='nav')
@@ -161,7 +159,7 @@ class WhitebearDocumentMenu(WhitebearDocument):
             if not item.get_article():
                 # Skip deleted articles.
                 continue
-            if not item.get_article().seo_test_self(online=True):
+            if not item.get_article().seo_test_self(self._config_manager.get_online_test()):
                 # Hide this menu item because this article is not yet finished or is deleted. The item will be available
                 # for future parsing though so the editor will load the menu item correctly for the unfinished article.
                 attrs['class'] = 'link hidden'
