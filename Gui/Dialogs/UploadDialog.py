@@ -319,7 +319,6 @@ class UploadDialog(wx.Dialog):
                                        password, files_to_upload)
         self._upload_gauge.SetRange(len(files_to_upload))
         self._upload_gauge.SetValue(0)
-        # TODO test server kill.
         if files_to_upload:
             self._sftp_thread.start()
 
