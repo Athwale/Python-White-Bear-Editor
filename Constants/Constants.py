@@ -14,7 +14,7 @@ class Numbers:
     private_key_permissions: oct = 0o600
     connection_timeout: int = 5
     put_timeout: int = 20
-    online_test_timeout: int = 2
+    online_test_timeout: int = 10
 
     three_click_timeout: int = 400
     photo_ratio: float = 4 / 3

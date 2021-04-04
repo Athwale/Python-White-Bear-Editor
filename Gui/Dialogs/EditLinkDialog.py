@@ -17,7 +17,6 @@ class EditLinkDialog(wx.Dialog):
         :param parent: Parent frame.
         :param link: the Link instance to display.
         """
-        # todo show busy wait when testing url in dialogs.
         wx.Dialog.__init__(self, parent, title=Strings.label_dialog_edit_link,
                            size=(Numbers.edit_link_dialog_width, Numbers.edit_link_dialog_height),
                            style=wx.DEFAULT_DIALOG_STYLE)

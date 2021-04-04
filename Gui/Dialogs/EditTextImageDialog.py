@@ -3,6 +3,7 @@ import os
 import wx
 
 from Constants.Constants import Strings, Numbers
+from Gui.Dialogs.AddImageDialog import AddImageDialog
 from Tools.Document.ArticleElements.ImageInText import ImageInText
 from Tools.Tools import Tools
 
@@ -114,11 +115,14 @@ class EditTextImageDialog(wx.Dialog):
         self._ok_button = wx.Button(self, wx.ID_OK, Strings.button_ok)
         self._ok_button.SetDefault()
         self._browse_button = wx.Button(self, wx.ID_OPEN, Strings.button_browse)
+        self._add_button = wx.Button(self, wx.ID_ADD, Strings.button_add)
         grouping_sizer.Add(self._ok_button)
         grouping_sizer.Add((Numbers.widget_border_size, Numbers.widget_border_size))
         grouping_sizer.Add(self._cancel_button)
         grouping_sizer.Add((Numbers.widget_border_size, Numbers.widget_border_size))
         grouping_sizer.Add(self._browse_button)
+        grouping_sizer.Add((Numbers.widget_border_size, Numbers.widget_border_size))
+        grouping_sizer.Add(self._add_button)
         self._button_sizer.Add(grouping_sizer, flag=wx.ALIGN_CENTER_HORIZONTAL)
 
         # Putting the sizers together
@@ -136,6 +140,7 @@ class EditTextImageDialog(wx.Dialog):
         self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._ok_button)
         self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._cancel_button)
         self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._browse_button)
+        self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._add_button)
 
     def _handle_buttons(self, event: wx.CommandEvent) -> None:
         """
@@ -145,26 +150,22 @@ class EditTextImageDialog(wx.Dialog):
         """
         if event.GetId() == wx.ID_OPEN:
             new_path, new_name = self._ask_for_image()
-            img_dir: str = os.path.join(self._work_dir, Strings.folder_images, Strings.folder_thumbnails)
             if not new_path:
                 # No image was selected
                 event.Skip()
                 return
-            if img_dir not in new_path:
-                wx.MessageBox(Strings.warning_wrong_image_folder, Strings.status_error, wx.OK | wx.ICON_ERROR)
-                return
             else:
-                # Display the new image
-                html_thumbnail_filename: str = os.path.join(Strings.folder_images, Strings.folder_thumbnails, new_name)
-                self._image_copy = ImageInText(self._field_image_link_title.GetValue(),
-                                               self._field_image_alt.GetValue(),
-                                               new_path.replace(Strings.folder_thumbnails, Strings.folder_originals),
-                                               new_path, html_thumbnail_filename.replace(Strings.folder_thumbnails,
-                                                                                         Strings.folder_originals),
-                                               html_thumbnail_filename)
-                # Initializes all internal variables.
-                self._image_copy.seo_test_self()
-                self._display_dialog_contents()
+                self._change_image(new_path, new_name)
+        elif event.GetId() == wx.ID_ADD:
+            dlg = AddImageDialog(self, self._work_dir)
+            saved = dlg.ShowModal()
+            if saved == wx.ID_OK:
+                result = wx.MessageBox(Strings.label_use_image, Strings.label_image, wx.YES_NO | wx.ICON_QUESTION)
+                if result == wx.YES:
+                    # This function must be used only when the add image dialog is confirmed.
+                    # Parameter expansion, expands tuple into the two arguments needed by the function.
+                    self._change_image(*dlg.get_thumbnail_location())
+            dlg.Destroy()
         elif event.GetId() == wx.ID_OK:
             # Save new information into the copy of the image and rerun seo test.
             self._image_copy.set_link_title(self._field_image_link_title.GetValue())
@@ -187,6 +188,33 @@ class EditTextImageDialog(wx.Dialog):
         else:
             # Leave the old image as it is and do not do anything.
             event.Skip()
+
+    def _change_image(self, path: str, name: str) -> None:
+        """
+        Change image displayed in the dialog to a new image selected form disk.
+        :param path: Disk path.
+        :param name: File name
+        :return: None
+        """
+        img_dir: str = os.path.join(self._work_dir, Strings.folder_images, Strings.folder_thumbnails)
+        if not path:
+            # No image was selected
+            return
+        if img_dir not in path:
+            wx.MessageBox(Strings.warning_wrong_image_folder, Strings.status_error, wx.OK | wx.ICON_ERROR)
+            return
+        else:
+            # Display the new image
+            html_thumbnail_filename: str = os.path.join(Strings.folder_images, Strings.folder_thumbnails, name)
+            self._image_copy = ImageInText(self._field_image_link_title.GetValue(),
+                                           self._field_image_alt.GetValue(),
+                                           path.replace(Strings.folder_thumbnails, Strings.folder_originals),
+                                           path, html_thumbnail_filename.replace(Strings.folder_thumbnails,
+                                                                                 Strings.folder_originals),
+                                           html_thumbnail_filename)
+            # Initializes all internal variables.
+            self._image_copy.seo_test_self()
+            self._display_dialog_contents()
 
     def _ask_for_image(self) -> (str, str):
         """
