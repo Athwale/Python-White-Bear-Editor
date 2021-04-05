@@ -3,7 +3,6 @@
 """
 Starting class for the whitebear editor GUI. This class is necessary and must be in all wx python programs.
 OnInit must be overridden here.
-# todo deploy as package
 """
 import wx
 import wx.adv

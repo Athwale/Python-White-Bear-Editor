@@ -1,7 +1,6 @@
 wxPython~=4.1.1
 httplib2~=0.19.1
 htmlmin~=0.1.12
-bs4~=0.0.1
 beautifulsoup4~=4.9.3
 tinycss~=0.4
 webcolors~=1.11.1
