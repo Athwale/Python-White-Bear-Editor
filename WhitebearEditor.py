@@ -11,7 +11,7 @@ from Constants.Constants import Strings
 from Gui.Frames.MainFrame import MainFrame
 
 
-class MyApp(wx.App):
+class WhitebearEditor(wx.App):
     """
     Main class for running the gui.
     """
@@ -35,5 +35,5 @@ class MyApp(wx.App):
 
 if __name__ == "__main__":
     # Redirect allows the gui to show a window with std and err text output, or if set, send it to a file.
-    app = MyApp(redirect=False, filename=Strings.editor_output_debug_file)
+    app = WhitebearEditor(redirect=False, filename=Strings.editor_output_debug_file)
     app.MainLoop()
