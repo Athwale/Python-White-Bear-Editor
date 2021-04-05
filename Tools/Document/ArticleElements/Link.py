@@ -1,6 +1,6 @@
 import os
-from typing import List
 from ssl import SSLCertVerificationError
+from typing import List
 
 import httplib2
 import wx

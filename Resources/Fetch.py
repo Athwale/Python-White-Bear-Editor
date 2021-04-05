@@ -19,7 +19,7 @@ class Fetch:
         :raise FileNotFoundError: if resource is not found
         """
         path = Path(os.path.dirname(sys.argv[0]))
-        resource_dir = path.parent.joinpath('Resources')
+        resource_dir = path.joinpath('Resources')
         resource_path = os.path.join(resource_dir, name)
         if os.path.exists(resource_path):
             return resource_path

@@ -18,8 +18,8 @@ from Gui.Dialogs.EditMenuDialog import EditMenuDialog
 from Gui.Dialogs.EditMenuItemDialog import EditMenuItemDialog
 from Gui.Dialogs.LoadingDialog import LoadingDialog
 from Gui.Dialogs.NewFileDialog import NewFileDialog
-from Gui.Dialogs.WaitDialog import WaitDialog
 from Gui.Dialogs.UploadDialog import UploadDialog
+from Gui.Dialogs.WaitDialog import WaitDialog
 from Gui.Panels.AsideImagePanel import AsideImagePanel
 from Gui.Panels.CustomRichText import CustomRichText
 from Resources.Fetch import Fetch

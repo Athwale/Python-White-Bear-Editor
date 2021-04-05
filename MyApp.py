@@ -1,8 +1,10 @@
 #!/usr/bin/python3
 
-"""Starting class for the whitebear editor GUI. This
-class is necessary and must be in all wx python programs. OnInit must be overridden here"""
-
+"""
+Starting class for the whitebear editor GUI. This class is necessary and must be in all wx python programs.
+OnInit must be overridden here.
+# todo deploy as package
+"""
 import wx
 import wx.adv
 
@@ -12,7 +14,7 @@ from Gui.Frames.MainFrame import MainFrame
 
 class MyApp(wx.App):
     """
-    Main class for running the gui
+    Main class for running the gui.
     """
 
     def __init__(self, redirect, filename):

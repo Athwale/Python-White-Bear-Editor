@@ -1,7 +1,8 @@
+from ssl import SSLCertVerificationError
+
 import httplib2
 import wx
 
-from ssl import SSLCertVerificationError
 from Constants.Constants import Numbers, Strings
 from Resources.Fetch import Fetch
 
