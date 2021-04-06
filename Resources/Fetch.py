@@ -13,15 +13,19 @@ class Fetch:
     @staticmethod
     def get_resource_path(name: str) -> str:
         """
-        Return a string path of a resource from the Resources folder.
-        :param name: Name of the resource to get.
+        Return a string absolute path of a resource from the Resources folder or elsewhere.
+        :param name: Name of the resource to get or path.
         :return: Path to the resource on disk.
         :raise FileNotFoundError: if resource is not found
         """
-        path = Path(os.path.dirname(sys.argv[0]))
-        resource_dir = path.joinpath('Resources')
-        resource_path = os.path.join(resource_dir, name)
-        if os.path.exists(resource_path):
-            return resource_path
+        if os.path.exists(name):
+            # If the name is a path that already leads to a file return that as a absolute path.
+            return os.path.abspath(name)
         else:
-            raise FileNotFoundError(Strings.exception_resource_not_found)
+            # Assume it is a resource from the Resources folder.
+            path = Path(os.path.abspath(sys.path[0]))
+            resource_path = os.path.realpath(os.path.join(path, 'Resources', name))
+            if os.path.exists(resource_path):
+                return resource_path
+            else:
+                raise FileNotFoundError(Strings.exception_resource_not_found + ': ' + str(name))
