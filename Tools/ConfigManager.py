@@ -34,6 +34,7 @@ class ConfigManager:
     CONF_USER: str = 'user'
     CONF_KEYFILE: str = 'key'
     CONF_ONLINE_TEST: str = 'onlineTest'
+    CONF_LAST_IMG_DIR: str = 'lastImgDir'
 
     @staticmethod
     def get_instance():
@@ -75,6 +76,7 @@ class ConfigManager:
                 self.CONF_USER: '',
                 self.CONF_KEYFILE: '',
                 self.CONF_ONLINE_TEST: '1',
+                self.CONF_LAST_IMG_DIR: Strings.home_directory,
                 self.CONF_NEWS: str(Numbers.default_news)}
 
     def _init_config(self) -> None:
@@ -137,6 +139,10 @@ class ConfigManager:
         # If online test value is not recognized, set to 1.
         if self.CONF_ONLINE_TEST not in self._dir_conf.keys():
             self._dir_conf[self.CONF_ONLINE_TEST] = '1'
+
+        # If last img dir is not present, reset it to home dir.
+        if self.CONF_LAST_IMG_DIR not in self._dir_conf.keys():
+            self._dir_conf[self.CONF_LAST_IMG_DIR] = Strings.home_directory
 
         return correct
 
@@ -315,6 +321,22 @@ class ConfigManager:
             self._dir_conf[self.CONF_ONLINE_TEST] = '1'
             return True
 
+    def get_last_img_dir(self) -> str:
+        """
+        Get the last used image directory.
+        :return: String directory path to the last used image directory.
+        """
+        return self._dir_conf[self.CONF_LAST_IMG_DIR]
+
+    def store_last_img_dir(self, path: str) -> None:
+        """
+        Save a last used image directory
+        :param path: New last image directory path.
+        :return: None
+        """
+        self._dir_conf[self.CONF_LAST_IMG_DIR] = path
+        self.save_config_file()
+
     def store_online_test(self, enabled: bool) -> None:
         """
         Save online url test preference into the dictionary
@@ -325,6 +347,7 @@ class ConfigManager:
             self._dir_conf[self.CONF_ONLINE_TEST] = '1'
         else:
             self._dir_conf[self.CONF_ONLINE_TEST] = '0'
+        self.save_config_file()
 
     def store_working_dir(self, path: str) -> None:
         """

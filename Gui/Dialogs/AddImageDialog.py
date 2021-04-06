@@ -5,6 +5,7 @@ import wx
 
 from Constants.Constants import Strings, Numbers
 from Resources.Fetch import Fetch
+from Tools.ConfigManager import ConfigManager
 from Tools.Tools import Tools
 
 
@@ -32,6 +33,7 @@ class AddImageDialog(wx.Dialog):
         self._thumbnails_path = None
         self._thumbnail_path = None
         self._working_directory = work_dir
+        self._config_manager = ConfigManager.get_instance()
 
         # Disk location
         self._original_disk_location_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -138,10 +140,14 @@ class AddImageDialog(wx.Dialog):
         Show a file picker dialog to get an image from the user.
         :return: (file path, file name) or None, None if canceled
         """
-        with wx.FileDialog(self, Strings.label_select_image, Strings.home_directory, wildcard=Strings.image_extensions,
+        last_dir = self._config_manager.get_last_img_dir()
+        if not os.path.exists(last_dir):
+            last_dir = Strings.home_directory
+        with wx.FileDialog(self, Strings.label_select_image, last_dir, wildcard=Strings.image_extensions,
                            style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST | wx.FD_PREVIEW) as dlg:
             if dlg.ShowModal() == wx.ID_OK:
                 dlg: wx.FileDialog
+                self._config_manager.store_last_img_dir(os.path.dirname(dlg.GetPath()))
                 return dlg.GetPath(), dlg.GetFilename()
             return None, None
 
@@ -281,7 +287,10 @@ class AddImageDialog(wx.Dialog):
         self._content_image_thumbnail_size.SetLabelText(str(self._thumbnail.GetWidth()) + ' x ' +
                                                         str(self._thumbnail.GetHeight()) + ' px')
         self._bitmap.SetBitmap(wx.Bitmap(self._thumbnail))
-        self.SetSize(Numbers.add_image_dialog_width, self._thumbnail.GetHeight() + 120)
+        height = self._thumbnail.GetHeight()
+        if height < Numbers.main_image_height:
+            height = Numbers.main_image_height + 20
+        self.SetSize(Numbers.add_image_dialog_width, height)
         self.Layout()
 
     def get_thumbnail_location(self) -> (str, str):

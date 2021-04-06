@@ -4,6 +4,7 @@ import wx
 
 from Constants.Constants import Strings, Numbers
 from Resources.Fetch import Fetch
+from Tools.ConfigManager import ConfigManager
 from Tools.Tools import Tools
 
 
@@ -29,6 +30,7 @@ class AddLogoDialog(wx.Dialog):
         self._logos_path = None
         self._working_directory = work_dir
         self._file_path = None
+        self._config_manager = ConfigManager.get_instance()
 
         # Disk location
         self._original_disk_location_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -106,10 +108,14 @@ class AddLogoDialog(wx.Dialog):
         Show a file picker dialog to get an image from the user.
         :return: (file path, file name) or None, None if canceled
         """
-        with wx.FileDialog(self, Strings.label_select_image, Strings.home_directory, wildcard=Strings.image_jpg_only,
+        last_dir = self._config_manager.get_last_img_dir()
+        if not os.path.exists(last_dir):
+            last_dir = Strings.home_directory
+        with wx.FileDialog(self, Strings.label_select_image, last_dir, wildcard=Strings.image_jpg_only,
                            style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST | wx.FD_PREVIEW) as dlg:
             if dlg.ShowModal() == wx.ID_OK:
                 dlg: wx.FileDialog
+                self._config_manager.store_last_img_dir(os.path.dirname(dlg.GetPath()))
                 return dlg.GetPath(), dlg.GetFilename()
             return None, None
 
