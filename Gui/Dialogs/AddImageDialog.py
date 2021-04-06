@@ -290,6 +290,8 @@ class AddImageDialog(wx.Dialog):
         height = self._thumbnail.GetHeight()
         if height < Numbers.main_image_height:
             height = Numbers.main_image_height + 20
+        elif height == Numbers.main_image_height:
+            height = Numbers.main_image_height + 120
         self.SetSize(Numbers.add_image_dialog_width, height)
         self.Layout()
 
