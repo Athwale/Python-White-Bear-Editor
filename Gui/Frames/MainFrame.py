@@ -308,7 +308,6 @@ class MainFrame(wx.Frame):
         :param event:
         :return: None
         """
-        # todo article delete does not kill saving dialog (right after a new one is created)
         if event.IsChecked():
             self._current_document_instance.set_enabled(True)
             self._public_checkbox.SetForegroundColour(Numbers.DARK_GREEN_COLOR)
@@ -928,9 +927,10 @@ class MainFrame(wx.Frame):
         self._saving_dlg.set_message(file_name)
         # Clean thread list off stopped threads.
         self._thread_queue.remove(thread)
-        if not self._thread_queue and not disable:
-            # Enable only when all threads have finished.
+        if not self._thread_queue:
             self._saving_dlg.Destroy()
+        if not self._thread_queue and not disable:
+            # Enable only when all threads have finished and enabling is allowed.
             self._disable_editor(False)
 
     def on_sitemap_done(self, thread: SitemapThread, sitemap: str, disable: bool) -> None:
