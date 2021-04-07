@@ -51,7 +51,6 @@ class NewFileDialog(wx.Dialog):
         self._information_sizer = wx.BoxSizer(wx.VERTICAL)
 
         # Name sub sizer
-        # todo add article disable checkbox stored as class attribute of article tag which always fails seo preventing publication.
         self._name_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self._label_file_name = wx.StaticText(self, -1, Strings.label_file_name + ': ')
         self._field_name = wx.TextCtrl(self, -1)

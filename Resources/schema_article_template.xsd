@@ -45,7 +45,7 @@
 
             <xs:element name="section">
                 <xs:complexType>
-                    <xs:attribute name="class" type="xs:string" fixed="mainText" use="required"/>
+                    <xs:attribute name="class" type="sectionClass" use="required"/>
                 </xs:complexType>
             </xs:element>
 
@@ -79,5 +79,12 @@
             <xs:attribute name="lang" type="xs:string" fixed="cs" use="required"/>
         </xs:complexType>
     </xs:element>
+
+    <xs:simpleType name="sectionClass">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="mainText"/>
+            <xs:enumeration value="mainText disabled"/>
+        </xs:restriction>
+    </xs:simpleType>
 
 </xs:schema>

@@ -52,6 +52,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
         self._articles = articles
         self._css_document = css
         self._index_document = None
+        self._enabled = False
 
         # Article data
         self._menu_section = None
@@ -83,6 +84,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
         self._parse_main_article_image()
         self._parse_aside_images()
         self._parse_main_text()
+        self._parse_enabled_attribute()
         self.seo_test_self(self._config_manager.get_online_test())
 
     def seo_test_date(self, date: str) -> (bool, str, wx.Colour):
@@ -165,6 +167,9 @@ class WhitebearDocumentArticle(WhitebearDocument):
             if not link.seo_test_self(online):
                 self.set_status_color(Numbers.RED_COLOR)
 
+        if not self._enabled:
+            self.set_status_color(Numbers.RED_COLOR)
+
         if self.get_status_color() == Numbers.RED_COLOR:
             return False
         return True
@@ -185,6 +190,15 @@ class WhitebearDocumentArticle(WhitebearDocument):
                 break
         if not self._menu_item:
             raise WrongFormatException(Strings.exception_menu_item_missing + ' for: ' + self.get_filename())
+
+    def _parse_enabled_attribute(self) -> None:
+        """
+        Determine whether the publication of this article is enabled or whether this article is not finished.
+        :return: None
+        """
+        # Find a section tag with both classes, if such is present, the article is disabled.
+        # This returns true when the disabled class is present, so it has to be negated.
+        self._enabled = not(bool(self._parsed_html.select('section.mainText.disabled')))
 
     def _parse_main_text(self) -> None:
         """
@@ -485,7 +499,10 @@ class WhitebearDocumentArticle(WhitebearDocument):
         main_image_figure.figcaption.string = self.get_article_image().get_caption()[0]
 
         # Fill main text.
-        text_section = parsed_template.find(name='section', attrs={'class': 'mainText'})
+        text_section = parsed_template.find(name='section', attrs='mainText')
+        if not self._enabled:
+            # Save the disabled state into the html, once the article is enabled, this special class will be removed.
+            text_section['class'] = 'mainText disabled'
         for element in self.get_main_text_elements():
             if isinstance(element, Heading):
                 size = 'h3' if element.get_size() == Heading.SIZE_H3 else 'h4'
@@ -664,6 +681,13 @@ class WhitebearDocumentArticle(WhitebearDocument):
         """
         return self._status_color
 
+    def is_enabled(self) -> bool:
+        """
+        Returns True if publication of this article is enabled.
+        :return: True if publication of this article is enabled.
+        """
+        return self._enabled
+
     def is_modified(self) -> bool:
         """
         Return True if this file or it's images, links or videos were modified in the editor.
@@ -827,6 +851,14 @@ class WhitebearDocumentArticle(WhitebearDocument):
         :return: None
         """
         self._html = ''
+
+    def set_enabled(self, enabled: bool) -> None:
+        """
+        Sets the publication enabled attribute.
+        :param enabled: True if article publication is enabled.
+        :return: None
+        """
+        self._enabled = enabled
 
     def set_index_document(self, index: WhitebearDocumentIndex) -> None:
         """

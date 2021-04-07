@@ -402,6 +402,7 @@ class Strings:
     label_server_structure: str = 'The editor expects the same folder structure on the server as is in the working ' \
                                   'directory.\nExisting files on server are overwritten.'
     label_server_overwrite: str = 'Existing files on server are overwritten.'
+    label_article_public: str = 'Enable article'
 
     status_loading: str = 'Loading and testing'
     status_ready: str = 'Ready'

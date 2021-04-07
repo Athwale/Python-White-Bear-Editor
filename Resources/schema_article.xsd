@@ -137,13 +137,20 @@
                             </xs:complexType>
                         </xs:element>
                     </xs:choice>
-                    <xs:attribute name="class" type="xs:string" fixed="mainText" use="required"/>
+                    <xs:attribute name="class" type="sectionClass" use="required"/>
                 </xs:complexType>
             </xs:element>
 
         </xs:sequence>
         <xs:attribute name="class" type="xs:string" fixed="textPage" use="required"/>
     </xs:complexType>
+
+    <xs:simpleType name="sectionClass">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="mainText"/>
+            <xs:enumeration value="mainText disabled"/>
+        </xs:restriction>
+    </xs:simpleType>
 
     <xs:complexType name="articleType">
         <xs:sequence>

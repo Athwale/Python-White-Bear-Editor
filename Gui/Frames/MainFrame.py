@@ -297,9 +297,26 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_TEXT, self._search_box_handler, self._search_box)
         self.Bind(wx.EVT_TEXT_ENTER, self._search_tools_handler, self._search_box)
 
+        self._public_checkbox = wx.CheckBox(self.tool_bar, wx.ID_IGNORE, Strings.label_article_public)
+        self.Bind(wx.EVT_CHECKBOX, self._public_checkbox_handler, self._public_checkbox)
+
         self.tool_bar.Realize()
 
-    def _init_search_box(self) -> None:
+    def _public_checkbox_handler(self, event: wx.CommandEvent) -> None:
+        """
+        Handle enabling and disabling article publication.
+        :param event:
+        :return: None
+        """
+        # todo article delete does not kill saving dialog (right after a new one is created)
+        if event.IsChecked():
+            self._current_document_instance.set_enabled(True)
+            self._public_checkbox.SetForegroundColour(Numbers.DARK_GREEN_COLOR)
+        else:
+            self._current_document_instance.set_enabled(False)
+            self._public_checkbox.SetForegroundColour(wx.RED)
+
+    def _init_toolbar_controls(self) -> None:
         """
         Add search box into the top tool bar.
         :return: None
@@ -308,6 +325,9 @@ class MainFrame(wx.Frame):
             # Only add the search box once and not when a new directory is loaded again.
             self.tool_bar.AddSeparator()
             self.tool_bar.AddControl(self._search_box)
+        if not self.tool_bar.FindById(wx.ID_IGNORE):
+            self.tool_bar.AddSeparator()
+            self.tool_bar.AddControl(self._public_checkbox)
 
     def _create_color_tool(self, name: str, toolbar: wx.ToolBar, color: wx.Colour) -> None:
         """
@@ -686,7 +706,7 @@ class MainFrame(wx.Frame):
         css_colors = css.get_colors()
         for name, color in css_colors.items():
             self._create_color_tool(name, self.tool_bar, color)
-        self._init_search_box()
+        self._init_toolbar_controls()
 
     def on_filelist_loaded(self, documents: Dict[str, WhitebearDocumentArticle],
                            menus: Dict[str, WhitebearDocumentMenu], index: WhitebearDocumentIndex) -> None:
@@ -1210,11 +1230,19 @@ class MainFrame(wx.Frame):
             pass
         self._main_text_area.set_content(doc)
 
-        # Set main image caption
+        # Set main image caption.
         self._text_main_image_caption.SetLabelText(doc.get_article_image().get_caption()[0])
 
-        # Set menu item name
+        # Set menu item name.
         self._update_menu_sizer(doc.get_menu_item())
+
+        # Set publication check box.
+        if not doc.is_enabled():
+            self._public_checkbox.SetValue(False)
+            self._public_checkbox.SetForegroundColour(wx.RED)
+        else:
+            self._public_checkbox.SetValue(True)
+            self._public_checkbox.SetForegroundColour(Numbers.DARK_GREEN_COLOR)
 
         self._ignore_change = False
         self._disable_editor(False)
