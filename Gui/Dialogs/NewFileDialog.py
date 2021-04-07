@@ -51,14 +51,14 @@ class NewFileDialog(wx.Dialog):
         self._information_sizer = wx.BoxSizer(wx.VERTICAL)
 
         # Name sub sizer
+        # todo add article disable checkbox stored as class attribute of article tag which always fails seo preventing publication.
         self._name_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self._label_file_name = wx.StaticText(self, -1, Strings.label_name + ': ')
+        self._label_file_name = wx.StaticText(self, -1, Strings.label_file_name + ': ')
         self._field_name = wx.TextCtrl(self, -1)
         self._name_sub_sizer.Add(self._label_file_name, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
-        self._name_sub_sizer.Add(8, -1)
         self._name_sub_sizer.Add(self._field_name, proportion=1)
         self._information_sizer.Add(self._name_sub_sizer, flag=wx.EXPAND | wx.TOP, border=Numbers.widget_border_size)
-        self._field_name_tip = Tools.get_warning_tip(self._field_name, Strings.label_article_title)
+        self._field_name_tip = Tools.get_warning_tip(self._field_name, Strings.label_file_name)
         self._field_name.SetBackgroundColour(Numbers.RED_COLOR)
         self._field_name_tip.SetMessage(Strings.warning_empty)
 
@@ -69,6 +69,7 @@ class NewFileDialog(wx.Dialog):
         self._box_menu = wx.ComboBox(self, -1, choices=choices, style=wx.CB_DROPDOWN | wx.CB_SORT | wx.CB_READONLY)
         self._box_menu.SetSelection(0)
         self._category_sub_sizer.Add(self._label_category, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
+        self._category_sub_sizer.Add(16, -1)
         self._category_sub_sizer.Add(self._box_menu, proportion=1)
         self._information_sizer.Add(self._category_sub_sizer, flag=wx.EXPAND | wx.TOP,
                                     border=Numbers.widget_border_size)
