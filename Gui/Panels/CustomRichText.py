@@ -1196,7 +1196,11 @@ class CustomRichText(rt.RichTextCtrl):
             color = None
             # Color is irrelevant for links.
             if not attrs.HasURL():
+                # todo sometimes the color is unrecognized
+                # todo link at the beginning of par forbids new line.
+                # todo shift, capslock canclels selection
                 color = self._css_document.translate_color_str(attrs.GetTextColour())
+                print(str(text), str(attrs.GetTextColour()), str(color))
 
             if attrs.HasURL():
                 # This will be a link

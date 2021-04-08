@@ -204,13 +204,13 @@ class AddImageDialog(wx.Dialog):
         full_file: str = os.path.join(self._originals_path, new_name)
         # Determine the file type, we can only open jpg and png files in the browse dialog.
         _, file_extension = os.path.splitext(os.path.join(self._image_path, self._image_name))
-        if file_extension == Strings.extension_jpg:
+        if file_extension.lower() == Strings.extension_jpg:
             img_type = wx.BITMAP_TYPE_JPEG
         else:
             img_type = wx.BITMAP_TYPE_PNG
 
-        self._thumbnail_path = self._thumbnail_path + file_extension
-        full_file = full_file + file_extension
+        self._thumbnail_path = self._thumbnail_path + file_extension.lower()
+        full_file = full_file + file_extension.lower()
         if os.path.exists(self._thumbnail_path):
             result = wx.MessageBox(Strings.warning_file_exists_overwrite + ': \n' + self._thumbnail_path,
                                    Strings.status_error, wx.YES_NO | wx.ICON_ERROR)
