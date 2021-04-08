@@ -185,11 +185,12 @@ class WhitebearDocumentIndex(WhitebearDocument):
         # Fill aside images from the newest articles.
         latest_images = []
         for article in sorted_articles:
-            images = article.get_aside_images()
-            if images:
-                latest_images.append(images[0])
-            if len(latest_images) >= Numbers.max_index_images:
-                break
+            if article.is_enabled():
+                images = article.get_aside_images()
+                if images:
+                    latest_images.append(images[0])
+                if len(latest_images) >= Numbers.max_index_images:
+                    break
 
         aside = parsed_template.find(name='aside')
         for img in latest_images:
