@@ -384,7 +384,6 @@ class CustomRichText(rt.RichTextCtrl):
                 # Remove the url
                 attrs.SetURL('')
                 attrs.SetFlags(attrs.GetFlags() ^ wx.TEXT_ATTR_URL)
-                attrs.SetTextColour(style.GetTextColour())
                 attrs.SetCharacterStyleName('')
                 attrs.SetFontUnderlined(False)
 
