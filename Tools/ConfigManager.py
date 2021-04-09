@@ -1,3 +1,4 @@
+import os
 from typing import Tuple, Dict
 
 import yaml
@@ -152,6 +153,8 @@ class ConfigManager:
         :param path: The directory path.
         :return: True if the requested directory is in the config.
         """
+        if not os.path.exists(path):
+            return False
         try:
             self._dir_conf = self._whole_conf[path]
         except KeyError:

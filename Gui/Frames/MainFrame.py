@@ -98,6 +98,8 @@ class MainFrame(wx.Frame):
         # Find the last opened whitebear directory, switch config manager to it and load it.
         if self._config_manager.set_active_dir(self._config_manager.get_last_directory()):
             self._load_working_directory(self._config_manager.get_working_dir())
+            # Load online test state.
+            self._file_menu.Check(wx.ID_NETWORK, self._config_manager.get_online_test())
         else:
             self._disable_editor(True)
 
@@ -108,9 +110,6 @@ class MainFrame(wx.Frame):
             self.Maximize()
         else:
             self.SetSize(size)
-
-        # Load online test state.
-        self._file_menu.Check(wx.ID_NETWORK, self._config_manager.get_online_test())
 
     def _init_menu(self) -> None:
         """
@@ -645,6 +644,8 @@ class MainFrame(wx.Frame):
         self.tool_bar.EnableTool(MainFrame.VIDEO_TOOL_ID, (not state))
         self.tool_bar.EnableTool(wx.ID_NEW, (not state))
         # Disable menu items
+        self._public_checkbox.Enable(not state)
+        self._file_menu.Enable(wx.ID_NETWORK, not state)
         for menu_item in self._disableable_menu_items:
             menu_item.Enable(not state)
         if leave_files:
