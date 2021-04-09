@@ -4,6 +4,7 @@ import wx
 import wx.richtext as rt
 
 from Constants.Constants import Strings, Numbers
+from Exceptions.WrongFormatException import WrongFormatException
 from Gui.Dialogs.EditLinkDialog import EditLinkDialog
 from Gui.Dialogs.EditTextImageDialog import EditTextImageDialog
 from Gui.Dialogs.EditVideoDialog import EditVideoDialog
@@ -242,13 +243,14 @@ class CustomRichText(rt.RichTextCtrl):
         names.append(Strings.style_list)
         self._style_picker.InsertItems(names, 0)
 
-    def _change_style(self, style_name: str, position: int) -> None:
+    def _change_style(self, style_name: str, position: int, preserve_url=True) -> None:
         """
         Changes the style of the current paragraph or selection.
         :param style_name: The name of a style in stylesheet.
         :param position: The position of the caret. This is needed because when changing style over multiple paragraphs
-        the position is passed from selection.
-        This is used when joining heading and ordinary paragraph using delete or backspace.
+        the position is passed from selection. This is used when joining heading and ordinary paragraph using
+        delete or backspace.
+        :param preserve_url: True to preserve url when changing to paragraph style.
         :return: None
         """
         if position == -1:
@@ -258,7 +260,7 @@ class CustomRichText(rt.RichTextCtrl):
             self._apply_heading_style(style_name, position)
 
         elif style_name == Strings.style_paragraph:
-            self._apply_paragraph_style(position)
+            self._apply_paragraph_style(position, preserve_url)
 
         elif style_name == Strings.style_list:
             self._apply_list_style(position)
@@ -328,11 +330,12 @@ class CustomRichText(rt.RichTextCtrl):
                 attrs.SetTextColour(style.GetTextColour())
                 attrs.SetCharacterStyleName('')
 
-    def _apply_paragraph_style(self, position: int) -> None:
+    def _apply_paragraph_style(self, position: int, preserve_url: bool) -> None:
         """
         Changes current paragraph under the cursor into the paragraph style defined for normal text.
         Retains links, text weight and color.
         :param position: The position of the caret.
+        :param preserve_url: True to preserve urls.
         :return: None
         """
         p: rt.RichTextParagraph = self.GetFocusObject().GetParagraphAtPosition(position)
@@ -372,11 +375,18 @@ class CustomRichText(rt.RichTextCtrl):
             attrs.SetParagraphSpacingAfter(style.GetParagraphSpacingAfter())
             attrs.SetFontFaceName(Strings.style_paragraph)
             attrs.SetAlignment(wx.TEXT_ALIGNMENT_LEFT)
-            if attrs.HasURL():
+            if attrs.HasURL() and preserve_url:
                 # Only urls have background color and underline.
                 attrs.SetBackgroundColour(attr_dict['background'])
                 attrs.SetFontUnderlined(True)
                 attrs.SetFontFaceName(Strings.style_url)
+            else:
+                # Remove the url
+                attrs.SetURL('')
+                attrs.SetFlags(attrs.GetFlags() ^ wx.TEXT_ATTR_URL)
+                attrs.SetTextColour(style.GetTextColour())
+                attrs.SetCharacterStyleName('')
+                attrs.SetFontUnderlined(False)
 
     def _apply_list_style(self, position: int) -> None:
         """
@@ -478,7 +488,7 @@ class CustomRichText(rt.RichTextCtrl):
         Handle keypress events. Runs on key down.
         :return: None
         """
-        # Disable other keyboard input while this method is working?
+        # Disable other keyboard input while this method is working.
         self._disable_input = True
 
         position = self.GetAdjustedCaretPosition(self.GetCaretPosition())
@@ -510,13 +520,14 @@ class CustomRichText(rt.RichTextCtrl):
                 self._change_style(Strings.style_paragraph, position=-1)
                 paragraph_style = Strings.style_paragraph
                 p: rt.RichTextParagraph = self.GetFocusObject().GetParagraphAtPosition(position)
+
         # Turn empty lines into paragraph style. Also turns deleted images into paragraph style.
         elif not p.GetTextForRange(p.GetRange()):
             attrs: rt.RichTextAttr = p.GetAttributes()
             if attrs.GetBulletStyle() != wx.TEXT_ATTR_BULLET_STYLE_STANDARD:
                 if not isinstance(p.GetChild(0), rt.RichTextField):
                     # Field is not seen as text.
-                    self._change_style(Strings.style_paragraph, position=-1)
+                    self._change_style(Strings.style_paragraph, position=-1, preserve_url=False)
                     # Changing the style above also changes the paragraph address in memory, find it again then.
                     # Not doing this may cause segfaults.
                     p: rt.RichTextParagraph = self.GetFocusObject().GetParagraphAtPosition(position)
@@ -588,11 +599,14 @@ class CustomRichText(rt.RichTextCtrl):
         position = self.GetAdjustedCaretPosition(self.GetCaretPosition())
         paragraph_style, character_style = self._get_style_at_pos(position)
 
-        _, next_character_style = self._get_style_at_pos(position + 1)
-        if character_style == Strings.style_url and next_character_style == Strings.style_url:
-            if event.GetKeyCode() == wx.WXK_RETURN:
-                # Prevent return key inside url style but not at the end of the link.
-                return
+        # Detect paragraph beginning. Allow pressing return at the beginning of line.
+        paragraph_start = self.GetFocusObject().GetParagraphAtPosition(position).GetRange()[0]
+        if paragraph_start != position:
+            _, next_character_style = self._get_style_at_pos(position + 1)
+            if character_style == Strings.style_url and next_character_style == Strings.style_url:
+                if event.GetKeyCode() == wx.WXK_RETURN:
+                    # Prevent return key inside url style but not at the end of the link.
+                    return
 
         if paragraph_style == Strings.style_image:
             # Prevent everything except arrows, return and erase keys.
@@ -1196,11 +1210,12 @@ class CustomRichText(rt.RichTextCtrl):
             color = None
             # Color is irrelevant for links.
             if not attrs.HasURL():
-                # todo sometimes the color is unrecognized
-                # todo link at the beginning of par forbids new line.
                 # todo shift, capslock cancels selection
-                color = self._css_document.translate_color_str(attrs.GetTextColour())
-                print(str(text), str(attrs.GetTextColour()), str(color))
+                try:
+                    color = self._css_document.translate_color_str(attrs.GetTextColour())
+                except WrongFormatException:
+                    # todo sometimes the color is unrecognized
+                    print(str(text), str(attrs.GetTextColour()), str(color))
 
             if attrs.HasURL():
                 # This will be a link
