@@ -585,8 +585,8 @@ class CustomRichText(rt.RichTextCtrl):
         if key_code == wx.WXK_RETURN and event.GetModifiers() == wx.MOD_SHIFT:
             return
 
-        # Do not run this method when we pressed ctrl. Events for ctrl-z are EVT_MENU.
-        if event.ControlDown():
+        # Do not run this method when we press ctrl. Events for ctrl-z are EVT_MENU. Also skip special keys.
+        if event.ControlDown() or event.ShiftDown() or event.AltDown() or event.GetKeyCode() == wx.WXK_CAPITAL:
             # Skip is needed for keyboard menu shortcuts to work.
             event.Skip()
             return
@@ -1209,7 +1209,6 @@ class CustomRichText(rt.RichTextCtrl):
             color = None
             # Color is irrelevant for links.
             if not attrs.HasURL():
-                # todo shift, capslock cancels selection
                 try:
                     color = self._css_document.translate_color_str(attrs.GetTextColour())
                 except WrongFormatException:
