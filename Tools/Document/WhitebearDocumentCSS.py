@@ -4,6 +4,7 @@ import tinycss
 import webcolors
 from wx import Colour
 from wx import NullColour
+from wx import BLUE
 
 from Constants.Constants import Strings
 from Exceptions.WrongFormatException import WrongFormatException
@@ -66,7 +67,7 @@ class WhitebearDocumentCSS:
         try:
             return self._str_to_color_dict[name]
         except KeyError as _:
-            raise WrongFormatException(Strings.exception_unrecognized_color + ': ' + name)
+            raise WrongFormatException(Strings.exception_unrecognized_color + ': ' + str(name))
 
     def translate_color_str(self, color: Colour) -> str:
         """
@@ -76,6 +77,9 @@ class WhitebearDocumentCSS:
         """
         if color == NullColour:
             # Special case of empty paragraph which should by default be black.
+            return Strings.color_black
+        if color == BLUE:
+            # Special case, deleted link color attribute remains blue for some reason.
             return Strings.color_black
         # wx.Colour can not be used as a key, so we have to find it this way.
         for name, rgb in self._str_to_color_dict.items():

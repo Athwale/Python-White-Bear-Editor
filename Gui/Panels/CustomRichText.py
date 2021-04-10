@@ -4,7 +4,6 @@ import wx
 import wx.richtext as rt
 
 from Constants.Constants import Strings, Numbers
-from Exceptions.WrongFormatException import WrongFormatException
 from Gui.Dialogs.EditLinkDialog import EditLinkDialog
 from Gui.Dialogs.EditTextImageDialog import EditTextImageDialog
 from Gui.Dialogs.EditVideoDialog import EditVideoDialog
@@ -1209,11 +1208,7 @@ class CustomRichText(rt.RichTextCtrl):
             color = None
             # Color is irrelevant for links.
             if not attrs.HasURL():
-                try:
-                    color = self._css_document.translate_color_str(attrs.GetTextColour())
-                except WrongFormatException:
-                    # todo sometimes the color is unrecognized
-                    print(str(text), str(attrs.GetTextColour()), str(color))
+                color = self._css_document.translate_color_str(attrs.GetTextColour())
 
             if attrs.HasURL():
                 # This will be a link
