@@ -3,6 +3,7 @@ import threading
 import wx
 
 from Exceptions.AccessException import AccessException
+from Exceptions.IndexException import IndexException
 from Exceptions.UnrecognizedFileException import UnrecognizedFileException
 from Exceptions.WrongFormatException import WrongFormatException
 from Tools.DirectoryLoader import DirectoryLoader
@@ -42,5 +43,5 @@ class FileListThread(threading.Thread):
                          self._directory_loader.get_menus(), self._directory_loader.get_index_page())
         except (AccessException, FileNotFoundError, UnrecognizedFileException, WrongFormatException) as e:
             wx.CallAfter(self._parent.on_filelist_load_fail, '', e)
-        except IndexError as e:
+        except IndexException as e:
             wx.CallAfter(self._parent.on_filelist_load_fail, self._path, e)

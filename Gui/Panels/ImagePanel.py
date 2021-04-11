@@ -25,7 +25,7 @@ class ImagePanel(wx.Panel):
         self._bitmap_button = wx.Button(self, -1, style=wx.BU_EXACTFIT | wx.BORDER_NONE)
         self._bitmap_button.SetBitmap(wx.Bitmap(placeholder_image))
         self._bitmap_button.SetMinSize((Numbers.main_image_width, Numbers.main_image_height))
-        self._label = wx.StaticText(self, -1, Strings.label_image)
+        self._label = wx.StaticText(self, -1, Strings.label_image, style=wx.ST_ELLIPSIZE_MIDDLE | wx.ST_NO_AUTORESIZE)
         self._sizer.Add(self._bitmap_button, flag=wx.EXPAND | wx.ALIGN_LEFT)
         self._sizer.Add(self._label, flag=wx.EXPAND | wx.ALIGN_LEFT)
         self._sizer.Add((Numbers.widget_border_size, Numbers.widget_border_size))

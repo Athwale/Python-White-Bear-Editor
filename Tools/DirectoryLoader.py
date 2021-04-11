@@ -8,7 +8,9 @@ from lxml.etree import XMLSyntaxError, XMLSchemaParseError
 
 from Constants.Constants import Strings
 from Exceptions.AccessException import AccessException
+from Exceptions.IndexException import IndexException
 from Exceptions.UnrecognizedFileException import UnrecognizedFileException
+from Exceptions.WrongFormatException import WrongFormatException
 from Resources.Fetch import Fetch
 from Tools.Document.WhitebearDocumentArticle import WhitebearDocumentArticle
 from Tools.Document.WhitebearDocumentCSS import WhitebearDocumentCSS
@@ -102,11 +104,11 @@ class DirectoryLoader:
             try:
                 xml_doc = html.parse(os.path.join(path, 'index.html'))
                 if not self._xmlschema_index.validate(xml_doc):
-                    raise IndexError(Strings.exception_not_white_bear + '\n' + str(self._xmlschema_index.error_log))
+                    raise IndexException(Strings.exception_not_white_bear + '\n' + str(self._xmlschema_index.error_log))
             except XMLSyntaxError as e:
-                raise IndexError(Strings.exception_html_syntax_error + '\n' + str(e) + ': index.html')
+                raise IndexException(Strings.exception_html_syntax_error + '\n' + str(e) + ': index.html')
             except ValueError as _:
-                raise IndexError(Strings.exception_html_syntax_error + ':\n' + 'index.html')
+                raise IndexException(Strings.exception_html_syntax_error + ':\n' + 'index.html')
         return True
 
     def _prepare_documents(self, path: str) -> None:
@@ -166,7 +168,13 @@ class DirectoryLoader:
 
         # Parse all articles after we have recognized and parsed all menu pages.
         for article in self._article_documents.values():
-            article.parse_self()
-            article.set_index_document(self._index_document)
-        # Parse index.
-        self._index_document.parse_self()
+            try:
+                article.parse_self()
+                article.set_index_document(self._index_document)
+            except IndexError as _:
+                raise WrongFormatException(Strings.exception_broken_html + ': ' + article.get_path())
+        try:
+            # Parse index.
+            self._index_document.parse_self()
+        except IndexError as _:
+            raise WrongFormatException(Strings.exception_broken_html + ': ' + self._index_document.get_path())

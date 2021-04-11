@@ -182,6 +182,7 @@ class Strings:
     exception_default_value_not_set: str = 'Page setup is incomplete'
     exception_bug: str = 'BUG Generated html failed validation'
     exception_sftp_fail: str = 'Transfer failed'
+    exception_broken_html: str = 'Corrupted html code'
 
     seo_error_length: str = 'Required length'
     seo_error_keywords_length: str = 'Length must be: ' + str(Numbers.keywords_min_length) + ' - ' + str(
