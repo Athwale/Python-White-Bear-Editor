@@ -283,17 +283,8 @@ class CustomRichText(rt.RichTextCtrl):
         p: rt.RichTextParagraph = self.GetFocusObject().GetParagraphAtPosition(position)
         style: rt.RichTextAttr = self._stylesheet.FindStyle(heading_type).GetStyle()
         p_range = p.GetRange().FromInternal()
-        # Save text children attributes to restore them after forcing the paragraph style.
-        # We need text weight, color, background, underline. URL flag remains untouched. Font size will be replaced by
-        # the heading style.
-        child_list = []
-        for child in p.GetChildren():
-            saved_attrs = {}
-            # The built in wx Copy method causes the children to disappear for a wtf reason.
-            # We only need to preserve font color, the rest will be set by the heading style.
-            attrs: rt.RichTextAttr = child.GetAttributes()
-            saved_attrs['color'] = attrs.GetTextColour()
-            child_list.append(saved_attrs)
+        # Save the color of the first child, this color will be used for the whole text.
+        color = p.GetChild(0).GetAttributes().GetTextColour()
 
         # Brute force the paragraph into the heading style paragraph attributes are reset completely which removes list
         # style. Character attributes are changed but not reset. Specific attributes are then changed separately.
@@ -311,7 +302,7 @@ class CustomRichText(rt.RichTextCtrl):
         # The paragraph changes after style set, so find it again.
         p = self.GetFocusObject().GetParagraphAtPosition(position)
         # Restore and set only relevant attributes for the style.
-        for child, attr_dict in zip(p.GetChildren(), child_list):
+        for child in p.GetChildren():
             attrs: rt.RichTextAttr = child.GetAttributes()
             attrs.SetFontSize(style.GetFontSize())
             attrs.SetFontWeight(wx.FONTWEIGHT_BOLD)
@@ -320,6 +311,7 @@ class CustomRichText(rt.RichTextCtrl):
             attrs.SetParagraphSpacingAfter(style.GetParagraphSpacingAfter())
             attrs.SetFontFaceName(style.GetFontFaceName())
             attrs.SetAlignment(wx.TEXT_ALIGNMENT_LEFT)
+            attrs.SetTextColour(color)
             # Only links can be underlined, it is safe to remove it here.
             attrs.SetFontUnderlined(style.GetFontUnderlined())
             if attrs.HasURL():
@@ -401,7 +393,7 @@ class CustomRichText(rt.RichTextCtrl):
         for child in p.GetChildren():
             child: rt.RichTextPlainText
             saved_attrs = {}
-            # The build in wx Copy method causes the children to disappear for a wtf reason.
+            # The built in wx Copy method causes the children to disappear for a wtf reason.
             attrs: rt.RichTextAttr = child.GetAttributes()
             if attrs.GetFontFaceName() == Strings.style_heading_3 or attrs.GetFontFaceName() == Strings.style_heading_4:
                 # Do not save bold font weight from heading style.
@@ -560,7 +552,17 @@ class CustomRichText(rt.RichTextCtrl):
                 first_style = Strings.style_list
             if first_style == Strings.style_url:
                 first_style = paragraph_style
-            self._change_style(first_style, position=-1)
+
+            # Test all children, maybe we do not need to change the style.
+            style_set = set()
+            for child in p.GetChildren():
+                attrs: rt.RichTextAttr = child.GetAttributes()
+                style_set.add(attrs.GetFontFaceName())
+            if len(style_set) != 1 and style_set != {Strings.style_paragraph, Strings.style_url} and style_set != \
+                    {Strings.style_list, Strings.style_url}:
+                # Skip changing style if there is only one style in the set or the set only contains paragraph/list
+                # style and url style, otherwise change the style.
+                self._change_style(first_style, position=-1)
 
         self._update_style_picker()
         self._enable_buttons()

@@ -5,7 +5,6 @@ Starting class for the whitebear editor GUI. This class is necessary and must be
 OnInit must be overridden here.
 # TODO fix bugs and package this into a binary.
 # TODO https://www.blog.pythonlibrary.org/2019/03/19/distributing-a-wxpython-application/
-# TODO moving right stops at the end of line.
 """
 
 import wx
