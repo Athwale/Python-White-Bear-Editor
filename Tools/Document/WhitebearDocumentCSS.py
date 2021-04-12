@@ -49,6 +49,8 @@ class WhitebearDocumentCSS:
                     # This means we have a text color declaration
                     if dec_names == ['color', 'display']:
                         color = Colour(dec_color.red, dec_color.green, dec_color.blue)
+                        if color == Colour(0, 0, 255, 255):
+                            raise WrongFormatException(Strings.exception_reserved_blue + ': ' + str(color))
                         self._str_to_color_dict[rule.selector.as_css().lstrip('.')] = color
 
     def get_colors(self) -> Dict[str, Colour]:

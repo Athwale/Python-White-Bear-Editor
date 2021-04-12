@@ -5,8 +5,6 @@ Starting class for the whitebear editor GUI. This class is necessary and must be
 OnInit must be overridden here.
 # TODO fix bugs and package this into a binary.
 # TODO https://www.blog.pythonlibrary.org/2019/03/19/distributing-a-wxpython-application/
-# TODO set locale for the whole program not individual dialogs.
-# TODO warn if pure blue reserved for links is detected in css.
 # TODO moving right stops at the end of line.
 """
 

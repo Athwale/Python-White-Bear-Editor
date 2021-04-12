@@ -183,6 +183,7 @@ class Strings:
     exception_bug: str = 'BUG Generated html failed validation'
     exception_sftp_fail: str = 'Transfer failed'
     exception_broken_html: str = 'Corrupted html code'
+    exception_reserved_blue: str = 'Blue color reserved for urls detected in CSS'
 
     seo_error_length: str = 'Required length'
     seo_error_keywords_length: str = 'Length must be: ' + str(Numbers.keywords_min_length) + ' - ' + str(
