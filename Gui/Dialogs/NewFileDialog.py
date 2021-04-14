@@ -62,11 +62,13 @@ class NewFileDialog(wx.Dialog):
         self._field_name_tip.SetMessage(Strings.warning_empty)
 
         choices: List[str] = [menu.get_page_name()[0] for menu in self._menus.values()]
+        choices.append('-')
         # Category sub sizer
         self._category_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self._label_category = wx.StaticText(self, -1, Strings.label_target_section + ': ')
         self._box_menu = wx.ComboBox(self, -1, choices=choices, style=wx.CB_DROPDOWN | wx.CB_SORT | wx.CB_READONLY)
         self._box_menu.SetSelection(0)
+        self._box_menu.SetBackgroundColour(Numbers.RED_COLOR)
         self._category_sub_sizer.Add(self._label_category, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
         self._category_sub_sizer.Add(16, -1)
         self._category_sub_sizer.Add(self._box_menu, proportion=1)
@@ -115,9 +117,10 @@ class NewFileDialog(wx.Dialog):
         # Bind handlers
         self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._ok_button)
         self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._cancel_button)
-        self.Bind(wx.EVT_TEXT, self._handle_name_change, self._field_name)
+        self.Bind(wx.EVT_TEXT, self._handle_fields, self._field_name)
         self.Bind(wx.EVT_BUTTON, self._handle_image_buttons, self._main_image_button)
         self.Bind(wx.EVT_BUTTON, self._handle_image_buttons, self._menu_logo_button)
+        self.Bind(wx.EVT_COMBOBOX, self._handle_fields, self._box_menu)
 
         # If there are no menus, disable the dialog.
         if not choices:
@@ -229,12 +232,19 @@ class NewFileDialog(wx.Dialog):
                 self._article_image = image
 
     # noinspection PyUnusedLocal
-    def _handle_name_change(self, event: wx.CommandEvent) -> None:
+    def _handle_fields(self, event) -> None:
         """
-        Disable OK button if the name field is empty.
+        Disable OK button if the fields contain wrong values.
         :param event: Not used
         :return: None
         """
+        disable = False
+        if self._box_menu.GetValue() == '-':
+            disable = True
+            self._box_menu.SetBackgroundColour(Numbers.RED_COLOR)
+        else:
+            self._box_menu.SetBackgroundColour(Numbers.GREEN_COLOR)
+
         new_name = self._field_name.GetValue()
         wrong_name: bool = False
         for c in new_name:
@@ -244,6 +254,7 @@ class NewFileDialog(wx.Dialog):
                 wrong_name = False
         if wrong_name or not self._get_document_path() or not self._field_name.GetValue():
             self._field_name.SetBackgroundColour(Numbers.RED_COLOR)
+            disable = True
             if wrong_name:
                 self._field_name_tip.SetMessage(Strings.warning_name_incorrect)
             if not self._get_document_path():
@@ -252,13 +263,16 @@ class NewFileDialog(wx.Dialog):
                 self._field_name_tip.SetMessage(Strings.warning_empty)
             self._field_name_tip.EnableTip(True)
             self._field_name_tip.Show(True)
-            self._ok_button.Disable()
-            self._main_image_button.Disable()
-            self._menu_logo_button.Disable()
         else:
             self._field_name_tip.SetMessage(Strings.status_ok)
             self._field_name_tip.DoHideNow()
             self._field_name.SetBackgroundColour(Numbers.GREEN_COLOR)
+
+        if disable:
+            self._ok_button.Disable()
+            self._main_image_button.Disable()
+            self._menu_logo_button.Disable()
+        else:
             self._menu_logo_button.Enable()
 
     def get_new_document(self) -> WhitebearDocumentArticle:
