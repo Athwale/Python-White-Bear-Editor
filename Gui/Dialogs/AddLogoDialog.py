@@ -102,6 +102,16 @@ class AddLogoDialog(wx.Dialog):
         self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._save_button)
         self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._cancel_button)
         self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._browse_button)
+        self.Bind(wx.EVT_TEXT, self._switch_default_button, self._field_image_name)
+
+    # noinspection PyUnusedLocal
+    def _switch_default_button(self, event: wx.CommandEvent) -> None:
+        """
+        Switch the default button to save once the user changes the image name.
+        :param event: Not used
+        :return: None
+        """
+        self._save_button.SetDefault()
 
     def _ask_for_image(self) -> (str, str):
         """
@@ -130,6 +140,7 @@ class AddLogoDialog(wx.Dialog):
             self._image_path, self._image_name = self._ask_for_image()
             if self._image_path and self._image_name:
                 self._load_image()
+                self._field_image_name.SetFocus()
             if self._menu_image:
                 self._save_button.Enable()
         elif event.GetId() == wx.ID_OK:

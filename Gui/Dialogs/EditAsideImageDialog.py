@@ -169,6 +169,7 @@ class EditAsideImageDialog(wx.Dialog):
                 return
             else:
                 self._change_image(new_path, new_name)
+                self._ok_button.SetDefault()
         elif event.GetId() == wx.ID_OK:
             # Save new information into image and rerun seo test.
             self._image_copy.set_caption(self._field_image_caption.GetValue())
