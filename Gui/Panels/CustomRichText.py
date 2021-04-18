@@ -38,7 +38,7 @@ class CustomRichText(rt.RichTextCtrl):
         self._doc = None
         self._css_document = None
         self._img_tool_id = img_tool_id
-        self.video_tool_id = video_tool_id
+        self._video_tool_id = video_tool_id
         # Used to prevent over-calling methods on keypress.
         self._disable_input = False
         self._click_counter = 0
@@ -565,7 +565,7 @@ class CustomRichText(rt.RichTextCtrl):
                 self._change_style(first_style, position=-1)
 
         self._update_style_picker()
-        self._enable_buttons()
+        self.enable_buttons()
 
         if self.BatchingUndo():
             self.EndBatchUndo()
@@ -670,7 +670,7 @@ class CustomRichText(rt.RichTextCtrl):
         """
         if self.HasFocus():
             self._update_style_picker()
-            self._enable_buttons()
+            self.enable_buttons()
         event.Skip()
 
     def _on_mouse_left(self, event: wx.MouseEvent) -> None:
@@ -720,7 +720,7 @@ class CustomRichText(rt.RichTextCtrl):
             self._change_style(evt.GetString(), position=-1)
         self.EndBatchUndo()
 
-    def _enable_buttons(self) -> None:
+    def enable_buttons(self) -> None:
         """
         Enable or disable styling buttons based on caret position.
         :return: None
@@ -732,10 +732,10 @@ class CustomRichText(rt.RichTextCtrl):
                 and not isinstance(p.GetChild(0), rt.RichTextField):
             # Only allow inserting images on an empty paragraph line with no other images.
             self._main_frame.tool_bar.EnableTool(self._img_tool_id, True)
-            self._main_frame.tool_bar.EnableTool(self.video_tool_id, True)
+            self._main_frame.tool_bar.EnableTool(self._video_tool_id, True)
         else:
             self._main_frame.tool_bar.EnableTool(self._img_tool_id, False)
-            self._main_frame.tool_bar.EnableTool(self.video_tool_id, False)
+            self._main_frame.tool_bar.EnableTool(self._video_tool_id, False)
         if paragraph_style == Strings.style_image:
             self._style_picker.Disable()
             # Remove selection from the picker to avoid confusing flicker.

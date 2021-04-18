@@ -640,8 +640,7 @@ class MainFrame(wx.Frame):
         # Disable toolbar buttons
         for tool_id in self._tool_ids:
             self.tool_bar.EnableTool(tool_id, (not state))
-        self.tool_bar.EnableTool(MainFrame.IMAGE_TOOL_ID, (not state))
-        self.tool_bar.EnableTool(MainFrame.VIDEO_TOOL_ID, (not state))
+        self._main_text_area.enable_buttons()
         self.tool_bar.EnableTool(wx.ID_NEW, (not state))
         # Disable menu items
         self._public_checkbox.Enable(not state)
