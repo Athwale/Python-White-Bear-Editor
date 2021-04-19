@@ -70,7 +70,7 @@ class CustomRichText(rt.RichTextCtrl):
 
         self.Bind(wx.EVT_KEY_DOWN, self._on_key_down)
         self.Bind(wx.EVT_KEY_UP, self._update_gui_handler)
-        self.Bind(wx.EVT_MENU, self._prevent_paste, id=wx.ID_PASTE)
+        self.Bind(wx.EVT_MENU, self._clipboard_paste_handler, id=wx.ID_PASTE)
         self.Bind(wx.EVT_MENU, self._undo_redo, id=wx.ID_UNDO)
         self.Bind(wx.EVT_MENU, self._undo_redo, id=wx.ID_REDO)
         self.Bind(wx.EVT_COLOUR_CHANGED, self._refresh)
@@ -625,11 +625,21 @@ class CustomRichText(rt.RichTextCtrl):
         # fire on list bullet deletion.
         wx.CallAfter(self._modify_text)
 
-    def _prevent_paste(self, event: wx.CommandEvent) -> None:
+    def _clipboard_paste_handler(self, event: wx.CommandEvent) -> None:
+        """
+        Handle text paste into the control.
+        :param event: Passed to other methods.
+        :return: None
+        """
+        if self._prevent_paste(event):
+            return
+        event.Skip()
+
+    def _prevent_paste(self, event: wx.CommandEvent) -> bool:
         """
         Prevent paste if we are in an image style.
         :param event: Used to get id.
-        :return: None
+        :return: True when paste should not be allowed.
         """
         if event.GetId() == wx.ID_PASTE:
             if not self.BatchingUndo():
@@ -638,9 +648,10 @@ class CustomRichText(rt.RichTextCtrl):
             position = self.GetAdjustedCaretPosition(self.GetCaretPosition())
             paragraph_style, _ = self._get_style_at_pos(position)
             if paragraph_style == Strings.style_image:
-                return
+                return True
+            # Keeps undo working.
             self._modify_text()
-        event.Skip()
+        return False
 
     def _undo_redo(self, event: wx.CommandEvent):
         processor: wx.CommandProcessor = self.GetCommandProcessor()
