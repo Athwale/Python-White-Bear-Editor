@@ -34,6 +34,8 @@ class CustomRichText(rt.RichTextCtrl):
         :param style: wx style attributes.
         """
         super().__init__(parent, -1, style=style)
+        # Required for copy paste to work and retain text attributes
+        rt.RichTextBuffer.AddHandler(rt.RichTextXMLHandler())
         self._parent = parent
         self._doc = None
         self._css_document = None
