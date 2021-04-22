@@ -10,7 +10,7 @@ class Numbers:
     YELLOW_COLOR = Colour(250, 255, 196)
     BLUE_COLOR = Colour(145, 207, 255)
 
-    # Turn link sanity check on/off.
+    char_v: int = 86
     private_key_permissions: oct = 0o600
     connection_timeout: int = 5
     put_timeout: int = 20
