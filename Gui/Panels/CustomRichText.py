@@ -47,7 +47,7 @@ class CustomRichText(rt.RichTextCtrl):
         # Is set to true when a document is fully loaded, prevents setting document to modified before it is loaded.
         self._load_indicator = False
         # Saves the last cursor position when a key is pressed. This is used to correctly modify pasted text.
-        self._key_down_position = 0
+        self._paste_start_position = 0
         self._config_manager = ConfigManager.get_instance()
 
         self._stylesheet = rt.RichTextStyleSheet()
@@ -78,7 +78,6 @@ class CustomRichText(rt.RichTextCtrl):
         self.Bind(wx.EVT_MENU, self._undo_redo, id=wx.ID_UNDO)
         self.Bind(wx.EVT_MENU, self._undo_redo, id=wx.ID_REDO)
         self.Bind(wx.EVT_COLOUR_CHANGED, self._refresh)
-        self.Bind(wx.EVT_KEY_UP, self._pasted_text_handler, self)
 
         # Disable drag and drop text.
         self.SetDropTarget(None)
@@ -586,8 +585,6 @@ class CustomRichText(rt.RichTextCtrl):
         if self._disable_input:
             return
 
-        self._key_down_position = self.GetAdjustedCaretPosition(self.GetCaretPosition())
-
         key_code = event.GetKeyCode()
         # Disable shift enter since it is broken and does not break lines consistently.
         if key_code == wx.WXK_RETURN and event.GetModifiers() == wx.MOD_SHIFT:
@@ -603,11 +600,11 @@ class CustomRichText(rt.RichTextCtrl):
             # Start batch here because delete text would go through before the batch would be started in modify text.
             self.BeginBatchUndo(Strings.undo_last_action)
 
-        paragraph_style, character_style = self._get_style_at_pos(self._key_down_position)
+        paragraph_style, character_style = self._get_style_at_pos(self._paste_start_position)
         # Detect paragraph beginning. Allow pressing return at the beginning of line.
-        paragraph_start = self.GetFocusObject().GetParagraphAtPosition(self._key_down_position).GetRange()[0]
-        if paragraph_start != self._key_down_position:
-            _, next_character_style = self._get_style_at_pos(self._key_down_position + 1)
+        paragraph_start = self.GetFocusObject().GetParagraphAtPosition(self._paste_start_position).GetRange()[0]
+        if paragraph_start != self._paste_start_position:
+            _, next_character_style = self._get_style_at_pos(self._paste_start_position + 1)
             if character_style == Strings.style_url and next_character_style == Strings.style_url:
                 if event.GetKeyCode() == wx.WXK_RETURN:
                     # Prevent return key inside url style but not at the end of the link.
@@ -630,34 +627,34 @@ class CustomRichText(rt.RichTextCtrl):
         # fire on list bullet deletion.
         wx.CallAfter(self._modify_text)
 
-    def _pasted_text_handler(self, event: wx.KeyEvent) -> None:
-        """
-        Update pasted text to preserve correct styling.
-        :param event: Used to detect ctrl+v.
-        :return: None
-        """
-        if self._load_indicator:
-            if event.ControlDown() and event.GetKeyCode() == Numbers.char_v:
-                # WXK_CONTROL_V is ctrl+v but only shows up in wx.TextCtrl, 86 is 'v' character code.
-                if not self.BatchingUndo():
-                    # Start batch here because ctrl does not get through _on_key_down().
-                    self.BeginBatchUndo(Strings.undo_last_action)
-                # todo undo is broken, must be used twice.
-                # todo change must happen on the line where the insertion happened.
-                # todo try accessing the clipboard before pasting.
-                # todo remove paste from edit menu and right click menu, key down position would be wrong.
-                wx.CallAfter(self._modify_text)
-                print(self._key_down_position, self.GetAdjustedCaretPosition(self.GetCaretPosition()))
-
     def _clipboard_paste_handler(self, event: wx.CommandEvent) -> None:
         """
         Handle text paste into the control. Runs before the text is pasted.
         :param event: Passed to other methods.
         :return: None
         """
+        # Save current position, this is where pasted text style must be adjusted.
+        self._paste_start_position = self.GetAdjustedCaretPosition(self.GetCaretPosition())
+        print('paste start pos: ', self._paste_start_position)
+        print(self.GetValue())
+
         if self._prevent_paste(event):
             return
         event.Skip()
+
+        # todo adjust at start position and move back, catch middle button too.
+        # todo style is wrong on next lines.
+        # todo undo is probably broken
+        # Calls the function when the current event handler has exited and thus the text will be already pasted.
+        wx.CallAfter(self._adjust_pasted_text)
+
+    def _adjust_pasted_text(self) -> None:
+        """
+
+        :return: None
+        """
+        self.MoveCaret(self._paste_start_position)
+        self._modify_text()
 
     def _prevent_paste(self, event: wx.CommandEvent) -> bool:
         """
