@@ -47,7 +47,7 @@ class CustomRichText(rt.RichTextCtrl):
         # Is set to true when a document is fully loaded, prevents setting document to modified before it is loaded.
         self._load_indicator = False
         # Saves the last cursor position when a key is pressed. This is used to correctly modify pasted text.
-        self._paste_start_position = 0
+        self._paste_signal = False
         self._config_manager = ConfigManager.get_instance()
 
         self._stylesheet = rt.RichTextStyleSheet()
@@ -74,10 +74,12 @@ class CustomRichText(rt.RichTextCtrl):
 
         self.Bind(wx.EVT_KEY_DOWN, self._on_key_down)
         self.Bind(wx.EVT_KEY_UP, self._update_gui_handler)
-        self.Bind(wx.EVT_MENU, self._clipboard_paste_handler, id=wx.ID_PASTE)
         self.Bind(wx.EVT_MENU, self._undo_redo, id=wx.ID_UNDO)
         self.Bind(wx.EVT_MENU, self._undo_redo, id=wx.ID_REDO)
         self.Bind(wx.EVT_COLOUR_CHANGED, self._refresh)
+        # Text paste handling.
+        self.Bind(wx.EVT_MENU, self._paste_handler, id=wx.ID_PASTE)
+        self.Bind(rt.EVT_RICHTEXT_CONTENT_INSERTED, self._insert_handler, self)
 
         # Disable drag and drop text.
         self.SetDropTarget(None)
@@ -559,13 +561,20 @@ class CustomRichText(rt.RichTextCtrl):
 
             # Test all children, maybe we do not need to change the style.
             style_set = set()
+            font_face = None
             for child in p.GetChildren():
                 attrs: rt.RichTextAttr = child.GetAttributes()
-                style_set.add(attrs.GetFontFaceName())
+                font_face = attrs.GetFontFaceName()
+                style_set.add(font_face)
             if len(style_set) != 1 and style_set != {Strings.style_paragraph, Strings.style_url} and style_set != \
                     {Strings.style_list, Strings.style_url}:
+                print('a')
                 # Skip changing style if there is only one style in the set or the set only contains paragraph/list
                 # style and url style, otherwise change the style.
+                self._change_style(first_style, position=-1)
+            elif font_face != paragraph_style:
+                # todo this
+                # Used for fixing pasted styles which are wrong for some reason.
                 self._change_style(first_style, position=-1)
 
         self._update_style_picker()
@@ -600,11 +609,12 @@ class CustomRichText(rt.RichTextCtrl):
             # Start batch here because delete text would go through before the batch would be started in modify text.
             self.BeginBatchUndo(Strings.undo_last_action)
 
-        paragraph_style, character_style = self._get_style_at_pos(self._paste_start_position)
+        position = self.GetAdjustedCaretPosition(self.GetCaretPosition())
+        paragraph_style, character_style = self._get_style_at_pos(position)
         # Detect paragraph beginning. Allow pressing return at the beginning of line.
-        paragraph_start = self.GetFocusObject().GetParagraphAtPosition(self._paste_start_position).GetRange()[0]
-        if paragraph_start != self._paste_start_position:
-            _, next_character_style = self._get_style_at_pos(self._paste_start_position + 1)
+        paragraph_start = self.GetFocusObject().GetParagraphAtPosition(position).GetRange()[0]
+        if paragraph_start != position:
+            _, next_character_style = self._get_style_at_pos(position + 1)
             if character_style == Strings.style_url and next_character_style == Strings.style_url:
                 if event.GetKeyCode() == wx.WXK_RETURN:
                     # Prevent return key inside url style but not at the end of the link.
@@ -627,34 +637,40 @@ class CustomRichText(rt.RichTextCtrl):
         # fire on list bullet deletion.
         wx.CallAfter(self._modify_text)
 
-    def _clipboard_paste_handler(self, event: wx.CommandEvent) -> None:
+    def _paste_handler(self, event: wx.CommandEvent) -> None:
         """
-        Handle text paste into the control. Runs before the text is pasted.
+        Handle text paste into the control. Runs before the text is pasted. Runs on evt_menu - ID_PASTE
         :param event: Passed to other methods.
         :return: None
         """
-        # Save current position, this is where pasted text style must be adjusted.
-        self._paste_start_position = self.GetAdjustedCaretPosition(self.GetCaretPosition())
-        print('paste start pos: ', self._paste_start_position)
-        print(self.GetValue())
-
         if self._prevent_paste(event):
             return
+        # Indicate that text has been pasted, this is used in _insert_handler to only handle text paste not all inserts.
+        self._paste_signal = True
         event.Skip()
 
-        # todo adjust at start position and move back, catch middle button too.
-        # todo style is wrong on next lines.
-        # todo undo is probably broken
-        # Calls the function when the current event handler has exited and thus the text will be already pasted.
-        wx.CallAfter(self._adjust_pasted_text)
-
-    def _adjust_pasted_text(self) -> None:
+    def _insert_handler(self, event: rt.RichTextEvent) -> None:
         """
-
+        Handles text paste using the paste signal which is only set when text is pasted.
+        :param event: Used to get the range of the pasted text.
         :return: None
         """
-        self.MoveCaret(self._paste_start_position)
-        self._modify_text()
+        if self._paste_signal:
+            # The position is set when text is pasted and used here to detect paste.
+            self._paste_signal = False
+            wx.CallAfter(self._fix_pasted_text_style, event.GetRange())
+
+    def _fix_pasted_text_style(self, paste_range: (int, int)) -> None:
+        """
+
+        :param paste_range:
+        :return: None
+        """
+        for pos in range(paste_range[0], paste_range[1]):
+            # todo go just through lines not each character.
+            self.MoveCaret(pos)
+            self._modify_text()
+        # todo undo is probably broken
 
     def _prevent_paste(self, event: wx.CommandEvent) -> bool:
         """
