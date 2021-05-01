@@ -49,6 +49,8 @@ class CustomRichText(rt.RichTextCtrl):
         # Saves the last cursor position when a key is pressed. This is used to correctly modify pasted text.
         self._paste_signal = False
         self._config_manager = ConfigManager.get_instance()
+        # This is used to control undo and redo
+        self._command_processor: wx.CommandProcessor = self.GetCommandProcessor()
 
         self._stylesheet = rt.RichTextStyleSheet()
         self._stylesheet.SetName('Stylesheet')
@@ -74,8 +76,6 @@ class CustomRichText(rt.RichTextCtrl):
 
         self.Bind(wx.EVT_KEY_DOWN, self._on_key_down)
         self.Bind(wx.EVT_KEY_UP, self._update_gui_handler)
-        self.Bind(wx.EVT_MENU, self._undo_redo, id=wx.ID_UNDO)
-        self.Bind(wx.EVT_MENU, self._undo_redo, id=wx.ID_REDO)
         self.Bind(wx.EVT_COLOUR_CHANGED, self._refresh)
         # Text paste handling.
         self.Bind(wx.EVT_MENU, self._paste_handler, id=wx.ID_PASTE)
@@ -647,9 +647,6 @@ class CustomRichText(rt.RichTextCtrl):
         # Indicate that text has been pasted, this is used in _insert_handler to only handle text paste not all inserts.
         self._paste_signal = True
         event.Skip()
-        if not self.BatchingUndo():
-            # Start batch here because delete text would go through before the batch would be started in modify text.
-            self.BeginBatchUndo(Strings.undo_last_action)
 
     def _insert_handler(self, event: rt.RichTextEvent) -> None:
         """
@@ -662,8 +659,8 @@ class CustomRichText(rt.RichTextCtrl):
 
     def _fix_pasted_text_style(self, paste_range: (int, int)) -> None:
         """
-
-        :param paste_range:
+        Fix the styles of pasted text.
+        :param paste_range: The range of pasted text.
         :return: None
         """
         for pos in range(paste_range[0], paste_range[1]):
@@ -671,7 +668,7 @@ class CustomRichText(rt.RichTextCtrl):
             self._modify_text()
         # The position is set when text is pasted and used here to detect paste.
         # todo fix urls, videos and images in pasted text.
-        # todo undo is probably broken
+        # todo redo is broken
         if self._paste_signal and self.BatchingUndo():
             self.EndBatchUndo()
         self._paste_signal = False
@@ -683,37 +680,17 @@ class CustomRichText(rt.RichTextCtrl):
         :return: True when paste should not be allowed.
         """
         if event.GetId() == wx.ID_PASTE:
-            if not self.BatchingUndo():
-                # We get here without starting undo batch, since on key down ignores ctrl.
-                self.BeginBatchUndo(Strings.undo_last_action)
             position = self.GetAdjustedCaretPosition(self.GetCaretPosition())
             paragraph_style, _ = self._get_style_at_pos(position)
             if paragraph_style == Strings.style_image:
+                # We get here without starting undo batch, since on key down ignores ctrl.
+                self.BeginBatchUndo(Strings.undo_last_action)
                 return True
-            # Keeps undo working.
-            self._modify_text()
+            if not self.BatchingUndo():
+                # Start paste batch here because delete text would go through before the batch would be started
+                # in modify text.
+                self.BeginBatchUndo(Strings.undo_last_action)
         return False
-
-    def _undo_redo(self, event: wx.CommandEvent):
-        # todo check whether this is even needed.
-        processor: wx.CommandProcessor = self.GetCommandProcessor()
-        if processor.GetCurrentCommand():
-            # There may be no command.
-            if event.GetId() == wx.ID_UNDO:
-                if processor.GetCurrentCommand().GetName() == 'Paste':
-                    # Paste is followed by style change, we want to undo both in one go.
-                    processor.Undo()
-                    processor.Undo()
-                else:
-                    processor.Undo()
-            elif event.GetId() == wx.ID_REDO:
-                if processor.GetCurrentCommand().GetName() == 'Paste':
-                    # Paste is followed by style change, we want to undo both in one go.
-                    processor.Redo()
-                    processor.Redo()
-                else:
-                    processor.Redo()
-        self.MoveRight(0)
 
     def _update_gui_handler(self, event: wx.CommandEvent) -> None:
         """
