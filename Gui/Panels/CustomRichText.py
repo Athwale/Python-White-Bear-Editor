@@ -568,19 +568,18 @@ class CustomRichText(rt.RichTextCtrl):
                 style_set.add(font_face)
             if len(style_set) != 1 and style_set != {Strings.style_paragraph, Strings.style_url} and style_set != \
                     {Strings.style_list, Strings.style_url}:
-                print('a')
                 # Skip changing style if there is only one style in the set or the set only contains paragraph/list
                 # style and url style, otherwise change the style.
                 self._change_style(first_style, position=-1)
             elif font_face != paragraph_style:
-                # todo this
                 # Used for fixing pasted styles which are wrong for some reason.
                 self._change_style(first_style, position=-1)
 
         self._update_style_picker()
         self.enable_buttons()
 
-        if self.BatchingUndo():
+        if not self._paste_signal and self.BatchingUndo():
+            # Lock undo batch while paste text action is being done.
             self.EndBatchUndo()
 
         self._disable_input = False
@@ -648,6 +647,9 @@ class CustomRichText(rt.RichTextCtrl):
         # Indicate that text has been pasted, this is used in _insert_handler to only handle text paste not all inserts.
         self._paste_signal = True
         event.Skip()
+        if not self.BatchingUndo():
+            # Start batch here because delete text would go through before the batch would be started in modify text.
+            self.BeginBatchUndo(Strings.undo_last_action)
 
     def _insert_handler(self, event: rt.RichTextEvent) -> None:
         """
@@ -656,8 +658,6 @@ class CustomRichText(rt.RichTextCtrl):
         :return: None
         """
         if self._paste_signal:
-            # The position is set when text is pasted and used here to detect paste.
-            self._paste_signal = False
             wx.CallAfter(self._fix_pasted_text_style, event.GetRange())
 
     def _fix_pasted_text_style(self, paste_range: (int, int)) -> None:
@@ -667,10 +667,14 @@ class CustomRichText(rt.RichTextCtrl):
         :return: None
         """
         for pos in range(paste_range[0], paste_range[1]):
-            # todo go just through lines not each character.
             self.MoveCaret(pos)
             self._modify_text()
+        # The position is set when text is pasted and used here to detect paste.
+        # todo fix urls, videos and images in pasted text.
         # todo undo is probably broken
+        if self._paste_signal and self.BatchingUndo():
+            self.EndBatchUndo()
+        self._paste_signal = False
 
     def _prevent_paste(self, event: wx.CommandEvent) -> bool:
         """
@@ -691,6 +695,7 @@ class CustomRichText(rt.RichTextCtrl):
         return False
 
     def _undo_redo(self, event: wx.CommandEvent):
+        # todo check whether this is even needed.
         processor: wx.CommandProcessor = self.GetCommandProcessor()
         if processor.GetCurrentCommand():
             # There may be no command.
