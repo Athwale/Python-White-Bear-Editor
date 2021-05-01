@@ -642,6 +642,15 @@ class CustomRichText(rt.RichTextCtrl):
         :param event: Passed to other methods.
         :return: None
         """
+        text_data = rt.RichTextBufferDataObject()
+        success = False
+        if wx.TheClipboard.Open():
+            success = wx.TheClipboard.GetData(text_data)
+            wx.TheClipboard.Close()
+        if success:
+            paste_buffer: rt.RichTextBuffer = text_data.GetRichTextBuffer()
+            print(paste_buffer.GetText())
+
         if self._prevent_paste(event):
             return
         # Indicate that text has been pasted, this is used in _insert_handler to only handle text paste not all inserts.
@@ -668,7 +677,7 @@ class CustomRichText(rt.RichTextCtrl):
             self._modify_text()
         # The position is set when text is pasted and used here to detect paste.
         # todo fix urls, videos and images in pasted text.
-        # todo redo is broken
+        # todo redo does not restore styles to first line
         if self._paste_signal and self.BatchingUndo():
             self.EndBatchUndo()
         self._paste_signal = False
@@ -682,14 +691,12 @@ class CustomRichText(rt.RichTextCtrl):
         if event.GetId() == wx.ID_PASTE:
             position = self.GetAdjustedCaretPosition(self.GetCaretPosition())
             paragraph_style, _ = self._get_style_at_pos(position)
+            # We get here without starting undo batch, since on key down ignores ctrl.
+            # Start paste batch here because delete text would go through before the batch would be started
+            # in modify text.
+            self.BeginBatchUndo(Strings.undo_last_action)
             if paragraph_style == Strings.style_image:
-                # We get here without starting undo batch, since on key down ignores ctrl.
-                self.BeginBatchUndo(Strings.undo_last_action)
                 return True
-            if not self.BatchingUndo():
-                # Start paste batch here because delete text would go through before the batch would be started
-                # in modify text.
-                self.BeginBatchUndo(Strings.undo_last_action)
         return False
 
     def _update_gui_handler(self, event: wx.CommandEvent) -> None:
