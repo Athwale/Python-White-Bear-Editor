@@ -245,9 +245,10 @@ class CustomRichText(rt.RichTextCtrl):
         names.append(Strings.style_list)
         self._style_picker.InsertItems(names, 0)
 
-    def _change_style(self, style_name: str, position: int, preserve_url=True) -> None:
+    def _change_style(self, buffer: rt.RichTextBuffer, style_name: str, position: int, preserve_url=True) -> None:
         """
-        Changes the style of the current paragraph or selection.
+        Changes the style of the current paragraph or selection in the rich text control.
+        :param buffer: The rich text buffer to work with.
         :param style_name: The name of a style in stylesheet.
         :param position: The position of the caret. This is needed because when changing style over multiple paragraphs
         the position is passed from selection. This is used when joining heading and ordinary paragraph using
@@ -259,15 +260,16 @@ class CustomRichText(rt.RichTextCtrl):
             position = self.GetAdjustedCaretPosition(self.GetCaretPosition())
 
         if style_name == Strings.style_heading_3 or style_name == Strings.style_heading_4:
-            self._apply_heading_style(style_name, position)
+            self._apply_heading_style(buffer, style_name, position)
 
         elif style_name == Strings.style_paragraph:
-            self._apply_paragraph_style(position, preserve_url)
+            self._apply_paragraph_style(buffer, position, preserve_url)
 
         elif style_name == Strings.style_list:
-            self._apply_list_style(position)
+            self._apply_list_style(buffer, position)
 
         elif style_name == Strings.style_url:
+            # todo buffer here?
             self._apply_url_style()
 
         # Unless we simulate a move, you can still type in the wrong style after change.
@@ -276,34 +278,35 @@ class CustomRichText(rt.RichTextCtrl):
         self.MoveRight(0)
         self._update_style_picker()
 
-    def _apply_heading_style(self, heading_type: str, position: int) -> None:
+    def _apply_heading_style(self, buffer: rt.RichTextBuffer, heading_type: str, position: int) -> None:
         """
         Changes current paragraph under the cursor into a heading 3 or 4, removing any links.
+        :param buffer: The rich text buffer to work with.
         :param heading_type: The heading style size.
         :param position: The position of the caret.
         :return: None
         """
-        p: rt.RichTextParagraph = self.GetFocusObject().GetParagraphAtPosition(position)
+        p: rt.RichTextParagraph = buffer.GetParagraphAtPosition(position)
         style: rt.RichTextAttr = self._stylesheet.FindStyle(heading_type).GetStyle()
-        p_range = p.GetRange().FromInternal()
+        p_range = p.GetRange().ToInternal()
         # Save the color of the first child, this color will be used for the whole text.
         color = p.GetChild(0).GetAttributes().GetTextColour()
 
         # Brute force the paragraph into the heading style paragraph attributes are reset completely which removes list
         # style. Character attributes are changed but not reset. Specific attributes are then changed separately.
         end_batch = False
-        if not self.BatchingUndo():
+        if not buffer.BatchingUndo():
             # Only batch undo if we are not already recording changes from the beginning of modify text method.
             # Basically only if this method is called from the style picker.
-            self.BeginBatchUndo(Strings.undo_last_action)
+            buffer.BeginBatchUndo(Strings.undo_last_action)
             end_batch = True
-        self.SetStyleEx(p_range, style, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_PARAGRAPHS_ONLY |
+        buffer.SetStyle(p_range, style, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_PARAGRAPHS_ONLY |
                         rt.RICHTEXT_SETSTYLE_RESET)
         if end_batch:
-            self.EndBatchUndo()
+            buffer.EndBatchUndo()
 
         # The paragraph changes after style set, so find it again.
-        p = self.GetFocusObject().GetParagraphAtPosition(position)
+        p = buffer.GetParagraphAtPosition(position)
         # Restore and set only relevant attributes for the style.
         for child in p.GetChildren():
             attrs: rt.RichTextAttr = child.GetAttributes()
@@ -324,19 +327,20 @@ class CustomRichText(rt.RichTextCtrl):
                 attrs.SetTextColour(style.GetTextColour())
                 attrs.SetCharacterStyleName('')
 
-    def _apply_paragraph_style(self, position: int, preserve_url: bool) -> None:
+    def _apply_paragraph_style(self, buffer: rt.RichTextBuffer, position: int, preserve_url: bool) -> None:
         """
         Changes current paragraph under the cursor into the paragraph style defined for normal text.
         Retains links, text weight and color.
+        :param buffer: The rich text buffer to work with.
         :param position: The position of the caret.
         :param preserve_url: True to preserve urls.
         :return: None
         """
-        p: rt.RichTextParagraph = self.GetFocusObject().GetParagraphAtPosition(position)
+        p: rt.RichTextParagraph = buffer.GetParagraphAtPosition(position)
         # This is needed to prevent loss of children attributes when typing quickly for some reason.
         p.Defragment(rt.RichTextDrawingContext(p.GetBuffer()))
         style: rt.RichTextAttr = self._stylesheet.FindStyle(Strings.style_paragraph).GetStyle()
-        p_range = p.GetRange().FromInternal()
+        p_range = p.GetRange().ToInternal()
         child_list = []
         for child in p.GetChildren():
             saved_attrs = {}
@@ -351,15 +355,15 @@ class CustomRichText(rt.RichTextCtrl):
             child_list.append(saved_attrs)
 
         end_batch = False
-        if not self.BatchingUndo():
-            self.BeginBatchUndo(Strings.undo_last_action)
+        if not buffer.BatchingUndo():
+            buffer.BeginBatchUndo(Strings.undo_last_action)
             end_batch = True
-        self.SetStyleEx(p_range, style, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_PARAGRAPHS_ONLY |
+        buffer.SetStyle(p_range, style, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_PARAGRAPHS_ONLY |
                         rt.RICHTEXT_SETSTYLE_RESET)
         if end_batch:
-            self.EndBatchUndo()
+            buffer.EndBatchUndo()
 
-        p = self.GetFocusObject().GetParagraphAtPosition(position)
+        p = buffer.GetParagraphAtPosition(position)
         for child, attr_dict in zip(p.GetChildren(), child_list):
             attrs: rt.RichTextAttr = child.GetAttributes()
             attrs.SetFontWeight(attr_dict['weight'])
@@ -381,17 +385,18 @@ class CustomRichText(rt.RichTextCtrl):
                 attrs.SetCharacterStyleName('')
                 attrs.SetFontUnderlined(False)
 
-    def _apply_list_style(self, position: int) -> None:
+    def _apply_list_style(self, buffer: rt.RichTextBuffer, position: int) -> None:
         """
         Changes paragraph on position into list item.
+        :param buffer: The rich text buffer to work with.
         :param position: The position of the caret.
         :return: None
         """
-        p: rt.RichTextParagraph = self.GetFocusObject().GetParagraphAtPosition(position)
+        p: rt.RichTextParagraph = buffer.GetParagraphAtPosition(position)
         p.Defragment(rt.RichTextDrawingContext(p.GetBuffer()))
         style_def: rt.RichTextListStyleDefinition = self._stylesheet.FindStyle(Strings.style_list)
         style: rt.RichTextAttr = style_def.GetStyle()
-        p_range = p.GetRange().FromInternal()
+        p_range = p.GetRange().ToInternal()
         child_list = []
         for child in p.GetChildren():
             child: rt.RichTextPlainText
@@ -408,17 +413,17 @@ class CustomRichText(rt.RichTextCtrl):
             child_list.append(saved_attrs)
 
         end_batch = False
-        if not self.BatchingUndo():
-            self.BeginBatchUndo(Strings.undo_last_action)
+        if not buffer.BatchingUndo():
+            buffer.BeginBatchUndo(Strings.undo_last_action)
             end_batch = True
-        self.SetStyleEx(p_range, style, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_PARAGRAPHS_ONLY |
+        buffer.SetStyle(p_range, style, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_PARAGRAPHS_ONLY |
                         rt.RICHTEXT_SETSTYLE_RESET)
-        self.SetListStyle(p_range, style_def, specifiedLevel=0,
-                          flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_SPECIFY_LEVEL)
+        buffer.SetListStyle(p_range, style_def, specifiedLevel=0, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO |
+                            rt.RICHTEXT_SETSTYLE_SPECIFY_LEVEL)
         if end_batch:
-            self.EndBatchUndo()
+            buffer.EndBatchUndo()
 
-        p = self.GetFocusObject().GetParagraphAtPosition(position)
+        p = buffer.GetParagraphAtPosition(position)
         # Restore only relevant attributes to the new children. The order is the same.
         for child, attr_dict in zip(p.GetChildren(), child_list):
             attrs: rt.RichTextAttr = child.GetAttributes()
@@ -513,7 +518,7 @@ class CustomRichText(rt.RichTextCtrl):
         if paragraph_style == Strings.style_list:
             attrs: rt.RichTextAttr = p.GetAttributes()
             if attrs.GetBulletStyle() != wx.TEXT_ATTR_BULLET_STYLE_STANDARD:
-                self._change_style(Strings.style_paragraph, position=-1)
+                self._change_style(self.GetBuffer(), Strings.style_paragraph, position=-1)
                 paragraph_style = Strings.style_paragraph
                 p: rt.RichTextParagraph = self.GetFocusObject().GetParagraphAtPosition(position)
 
@@ -523,7 +528,7 @@ class CustomRichText(rt.RichTextCtrl):
             if attrs.GetBulletStyle() != wx.TEXT_ATTR_BULLET_STYLE_STANDARD:
                 if not isinstance(p.GetChild(0), rt.RichTextField):
                     # Field is not seen as text.
-                    self._change_style(Strings.style_paragraph, position=-1, preserve_url=False)
+                    self._change_style(self.GetBuffer(), Strings.style_paragraph, position=-1, preserve_url=False)
                     # Changing the style above also changes the paragraph address in memory, find it again then.
                     # Not doing this may cause segfaults.
                     p: rt.RichTextParagraph = self.GetFocusObject().GetParagraphAtPosition(position)
@@ -539,7 +544,7 @@ class CustomRichText(rt.RichTextCtrl):
                 if font_face == Strings.style_url:
                     # We do not want to change whole paragraphs into links, so use paragraph.
                     font_face = Strings.style_paragraph
-                self._change_style(font_face, position=-1)
+                self._change_style(self.GetBuffer(), font_face, position=-1)
                 # Changing the style above also changes the paragraph address in memory, find it again then.
                 p: rt.RichTextParagraph = self.GetFocusObject().GetParagraphAtPosition(position)
             else:
@@ -570,10 +575,10 @@ class CustomRichText(rt.RichTextCtrl):
                     {Strings.style_list, Strings.style_url}:
                 # Skip changing style if there is only one style in the set or the set only contains paragraph/list
                 # style and url style, otherwise change the style.
-                self._change_style(first_style, position=-1)
+                self._change_style(self.GetBuffer(), first_style, position=-1)
             elif font_face != paragraph_style:
                 # Used for fixing pasted styles which are wrong for some reason.
-                self._change_style(first_style, position=-1)
+                self._change_style(self.GetBuffer(), first_style, position=-1)
 
         self._update_style_picker()
         self.enable_buttons()
@@ -732,9 +737,9 @@ class CustomRichText(rt.RichTextCtrl):
                     # Skip changing style on images
                     if p.GetAttributes().GetFontFaceName() != evt.GetString():
                         # Apply style to all the paragraphs unless they are already in the style
-                        self._change_style(evt.GetString(), position)
+                        self._change_style(self.GetBuffer(), evt.GetString(), position)
         else:
-            self._change_style(evt.GetString(), position=-1)
+            self._change_style(self.GetBuffer(), evt.GetString(), position=-1)
         self.EndBatchUndo()
 
     def enable_buttons(self) -> None:
