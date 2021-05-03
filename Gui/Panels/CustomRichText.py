@@ -46,8 +46,6 @@ class CustomRichText(rt.RichTextCtrl):
         self._click_counter = 0
         # Is set to true when a document is fully loaded, prevents setting document to modified before it is loaded.
         self._load_indicator = False
-        # Saves the last cursor position when a key is pressed. This is used to correctly modify pasted text.
-        self._paste_signal = False
         self._config_manager = ConfigManager.get_instance()
         # This is used to control undo and redo
         self._command_processor: wx.CommandProcessor = self.GetCommandProcessor()
@@ -79,7 +77,6 @@ class CustomRichText(rt.RichTextCtrl):
         self.Bind(wx.EVT_COLOUR_CHANGED, self._refresh)
         # Text paste handling.
         self.Bind(wx.EVT_MENU, self._paste_handler, id=wx.ID_PASTE)
-        self.Bind(rt.EVT_RICHTEXT_CONTENT_INSERTED, self._insert_handler, self)
 
         # Disable drag and drop text.
         self.SetDropTarget(None)
@@ -447,17 +444,19 @@ class CustomRichText(rt.RichTextCtrl):
             self.SetStyleEx(link_range, self._stylesheet.FindStyle(Strings.style_url).GetStyle(),
                             flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_CHARACTERS_ONLY)
 
-    def _get_style_at_pos(self, position: int = 0) -> (str, str):
+    @staticmethod
+    def _get_style_at_pos(buffer: rt.RichTextBuffer, position: int = 0) -> (str, str):
         """
         Get the style name at given position in the text. 0 - current position, -1 - before current position
         1 - after current position.
         :param position: The position.
+        :param buffer: The buffer to work with.
         :return: (paragraph style name, character style name) or (None, None).
         """
         style_carrier = rt.RichTextAttr()
         paragraph_style_name = None
         character_style_name = None
-        self.GetStyle(position, style_carrier)
+        buffer.GetStyle(position, style_carrier)
         if style_carrier.GetCharacterStyleName():
             character_style_name = style_carrier.GetCharacterStyleName()
         if style_carrier.GetListStyleName():
@@ -470,7 +469,8 @@ class CustomRichText(rt.RichTextCtrl):
         """
         Show current style under cursor in the style box.
         """
-        paragraph_style_name, character_style_name = self._get_style_at_pos(self.GetAdjustedCaretPosition
+        paragraph_style_name, character_style_name = self._get_style_at_pos(self.GetBuffer(),
+                                                                            self.GetAdjustedCaretPosition
                                                                             (self.GetCaretPosition()))
         if character_style_name:
             self._style_picker.SetSelection(self._style_picker.FindString(character_style_name))
@@ -489,7 +489,7 @@ class CustomRichText(rt.RichTextCtrl):
 
         position = self.GetAdjustedCaretPosition(self.GetCaretPosition())
         p: rt.RichTextParagraph = self.GetFocusObject().GetParagraphAtPosition(position)
-        paragraph_style, character_style = self._get_style_at_pos(position)
+        paragraph_style, character_style = self._get_style_at_pos(self.GetBuffer(), position)
 
         # End url style if next character has different or no url.
         if character_style == Strings.style_url:
@@ -578,7 +578,7 @@ class CustomRichText(rt.RichTextCtrl):
         self._update_style_picker()
         self.enable_buttons()
 
-        if not self._paste_signal and self.BatchingUndo():
+        if self.BatchingUndo():
             # Lock undo batch while paste text action is being done.
             self.EndBatchUndo()
 
@@ -609,11 +609,11 @@ class CustomRichText(rt.RichTextCtrl):
             self.BeginBatchUndo(Strings.undo_last_action)
 
         position = self.GetAdjustedCaretPosition(self.GetCaretPosition())
-        paragraph_style, character_style = self._get_style_at_pos(position)
+        paragraph_style, character_style = self._get_style_at_pos(self.GetBuffer(), position)
         # Detect paragraph beginning. Allow pressing return at the beginning of line.
         paragraph_start = self.GetFocusObject().GetParagraphAtPosition(position).GetRange()[0]
         if paragraph_start != position:
-            _, next_character_style = self._get_style_at_pos(position + 1)
+            _, next_character_style = self._get_style_at_pos(self.GetBuffer(), position + 1)
             if character_style == Strings.style_url and next_character_style == Strings.style_url:
                 if event.GetKeyCode() == wx.WXK_RETURN:
                     # Prevent return key inside url style but not at the end of the link.
@@ -642,6 +642,10 @@ class CustomRichText(rt.RichTextCtrl):
         :param event: Passed to other methods.
         :return: None
         """
+        if self._prevent_paste(event):
+            return
+
+        paste_position = self.GetAdjustedCaretPosition(self.GetCaretPosition())
         text_data = rt.RichTextBufferDataObject()
         success = False
         if wx.TheClipboard.Open():
@@ -649,38 +653,14 @@ class CustomRichText(rt.RichTextCtrl):
             wx.TheClipboard.Close()
         if success:
             paste_buffer: rt.RichTextBuffer = text_data.GetRichTextBuffer()
-            print(paste_buffer.GetText())
-
-        if self._prevent_paste(event):
-            return
+            # todo if the first style is image, paste on new line.
+            # todo paste inside a link is a problem.
+            # Turn the style of the first paragraph into the correct style
+            if self._get_style_at_pos(paste_buffer, 0) != self._get_style_at_pos(self.GetBuffer(), paste_position):
+                # Only change the style when we are pasting into a different style.
+                p: rt.RichTextParagraph = paste_buffer.GetParagraphAtPosition(0)
         # Indicate that text has been pasted, this is used in _insert_handler to only handle text paste not all inserts.
-        self._paste_signal = True
         event.Skip()
-
-    def _insert_handler(self, event: rt.RichTextEvent) -> None:
-        """
-        Handles text paste using the paste signal which is only set when text is pasted.
-        :param event: Used to get the range of the pasted text.
-        :return: None
-        """
-        if self._paste_signal:
-            wx.CallAfter(self._fix_pasted_text_style, event.GetRange())
-
-    def _fix_pasted_text_style(self, paste_range: (int, int)) -> None:
-        """
-        Fix the styles of pasted text.
-        :param paste_range: The range of pasted text.
-        :return: None
-        """
-        for pos in range(paste_range[0], paste_range[1]):
-            self.MoveCaret(pos)
-            self._modify_text()
-        # The position is set when text is pasted and used here to detect paste.
-        # todo fix urls, videos and images in pasted text.
-        # todo redo does not restore styles to first line
-        if self._paste_signal and self.BatchingUndo():
-            self.EndBatchUndo()
-        self._paste_signal = False
 
     def _prevent_paste(self, event: wx.CommandEvent) -> bool:
         """
@@ -690,7 +670,7 @@ class CustomRichText(rt.RichTextCtrl):
         """
         if event.GetId() == wx.ID_PASTE:
             position = self.GetAdjustedCaretPosition(self.GetCaretPosition())
-            paragraph_style, _ = self._get_style_at_pos(position)
+            paragraph_style, _ = self._get_style_at_pos(self.GetBuffer(), position)
             # We get here without starting undo batch, since on key down ignores ctrl.
             # Start paste batch here because delete text would go through before the batch would be started
             # in modify text.
@@ -763,7 +743,7 @@ class CustomRichText(rt.RichTextCtrl):
         :return: None
         """
         position = self.GetAdjustedCaretPosition(self.GetCaretPosition())
-        paragraph_style, character_style = self._get_style_at_pos(position)
+        paragraph_style, character_style = self._get_style_at_pos(self.GetBuffer(), position)
         p: rt.RichTextParagraph = self.GetFocusObject().GetParagraphAtPosition(position)
         if not p.GetTextForRange(p.GetRange()) and paragraph_style == Strings.style_paragraph \
                 and not isinstance(p.GetChild(0), rt.RichTextField):
