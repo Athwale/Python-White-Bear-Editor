@@ -52,7 +52,6 @@ class CustomRichText(rt.RichTextCtrl):
 
         self._stylesheet = rt.RichTextStyleSheet()
         self._stylesheet.SetName('Stylesheet')
-        self.SetStyleSheet(self._stylesheet)
 
         self._style_picker = style_control
 
@@ -247,28 +246,21 @@ class CustomRichText(rt.RichTextCtrl):
 
     def _change_style(self, buffer: rt.RichTextBuffer, style_name: str, position: int, preserve_url=True) -> None:
         """
-        Changes the style of the current paragraph or selection in the rich text control.
+        Changes the style of a paragraph or selection in the rich text control buffer visible on screen.
         :param buffer: The rich text buffer to work with.
         :param style_name: The name of a style in stylesheet.
         :param position: The position of the caret. This is needed because when changing style over multiple paragraphs
         the position is passed from selection. This is used when joining heading and ordinary paragraph using
-        delete or backspace.
+        delete or backspace. If position is -1, the current caret position is used.
         :param preserve_url: True to preserve url when changing to paragraph style.
         :return: None
         """
         if position == -1:
             position = self.GetAdjustedCaretPosition(self.GetCaretPosition())
 
-        if style_name == Strings.style_heading_3 or style_name == Strings.style_heading_4:
-            self._apply_heading_style(buffer, style_name, position)
+        self._change_style_in_buffer(buffer, style_name, position, preserve_url)
 
-        elif style_name == Strings.style_paragraph:
-            self._apply_paragraph_style(buffer, position, preserve_url)
-
-        elif style_name == Strings.style_list:
-            self._apply_list_style(buffer, position)
-
-        elif style_name == Strings.style_url:
+        if style_name == Strings.style_url:
             # todo buffer here?
             self._apply_url_style()
 
@@ -278,7 +270,26 @@ class CustomRichText(rt.RichTextCtrl):
         self.MoveRight(0)
         self._update_style_picker()
 
-    def _apply_heading_style(self, buffer: rt.RichTextBuffer, heading_type: str, position: int) -> None:
+    def _change_style_in_buffer(self, buffer: rt.RichTextBuffer, style: str, position: int, preserve_url=True) -> None:
+        """
+        Changes the style of a paragraph in the buffer.
+        :param buffer: The rich text buffer to work with.
+        :param style: The name of a style in stylesheet.
+        :param position: The position of the caret.
+        :param preserve_url: True to preserve url when changing to paragraph style.
+        :return: None
+        """
+        if style == Strings.style_heading_3 or style == Strings.style_heading_4:
+            self._apply_heading_style(buffer, style, position)
+
+        elif style == Strings.style_paragraph:
+            self._apply_paragraph_style(buffer, position, preserve_url)
+
+        elif style == Strings.style_list:
+            self._apply_list_style(buffer, position)
+
+    @staticmethod
+    def _apply_heading_style(buffer: rt.RichTextBuffer, heading_type: str, position: int) -> None:
         """
         Changes current paragraph under the cursor into a heading 3 or 4, removing any links.
         :param buffer: The rich text buffer to work with.
@@ -287,7 +298,7 @@ class CustomRichText(rt.RichTextCtrl):
         :return: None
         """
         p: rt.RichTextParagraph = buffer.GetParagraphAtPosition(position)
-        style: rt.RichTextAttr = self._stylesheet.FindStyle(heading_type).GetStyle()
+        style: rt.RichTextAttr = buffer.GetStyleSheet().FindStyle(heading_type).GetStyle()
         p_range = p.GetRange().ToInternal()
         # Save the color of the first child, this color will be used for the whole text.
         color = p.GetChild(0).GetAttributes().GetTextColour()
@@ -327,7 +338,8 @@ class CustomRichText(rt.RichTextCtrl):
                 attrs.SetTextColour(style.GetTextColour())
                 attrs.SetCharacterStyleName('')
 
-    def _apply_paragraph_style(self, buffer: rt.RichTextBuffer, position: int, preserve_url: bool) -> None:
+    @staticmethod
+    def _apply_paragraph_style(buffer: rt.RichTextBuffer, position: int, preserve_url: bool) -> None:
         """
         Changes current paragraph under the cursor into the paragraph style defined for normal text.
         Retains links, text weight and color.
@@ -339,7 +351,7 @@ class CustomRichText(rt.RichTextCtrl):
         p: rt.RichTextParagraph = buffer.GetParagraphAtPosition(position)
         # This is needed to prevent loss of children attributes when typing quickly for some reason.
         p.Defragment(rt.RichTextDrawingContext(p.GetBuffer()))
-        style: rt.RichTextAttr = self._stylesheet.FindStyle(Strings.style_paragraph).GetStyle()
+        style: rt.RichTextAttr = buffer.GetStyleSheet().FindStyle(Strings.style_paragraph).GetStyle()
         p_range = p.GetRange().ToInternal()
         child_list = []
         for child in p.GetChildren():
@@ -385,7 +397,8 @@ class CustomRichText(rt.RichTextCtrl):
                 attrs.SetCharacterStyleName('')
                 attrs.SetFontUnderlined(False)
 
-    def _apply_list_style(self, buffer: rt.RichTextBuffer, position: int) -> None:
+    @staticmethod
+    def _apply_list_style(buffer: rt.RichTextBuffer, position: int) -> None:
         """
         Changes paragraph on position into list item.
         :param buffer: The rich text buffer to work with.
@@ -394,7 +407,7 @@ class CustomRichText(rt.RichTextCtrl):
         """
         p: rt.RichTextParagraph = buffer.GetParagraphAtPosition(position)
         p.Defragment(rt.RichTextDrawingContext(p.GetBuffer()))
-        style_def: rt.RichTextListStyleDefinition = self._stylesheet.FindStyle(Strings.style_list)
+        style_def: rt.RichTextListStyleDefinition = buffer.GetStyleSheet().FindStyle(Strings.style_list)
         style: rt.RichTextAttr = style_def.GetStyle()
         p_range = p.GetRange().ToInternal()
         child_list = []
@@ -650,22 +663,29 @@ class CustomRichText(rt.RichTextCtrl):
         if self._prevent_paste(event):
             return
 
-        paste_position = self.GetAdjustedCaretPosition(self.GetCaretPosition())
         text_data = rt.RichTextBufferDataObject()
         success = False
         if wx.TheClipboard.Open():
             success = wx.TheClipboard.GetData(text_data)
             wx.TheClipboard.Close()
         if success:
+            paste_position = self.GetAdjustedCaretPosition(self.GetCaretPosition())
             paste_buffer: rt.RichTextBuffer = text_data.GetRichTextBuffer()
+            paste_buffer.SetStyleSheet(self._stylesheet)
+            current_style = self._get_style_at_pos(self.GetBuffer(), paste_position)
             # todo if the first style is image, paste on new line.
             # todo paste inside a link is a problem.
             # Turn the style of the first paragraph into the correct style
-            if self._get_style_at_pos(paste_buffer, 0) != self._get_style_at_pos(self.GetBuffer(), paste_position):
+            if self._get_style_at_pos(paste_buffer, 0) != current_style:
                 # Only change the style when we are pasting into a different style.
-                p: rt.RichTextParagraph = paste_buffer.GetParagraphAtPosition(0)
-        # Indicate that text has been pasted, this is used in _insert_handler to only handle text paste not all inserts.
-        event.Skip()
+                self._change_style_in_buffer(paste_buffer, current_style[0], 0)
+                print(self._get_style_at_pos(paste_buffer, 0))
+
+                self.GetBuffer().InsertParagraphsWithUndo(paste_position+1, paste_buffer, self, 0)
+                self.ShowPosition(paste_position + paste_buffer.GetOwnRange().GetEnd())
+
+        # todo skip when just plain text
+        #event.Skip()
 
     def _prevent_paste(self, event: wx.CommandEvent) -> bool:
         """
