@@ -46,6 +46,8 @@ class CustomRichText(rt.RichTextCtrl):
         self._click_counter = 0
         # Is set to true when a document is fully loaded, prevents setting document to modified before it is loaded.
         self._load_indicator = False
+        # Used to distinguish paste
+        self._paste_indicator = False
         self._config_manager = ConfigManager.get_instance()
         # This is used to control undo and redo
         self._command_processor: wx.CommandProcessor = self.GetCommandProcessor()
@@ -76,6 +78,7 @@ class CustomRichText(rt.RichTextCtrl):
         self.Bind(wx.EVT_COLOUR_CHANGED, self._refresh)
         # Text paste handling.
         self.Bind(wx.EVT_MENU, self._paste_handler, id=wx.ID_PASTE)
+        self.Bind(rt.EVT_RICHTEXT_CONTENT_INSERTED, self._paste_finish, self)
 
         # Disable drag and drop text.
         self.SetDropTarget(None)
@@ -597,7 +600,6 @@ class CustomRichText(rt.RichTextCtrl):
         self.enable_buttons()
 
         if self.BatchingUndo():
-            # Lock undo batch while paste text action is being done.
             self.EndBatchUndo()
 
         self._disable_input = False
@@ -663,6 +665,8 @@ class CustomRichText(rt.RichTextCtrl):
         if self._prevent_paste(event):
             return
 
+        # Indicate paste to the paste finish handler.
+        self._paste_indicator = True
         text_data = rt.RichTextBufferDataObject()
         success = False
         if wx.TheClipboard.Open():
@@ -677,25 +681,45 @@ class CustomRichText(rt.RichTextCtrl):
             current_style = self._get_style_at_pos(ctrl_buffer, paste_position)
             # todo if the first style is image, paste on new line.
             # todo paste inside a link is a problem.
+            # todo undo broken.
             # Turn the style of the first paragraph into the correct style
             if self._get_style_at_pos(paste_buffer, 0) != current_style:
                 # Only change the style when we are pasting into a different style.
                 self._change_style_in_buffer(paste_buffer, current_style[0], 0)
 
-            ctrl_buffer.Modify(True)
-            container: rt.RichTextParagraphLayoutBox = ctrl_buffer.GetContainer()
-            container.InsertFragment(paste_position + 1, paste_buffer)
-            container.UpdateRanges()
-            container.Invalidate()
-            self.MoveCaret(paste_position + paste_buffer.GetOwnRange().GetLength() - 1)
-
-            # todo last par always inserted in last known active style.
-            #paste_buffer.AddParagraph('')
-            #ctrl_buffer.InsertParagraphsWithUndo(paste_position + 1, paste_buffer, self, 0)
-            # Last paragraph is for some reason pasted in current style. So we need to fix it.
+            # Add empty paragraph after the pasted text. This paragraph retains the original style from the point of
+            # paste. The paragraph will be removed later if empty. Only add if we are adding more than one paragraph.
+            if len(paste_buffer.GetChildren()) > 1:
+                paste_buffer.AddParagraph('')
+            ctrl_buffer.InsertParagraphsWithUndo(paste_position + 1, paste_buffer, self, 0)
 
         # todo skip when just plain text
         #event.Skip()
+
+    # noinspection PyUnusedLocal
+    def _paste_finish(self, event: rt.RichTextEvent) -> None:
+        """
+        Finish pasting a new text. Delete the additional empty paragraph to workaround the weird behavior of last
+        paragraph being pasted in the style of the paste start point.
+        :param event: Not used.
+        :return: None
+        """
+        # todo images and videos
+        if self._paste_indicator:
+            # Delete the current paragraph if it is empty. Paste adds one paragraph which either ends up containing the
+            # continuation of the paragraphs where paste occurred or nothing.
+            position = self.GetAdjustedCaretPosition(self.GetCaretPosition())
+            p: rt.RichTextParagraph = self.GetFocusObject().GetParagraphAtPosition(position)
+            if not p.GetTextForRange(p.GetRange()):
+                attrs: rt.RichTextAttr = p.GetAttributes()
+                if attrs.GetBulletStyle() != wx.TEXT_ATTR_BULLET_STYLE_STANDARD:
+                    if not isinstance(p.GetChild(0), rt.RichTextField):
+                        # Field is not seen as text. Paragraph is empty.
+                        self.Delete(rt.RichTextRange(p.GetRange()[0], p.GetRange()[0] + 1))
+                        self._paste_indicator = False
+        if self.BatchingUndo():
+            # Causes segfault if called directly.
+            wx.CallAfter(self.EndBatchUndo)
 
     def _prevent_paste(self, event: wx.CommandEvent) -> bool:
         """
@@ -709,6 +733,7 @@ class CustomRichText(rt.RichTextCtrl):
             # We get here without starting undo batch, since on key down ignores ctrl.
             # Start paste batch here because delete text would go through before the batch would be started
             # in modify text.
+            print(self.BatchingUndo())
             self.BeginBatchUndo(Strings.undo_last_action)
             if paragraph_style == Strings.style_image:
                 return True

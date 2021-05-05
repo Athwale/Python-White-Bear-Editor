@@ -16,7 +16,7 @@ class Numbers:
     put_timeout: int = 20
     online_test_timeout: int = 10
 
-    three_click_timeout: int = 400
+    three_click_timeout: int = 600
     photo_ratio: float = 4 / 3
     photo_ratio_tolerance: float = 0.01
 
