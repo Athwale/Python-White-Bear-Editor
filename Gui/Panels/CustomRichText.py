@@ -671,18 +671,28 @@ class CustomRichText(rt.RichTextCtrl):
         if success:
             paste_position = self.GetAdjustedCaretPosition(self.GetCaretPosition())
             paste_buffer: rt.RichTextBuffer = text_data.GetRichTextBuffer()
+            # We need the stylesheet to change styles in the buffer before pasting.
             paste_buffer.SetStyleSheet(self._stylesheet)
-            current_style = self._get_style_at_pos(self.GetBuffer(), paste_position)
+            ctrl_buffer: rt.RichTextBuffer = self.GetBuffer()
+            current_style = self._get_style_at_pos(ctrl_buffer, paste_position)
             # todo if the first style is image, paste on new line.
             # todo paste inside a link is a problem.
             # Turn the style of the first paragraph into the correct style
             if self._get_style_at_pos(paste_buffer, 0) != current_style:
                 # Only change the style when we are pasting into a different style.
                 self._change_style_in_buffer(paste_buffer, current_style[0], 0)
-                print(self._get_style_at_pos(paste_buffer, 0))
 
-                self.GetBuffer().InsertParagraphsWithUndo(paste_position+1, paste_buffer, self, 0)
-                self.ShowPosition(paste_position + paste_buffer.GetOwnRange().GetEnd())
+            ctrl_buffer.Modify(True)
+            container: rt.RichTextParagraphLayoutBox = ctrl_buffer.GetContainer()
+            container.InsertFragment(paste_position + 1, paste_buffer)
+            container.UpdateRanges()
+            container.Invalidate()
+            self.MoveCaret(paste_position + paste_buffer.GetOwnRange().GetLength() - 1)
+
+            # todo last par always inserted in last known active style.
+            #paste_buffer.AddParagraph('')
+            #ctrl_buffer.InsertParagraphsWithUndo(paste_position + 1, paste_buffer, self, 0)
+            # Last paragraph is for some reason pasted in current style. So we need to fix it.
 
         # todo skip when just plain text
         #event.Skip()
@@ -1163,7 +1173,6 @@ class CustomRichText(rt.RichTextCtrl):
         buffer: rt.RichTextBuffer = self.GetBuffer()
         paragraphs: List[rt.RichTextParagraph] = buffer.GetChildren()
         for p in paragraphs:
-            p: rt.RichTextParagraph
             par_style: str = p.GetAttributes().GetFontFaceName()
             if par_style == Strings.style_paragraph:
                 last_was_list = False
