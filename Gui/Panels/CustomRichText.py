@@ -717,9 +717,9 @@ class CustomRichText(rt.RichTextCtrl):
                         # Field is not seen as text. Paragraph is empty.
                         self.Delete(rt.RichTextRange(p.GetRange()[0], p.GetRange()[0] + 1))
                         self._paste_indicator = False
-        if self.BatchingUndo():
-            # Causes segfault if called directly.
-            wx.CallAfter(self.EndBatchUndo)
+            if self.BatchingUndo():
+                # Causes segfault if called directly.
+                wx.CallAfter(self.EndBatchUndo)
 
     def _prevent_paste(self, event: wx.CommandEvent) -> bool:
         """
