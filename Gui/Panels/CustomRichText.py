@@ -286,6 +286,8 @@ class CustomRichText(rt.RichTextCtrl):
             self._apply_heading_style(buffer, style, position)
 
         elif style == Strings.style_paragraph:
+            # todo style applied in buffer is only updated after something is typed in. ToInternal FromInternal
+            #self._apply_paragraph_style_old(buffer, position, preserve_url)
             self._apply_paragraph_style(buffer, position, preserve_url)
 
         elif style == Strings.style_list:
@@ -355,7 +357,8 @@ class CustomRichText(rt.RichTextCtrl):
         # This is needed to prevent loss of children attributes when typing quickly for some reason.
         p.Defragment(rt.RichTextDrawingContext(p.GetBuffer()))
         style: rt.RichTextAttr = buffer.GetStyleSheet().FindStyle(Strings.style_paragraph).GetStyle()
-        p_range = p.GetRange().ToInternal()
+        # The GetRange.To/FromInternal is causing problems here.
+        p_range: rt.RichTextRange = p.GetRange()
         child_list = []
         for child in p.GetChildren():
             saved_attrs = {}
@@ -379,6 +382,63 @@ class CustomRichText(rt.RichTextCtrl):
             buffer.EndBatchUndo()
 
         p = buffer.GetParagraphAtPosition(position)
+        for child, attr_dict in zip(p.GetChildren(), child_list):
+            attrs: rt.RichTextAttr = child.GetAttributes()
+            attrs.SetFontWeight(attr_dict['weight'])
+            attrs.SetBackgroundColour(style.GetBackgroundColour())
+            attrs.SetFontSize(style.GetFontSize())
+            attrs.SetParagraphSpacingBefore(style.GetParagraphSpacingBefore())
+            attrs.SetParagraphSpacingAfter(style.GetParagraphSpacingAfter())
+            attrs.SetFontFaceName(Strings.style_paragraph)
+            attrs.SetAlignment(wx.TEXT_ALIGNMENT_LEFT)
+            if attrs.HasURL() and preserve_url:
+                # Only urls have background color and underline.
+                attrs.SetBackgroundColour(attr_dict['background'])
+                attrs.SetFontUnderlined(True)
+                attrs.SetFontFaceName(Strings.style_url)
+            else:
+                # Remove the url
+                attrs.SetURL('')
+                attrs.SetFlags(attrs.GetFlags() ^ wx.TEXT_ATTR_URL)
+                attrs.SetCharacterStyleName('')
+                attrs.SetFontUnderlined(False)
+
+    def _apply_paragraph_style_old(self, buffer: rt.RichTextBuffer, position: int, preserve_url: bool) -> None:
+        """
+        Changes current paragraph under the cursor into the paragraph style defined for normal text.
+        Retains links, text weight and color.
+        :param position: The position of the caret.
+        :param preserve_url: True to preserve urls.
+        :return: None
+        """
+        p: rt.RichTextParagraph = buffer.GetParagraphAtPosition(position)
+        # This is needed to prevent loss of children attributes when typing quickly for some reason.
+        p.Defragment(rt.RichTextDrawingContext(p.GetBuffer()))
+        style: rt.RichTextAttr = buffer.GetStyleSheet().FindStyle(Strings.style_paragraph).GetStyle()
+        p_range = p.GetRange().FromInternal()
+        child_list = []
+        for child in p.GetChildren():
+            saved_attrs = {}
+            attrs: rt.RichTextAttr = child.GetAttributes()
+            if attrs.GetFontFaceName() == Strings.style_heading_3 or attrs.GetFontFaceName() == Strings.style_heading_4:
+                # Do not save bold font weight from heading style we assume the weight should be normal.
+                saved_attrs['weight'] = wx.FONTWEIGHT_NORMAL
+            else:
+                saved_attrs['weight'] = attrs.GetFontWeight()
+            # Font color does not need to be saved, it is preserved from the previous child. Background is for urls.
+            saved_attrs['background'] = attrs.GetBackgroundColour()
+            child_list.append(saved_attrs)
+
+        end_batch = False
+        if not self.BatchingUndo():
+            self.BeginBatchUndo(Strings.undo_last_action)
+            end_batch = True
+        self.SetStyleEx(p_range, style, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_PARAGRAPHS_ONLY |
+                                              rt.RICHTEXT_SETSTYLE_RESET)
+        if end_batch:
+            self.EndBatchUndo()
+
+        p = self.GetFocusObject().GetParagraphAtPosition(position)
         for child, attr_dict in zip(p.GetChildren(), child_list):
             attrs: rt.RichTextAttr = child.GetAttributes()
             attrs.SetFontWeight(attr_dict['weight'])
@@ -574,7 +634,8 @@ class CustomRichText(rt.RichTextCtrl):
             # The style of the first paragraph child.
             first_style: str = p.GetChild(0).GetAttributes().GetFontFaceName()
             attrs: rt.RichTextAttr = p.GetAttributes()
-            if attrs.GetBulletStyle() == wx.TEXT_ATTR_BULLET_STYLE_STANDARD and not first_style:
+            # and not first style was in the condition below
+            if attrs.GetBulletStyle() == wx.TEXT_ATTR_BULLET_STYLE_STANDARD:
                 # Empty list line has no child and no first style.
                 first_style = Strings.style_list
             if first_style == Strings.style_url:
