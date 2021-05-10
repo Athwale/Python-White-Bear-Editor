@@ -271,7 +271,6 @@ class CustomRichText(rt.RichTextCtrl):
         self.Invalidate()
         self.Refresh()
         self.MoveRight(0)
-        self._update_style_picker()
 
     def _change_style_in_buffer(self, buffer: rt.RichTextBuffer, style: str, position: int, preserve_url=True) -> None:
         """
@@ -491,8 +490,6 @@ class CustomRichText(rt.RichTextCtrl):
         """
         Show current style under cursor in the style box.
         """
-        # todo style picker broken, can not select style on empty line until something is typed.
-        # todo the style is not show in field until typed from where it is picked up by the picker.
         paragraph_style_name, character_style_name = self._get_style_at_pos(self.GetBuffer(),
                                                                             self.GetAdjustedCaretPosition
                                                                             (self.GetCaretPosition()))
@@ -500,8 +497,6 @@ class CustomRichText(rt.RichTextCtrl):
             self._style_picker.SetSelection(self._style_picker.FindString(character_style_name))
         elif paragraph_style_name:
             self._style_picker.SetSelection(self._style_picker.FindString(paragraph_style_name))
-        # Return focus back into the text area. The focus must happen a little later when the style picker is finished.
-        wx.CallLater(100, self.SetFocus)
 
     def _modify_text(self) -> None:
         """
@@ -750,7 +745,6 @@ class CustomRichText(rt.RichTextCtrl):
         :return: None
         """
         if self.HasFocus():
-            self._update_style_picker()
             self.enable_buttons()
         event.Skip()
 
@@ -760,6 +754,7 @@ class CustomRichText(rt.RichTextCtrl):
         :param event: Not used.
         :return: None
         """
+        self._update_style_picker()
         if not self._timer.IsRunning():
             self._timer.Start(Numbers.three_click_timeout)
         self._click_counter = self._click_counter + 1
@@ -800,6 +795,8 @@ class CustomRichText(rt.RichTextCtrl):
         else:
             self._change_style(self.GetBuffer(), evt.GetString(), position=-1)
         self.EndBatchUndo()
+        # Return focus back into the text area. The focus must happen a little later when the style picker is finished.
+        wx.CallLater(100, self.SetFocus)
 
     def enable_buttons(self) -> None:
         """
@@ -920,6 +917,8 @@ class CustomRichText(rt.RichTextCtrl):
         self.EndSuppressUndo()
         self._modify_text()
         self._load_indicator = True
+        # Set focus to the text area.
+        wx.CallLater(100, self.SetFocus)
 
     def _write_list(self, ul: UnorderedList) -> None:
         """
