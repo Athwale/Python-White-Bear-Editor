@@ -308,7 +308,7 @@ class CustomRichText(rt.RichTextCtrl):
         # Brute force the paragraph into the heading style paragraph attributes are reset completely which removes list
         # style. Character attributes are changed but not reset. Specific attributes are then changed separately.
         end_batch = False
-        if not buffer.BatchingUndo():
+        if not buffer.SuppressingUndo() and not buffer.BatchingUndo():
             # Only batch undo if we are not already recording changes from the beginning of modify text method.
             # Basically only if this method is called from the style picker.
             buffer.BeginBatchUndo(Strings.undo_last_action)
@@ -370,7 +370,7 @@ class CustomRichText(rt.RichTextCtrl):
             child_list.append(saved_attrs)
 
         end_batch = False
-        if not buffer.BatchingUndo():
+        if not buffer.SuppressingUndo() and not buffer.BatchingUndo():
             buffer.BeginBatchUndo(Strings.undo_last_action)
             end_batch = True
         buffer.SetStyle(p_range, style, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_PARAGRAPHS_ONLY |
@@ -429,7 +429,7 @@ class CustomRichText(rt.RichTextCtrl):
             child_list.append(saved_attrs)
 
         end_batch = False
-        if not buffer.BatchingUndo():
+        if not buffer.SuppressingUndo() and not buffer.BatchingUndo():
             buffer.BeginBatchUndo(Strings.undo_last_action)
             end_batch = True
         buffer.SetStyle(p_range, style, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_PARAGRAPHS_ONLY |
@@ -676,49 +676,30 @@ class CustomRichText(rt.RichTextCtrl):
             paste_buffer: rt.RichTextBuffer = text_data.GetRichTextBuffer()
             # We need the stylesheet to change styles in the buffer before pasting.
             paste_buffer.SetStyleSheet(self._stylesheet)
+            paste_buffer.BeginSuppressUndo()
             ctrl_buffer: rt.RichTextBuffer = self.GetBuffer()
             current_style = self._get_style_at_pos(ctrl_buffer, paste_position)
             # todo if the first style is image, paste on new line.
             # todo paste inside a link is a problem.
-            # todo undo broken.
+            # todo images, urls, videos
+
             # Turn the style of the first paragraph into the correct style
             if self._get_style_at_pos(paste_buffer, 0) != current_style:
                 # Only change the style when we are pasting into a different style.
                 self._change_style_in_buffer(paste_buffer, current_style[0], 0)
 
-            # Add empty paragraph after the pasted text. This paragraph retains the original style from the point of
-            # paste. The paragraph will be removed later if empty. Only add if we are adding more than one paragraph.
+            # Search for urls in the pasted text and make a copy in the link list.
+
             if len(paste_buffer.GetChildren()) > 1:
+                # Add empty paragraph after the pasted text. This paragraph retains the original style from the point of
+                # paste. The paragraph will be removed later if empty.
                 paste_buffer.AddParagraph('')
+
+            paste_buffer.EndSuppressUndo()
             ctrl_buffer.InsertParagraphsWithUndo(paste_position + 1, paste_buffer, self, 0)
-
-        # todo skip when just plain text
-        #event.Skip()
-
-    # noinspection PyUnusedLocal
-    def _paste_finish(self, event: rt.RichTextEvent) -> None:
-        """
-        Finish pasting a new text. Delete the additional empty paragraph to workaround the weird behavior of last
-        paragraph being pasted in the style of the paste start point.
-        :param event: Not used.
-        :return: None
-        """
-        # todo images and videos
-        if self._paste_indicator:
-            # Delete the current paragraph if it is empty. Paste adds one paragraph which either ends up containing the
-            # continuation of the paragraphs where paste occurred or nothing.
-            position = self.GetAdjustedCaretPosition(self.GetCaretPosition())
-            p: rt.RichTextParagraph = self.GetFocusObject().GetParagraphAtPosition(position)
-            if not p.GetTextForRange(p.GetRange()):
-                attrs: rt.RichTextAttr = p.GetAttributes()
-                if attrs.GetBulletStyle() != wx.TEXT_ATTR_BULLET_STYLE_STANDARD:
-                    if not isinstance(p.GetChild(0), rt.RichTextField):
-                        # Field is not seen as text. Paragraph is empty.
-                        self.Delete(rt.RichTextRange(p.GetRange()[0], p.GetRange()[0] + 1))
-                        self._paste_indicator = False
-            if self.BatchingUndo():
-                # Causes segfault if called directly.
-                wx.CallAfter(self.EndBatchUndo)
+        else:
+            # Skip when just plain text from outside the editor and let the control paste in current style.
+            event.Skip()
 
     def _prevent_paste(self, event: wx.CommandEvent) -> bool:
         """
@@ -732,11 +713,24 @@ class CustomRichText(rt.RichTextCtrl):
             # We get here without starting undo batch, since on key down ignores ctrl.
             # Start paste batch here because delete text would go through before the batch would be started
             # in modify text.
-            print(self.BatchingUndo())
             self.BeginBatchUndo(Strings.undo_last_action)
             if paragraph_style == Strings.style_image:
                 return True
         return False
+
+    # noinspection PyUnusedLocal
+    def _paste_finish(self, event: rt.RichTextEvent) -> None:
+        """
+        Finish pasting a new text. Delete the additional empty paragraph to workaround the weird behavior of last
+        paragraph being pasted in the style of the paste start point.
+        :param event: Not used.
+        :return: None
+        """
+        if self._paste_indicator:
+            self._paste_indicator = False
+            if self.BatchingUndo():
+                # Causes segfault if called directly.
+                wx.CallAfter(self.EndBatchUndo)
 
     def _update_gui_handler(self, event: wx.CommandEvent) -> None:
         """
