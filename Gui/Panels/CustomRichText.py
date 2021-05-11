@@ -688,7 +688,45 @@ class CustomRichText(rt.RichTextCtrl):
                 # Only change the style when we are pasting into a different style.
                 self._change_style_in_buffer(paste_buffer, current_style[0], 0)
 
-            # Search for urls in the pasted text and make a copy in the link list.
+            # Search for urls, images and videos in the pasted text and make a copy in the lists.
+            paragraphs: List[rt.RichTextParagraph] = paste_buffer.GetChildren()
+            for p in paragraphs:
+                par_style: str = p.GetAttributes().GetFontFaceName()
+                if par_style == Strings.style_paragraph:
+                    for child in p.GetChildren():
+                        child: rt.RichTextPlainText
+                        attrs: rt.RichTextAttr = child.GetAttributes()
+                        text: str = child.GetText()
+                        if attrs.HasURL():
+                            stored_link: Link = self._doc.find_link(attrs.GetURL())
+                            print('stored link: ', stored_link)
+                            if not stored_link:
+                                # We are pasting text after the original was removed an the document saved. Create a
+                                # new link.
+                                # todo broken, url does not survive. Use a separate lookaside available across documents
+                                new_link = Link(text, attrs.GetURL(), text, self._doc.get_other_articles(),
+                                                self._doc.get_working_directory())
+                                new_link.seo_test_self(self._config_manager.get_online_test())
+                                self._doc.add_link(new_link)
+                            else:
+                                # Create a copy of the found link to allow independent modification.
+                                new_link = Link(stored_link.get_text()[0], stored_link.get_url()[0],
+                                                stored_link.get_title()[0], self._doc.get_other_articles(),
+                                                self._doc.get_working_directory())
+                                new_link.seo_test_self(self._config_manager.get_online_test())
+                                self._doc.add_link(new_link)
+                            # Set the new id to the pasted url to differentiate them.
+                            attrs.SetURL(new_link.get_id())
+                            print('new copy: ', new_link)
+
+                for child in p.GetChildren():
+                    # Find images and videos.
+                    if isinstance(child, rt.RichTextField):
+                        field_type: str = child.GetProperties().GetProperty(Strings.field_type)
+                        if field_type == Strings.field_image:
+                            print('image')
+                        else:
+                            print('video')
 
             if len(paste_buffer.GetChildren()) > 1:
                 # Add empty paragraph after the pasted text. This paragraph retains the original style from the point of
@@ -1188,10 +1226,12 @@ class CustomRichText(rt.RichTextCtrl):
         Create an internal representation of the document using the article elements classes.
         :return: None
         """
+        # todo empty first line causes exception.
+        # todo condense multiple empty lines to 1.
         self._doc: WhitebearDocumentArticle
         last_was_paragraph = False
         last_was_list = False
-        new_text_elements: List = []
+        new_text_elements = []
         buffer: rt.RichTextBuffer = self.GetBuffer()
         paragraphs: List[rt.RichTextParagraph] = buffer.GetChildren()
         for p in paragraphs:

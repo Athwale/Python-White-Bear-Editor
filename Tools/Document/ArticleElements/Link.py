@@ -17,7 +17,7 @@ class Link:
 
     def __init__(self, text: str, url: str, title: str, loaded_pages, working_directory: str):
         """
-        Constructor for a Link.
+        Constructor for a Link, creates a new link with a unique ID.
         :param text: The visible text of the link.
         :param url: The URL of the link.
         :param title: The html title of the link.
@@ -208,4 +208,5 @@ class Link:
         self._modified = modified
 
     def __str__(self) -> str:
-        return 'Link: text: ' + self._text + ', url: ' + self._url + ', title: ' + self._link_title
+        return 'Link: id: ' + str(self._link_id) + ', text: ' + self._text + ', url: ' + self._url + ', title: ' + \
+               self._link_title
