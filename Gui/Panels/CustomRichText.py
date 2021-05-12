@@ -719,7 +719,6 @@ class CustomRichText(rt.RichTextCtrl):
             return
 
         # Indicate paste to the paste finish handler.
-        # TODO save the lookaside lists on copy
         self._paste_indicator = True
         text_data = rt.RichTextBufferDataObject()
         success = False
@@ -757,8 +756,6 @@ class CustomRichText(rt.RichTextCtrl):
                             for link in self._link_lookaside:
                                 if link.get_id() == attrs.GetURL():
                                     stored_link = link
-                            '''
-                            print('stored link paste: ', stored_link)
                             # Create a copy of the found link to allow independent modification.
                             new_link = Link(stored_link.get_text()[0], stored_link.get_url()[0],
                                             stored_link.get_title()[0], self._doc.get_other_articles(),
@@ -767,8 +764,6 @@ class CustomRichText(rt.RichTextCtrl):
                             self._doc.add_link(new_link)
                             # Set the new id to the pasted url to differentiate them.
                             attrs.SetURL(new_link.get_id())
-                            print('new copy paste: ', new_link)
-                            '''
 
                 for child in p.GetChildren():
                     # Find images and videos.
