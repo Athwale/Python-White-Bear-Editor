@@ -57,6 +57,11 @@ class CustomRichText(rt.RichTextCtrl):
 
         self._style_picker = style_control
 
+        # Used to store copied text elements in case they need to be pasted in different documents or after save
+        self._link_lookaside = []
+        self._image_lookaside = set()
+        self._video_lookaside = set()
+
         # Used for three click select.
         self._timer = wx.Timer(self)
         self.Bind(wx.EVT_TIMER, self._on_click_timer, self._timer)
@@ -78,6 +83,7 @@ class CustomRichText(rt.RichTextCtrl):
         self.Bind(wx.EVT_COLOUR_CHANGED, self._refresh)
         # Text paste handling.
         self.Bind(wx.EVT_MENU, self._paste_handler, id=wx.ID_PASTE)
+        self.Bind(wx.EVT_MENU, self._copy_handler, id=wx.ID_COPY)
         self.Bind(rt.EVT_RICHTEXT_CONTENT_INSERTED, self._paste_finish, self)
 
         # Disable drag and drop text.
@@ -655,6 +661,54 @@ class CustomRichText(rt.RichTextCtrl):
         # fire on list bullet deletion.
         wx.CallAfter(self._modify_text)
 
+    def _copy_handler(self, event: wx.CommandEvent) -> None:
+        """
+        Runs a method scheduled right after this handler finishes. Runs on evt_menu - ID_COPY.
+        :param event: Not used.
+        :return: None
+        """
+        event.Skip()
+        wx.CallAfter(self._backup_copied_elements)
+
+    def _backup_copied_elements(self) -> None:
+        """
+        Backs up links, urls and video elements from the text which is being copied. This allows to paste text correctly
+        even after the document has been saved after the original text was removed.
+        :return: None
+        """
+        # Clear current lookaside lists.
+        self._link_lookaside.clear()
+        self._video_lookaside.clear()
+        self._image_lookaside.clear()
+
+        text_data = rt.RichTextBufferDataObject()
+        success = None
+        if wx.TheClipboard.Open():
+            success = wx.TheClipboard.GetData(text_data)
+            wx.TheClipboard.Close()
+        if success:
+            copy_buffer: rt.RichTextBuffer = text_data.GetRichTextBuffer()
+            # Search for urls, images and videos in the pasted text and back them up.
+            paragraphs: List[rt.RichTextParagraph] = copy_buffer.GetChildren()
+            for p in paragraphs:
+                par_style: str = p.GetAttributes().GetFontFaceName()
+                if par_style == Strings.style_paragraph:
+                    for child in p.GetChildren():
+                        child: rt.RichTextPlainText
+                        attrs: rt.RichTextAttr = child.GetAttributes()
+                        if attrs.HasURL():
+                            # Find the copied link in the lookaside.
+                            self._link_lookaside.append(self._doc.find_link(attrs.GetURL()))
+
+                for child in p.GetChildren():
+                    # Find images and videos.
+                    if isinstance(child, rt.RichTextField):
+                        field_type: str = child.GetProperties().GetProperty(Strings.field_type)
+                        if field_type == Strings.field_image:
+                            self._image_lookaside.add(self._doc.find_in_text_image(child.GetFieldType()))
+                        else:
+                            self._video_lookaside.add(self._doc.find_video(child.GetFieldType()))
+
     def _paste_handler(self, event: wx.CommandEvent) -> None:
         """
         Handle text paste into the control. Runs before the text is pasted. Runs on evt_menu - ID_PASTE
@@ -665,6 +719,7 @@ class CustomRichText(rt.RichTextCtrl):
             return
 
         # Indicate paste to the paste finish handler.
+        # TODO save the lookaside lists on copy
         self._paste_indicator = True
         text_data = rt.RichTextBufferDataObject()
         success = False
@@ -696,28 +751,24 @@ class CustomRichText(rt.RichTextCtrl):
                     for child in p.GetChildren():
                         child: rt.RichTextPlainText
                         attrs: rt.RichTextAttr = child.GetAttributes()
-                        text: str = child.GetText()
                         if attrs.HasURL():
-                            stored_link: Link = self._doc.find_link(attrs.GetURL())
-                            print('stored link: ', stored_link)
-                            if not stored_link:
-                                # We are pasting text after the original was removed an the document saved. Create a
-                                # new link.
-                                # todo broken, url does not survive. Use a separate lookaside available across documents
-                                new_link = Link(text, attrs.GetURL(), text, self._doc.get_other_articles(),
-                                                self._doc.get_working_directory())
-                                new_link.seo_test_self(self._config_manager.get_online_test())
-                                self._doc.add_link(new_link)
-                            else:
-                                # Create a copy of the found link to allow independent modification.
-                                new_link = Link(stored_link.get_text()[0], stored_link.get_url()[0],
-                                                stored_link.get_title()[0], self._doc.get_other_articles(),
-                                                self._doc.get_working_directory())
-                                new_link.seo_test_self(self._config_manager.get_online_test())
-                                self._doc.add_link(new_link)
+                            # Find the copied link in the lookaside.
+                            stored_link = None
+                            for link in self._link_lookaside:
+                                if link.get_id() == attrs.GetURL():
+                                    stored_link = link
+                            '''
+                            print('stored link paste: ', stored_link)
+                            # Create a copy of the found link to allow independent modification.
+                            new_link = Link(stored_link.get_text()[0], stored_link.get_url()[0],
+                                            stored_link.get_title()[0], self._doc.get_other_articles(),
+                                            self._doc.get_working_directory())
+                            new_link.seo_test_self(self._config_manager.get_online_test())
+                            self._doc.add_link(new_link)
                             # Set the new id to the pasted url to differentiate them.
                             attrs.SetURL(new_link.get_id())
-                            print('new copy: ', new_link)
+                            print('new copy paste: ', new_link)
+                            '''
 
                 for child in p.GetChildren():
                     # Find images and videos.
