@@ -1297,8 +1297,6 @@ class CustomRichText(rt.RichTextCtrl):
         Create an internal representation of the document using the article elements classes.
         :return: None
         """
-        # todo condense multiple empty lines to 1.
-        # todo empty line after video is a problem
         self._doc: WhitebearDocumentArticle
         last_was_paragraph = False
         last_was_list = False
