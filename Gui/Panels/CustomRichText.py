@@ -780,6 +780,8 @@ class CustomRichText(rt.RichTextCtrl):
                                     stored_element = video
                 if stored_element:
                     # Create a copy of the video/image.
+                    # todo use ids for images and videos the same way it is used for links.
+                    # todo will require change of the find methods too.
                     if isinstance(stored_element, ImageInText):
                         new_image = ImageInText(stored_element.get_link_title()[0],
                                                 stored_element.get_image_alt()[0],

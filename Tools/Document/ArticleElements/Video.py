@@ -12,6 +12,8 @@ class Video:
     Represents a placeholder for a youtube video in the text of the page.
     """
 
+    count: int = 1
+
     def __init__(self, title: str, width: int, height: int, url: str):
         """
         Constructor for a video placeholder.
@@ -30,6 +32,10 @@ class Video:
         self._status_color = None
         self._image = None
         self._modified = False
+
+        # Create a unique ID.
+        self._video_id = str(Video.count)
+        Video.count = Video.count + 1
 
     def seo_test_self(self, online: bool) -> bool:
         """
@@ -85,6 +91,13 @@ class Video:
         return result
 
     # Getters ----------------------------------------------------------------------------------------------------------
+    def get_id(self) -> str:
+        """
+        Return the ID of this video.
+        :return: Return the ID of this video.
+        """
+        return self._video_id
+
     def get_image(self) -> wx.Image:
         """
         Return the placeholder image. Either correct video placeholder or error image.
@@ -164,5 +177,5 @@ class Video:
         self._modified = modified
 
     def __str__(self) -> str:
-        return "Video: url: {}, title: {}, size: {} x {} px".format(self._url, self._link_title, self._width,
-                                                                    self._height)
+        return "Video: id: {}, url: {}, title: {}, size: {} x {} px".format(self._video_id, self._url, self._link_title,
+                                                                            self._width, self._height)

@@ -12,6 +12,8 @@ class BaseImage:
     Base class for AsideImage and ImageInText.
     """
 
+    count: int = 1
+
     def __init__(self, title: str, image_alt: str, original_image_path: str, thumbnail_path: str,
                  full_filename: str, thumbnail_filename: str):
         """
@@ -36,6 +38,10 @@ class BaseImage:
         self._thumbnail_size = (0, 0)
         self._original_size = (0, 0)
         self._modified = False
+
+        # Create a unique ID.
+        self._image_id = str(BaseImage.count)
+        BaseImage.count = BaseImage.count + 1
 
     def seo_test_self(self) -> bool:
         """
@@ -75,6 +81,13 @@ class BaseImage:
         return result
 
     # Getters ----------------------------------------------------------------------------------------------------------
+    def get_id(self) -> str:
+        """
+        Return the ID of this image.
+        :return: Return the ID of this image.
+        """
+        return self._image_id
+
     def is_modified(self) -> bool:
         """
         Return true if this instance was modified.
@@ -233,7 +246,8 @@ class BaseImage:
         self._modified = modified
 
     def __str__(self) -> str:
-        return "Base image: original: {}, thumbnail: {}, title: {}, alt: {}".format(self._original_image_path,
-                                                                                    self._thumbnail_path,
-                                                                                    self._link_title,
-                                                                                    self._image_alt)
+        return "Base image: id {}, original: {}, thumbnail: {}, title: {}, alt: {}".format(self._image_id,
+                                                                                           self._original_image_path,
+                                                                                           self._thumbnail_path,
+                                                                                           self._link_title,
+                                                                                           self._image_alt)

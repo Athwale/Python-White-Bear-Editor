@@ -70,7 +70,8 @@ class ImageInText(BaseImage):
         return result
 
     def __str__(self) -> str:
-        return "In text image: original: {}, thumbnail: {}, title: {}, alt: {}".format(self._original_image_path,
-                                                                                       self._thumbnail_path,
-                                                                                       self._link_title,
-                                                                                       self._image_alt)
+        return "Text image: id: {}, original: {}, thumbnail: {}, title: {}, alt: {}".format(self._image_id,
+                                                                                            self._original_image_path,
+                                                                                            self._thumbnail_path,
+                                                                                            self._link_title,
+                                                                                            self._image_alt)

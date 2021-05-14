@@ -13,7 +13,7 @@ class Link:
     Represents a link inside text.
     """
 
-    count = 10
+    count: int = 1
 
     def __init__(self, text: str, url: str, title: str, loaded_pages, working_directory: str):
         """
@@ -39,7 +39,7 @@ class Link:
         self._status_color = None
         self._modified = False
 
-        # Create a unique ID from text, url and title
+        # Create a unique ID.
         self._link_id = str(Link.count)
         Link.count = Link.count + 1
 

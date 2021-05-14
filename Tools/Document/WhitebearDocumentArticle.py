@@ -2,7 +2,7 @@ import datetime
 import os
 import re
 import time
-from typing import List, Dict, Set
+from typing import List, Dict
 
 import wx
 from bs4 import BeautifulSoup
@@ -60,8 +60,8 @@ class WhitebearDocumentArticle(WhitebearDocument):
         self._aside_images = []
         self._main_text_elements = []
         self._links = []
-        self._text_images = set()
-        self._videos = set()
+        self._text_images = []
+        self._videos = []
 
         self._date = ''
         self._date_error_message: str = ''
@@ -223,11 +223,11 @@ class WhitebearDocumentArticle(WhitebearDocument):
             elif child.name == 'div':
                 if child.next.name == 'a':
                     image = self._process_img(child)
-                    self._text_images.add(image)
+                    self._text_images.append(image)
                     self._main_text_elements.append(image)
                 elif child.next.name == 'iframe':
                     video = self._process_iframe(child)
-                    self._videos.add(video)
+                    self._videos.append(video)
                     self._main_text_elements.append(video)
             else:
                 raise WrongFormatException(Strings.exception_html_syntax_error)
@@ -732,7 +732,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
         """
         return self._links
 
-    def get_text_images(self) -> Set[ImageInText]:
+    def get_text_images(self) -> List[ImageInText]:
         """
         Return a list of all images in text which are in current text elements.
         :return: A list of all images in text which are in current text elements
@@ -823,7 +823,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
         :param image: The new image.
         :return: None
         """
-        self._text_images.add(image)
+        self._text_images.append(image)
         self.set_modified(True)
 
     def add_video(self, video: Video) -> None:
@@ -832,7 +832,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
         :param video: The new video.
         :return: None
         """
-        self._videos.add(video)
+        self._videos.append(video)
         self.set_modified(True)
 
     def add_aside_image(self, image: ImageInText) -> None:
@@ -918,9 +918,9 @@ class WhitebearDocumentArticle(WhitebearDocument):
             self._videos.clear()
             for element in elements:
                 if isinstance(element, Video):
-                    self._videos.add(element)
+                    self._videos.append(element)
                 elif isinstance(element, ImageInText):
-                    self._text_images.add(element)
+                    self._text_images.append(element)
                 elif isinstance(element, Paragraph):
                     self._links.extend(element.get_links())
                 elif isinstance(element, UnorderedList):
