@@ -1297,7 +1297,6 @@ class CustomRichText(rt.RichTextCtrl):
         Create an internal representation of the document using the article elements classes.
         :return: None
         """
-        # todo empty first line causes exception.
         # todo condense multiple empty lines to 1.
         # todo empty line after video is a problem
         self._doc: WhitebearDocumentArticle
@@ -1324,7 +1323,9 @@ class CustomRichText(rt.RichTextCtrl):
                     if next_p:
                         # Do not append empty paragraphs.
                         new_text_elements.append(next_p)
-                    last_was_paragraph = True
+                    # Skip empty paragraphs which are translated to breaks.
+                    if p.GetChildCount() > 1:
+                        last_was_paragraph = True
             elif par_style == Strings.style_heading_3 or par_style == Strings.style_heading_4:
                 last_was_paragraph = False
                 last_was_list = False
