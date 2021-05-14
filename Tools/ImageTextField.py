@@ -20,11 +20,7 @@ class ImageTextField(RichTextFieldTypeStandard):
         """
         self._work_dir = working_dir
         self._element = element
-        if isinstance(element, ImageInText):
-            path = element.get_thumbnail_image_path()
-        else:
-            path = element.get_url()[0]
-        super().__init__(path, bitmap=wx.Bitmap(element.get_image()),
+        super().__init__(element.get_id(), bitmap=wx.Bitmap(element.get_image()),
                          displayStyle=RichTextFieldTypeStandard.RICHTEXT_FIELD_STYLE_RECTANGLE)
         self.SetBorderColour(self._element.get_status_color())
 

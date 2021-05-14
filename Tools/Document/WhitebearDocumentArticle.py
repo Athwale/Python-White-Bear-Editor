@@ -777,24 +777,26 @@ class WhitebearDocumentArticle(WhitebearDocument):
             if link.get_id() == link_id:
                 return link
 
-    def find_in_text_image(self, path: str) -> ImageInText:
+    def find_in_text_image(self, image_id: int) -> ImageInText:
         """
         Find and return an ImageInText instance based on the image's thumbnail disk path.
-        :param path: The path to the image thumbnail on disk.
+        :param image_id: Id of the image.
         :return: A ImageInText instance.
         """
         for img in self._text_images:
-            if img.get_thumbnail_image_path() == path:
+            img: ImageInText
+            if img.get_id() == image_id:
                 return img
 
-    def find_video(self, url: str) -> Video:
+    def find_video(self, video_id: int) -> Video:
         """
         Find and return a Video instance based on the url of the video.
-        :param url: The youtube url of the video.
+        :param video_id: Id of the video.
         :return: A Video instance.
         """
         for video in self._videos:
-            if video.get_url()[0] == url:
+            video: Video
+            if video.get_id() == video_id:
                 return video
 
     def add_link(self, link: Link) -> None:

@@ -735,7 +735,6 @@ class CustomRichText(rt.RichTextCtrl):
             current_style = self._get_style_at_pos(ctrl_buffer, paste_position)
             # todo if the first style is image, paste on new line.
             # todo paste inside a link is a problem.
-            # todo images, videos
 
             # Turn the style of the first paragraph into the correct style
             if self._get_style_at_pos(paste_buffer, 0) != current_style:
@@ -766,38 +765,39 @@ class CustomRichText(rt.RichTextCtrl):
                             attrs.SetURL(new_link.get_id())
 
                 stored_element = None
+                new_field = None
                 for child in p.GetChildren():
                     # Find images and videos.
                     if isinstance(child, rt.RichTextField):
                         field_type: str = child.GetProperties().GetProperty(Strings.field_type)
                         if field_type == Strings.field_image:
                             for img in self._image_lookaside:
-                                if img.get_thumbnail_image_path() == child.GetFieldType():
+                                if img.get_id() == child.GetFieldType():
                                     stored_element = img
                         else:
                             for video in self._video_lookaside:
-                                if video.get_url()[0] == child.GetFieldType():
+                                if video.get_id() == child.GetFieldType():
                                     stored_element = video
-                if stored_element:
-                    # Create a copy of the video/image.
-                    # todo use ids for images and videos the same way it is used for links.
-                    # todo will require change of the find methods too.
-                    if isinstance(stored_element, ImageInText):
-                        new_image = ImageInText(stored_element.get_link_title()[0],
-                                                stored_element.get_image_alt()[0],
-                                                stored_element.get_original_image_path(),
-                                                stored_element.get_thumbnail_image_path(),
-                                                stored_element.get_full_filename(),
-                                                stored_element.get_thumbnail_filename())
-                        new_image.seo_test_self()
-                        self._doc.add_image(new_image)
-                    elif isinstance(stored_element, Video):
-                        new_video = Video(stored_element.get_title()[0],
-                                          stored_element.get_size()[0],
-                                          stored_element.get_size()[1],
-                                          stored_element.get_url()[0])
-                        new_video.seo_test_self(self._config_manager.get_online_test())
-                        self._doc.add_video(new_video)
+                    if stored_element:
+                        # Create a copy of the video/image.
+                        if isinstance(stored_element, ImageInText):
+                            new_field = ImageInText(stored_element.get_link_title()[0],
+                                                    stored_element.get_image_alt()[0],
+                                                    stored_element.get_original_image_path(),
+                                                    stored_element.get_thumbnail_image_path(),
+                                                    stored_element.get_full_filename(),
+                                                    stored_element.get_thumbnail_filename())
+                            new_field.seo_test_self()
+                            self._doc.add_image(new_field)
+                        elif isinstance(stored_element, Video):
+                            new_field = Video(stored_element.get_title()[0],
+                                              stored_element.get_size()[0],
+                                              stored_element.get_size()[1],
+                                              stored_element.get_url()[0])
+                            new_field.seo_test_self(self._config_manager.get_online_test())
+                            self._doc.add_video(new_field)
+                        self._register_field(new_field)
+                        child.SetFieldType(new_field.get_id())
 
             if len(paste_buffer.GetChildren()) > 1:
                 # Add empty paragraph after the pasted text. This paragraph retains the original style from the point of
@@ -1299,6 +1299,7 @@ class CustomRichText(rt.RichTextCtrl):
         """
         # todo empty first line causes exception.
         # todo condense multiple empty lines to 1.
+        # todo empty line after video is a problem
         self._doc: WhitebearDocumentArticle
         last_was_paragraph = False
         last_was_list = False
