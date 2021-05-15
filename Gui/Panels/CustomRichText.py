@@ -805,7 +805,12 @@ class CustomRichText(rt.RichTextCtrl):
                 paste_buffer.AddParagraph('')
 
             paste_buffer.EndSuppressUndo()
-            ctrl_buffer.InsertParagraphsWithUndo(paste_position + 1, paste_buffer, self, 0)
+            # Only add 1 to paste position when we are not on an empty line.
+            p = ctrl_buffer.GetParagraphAtPosition(self.GetAdjustedCaretPosition(self.GetCaretPosition()))
+            if p.GetChildCount() > 1:
+                # We are not on an empty line
+                paste_position = paste_position + 1
+            ctrl_buffer.InsertParagraphsWithUndo(paste_position, paste_buffer, self, 0)
         else:
             # Skip when just plain text from outside the editor and let the control paste in current style.
             event.Skip()
