@@ -733,14 +733,21 @@ class CustomRichText(rt.RichTextCtrl):
             paste_buffer.BeginSuppressUndo()
             ctrl_buffer: rt.RichTextBuffer = self.GetBuffer()
             current_style = self._get_style_at_pos(ctrl_buffer, paste_position)
-            # todo if the first style is image, paste on new line.
             # todo paste inside a link is a problem.
+            # todo pasting image on empty line still does not work.
 
-            # Turn the style of the first paragraph into the correct style
-            if self._get_style_at_pos(paste_buffer, 0) != current_style:
+            # Turn the style of the first paragraph into the correct style.
+            first_buffer_style = self._get_style_at_pos(paste_buffer, 0)
+            if first_buffer_style[0] == Strings.style_image:
+                # if the first style is image, paste on new line if we are not on an empty line to preserve style.
+                p = ctrl_buffer.GetParagraphAtPosition(self.GetAdjustedCaretPosition(self.GetCaretPosition()))
+                if p.GetChild(0).GetText():
+                    # This messes up the caret position because of the self so we must restore it.
+                    paste_buffer.InsertTextWithUndo(0, '\n', self)
+                    self.SetCaretPosition(paste_position)
+            elif first_buffer_style != current_style:
                 # Only change the style when we are pasting into a different style.
                 self._change_style_in_buffer(paste_buffer, current_style[0], 0)
-
             # Search for urls, images and videos in the pasted text and make a copy in the lists.
             paragraphs: List[rt.RichTextParagraph] = paste_buffer.GetChildren()
             for p in paragraphs:
@@ -763,7 +770,6 @@ class CustomRichText(rt.RichTextCtrl):
                             self._doc.add_link(new_link)
                             # Set the new id to the pasted url to differentiate them.
                             attrs.SetURL(new_link.get_id())
-
                 stored_element = None
                 new_field = None
                 for child in p.GetChildren():
@@ -798,19 +804,26 @@ class CustomRichText(rt.RichTextCtrl):
                             self._doc.add_video(new_field)
                         self._register_field(new_field)
                         child.SetFieldType(new_field.get_id())
-
             if len(paste_buffer.GetChildren()) > 1:
                 # Add empty paragraph after the pasted text. This paragraph retains the original style from the point of
-                # paste. The paragraph will be removed later if empty.
+                # paste. The paragraph will be removed later if empty. Catches images because a field has an empty line
+                # added to the front.
                 paste_buffer.AddParagraph('')
 
-            paste_buffer.EndSuppressUndo()
             # Only add 1 to paste position when we are not on an empty line.
-            p = ctrl_buffer.GetParagraphAtPosition(self.GetAdjustedCaretPosition(self.GetCaretPosition()))
+            # todo this is always giving the first paragraph, caret position is wrong here.
+            p = ctrl_buffer.GetParagraphAtPosition(paste_position)
+            print(self.GetAdjustedCaretPosition(self.GetCaretPosition()))
+            print(p.GetTextForRange(p.GetRange()))
             if p.GetChildCount() > 1:
-                # We are not on an empty line
+                # We are not on an empty line.
+                # todo do not add 1 to position when pasting an image on the first position of a paragraph.
+                if isinstance(paste_buffer.GetChildren()[1].GetChildren()[0], rt.RichTextField):
+                    # The first child will be an empty line.
+                    print('img')
                 paste_position = paste_position + 1
             ctrl_buffer.InsertParagraphsWithUndo(paste_position, paste_buffer, self, 0)
+            paste_buffer.EndSuppressUndo()
         else:
             # Skip when just plain text from outside the editor and let the control paste in current style.
             event.Skip()
