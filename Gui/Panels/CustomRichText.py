@@ -734,7 +734,6 @@ class CustomRichText(rt.RichTextCtrl):
             ctrl_buffer: rt.RichTextBuffer = self.GetBuffer()
             current_style = self._get_style_at_pos(ctrl_buffer, paste_position)
             # todo paste inside a link is a problem.
-            # todo pasting image on empty line still does not work.
 
             # Turn the style of the first paragraph into the correct style.
             first_buffer_style = self._get_style_at_pos(paste_buffer, 0)
@@ -804,25 +803,38 @@ class CustomRichText(rt.RichTextCtrl):
                             self._doc.add_video(new_field)
                         self._register_field(new_field)
                         child.SetFieldType(new_field.get_id())
+            print(paste_buffer.GetChildren(), paste_buffer.GetChildCount())
             if len(paste_buffer.GetChildren()) > 1:
                 # Add empty paragraph after the pasted text. This paragraph retains the original style from the point of
                 # paste. The paragraph will be removed later if empty. Catches images because a field has an empty line
                 # added to the front.
                 paste_buffer.AddParagraph('')
+            elif paste_buffer.GetChildCount() == 1 and isinstance(paste_buffer.GetChild(0).GetChild(0),
+                                                                  rt.RichTextField):
+                # add empty line to image which is pasted alone on an empty line.
+                paste_buffer.AddParagraph('')
 
             # Only add 1 to paste position when we are not on an empty line.
-            # todo this is always giving the first paragraph, caret position is wrong here.
-            p = ctrl_buffer.GetParagraphAtPosition(paste_position)
-            print(self.GetAdjustedCaretPosition(self.GetCaretPosition()))
-            print(p.GetTextForRange(p.GetRange()))
-            if p.GetChildCount() > 1:
-                # We are not on an empty line.
-                # todo do not add 1 to position when pasting an image on the first position of a paragraph.
-                if isinstance(paste_buffer.GetChildren()[1].GetChildren()[0], rt.RichTextField):
-                    # The first child will be an empty line.
-                    print('img')
-                paste_position = paste_position + 1
-            ctrl_buffer.InsertParagraphsWithUndo(paste_position, paste_buffer, self, 0)
+            p: rt.RichTextParagraph = ctrl_buffer.GetParagraphAtPosition(paste_position)
+            if p.GetChildCount() >= 1:
+                if p.GetChild(0).GetText():
+                    # We are not on an empty line.
+                    if p.GetRange().GetStart() == paste_position:
+                        if paste_buffer.GetChildCount() > 1 and paste_buffer.GetChildren()[1].GetChildCount() > 0:
+                            if isinstance(paste_buffer.GetChildren()[1].GetChildren()[0], rt.RichTextField):
+                                # We are pasting an image. The first child will be an empty line.
+                                # todo works with text not with images, paste around the 1st character is always wrong.
+                                ctrl_buffer.InsertParagraphsWithUndo(self.GetCaretPosition(), paste_buffer, self, 0)
+                                paste_buffer.EndSuppressUndo()
+                                return
+                        else:
+                            # For some reason we can not use the adjusted position here.
+                            # Pasting just text not beginning with an image onto a non-empty line.
+                            ctrl_buffer.InsertParagraphsWithUndo(self.GetCaretPosition() + 1, paste_buffer, self, 0)
+                            paste_buffer.EndSuppressUndo()
+                            return
+            # Pasting onto an empty line
+            ctrl_buffer.InsertParagraphsWithUndo(self.GetCaretPosition() + 1, paste_buffer, self, 0)
             paste_buffer.EndSuppressUndo()
         else:
             # Skip when just plain text from outside the editor and let the control paste in current style.
