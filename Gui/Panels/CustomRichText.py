@@ -270,7 +270,6 @@ class CustomRichText(rt.RichTextCtrl):
         self._change_style_in_buffer(buffer, style_name, position, preserve_url)
 
         if style_name == Strings.style_url:
-            # todo buffer here?
             self._apply_url_style()
 
         # Unless we simulate a move, you can still type in the wrong style after change.
@@ -724,6 +723,8 @@ class CustomRichText(rt.RichTextCtrl):
         success = False
         if wx.TheClipboard.Open():
             success = wx.TheClipboard.GetData(text_data)
+            # todo second copy is broken only for images, paste does not even run
+            print('success: ', success)
             wx.TheClipboard.Close()
         if success:
             paste_position = self.GetAdjustedCaretPosition(self.GetCaretPosition())
@@ -734,6 +735,8 @@ class CustomRichText(rt.RichTextCtrl):
             ctrl_buffer: rt.RichTextBuffer = self.GetBuffer()
             current_style = self._get_style_at_pos(ctrl_buffer, paste_position)
             # todo paste inside a link is a problem.
+            # todo title broken on image paste
+            # todo paste image into list is broken.
 
             # Turn the style of the first paragraph into the correct style.
             first_buffer_style = self._get_style_at_pos(paste_buffer, 0)
@@ -803,7 +806,6 @@ class CustomRichText(rt.RichTextCtrl):
                             self._doc.add_video(new_field)
                         self._register_field(new_field)
                         child.SetFieldType(new_field.get_id())
-            print(paste_buffer.GetChildren(), paste_buffer.GetChildCount())
             if len(paste_buffer.GetChildren()) > 1:
                 # Add empty paragraph after the pasted text. This paragraph retains the original style from the point of
                 # paste. The paragraph will be removed later if empty. Catches images because a field has an empty line
