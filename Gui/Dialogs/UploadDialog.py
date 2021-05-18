@@ -454,31 +454,29 @@ class UploadDialog(wx.Dialog):
             if document.get_html_to_save() and document.is_seo_ok():
                 # Add all that belongs to this document into the list and check it.
                 # Add the menu of this document to the list too.
-                self._upload_dict[self._get_id()] = document.get_menu_section().get_path()
-                self._upload_dict[self._get_id()] = document.get_path()
-                self._upload_dict[self._get_id()] = document.get_article_image().get_original_image_path()
-                self._upload_dict[self._get_id()] = document.get_article_image().get_thumbnail_image_path()
-                self._upload_dict[self._get_id()] = document.get_menu_item().get_image_path()
+                self._add_if_not_in(document.get_menu_section().get_path())
+                self._add_if_not_in(document.get_path())
+                self._add_if_not_in(document.get_article_image().get_original_image_path())
+                self._add_if_not_in(document.get_article_image().get_thumbnail_image_path())
+                self._add_if_not_in(document.get_menu_item().get_image_path())
                 for image in document.get_aside_images():
                     # Add all aside images and thumbnails
-                    self._upload_dict[self._get_id()] = image.get_original_image_path()
-                    self._upload_dict[self._get_id()] = image.get_thumbnail_image_path()
+                    self._add_if_not_in(image.get_original_image_path())
+                    self._add_if_not_in(image.get_thumbnail_image_path())
                 for image in document.get_text_images():
-                    self._upload_dict[self._get_id()] = image.get_original_image_path()
-                    self._upload_dict[self._get_id()] = image.get_thumbnail_image_path()
+                    self._add_if_not_in(image.get_original_image_path())
+                    self._add_if_not_in(image.get_thumbnail_image_path())
                 for link in document.get_links():
                     # Add all files and images that are linked from the article
                     if link.get_url()[0].startswith(Strings.folder_files):
-                        self._upload_dict[self._get_id()] = os.path.join(self._config_manager.get_working_dir(),
-                                                                         link.get_url()[0])
+                        self._add_if_not_in(os.path.join(self._config_manager.get_working_dir(), link.get_url()[0]))
 
         if self._upload_dict:
             # If any files were changed, add index, robots and sitemap.
-            self._upload_dict[self._get_id()] = self._index.get_path()
-            self._upload_dict[self._get_id()] = os.path.join(self._config_manager.get_working_dir(),
-                                                             Strings.robots_file)
-            self._upload_dict[self._get_id()] = os.path.join(self._config_manager.get_working_dir(),
-                                                             Strings.sitemap_file)
+            self._add_if_not_in(self._index.get_path())
+            self._add_if_not_in(self._css.get_path())
+            self._add_if_not_in(os.path.join(self._config_manager.get_working_dir(), Strings.robots_file))
+            self._add_if_not_in(os.path.join(self._config_manager.get_working_dir(), Strings.sitemap_file))
 
         for item_id, file in sorted(self._upload_dict.items()):
             self._append_into_list(item_id, file)
@@ -488,6 +486,18 @@ class UploadDialog(wx.Dialog):
         self._field_user.SetValue(self._config_manager.get_user())
         self._field_keyfile.SetValue(self._config_manager.get_keyfile())
         self.Enable()
+
+    def _add_if_not_in(self, new_path: str) -> None:
+        """
+        Add file_id and file path to upload dict if it is not there already.
+        :param new_path: The file path
+        :return: None
+        """
+        for _, file_path in sorted(self._upload_dict.items()):
+            if file_path == new_path:
+                return
+        # Add the new file with a new id.
+        self._upload_dict[self._get_id()] = new_path
 
     def _validate_fields(self) -> bool:
         """

@@ -14,6 +14,9 @@ class RichTextFrame(wx.Frame):
         self.rtc = rt.RichTextCtrl(self, style=wx.VSCROLL | wx.HSCROLL | wx.NO_BORDER)
         self._main_sizer = wx.BoxSizer(wx.VERTICAL)
 
+        # Required for copy paste to work and retain text attributes.
+        rt.RichTextBuffer.AddHandler(rt.RichTextXMLHandler())
+
         self._main_sizer.Add(self.rtc, 1, flag=wx.EXPAND)
         self.SetSizer(self._main_sizer)
 

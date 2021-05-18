@@ -60,6 +60,13 @@ class WhitebearDocumentCSS:
         """
         return self._str_to_color_dict
 
+    def get_path(self) -> str:
+        """
+        Return the full file path on disk.
+        :return: Return the full file path on disk.
+        """
+        return self._file_path
+
     def translate_str_color(self, name: str) -> Colour:
         """
         Translate a CSS color name into a wx.Colour

@@ -6,8 +6,6 @@ OnInit must be overridden here.
 # TODO fix bugs and package this into a binary.
 # TODO copy written text from first field to lower fields in add image dialogs.
 # TODO move newly added image in the sidepanel to the view.
-# TODO only add menu files to the upload dialog once, test with two articles from the same category.
-# TODO email image positioned incorrectly.
 # TODO https://www.blog.pythonlibrary.org/2019/03/19/distributing-a-wxpython-application/
 """
 
