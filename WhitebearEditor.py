@@ -4,9 +4,9 @@
 Starting class for the whitebear editor GUI. This class is necessary and must be in all wx python programs.
 OnInit must be overridden here.
 # TODO fix bugs and package this into a binary.
-# TODO copy written text from first field to lower fields in add image dialogs.
-# TODO move newly added image in the sidepanel to the view.
 # TODO https://www.blog.pythonlibrary.org/2019/03/19/distributing-a-wxpython-application/
+
+# TODO copy written text from first field to lower fields in add image dialogs.
 """
 
 import wx

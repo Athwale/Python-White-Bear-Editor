@@ -22,6 +22,7 @@ class AsideImagePanel(wx.lib.scrolledpanel.ScrolledPanel):
         """
         wx.lib.scrolledpanel.ScrolledPanel.__init__(self, parent, -1)
         self._doc = None
+        self._img_index = 0
         self._images: List[AsideImage] = []
         self._sizer = wx.BoxSizer(wx.VERTICAL)
         self.SetSizer(self._sizer)
@@ -30,32 +31,35 @@ class AsideImagePanel(wx.lib.scrolledpanel.ScrolledPanel):
 
     def _on_image_modify(self, event: wx.CommandEvent):
         """
-        Move image up one position.
+        Move image up/down one position, remove or edit them.
         :param event: Used to distinguish between up/down buttons. And contains reference to the image that is being
         moved.
         :return: None
         """
-        img_index = self._images.index(event.GetClientData())
+        event.Skip()
+        self._img_index = self._images.index(event.GetClientData())
         # Rearrange the images in the list
         if event.GetId() == wx.ID_UP:
-            if img_index == 0:
+            if self._img_index == 0:
                 return
-            self._images[img_index], self._images[img_index - 1] = self._images[img_index - 1], self._images[img_index]
+            self._images[self._img_index], self._images[self._img_index - 1] = \
+                self._images[self._img_index - 1], self._images[self._img_index]
             self._doc.set_modified(True)
         elif event.GetId() == wx.ID_DOWN:
-            if img_index + 1 == len(self._images):
+            if self._img_index + 1 == len(self._images):
                 return
-            self._images[img_index], self._images[img_index + 1] = self._images[img_index + 1], self._images[img_index]
+            self._images[self._img_index], self._images[self._img_index + 1] = \
+                self._images[self._img_index + 1], self._images[self._img_index]
             self._doc.set_modified(True)
         # Remove image from list
         elif event.GetId() == wx.ID_DELETE:
             result = wx.MessageBox(Strings.text_remove_image, Strings.status_warning, wx.YES_NO | wx.ICON_WARNING)
             if result == wx.YES:
-                del self._images[img_index]
+                del self._images[self._img_index]
             self._doc.set_modified(True)
         else:
             # Modify image data
-            edit_dialog = EditAsideImageDialog(self, self._images[img_index], self._doc.get_working_directory())
+            edit_dialog = EditAsideImageDialog(self, self._images[self._img_index], self._doc.get_working_directory())
             _ = edit_dialog.ShowModal()
             edit_dialog.Destroy()
         self.show_images()
@@ -107,4 +111,4 @@ class AsideImagePanel(wx.lib.scrolledpanel.ScrolledPanel):
             image_panel.set_image(img)
             self._sizer.Add(image_panel, 1, flag=wx.EXPAND | wx.ALIGN_LEFT)
 
-        self.SetupScrolling(scroll_x=False, scrollIntoView=True)
+        self.SetupScrolling(scroll_x=False, scrollIntoView=True, scrollToTop=False)
