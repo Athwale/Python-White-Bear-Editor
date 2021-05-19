@@ -27,6 +27,9 @@ class EditAsideImageDialog(wx.Dialog):
         self._image_copy: AsideImage = self._original_image.copy()
         self._image_copy.seo_test_self()
 
+        self._alt_lock = False
+        self._title_lock = False
+
         self._main_vertical_sizer = wx.BoxSizer(wx.VERTICAL)
         self._horizontal_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self._vertical_sizer = wx.BoxSizer(wx.VERTICAL)
@@ -90,7 +93,7 @@ class EditAsideImageDialog(wx.Dialog):
         # Image link title sub sizer
         self._title_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self._label_image_title = wx.StaticText(self, -1, Strings.label_link_title + ': ')
-        self._field_image_link_title = wx.TextCtrl(self, -1)
+        self._field_image_link_title = wx.TextCtrl(self, wx.ID_FILE1)
         self._title_sub_sizer.Add(self._label_image_title, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
         self._title_sub_sizer.Add((44, -1))
         self._title_sub_sizer.Add(self._field_image_link_title, proportion=1)
@@ -101,7 +104,7 @@ class EditAsideImageDialog(wx.Dialog):
         # Image alt sub sizer
         self._alt_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self._label_image_alt = wx.StaticText(self, -1, Strings.label_alt_description + ': ')
-        self._field_image_alt = wx.TextCtrl(self, -1)
+        self._field_image_alt = wx.TextCtrl(self, wx.ID_FILE2)
         self._alt_sub_sizer.Add(self._label_image_alt, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
         self._alt_sub_sizer.Add((5, -1))
         self._alt_sub_sizer.Add(self._field_image_alt, proportion=1)
@@ -149,11 +152,48 @@ class EditAsideImageDialog(wx.Dialog):
         self.SetSizer(self._main_vertical_sizer)
         self._display_dialog_contents()
 
+        # Disable auto copy of fields if the fields contain different data.
+        if self._field_image_caption.GetValue() != self._field_image_link_title.GetValue():
+            self._title_lock = True
+        if self._field_image_caption.GetValue() != self._field_image_alt.GetValue():
+            self._alt_lock = True
+
         # Bind handlers
         self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._ok_button)
         self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._cancel_button)
         self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._browse_button)
         self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._add_button)
+
+        self.Bind(wx.EVT_TEXT, self._handle_edit, self._field_image_caption)
+        self.Bind(wx.EVT_TEXT, self._lock_fields, self._field_image_alt)
+        self.Bind(wx.EVT_TEXT, self._lock_fields, self._field_image_link_title)
+
+    # noinspection PyUnusedLocal
+    def _handle_edit(self, event: wx.CommandEvent) -> None:
+        """
+        Copy the text from the first field to the other fields as long as the contents of them are the same.
+        Speeds up filling the metadata for new images.
+        :param event: Not used.
+        :return: None
+        """
+        text = self._field_image_caption.GetValue()
+        if not self._alt_lock:
+            self._field_image_alt.SetValue(text)
+        if not self._title_lock:
+            self._field_image_link_title.SetValue(text)
+
+    def _lock_fields(self, event: wx.CommandEvent) -> None:
+        """
+        Prevents automatic copying of text to other fields when they are edited manually.
+        :param event:
+        :return: None
+        """
+        if event.GetId() == wx.ID_FILE1:
+            if self._field_image_caption.GetValue() != self._field_image_link_title.GetValue():
+                self._title_lock = True
+        elif event.GetId() == wx.ID_FILE2:
+            if self._field_image_caption.GetValue() != self._field_image_alt.GetValue():
+                self._alt_lock = True
 
     def _handle_buttons(self, event: wx.CommandEvent) -> None:
         """

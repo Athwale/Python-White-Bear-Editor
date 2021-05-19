@@ -26,6 +26,9 @@ class EditMenuItemDialog(wx.Dialog):
         self._item_copy: MenuItem = self._original_item.copy()
         self._item_copy.seo_test_self()
 
+        self._alt_lock = False
+        self._title_lock = False
+
         self._main_vertical_sizer = wx.BoxSizer(wx.VERTICAL)
         self._horizontal_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self._vertical_sizer = wx.BoxSizer(wx.VERTICAL)
@@ -78,7 +81,7 @@ class EditMenuItemDialog(wx.Dialog):
         # Image link title sub sizer
         self._title_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self._label_image_title = wx.StaticText(self, -1, Strings.label_link_title + ': ')
-        self._field_image_link_title = wx.TextCtrl(self, -1)
+        self._field_image_link_title = wx.TextCtrl(self, wx.ID_FILE2)
         self._title_sub_sizer.Add(self._label_image_title, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
         self._title_sub_sizer.Add((44, -1))
         self._title_sub_sizer.Add(self._field_image_link_title, proportion=1)
@@ -89,7 +92,7 @@ class EditMenuItemDialog(wx.Dialog):
         # Image alt sub sizer
         self._alt_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self._label_image_alt = wx.StaticText(self, -1, Strings.label_alt_description + ': ')
-        self._field_image_alt = wx.TextCtrl(self, -1)
+        self._field_image_alt = wx.TextCtrl(self, wx.ID_FILE1)
         self._alt_sub_sizer.Add(self._label_image_alt, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
         self._alt_sub_sizer.Add((5, -1))
         self._alt_sub_sizer.Add(self._field_image_alt, proportion=1)
@@ -146,15 +149,37 @@ class EditMenuItemDialog(wx.Dialog):
         self.Bind(wx.EVT_TEXT, self._handle_name_change, self._field_item_name)
         self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._browse_button)
         self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._add_button)
+        self.Bind(wx.EVT_TEXT, self._lock_fields, self._field_image_alt)
+        self.Bind(wx.EVT_TEXT, self._lock_fields, self._field_image_link_title)
 
     # noinspection PyUnusedLocal
     def _handle_name_change(self, event: wx.CommandEvent) -> None:
         """
         Handle text changes in the item name field, these have to be shown in the live preview under the image.
+        Copy the text from the first field to the other fields as long as the contents of them are the same.
+        Speeds up filling the metadata for new images.
         :param event: Not used
         :return: None
         """
         self._set_interactive_item_name(self._field_item_name.GetValue())
+        text = self._field_item_name.GetValue()
+        if not self._alt_lock:
+            self._field_image_alt.SetValue(text)
+        if not self._title_lock:
+            self._field_image_link_title.SetValue(text)
+
+    def _lock_fields(self, event: wx.CommandEvent) -> None:
+        """
+        Prevents automatic copying of text to other fields when they are edited manually.
+        :param event:
+        :return: None
+        """
+        if event.GetId() == wx.ID_FILE1:
+            if self._field_image_alt.GetValue() != self._field_item_name.GetValue():
+                self._alt_lock = True
+        elif event.GetId() == wx.ID_FILE2:
+            if self._field_image_link_title.GetValue() != self._field_item_name.GetValue():
+                self._title_lock = True
 
     def _set_interactive_item_name(self, text: str) -> None:
         """
@@ -319,3 +344,9 @@ class EditMenuItemDialog(wx.Dialog):
             self.content_image_full_path.SetLabelText(full_path)
         else:
             self.content_image_full_path.SetLabelText(self._item_copy.get_filename())
+
+        # Disable auto copy of fields if the fields contain different data.
+        if self._field_image_link_title.GetValue() != self._field_item_name.GetValue():
+            self._title_lock = True
+        if self._field_image_alt.GetValue() != self._field_item_name.GetValue():
+            self._alt_lock = True
