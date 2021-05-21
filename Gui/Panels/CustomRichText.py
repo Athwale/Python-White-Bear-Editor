@@ -711,6 +711,7 @@ class CustomRichText(rt.RichTextCtrl):
     def _paste_handler(self, event: wx.CommandEvent) -> None:
         """
         Handle text paste into the control. Runs before the text is pasted. Runs on evt_menu - ID_PASTE
+        Pasting a field does not work correctly when using x11 on linux.
         :param event: Passed to other methods.
         :return: None
         """
@@ -732,8 +733,6 @@ class CustomRichText(rt.RichTextCtrl):
             paste_buffer.BeginSuppressUndo()
             ctrl_buffer: rt.RichTextBuffer = self.GetBuffer()
             current_style = self._get_style_at_pos(ctrl_buffer, paste_position)
-            # todo paste inside a link is a problem.
-            # todo title broken on image paste
             # todo paste image into list is broken.
 
             # Turn the style of the first paragraph into the correct style.
@@ -743,7 +742,15 @@ class CustomRichText(rt.RichTextCtrl):
                 p = ctrl_buffer.GetParagraphAtPosition(self.GetAdjustedCaretPosition(self.GetCaretPosition()))
                 if p.GetChild(0).GetText():
                     # This messes up the caret position because of the self so we must restore it.
-                    paste_buffer.InsertTextWithUndo(0, '\n', self)
+                    # Set the style to the current style before adding the new line, otherwise the current line changes.
+                    paste_buffer.SetDefaultStyle(paste_buffer.GetStyleSheet().FindStyle(current_style[0]).GetStyle())
+                    if current_style[0] == Strings.style_list:
+                        paste_buffer.InsertTextWithUndo(0, '\n', self)
+                        style_def = paste_buffer.GetStyleSheet().FindStyle(Strings.style_list)
+                        paste_buffer.SetListStyle((0, 0), style_def, specifiedLevel=0,
+                                                  flags=rt.RICHTEXT_SETSTYLE_SPECIFY_LEVEL)
+                    else:
+                        paste_buffer.InsertTextWithUndo(0, '\n', self)
                     self.SetCaretPosition(paste_position)
             elif first_buffer_style != current_style:
                 # Only change the style when we are pasting into a different style.
