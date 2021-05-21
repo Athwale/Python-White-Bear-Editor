@@ -9,7 +9,7 @@ class LoadingDialog(wx.Dialog):
 
     def __init__(self, parent):
         """
-        Display a modal dialog with a message with the text being selectable.
+        Display a dialog with splash screen.
         :param parent: Parent frame.
         """
         wx.Dialog.__init__(self, parent, title=Strings.status_loading, style=wx.STAY_ON_TOP)

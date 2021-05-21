@@ -661,6 +661,7 @@ class MainFrame(wx.Frame):
         """
         self._loading_dlg = LoadingDialog(None)
         self._loading_dlg.Show()
+        self._loading_dlg.Centre()
         # Disable the gui until load is done
         self.Disable()
         self._set_status_text(Strings.status_loading, 3)

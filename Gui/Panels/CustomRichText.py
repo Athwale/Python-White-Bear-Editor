@@ -723,8 +723,6 @@ class CustomRichText(rt.RichTextCtrl):
         success = False
         if wx.TheClipboard.Open():
             success = wx.TheClipboard.GetData(text_data)
-            # todo second copy is broken only for images, paste does not even run
-            print('success: ', success)
             wx.TheClipboard.Close()
         if success:
             paste_position = self.GetAdjustedCaretPosition(self.GetCaretPosition())

@@ -20,7 +20,52 @@ class RichTextFrame(wx.Frame):
         self._main_sizer.Add(self.rtc, 1, flag=wx.EXPAND)
         self.SetSizer(self._main_sizer)
 
+        # Text paste handling.
+        self.rtc.Bind(wx.EVT_MENU, self._paste_handler, id=wx.ID_PASTE)
+        self.rtc.Bind(wx.EVT_MENU, self._copy_handler, id=wx.ID_COPY)
+
         self.rtc.GetBuffer().CleanUpFieldTypes()
+
+    def _copy_handler(self, event: wx.CommandEvent) -> None:
+        """
+        Runs a method scheduled right after this handler finishes. Runs on evt_menu - ID_COPY.
+        :param event: Not used.
+        :return: None
+        """
+        event.Skip()
+        wx.CallAfter(self._backup_copied_elements)
+
+    def _backup_copied_elements(self) -> None:
+        """
+        :return: None
+        """
+        text_data = rt.RichTextBufferDataObject()
+        success = None
+        if wx.TheClipboard.Open():
+            success = wx.TheClipboard.GetData(text_data)
+            wx.TheClipboard.Close()
+            print('copy: ', success)
+        if success:
+            copy_buffer: rt.RichTextBuffer = text_data.GetRichTextBuffer()
+            # Search for urls, images and videos in the pasted text and back them up.
+            paragraphs = copy_buffer.GetChildren()
+            print(paragraphs)
+
+    def _paste_handler(self, event: wx.CommandEvent) -> None:
+        """
+        :return: None
+        """
+        text_data = rt.RichTextBufferDataObject()
+        success = False
+        if wx.TheClipboard.Open():
+            success = wx.TheClipboard.GetData(text_data)
+            wx.TheClipboard.Close()
+            print('paste: ', success)
+        if success:
+            paste_buffer: rt.RichTextBuffer = text_data.GetRichTextBuffer()
+            paragraphs = paste_buffer.GetChildren()
+            print(paragraphs)
+        event.Skip()
 
     def write_field(self) -> None:
         """

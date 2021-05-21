@@ -59,7 +59,7 @@ class Numbers:
     icon_height: int = 30
     color_icon_width: int = 15
     color_icon_height: int = 15
-    splashscreen_dialog_size: (int, int) = (300, 337)
+    splashscreen_dialog_size: (int, int) = (350, 350)
 
     # Styling
     main_heading_size = 18
