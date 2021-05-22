@@ -243,6 +243,7 @@ class Strings:
     warning_server_folders_repaired: str = 'Server folder structure repaired'
     warning_upload_unfinished: str = 'Upload has not finished.\nDo you want to force disconnect?\nThis may ' \
                                      'leave damaged files on the server.'
+    warning_paste_into_url: str = 'Can not paste multiple paragraphs into url'
 
     label_menu_file: str = 'File'
     label_menu_item_new: str = 'New document...\tctrl+n'

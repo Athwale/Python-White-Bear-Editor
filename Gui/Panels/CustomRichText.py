@@ -733,11 +733,25 @@ class CustomRichText(rt.RichTextCtrl):
             paste_buffer.BeginSuppressUndo()
             ctrl_buffer: rt.RichTextBuffer = self.GetBuffer()
             current_style = self._get_style_at_pos(ctrl_buffer, paste_position)
-            # todo paste image into list is broken.
 
             # Turn the style of the first paragraph into the correct style.
             first_buffer_style = self._get_style_at_pos(paste_buffer, 0)
-            if first_buffer_style[0] == Strings.style_image:
+            if current_style[1] == Strings.style_url:
+                paragraphs: List[rt.RichTextParagraph] = paste_buffer.GetChildren()
+                if len(paragraphs) > 1:
+                    # Prevent pasting multiple paragraphs into an url.
+                    wx.MessageBox(Strings.warning_paste_into_url, Strings.status_error, wx.OK | wx.ICON_ERROR)
+                    return
+                elif paste_buffer.GetChildCount() == 1 and isinstance(paste_buffer.GetChild(0).GetChild(0),
+                                                                      rt.RichTextField):
+                    # Do not allow pasting images into urls.
+                    return
+                else:
+                    # Paste as plain text.
+                    text = paragraphs[0].GetTextForRange(paragraphs[0].GetRange())
+                    ctrl_buffer.InsertTextWithUndo(self.GetCaretPosition() + 1, text, self, 0)
+                    return
+            elif first_buffer_style[0] == Strings.style_image:
                 # if the first style is image, paste on new line if we are not on an empty line to preserve style.
                 p = ctrl_buffer.GetParagraphAtPosition(self.GetAdjustedCaretPosition(self.GetCaretPosition()))
                 if p.GetChild(0).GetText():
@@ -830,7 +844,7 @@ class CustomRichText(rt.RichTextCtrl):
                         if paste_buffer.GetChildCount() > 1 and paste_buffer.GetChildren()[1].GetChildCount() > 0:
                             if isinstance(paste_buffer.GetChildren()[1].GetChildren()[0], rt.RichTextField):
                                 # We are pasting an image. The first child will be an empty line.
-                                # todo works with text not with images, paste around the 1st character is always wrong.
+                                # Works with text not with images, paste around the 1st character is always wrong.
                                 ctrl_buffer.InsertParagraphsWithUndo(self.GetCaretPosition(), paste_buffer, self, 0)
                                 paste_buffer.EndSuppressUndo()
                                 return
