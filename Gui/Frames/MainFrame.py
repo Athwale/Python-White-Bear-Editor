@@ -19,7 +19,6 @@ from Gui.Dialogs.EditMenuItemDialog import EditMenuItemDialog
 from Gui.Dialogs.LoadingDialog import LoadingDialog
 from Gui.Dialogs.NewFileDialog import NewFileDialog
 from Gui.Dialogs.UploadDialog import UploadDialog
-from Gui.Dialogs.WaitDialog import WaitDialog
 from Gui.Panels.AsideImagePanel import AsideImagePanel
 from Gui.Panels.CustomRichText import CustomRichText
 from Resources.Fetch import Fetch
@@ -71,7 +70,6 @@ class MainFrame(wx.Frame):
         self._current_document_instance = None
         self._css_document = None
         self._loading_dlg = None
-        self._saving_dlg = None
         self._ignore_change = False
         self._no_save = False
         self._enabled = True
@@ -872,11 +870,7 @@ class MainFrame(wx.Frame):
         :param disable: Leave the editor disabled after threads finish.
         :return: None.
         """
-        if not self._saving_dlg:
-            self._saving_dlg = WaitDialog(self)
-            self._saving_dlg.set_status(Strings.label_saving + ':')
-            self._saving_dlg.set_message(doc.get_filename())
-            self._saving_dlg.Show()
+        self._set_status_text(Strings.label_saving + ': ' + doc.get_filename(), 3)
         # Editor will be enabled when the thread finishes.
         if self._enabled:
             self._disable_editor(True)
@@ -919,20 +913,19 @@ class MainFrame(wx.Frame):
             try:
                 with open(file_path, 'w', encoding='utf8') as file:
                     file.write(html_string)
-                    self._set_status_text(Strings.status_saved + ': ' + last_save, 3)
+                    print('a')
             except IOError:
                 self._show_error_dialog(Strings.warning_can_not_save + '\n' + Strings.exception_access_html + '\n' +
                                         file_path)
         # Set modified false for all document parts it was saved and does not need to be asked for save until changed.
         doc.set_modified(False)
-        self._saving_dlg.set_message(file_name)
+        self._set_status_text(Strings.label_saving + ': ' + file_name, 3)
         # Clean thread list off stopped threads.
         self._thread_queue.remove(thread)
-        if not self._thread_queue:
-            self._saving_dlg.Destroy()
         if not self._thread_queue and not disable:
             # Enable only when all threads have finished and enabling is allowed.
             self._disable_editor(False)
+            self._set_status_text(Strings.status_saved + ': ' + last_save, 3)
 
     def on_sitemap_done(self, thread: SitemapThread, sitemap: str, disable: bool) -> None:
         """
@@ -949,13 +942,13 @@ class MainFrame(wx.Frame):
             with open(sitemap_file, 'w', encoding='utf8') as file:
                 file.write(sitemap)
                 self._set_status_text(Strings.status_saved + ': ' + last_save, 3)
-                self._saving_dlg.set_message(Strings.sitemap_file)
+                self._set_status_text(Strings.label_saving + ': ' + Strings.sitemap_file, 3)
             # Save robots.txt if not present
             if not os.path.exists(robots_txt):
                 with open(robots_txt, 'w', encoding='utf8') as file:
                     file.write(Strings.sitemap_keyword + ' ' + self._config_manager.get_url() + '/' +
                                Strings.sitemap_file)
-                    self._saving_dlg.set_message(Strings.robots_file)
+                    self._set_status_text(Strings.label_saving + ': ' + Strings.robots_file, 3)
         except IOError:
             self._show_error_dialog(Strings.warning_can_not_save + '\n' + Strings.exception_access_html + '\n' +
                                     sitemap_file)
@@ -963,7 +956,6 @@ class MainFrame(wx.Frame):
         self._thread_queue.remove(thread)
         if not self._thread_queue and not disable:
             # Enable only when all threads have finished.
-            self._saving_dlg.Destroy()
             self._disable_editor(False)
 
     def _get_new_file_path(self, suffix: str) -> str:
@@ -992,7 +984,6 @@ class MainFrame(wx.Frame):
         :return: None
         """
         self._show_error_dialog(Strings.warning_can_not_save + '\n\n' + str(e))
-        self._saving_dlg.Destroy()
         self._disable_editor(False)
 
     # noinspection PyUnusedLocal

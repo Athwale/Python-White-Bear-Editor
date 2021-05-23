@@ -1,5 +1,4 @@
 import wx
-import wx.html
 
 from Constants.Constants import Strings, Numbers
 from Resources.Fetch import Fetch

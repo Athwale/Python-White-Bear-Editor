@@ -1,120 +1,15 @@
 import wx
-import wx.richtext as rt
-
-from wx.richtext import RichTextField, RichTextFieldTypeStandard
 
 
-class RichTextFrame(wx.Frame):
-
-    # Used for image differentiation.
-    id = 1
+class TestFrame(wx.Frame):
 
     def __init__(self, *args, **kw):
         wx.Frame.__init__(self, *args, **kw)
-        self.rtc = rt.RichTextCtrl(self, style=wx.VSCROLL | wx.HSCROLL | wx.NO_BORDER)
         self._main_sizer = wx.BoxSizer(wx.VERTICAL)
-
-        # Required for copy paste to work and retain text attributes.
-        rt.RichTextBuffer.AddHandler(rt.RichTextXMLHandler())
-
-        self._main_sizer.Add(self.rtc, 1, flag=wx.EXPAND)
         self.SetSizer(self._main_sizer)
 
-        # Text paste handling.
-        self.rtc.Bind(wx.EVT_MENU, self._paste_handler, id=wx.ID_PASTE)
-        self.rtc.Bind(wx.EVT_MENU, self._copy_handler, id=wx.ID_COPY)
-
-        self.rtc.GetBuffer().CleanUpFieldTypes()
-
-    def _copy_handler(self, event: wx.CommandEvent) -> None:
-        """
-        Runs a method scheduled right after this handler finishes. Runs on evt_menu - ID_COPY.
-        :param event: Not used.
-        :return: None
-        """
-        event.Skip()
-        wx.CallAfter(self._backup_copied_elements)
-
-    def _backup_copied_elements(self) -> None:
-        """
-        :return: None
-        """
-        text_data = rt.RichTextBufferDataObject()
-        success = None
-        if wx.TheClipboard.Open():
-            success = wx.TheClipboard.GetData(text_data)
-            wx.TheClipboard.Close()
-            print('copy: ', success)
-        if success:
-            copy_buffer: rt.RichTextBuffer = text_data.GetRichTextBuffer()
-            # Search for urls, images and videos in the pasted text and back them up.
-            paragraphs = copy_buffer.GetChildren()
-            print(paragraphs)
-
-    def _paste_handler(self, event: wx.CommandEvent) -> None:
-        """
-        :return: None
-        """
-        text_data = rt.RichTextBufferDataObject()
-        success = False
-        if wx.TheClipboard.Open():
-            success = wx.TheClipboard.GetData(text_data)
-            wx.TheClipboard.Close()
-            print('paste: ', success)
-        if success:
-            paste_buffer: rt.RichTextBuffer = text_data.GetRichTextBuffer()
-            paragraphs = paste_buffer.GetChildren()
-            print(paragraphs)
-        event.Skip()
-
-    def write_field(self) -> None:
-        """
-        Write an image field into the text area.
-        :return: None
-        """
-        new_field = self._register_field()
-        self.rtc.WriteField(new_field.GetName(), rt.RichTextProperties())
-        print(new_field.GetName())
-
-    @staticmethod
-    def _register_field():
-        """
-        Register a new custom image field.
-        :return: None
-        """
-        # Create unique id for the image.
-        RichTextFrame.id = RichTextFrame.id + 1
-
-        # Create a sample image for the field.
-        dc = wx.MemoryDC()
-        font: wx.Font = dc.GetFont()
-        font.SetPointSize(16)
-        dc.SetFont(font)
-        size = dc.GetTextExtent('Field: ' + str(RichTextFrame.id))
-        bitmap = wx.Bitmap(width=size[0] + 10, height=size[1] + 10)
-        dc.SelectObject(bitmap)
-        dc.Clear()
-        dc.SetTextForeground(wx.BLACK)
-        dc.DrawText('Field: ' + str(RichTextFrame.id), 5, 5)
-
-        field_type = ImageTextField(str(RichTextFrame.id), bitmap)
-        rt.RichTextBuffer.AddFieldType(field_type)
-        return field_type
-
-
-class ImageTextField(RichTextFieldTypeStandard):
-    """
-    Custom RichTextFieldType class with an image.
-    """
-
-    def __init__(self, field_id: str, img: wx.Bitmap):
-        """
-        Constructor for a custom label for displaying images.
-        """
-        super().__init__(field_id, bitmap=img, displayStyle=RichTextFieldTypeStandard.RICHTEXT_FIELD_STYLE_RECTANGLE)
-
-    def CanEditProperties(self, obj: RichTextField) -> bool:
-        return False
+    def dlg_test(self) -> None:
+        TestDialog(self)
 
 
 class MyApp(wx.App):
@@ -126,11 +21,26 @@ class MyApp(wx.App):
         self.frame = None
 
     def OnInit(self):
-        self.frame = RichTextFrame(None, -1, "RichTextCtrl", size=(300, 300), style=wx.DEFAULT_FRAME_STYLE)
+        self.frame = TestFrame(None, -1, "Test", size=(500, 500), style=wx.DEFAULT_FRAME_STYLE)
         self.SetTopWindow(self.frame)
         self.frame.Show()
-        self.frame.write_field()
+        self.frame.dlg_test()
         return True
+
+
+class TestDialog(wx.Dialog):
+
+    def __init__(self, parent):
+        wx.Dialog.__init__(self, parent, title='Strings', size=(200, 200))
+        self._main_vertical_sizer = wx.BoxSizer(wx.VERTICAL)
+        self.SetSizer(self._main_vertical_sizer)
+
+        self.CenterOnParent()
+
+        # Show modal shows centered, show alone does not.
+        self.Maximize()
+        self.Show()
+        self.Maximize(False)
 
 
 if __name__ == "__main__":
