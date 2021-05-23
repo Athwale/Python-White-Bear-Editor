@@ -913,19 +913,19 @@ class MainFrame(wx.Frame):
             try:
                 with open(file_path, 'w', encoding='utf8') as file:
                     file.write(html_string)
-                    print('a')
             except IOError:
                 self._show_error_dialog(Strings.warning_can_not_save + '\n' + Strings.exception_access_html + '\n' +
                                         file_path)
-        # Set modified false for all document parts it was saved and does not need to be asked for save until changed.
-        doc.set_modified(False)
-        self._set_status_text(Strings.label_saving + ': ' + file_name, 3)
+            # Set modified false for all docu parts it was saved and does not need to be asked for save until changed.
+            doc.set_modified(False)
+            self._set_status_text(Strings.label_saving + ': ' + file_name, 3)
         # Clean thread list off stopped threads.
         self._thread_queue.remove(thread)
         if not self._thread_queue and not disable:
             # Enable only when all threads have finished and enabling is allowed.
             self._disable_editor(False)
-            self._set_status_text(Strings.status_saved + ': ' + last_save, 3)
+            if file_path:
+                self._set_status_text(Strings.status_saved + ': ' + last_save, 3)
 
     def on_sitemap_done(self, thread: SitemapThread, sitemap: str, disable: bool) -> None:
         """
