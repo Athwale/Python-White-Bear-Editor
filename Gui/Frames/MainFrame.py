@@ -16,7 +16,6 @@ from Gui.Dialogs.EditAsideImageDialog import EditAsideImageDialog
 from Gui.Dialogs.EditDefaultValuesDialog import EditDefaultValuesDialog
 from Gui.Dialogs.EditMenuDialog import EditMenuDialog
 from Gui.Dialogs.EditMenuItemDialog import EditMenuItemDialog
-from Gui.Dialogs.LoadingDialog import LoadingDialog
 from Gui.Dialogs.NewFileDialog import NewFileDialog
 from Gui.Dialogs.UploadDialog import UploadDialog
 from Gui.Panels.AsideImagePanel import AsideImagePanel
@@ -47,7 +46,8 @@ class MainFrame(wx.Frame):
         Constructor for the GUI of the editor. This is the main frame so we pass None as the parent.
         """
         # -1 is a special ID which generates a random wx ID
-        super(MainFrame, self).__init__(None, -1, title=Strings.editor_name, style=wx.DEFAULT_FRAME_STYLE)
+        super(MainFrame, self).__init__(None, -1, title=Strings.editor_name + ' - ' + Strings.status_loading,
+                                        style=wx.DEFAULT_FRAME_STYLE)
 
         self.SetIcon(wx.Icon(Fetch.get_resource_path('icon.ico')))
         # Create fonts for text fields
@@ -69,7 +69,6 @@ class MainFrame(wx.Frame):
         self._current_document_name = None
         self._current_document_instance = None
         self._css_document = None
-        self._loading_dlg = None
         self._ignore_change = False
         self._no_save = False
         self._enabled = True
@@ -657,9 +656,6 @@ class MainFrame(wx.Frame):
         :param path: str, path to the working directory
         :return: None
         """
-        self._loading_dlg = LoadingDialog(None)
-        self._loading_dlg.Show()
-        self._loading_dlg.Centre()
         # Disable the gui until load is done
         self.Disable()
         self._set_status_text(Strings.status_loading, 3)
@@ -685,7 +681,6 @@ class MainFrame(wx.Frame):
         :param e: Exception that caused the call of this method.
         :return: None
         """
-        self._loading_dlg.Destroy()
         self._show_error_dialog(str(e))
         self._disable_editor(True)
         self._side_photo_panel.reset()
@@ -736,7 +731,6 @@ class MainFrame(wx.Frame):
             if index > -1:
                 self._file_list.Select(index)
             else:
-                self._loading_dlg.Destroy()
                 self._show_error_dialog(Strings.warning_last_document_not_found + ':' + '\n' + str(last_document))
                 self._clear_editor(leave_files=True)
 
@@ -744,8 +738,6 @@ class MainFrame(wx.Frame):
         # Enable GUI when the load is done
         self._set_status_text(Strings.status_ready, 3)
         self._set_status_text(Strings.status_articles + ' ' + str(len(self._articles)), 2)
-        if self._loading_dlg:
-            self._loading_dlg.Destroy()
 
         # Store this as last known open directory.
         self._config_manager.store_working_dir(self._index_document.get_working_directory())

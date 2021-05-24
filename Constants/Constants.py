@@ -43,7 +43,7 @@ class Numbers:
     add_logo_dialog_width: int = 500
     add_logo_dialog_height: int = 235
     page_setup_dialog_width: int = 900
-    page_setup_dialog_height: int = 845
+    page_setup_dialog_height: int = 860
     new_file_dialog_width: int = 600
     new_file_dialog_height: int = 440
     edit_menu_dialog_width: int = 600

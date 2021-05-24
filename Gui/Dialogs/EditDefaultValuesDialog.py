@@ -162,7 +162,7 @@ class EditDefaultValuesDialog(wx.Dialog):
                                  border=Numbers.widget_border_size)
         self._horizontal_sizer.Add(self._vertical_sizer, 1)
         self._main_vertical_sizer.Add(self._horizontal_sizer, 1, flag=wx.EXPAND)
-        self._main_vertical_sizer.Add(self._button_sizer, 0, flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM,
+        self._main_vertical_sizer.Add(self._button_sizer, 0, flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM | wx.TOP,
                                       border=Numbers.widget_border_size)
         self.SetSizer(self._main_vertical_sizer)
 
