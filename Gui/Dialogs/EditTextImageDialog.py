@@ -320,6 +320,6 @@ class EditTextImageDialog(wx.Dialog):
         height = self._image_copy.get_thumbnail_size()[1]
         if height == 0:
             height = Numbers.main_image_height
-        self.SetSize(Numbers.edit_text_image_dialog_width, height + 120)
+        self.SetSize(Numbers.edit_text_image_dialog_width, height + 140)
 
         self.Enable()

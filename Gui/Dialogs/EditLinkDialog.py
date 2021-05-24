@@ -1,8 +1,6 @@
 import wx
 
 from Constants.Constants import Strings, Numbers
-from Gui.Dialogs.WaitDialog import WaitDialog
-from Resources.Fetch import Fetch
 from Threads.WorkerThread import WorkerThread
 from Tools.ConfigManager import ConfigManager
 from Tools.Document.ArticleElements.Link import Link
@@ -22,7 +20,6 @@ class EditLinkDialog(wx.Dialog):
                            style=wx.DEFAULT_DIALOG_STYLE)
         self._link = link
         self._config_manager = ConfigManager.get_instance()
-        self._saving_dlg = None
 
         self._main_vertical_sizer = wx.BoxSizer(wx.VERTICAL)
         self._horizontal_sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -146,11 +143,7 @@ class EditLinkDialog(wx.Dialog):
                               passing_arg=return_value)
         thread.start()
         self.Disable()
-        self._saving_dlg = WaitDialog(self)
-        self._saving_dlg.set_status(Strings.status_seo)
-        self._saving_dlg.set_message(Strings.status_testing_link)
-        self._saving_dlg.set_bitmap(wx.Bitmap(wx.Image(Fetch.get_resource_path('online.png'))))
-        self._saving_dlg.Show()
+        self.SetTitle(Strings.status_seo + ': ' + Strings.status_testing_link)
 
     def on_seo_done(self, result: bool, return_value: int) -> None:
         """
@@ -160,8 +153,7 @@ class EditLinkDialog(wx.Dialog):
         :return: None
         """
         self.Enable()
-        if self._saving_dlg:
-            self._saving_dlg.Destroy()
+        self.SetTitle(Strings.label_dialog_edit_link)
         if result and self._link.get_status_color() != Numbers.RED_COLOR:
             self.EndModal(return_value)
         else:
