@@ -4,6 +4,8 @@
 Starting class for the whitebear editor GUI. This class is necessary and must be in all wx python programs.
 OnInit must be overridden here.
 # TODO fix bugs and package this into a binary.
+# TODO spellcheck.
+# TODO load with main panel replaced by a loading screen. Look at places where loading dialog was closed.
 # TODO https://www.blog.pythonlibrary.org/2019/03/19/distributing-a-wxpython-application/
 """
 

@@ -275,11 +275,13 @@ class MainFrame(wx.Frame):
                                                                          self._scale_icon('insert-image.png'),
                                                                          Strings.toolbar_insert_img)
         self.insert_img_tool.SetLongHelp(Strings.toolbar_insert_img)
+        self._tool_ids.append(MainFrame.IMAGE_TOOL_ID)
         self.insert_video_tool: wx.ToolBarToolBase = self.tool_bar.AddTool(MainFrame.VIDEO_TOOL_ID,
                                                                            Strings.toolbar_insert_video,
                                                                            self._scale_icon('insert-video.png'),
                                                                            Strings.toolbar_insert_video)
         self.insert_video_tool.SetLongHelp(Strings.toolbar_insert_video)
+        self._tool_ids.append(MainFrame.VIDEO_TOOL_ID)
         self.bold_tool: wx.ToolBarToolBase = self.tool_bar.AddTool(self._add_tool_id(), Strings.toolbar_bold,
                                                                    self._scale_icon('bold.png'),
                                                                    Strings.toolbar_bold)
@@ -436,6 +438,12 @@ class MainFrame(wx.Frame):
         :return: None
         """
         # Insert GUI widgets into the sizers created above.
+        # Loading panel
+        self._loading_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self._loading_image = wx.Bitmap(Fetch.get_resource_path('splashscreen.png'), wx.BITMAP_TYPE_PNG)
+        self._loading_bitmap = wx.StaticBitmap(self, -1, self._loading_image)
+        self._loading_sizer.Add(self._loading_bitmap, 1, flag=wx.EXPAND)
+
         # Logo section -------------------------------------------------------------------------------------------------
         # Create a placeholder image
         placeholder_logo_image = wx.Image(Numbers.menu_logo_image_size, Numbers.menu_logo_image_size)
@@ -586,6 +594,22 @@ class MainFrame(wx.Frame):
         accel_tbl = wx.AcceleratorTable([(wx.ACCEL_CTRL, ord('F'), new_id)])
         self.SetAcceleratorTable(accel_tbl)
 
+    def _loading_screen_on(self, display: bool) -> None:
+        """
+        Display or not display the loading image.
+        :param display: True to switch to loading panel, False to switch to editor.
+        :return: None
+        """
+        if display:
+            self.SetSizer(self._loading_sizer, deleteOld=False)
+            self._loading_bitmap.Show()
+            self._split_screen.Hide()
+        else:
+            self.SetSizer(self._main_horizontal_sizer, deleteOld=False)
+            self._loading_bitmap.Hide()
+            self._split_screen.Show()
+        self.Layout()
+
     # noinspection PyUnusedLocal
     def _focus_to_search(self, event: wx.CommandEvent) -> None:
         """
@@ -605,11 +629,12 @@ class MainFrame(wx.Frame):
         to_set = '| ' + text
         self._status_bar.SetStatusText(to_set, position)
 
-    def _disable_editor(self, state, leave_files: bool = False) -> None:
+    def _disable_editor(self, state, leave_files: bool = False, all_menu: bool = False) -> None:
         """
         Disable all window controls except menu a title bar.
         :param state: True to disable, False to enable all GUI elements.
         :param leave_files: If True the file list will not be disabled.
+        :param all_menu: Disable all menu items.
         :return: None
         """
         self._enabled = not state
@@ -635,6 +660,7 @@ class MainFrame(wx.Frame):
             self._file_list.SetBackgroundColour(wx.WHITE)
             self._file_list.SetForegroundColour(wx.BLACK)
         # Disable toolbar buttons
+        self.tool_bar.Enable(not state)
         for tool_id in self._tool_ids:
             self.tool_bar.EnableTool(tool_id, (not state))
         self._main_text_area.enable_buttons()
@@ -642,7 +668,12 @@ class MainFrame(wx.Frame):
         # Disable menu items
         self._public_checkbox.Enable(not state)
         self._file_menu.Enable(wx.ID_NETWORK, not state)
-        for menu_item in self._disableable_menu_items:
+        menu_items_to_disable = []
+        menu_items_to_disable.extend(self._disableable_menu_items)
+        if all_menu:
+            menu_items_to_disable.append(self._file_menu_item_open)
+            menu_items_to_disable.append(self._file_menu_item_new_dir)
+        for menu_item in menu_items_to_disable:
             menu_item.Enable(not state)
         if leave_files:
             # Files are left enabled in white bear directories only.
@@ -656,8 +687,9 @@ class MainFrame(wx.Frame):
         :param path: str, path to the working directory
         :return: None
         """
+        self._loading_screen_on(True)
         # Disable the gui until load is done
-        self.Disable()
+        self._disable_editor(True, leave_files=False, all_menu=True)
         self._set_status_text(Strings.status_loading, 3)
         self._set_status_text(('Work dir: ' + str(path)), 1)
         self._set_status_text(Strings.status_ready, 0)
@@ -681,6 +713,7 @@ class MainFrame(wx.Frame):
         :param e: Exception that caused the call of this method.
         :return: None
         """
+        self._loading_screen_on(False)
         self._show_error_dialog(str(e))
         self._disable_editor(True)
         self._side_photo_panel.reset()
@@ -731,6 +764,7 @@ class MainFrame(wx.Frame):
             if index > -1:
                 self._file_list.Select(index)
             else:
+                self._loading_screen_on(False)
                 self._show_error_dialog(Strings.warning_last_document_not_found + ':' + '\n' + str(last_document))
                 self._clear_editor(leave_files=True)
 
@@ -738,6 +772,7 @@ class MainFrame(wx.Frame):
         # Enable GUI when the load is done
         self._set_status_text(Strings.status_ready, 3)
         self._set_status_text(Strings.status_articles + ' ' + str(len(self._articles)), 2)
+        self._loading_screen_on(False)
 
         # Store this as last known open directory.
         self._config_manager.store_working_dir(self._index_document.get_working_directory())
@@ -1045,6 +1080,7 @@ class MainFrame(wx.Frame):
                     result = wx.MessageBox(Strings.warning_unsaved, Strings.status_warning, wx.YES_NO | wx.ICON_WARNING)
                     if result == wx.YES:
                         self.Destroy()
+                        break
                     else:
                         event.Veto()
                         return
@@ -1229,7 +1265,7 @@ class MainFrame(wx.Frame):
             self._public_checkbox.SetForegroundColour(Numbers.DARK_GREEN_COLOR)
 
         self._ignore_change = False
-        self._disable_editor(False)
+        self._disable_editor(False, all_menu=True)
 
     # noinspection PyUnusedLocal
     def _handle_name_change(self, event: wx.CommandEvent) -> None:
