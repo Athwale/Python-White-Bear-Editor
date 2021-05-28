@@ -1373,7 +1373,7 @@ class CustomRichText(rt.RichTextCtrl):
                         # Do not append empty paragraphs.
                         new_text_elements.append(next_p)
                     # Skip empty paragraphs which are translated to breaks.
-                    if p.GetChildCount() > 1:
+                    if p.GetTextForRange(p.GetRange()):
                         last_was_paragraph = True
             elif par_style == Strings.style_heading_3 or par_style == Strings.style_heading_4:
                 last_was_paragraph = False
