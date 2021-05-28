@@ -26,8 +26,10 @@ class ImagePanel(wx.Panel):
         self._bitmap_button.SetBitmap(wx.Bitmap(placeholder_image))
         self._bitmap_button.SetMinSize((Numbers.main_image_width, Numbers.main_image_height))
         self._label = wx.StaticText(self, -1, Strings.label_image, style=wx.ST_ELLIPSIZE_MIDDLE | wx.ST_NO_AUTORESIZE)
-        self._sizer.Add(self._bitmap_button, flag=wx.EXPAND | wx.ALIGN_LEFT)
-        self._sizer.Add(self._label, flag=wx.EXPAND | wx.ALIGN_LEFT)
+        # Minimal border is required otherwise the button has weird edges when hovered over.
+        self._sizer.Add(self._bitmap_button, flag=wx.ALIGN_LEFT | wx.LEFT | wx.BOTTOM | wx.RIGHT,
+                        border=Numbers.widget_border_size)
+        self._sizer.Add(self._label, flag=wx.EXPAND | wx.ALIGN_LEFT | wx.LEFT, border=Numbers.widget_border_size)
         self._sizer.Add((Numbers.widget_border_size, Numbers.widget_border_size))
 
         # Create popup context menu

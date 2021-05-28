@@ -112,3 +112,5 @@ class AsideImagePanel(wx.lib.scrolledpanel.ScrolledPanel):
             self._sizer.Add(image_panel, 1, flag=wx.EXPAND | wx.ALIGN_LEFT)
 
         self.SetupScrolling(scroll_x=False, scrollIntoView=True, scrollToTop=False)
+        # This makes the scrollbar space on the right disappear while the collapsible scrollbar still appears.
+        self.SetScrollbar(wx.VERTICAL, 0, 0, 0)
