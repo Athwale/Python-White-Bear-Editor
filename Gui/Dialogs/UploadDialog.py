@@ -258,9 +258,12 @@ class UploadDialog(wx.Dialog):
         :param fail: True if transfer failed.
         :return: None
         """
-        color = Numbers.GREEN_COLOR
         if fail:
             color = Numbers.RED_COLOR
+        else:
+            color = Numbers.GREEN_COLOR
+            # Remove successful uploads from the list of unuploaded files.
+            self._config_manager.remove_uploaded(os.path.basename(file))
         index = self._file_list.FindItem(0, os.path.relpath(file, start=self._config_manager.get_working_dir()))
         if index > -1:
             self._file_list.SetItemBackgroundColour(index, color)

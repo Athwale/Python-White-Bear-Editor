@@ -1,5 +1,5 @@
 import os
-from typing import Tuple, Dict
+from typing import Tuple, Dict, List
 
 import yaml
 from yaml.parser import ParserError
@@ -36,6 +36,7 @@ class ConfigManager:
     CONF_KEYFILE: str = 'key'
     CONF_ONLINE_TEST: str = 'onlineTest'
     CONF_LAST_IMG_DIR: str = 'lastImgDir'
+    CONF_UNUPLOADED: str = 'unuploaded'
 
     @staticmethod
     def get_instance():
@@ -52,11 +53,11 @@ class ConfigManager:
             raise Exception("This class is a singleton!")
         else:
             ConfigManager.__instance = self
-        self._dir_conf: Dict[str, str] = {}
+        self._dir_conf = {}
         self._whole_conf = {}
         self._load()
 
-    def _create_new_dir_config(self) -> Dict[str, str]:
+    def _create_new_dir_config(self) -> Dict[str, object]:
         """
         Create a new config file with default values.
         :return: New configuration dictionary.
@@ -78,7 +79,8 @@ class ConfigManager:
                 self.CONF_KEYFILE: '',
                 self.CONF_ONLINE_TEST: '1',
                 self.CONF_LAST_IMG_DIR: Strings.home_directory,
-                self.CONF_NEWS: str(Numbers.default_news)}
+                self.CONF_NEWS: str(Numbers.default_news),
+                self.CONF_UNUPLOADED: []}
 
     def _init_config(self) -> None:
         """
@@ -136,6 +138,8 @@ class ConfigManager:
         for name in [self.CONF_IP, self.CONF_USER, self.CONF_KEYFILE]:
             if name not in self._dir_conf.keys():
                 self._dir_conf[name] = ''
+        if self.CONF_UNUPLOADED not in self._dir_conf.keys():
+            self._dir_conf[self.CONF_UNUPLOADED] = []
 
         # If online test value is not recognized, set to 1.
         if self.CONF_ONLINE_TEST not in self._dir_conf.keys():
@@ -330,6 +334,35 @@ class ConfigManager:
         :return: String directory path to the last used image directory.
         """
         return self._dir_conf[self.CONF_LAST_IMG_DIR]
+
+    def get_not_uploaded(self) -> List[str]:
+        """
+        Get a list of documents which are modified but not uploaded.
+        :return: List of documents which are modified but not uploaded.
+        """
+        return self._dir_conf[self.CONF_UNUPLOADED]
+
+    def store_not_uploaded(self, file: str) -> None:
+        """
+        Add a file name to the not yet uploaded file list if not in it already.
+        :param file: The file name to add.
+        :return: None
+        """
+        file_list: List[str] = self._dir_conf[self.CONF_UNUPLOADED]
+        if file not in file_list:
+            file_list.append(file)
+        self.save_config_file()
+
+    def remove_uploaded(self, file: str) -> None:
+        """
+        Remove an uploaded file name from the list of not yet uploaded files.
+        :param file: The file name to remove.
+        :return: None
+        """
+        file_list: List[str] = self._dir_conf[self.CONF_UNUPLOADED]
+        if file in file_list:
+            file_list.remove(file)
+        self.save_config_file()
 
     def store_last_img_dir(self, path: str) -> None:
         """

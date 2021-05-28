@@ -230,7 +230,7 @@ class Strings:
     warning_new_dir_created: str = 'New directory created.\n' \
                                    'Please add custom files.\n' \
                                    'favicon.ico, 404.html, google tracking page...'
-    warning_unsaved: str = 'At least one document is not saved.\nQuit anyway?'
+    warning_unsaved: str = 'At least one document is not saved or uploaded.\nQuit anyway?'
     warning_new_dir_unsaved: str = 'At least one document is not saved.\nContinue?'
     warning_file_inaccessible: str = 'Can not access file'
     warning_incorrect_format: str = 'Incorrect format'

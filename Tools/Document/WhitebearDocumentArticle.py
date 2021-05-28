@@ -899,6 +899,10 @@ class WhitebearDocumentArticle(WhitebearDocument):
         :return: None
         """
         super(WhitebearDocumentArticle, self).set_modified(modified)
+        # Save the fact that this file is changed into the list of file that we need to upload. This survives editor
+        # exit and can be restored on start. This list is cleared when a file is uploaded.
+        if modified:
+            self._config_manager.store_not_uploaded(self.get_filename())
         if not modified:
             for list_var in [self._aside_images, self._text_images, self._links, self._videos]:
                 for content in list_var:

@@ -752,7 +752,12 @@ class MainFrame(wx.Frame):
             self._file_menu_item_edit_menu.Enable(True)
         self._index_document = index
         self._clear_editor(leave_files=False)
+        unsaved = self._config_manager.get_not_uploaded()
         for document_name in sorted(list(self._articles.keys()), reverse=True):
+            if document_name in unsaved:
+                # Restore which documents have been modified but not saved yet
+                print('a')
+                self._articles[document_name].set_modified(True)
             status_color = self._articles[document_name].get_status_color()
             self._file_list.InsertItem(0, document_name)
             self._file_list.SetItemBackgroundColour(0, status_color)
@@ -1588,6 +1593,8 @@ class MainFrame(wx.Frame):
             path = self._current_document_instance.get_path()
             if os.path.exists(path) and os.access(path, os.R_OK) and os.access(path, os.W_OK):
                 os.remove(path)
+                # Remove from unuploaded list if it is there.
+                self._config_manager.remove_uploaded(self._current_document_name)
                 self._articles.pop(self._current_document_name)
                 self._file_list.DeleteItem(self._file_list.FindItem(-1, self._current_document_instance.get_filename()))
                 self._save_all(disable=True)

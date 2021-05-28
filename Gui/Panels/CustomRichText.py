@@ -44,7 +44,7 @@ class CustomRichText(rt.RichTextCtrl):
         # Used to prevent over-calling methods on keypress.
         self._disable_input = False
         self._click_counter = 0
-        # Is set to true when a document is fully loaded, prevents setting document to modified before it is loaded.
+        # Is set to True when a document is fully loaded, prevents setting document to modified before it is loaded.
         self._load_indicator = False
         # Used to distinguish paste
         self._paste_indicator = False
@@ -101,6 +101,7 @@ class CustomRichText(rt.RichTextCtrl):
         :param event: Not used
         :return: None
         """
+        # todo This is fired on clear for some reason
         if self._load_indicator:
             event.Skip()
             self._doc.set_modified(True)
@@ -1004,6 +1005,7 @@ class CustomRichText(rt.RichTextCtrl):
         Clears all styles and prepares the control for a new article.
         :return: None
         """
+        self._load_indicator = False
         # Set default attributes. Copied from wxPython source code.
         self.SetFont(wx.SystemSettings.GetFont(wx.SYS_DEFAULT_GUI_FONT))
         attrs: rt.RichTextAttr = rt.RichTextAttr()
@@ -1038,7 +1040,6 @@ class CustomRichText(rt.RichTextCtrl):
         :param doc: The white bear article.
         :return: None
         """
-        self._load_indicator = False
         self._doc = doc
         self._css_document = doc.get_css_document()
         self.BeginSuppressUndo()
@@ -1372,7 +1373,7 @@ class CustomRichText(rt.RichTextCtrl):
                     if next_p:
                         # Do not append empty paragraphs.
                         new_text_elements.append(next_p)
-                    # Skip empty paragraphs which are translated to breaks.
+                    # Skip multiple empty paragraphs which are translated to breaks.
                     if p.GetTextForRange(p.GetRange()):
                         last_was_paragraph = True
             elif par_style == Strings.style_heading_3 or par_style == Strings.style_heading_4:
