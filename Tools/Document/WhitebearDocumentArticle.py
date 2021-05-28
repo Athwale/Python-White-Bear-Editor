@@ -579,6 +579,9 @@ class WhitebearDocumentArticle(WhitebearDocument):
             raise UnrecognizedFileException(Strings.exception_bug + '\n' + self.get_filename() + ' \n' + str(errors))
 
         self._html = output
+        # Save the fact that this file is changed into the list of file that we need to upload. This survives editor
+        # exit and can be restored on start. This list is cleared when a file is uploaded.
+        self._config_manager.store_not_uploaded(self.get_filename())
 
     @staticmethod
     def _convert_text_contents(container: Tag, par: Paragraph, soup: BeautifulSoup) -> Tag:
@@ -854,6 +857,14 @@ class WhitebearDocumentArticle(WhitebearDocument):
         """
         self._html = ''
 
+    def set_html(self, html: str) -> None:
+        """
+        Set the html to be saved.
+        :param html: The html code.
+        :return: None
+        """
+        self._html = html
+
     def set_enabled(self, enabled: bool) -> None:
         """
         Sets the publication enabled attribute.
@@ -899,10 +910,6 @@ class WhitebearDocumentArticle(WhitebearDocument):
         :return: None
         """
         super(WhitebearDocumentArticle, self).set_modified(modified)
-        # Save the fact that this file is changed into the list of file that we need to upload. This survives editor
-        # exit and can be restored on start. This list is cleared when a file is uploaded.
-        if modified:
-            self._config_manager.store_not_uploaded(self.get_filename())
         if not modified:
             for list_var in [self._aside_images, self._text_images, self._links, self._videos]:
                 for content in list_var:

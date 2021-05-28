@@ -756,11 +756,12 @@ class MainFrame(wx.Frame):
         for document_name in sorted(list(self._articles.keys()), reverse=True):
             if document_name in unsaved:
                 # Restore which documents have been modified but not saved yet
-                print('a')
                 self._articles[document_name].set_modified(True)
+                # Set html code to something not False because at this point we have the final html on disk.
+                self._articles[document_name].set_html('current html on disk')
             status_color = self._articles[document_name].get_status_color()
             self._file_list.InsertItem(0, document_name)
-            self._file_list.SetItemBackgroundColour(0, status_color)
+            self._update_file_color(0)
 
         # Select last used document
         last_document = self._config_manager.get_last_document()
@@ -1175,9 +1176,9 @@ class MainFrame(wx.Frame):
         :param event: wx event, brings the selected string from the menu.
         :return: None
         """
-        if self._current_document_instance and event.GetClientData() != Strings.flag_no_save and \
-                self._current_document_instance.is_modified():
+        if self._current_document_instance and self._current_document_instance.is_modified():
             # Only ask to save if there is a document already opened in the editor and saving is allowed.
+            print('a')
             self._save_current_doc(confirm=True)
 
         self._disable_editor(True)

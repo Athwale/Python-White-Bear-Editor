@@ -454,7 +454,6 @@ class Strings:
     undo_last_action: str = 'Last action'
     undo_bold: str = 'Undo bold text'
 
-    flag_no_save: str = 'dont_save'
     field_type: str = 'type'
     field_video: str = 'video'
     field_image: str = 'image'
