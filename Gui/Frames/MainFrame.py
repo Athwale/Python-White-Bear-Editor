@@ -755,11 +755,13 @@ class MainFrame(wx.Frame):
         unsaved = self._config_manager.get_not_uploaded()
         for document_name in sorted(list(self._articles.keys()), reverse=True):
             if document_name in unsaved:
-                # Restore which documents have been modified but not saved yet
+                # Set blue color to documents have been modified but not saved yet. Simulate a save because these are
+                # right after load ready for upload and if changed then they have to be saved again which regenrates
+                # them.
                 self._articles[document_name].set_modified(True)
+                self._articles[document_name].set_modified(False)
                 # Set html code to something not False because at this point we have the final html on disk.
                 self._articles[document_name].set_html('current html on disk')
-            status_color = self._articles[document_name].get_status_color()
             self._file_list.InsertItem(0, document_name)
             self._update_file_color(0)
 
@@ -1367,7 +1369,6 @@ class MainFrame(wx.Frame):
             # Nothing is selected nor given an index to update.
             return
         doc = self._articles[self._file_list.GetItemText(index)]
-        doc.is_modified()
         new_color = doc.get_status_color()
         if doc.get_html_to_save():
             # Only exported documents have this.

@@ -26,6 +26,8 @@ class UploadDialog(wx.Dialog):
                            size=(Numbers.upload_dialog_width, Numbers.upload_dialog_height))
         self.small_font = wx.Font(Numbers.text_field_font_size, wx.FONTFAMILY_DEFAULT,
                                   wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, False)
+        self.bold_small_font = wx.Font(Numbers.text_field_font_size, wx.FONTFAMILY_DEFAULT,
+                                       wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD, False)
         self._config_manager: ConfigManager = ConfigManager.get_instance()
         self._articles = articles
         self._index = index
@@ -583,4 +585,7 @@ class UploadDialog(wx.Dialog):
         index = self._file_list.InsertItem(self._file_list.GetItemCount(),
                                            os.path.relpath(path, start=self._config_manager.get_working_dir()))
         self._file_list.SetItemData(index, item_id)
+
+        if not path.startswith(os.path.join(self._config_manager.get_working_dir(), Strings.folder_images)):
+            self._file_list.SetItemFont(index, self.bold_small_font)
         self._file_list.CheckItem(index, True)
