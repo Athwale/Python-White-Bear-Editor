@@ -16,6 +16,7 @@ class MyApp(wx.App):
     """
     Main class for running the gui.
     """
+
     def __init__(self):
         wx.App.__init__(self)
         self.frame = None

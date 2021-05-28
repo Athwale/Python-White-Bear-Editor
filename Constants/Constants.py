@@ -125,7 +125,7 @@ class Strings:
     contact_default_alt: str = 'kontakt'
     home_page: str = 'Hlavní strana'
     image_extensions: str = 'JPG files (*' + extension_jpg + ')|*.[jJ][pP][gG]' \
-                            '|png files (*' + extension_png + ')|*.[pP][nN][gG]'
+                                                             '|png files (*' + extension_png + ')|*.[pP][nN][gG]'
     image_jpg_only: str = 'JPG files (*' + extension_jpg + ')|*' + extension_jpg
     html_wildcard: str = 'HTML files (*' + extension_html + ')|*' + extension_html
     default_file: str = 'untitled'

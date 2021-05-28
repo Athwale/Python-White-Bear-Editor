@@ -2,9 +2,9 @@ from typing import Dict
 
 import tinycss
 import webcolors
+from wx import BLUE
 from wx import Colour
 from wx import NullColour
-from wx import BLUE
 
 from Constants.Constants import Strings
 from Exceptions.WrongFormatException import WrongFormatException

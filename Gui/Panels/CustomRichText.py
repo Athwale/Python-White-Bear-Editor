@@ -101,7 +101,6 @@ class CustomRichText(rt.RichTextCtrl):
         :param event: Not used
         :return: None
         """
-        # todo This is fired on clear for some reason
         if self._load_indicator:
             event.Skip()
             self._doc.set_modified(True)

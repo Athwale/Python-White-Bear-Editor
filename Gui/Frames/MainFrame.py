@@ -756,7 +756,7 @@ class MainFrame(wx.Frame):
         for document_name in sorted(list(self._articles.keys()), reverse=True):
             if document_name in unsaved:
                 # Set blue color to documents have been modified but not saved yet. Simulate a save because these are
-                # right after load ready for upload and if changed then they have to be saved again which regenrates
+                # right after load ready for upload and if changed then they have to be saved again which regenerates
                 # them.
                 self._articles[document_name].set_modified(True)
                 self._articles[document_name].set_modified(False)

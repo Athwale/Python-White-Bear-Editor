@@ -198,7 +198,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
         """
         # Find a section tag with both classes, if such is present, the article is disabled.
         # This returns true when the disabled class is present, so it has to be negated.
-        self._enabled = not(bool(self._parsed_html.select('section.mainText.disabled')))
+        self._enabled = not (bool(self._parsed_html.select('section.mainText.disabled')))
 
     def _parse_main_text(self) -> None:
         """
