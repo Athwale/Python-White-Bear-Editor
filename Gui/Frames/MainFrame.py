@@ -843,6 +843,8 @@ class MainFrame(wx.Frame):
                     continue
                 attr.SetTextColour(color)
                 self._main_text_area.SetStyleEx(single_range, attr, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO)
+                self._current_document_instance.set_modified(True)
+                self._update_file_color()
             self._main_text_area.EndBatchUndo()
         else:
             self._main_text_area.BeginTextColour(color)

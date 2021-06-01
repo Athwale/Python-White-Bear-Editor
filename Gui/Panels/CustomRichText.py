@@ -948,6 +948,11 @@ class CustomRichText(rt.RichTextCtrl):
                         self._change_style(self.GetBuffer(), evt.GetString(), position)
         else:
             self._change_style(self.GetBuffer(), evt.GetString(), position=-1)
+
+        self._doc.set_modified(True)
+        color_evt = wx.CommandEvent(wx.wxEVT_COLOUR_CHANGED, self.GetId())
+        color_evt.SetEventObject(self)
+        wx.PostEvent(self.GetEventHandler(), color_evt)
         self.EndBatchUndo()
         # Return focus back into the text area. The focus must happen a little later when the style picker is finished.
         wx.CallLater(100, self.SetFocus)
@@ -1337,6 +1342,10 @@ class CustomRichText(rt.RichTextCtrl):
                     attr.SetFontWeight(wx.FONTWEIGHT_NORMAL)
                 self.SetStyleEx(single_range, attr, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO)
             self.EndBatchUndo()
+            self._doc.set_modified(True)
+            color_evt = wx.CommandEvent(wx.wxEVT_COLOUR_CHANGED, self.GetId())
+            color_evt.SetEventObject(self)
+            wx.PostEvent(self.GetEventHandler(), color_evt)
         else:
             if not self.IsSelectionBold():
                 self.BeginBold()
