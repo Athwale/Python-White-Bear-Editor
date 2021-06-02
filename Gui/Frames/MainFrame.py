@@ -809,6 +809,7 @@ class MainFrame(wx.Frame):
         """
         tool: wx.ToolBarToolBase = self.tool_bar.FindById(evt.GetId())
         color = self._css_document.translate_str_color(tool.GetShortHelp())
+        self._main_text_area: CustomRichText
         if self._main_text_area.HasSelection():
             self._main_text_area.BeginBatchUndo(Strings.undo_last_action)
             color_range: rt.RichTextRange = self._main_text_area.GetSelectionRange()
@@ -847,7 +848,17 @@ class MainFrame(wx.Frame):
                 self._update_file_color()
             self._main_text_area.EndBatchUndo()
         else:
-            self._main_text_area.BeginTextColour(color)
+            # Prevent beginning a new color inside urls and headings.
+            position = self._main_text_area.GetAdjustedCaretPosition(self._main_text_area.GetCaretPosition())
+            par_style, char_style = self._main_text_area.get_style_at_pos(self._main_text_area.GetBuffer(), position)
+            if char_style == Strings.style_url:
+                return
+            elif par_style == Strings.style_heading_3 or par_style == Strings.style_heading_4:
+                # Select current word and recursively call itself to color the whole heading.
+                self._main_text_area.SelectWord(position)
+                self._change_color(evt)
+            else:
+                self._main_text_area.BeginTextColour(color)
 
     def _save_current_doc(self, confirm: bool = False, save_as: bool = False, disable: bool = False) -> bool:
         """

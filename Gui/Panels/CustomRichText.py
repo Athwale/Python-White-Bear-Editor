@@ -471,10 +471,9 @@ class CustomRichText(rt.RichTextCtrl):
                             flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_CHARACTERS_ONLY)
 
     @staticmethod
-    def _get_style_at_pos(buffer: rt.RichTextBuffer, position: int = 0) -> (str, str):
+    def get_style_at_pos(buffer: rt.RichTextBuffer, position) -> (str, str):
         """
-        Get the style name at given position in the text. 0 - current position, -1 - before current position
-        1 - after current position.
+        Get the style name at given position in the text.
         :param position: The position.
         :param buffer: The buffer to work with.
         :return: (paragraph style name, character style name) or (None, None).
@@ -495,8 +494,8 @@ class CustomRichText(rt.RichTextCtrl):
         """
         Show current style under cursor in the style box.
         """
-        paragraph_style_name, character_style_name = self._get_style_at_pos(self.GetBuffer(),
-                                                                            self.GetAdjustedCaretPosition
+        paragraph_style_name, character_style_name = self.get_style_at_pos(self.GetBuffer(),
+                                                                           self.GetAdjustedCaretPosition
                                                                             (self.GetCaretPosition()))
         if character_style_name:
             self._style_picker.SetSelection(self._style_picker.FindString(character_style_name))
@@ -513,7 +512,7 @@ class CustomRichText(rt.RichTextCtrl):
 
         position = self.GetAdjustedCaretPosition(self.GetCaretPosition())
         p: rt.RichTextParagraph = self.GetFocusObject().GetParagraphAtPosition(position)
-        paragraph_style, character_style = self._get_style_at_pos(self.GetBuffer(), position)
+        paragraph_style, character_style = self.get_style_at_pos(self.GetBuffer(), position)
 
         # End url style if next character has different or no url.
         if character_style == Strings.style_url:
@@ -633,11 +632,11 @@ class CustomRichText(rt.RichTextCtrl):
             self.BeginBatchUndo(Strings.undo_last_action)
 
         position = self.GetAdjustedCaretPosition(self.GetCaretPosition())
-        paragraph_style, character_style = self._get_style_at_pos(self.GetBuffer(), position)
+        paragraph_style, character_style = self.get_style_at_pos(self.GetBuffer(), position)
         # Detect paragraph beginning. Allow pressing return at the beginning of line.
         paragraph_start = self.GetFocusObject().GetParagraphAtPosition(position).GetRange()[0]
         if paragraph_start != position:
-            _, next_character_style = self._get_style_at_pos(self.GetBuffer(), position + 1)
+            _, next_character_style = self.get_style_at_pos(self.GetBuffer(), position + 1)
             if character_style == Strings.style_url and next_character_style == Strings.style_url:
                 if event.GetKeyCode() == wx.WXK_RETURN:
                     # Prevent return key inside url style but not at the end of the link.
@@ -732,10 +731,10 @@ class CustomRichText(rt.RichTextCtrl):
             paste_buffer.SetStyleSheet(self._stylesheet)
             paste_buffer.BeginSuppressUndo()
             ctrl_buffer: rt.RichTextBuffer = self.GetBuffer()
-            current_style = self._get_style_at_pos(ctrl_buffer, paste_position)
+            current_style = self.get_style_at_pos(ctrl_buffer, paste_position)
 
             # Turn the style of the first paragraph into the correct style.
-            first_buffer_style = self._get_style_at_pos(paste_buffer, 0)
+            first_buffer_style = self.get_style_at_pos(paste_buffer, 0)
             if current_style[1] == Strings.style_url:
                 paragraphs: List[rt.RichTextParagraph] = paste_buffer.GetChildren()
                 if len(paragraphs) > 1:
@@ -869,7 +868,7 @@ class CustomRichText(rt.RichTextCtrl):
         """
         if event.GetId() == wx.ID_PASTE:
             position = self.GetAdjustedCaretPosition(self.GetCaretPosition())
-            paragraph_style, _ = self._get_style_at_pos(self.GetBuffer(), position)
+            paragraph_style, _ = self.get_style_at_pos(self.GetBuffer(), position)
             # We get here without starting undo batch, since on key down ignores ctrl.
             # Start paste batch here because delete text would go through before the batch would be started
             # in modify text.
@@ -963,7 +962,7 @@ class CustomRichText(rt.RichTextCtrl):
         :return: None
         """
         position = self.GetAdjustedCaretPosition(self.GetCaretPosition())
-        paragraph_style, character_style = self._get_style_at_pos(self.GetBuffer(), position)
+        paragraph_style, character_style = self.get_style_at_pos(self.GetBuffer(), position)
         p: rt.RichTextParagraph = self.GetFocusObject().GetParagraphAtPosition(position)
         if not p.GetTextForRange(p.GetRange()) and paragraph_style == Strings.style_paragraph \
                 and not isinstance(p.GetChild(0), rt.RichTextField):
