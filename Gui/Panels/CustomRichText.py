@@ -1340,12 +1340,20 @@ class CustomRichText(rt.RichTextCtrl):
                 else:
                     attr.SetFontWeight(wx.FONTWEIGHT_NORMAL)
                 self.SetStyleEx(single_range, attr, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO)
+                self.SelectNone()
             self.EndBatchUndo()
             self._doc.set_modified(True)
             color_evt = wx.CommandEvent(wx.wxEVT_COLOUR_CHANGED, self.GetId())
             color_evt.SetEventObject(self)
             wx.PostEvent(self.GetEventHandler(), color_evt)
         else:
+            # Prevent beginning bold inside urls and headings.
+            position = self.GetAdjustedCaretPosition(self.GetCaretPosition())
+            par_style, char_style = self.get_style_at_pos(self.GetBuffer(), position)
+            if char_style == Strings.style_url:
+                return
+            elif par_style == Strings.style_heading_3 or par_style == Strings.style_heading_4:
+                return
             if not self.IsSelectionBold():
                 self.BeginBold()
             else:

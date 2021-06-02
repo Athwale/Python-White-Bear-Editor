@@ -6,7 +6,6 @@ OnInit must be overridden here.
 # TODO fix bugs and package this into a binary.
 # TODO spellcheck.
 # TODO plaintext editor for styles and robots.
-# TODO changing color/bold inside heading without selection allow multicolored headings, same problem inside links.
 # TODO https://www.blog.pythonlibrary.org/2019/03/19/distributing-a-wxpython-application/
 """
 

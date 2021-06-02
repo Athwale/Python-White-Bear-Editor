@@ -846,6 +846,7 @@ class MainFrame(wx.Frame):
                 self._main_text_area.SetStyleEx(single_range, attr, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO)
                 self._current_document_instance.set_modified(True)
                 self._update_file_color()
+                self._main_text_area.SelectNone()
             self._main_text_area.EndBatchUndo()
         else:
             # Prevent beginning a new color inside urls and headings.
