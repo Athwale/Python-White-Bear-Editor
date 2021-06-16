@@ -36,7 +36,6 @@ class AsideImagePanel(wx.lib.scrolledpanel.ScrolledPanel):
         moved.
         :return: None
         """
-        event.Skip()
         self._img_index = self._images.index(event.GetClientData())
         # Rearrange the images in the list
         if event.GetId() == wx.ID_UP:
