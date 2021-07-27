@@ -1471,7 +1471,7 @@ class MainFrame(wx.Frame):
     # noinspection PyUnusedLocal
     def _repeat_search(self, event: wx.CommandEvent) -> None:
         """
-        Force repeating search on arrow press because the text has changed and indexes would no longer match.
+        Force repeating search because the text has changed and indexes would no longer match.
         :param event: Not used.
         :return: None
         """
@@ -1517,7 +1517,42 @@ class MainFrame(wx.Frame):
 
         # Select first found string.
         self._main_text_area.SetSelection(self._search_results[0], (self._search_results[0] + len(self._search_term)))
+        # TODO scroll found text to view.
+        self._main_text_area.ShowPosition(self._search_results[0])
+        self._main_text_area.LayoutContent()
         return True
+
+    # noinspection PyUnusedLocal
+    def _search_tools_handler(self, event: wx.CommandEvent) -> None:
+        """
+        Fires on pressing the enter key inside the search box.
+        :param event: Used to get the tool id.
+        :return: None
+        """
+        if self._text_changed:
+            # Repeat search when the text has changed.
+            # Back up current selected position for later comparison.
+            self._text_changed = False
+            # When the text changes, restart search from beginning.
+            self._search_index = 0
+            if not self._search_string(self._search_box.GetValue()):
+                # If there are no results then, do nothing.
+                return
+
+        if not self._search_results:
+            return
+
+        # Cycle over the results.
+        if self._search_index == len(self._search_results) - 1:
+            self._search_index = 0
+        else:
+            self._search_index = self._search_index + 1
+
+        position: int = self._search_results[self._search_index]
+        self._main_text_area.SetSelection(position, (position + len(self._search_term)))
+        # Scroll found text to view.
+        self._main_text_area.ShowPosition(position)
+        self._main_text_area.LayoutContent()
 
     # noinspection PyUnusedLocal
     def _new_file_handler(self, event: wx.CommandEvent) -> None:
@@ -1677,35 +1712,6 @@ class MainFrame(wx.Frame):
         dlg = UploadDialog(self, self._articles, self._index_document, self._css_document)
         dlg.ShowModal()
         dlg.Destroy()
-
-    # noinspection PyUnusedLocal
-    def _search_tools_handler(self, event: wx.CommandEvent) -> None:
-        """
-        Handles the arrows that switch between found strings. Fires on pressing the enter key.
-        :param event: Used to get the tool id.
-        :return: None
-        """
-        if self._text_changed:
-            # Repeat search when the text has changed.
-            # Back up current selected position for later comparison.
-            self._text_changed = False
-            # When the text changes, restart search from beginning.
-            self._search_index = 0
-            if not self._search_string(self._search_box.GetValue()):
-                # If there are no results then, do nothing.
-                return
-
-        if not self._search_results:
-            return
-
-        # Cycle over the results.
-        if self._search_index == len(self._search_results) - 1:
-            self._search_index = 0
-        else:
-            self._search_index = self._search_index + 1
-
-        position: int = self._search_results[self._search_index]
-        self._main_text_area.SetSelection(position, (position + len(self._search_term)))
 
     def _online_test_handler(self, event: wx.CommandEvent) -> None:
         """

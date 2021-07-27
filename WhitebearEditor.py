@@ -6,6 +6,7 @@ OnInit must be overridden here.
 # TODO fix bugs and package this into a binary.
 # TODO spellcheck.
 # TODO plaintext editor for styles and robots.
+# TODO show free server disk space in upload dialog.
 # TODO https://www.blog.pythonlibrary.org/2019/03/19/distributing-a-wxpython-application/
 """
 
