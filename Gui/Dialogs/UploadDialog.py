@@ -300,6 +300,7 @@ class UploadDialog(wx.Dialog):
         :param password: RSA private key password.
         :return: None
         """
+        # TODO show free server disk space in upload dialog.
         ip, port = self._field_ip_port.GetValue().split(':', 2)
         # Contains tuples (full disk path, relative path on server)
         files_to_upload: List[Tuple[str, str]] = []

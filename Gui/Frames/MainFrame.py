@@ -1501,7 +1501,7 @@ class MainFrame(wx.Frame):
             self._set_status_text(Strings.status_ready, 3)
             return False
 
-        text_content: str = self._main_text_area.GetValue()
+        text_content: str = self._main_text_area.GetValue().lower()
         start_index: int = text_content.find(self._search_term, 0)
         while start_index != -1:
             # At least one was found
@@ -1517,7 +1517,7 @@ class MainFrame(wx.Frame):
 
         # Select first found string.
         self._main_text_area.SetSelection(self._search_results[0], (self._search_results[0] + len(self._search_term)))
-        # TODO scroll found text to view.
+        # Scroll found text to view.
         self._main_text_area.ShowPosition(self._search_results[0])
         self._main_text_area.LayoutContent()
         return True
@@ -1529,6 +1529,7 @@ class MainFrame(wx.Frame):
         :param event: Used to get the tool id.
         :return: None
         """
+        # TODO search box index out of range when only one is found. Search does not continue whe text is changed.
         if self._text_changed:
             # Repeat search when the text has changed.
             # Back up current selected position for later comparison.
