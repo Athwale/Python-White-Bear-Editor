@@ -1285,6 +1285,11 @@ class MainFrame(wx.Frame):
             self._public_checkbox.SetValue(True)
             self._public_checkbox.SetForegroundColour(Numbers.DARK_GREEN_COLOR)
 
+        # Clear any search terms.
+        self._text_changed = True
+        self._search_index = 0
+        self._search_results.clear()
+
         self._ignore_change = False
         self._disable_editor(False, all_menu=True)
 
@@ -1521,15 +1526,13 @@ class MainFrame(wx.Frame):
         :param event: Used to get the tool id.
         :return: None
         """
-        # TODO search box index out of range when only one is found. Search does not continue when text is changed.
+        # TODO react to ctrl-f from anywhere,
         if self._text_changed:
-            print('a')
             # Repeat search when the text has changed. Indicate that text is now stable.
             # When the text changes, restart search from beginning.
             self._text_changed = False
             self._search_index = 0
             if not self._search_string(self._search_box.GetValue().lower()):
-                print('b')
                 # If there are no results then, do nothing.
                 return
 
