@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=White-bear web editor
+Comment=python3 White-bear web editor
+Exec=whitebear-editor
+Icon=/home/$USER/PycharmProjects/Python-White-Bear-Editor/Resources/icon.ico
+Terminal=false

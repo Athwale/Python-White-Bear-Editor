@@ -496,7 +496,7 @@ class CustomRichText(rt.RichTextCtrl):
         """
         paragraph_style_name, character_style_name = self.get_style_at_pos(self.GetBuffer(),
                                                                            self.GetAdjustedCaretPosition
-                                                                            (self.GetCaretPosition()))
+                                                                           (self.GetCaretPosition()))
         if character_style_name:
             self._style_picker.SetSelection(self._style_picker.FindString(character_style_name))
         elif paragraph_style_name:

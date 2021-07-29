@@ -533,7 +533,6 @@ class MainFrame(wx.Frame):
                                               self._right_panel, style=wx.VSCROLL)
         self._middle_vertical_sizer.Add(self._main_text_area, flag=wx.EXPAND | wx.TOP, proportion=1,
                                         border=Numbers.widget_border_size)
-        self.Bind(wx.EVT_TEXT, self._repeat_search, self._main_text_area)
         # Update file color on change.
         self.Bind(wx.EVT_TEXT, self._text_area_edit_handler, self._main_text_area)
         # --------------------------------------------------------------------------------------------------------------
@@ -1367,6 +1366,8 @@ class MainFrame(wx.Frame):
         :param event: Not used.
         :return: None
         """
+        # Force repeating search because the text has changed and indexes would no longer match.
+        self._text_changed = True
         if not self._ignore_change:
             self._current_document_instance.clear_converted_html()
             self._update_file_color()
@@ -1468,15 +1469,6 @@ class MainFrame(wx.Frame):
         else:
             self._save_current_doc()
 
-    # noinspection PyUnusedLocal
-    def _repeat_search(self, event: wx.CommandEvent) -> None:
-        """
-        Force repeating search because the text has changed and indexes would no longer match.
-        :param event: Not used.
-        :return: None
-        """
-        self._text_changed = True
-
     def _search_box_handler(self, event: wx.CommandEvent) -> None:
         """
         Forward the string we are searching for into the search method. Fires as text is being typed.
@@ -1531,11 +1523,13 @@ class MainFrame(wx.Frame):
         """
         # TODO search box index out of range when only one is found. Search does not continue when text is changed.
         if self._text_changed:
+            print('a')
             # Repeat search when the text has changed. Indicate that text is now stable.
             # When the text changes, restart search from beginning.
             self._text_changed = False
             self._search_index = 0
             if not self._search_string(self._search_box.GetValue().lower()):
+                print('b')
                 # If there are no results then, do nothing.
                 return
 
