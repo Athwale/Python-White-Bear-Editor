@@ -1483,7 +1483,7 @@ class MainFrame(wx.Frame):
         :param event: Carries the string from search box.
         :return: None
         """
-        self._search_string(event.GetString())
+        self._search_string(event.GetString().lower())
 
     def _search_string(self, text: str) -> bool:
         """
@@ -1529,14 +1529,13 @@ class MainFrame(wx.Frame):
         :param event: Used to get the tool id.
         :return: None
         """
-        # TODO search box index out of range when only one is found. Search does not continue whe text is changed.
+        # TODO search box index out of range when only one is found. Search does not continue when text is changed.
         if self._text_changed:
-            # Repeat search when the text has changed.
-            # Back up current selected position for later comparison.
-            self._text_changed = False
+            # Repeat search when the text has changed. Indicate that text is now stable.
             # When the text changes, restart search from beginning.
+            self._text_changed = False
             self._search_index = 0
-            if not self._search_string(self._search_box.GetValue()):
+            if not self._search_string(self._search_box.GetValue().lower()):
                 # If there are no results then, do nothing.
                 return
 
