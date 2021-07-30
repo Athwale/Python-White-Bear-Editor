@@ -49,6 +49,7 @@ class Uploader:
             raise AccessException(Strings.warning_rsa_passphrase_wrong)
         # Connect SSH client.
         self._ssh_connection = paramiko.SSHClient()
+        self._ssh_connection.load_system_host_keys()
         self._ssh_connection.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         self._ssh_connection.connect(self._ip, self._port, self._user, pkey=key, timeout=Numbers.connection_timeout)
         self._sftp_connection = self._ssh_connection.open_sftp()

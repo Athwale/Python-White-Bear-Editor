@@ -465,7 +465,7 @@ class MainFrame(wx.Frame):
         # File list section --------------------------------------------------------------------------------------------
         self._style_picker = wx.ListBox(self._left_panel, -1, size=(-1, 160))
         self._style_sizer.Add(self._style_picker, 1, flag=wx.EXPAND)
-        self._file_list = wx.ListCtrl(self._left_panel, -1, style=wx.LC_REPORT | wx.LC_SINGLE_SEL)
+        self._file_list = wx.ListCtrl(self._left_panel, -1, style=wx.LC_REPORT | wx.LC_SINGLE_SEL | wx.LC_HRULES)
         self._file_list.SetFont(self.small_font)
         self._filelist_column_sizer.Add(self._style_sizer, flag=wx.EXPAND, border=Numbers.widget_border_size)
         # Add the list into the bottom sizer, give it a sizing weight and let it expand vertically
@@ -1193,7 +1193,6 @@ class MainFrame(wx.Frame):
         """
         if self._current_document_instance and self._current_document_instance.is_modified():
             # Only ask to save if there is a document already opened in the editor and saving is allowed.
-            print('a')
             self._save_current_doc(confirm=True)
 
         self._disable_editor(True)
@@ -1526,7 +1525,6 @@ class MainFrame(wx.Frame):
         :param event: Used to get the tool id.
         :return: None
         """
-        # TODO react to ctrl-f from anywhere,
         if self._text_changed:
             # Repeat search when the text has changed. Indicate that text is now stable.
             # When the text changes, restart search from beginning.

@@ -44,7 +44,7 @@ class UploadDialog(wx.Dialog):
 
         # File list sizer
         self._filelist_sizer = wx.BoxSizer(wx.VERTICAL)
-        self._file_list = wx.ListCtrl(self, -1, style=wx.LC_REPORT | wx.LC_SINGLE_SEL)
+        self._file_list = wx.ListCtrl(self, -1, style=wx.LC_REPORT | wx.LC_SINGLE_SEL | wx.LC_HRULES)
         self._file_list.SetFont(self.small_font)
         self._file_list.InsertColumn(0, Strings.label_files_to_upload, format=wx.LIST_FORMAT_LEFT)
         self._file_list.SetColumnWidth(0, Numbers.upload_filelist_width)
@@ -300,7 +300,6 @@ class UploadDialog(wx.Dialog):
         :param password: RSA private key password.
         :return: None
         """
-        # TODO show free server disk space in upload dialog.
         ip, port = self._field_ip_port.GetValue().split(':', 2)
         # Contains tuples (full disk path, relative path on server)
         files_to_upload: List[Tuple[str, str]] = []
