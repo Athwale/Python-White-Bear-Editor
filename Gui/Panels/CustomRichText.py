@@ -1284,10 +1284,11 @@ class CustomRichText(rt.RichTextCtrl):
         # Create a new placeholder text image or video
         if evt.GetId() == self._img_tool_id:
             new_element = ImageInText('', '', '', '', Strings.status_none, Strings.status_none)
+            # This will set the image internal state to missing image placeholder.
+            new_element.seo_test_self()
         else:
             new_element = Video('', Numbers.video_width, Numbers.video_height, Strings.url_stub)
-        # This will set the image internal state to missing image placeholder.
-        new_element.seo_test_self(self._config_manager.get_online_test())
+            new_element.seo_test_self(self._config_manager.get_online_test())
         # Open edit dialog.
         if evt.GetId() == self._img_tool_id:
             edit_dialog = EditTextImageDialog(self._parent, new_element, self._doc.get_working_directory())
