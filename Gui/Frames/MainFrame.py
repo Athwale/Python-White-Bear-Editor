@@ -1288,6 +1288,7 @@ class MainFrame(wx.Frame):
         self._text_changed = True
         self._search_index = 0
         self._search_results.clear()
+        self._file_list.EnsureVisible(self._file_list.GetFirstSelected())
 
         self._ignore_change = False
         self._disable_editor(False, all_menu=True)
