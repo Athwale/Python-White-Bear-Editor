@@ -491,6 +491,7 @@ class UploadDialog(wx.Dialog):
         self._field_user.SetValue(self._config_manager.get_user())
         self._field_keyfile.SetValue(self._config_manager.get_keyfile())
         self.Enable()
+        self._add_button.SetFocus()
 
     def _add_if_not_in(self, new_path: str) -> None:
         """

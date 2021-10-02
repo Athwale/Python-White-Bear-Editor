@@ -12,6 +12,7 @@ OnInit must be overridden here.
 # TODO move config to home .config
 # TODO check that youtube link is an embedded video
 # TODO add index into page menu in url edit.
+# TODO scroll active page to view in left list on load.
 # TODO open in browser button.
 # TODO look at cookies from whitebear pomoci requests headers bacha ba presmerovani, set cookie warning
 # TODO https://www.blog.pythonlibrary.org/2019/03/19/distributing-a-wxpython-application/
