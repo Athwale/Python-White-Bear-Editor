@@ -13,6 +13,7 @@ OnInit must be overridden here.
 # TODO check that youtube link is an embedded video
 # TODO add index into page menu in url edit.
 # TODO open in browser button.
+# TODO escape can close menu edit dialog or other dialogs, disable that if needed.
 # TODO look at cookies from whitebear pomoci requests headers bacha ba presmerovani, set cookie warning
 # TODO https://www.blog.pythonlibrary.org/2019/03/19/distributing-a-wxpython-application/
 """
