@@ -16,6 +16,7 @@ OnInit must be overridden here.
 # TODO escape can close menu edit dialog or other dialogs, disable that if needed.
 # TODO look at cookies from whitebear pomoci requests headers bacha ba presmerovani, set cookie warning
 # TODO https://www.blog.pythonlibrary.org/2019/03/19/distributing-a-wxpython-application/
+# TODO package into rpm Ponorme se do pythonu nebo youtube.
 """
 
 import wx

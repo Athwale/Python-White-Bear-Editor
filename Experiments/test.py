@@ -1,30 +1,42 @@
-import wx
+#!/usr/bin/python3
+import locale
+import sys
+import gi
+gi.require_version('Gtk', '3.0')
+from gi.repository import Gtk
+from gtkspellcheck import SpellChecker
 
 
-class TestFrame(wx.Frame):
-
-    def __init__(self, *args, **kw):
-        wx.Frame.__init__(self, *args, **kw)
-        self._main_sizer = wx.BoxSizer(wx.VERTICAL)
-        self.SetSizer(self._main_sizer)
-
-
-class MyApp(wx.App):
+class AppWindow(Gtk.ApplicationWindow):
     """
-    Main class for running the gui.
+    Main class for all the work.
     """
 
-    def __init__(self):
-        wx.App.__init__(self)
-        self.frame = None
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        text = Gtk.TextView()
+        self.add(text)
+        self.set_size_request(width=100, height=200)
 
-    def OnInit(self):
-        self.frame = TestFrame(None, -1, "Test", size=(500, 500), style=wx.DEFAULT_FRAME_STYLE)
-        self.SetTopWindow(self.frame)
-        self.frame.Show()
-        return True
+        # Requires yum install hunspell-cs
+        spellchecker = SpellChecker(text, language='cs_CZ', collapse=False)
+
+    def on_destroy(self, widget, extra_arg):
+        print(widget)
+
+
+class Application(Gtk.Application):
+    def __init__(self, *args, **kwargs):
+        super().__init__(application_id="org.example.myapp", **kwargs)
+        self.window = None
+
+    def do_activate(self):
+        if not self.window:
+            self.window = AppWindow(application=self, title="Main Window")
+            # Shows all widgets inside the window.
+            self.window.show_all()
 
 
 if __name__ == "__main__":
-    app = MyApp()
-    app.MainLoop()
+    app = Application()
+    app.run(sys.argv)

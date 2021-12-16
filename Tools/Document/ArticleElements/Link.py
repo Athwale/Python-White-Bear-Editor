@@ -80,6 +80,7 @@ class Link:
         else:
             self._is_local = False
             if online:
+                # Cache folder not set because we want to test the existence again every time.
                 h = httplib2.Http(timeout=Numbers.online_test_timeout)
                 try:
                     resp = h.request(self._url, 'HEAD')

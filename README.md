@@ -8,7 +8,7 @@ White-bear website editor written in Python 3.
 ### Goals:  
 - Generate fast static html5 pages from easily written text.
 - CSS3 Styles separated from content.
-- Easy page deployment, pages are simple static html.
+- Easy page deployment on a simple http server, pages are simple static html.
 - Automatically generate index page.  
 - Automatically generate menu pages.  
 - Check common SEO issues.

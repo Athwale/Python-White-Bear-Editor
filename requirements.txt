@@ -1,9 +1,0 @@
-wxPython~=4.1.1
-httplib2~=0.19.1
-htmlmin~=0.1.12
-beautifulsoup4~=4.9.3
-tinycss~=0.4
-webcolors~=1.11.1
-lxml~=4.6.3
-paramiko~=2.7.2
-PyYAML~=5.4.1
