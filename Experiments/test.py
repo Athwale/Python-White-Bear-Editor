@@ -3,7 +3,7 @@ import sys
 import gi
 gi.require_version('Gtk', '3.0')
 
-from gi.repository import Gtk
+from gi.repository import Gtk, Pango
 from gtkspellcheck import SpellChecker
 
 
@@ -11,6 +11,17 @@ class AppWindow(Gtk.ApplicationWindow):
     """
     Main class for all the work.
     """
+    # Character counts are offsets
+    # Byte counts are indexes.
+    # Tags apply attributes to a range of text. Tags are inside a buffer tag table.
+    # Text widget stores a set of global text attributes that can be changed for text ranges with tags.
+    # Text iterator is a position between two characters. They are all invalidated any time the text changes.
+    # Text marks are also positions between characters but they are updates when text changes.
+    # Text tags set text attributes.
+    # gtk_text_buffer_get_bounds can be used with gtk_text_buffer_get_slice to get whole contents with images.
+    # Empty buffer, one with zero characters is considered to have a single line with no characters in it,
+    # and in particular, no line separator at the end.
+    # gtk_text_buffer_get_line_count, char count and display that in the bottom status bar.
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -20,13 +31,17 @@ class AppWindow(Gtk.ApplicationWindow):
         v_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=3)
 
         self._text = Gtk.TextView()
-        self._buffer = self._text.get_buffer()
+        self._text.set_wrap_mode(Gtk.WrapMode.WORD)
+        # self._text.set_pixels_inside_wrap(50)
+        # todo lists using a decoration in margin???
+        # self._text.set_indent(50)
+        self._buffer: Gtk.TextBuffer = self._text.get_buffer()
 
         text_scrolled = Gtk.ScrolledWindow()
         text_scrolled.set_size_request(200, -1)
         text_scrolled.add(self._text)
 
-        for name in ['Bold', 'Color 1', 'Color 2']:
+        for name in ['Bold', 'Red', 'Green', 'Orange']:
             button = Gtk.Button()
             button.set_label(name)
             button.set_size_request(200, -1)
@@ -40,15 +55,35 @@ class AppWindow(Gtk.ApplicationWindow):
         self.set_border_width(3)
 
         # Requires yum install hunspell-cs
+        # todo gtk text mark set visible is possible.
         spellchecker = SpellChecker(self._text, language='cs_CZ', collapse=False)
+
+        self.red_color_tag = self._buffer.create_tag("red_fg", foreground="red")
+        self.green_color_tag = self._buffer.create_tag("green_bg", foreground="green")
+        self.orange_color_tag = self._buffer.create_tag("orange_bg", foreground="orange")
+
         self._write_text()
 
     def on_button_clicked(self, button: Gtk.Button):
-        print(button.get_label())
+        if self._buffer.get_has_selection():
+            start, end = self._buffer.get_selection_bounds()
+            button_id = button.get_label()
+            self._buffer.remove_all_tags(start, end)
+            if button_id == 'Red':
+                self._buffer.apply_tag(self.red_color_tag, start, end)
+            elif button_id == 'Green':
+                self._buffer.apply_tag(self.green_color_tag, start, end)
+            elif button_id == 'Orange':
+                self._buffer.apply_tag(self.orange_color_tag, start, end)
+            elif button_id == 'Bold':
+                print('bold')
 
     def _write_text(self):
-        self._buffer.set_text('test')
-
+        text = 'test test test test test test test test test test test test'
+        mark = self._buffer.get_insert()
+        text_iter = self._buffer.get_iter_at_mark(mark)
+        self._buffer.insert(text_iter, text, len(text))
+        
 
 class Application(Gtk.Application):
     def __init__(self, *args, **kwargs):
