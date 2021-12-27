@@ -46,6 +46,7 @@ class AppWindow(Gtk.ApplicationWindow):
         self._buffer: Gtk.TextBuffer = self._text.get_buffer()
 
         text_scrolled = Gtk.ScrolledWindow()
+        text_scrolled.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.ALWAYS)
         text_scrolled.set_size_request(300, -1)
         text_scrolled.add(self._text)
 
@@ -90,16 +91,20 @@ class AppWindow(Gtk.ApplicationWindow):
         self._buffer.create_tag("paragraph", scale=1)
         self._buffer.create_tag("list", scale=1)
 
-        self._write_text()
-        self._write_text()
-        self._write_text()
+        self._write_test_text()
 
     def on_button_clicked(self, button: Gtk.Button):
+        button_id = button.get_label()
         start_iter: Gtk.TextIter = self._buffer.get_start_iter()
         print(start_iter.get_tags())
+
+        if button_id == 'h3':
+            self._apply_h_style('h3')
+        elif button_id == 'h4':
+            self._apply_h_style('h4')
+
         if self._buffer.get_has_selection():
             start, end = self._buffer.get_selection_bounds()
-            button_id = button.get_label()
             # todo remove only color tags, eventually remove only a selection of tags based on what style is chosen.
             if button_id == 'Red':
                 self._buffer.apply_tag_by_name('red_fg', start, end)
@@ -109,10 +114,6 @@ class AppWindow(Gtk.ApplicationWindow):
                 self._buffer.apply_tag_by_name('orange_fg', start, end)
             elif button_id == 'Bold':
                 self._buffer.apply_tag_by_name('bold', start, end)
-            elif button_id == 'h3':
-                self._apply_h_style('h3')
-            elif button_id == 'h4':
-                self._apply_h_style('h4')
             elif button_id == 'Paragraph':
                 self._buffer.apply_tag_by_name('paragraph', start, end)
             elif button_id == 'List':
@@ -124,31 +125,33 @@ class AppWindow(Gtk.ApplicationWindow):
         :param style: One of the defined style tags (h3, h4)
         :return: None
         """
-        # TODO start style if no selection.
+        start: Gtk.TextIter
+        end: Gtk.TextIter
         if self._buffer.get_has_selection():
-            start: Gtk.TextIter
-            end: Gtk.TextIter
             start, end = self._buffer.get_selection_bounds()
-            for line_number in range(start.get_line(), end.get_line() + 1):
-                print(line_number)
-                # Start iterator is already at the current line start.
-                line_iter_start: Gtk.TextIter = self._buffer.get_iter_at_line(line_number)
-                line_iter_end: Gtk.TextIter = self._buffer.get_iter_at_line(line_number)
-                line_iter_end.forward_to_line_end()
+        else:
+            insertion_point: Gtk.TextIter = self._buffer.get_iter_at_mark(self._buffer.get_insert())
+            start = end = insertion_point
 
-                # Remove all other styles, titles do not keep anything.
-                self._buffer.remove_all_tags(line_iter_start, line_iter_end)
-                # A title is a larger and bold font.
-                self._buffer.apply_tag_by_name(style, line_iter_start, line_iter_end)
-                self._buffer.apply_tag_by_name('bold', line_iter_start, line_iter_end)
+        for line_number in range(start.get_line(), end.get_line() + 1):
+            # Start iterator is already at the current line start.
+            line_iter_start: Gtk.TextIter = self._buffer.get_iter_at_line(line_number)
+            line_iter_end: Gtk.TextIter = self._buffer.get_iter_at_line(line_number)
+            line_iter_end.forward_to_line_end()
 
-    def _write_text(self):
-        text = 'test test test test test ' \
-               'test test test test test ' \
-               'test test test test test\n'
-        mark = self._buffer.get_insert()
-        text_iter = self._buffer.get_iter_at_mark(mark)
-        self._buffer.insert(text_iter, text, len(text))
+            # Remove all other styles, titles do not keep anything.
+            self._buffer.remove_all_tags(line_iter_start, line_iter_end)
+            # A title is a larger and bold font.
+            self._buffer.apply_tag_by_name(style, line_iter_start, line_iter_end)
+            self._buffer.apply_tag_by_name('bold', line_iter_start, line_iter_end)
+
+    def _write_test_text(self):
+        for i in range(3):
+            text = 'Line: {} Lorem ipsum dolor sit amet, consent additional elite, ' \
+                   'sed do esmeralda temporary incidental ut labor\n'.format(i)
+            mark = self._buffer.get_insert()
+            text_iter = self._buffer.get_iter_at_mark(mark)
+            self._buffer.insert(text_iter, text, len(text))
         
 
 class Application(Gtk.Application):
