@@ -91,6 +91,8 @@ class AppWindow(Gtk.ApplicationWindow):
         self._buffer.create_tag("list", scale=1)
 
         self._write_text()
+        self._write_text()
+        self._write_text()
 
     def on_button_clicked(self, button: Gtk.Button):
         start_iter: Gtk.TextIter = self._buffer.get_start_iter()
@@ -122,19 +124,28 @@ class AppWindow(Gtk.ApplicationWindow):
         :param style: One of the defined style tags (h3, h4)
         :return: None
         """
-        # TODO remove tags that are irrelevant and only apply/keep those needed for the style.
         # TODO start style if no selection.
         if self._buffer.get_has_selection():
+            start: Gtk.TextIter
+            end: Gtk.TextIter
             start, end = self._buffer.get_selection_bounds()
-            self._buffer.remove_all_tags(start, end)
-            # TODO remove par, h3/4, list, color, apply on whole paragraph even with selection.
-            self._buffer.apply_tag_by_name(style, start, end)
-            self._buffer.apply_tag_by_name('bold', start, end)
+            for line_number in range(start.get_line(), end.get_line() + 1):
+                print(line_number)
+                # Start iterator is already at the current line start.
+                line_iter_start: Gtk.TextIter = self._buffer.get_iter_at_line(line_number)
+                line_iter_end: Gtk.TextIter = self._buffer.get_iter_at_line(line_number)
+                line_iter_end.forward_to_line_end()
+
+                # Remove all other styles, titles do not keep anything.
+                self._buffer.remove_all_tags(line_iter_start, line_iter_end)
+                # A title is a larger and bold font.
+                self._buffer.apply_tag_by_name(style, line_iter_start, line_iter_end)
+                self._buffer.apply_tag_by_name('bold', line_iter_start, line_iter_end)
 
     def _write_text(self):
         text = 'test test test test test ' \
                'test test test test test ' \
-               'test test test test test '
+               'test test test test test\n'
         mark = self._buffer.get_insert()
         text_iter = self._buffer.get_iter_at_mark(mark)
         self._buffer.insert(text_iter, text, len(text))
