@@ -52,7 +52,7 @@ class AppWindow(Gtk.ApplicationWindow):
 
         v_box.add(Gtk.Separator(orientation=Gtk.Orientation.VERTICAL))
 
-        for name in ['H3', 'H4', 'Paragraph', 'List']:
+        for name in ['h3', 'h4', 'Paragraph', 'List']:
             button = Gtk.Button()
             button.set_label(name)
             button.set_size_request(200, -1)
@@ -74,6 +74,12 @@ class AppWindow(Gtk.ApplicationWindow):
         self._buffer.create_tag("orange_fg", foreground="orange")
         self._buffer.create_tag("bold", weight=Pango.Weight.BOLD)
 
+        # Font definitions
+        self._buffer.create_tag("h3", weight=Pango.Weight.BOLD, scale=2)
+        self._buffer.create_tag("h4", weight=Pango.Weight.BOLD, scale=1.5)
+        self._buffer.create_tag("paragraph", weight=Pango.Weight.BOLD, scale=1)
+        self._buffer.create_tag("list", weight=Pango.Weight.BOLD, scale=1)
+
         self._write_text()
 
     def on_button_clicked(self, button: Gtk.Button):
@@ -83,7 +89,7 @@ class AppWindow(Gtk.ApplicationWindow):
             start, end = self._buffer.get_selection_bounds()
             button_id = button.get_label()
             # todo remove only color tags, eventually remove only a selection of tags based on what style is chosen.
-            # self._buffer.remove_all_tags(start, end)
+            self._buffer.remove_all_tags(start, end)
             if button_id == 'Red':
                 self._buffer.apply_tag_by_name('red_fg', start, end)
             elif button_id == 'Green':
@@ -92,6 +98,14 @@ class AppWindow(Gtk.ApplicationWindow):
                 self._buffer.apply_tag_by_name('orange_fg', start, end)
             elif button_id == 'Bold':
                 self._buffer.apply_tag_by_name('bold', start, end)
+            elif button_id == 'h3':
+                self._buffer.apply_tag_by_name('h3', start, end)
+            elif button_id == 'h4':
+                self._buffer.apply_tag_by_name('h4', start, end)
+            elif button_id == 'Paragraph':
+                self._buffer.apply_tag_by_name('paragraph', start, end)
+            elif button_id == 'List':
+                self._buffer.apply_tag_by_name('list', start, end)
 
     def _write_text(self):
         text = 'test test test test test test test test test test test test'
