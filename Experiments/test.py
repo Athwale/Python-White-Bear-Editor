@@ -25,6 +25,12 @@ class AppWindow(Gtk.ApplicationWindow):
     # Tags have priority that can solve conflicts.
     # https://askubuntu.com/questions/272446/pygtk-textbuffer-adding-tags-and-reading-text finding tags
 
+    # Style limits:
+    # H3/4 can only have one color.
+    # H3/4 can not be mixed with other styles.
+    # H3/$ can not contain urls.
+    # H3/4 can not be bold twice.
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -69,16 +75,20 @@ class AppWindow(Gtk.ApplicationWindow):
         # todo gtk text mark set visible is possible.
         spellchecker = SpellChecker(self._text, language='cs_CZ', collapse=False)
 
+        # Text effects:
+        # Colors:
         self._buffer.create_tag("red_fg", foreground="red")
         self._buffer.create_tag("green_fg", foreground="green")
         self._buffer.create_tag("orange_fg", foreground="orange")
+        # TODO Url can be clickable???
+        # Weights:
         self._buffer.create_tag("bold", weight=Pango.Weight.BOLD)
 
-        # Font definitions
-        self._buffer.create_tag("h3", weight=Pango.Weight.BOLD, scale=2)
-        self._buffer.create_tag("h4", weight=Pango.Weight.BOLD, scale=1.5)
-        self._buffer.create_tag("paragraph", weight=Pango.Weight.BOLD, scale=1)
-        self._buffer.create_tag("list", weight=Pango.Weight.BOLD, scale=1)
+        # Font sizes:
+        self._buffer.create_tag("h3", scale=2)
+        self._buffer.create_tag("h4", scale=1.5)
+        self._buffer.create_tag("paragraph", scale=1)
+        self._buffer.create_tag("list", scale=1)
 
         self._write_text()
 
@@ -89,7 +99,6 @@ class AppWindow(Gtk.ApplicationWindow):
             start, end = self._buffer.get_selection_bounds()
             button_id = button.get_label()
             # todo remove only color tags, eventually remove only a selection of tags based on what style is chosen.
-            self._buffer.remove_all_tags(start, end)
             if button_id == 'Red':
                 self._buffer.apply_tag_by_name('red_fg', start, end)
             elif button_id == 'Green':
@@ -99,16 +108,33 @@ class AppWindow(Gtk.ApplicationWindow):
             elif button_id == 'Bold':
                 self._buffer.apply_tag_by_name('bold', start, end)
             elif button_id == 'h3':
-                self._buffer.apply_tag_by_name('h3', start, end)
+                self._apply_h_style('h3')
             elif button_id == 'h4':
-                self._buffer.apply_tag_by_name('h4', start, end)
+                self._apply_h_style('h4')
             elif button_id == 'Paragraph':
                 self._buffer.apply_tag_by_name('paragraph', start, end)
             elif button_id == 'List':
                 self._buffer.apply_tag_by_name('list', start, end)
 
+    def _apply_h_style(self, style: str) -> None:
+        """
+        Applies h3/4 style to the selected test or begins the style if nothing is selected.
+        :param style: One of the defined style tags (h3, h4)
+        :return: None
+        """
+        # TODO remove tags that are irrelevant and only apply/keep those needed for the style.
+        # TODO start style if no selection.
+        if self._buffer.get_has_selection():
+            start, end = self._buffer.get_selection_bounds()
+            self._buffer.remove_all_tags(start, end)
+            # TODO remove par, h3/4, list, color, apply on whole paragraph even with selection.
+            self._buffer.apply_tag_by_name(style, start, end)
+            self._buffer.apply_tag_by_name('bold', start, end)
+
     def _write_text(self):
-        text = 'test test test test test test test test test test test test'
+        text = 'test test test test test ' \
+               'test test test test test ' \
+               'test test test test test '
         mark = self._buffer.get_insert()
         text_iter = self._buffer.get_iter_at_mark(mark)
         self._buffer.insert(text_iter, text, len(text))
