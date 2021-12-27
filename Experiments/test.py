@@ -22,6 +22,8 @@ class AppWindow(Gtk.ApplicationWindow):
     # Empty buffer, one with zero characters is considered to have a single line with no characters in it,
     # and in particular, no line separator at the end.
     # gtk_text_buffer_get_line_count, char count and display that in the bottom status bar.
+    # Tags have priority that can solve conflicts.
+    # https://askubuntu.com/questions/272446/pygtk-textbuffer-adding-tags-and-reading-text finding tags
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -38,7 +40,7 @@ class AppWindow(Gtk.ApplicationWindow):
         self._buffer: Gtk.TextBuffer = self._text.get_buffer()
 
         text_scrolled = Gtk.ScrolledWindow()
-        text_scrolled.set_size_request(200, -1)
+        text_scrolled.set_size_request(300, -1)
         text_scrolled.add(self._text)
 
         for name in ['Bold', 'Red', 'Green', 'Orange']:
@@ -48,35 +50,48 @@ class AppWindow(Gtk.ApplicationWindow):
             button.connect("clicked", self.on_button_clicked)
             v_box.add(button)
 
+        v_box.add(Gtk.Separator(orientation=Gtk.Orientation.VERTICAL))
+
+        for name in ['H3', 'H4', 'Paragraph', 'List']:
+            button = Gtk.Button()
+            button.set_label(name)
+            button.set_size_request(200, -1)
+            button.connect("clicked", self.on_button_clicked)
+            v_box.add(button)
+
         h_box.add(text_scrolled)
         h_box.add(v_box)
         self.add(h_box)
-        self.set_size_request(width=400, height=400)
+        self.set_size_request(width=400, height=550)
         self.set_border_width(3)
 
         # Requires yum install hunspell-cs
         # todo gtk text mark set visible is possible.
         spellchecker = SpellChecker(self._text, language='cs_CZ', collapse=False)
 
-        self.red_color_tag = self._buffer.create_tag("red_fg", foreground="red")
-        self.green_color_tag = self._buffer.create_tag("green_bg", foreground="green")
-        self.orange_color_tag = self._buffer.create_tag("orange_bg", foreground="orange")
+        self._buffer.create_tag("red_fg", foreground="red")
+        self._buffer.create_tag("green_fg", foreground="green")
+        self._buffer.create_tag("orange_fg", foreground="orange")
+        self._buffer.create_tag("bold", weight=Pango.Weight.BOLD)
 
         self._write_text()
 
     def on_button_clicked(self, button: Gtk.Button):
+        start_iter: Gtk.TextIter = self._buffer.get_start_iter()
+        print(start_iter.get_tags())
         if self._buffer.get_has_selection():
             start, end = self._buffer.get_selection_bounds()
             button_id = button.get_label()
-            self._buffer.remove_all_tags(start, end)
+            # todo remove only color tags, eventually remove only a selection of tags based on what style is chosen.
+            # self._buffer.remove_all_tags(start, end)
             if button_id == 'Red':
-                self._buffer.apply_tag(self.red_color_tag, start, end)
+                self._buffer.apply_tag_by_name('red_fg', start, end)
             elif button_id == 'Green':
-                self._buffer.apply_tag(self.green_color_tag, start, end)
+                self._buffer.apply_tag_by_name('green_fg', start, end)
             elif button_id == 'Orange':
-                self._buffer.apply_tag(self.orange_color_tag, start, end)
+                self._buffer.apply_tag_by_name('orange_fg', start, end)
             elif button_id == 'Bold':
-                print('bold')
+                self._buffer.apply_tag_by_name('bold', start, end)
 
     def _write_text(self):
         text = 'test test test test test test test test test test test test'
