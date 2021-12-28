@@ -1,5 +1,7 @@
 #!/usr/bin/python3
 import sys
+from typing import Dict
+
 import gi
 gi.require_version('Gtk', '3.0')
 
@@ -12,6 +14,14 @@ class Styles:
     STYLE_H3: str = 'heading3_style'
     STYLE_H4: str = 'heading4_style'
     STYLE_LIST: str = 'list_style'
+
+    TAG_PAR: str = 'paragraph'
+    TAG_H3: str = 'h3'
+    TAG_H4: str = 'h4'
+    TAG_LIST: str = 'list'
+    TAG_BOLD: str = 'bold'
+
+    COLORS: Dict[str, str] = {'red': 'red', 'green': 'green', 'orange': 'orange'}
 
 
 class AppWindow(Gtk.ApplicationWindow):
@@ -93,18 +103,18 @@ class AppWindow(Gtk.ApplicationWindow):
         # Styles are combination of set tags.
         # Text effects:
         # Colors:
-        self._buffer.create_tag("red_fg", foreground="red")
-        self._buffer.create_tag("green_fg", foreground="green")
-        self._buffer.create_tag("orange_fg", foreground="orange")
+        self._buffer.create_tag(Styles.COLORS['red'], foreground="red")
+        self._buffer.create_tag(Styles.COLORS['green'], foreground="green")
+        self._buffer.create_tag(Styles.COLORS['orange'], foreground="orange")
         # TODO Url can be clickable???
         # Weights:
-        self._buffer.create_tag("bold", weight=Pango.Weight.BOLD)
+        self._buffer.create_tag(Styles.TAG_BOLD, weight=Pango.Weight.BOLD)
 
         # Font sizes:
-        self._buffer.create_tag("h3", scale=2)
-        self._buffer.create_tag("h4", scale=1.5)
-        self._buffer.create_tag("paragraph", scale=1)
-        self._buffer.create_tag("list", scale=1)
+        self._buffer.create_tag(Styles.TAG_H3, scale=2)
+        self._buffer.create_tag(Styles.TAG_H4, scale=1.5)
+        self._buffer.create_tag(Styles.TAG_PAR, scale=1)
+        self._buffer.create_tag(Styles.TAG_LIST, scale=1)
 
         self._write_test_text()
 
@@ -123,13 +133,13 @@ class AppWindow(Gtk.ApplicationWindow):
             # TODO transform this to apply style too
             start, end = self._buffer.get_selection_bounds()
             if button_id == 'Red':
-                self._buffer.apply_tag_by_name('red_fg', start, end)
+                self._buffer.apply_tag_by_name(Styles.COLORS['red'], start, end)
             elif button_id == 'Green':
-                self._buffer.apply_tag_by_name('green_fg', start, end)
+                self._buffer.apply_tag_by_name(Styles.COLORS['green'], start, end)
             elif button_id == 'Orange':
-                self._buffer.apply_tag_by_name('orange_fg', start, end)
+                self._buffer.apply_tag_by_name(Styles.COLORS['orange'], start, end)
             elif button_id == 'Bold':
-                self._buffer.apply_tag_by_name('bold', start, end)
+                self._buffer.apply_tag_by_name(Styles.TAG_BOLD, start, end)
         self._text.grab_focus()
 
     def _apply_style(self, style: str) -> None:
@@ -147,9 +157,9 @@ class AppWindow(Gtk.ApplicationWindow):
             insertion_point: Gtk.TextIter = self._buffer.get_iter_at_mark(self._buffer.get_insert())
             start = end = insertion_point
         if style == Styles.STYLE_H3:
-            self._apply_h_style('h3', start, end)
+            self._apply_h_style(Styles.TAG_H3, start, end)
         elif style == Styles.STYLE_H4:
-            self._apply_h_style('h4', start, end)
+            self._apply_h_style(Styles.TAG_H4, start, end)
         elif style == Styles.STYLE_PAR:
             self._apply_paragraph_style(start, end)
         elif style == Styles.STYLE_LIST:
@@ -173,7 +183,7 @@ class AppWindow(Gtk.ApplicationWindow):
             self._buffer.remove_all_tags(line_iter_start, line_iter_end)
             # A title is a larger and bold font.
             self._buffer.apply_tag_by_name(style_tag, line_iter_start, line_iter_end)
-            self._buffer.apply_tag_by_name('bold', line_iter_start, line_iter_end)
+            self._buffer.apply_tag_by_name(Styles.TAG_BOLD, line_iter_start, line_iter_end)
 
     def _apply_paragraph_style(self, start: Gtk.TextIter, end: Gtk.TextIter) -> None:
         """
@@ -182,7 +192,17 @@ class AppWindow(Gtk.ApplicationWindow):
         :param end: Text buffer end iterator.
         :return: None
         """
-        print('par')
+        for line_number in range(start.get_line(), end.get_line() + 1):
+            # Start iterator is already at the current line start.
+            line_iter_start: Gtk.TextIter = self._buffer.get_iter_at_line(line_number)
+            line_iter_end: Gtk.TextIter = self._buffer.get_iter_at_line(line_number)
+            line_iter_end.forward_to_line_end()
+
+            # Remove all other styles, titles do not keep anything.
+            for style in [Styles.TAG_H3, Styles.TAG_H4, Styles.TAG_LIST]:
+                self._buffer.remove_tag_by_name(style, line_iter_start, line_iter_end)
+            # A title is a larger and bold font.
+            self._buffer.apply_tag_by_name(Styles.TAG_PAR, line_iter_start, line_iter_end)
 
     def _apply_list_style(self, start: Gtk.TextIter, end: Gtk.TextIter) -> None:
         """
