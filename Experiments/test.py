@@ -7,6 +7,7 @@ gi.require_version('Gtk', '3.0')
 
 from gi.repository import Gtk, Pango
 from gtkspellcheck import SpellChecker
+from gi.repository import Gdk
 
 
 class Styles:
@@ -21,7 +22,7 @@ class Styles:
     TAG_LIST: str = 'list'
     TAG_BOLD: str = 'bold'
 
-    COLORS: Dict[str, str] = {'red': 'red', 'green': 'green', 'orange': 'orange'}
+    COLORS: Dict[str, str] = {'red': 'rgb(255,0,0)', 'green': 'rgb(0,255,0)', 'orange': 'rgb(255,215,0)'}
 
 
 class AppWindow(Gtk.ApplicationWindow):
@@ -51,7 +52,6 @@ class AppWindow(Gtk.ApplicationWindow):
 
     # Paragraph can not be mixed with other styles.
     # Paragraph retains text color and boldness.
-    # Paragraph
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -73,13 +73,19 @@ class AppWindow(Gtk.ApplicationWindow):
         text_scrolled.add(self._text)
 
         # Create text effect buttons:
-        for name in ['Bold', 'Red', 'Green', 'Orange']:
+        for color_name in Styles.COLORS.keys():
             button = Gtk.Button()
-            button.set_label(name)
+            button.set_label(color_name)
             button.set_size_request(200, -1)
             button.connect("clicked", self.on_button_clicked)
             v_box.add(button)
 
+        v_box.add(Gtk.Separator(orientation=Gtk.Orientation.VERTICAL))
+        button = Gtk.Button()
+        button.set_label(Styles.TAG_BOLD)
+        button.set_size_request(200, -1)
+        button.connect("clicked", self.on_button_clicked)
+        v_box.add(button)
         v_box.add(Gtk.Separator(orientation=Gtk.Orientation.VERTICAL))
 
         # Create text style buttons:
@@ -98,14 +104,15 @@ class AppWindow(Gtk.ApplicationWindow):
 
         # Requires yum install hunspell-cs
         # todo gtk text mark set visible is possible.
-        spellchecker = SpellChecker(self._text, language='cs_CZ', collapse=False)
+        self._spellchecker = SpellChecker(self._text, language='cs_CZ', collapse=False)
 
         # Styles are combination of set tags.
         # Text effects:
         # Colors:
-        self._buffer.create_tag(Styles.COLORS['red'], foreground="red")
-        self._buffer.create_tag(Styles.COLORS['green'], foreground="green")
-        self._buffer.create_tag(Styles.COLORS['orange'], foreground="orange")
+        for color_name, definition in Styles.COLORS.items():
+            rgb = Gdk.RGBA()
+            rgb.parse(definition)
+            self._buffer.create_tag(color_name, foreground_rgba=rgb)
         # TODO Url can be clickable???
         # Weights:
         self._buffer.create_tag(Styles.TAG_BOLD, weight=Pango.Weight.BOLD)
@@ -118,6 +125,18 @@ class AppWindow(Gtk.ApplicationWindow):
 
         self._write_test_text()
 
+    def _write_test_text(self) -> None:
+        """
+        Write some test text into the text view.
+        :return: None
+        """
+        for i in range(3):
+            text = 'Line: {} Lorem ipsum dolor sit amet, consent additional elite, ' \
+                   'sed do esmeralda temporary incidental ut labor\n'.format(i)
+            mark = self._buffer.get_insert()
+            text_iter = self._buffer.get_iter_at_mark(mark)
+            self._buffer.insert(text_iter, text, len(text))
+
     def on_button_clicked(self, button: Gtk.Button):
         button_id = button.get_label()
         if button_id == 'h3':
@@ -128,17 +147,14 @@ class AppWindow(Gtk.ApplicationWindow):
             self._apply_style(Styles.STYLE_PAR)
         elif button_id == 'List':
             self._apply_style(Styles.STYLE_LIST)
+        elif button_id in Styles.COLORS.keys():
+            # todo carry the style in the button for all in some way.
+            self._apply_style(button_id)
 
         if self._buffer.get_has_selection():
             # TODO transform this to apply style too
             start, end = self._buffer.get_selection_bounds()
-            if button_id == 'Red':
-                self._buffer.apply_tag_by_name(Styles.COLORS['red'], start, end)
-            elif button_id == 'Green':
-                self._buffer.apply_tag_by_name(Styles.COLORS['green'], start, end)
-            elif button_id == 'Orange':
-                self._buffer.apply_tag_by_name(Styles.COLORS['orange'], start, end)
-            elif button_id == 'Bold':
+            if button_id == 'Bold':
                 self._buffer.apply_tag_by_name(Styles.TAG_BOLD, start, end)
         self._text.grab_focus()
 
@@ -148,7 +164,6 @@ class AppWindow(Gtk.ApplicationWindow):
         :param style: Style name from Styles class.
         :return: None
         """
-        print(style)
         start: Gtk.TextIter
         end: Gtk.TextIter
         if self._buffer.get_has_selection():
@@ -164,6 +179,22 @@ class AppWindow(Gtk.ApplicationWindow):
             self._apply_paragraph_style(start, end)
         elif style == Styles.STYLE_LIST:
             self._apply_list_style(start, end)
+        elif style in Styles.COLORS.keys():
+            self._apply_color(style, start, end)
+
+    def _apply_color(self, color: str, start: Gtk.TextIter, end: Gtk.TextIter) -> None:
+        """
+        Applies h3/4 style to the current paragraph or all selected paragraphs.
+        :param color: Color name corresponding to the Gdk RGB color definition.
+        :param start: Text buffer start iterator.
+        :param end: Text buffer end iterator.
+        :return: None
+        """
+        # Remove all other color tags.
+        # TODO if applied to title, color the whole title.
+        for color_tag in Styles.COLORS.keys():
+            self._buffer.remove_tag_by_name(color_tag, start, end)
+        self._buffer.apply_tag_by_name(color, start, end)
 
     def _apply_h_style(self, style_tag: str, start: Gtk.TextIter, end: Gtk.TextIter) -> None:
         """
@@ -199,8 +230,8 @@ class AppWindow(Gtk.ApplicationWindow):
             line_iter_end.forward_to_line_end()
 
             # Remove all other styles, titles do not keep anything.
-            for style in [Styles.TAG_H3, Styles.TAG_H4, Styles.TAG_LIST]:
-                self._buffer.remove_tag_by_name(style, line_iter_start, line_iter_end)
+            for tag in [Styles.TAG_H3, Styles.TAG_H4, Styles.TAG_LIST]:
+                self._buffer.remove_tag_by_name(tag, line_iter_start, line_iter_end)
             # A title is a larger and bold font.
             self._buffer.apply_tag_by_name(Styles.TAG_PAR, line_iter_start, line_iter_end)
 
@@ -212,14 +243,6 @@ class AppWindow(Gtk.ApplicationWindow):
         :return: None
         """
         print('list')
-
-    def _write_test_text(self):
-        for i in range(3):
-            text = 'Line: {} Lorem ipsum dolor sit amet, consent additional elite, ' \
-                   'sed do esmeralda temporary incidental ut labor\n'.format(i)
-            mark = self._buffer.get_insert()
-            text_iter = self._buffer.get_iter_at_mark(mark)
-            self._buffer.insert(text_iter, text, len(text))
         
 
 class Application(Gtk.Application):
