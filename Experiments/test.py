@@ -119,8 +119,8 @@ class AppWindow(Gtk.ApplicationWindow):
         self._buffer.create_tag(Styles.TAG_BOLD, weight=Pango.Weight.BOLD)
 
         # Font sizes:
-        self._buffer.create_tag(Styles.TAG_H3, scale=2)
-        self._buffer.create_tag(Styles.TAG_H4, scale=1.5)
+        self._buffer.create_tag(Styles.TAG_H3, scale=2, weight=Pango.Weight.BOLD)
+        self._buffer.create_tag(Styles.TAG_H4, scale=1.5, weight=Pango.Weight.BOLD)
         self._buffer.create_tag(Styles.TAG_PAR, scale=1)
         self._buffer.create_tag(Styles.TAG_LIST, scale=1)
 
@@ -156,7 +156,7 @@ class AppWindow(Gtk.ApplicationWindow):
             self._apply_style(Styles.STYLE_LIST)
         elif button_id in Styles.COLORS.keys():
             self._apply_style(button_id)
-        elif button_id == 'Bold':
+        elif button_id == 'bold':
             self._apply_style(Styles.TAG_BOLD)
         self._text.grab_focus()
 
@@ -171,6 +171,7 @@ class AppWindow(Gtk.ApplicationWindow):
         if self._buffer.get_has_selection():
             start, end = self._buffer.get_selection_bounds()
         else:
+            # TODO starting s style without a selection does not seem to work yet.
             insertion_point: Gtk.TextIter = self._buffer.get_iter_at_mark(self._buffer.get_insert())
             start = end = insertion_point
         if style == Styles.STYLE_H3:
@@ -183,6 +184,8 @@ class AppWindow(Gtk.ApplicationWindow):
             self._apply_list_style(start, end)
         elif style in Styles.COLORS.keys():
             self._apply_color(style, start, end)
+        elif style == Styles.TAG_BOLD:
+            self._apply_bold(start, end)
 
     def _apply_color(self, color: str, start: Gtk.TextIter, end: Gtk.TextIter) -> None:
         """
@@ -197,8 +200,8 @@ class AppWindow(Gtk.ApplicationWindow):
             # Start iterator is already at the current line start.
             line_iter_start: Gtk.TextIter = self._buffer.get_iter_at_line(line_number)
             tag_table: Gtk.TextTagTable = self._buffer.get_tag_table()
-            h3_tag = tag_table.lookup(Styles.TAG_H3)
-            h4_tag = tag_table.lookup(Styles.TAG_H4)
+            h3_tag: Gtk.TextTag = tag_table.lookup(Styles.TAG_H3)
+            h4_tag: Gtk.TextTag = tag_table.lookup(Styles.TAG_H4)
             if line_iter_start.has_tag(h4_tag) or line_iter_start.has_tag(h3_tag):
                 # Color the whole line
                 line_iter_end: Gtk.TextIter = self._buffer.get_iter_at_line(line_number)
@@ -215,12 +218,21 @@ class AppWindow(Gtk.ApplicationWindow):
 
     def _apply_bold(self, start: Gtk.TextIter, end: Gtk.TextIter) -> None:
         """
-        Applies/removes bold style to the current selection.
+        Toggles bold style on/off on the current selection.
         :param start: Text buffer start iterator.
         :param end: Text buffer end iterator.
         :return: None
         """
-        print('bold')
+        # Get bold state at insertion point and then either apply or remove bold.
+        insertion_point: Gtk.TextIter = self._buffer.get_iter_at_mark(self._buffer.get_insert())
+        if insertion_point.has_tag(self._buffer.get_tag_table().lookup(Styles.TAG_BOLD)):
+            # The cursor is inside bold text. Just remove the bold tag.
+            self._buffer.remove_tag_by_name(Styles.TAG_BOLD, start, end)
+        else:
+            # Cursor is not in bold text, reapply bold to the whole selection.
+            # Remove bold tag on the whole selection and reapply it.
+            self._buffer.remove_tag_by_name(Styles.TAG_BOLD, start, end)
+            self._buffer.apply_tag_by_name(Styles.TAG_BOLD, start, end)
 
     def _apply_h_style(self, style_tag: str, start: Gtk.TextIter, end: Gtk.TextIter) -> None:
         """
@@ -238,9 +250,7 @@ class AppWindow(Gtk.ApplicationWindow):
 
             # Remove all other styles, titles do not keep anything.
             self._buffer.remove_all_tags(line_iter_start, line_iter_end)
-            # A title is a larger and bold font.
             self._buffer.apply_tag_by_name(style_tag, line_iter_start, line_iter_end)
-            self._buffer.apply_tag_by_name(Styles.TAG_BOLD, line_iter_start, line_iter_end)
 
     def _apply_paragraph_style(self, start: Gtk.TextIter, end: Gtk.TextIter) -> None:
         """
