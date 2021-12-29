@@ -42,7 +42,6 @@ class AppWindow(Gtk.ApplicationWindow):
     # gtk_text_buffer_get_line_count, char count and display that in the bottom status bar.
     # Tags have priority that can solve conflicts.
     # https://askubuntu.com/questions/272446/pygtk-textbuffer-adding-tags-and-reading-text finding tags
-    # start_iter: Gtk.TextIter = self._buffer.get_start_iter(); print(start_iter.get_tags())
 
     # Style limits:
     # H3/4 can only have one color.
@@ -190,11 +189,23 @@ class AppWindow(Gtk.ApplicationWindow):
         :param end: Text buffer end iterator.
         :return: None
         """
-        # Remove all other color tags.
-        # TODO if applied to title, color the whole title.
         for color_tag in Styles.COLORS.keys():
+            # Remove all other color tags.
             self._buffer.remove_tag_by_name(color_tag, start, end)
-        self._buffer.apply_tag_by_name(color, start, end)
+        # Titles will always be whole lines, so we only need to check the start tags.
+        for line_number in range(start.get_line(), end.get_line() + 1):
+            # Start iterator is already at the current line start.
+            line_iter_start: Gtk.TextIter = self._buffer.get_iter_at_line(line_number)
+            tag_table: Gtk.TextTagTable = self._buffer.get_tag_table()
+            h3_tag = tag_table.lookup(Styles.TAG_H3)
+            h4_tag = tag_table.lookup(Styles.TAG_H4)
+            if line_iter_start.has_tag(h4_tag) or line_iter_start.has_tag(h3_tag):
+                # Color the whole line
+                line_iter_end: Gtk.TextIter = self._buffer.get_iter_at_line(line_number)
+                line_iter_end.forward_to_line_end()
+                self._buffer.apply_tag_by_name(color, line_iter_start, line_iter_end)
+            else:
+                self._buffer.apply_tag_by_name(color, start, end)
 
     def _apply_h_style(self, style_tag: str, start: Gtk.TextIter, end: Gtk.TextIter) -> None:
         """
