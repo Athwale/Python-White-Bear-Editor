@@ -52,6 +52,8 @@ class AppWindow(Gtk.ApplicationWindow):
     # Paragraph can not be mixed with other styles.
     # Paragraph retains text color and boldness.
 
+    # Urls ignore bold and color change.
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -136,7 +138,13 @@ class AppWindow(Gtk.ApplicationWindow):
             text_iter = self._buffer.get_iter_at_mark(mark)
             self._buffer.insert(text_iter, text, len(text))
 
-    def on_button_clicked(self, button: Gtk.Button):
+    def on_button_clicked(self, button: Gtk.Button) -> None:
+        """
+        Style buttons handler.
+        :param button: The button that was pressed.
+        :return: None
+        """
+        # TODO Carry the style in the button for all in some way.
         button_id = button.get_label()
         if button_id == 'h3':
             self._apply_style(Styles.STYLE_H3)
@@ -147,14 +155,9 @@ class AppWindow(Gtk.ApplicationWindow):
         elif button_id == 'List':
             self._apply_style(Styles.STYLE_LIST)
         elif button_id in Styles.COLORS.keys():
-            # todo carry the style in the button for all in some way.
             self._apply_style(button_id)
-
-        if self._buffer.get_has_selection():
-            # TODO transform this to apply style too
-            start, end = self._buffer.get_selection_bounds()
-            if button_id == 'Bold':
-                self._buffer.apply_tag_by_name(Styles.TAG_BOLD, start, end)
+        elif button_id == 'Bold':
+            self._apply_style(Styles.TAG_BOLD)
         self._text.grab_focus()
 
     def _apply_style(self, style: str) -> None:
@@ -183,15 +186,12 @@ class AppWindow(Gtk.ApplicationWindow):
 
     def _apply_color(self, color: str, start: Gtk.TextIter, end: Gtk.TextIter) -> None:
         """
-        Applies h3/4 style to the current paragraph or all selected paragraphs.
+        Applies color to the selected text. If a title is within the selection, the whole title is colored.
         :param color: Color name corresponding to the Gdk RGB color definition.
         :param start: Text buffer start iterator.
         :param end: Text buffer end iterator.
         :return: None
         """
-        for color_tag in Styles.COLORS.keys():
-            # Remove all other color tags.
-            self._buffer.remove_tag_by_name(color_tag, start, end)
         # Titles will always be whole lines, so we only need to check the start tags.
         for line_number in range(start.get_line(), end.get_line() + 1):
             # Start iterator is already at the current line start.
@@ -203,9 +203,24 @@ class AppWindow(Gtk.ApplicationWindow):
                 # Color the whole line
                 line_iter_end: Gtk.TextIter = self._buffer.get_iter_at_line(line_number)
                 line_iter_end.forward_to_line_end()
+                for color_tag in Styles.COLORS.keys():
+                    # Remove all other color tags on whole titles.
+                    self._buffer.remove_tag_by_name(color_tag, line_iter_start, line_iter_end)
                 self._buffer.apply_tag_by_name(color, line_iter_start, line_iter_end)
             else:
+                for color_tag in Styles.COLORS.keys():
+                    # Remove all other color tags.
+                    self._buffer.remove_tag_by_name(color_tag, start, end)
                 self._buffer.apply_tag_by_name(color, start, end)
+
+    def _apply_bold(self, start: Gtk.TextIter, end: Gtk.TextIter) -> None:
+        """
+        Applies/removes bold style to the current selection.
+        :param start: Text buffer start iterator.
+        :param end: Text buffer end iterator.
+        :return: None
+        """
+        print('bold')
 
     def _apply_h_style(self, style_tag: str, start: Gtk.TextIter, end: Gtk.TextIter) -> None:
         """
