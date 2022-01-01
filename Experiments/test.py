@@ -29,6 +29,7 @@ class AppWindow(Gtk.ApplicationWindow):
     """
     Main class for all the work.
     """
+    # TODO when this is done post it to stack exchange as an example and hope for betterment.
     # Character counts are offsets
     # Byte counts are indexes.
     # Tags apply attributes to a range of text. Tags are inside a buffer tag table.
@@ -52,7 +53,11 @@ class AppWindow(Gtk.ApplicationWindow):
     # Paragraph can not be mixed with other styles.
     # Paragraph retains text color and boldness.
 
+    # List must automatically continue on a new line.
+
     # Urls ignore bold and color change.
+
+    # TODO styles must combine when deleted/backspaced together.
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -64,14 +69,13 @@ class AppWindow(Gtk.ApplicationWindow):
         self._text = Gtk.TextView()
         self._text.set_wrap_mode(Gtk.WrapMode.WORD)
         # self._text.set_pixels_inside_wrap(50)
-        # todo lists using a decoration in margin???
         # self._text.set_indent(50)
         self._buffer: Gtk.TextBuffer = self._text.get_buffer()
 
-        text_scrolled = Gtk.ScrolledWindow()
-        text_scrolled.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.ALWAYS)
-        text_scrolled.set_size_request(300, -1)
-        text_scrolled.add(self._text)
+        self._text_scrolled = Gtk.ScrolledWindow()
+        self._text_scrolled.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.ALWAYS)
+        self._text_scrolled.set_size_request(300, -1)
+        self._text_scrolled.add(self._text)
 
         # Create text effect buttons:
         for color_name in Styles.COLORS.keys():
@@ -97,7 +101,7 @@ class AppWindow(Gtk.ApplicationWindow):
             button.connect("clicked", self.on_button_clicked)
             v_box.add(button)
 
-        h_box.add(text_scrolled)
+        h_box.add(self._text_scrolled)
         h_box.add(v_box)
         self.add(h_box)
         self.set_size_request(width=400, height=550)
@@ -118,12 +122,13 @@ class AppWindow(Gtk.ApplicationWindow):
         # Weights:
         self._buffer.create_tag(Styles.TAG_BOLD, weight=Pango.Weight.BOLD)
 
-        # Font sizes:
+        # Tag definitions:
+        # TODO add line spacing to styles.
         self._buffer.create_tag(Styles.TAG_H3, scale=2, weight=Pango.Weight.BOLD)
         self._buffer.create_tag(Styles.TAG_H4, scale=1.5, weight=Pango.Weight.BOLD)
         self._buffer.create_tag(Styles.TAG_PAR, scale=1)
+        # List style:
         self._buffer.create_tag(Styles.TAG_LIST, scale=1)
-
         self._write_test_text()
 
     def _write_test_text(self) -> None:
@@ -278,8 +283,29 @@ class AppWindow(Gtk.ApplicationWindow):
         :param end: Text buffer end iterator.
         :return: None
         """
-        print('list')
-        
+        # TODO Add bullet to the beginning of lines.
+        for line_number in range(start.get_line(), end.get_line() + 1):
+            # Start iterator is already at the current line start.
+            line_iter_start: Gtk.TextIter = self._buffer.get_iter_at_line(line_number)
+            # Get the iterator at the end of the line.
+            line_iter_end: Gtk.TextIter = self._buffer.get_iter_at_line(line_number)
+            line_iter_end.forward_to_line_end()
+
+            for tag in [Styles.TAG_H3, Styles.TAG_H4, Styles.TAG_PAR]:
+                self._buffer.remove_tag_by_name(tag, line_iter_start, line_iter_end)
+            # TODO use a special widget at the start of the line that behaves like a single character.
+            # Insert a special label widget that makes the list bullet.
+            anchor = self._buffer.create_child_anchor(line_iter_start)
+            bullet = Gtk.Label(label='\t•\t')
+            bullet = Gtk.Button.new_with_label("the button")
+            self._text.add_child_at_anchor(bullet, anchor)
+
+            # Writing invalidated the iterators.
+            line_iter_start = self._buffer.get_iter_at_line(line_number)
+            line_iter_end = self._buffer.get_iter_at_line(line_number)
+            line_iter_end.forward_to_line_end()
+            self._buffer.apply_tag_by_name(Styles.TAG_LIST, line_iter_start, line_iter_end)
+
 
 class Application(Gtk.Application):
     def __init__(self, *args, **kwargs):
