@@ -66,16 +66,16 @@ class AppWindow(Gtk.ApplicationWindow):
         h_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=3)
         v_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=3)
 
-        self._text = Gtk.TextView()
-        self._text.set_wrap_mode(Gtk.WrapMode.WORD)
+        self._text_view = Gtk.TextView()
+        self._text_view.set_wrap_mode(Gtk.WrapMode.WORD)
         # self._text.set_pixels_inside_wrap(50)
         # self._text.set_indent(50)
-        self._buffer: Gtk.TextBuffer = self._text.get_buffer()
+        self._buffer: Gtk.TextBuffer = self._text_view.get_buffer()
 
         self._text_scrolled = Gtk.ScrolledWindow()
         self._text_scrolled.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.ALWAYS)
         self._text_scrolled.set_size_request(300, -1)
-        self._text_scrolled.add(self._text)
+        self._text_scrolled.add(self._text_view)
 
         # Create text effect buttons:
         for color_name in Styles.COLORS.keys():
@@ -109,7 +109,7 @@ class AppWindow(Gtk.ApplicationWindow):
 
         # Requires yum install hunspell-cs
         # todo gtk text mark set visible is possible.
-        self._spellchecker = SpellChecker(self._text, language='cs_CZ', collapse=False)
+        self._spellchecker = SpellChecker(self._text_view, language='cs_CZ', collapse=False)
 
         # Styles are combination of set tags.
         # Text effects:
@@ -141,7 +141,7 @@ class AppWindow(Gtk.ApplicationWindow):
                    'sed do esmeralda temporary incidental ut labor\n'.format(i)
             mark = self._buffer.get_insert()
             text_iter = self._buffer.get_iter_at_mark(mark)
-            self._buffer.insert(text_iter, text, len(text))
+            self._buffer.insert(text_iter, text)
 
     def on_button_clicked(self, button: Gtk.Button) -> None:
         """
@@ -163,7 +163,7 @@ class AppWindow(Gtk.ApplicationWindow):
             self._apply_style(button_id)
         elif button_id == 'bold':
             self._apply_style(Styles.TAG_BOLD)
-        self._text.grab_focus()
+        self._text_view.grab_focus()
 
     def _apply_style(self, style: str) -> None:
         """
@@ -293,18 +293,25 @@ class AppWindow(Gtk.ApplicationWindow):
 
             for tag in [Styles.TAG_H3, Styles.TAG_H4, Styles.TAG_PAR]:
                 self._buffer.remove_tag_by_name(tag, line_iter_start, line_iter_end)
-            # TODO use a special widget at the start of the line that behaves like a single character.
+
             # Insert a special label widget that makes the list bullet.
             anchor = self._buffer.create_child_anchor(line_iter_start)
-            bullet = Gtk.Label(label='\t•\t')
-            bullet = Gtk.Button.new_with_label("the button")
-            self._text.add_child_at_anchor(bullet, anchor)
+
+            bullet = Gtk.Label(label='•')
+            bullet.set_size_request(30, 10)
+            rgb = Gdk.RGBA()
+            rgb.parse('rgb(255, 0, 0)')
+            bullet.override_background_color(Gtk.StateFlags.NORMAL, rgb)
+
+            self._text_view.add_child_at_anchor(bullet, anchor)
 
             # Writing invalidated the iterators.
             line_iter_start = self._buffer.get_iter_at_line(line_number)
             line_iter_end = self._buffer.get_iter_at_line(line_number)
             line_iter_end.forward_to_line_end()
             self._buffer.apply_tag_by_name(Styles.TAG_LIST, line_iter_start, line_iter_end)
+            # Refresh the window to show the new label.
+            self.show_all()
 
 
 class Application(Gtk.Application):
@@ -317,6 +324,7 @@ class Application(Gtk.Application):
             self.window = AppWindow(application=self, title="Text test")
             # Shows all widgets inside the window.
             self.window.show_all()
+            self.window.present()
 
 
 if __name__ == "__main__":
