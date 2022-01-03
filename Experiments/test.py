@@ -22,6 +22,10 @@ class Styles:
     TAG_LIST: str = 'list'
     TAG_BOLD: str = 'bold'
 
+    LIST_BULLET_SIZE: int = 30
+    H3_SPACING: int = 15
+    H4_SPACING: int = 10
+
     COLORS: Dict[str, str] = {'red': 'rgb(255,0,0)', 'green': 'rgb(0,255,0)', 'orange': 'rgb(255,215,0)'}
 
 
@@ -128,11 +132,16 @@ class AppWindow(Gtk.ApplicationWindow):
 
         # Tag definitions:
         # TODO add line spacing to styles.
-        self._buffer.create_tag(Styles.TAG_H3, scale=2, weight=Pango.Weight.BOLD)
-        self._buffer.create_tag(Styles.TAG_H4, scale=1.5, weight=Pango.Weight.BOLD)
+        self._buffer.create_tag(Styles.TAG_H3, scale=2, weight=Pango.Weight.BOLD,
+                                pixels_above_lines=Styles.H3_SPACING,
+                                pixels_below_lines=Styles.H3_SPACING)
+        self._buffer.create_tag(Styles.TAG_H4, scale=1.5, weight=Pango.Weight.BOLD,
+                                pixels_above_lines=Styles.H4_SPACING,
+                                pixels_below_lines=Styles.H4_SPACING)
         self._buffer.create_tag(Styles.TAG_PAR, scale=1)
         # List style:
-        self._buffer.create_tag(Styles.TAG_LIST, scale=1)
+        # Each new line is a separate bullet, so left marin is not necessary.
+        self._buffer.create_tag(Styles.TAG_LIST, scale=1, indent=-30)
         self._write_test_text()
 
     def _write_test_text(self) -> None:
@@ -163,6 +172,8 @@ class AppWindow(Gtk.ApplicationWindow):
         tag_table: Gtk.TextTagTable = self._buffer.get_tag_table()
         list_tag: Gtk.TextTag = tag_table.lookup(Styles.TAG_LIST)
         if line_start_iter.has_tag(list_tag):
+            # TODO get anchor get widgets
+            # TODO add list style margins
             print('list')
 
     def on_button_clicked(self, button: Gtk.Button) -> None:
@@ -320,7 +331,7 @@ class AppWindow(Gtk.ApplicationWindow):
             if not anchor:
                 anchor: Gtk.TextChildAnchor = self._buffer.create_child_anchor(line_start_iter)
                 bullet = Gtk.Label(label='•')
-                bullet.set_size_request(30, 10)
+                bullet.set_size_request(Styles.LIST_BULLET_SIZE, -1)
                 self._text_view.add_child_at_anchor(bullet, anchor)
 
             # Writing invalidated the iterators.
