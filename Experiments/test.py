@@ -316,15 +316,12 @@ class AppWindow(Gtk.ApplicationWindow):
                 self._buffer.remove_tag_by_name(tag, line_start_iter, line_end_iter)
 
             # Insert a special label widget that makes the list bullet.
-            # Todo only write bullet if there is not one already.
-            # TODO we will need to reapply list style on par joining so only prevent multiple bullets.
-            anchor: Gtk.TextChildAnchor  = line_start_iter.get_child_anchor()
-
-
-            anchor: Gtk.TextChildAnchor = self._buffer.create_child_anchor(line_start_iter)
-            bullet = Gtk.Label(label='•')
-            bullet.set_size_request(30, 10)
-            self._text_view.add_child_at_anchor(bullet, anchor)
+            anchor: Gtk.TextChildAnchor = line_start_iter.get_child_anchor()
+            if not anchor:
+                anchor: Gtk.TextChildAnchor = self._buffer.create_child_anchor(line_start_iter)
+                bullet = Gtk.Label(label='•')
+                bullet.set_size_request(30, 10)
+                self._text_view.add_child_at_anchor(bullet, anchor)
 
             # Writing invalidated the iterators.
             line_start_iter = self._buffer.get_iter_at_line(line_number)
