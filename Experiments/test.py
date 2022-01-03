@@ -68,14 +68,14 @@ class AppWindow(Gtk.ApplicationWindow):
 
         self._text_view = Gtk.TextView()
         self._text_view.set_wrap_mode(Gtk.WrapMode.WORD)
-        # self._text.set_pixels_inside_wrap(50)
-        # self._text.set_indent(50)
-        self._buffer: Gtk.TextBuffer = self._text_view.get_buffer()
 
-        self._text_scrolled = Gtk.ScrolledWindow()
-        self._text_scrolled.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.ALWAYS)
-        self._text_scrolled.set_size_request(300, -1)
-        self._text_scrolled.add(self._text_view)
+        self._buffer: Gtk.TextBuffer = self._text_view.get_buffer()
+        self._buffer.connect("changed", self.on_text_changed)
+
+        text_scrolled = Gtk.ScrolledWindow()
+        text_scrolled.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.ALWAYS)
+        text_scrolled.set_size_request(300, -1)
+        text_scrolled.add(self._text_view)
 
         # Create text effect buttons:
         for color_name in Styles.COLORS.keys():
@@ -101,7 +101,11 @@ class AppWindow(Gtk.ApplicationWindow):
             button.connect("clicked", self.on_button_clicked)
             v_box.add(button)
 
-        h_box.add(self._text_scrolled)
+        self._label = Gtk.Label()
+        self._label.set_text('Counter')
+        v_box.add(self._label)
+
+        h_box.add(text_scrolled)
         h_box.add(v_box)
         self.add(h_box)
         self.set_size_request(width=400, height=550)
@@ -142,6 +146,24 @@ class AppWindow(Gtk.ApplicationWindow):
             mark = self._buffer.get_insert()
             text_iter = self._buffer.get_iter_at_mark(mark)
             self._buffer.insert(text_iter, text)
+
+    def on_text_changed(self, buffer: Gtk.TextBuffer) -> None:
+        """
+        Text area handler.
+        :param buffer: The text_view that was pressed.
+        :return: None
+        """
+        current_line: int = self._buffer.get_iter_at_mark(self._buffer.get_insert()).get_line()
+        self._label.set_text('Lines: {}\nChars: {}\nCurrent line: {}'.format(buffer.get_line_count(),
+                                                                             buffer.get_char_count(),
+                                                                             current_line))
+        # TODO Handle lists
+        # TODO Catch text edits inside list and continue/cancel list/prevent multiple bullets on one line.
+        line_start_iter: Gtk.TextIter = self._buffer.get_iter_at_line(current_line)
+        tag_table: Gtk.TextTagTable = self._buffer.get_tag_table()
+        list_tag: Gtk.TextTag = tag_table.lookup(Styles.TAG_LIST)
+        if line_start_iter.has_tag(list_tag):
+            print('list')
 
     def on_button_clicked(self, button: Gtk.Button) -> None:
         """
@@ -203,18 +225,18 @@ class AppWindow(Gtk.ApplicationWindow):
         # Titles will always be whole lines, so we only need to check the start tags.
         for line_number in range(start.get_line(), end.get_line() + 1):
             # Start iterator is already at the current line start.
-            line_iter_start: Gtk.TextIter = self._buffer.get_iter_at_line(line_number)
+            line_start_iter: Gtk.TextIter = self._buffer.get_iter_at_line(line_number)
             tag_table: Gtk.TextTagTable = self._buffer.get_tag_table()
             h3_tag: Gtk.TextTag = tag_table.lookup(Styles.TAG_H3)
             h4_tag: Gtk.TextTag = tag_table.lookup(Styles.TAG_H4)
-            if line_iter_start.has_tag(h4_tag) or line_iter_start.has_tag(h3_tag):
+            if line_start_iter.has_tag(h4_tag) or line_start_iter.has_tag(h3_tag):
                 # Color the whole line
-                line_iter_end: Gtk.TextIter = self._buffer.get_iter_at_line(line_number)
-                line_iter_end.forward_to_line_end()
+                line_end_iter: Gtk.TextIter = self._buffer.get_iter_at_line(line_number)
+                line_end_iter.forward_to_line_end()
                 for color_tag in Styles.COLORS.keys():
                     # Remove all other color tags on whole titles.
-                    self._buffer.remove_tag_by_name(color_tag, line_iter_start, line_iter_end)
-                self._buffer.apply_tag_by_name(color, line_iter_start, line_iter_end)
+                    self._buffer.remove_tag_by_name(color_tag, line_start_iter, line_end_iter)
+                self._buffer.apply_tag_by_name(color, line_start_iter, line_end_iter)
             else:
                 for color_tag in Styles.COLORS.keys():
                     # Remove all other color tags.
@@ -249,13 +271,13 @@ class AppWindow(Gtk.ApplicationWindow):
         """
         for line_number in range(start.get_line(), end.get_line() + 1):
             # Start iterator is already at the current line start.
-            line_iter_start: Gtk.TextIter = self._buffer.get_iter_at_line(line_number)
-            line_iter_end: Gtk.TextIter = self._buffer.get_iter_at_line(line_number)
-            line_iter_end.forward_to_line_end()
+            line_start_iter: Gtk.TextIter = self._buffer.get_iter_at_line(line_number)
+            line_end_iter: Gtk.TextIter = self._buffer.get_iter_at_line(line_number)
+            line_end_iter.forward_to_line_end()
 
             # Remove all other styles, titles do not keep anything.
-            self._buffer.remove_all_tags(line_iter_start, line_iter_end)
-            self._buffer.apply_tag_by_name(style_tag, line_iter_start, line_iter_end)
+            self._buffer.remove_all_tags(line_start_iter, line_end_iter)
+            self._buffer.apply_tag_by_name(style_tag, line_start_iter, line_end_iter)
 
     def _apply_paragraph_style(self, start: Gtk.TextIter, end: Gtk.TextIter) -> None:
         """
@@ -266,15 +288,15 @@ class AppWindow(Gtk.ApplicationWindow):
         """
         for line_number in range(start.get_line(), end.get_line() + 1):
             # Start iterator is already at the current line start.
-            line_iter_start: Gtk.TextIter = self._buffer.get_iter_at_line(line_number)
-            line_iter_end: Gtk.TextIter = self._buffer.get_iter_at_line(line_number)
-            line_iter_end.forward_to_line_end()
+            line_start_iter: Gtk.TextIter = self._buffer.get_iter_at_line(line_number)
+            line_end_iter: Gtk.TextIter = self._buffer.get_iter_at_line(line_number)
+            line_end_iter.forward_to_line_end()
 
             # Remove all other styles, titles do not keep anything.
             for tag in [Styles.TAG_H3, Styles.TAG_H4, Styles.TAG_LIST]:
-                self._buffer.remove_tag_by_name(tag, line_iter_start, line_iter_end)
+                self._buffer.remove_tag_by_name(tag, line_start_iter, line_end_iter)
             # A title is a larger and bold font.
-            self._buffer.apply_tag_by_name(Styles.TAG_PAR, line_iter_start, line_iter_end)
+            self._buffer.apply_tag_by_name(Styles.TAG_PAR, line_start_iter, line_end_iter)
 
     def _apply_list_style(self, start: Gtk.TextIter, end: Gtk.TextIter) -> None:
         """
@@ -283,33 +305,32 @@ class AppWindow(Gtk.ApplicationWindow):
         :param end: Text buffer end iterator.
         :return: None
         """
-        # TODO Add bullet to the beginning of lines.
         for line_number in range(start.get_line(), end.get_line() + 1):
             # Start iterator is already at the current line start.
-            line_iter_start: Gtk.TextIter = self._buffer.get_iter_at_line(line_number)
+            line_start_iter: Gtk.TextIter = self._buffer.get_iter_at_line(line_number)
             # Get the iterator at the end of the line.
-            line_iter_end: Gtk.TextIter = self._buffer.get_iter_at_line(line_number)
-            line_iter_end.forward_to_line_end()
+            line_end_iter: Gtk.TextIter = self._buffer.get_iter_at_line(line_number)
+            line_end_iter.forward_to_line_end()
 
             for tag in [Styles.TAG_H3, Styles.TAG_H4, Styles.TAG_PAR]:
-                self._buffer.remove_tag_by_name(tag, line_iter_start, line_iter_end)
+                self._buffer.remove_tag_by_name(tag, line_start_iter, line_end_iter)
 
             # Insert a special label widget that makes the list bullet.
-            anchor = self._buffer.create_child_anchor(line_iter_start)
+            # Todo only write bullet if there is not one already.
+            # TODO we will need to reapply list style on par joining so only prevent multiple bullets.
+            anchor: Gtk.TextChildAnchor  = line_start_iter.get_child_anchor()
 
+
+            anchor: Gtk.TextChildAnchor = self._buffer.create_child_anchor(line_start_iter)
             bullet = Gtk.Label(label='•')
             bullet.set_size_request(30, 10)
-            rgb = Gdk.RGBA()
-            rgb.parse('rgb(255, 0, 0)')
-            bullet.override_background_color(Gtk.StateFlags.NORMAL, rgb)
-
             self._text_view.add_child_at_anchor(bullet, anchor)
 
             # Writing invalidated the iterators.
-            line_iter_start = self._buffer.get_iter_at_line(line_number)
-            line_iter_end = self._buffer.get_iter_at_line(line_number)
-            line_iter_end.forward_to_line_end()
-            self._buffer.apply_tag_by_name(Styles.TAG_LIST, line_iter_start, line_iter_end)
+            line_start_iter = self._buffer.get_iter_at_line(line_number)
+            line_end_iter = self._buffer.get_iter_at_line(line_number)
+            line_end_iter.forward_to_line_end()
+            self._buffer.apply_tag_by_name(Styles.TAG_LIST, line_start_iter, line_end_iter)
             # Refresh the window to show the new label.
             self.show_all()
 

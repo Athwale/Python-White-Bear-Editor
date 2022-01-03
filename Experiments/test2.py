@@ -119,7 +119,6 @@ class AppWindow(Gtk.ApplicationWindow):
         bullet.override_background_color(Gtk.StateFlags.NORMAL, rgb)
 
         self._text_view.add_child_at_anchor(bullet, anchor)
-        # todo label is not drawn outside of constructor
         self.show_all()
 
 
