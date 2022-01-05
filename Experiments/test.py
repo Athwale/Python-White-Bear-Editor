@@ -16,17 +16,20 @@ class Styles:
     STYLE_H4: str = 'heading4_style'
     STYLE_LIST: str = 'list_style'
 
-    TAG_PAR: str = 'paragraph'
-    TAG_H3: str = 'h3'
-    TAG_H4: str = 'h4'
-    TAG_LIST: str = 'list'
-    TAG_BOLD: str = 'bold'
+    TAG_PAR: str = 'tag-paragraph'
+    TAG_H3: str = 'tag-h3'
+    TAG_H4: str = 'tag-h4'
+    TAG_LIST: str = 'tag-list'
+    TAG_BOLD: str = 'tag-bold'
 
     LIST_BULLET_SIZE: int = 30
     H3_SPACING: int = 15
     H4_SPACING: int = 10
 
-    COLORS: Dict[str, str] = {'red': 'rgb(255,0,0)', 'green': 'rgb(0,255,0)', 'orange': 'rgb(255,215,0)'}
+    COLORS: Dict[str, str] = {'red': 'rgb(255,0,0)',
+                              'green': 'rgb(0,255,0)',
+                              'orange': 'rgb(255,215,0)',
+                              'black': 'rgb(0,0,0)'}
 
 
 class AppWindow(Gtk.ApplicationWindow):
@@ -74,7 +77,8 @@ class AppWindow(Gtk.ApplicationWindow):
         self._text_view.set_wrap_mode(Gtk.WrapMode.WORD)
 
         self._buffer: Gtk.TextBuffer = self._text_view.get_buffer()
-        self._buffer.connect("changed", self.on_text_changed)
+        # Using modified signal does not work, iterators are invalid.
+        self._buffer.connect("end-user-action", self.on_text_changed)
 
         text_scrolled = Gtk.ScrolledWindow()
         text_scrolled.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.ALWAYS)
@@ -131,50 +135,96 @@ class AppWindow(Gtk.ApplicationWindow):
         self._buffer.create_tag(Styles.TAG_BOLD, weight=Pango.Weight.BOLD)
 
         # Tag definitions:
-        # TODO add line spacing to styles.
         self._buffer.create_tag(Styles.TAG_H3, scale=2, weight=Pango.Weight.BOLD,
-                                pixels_above_lines=Styles.H3_SPACING,
-                                pixels_below_lines=Styles.H3_SPACING)
+                                      pixels_above_lines=Styles.H3_SPACING,
+                                      pixels_below_lines=Styles.H3_SPACING)
         self._buffer.create_tag(Styles.TAG_H4, scale=1.5, weight=Pango.Weight.BOLD,
-                                pixels_above_lines=Styles.H4_SPACING,
-                                pixels_below_lines=Styles.H4_SPACING)
+                                      pixels_above_lines=Styles.H4_SPACING,
+                                      pixels_below_lines=Styles.H4_SPACING)
         self._buffer.create_tag(Styles.TAG_PAR, scale=1)
         # List style:
         # Each new line is a separate bullet, so left marin is not necessary.
         self._buffer.create_tag(Styles.TAG_LIST, scale=1, indent=-30)
         self._write_test_text()
 
+    # TODO write methods for all styles.
     def _write_test_text(self) -> None:
         """
         Write some test text into the text view.
         :return: None
         """
-        for i in range(3):
-            text = 'Line: {} Lorem ipsum dolor sit amet, consent additional elite, ' \
-                   'sed do esmeralda temporary incidental ut labor\n'.format(i)
-            mark = self._buffer.get_insert()
-            text_iter = self._buffer.get_iter_at_mark(mark)
-            self._buffer.insert(text_iter, text)
+        self._write_text_in_style(Styles.TAG_H3, 'Title h3\n', 'black', False)
+        self._write_text_in_style(Styles.TAG_PAR, 'Paragraph test text\n', 'black', False)
 
-    def on_text_changed(self, buffer: Gtk.TextBuffer) -> None:
+    def _write_text_in_style(self, style: str, text: str, color_tag: str, bold: bool) -> None:
         """
-        Text area handler.
-        :param buffer: The text_view that was pressed.
+        Writes text to the text field at the current insertion point using the style.
+        :param style: One of defined style constants from Styles.
+        :param text: The text to insert.
+        :param color_tag: The color to use.
+        :param bold: True if text should be bold.
+        :return: None
+        """
+        mark = self._buffer.get_insert()
+        text_iter = self._buffer.get_iter_at_mark(mark)
+        tags = [style, color_tag, Styles.TAG_BOLD] if bold else [style, color_tag]
+        self._buffer.insert_with_tags_by_name(text_iter, text, *tags)
+
+    @staticmethod
+    def _get_text(buffer: Gtk.TextBuffer) -> str:
+        """
+        Gets the whole text content of the buffer.
+        :param buffer: Buffer to get text from.
+        :return: String text from the buffer
+        """
+        start, end = buffer.get_bounds()
+        return buffer.get_text(start, end, include_hidden_chars=True)
+
+    def _update_field_info(self) -> None:
+        """
+        Rewrites the info label.
         :return: None
         """
         current_line: int = self._buffer.get_iter_at_mark(self._buffer.get_insert()).get_line()
-        self._label.set_text('Lines: {}\nChars: {}\nCurrent line: {}'.format(buffer.get_line_count(),
-                                                                             buffer.get_char_count(),
-                                                                             current_line))
-        # TODO Handle lists
-        # TODO Catch text edits inside list and continue/cancel list/prevent multiple bullets on one line.
         line_start_iter: Gtk.TextIter = self._buffer.get_iter_at_line(current_line)
         tag_table: Gtk.TextTagTable = self._buffer.get_tag_table()
+        tag_names = [Styles.TAG_H3, Styles.TAG_H4, Styles.TAG_PAR, Styles.TAG_LIST, Styles.TAG_BOLD]
+        tag_names.extend(Styles.COLORS.keys())
+        used_tags = []
+        # TODO more tags than one print all
+        for tag in line_start_iter.get_tags():
+            for tag_name in tag_names:
+                if tag_table.lookup(tag_name) == tag:
+                    used_tags.append(tag_name)
+        self._label.set_text('Lines: {}\n'
+                             'Chars: {}\n'
+                             'Current line: {}\n'
+                             'Style: {}'.format(self._buffer.get_line_count(),
+                                                self._buffer.get_char_count(),
+                                                current_line,
+                                                used_tags))
+
+    def on_text_changed(self, buffer: Gtk.TextBuffer) -> None:
+        """
+        Text area handler called on end-user-action signal from buffer.
+        :param buffer: The text_view's buffer that was used.
+        :return: None
+        """
+        self._update_field_info()
+        current_line: int = buffer.get_iter_at_mark(buffer.get_insert()).get_line()
+        # print(self._get_text(buffer))
+        # TODO Catch text edits inside list and continue/cancel list/prevent multiple bullets on one line.
+        line_start_iter: Gtk.TextIter = buffer.get_iter_at_line(current_line)
+        # TODO the buffer does not have any default tag on empty lines
+
+        tag_table: Gtk.TextTagTable = buffer.get_tag_table()
         list_tag: Gtk.TextTag = tag_table.lookup(Styles.TAG_LIST)
         if line_start_iter.has_tag(list_tag):
+            # TODO backspace can not remove list bullet. Because deleting the bullet does not remove the list style
+            # TODO which is then immediately reapplied.
             # TODO get anchor get widgets
-            # TODO add list style margins
-            print('list')
+            # TODO on enter it continues to be a list without indent, reapply style to create new bullet
+            self._apply_style(Styles.STYLE_LIST)
 
     def on_button_clicked(self, button: Gtk.Button) -> None:
         """

@@ -522,7 +522,7 @@ class CustomRichText(rt.RichTextCtrl):
             self.GetStyle(position + 1, style_carrier)
             next_url = style_carrier.GetURL()
             if not next_url or current_url != next_url or position == (p.GetRange()[1] - 1):
-                # End url style if we are at th end of a url, between different urls or at the end of paragraph.
+                # End url style if we are at th end of an url, between different urls or at the end of paragraph.
                 url_style: rt.RichTextAttr = self._stylesheet.FindCharacterStyle(Strings.style_url).GetStyle()
                 if p.GetTextForRange(rt.RichTextRange(position, position)) == ' ':
                     # Stop the url style on blank space
