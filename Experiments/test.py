@@ -76,9 +76,11 @@ class AppWindow(Gtk.ApplicationWindow):
         self._text_view = Gtk.TextView()
         self._text_view.set_wrap_mode(Gtk.WrapMode.WORD)
 
+        self.connect('key-release-event', self._update_field_info)
+
         self._buffer: Gtk.TextBuffer = self._text_view.get_buffer()
         # Using modified signal does not work, iterators are invalid.
-        self._buffer.connect("end-user-action", self.on_text_changed)
+        self._buffer.connect('end-user-action', self.on_text_changed)
 
         text_scrolled = Gtk.ScrolledWindow()
         text_scrolled.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.ALWAYS)
@@ -180,7 +182,7 @@ class AppWindow(Gtk.ApplicationWindow):
         start, end = buffer.get_bounds()
         return buffer.get_text(start, end, include_hidden_chars=True)
 
-    def _update_field_info(self) -> None:
+    def _update_field_info(self, window: Gtk.Window, _) -> None:
         """
         Rewrites the info label.
         :return: None
@@ -191,7 +193,6 @@ class AppWindow(Gtk.ApplicationWindow):
         tag_names = [Styles.TAG_H3, Styles.TAG_H4, Styles.TAG_PAR, Styles.TAG_LIST, Styles.TAG_BOLD]
         tag_names.extend(Styles.COLORS.keys())
         used_tags = []
-        # TODO more tags than one print all
         for tag in line_start_iter.get_tags():
             for tag_name in tag_names:
                 if tag_table.lookup(tag_name) == tag:
@@ -210,12 +211,11 @@ class AppWindow(Gtk.ApplicationWindow):
         :param buffer: The text_view's buffer that was used.
         :return: None
         """
-        self._update_field_info()
         current_line: int = buffer.get_iter_at_mark(buffer.get_insert()).get_line()
         # print(self._get_text(buffer))
         # TODO Catch text edits inside list and continue/cancel list/prevent multiple bullets on one line.
         line_start_iter: Gtk.TextIter = buffer.get_iter_at_line(current_line)
-        # TODO the buffer does not have any default tag on empty lines
+        # TODO the buffer does not have any default tag on empty lines. Try setting a tag for the whole line.
 
         tag_table: Gtk.TextTagTable = buffer.get_tag_table()
         list_tag: Gtk.TextTag = tag_table.lookup(Styles.TAG_LIST)
