@@ -1,18 +1,5 @@
-from typing import Any
 import wx
 from enchant.checker import SpellChecker
-"""
-    enchant.checker.wxSpellCheckerDialog: wxPython spellchecker interface
-    This module provides the class :py:class:`wxSpellCheckerDialog`, which provides
-    a wxPython dialog that can be used as an interface to a spell checking
-    session. Currently, it is intended as a proof-of-concept and demonstration
-    class, but it should be suitable for general-purpose use in a program.
-    The class must be given an :py:class:`enchant.checker.SpellChecker` object with
-    which to operate.  It can (in theory...) be used in modal and non-modal
-    modes.  Use `Show()` when operating on an array of characters as it will
-    modify the array in place, meaning other work can be done at the same
-    time.  Use `ShowModal()` when operating on a static string.
-"""
 
 
 class SpellCheckerDialog(wx.Dialog):
@@ -21,6 +8,11 @@ class SpellCheckerDialog(wx.Dialog):
     """
 
     def __init__(self, parent, checker: SpellChecker) -> None:
+        """
+        Spellchecker constructor
+        :param parent: Dialog parent.
+        :param checker: SpellChecker instance.
+        """
         wx.Dialog.__init__(self, parent, title='Spelling', size=(300, 70),
                            style=wx.DEFAULT_DIALOG_STYLE | wx.RESIZE_BORDER)
         self._numContext = 40
@@ -36,39 +28,28 @@ class SpellCheckerDialog(wx.Dialog):
         self.Bind(wx.EVT_CLOSE, self.on_close)
 
     def init_layout(self) -> None:
-        """Lay out controls and add buttons."""
+        """
+        Initialize layout.
+        :return: None
+        """
         sizer = wx.BoxSizer(wx.HORIZONTAL)
         txt_sizer = wx.BoxSizer(wx.VERTICAL)
         btn_sizer = wx.BoxSizer(wx.VERTICAL)
         replace_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        txt_sizer.Add(
-            wx.StaticText(self, -1, "Unrecognised Word:"), 0, wx.LEFT | wx.TOP, 5
-        )
+        txt_sizer.Add(wx.StaticText(self, -1, "Unrecognised Word:"), 0, wx.LEFT | wx.TOP, 5)
         txt_sizer.Add(self.error_text, 1, wx.ALL | wx.EXPAND, 5)
-        replace_sizer.Add(
-            wx.StaticText(self, -1, "Replace with:"),
-            0,
-            wx.ALL | wx.ALIGN_CENTER_VERTICAL,
-            5,
-        )
+        replace_sizer.Add(wx.StaticText(self, -1, "Replace with:"), 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL, 5)
         replace_sizer.Add(self.replace_text, 1, wx.ALL | wx.ALIGN_CENTER_VERTICAL, 5)
         txt_sizer.Add(replace_sizer, 0, wx.EXPAND, 0)
         txt_sizer.Add(self.replace_list, 2, wx.ALL | wx.EXPAND, 5)
         sizer.Add(txt_sizer, 1, wx.EXPAND, 0)
-        for label, action, tip in (
-            ("Ignore", self.on_ignore, "Ignore this word and continue"),
-            (
-                "Ignore All",
-                self.on_ignore_all,
-                "Ignore all instances of this word and continue",
-            ),
-            ("Replace", self.on_replace, "Replace this word"),
-            ("Replace All", self.on_replace_all, "Replace all instances of this word"),
-            ("Add", self.on_add, "Add this word to the dictionary"),
-            ("Done", self.on_done, "Finish spell-checking and accept changes"),
-        ):
+        for label, action in (("Ignore", self.on_ignore),
+                              ("Ignore All", self.on_ignore_all),
+                              ("Replace", self.on_replace),
+                              ("Replace All", self.on_replace_all),
+                              ("Add", self.on_add),
+                              ("Done", self.on_done)):
             btn = wx.Button(self, -1, label)
-            btn.SetToolTip(wx.ToolTip(tip))
             btn_sizer.Add(btn, 0, wx.ALIGN_RIGHT | wx.ALL, 4)
             btn.Bind(wx.EVT_BUTTON, action)
             self.buttons.append(btn)
@@ -78,11 +59,10 @@ class SpellCheckerDialog(wx.Dialog):
         sizer.Fit(self)
 
     def advance(self) -> bool:
-        """Advance to the next error.
-
-        This method advances the SpellChecker to the next error, if
-        any.  It then displays the error and some surrounding context,
-        and well as listing the suggested replacements.
+        """
+        Advance to the next error. This method advances the SpellChecker to the next error, if any. It then displays
+        the error and some surrounding context, as well as listing the suggested replacements.
+        :return:
         """
         # Advance to next error, disable if not available
         try:
@@ -116,26 +96,41 @@ class SpellCheckerDialog(wx.Dialog):
         return True
 
     def enable_buttons(self, state: bool = True) -> None:
-        """Enable the checking-related buttons"""
+        """
+        Enable buttons in dialog.
+        :param state: True to enable.
+        :return: None
+        """
         if state != self._buttonsEnabled:
             for btn in self.buttons[:-1]:
                 btn.Enable(state)
             self._buttonsEnabled = state
 
     def get_repl(self) -> str:
-        """Get the chosen replacement string."""
+        """
+        Get the chosen replacement string.
+        :return: The chosen string.
+        """
         repl = self.replace_text.GetValue()
         return repl
 
     # noinspection PyUnusedLocal
-    def on_add(self, evt: Any) -> None:
-        """Callback for the "add" button."""
+    def on_add(self, evt) -> None:
+        """
+        Add new word to the dictionary.
+        :param evt: Unused.
+        :return: None
+        """
         self._checker.add()
         self.advance()
 
     # noinspection PyUnusedLocal
-    def on_done(self, evt: Any) -> None:
-        """Callback for the "close" button."""
+    def on_done(self, evt) -> None:
+        """
+        Cose dialog.
+        :param evt: Unused.
+        :return: None
+        """
         SpellCheckerDialog.sz = self.error_text.GetSize()
         if self.IsModal():
             self.EndModal(wx.ID_OK)
@@ -143,36 +138,54 @@ class SpellCheckerDialog(wx.Dialog):
             self.Close()
 
     # noinspection PyUnusedLocal
-    def on_ignore(self, evt: Any) -> None:
-        """Callback for the "ignore" button.
-        This simply advances to the next error.
+    def on_ignore(self, evt) -> None:
+        """
+        Moves to the next error.
+        :param evt: Unused.
+        :return: None
         """
         self.advance()
 
     # noinspection PyUnusedLocal
-    def on_ignore_all(self, evt: Any) -> None:
-        """Callback for the "ignore all" button."""
+    def on_ignore_all(self, evt) -> None:
+        """
+        Sets the checker to ignore all occurrences of this mistake.
+        :param evt: Unused.
+        :return: None
+        """
         self._checker.ignore_always()
         self.advance()
 
     # noinspection PyUnusedLocal
-    def on_replace(self, evt: Any) -> None:
-        """Callback for the "replace" button."""
+    def on_replace(self, evt) -> None:
+        """
+        Replace button handler.
+        :param evt: Unused.
+        :return: None
+        """
         repl = self.get_repl()
         if repl:
             self._checker.replace(repl)
         self.advance()
 
     # noinspection PyUnusedLocal
-    def on_replace_all(self, evt: Any) -> None:
-        """Callback for the "replace all" button."""
+    def on_replace_all(self, evt) -> None:
+        """
+        Replace all button handler.
+        :param evt: Unused.
+        :return: None
+        """
         repl = self.get_repl()
         self._checker.replace_always(repl)
         self.advance()
 
     # noinspection PyUnusedLocal
-    def on_repl_select(self, evt: Any) -> None:
-        """Callback when a new replacement option is selected."""
+    def on_repl_select(self, evt) -> None:
+        """
+        Handler for the list of possible replacement words.
+        :param evt: Unused.
+        :return: None
+        """
         sel = self.replace_list.GetSelection()
         if sel == -1:
             return
@@ -180,7 +193,12 @@ class SpellCheckerDialog(wx.Dialog):
         self.replace_text.SetValue(opt)
 
     # noinspection PyUnusedLocal
-    def on_close(self, event):
+    def on_close(self, event) -> None:
+        """
+        Close event handler.
+        :param event: Unused.
+        :return: None
+        """
         print('A:', self._checker.get_text())
         self.Destroy()
 
