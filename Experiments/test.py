@@ -156,7 +156,10 @@ class AppWindow(Gtk.ApplicationWindow):
         :return: None
         """
         self._write_text_in_style(Styles.TAG_H3, 'Title h3\n', 'black', False)
-        self._write_text_in_style(Styles.TAG_PAR, 'Paragraph test text\n', 'black', False)
+        self._write_text_in_style(Styles.TAG_PAR, 'Paragraph test text ', 'black', False)
+        self._write_text_in_style(Styles.TAG_PAR, 'red text ', 'red', False)
+        self._write_text_in_style(Styles.TAG_PAR, 'bold green text\n', 'green', True)
+        self._write_text_in_style(Styles.TAG_H4, 'Title h4\n', 'black', False)
 
     def _write_text_in_style(self, style: str, text: str, color_tag: str, bold: bool) -> None:
         """
@@ -167,10 +170,21 @@ class AppWindow(Gtk.ApplicationWindow):
         :param bold: True if text should be bold.
         :return: None
         """
-        mark = self._buffer.get_insert()
-        text_iter = self._buffer.get_iter_at_mark(mark)
-        tags = [style, color_tag, Styles.TAG_BOLD] if bold else [style, color_tag]
-        self._buffer.insert_with_tags_by_name(text_iter, text, *tags)
+        # TODO styles do not hold on the whole line if you type at the start of the line.
+        # First insert text and only apply bold and color.
+        tags = [color_tag, Styles.TAG_BOLD] if bold else [color_tag]
+        current_line: int = self._buffer.get_iter_at_mark(self._buffer.get_insert()).get_line()
+        self._buffer.insert_with_tags_by_name(self._buffer.get_iter_at_mark(self._buffer.get_insert()), text, *tags)
+        # Apply style to the whole line.
+        # TODO might need to apply color to the whole line on titles.
+        line_start_iter: Gtk.TextIter = self._buffer.get_iter_at_line(current_line)
+        line_end_iter: Gtk.TextIter = self._buffer.get_iter_at_line(current_line)
+        # This moves the iterator one past the last valid character in the buffer which allows you to continue writing
+        # in the same style, otherwise you continue in default no style.
+        # TODO use this everywhere instead of to_line_end.
+        # TODO still does not work entirely, backspacing a different style to a line breaks it.
+        line_end_iter.forward_to_end()
+        self._buffer.apply_tag_by_name(style, line_start_iter, line_end_iter)
 
     @staticmethod
     def _get_text(buffer: Gtk.TextBuffer) -> str:
@@ -189,21 +203,30 @@ class AppWindow(Gtk.ApplicationWindow):
         """
         current_line: int = self._buffer.get_iter_at_mark(self._buffer.get_insert()).get_line()
         line_start_iter: Gtk.TextIter = self._buffer.get_iter_at_line(current_line)
+        line_end_iter: Gtk.TextIter = self._buffer.get_iter_at_line(current_line)
+        line_end_iter.forward_to_line_end()
         tag_table: Gtk.TextTagTable = self._buffer.get_tag_table()
         tag_names = [Styles.TAG_H3, Styles.TAG_H4, Styles.TAG_PAR, Styles.TAG_LIST, Styles.TAG_BOLD]
         tag_names.extend(Styles.COLORS.keys())
-        used_tags = []
+        used_tags_start = []
+        used_tags_end = []
         for tag in line_start_iter.get_tags():
             for tag_name in tag_names:
                 if tag_table.lookup(tag_name) == tag:
-                    used_tags.append(tag_name)
+                    used_tags_start.append(tag_name)
+        for tag in line_end_iter.get_tags():
+            for tag_name in tag_names:
+                if tag_table.lookup(tag_name) == tag:
+                    used_tags_end.append(tag_name)
         self._label.set_text('Lines: {}\n'
                              'Chars: {}\n'
                              'Current line: {}\n'
-                             'Style: {}'.format(self._buffer.get_line_count(),
-                                                self._buffer.get_char_count(),
-                                                current_line,
-                                                used_tags))
+                             'Style start: {}\n'
+                             'Style end: {}'.format(self._buffer.get_line_count(),
+                                                    self._buffer.get_char_count(),
+                                                    current_line,
+                                                    used_tags_start,
+                                                    used_tags_end))
 
     def on_text_changed(self, buffer: Gtk.TextBuffer) -> None:
         """
@@ -212,10 +235,12 @@ class AppWindow(Gtk.ApplicationWindow):
         :return: None
         """
         current_line: int = buffer.get_iter_at_mark(buffer.get_insert()).get_line()
-        # print(self._get_text(buffer))
         # TODO Catch text edits inside list and continue/cancel list/prevent multiple bullets on one line.
         line_start_iter: Gtk.TextIter = buffer.get_iter_at_line(current_line)
-        # TODO the buffer does not have any default tag on empty lines. Try setting a tag for the whole line.
+        # TODO the buffer does not have any default tag on empty lines.
+
+        # TODO reapply style every time based on the first style found in the line if the styles do not mach.
+        #  Might need to back up current style on key down.
 
         tag_table: Gtk.TextTagTable = buffer.get_tag_table()
         list_tag: Gtk.TextTag = tag_table.lookup(Styles.TAG_LIST)
