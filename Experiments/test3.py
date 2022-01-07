@@ -199,13 +199,13 @@ class SpellCheckerDialog(wx.Dialog):
         :param event: Unused.
         :return: None
         """
-        print('A:', self._checker.get_text())
+        print('out:', self._checker.get_text())
         self.Destroy()
 
 
 def run():
     text = "Toto je pkusny text s nkolika pravopismymy chibamy"
-    print("B:", text)
+    print('in: ', text)
     checker = SpellChecker("cs_CZ", text)
 
     app = wx.App(False)
