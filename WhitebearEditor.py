@@ -5,6 +5,7 @@ Starting class for the whitebear editor GUI. This class is necessary and must be
 OnInit must be overridden here.
 # TODO fix bugs and package this into a binary.
 # TODO spellcheck.
+# TODO viz wx forum copy paste reply.
 # TODO switch to pathlib, Path.home(), exists... https://naucse.python.cz/2019/pyladies-brno-podzim-st/intro/pathlib/
 # TODO switch to python gtk3
 # TODO use example.com for testing purposes.
