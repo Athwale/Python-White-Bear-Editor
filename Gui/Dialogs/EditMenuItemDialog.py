@@ -209,7 +209,7 @@ class EditMenuItemDialog(wx.Dialog):
     def _handle_buttons(self, event: wx.CommandEvent) -> None:
         """
         Handle button clicks, run seo check on the new values and display results. Prevent closing if seo failed.
-        :param event: The button event
+        :param event: The button event.
         :return: None
         """
         if event.GetId() == wx.ID_OPEN:

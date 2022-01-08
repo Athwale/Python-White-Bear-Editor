@@ -7,15 +7,17 @@ class SpellCheckerDialog(wx.Dialog):
     Spellchecker.
     # TODO work with richtextctrl
     # TODO where is the dictionary?
+    # TODO replace strings with Constants variables.
     """
 
-    def __init__(self, parent, checker: SpellChecker) -> None:
+    def __init__(self, parent, title, checker: SpellChecker) -> None:
         """
         Spellchecker constructor
         :param parent: Dialog parent.
+        :param title: Dialog title.
         :param checker: SpellChecker instance.
         """
-        wx.Dialog.__init__(self, parent, title='Spelling', size=(500, 350), style=wx.DEFAULT_DIALOG_STYLE)
+        wx.Dialog.__init__(self, parent, title=title, size=(500, 350), style=wx.DEFAULT_DIALOG_STYLE)
         self._checker = checker
         # How much of the text around current mistake is shown.
         self._context_chars = 40
@@ -26,9 +28,8 @@ class SpellCheckerDialog(wx.Dialog):
         self.suggestions_list = wx.ListBox(self, -1, style=wx.LB_SINGLE)
         self._init_layout()
 
-        self.Bind(wx.EVT_LISTBOX, self.on_list_select, self.suggestions_list)
-        self.Bind(wx.EVT_LISTBOX_DCLICK, self.on_replace, self.suggestions_list)
-        self.Bind(wx.EVT_CLOSE, self.on_close)
+        self.Bind(wx.EVT_LISTBOX, self.list_select_handler, self.suggestions_list)
+        self.Bind(wx.EVT_LISTBOX_DCLICK, self.list_doubleclick_handler, self.suggestions_list)
 
     def _init_layout(self) -> None:
         """
@@ -52,18 +53,19 @@ class SpellCheckerDialog(wx.Dialog):
 
         buttons_sizer.AddSpacer(mistakes_label.GetSize()[1] + border)
 
-        for label, action in (('Ignore', self.on_ignore),
-                              ('Ignore All', self.on_ignore_all),
-                              ('Replace', self.on_replace),
-                              ('Replace All', self.on_replace_all),
-                              ('Add to dictionary', self.on_add)):
-            button = wx.Button(self, -1, label, size=(150, -1))
+        for button_id, label, action in ((wx.ID_IGNORE, 'Ignore', self.buttons_handler),
+                                         (wx.ID_NOTOALL, 'Ignore All', self.buttons_handler),
+                                         (wx.ID_REPLACE, 'Replace', self.buttons_handler),
+                                         (wx.ID_REPLACE_ALL, 'Replace All', self.buttons_handler),
+                                         (wx.ID_ADD, 'Add to dictionary', self.buttons_handler)):
+            button = wx.Button(self, button_id, label, size=(150, -1))
             buttons_sizer.Add(button, 0, wx.ALL, border)
             button.Bind(wx.EVT_BUTTON, action)
             self._buttons.append(button)
-        close_button = wx.Button(self, -1, 'Close', size=(150, -1))
+        # Close button will never have to be disabled and therefore is not in _buttons.
+        close_button = wx.Button(self, wx.ID_CLOSE, 'Close', size=(150, -1))
         buttons_sizer.Add(close_button, 0, wx.ALL, border)
-        close_button.Bind(wx.EVT_BUTTON, self.on_done)
+        close_button.Bind(wx.EVT_BUTTON, self.buttons_handler)
 
         main_sizer.Add(text_fields_sizer, 1, wx.EXPAND, border)
         main_sizer.Add(buttons_sizer, 0, wx.RIGHT, border)
@@ -84,10 +86,6 @@ class SpellCheckerDialog(wx.Dialog):
             self.mistake_preview_field.Clear()
             self.suggestions_list.Clear()
             self.replace_with_field.Clear()
-            if self.IsModal():
-                # Close self if modal.
-                # TODO remove these if they end up being useless.
-                self.EndModal(wx.ID_OK)
             return False
         self.enable_buttons()
         # Display mistake context with wrong word in red.
@@ -102,10 +100,20 @@ class SpellCheckerDialog(wx.Dialog):
         self.mistake_preview_field.SetDefaultStyle(wx.TextAttr(wx.BLACK))
         self.mistake_preview_field.AppendText(self._checker.trailing_context(self._context_chars))
         # Display suggestions in the replacements list
-        suggests = self._checker.suggest()
-        self.suggestions_list.Set(suggests)
-        self.replace_with_field.SetValue(suggests[0] if suggests else '')
+        suggestions = self._checker.suggest()
+        self.suggestions_list.Set(suggestions)
+        self.replace_with_field.SetValue(suggestions[0] if suggestions else '')
         return True
+
+    def _replace(self) -> None:
+        """
+        Instructs the spellchecker to replace current mistake with the contents of replace_with_field.
+        :return: None
+        """
+        replacement = self.replace_with_field.GetValue()
+        if replacement:
+            self._checker.replace(replacement)
+        self.go_to_next()
 
     def enable_buttons(self, state: bool = True) -> None:
         """
@@ -117,80 +125,44 @@ class SpellCheckerDialog(wx.Dialog):
             button.Enable(state)
 
     # noinspection PyUnusedLocal
-    def on_add(self, event: wx.CommandEvent) -> None:
+    def list_doubleclick_handler(self, event: wx.CommandEvent) -> None:
         """
-        Add new word to the dictionary.
+        Handles double clicks in the suggestions list. Works like the replace button.
         :param event: Unused.
         :return: None
         """
-        self._checker.add()
-        self.go_to_next()
+        self._replace()
 
-    # noinspection PyUnusedLocal
-    def on_done(self, event: wx.CommandEvent) -> None:
+    def buttons_handler(self, event: wx.CommandEvent) -> None:
         """
-        Cose dialog. Calls on_close.
-        :param event: Unused.
+        Handle button clicks.
+        :param event: The button event.
         :return: None
         """
-        if self.IsModal():
-            self.EndModal(wx.ID_OK)
-        else:
-            self.Close()
+        button_id = event.GetId()
+        if button_id == wx.ID_IGNORE:
+            self.go_to_next()
+        elif button_id == wx.ID_NOTOALL:
+            self._checker.ignore_always()
+            self.go_to_next()
+        elif button_id == wx.ID_REPLACE:
+            self._replace()
+        elif button_id == wx.ID_REPLACE_ALL:
+            self._checker.replace_always(self.replace_with_field.GetValue())
+            self.go_to_next()
+        elif button_id == wx.ID_ADD:
+            # Add new word to dictionary.
+            self._checker.add()
+            self.go_to_next()
+        elif button_id == wx.ID_CLOSE:
+            print('out:', self._checker.get_text())
+            if self.IsModal():
+                self.EndModal(wx.ID_OK)
+            else:
+                self.Destroy()
 
     # noinspection PyUnusedLocal
-    def on_close(self, event: wx.CommandEvent) -> None:
-        """
-        Close event handler.
-        :param event: Unused.
-        :return: None
-        """
-        print('out:', self._checker.get_text())
-        self.Destroy()
-
-    # noinspection PyUnusedLocal
-    def on_ignore(self, event: wx.CommandEvent) -> None:
-        """
-        Moves to the next error.
-        :param event: Unused.
-        :return: None
-        """
-        self.go_to_next()
-
-    # noinspection PyUnusedLocal
-    def on_ignore_all(self, event: wx.CommandEvent) -> None:
-        """
-        Sets the checker to ignore all occurrences of this mistake.
-        :param event: Unused.
-        :return: None
-        """
-        self._checker.ignore_always()
-        self.go_to_next()
-
-    # noinspection PyUnusedLocal
-    def on_replace(self, event: wx.CommandEvent) -> None:
-        """
-        Replace button handler.
-        :param event: Unused.
-        :return: None
-        """
-        replacement = self.replace_with_field.GetValue()
-        if replacement:
-            self._checker.replace(replacement)
-        self.go_to_next()
-
-    # noinspection PyUnusedLocal
-    def on_replace_all(self, event: wx.CommandEvent) -> None:
-        """
-        Replace all button handler.
-        :param event: Unused.
-        :return: None
-        """
-        self._checker.replace_always(self.replace_with_field.GetValue())
-        self.go_to_next()
-
-    # noinspection PyUnusedLocal
-    def on_list_select(self, event: wx.CommandEvent) -> None:
+    def list_select_handler(self, event: wx.CommandEvent) -> None:
         """
         Handler for the list of possible replacement words.
         :param event: Unused.
@@ -208,7 +180,7 @@ def run():
     checker = SpellChecker('cs_CZ', text)
 
     app = wx.App(False)
-    dlg = SpellCheckerDialog(parent=None, checker=checker)
+    dlg = SpellCheckerDialog(parent=None, title='Spellchecker', checker=checker)
     dlg.Show()
     dlg.go_to_next()
     app.MainLoop()
