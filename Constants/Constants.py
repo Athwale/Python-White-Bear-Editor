@@ -15,6 +15,7 @@ class Numbers:
     connection_timeout: int = 5
     put_timeout: int = 20
     online_test_timeout: int = 10
+    context_chars: int = 40
 
     three_click_timeout: int = 600
     photo_ratio: float = 4 / 3
@@ -60,6 +61,8 @@ class Numbers:
     color_icon_width: int = 15
     color_icon_height: int = 15
     splashscreen_dialog_size: (int, int) = (350, 350)
+    spellcheck_dialog_width: int = 500
+    spellcheck_dialog_height: int = 357
 
     # Styling
     main_heading_size = 18
@@ -286,6 +289,8 @@ class Strings:
     label_menu_item_paste_hint: str = 'Paste'
     label_menu_item_select_all: str = 'Select all\tctrl+a'
     label_menu_item_select_all_hint: str = 'Select all'
+    label_menu_item_spellcheck: str = 'Check spelling\tctrl+t'
+    label_menu_item_spellcheck_hint: str = 'Run spellcheck'
 
     label_menu_add: str = 'Add'
     label_menu_item_add_text_image: str = 'Add image to collection\tctrl+i'
@@ -312,6 +317,7 @@ class Strings:
     label_dialog_page_setup: str = 'Page setup and default values'
     label_dialog_new_document: str = 'New document'
     label_dialog_edit_menu: str = 'Edit menu'
+    label_dialog_spellcheck: str = 'Spellcheck'
 
     label_article_menu_logo: str = 'Menu logo'
     label_article_menu_logo_name_placeholder: str = 'Menu item name'

@@ -2,7 +2,7 @@ import os
 from datetime import datetime
 from shutil import copyfile
 from typing import Dict, List
-
+import enchant
 import wx
 import wx.richtext as rt
 
@@ -18,6 +18,7 @@ from Gui.Dialogs.EditMenuDialog import EditMenuDialog
 from Gui.Dialogs.EditMenuItemDialog import EditMenuItemDialog
 from Gui.Dialogs.NewFileDialog import NewFileDialog
 from Gui.Dialogs.UploadDialog import UploadDialog
+from Gui.Dialogs.SpellcheckerDialog import SpellCheckerDialog
 from Gui.Panels.AsideImagePanel import AsideImagePanel
 from Gui.Panels.CustomRichText import CustomRichText
 from Resources.Fetch import Fetch
@@ -32,6 +33,9 @@ from Tools.Document.WhitebearDocumentCSS import WhitebearDocumentCSS
 from Tools.Document.WhitebearDocumentIndex import WhitebearDocumentIndex
 from Tools.Document.WhitebearDocumentMenu import WhitebearDocumentMenu
 from Tools.Tools import Tools
+from enchant.checker import SpellChecker
+from enchant.tokenize import EmailFilter, URLFilter
+from pathlib import Path
 
 
 class MainFrame(wx.Frame):
@@ -85,6 +89,9 @@ class MainFrame(wx.Frame):
         self._bind_handlers()
         self._init_top_tool_bar()
         self._setup_main_text_area()
+
+        # TODO make a new menu for selecting language, set from config manager.
+        self._spellchecker = SpellChecker('cs_CZ', filters=[EmailFilter, URLFilter])
 
         # Set minimal size of the frame on screen, smaller frame would squish GUI too much.
         self.SetMinClientSize(wx.Size(Numbers.minimal_window_size_width, Numbers.minimal_window_size_height))
@@ -203,6 +210,10 @@ class MainFrame(wx.Frame):
                                                       Strings.label_menu_item_select_all,
                                                       Strings.label_menu_item_select_all_hint)
         self._disableable_menu_items.append(self._edit_menu_item_select_all)
+        self._edit_menu_item_spellcheck = wx.MenuItem(self._edit_menu, wx.ID_SPELL_CHECK,
+                                                      Strings.label_menu_item_spellcheck,
+                                                      Strings.label_menu_item_spellcheck_hint)
+        self._disableable_menu_items.append(self._edit_menu_item_spellcheck)
 
         self._edit_menu.Append(self._edit_menu_item_undo)
         self._edit_menu.Append(self._edit_menu_item_redo)
@@ -210,6 +221,7 @@ class MainFrame(wx.Frame):
         self._edit_menu.Append(self._edit_menu_item_cut)
         self._edit_menu.Append(self._edit_menu_item_paste)
         self._edit_menu.Append(self._edit_menu_item_select_all)
+        self._edit_menu.Append(self._edit_menu_item_spellcheck)
 
         # Add menu ---------------------------------------------------------------------------------------------------
         self._add_menu_item_add_image = wx.MenuItem(self._add_menu, wx.ID_ADD, Strings.label_menu_item_add_text_image,
@@ -562,6 +574,7 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self._forward_event, self._edit_menu_item_undo)
         self.Bind(wx.EVT_MENU, self._forward_event, self._edit_menu_item_redo)
         self.Bind(wx.EVT_MENU, self._forward_event, self._edit_menu_item_select_all)
+        self.Bind(wx.EVT_MENU, self._spellcheck_handler, self._edit_menu_item_spellcheck)
         self.Bind(wx.EVT_MENU, self._add_image_handler, self._add_menu_item_add_image)
         self.Bind(wx.EVT_MENU, self._insert_aside_image_handler, self._add_menu_item_side_image)
         self.Bind(wx.EVT_MENU, self._add_menu_logo_handler, self._add_menu_item_add_logo)
@@ -1719,3 +1732,18 @@ class MainFrame(wx.Frame):
             self._config_manager.store_online_test(True)
         else:
             self._config_manager.store_online_test(False)
+
+    # noinspection PyUnusedLocal
+    def _spellcheck_handler(self, event: wx.CommandEvent) -> None:
+        """
+        Handle spellcheck dialog,
+        :param event: Not used.
+        :return: None
+        """
+        dlg = SpellCheckerDialog(self, self._spellchecker, self._main_text_area)
+        dlg.Show()
+        print(self._spellchecker.get_text())
+        print(enchant.list_languages())
+        print(self._spellchecker.dict.provider)
+        print(Path(enchant.get_user_config_dir() / Path(self._spellchecker.lang)))
+        # TODO gray out text area

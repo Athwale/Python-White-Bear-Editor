@@ -1,26 +1,31 @@
 import wx
 from enchant.checker import SpellChecker
+from Gui.Panels.CustomRichText import CustomRichText
+
+from Constants.Constants import Strings, Numbers
 
 
 class SpellCheckerDialog(wx.Dialog):
     """
     Spellchecker.
     # TODO work with richtextctrl
-    # TODO where is the dictionary?
     # TODO replace strings with Constants variables.
     """
 
-    def __init__(self, parent, title, checker: SpellChecker) -> None:
+    def __init__(self, parent, checker: SpellChecker, text_area: CustomRichText) -> None:
         """
         Spellchecker constructor
         :param parent: Dialog parent.
-        :param title: Dialog title.
         :param checker: SpellChecker instance.
+        :param text_area: RichTextCtrl instance to work with.
         """
-        wx.Dialog.__init__(self, parent, title=title, size=(500, 357), style=wx.DEFAULT_DIALOG_STYLE)
+        wx.Dialog.__init__(self, parent, title=Strings.label_dialog_spellcheck,
+                           size=(Numbers.spellcheck_dialog_width, Numbers.spellcheck_dialog_height),
+                           style=wx.DEFAULT_DIALOG_STYLE)
         self._checker = checker
+        self._text_area = text_area
         # How much of the text around current mistake is shown.
-        self._context_chars = 40
+        self._context_chars = Numbers.context_chars
         self._buttons = []
 
         self.mistake_preview_field = wx.TextCtrl(self, -1, style=wx.TE_MULTILINE | wx.TE_READONLY | wx.TE_RICH)
@@ -30,29 +35,32 @@ class SpellCheckerDialog(wx.Dialog):
 
         self.Bind(wx.EVT_LISTBOX, self.list_select_handler, self.suggestions_list)
         self.Bind(wx.EVT_LISTBOX_DCLICK, self.list_doubleclick_handler, self.suggestions_list)
+        self._run()
 
     def _init_layout(self) -> None:
         """
         Initialize layout.
         :return: None
         """
-        border: int = 3
+        # TODO fix layout.
         size = (150, -1)
         main_sizer = wx.BoxSizer(wx.HORIZONTAL)
         text_fields_sizer = wx.BoxSizer(wx.VERTICAL)
         buttons_sizer = wx.BoxSizer(wx.VERTICAL)
         replace_with_sizer = wx.BoxSizer(wx.HORIZONTAL)
 
-        replace_with_sizer.Add(wx.StaticText(self, -1, 'Replace with:'), 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL, border)
-        replace_with_sizer.Add(self.replace_with_field, 1, wx.ALL | wx.ALIGN_CENTER_VERTICAL, border)
+        replace_with_sizer.Add(wx.StaticText(self, -1, 'Replace with:'), 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL,
+                               Numbers.widget_border_size)
+        replace_with_sizer.Add(self.replace_with_field, 1, wx.ALL | wx.ALIGN_CENTER_VERTICAL,
+                               Numbers.widget_border_size)
 
         mistakes_label = wx.StaticText(self, -1, 'Unrecognised word:')
-        text_fields_sizer.Add(mistakes_label, 0, wx.LEFT | wx.TOP, border)
-        text_fields_sizer.Add(self.mistake_preview_field, 1, wx.ALL | wx.EXPAND, border)
-        text_fields_sizer.Add(replace_with_sizer, 0, wx.EXPAND, border)
-        text_fields_sizer.Add(self.suggestions_list, 1, wx.ALL | wx.EXPAND, border)
+        text_fields_sizer.Add(mistakes_label, 0, wx.LEFT | wx.TOP, Numbers.widget_border_size)
+        text_fields_sizer.Add(self.mistake_preview_field, 1, wx.ALL | wx.EXPAND, Numbers.widget_border_size)
+        text_fields_sizer.Add(replace_with_sizer, 0, wx.EXPAND, Numbers.widget_border_size)
+        text_fields_sizer.Add(self.suggestions_list, 1, wx.ALL | wx.EXPAND, Numbers.widget_border_size)
 
-        buttons_sizer.AddSpacer(mistakes_label.GetSize()[1] + border)
+        buttons_sizer.AddSpacer(mistakes_label.GetSize()[1] + Numbers.widget_border_size)
 
         counter: int = 1
         for button_id, label, action in ((wx.ID_IGNORE, 'Ignore', self.buttons_handler),
@@ -61,7 +69,7 @@ class SpellCheckerDialog(wx.Dialog):
                                          (wx.ID_REPLACE_ALL, 'Replace all', self.buttons_handler),
                                          (wx.ID_ADD, 'Add to dictionary', self.buttons_handler)):
             button = wx.Button(self, button_id, label, size=size)
-            buttons_sizer.Add(button, 0, wx.ALL, border)
+            buttons_sizer.Add(button, 0, wx.ALL, Numbers.widget_border_size)
             button.Bind(wx.EVT_BUTTON, action)
             self._buttons.append(button)
             if (counter % 2) == 0:
@@ -70,15 +78,15 @@ class SpellCheckerDialog(wx.Dialog):
         buttons_sizer.Add(wx.StaticLine(self, -1, size=size), 0, wx.ALIGN_CENTER_HORIZONTAL)
         # Close button will never have to be disabled and therefore is not in _buttons.
         close_button = wx.Button(self, wx.ID_CLOSE, 'Close', size=size)
-        buttons_sizer.Add(close_button, 0, wx.ALL, border)
+        buttons_sizer.Add(close_button, 0, wx.ALL, Numbers.widget_border_size)
         close_button.Bind(wx.EVT_BUTTON, self.buttons_handler)
 
-        main_sizer.Add(text_fields_sizer, 1, wx.EXPAND, border)
-        main_sizer.Add(buttons_sizer, 0, wx.RIGHT, border)
+        main_sizer.Add(text_fields_sizer, 1, wx.EXPAND, Numbers.widget_border_size)
+        main_sizer.Add(buttons_sizer, 0, wx.RIGHT, Numbers.widget_border_size)
         # We are using a set dialog size, so Fit method is not needed.
         self.SetSizer(main_sizer)
 
-    def go_to_next(self) -> bool:
+    def _go_to_next(self) -> bool:
         """
         Moves the SpellChecker to the next mistake, if there is one. It then displays the mistake and some
         surrounding context, as well as listing the suggested replacements.
@@ -119,7 +127,7 @@ class SpellCheckerDialog(wx.Dialog):
         replacement = self.replace_with_field.GetValue()
         if replacement:
             self._checker.replace(replacement)
-        self.go_to_next()
+        self._go_to_next()
 
     def enable_buttons(self, state: bool = True) -> None:
         """
@@ -138,19 +146,19 @@ class SpellCheckerDialog(wx.Dialog):
         """
         button_id = event.GetId()
         if button_id == wx.ID_IGNORE:
-            self.go_to_next()
+            self._go_to_next()
         elif button_id == wx.ID_NOTOALL:
             self._checker.ignore_always()
-            self.go_to_next()
+            self._go_to_next()
         elif button_id == wx.ID_REPLACE:
             self._replace()
         elif button_id == wx.ID_REPLACE_ALL:
             self._checker.replace_always(self.replace_with_field.GetValue())
-            self.go_to_next()
+            self._go_to_next()
         elif button_id == wx.ID_ADD:
             # Add new word to dictionary.
             self._checker.add()
-            self.go_to_next()
+            self._go_to_next()
         elif button_id == wx.ID_CLOSE:
             if self.IsModal():
                 self.EndModal(wx.ID_OK)
@@ -177,19 +185,10 @@ class SpellCheckerDialog(wx.Dialog):
         """
         self._replace()
 
-def run():
-    text = 'Toto je pkusny text s nkolika pravopismymy chibamy'
-    # text = 'Text bez oiewru'
-    checker = SpellChecker('cs_CZ', text)
-    print('in:  ', checker.get_text())
-
-    app = wx.App(False)
-    dlg = SpellCheckerDialog(parent=None, title='Spellchecker', checker=checker)
-    dlg.Show()
-    dlg.go_to_next()
-    app.MainLoop()
-    print('out: ', checker.get_text())
-
-
-if __name__ == '__main__':
-    run()
+    def _run(self) -> None:
+        """
+        Run spellchecker using the text area given to it.
+        :return: None.
+        """
+        self._checker.set_text(self._text_area.GetValue())
+        self._go_to_next()

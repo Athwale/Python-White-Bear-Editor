@@ -1210,283 +1210,12 @@ class CustomRichText(rt.RichTextCtrl):
         self.EndURL()
         self.EndStyle()
 
-    def _url_in_text_click_handler(self, evt: wx.TextUrlEvent) -> None:
-        """
-        Handles click on url links inside text.
-        :param evt: Not used
-        :return: None
-        """
-        link = self._doc.find_link(evt.GetString())
-        url = evt.GetString()
-        link_text = self.GetRange(evt.GetURLStart(), evt.GetURLEnd() + 1)
-        if not link:
-            # Create a new link
-            link = Link(link_text, url, link_text, self._doc.get_other_articles(),
-                        self._doc.get_working_directory())
-            link.seo_test_self(self._config_manager.get_online_test())
-
-        link.set_text(link_text)
-        edit_dialog = EditLinkDialog(self, link)
-        result = edit_dialog.ShowModal()
-        self._handle_link_edit(result, link, evt)
-        edit_dialog.Destroy()
-
-    def _handle_link_edit(self, result: int, link: Link, evt: wx.TextUrlEvent = None) -> None:
-        """
-        Handle actions needed after a link has been edited in the link edit dialog.
-        :param result: The wx result ID_OK, ID_CANCEL from the edit dialog
-        :param link: The modified Link instance
-        :param evt: If an event is passed in it is used to find where to replace the link, otherwise the link is
-        inserted into the current position.
-        :return: None
-        """
-        # Deleted links are not removed from the document to make undo work.
-        if not self.BatchingUndo():
-            self.BeginBatchUndo(Strings.undo_last_action)
-        stored_link = self._doc.find_link(link.get_id())
-        if result == wx.ID_OK:
-            # Only add link that is not already in the list
-            if not stored_link:
-                self._doc.add_link(link)
-            # Replace the text with link
-            self.Remove(evt.GetURLStart(), evt.GetURLEnd() + 1)
-            self._insert_link(link.get_text()[0], link.get_id(), link.get_status_color())
-        elif result == wx.ID_DELETE or result == wx.ID_CANCEL:
-            if stored_link and result == wx.ID_CANCEL:
-                if self.BatchingUndo():
-                    self.EndBatchUndo()
-                return
-            else:
-                style: rt.RichTextAttr = self._stylesheet.FindCharacterStyle(Strings.style_url).GetStyle()
-                style_range = rt.RichTextRange(evt.GetURLStart(), evt.GetURLEnd() + 1)
-                # If it is a new link remove the link style from the text
-                self.SetStyleEx(style_range, style, rt.RICHTEXT_SETSTYLE_REMOVE | rt.RICHTEXT_SETSTYLE_WITH_UNDO)
-                # Without moving the caret you can still type in the now incorrect url style.
-                self.MoveLeft(0)
-                self.Invalidate()
-                self.Refresh()
-
-        if self.BatchingUndo():
-            self.EndBatchUndo()
-
-        # Send an event to the main gui to signal document color change
-        color_evt = wx.CommandEvent(wx.wxEVT_COLOUR_CHANGED, self.GetId())
-        color_evt.SetEventObject(self)
-        wx.PostEvent(self.GetEventHandler(), color_evt)
-
-    def _on_insert_tool(self, evt: wx.CommandEvent) -> None:
-        """
-        Insert a new image or video in the current location in the text field.
-        :param evt: Used to get tool id.
-        :return: None
-        """
-        self._main_frame.tool_bar.EnableTool(evt.GetId(), False)
-        # Create a new placeholder text image or video
-        if evt.GetId() == self._img_tool_id:
-            new_element = ImageInText('', '', '', '', Strings.status_none, Strings.status_none)
-            # This will set the image internal state to missing image placeholder.
-            new_element.seo_test_self()
-        else:
-            new_element = Video('', Numbers.video_width, Numbers.video_height, Strings.url_stub)
-            new_element.seo_test_self(self._config_manager.get_online_test())
-        # Open edit dialog.
-        if evt.GetId() == self._img_tool_id:
-            edit_dialog = EditTextImageDialog(self._parent, new_element, self._doc.get_working_directory())
-        else:
-            edit_dialog = EditVideoDialog(self._parent, new_element)
-        result = edit_dialog.ShowModal()
-        if result == wx.ID_OK:
-            # Send an event to the main gui to signal document color change
-            if evt.GetId() == self._img_tool_id:
-                self._doc.add_image(new_element)
-            else:
-                self._doc.add_video(new_element)
-            self._write_field(new_element, from_button=True)
-            color_evt = wx.CommandEvent(wx.wxEVT_COLOUR_CHANGED, self.GetId())
-            color_evt.SetEventObject(self)
-            wx.PostEvent(self.GetEventHandler(), color_evt)
-        edit_dialog.Destroy()
-        # Return focus to the text area.
-        wx.CallLater(100, self.SetFocus)
-
-    # noinspection PyUnusedLocal
-    def _change_bold(self, event: wx.CommandEvent) -> None:
-        """
-        Make text bold and vice versa.
-        :param event: Not used
-        :return: None
-        """
-        if self.HasSelection():
-            self.BeginBatchUndo(Strings.undo_bold)
-            self.BeginBold()
-            bold_range = self.GetSelectionRange()
-            for char in range(bold_range[0], bold_range[1]):
-                if char + 1 > bold_range[1] + 1:
-                    break
-                single_range = rt.RichTextRange(char, char + 1)
-                # Get the attributes of the single char range and modify them in place. Otherwise changing paragraph.
-                # style is broken since the attributes are reset for the range.
-                attr = rt.RichTextAttr()
-                self.GetStyleForRange(single_range, attr)
-                font_face = attr.GetFontFaceName()
-                # Ignore links and headings.
-                if font_face == Strings.style_heading_3 or font_face == Strings.style_heading_4 or \
-                        font_face == Strings.style_image:
-                    continue
-                if attr.HasURL():
-                    continue
-                # Switch bold to normal and normal to bold.
-                if attr.GetFontWeight() == wx.FONTWEIGHT_NORMAL:
-                    attr.SetFontWeight(wx.FONTWEIGHT_BOLD)
-                else:
-                    attr.SetFontWeight(wx.FONTWEIGHT_NORMAL)
-                self.SetStyleEx(single_range, attr, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO)
-                self.SelectNone()
-            self.EndBatchUndo()
-            self._doc.set_modified(True)
-            color_evt = wx.CommandEvent(wx.wxEVT_COLOUR_CHANGED, self.GetId())
-            color_evt.SetEventObject(self)
-            wx.PostEvent(self.GetEventHandler(), color_evt)
-        else:
-            # Prevent beginning bold inside urls and headings.
-            position = self.GetAdjustedCaretPosition(self.GetCaretPosition())
-            par_style, char_style = self.get_style_at_pos(self.GetBuffer(), position)
-            if char_style == Strings.style_url:
-                return
-            elif par_style == Strings.style_heading_3 or par_style == Strings.style_heading_4:
-                return
-            if not self.IsSelectionBold():
-                self.BeginBold()
-            else:
-                self.EndBold()
-
-    def convert_document(self) -> None:
-        """
-        Create an internal representation of the document using the article elements classes.
-        :return: None
-        """
-        self._doc: WhitebearDocumentArticle
-        last_was_paragraph = False
-        last_was_list = False
-        new_text_elements = []
-        buffer: rt.RichTextBuffer = self.GetBuffer()
-        paragraphs: List[rt.RichTextParagraph] = buffer.GetChildren()
-        for p in paragraphs:
-            par_style: str = p.GetAttributes().GetFontFaceName()
-            if par_style == Strings.style_paragraph:
-                last_was_list = False
-                next_p: Paragraph = self._convert_paragraph(p)
-                if last_was_paragraph and new_text_elements[-1]:
-                    # Reuse last Paragraph instance and join it together with a Break.
-                    last_p: Paragraph = new_text_elements[-1]
-                    if next_p:
-                        last_p.add_element(Break())
-                        last_p.extend_elements(next_p)
-                        last_was_paragraph = True
-                    else:
-                        last_was_paragraph = False
-                else:
-                    if next_p:
-                        # Do not append empty paragraphs.
-                        new_text_elements.append(next_p)
-                    # Skip multiple empty paragraphs which are translated to breaks.
-                    if p.GetTextForRange(p.GetRange()):
-                        last_was_paragraph = True
-            elif par_style == Strings.style_heading_3 or par_style == Strings.style_heading_4:
-                last_was_paragraph = False
-                last_was_list = False
-                new_text_elements.append(self._convert_heading(p))
-            elif par_style == Strings.style_list:
-                last_was_paragraph = False
-                new_p: Paragraph = self._convert_paragraph(p)
-                if last_was_list:
-                    current_list: UnorderedList = new_text_elements[-1]
-                    if new_p:
-                        # Ignore empty list items.
-                        current_list.append_paragraph(new_p)
-                else:
-                    unordered_list: UnorderedList = UnorderedList()
-                    if new_p:
-                        unordered_list.append_paragraph(new_p)
-                    new_text_elements.append(unordered_list)
-                last_was_list = True
-            for child in p.GetChildren():
-                if isinstance(child, rt.RichTextField):
-                    last_was_paragraph = False
-                    last_was_list = False
-                    field_type: str = child.GetProperties().GetProperty(Strings.field_type)
-                    if field_type == Strings.field_image:
-                        new_text_elements.append(self._doc.find_in_text_image(child.GetFieldType()))
-                    else:
-                        new_text_elements.append(self._doc.find_video(child.GetFieldType()))
-        self._doc.set_text_elements(new_text_elements)
-
-    def _convert_heading(self, p: rt.RichTextParagraph) -> Heading:
-        """
-        Create a heading instance from a RichTextParagraph.
-        :param p: The RichTextParagraph.
-        :return: A Heading instance.
-        """
-        child: rt.RichTextPlainText = p.GetChild(0)
-        attrs: rt.RichTextAttr = child.GetAttributes()
-        text: str = child.GetText()
-        color: str = self._css_document.translate_color_str(attrs.GetTextColour())
-        size: int = Heading.SIZE_H3 if attrs.GetFontFaceName() == Strings.style_heading_3 else Heading.SIZE_H4
-        # Create the Heading instance.
-        # Headings are never explicitly bold.
-        return Heading(Text(text=text, bold=False, color=color), size)
-
-    def _convert_paragraph(self, p: rt.RichTextParagraph):
-        """
-        Create a paragraph instance from a RichTextParagraph.
-        :param p: The RichTextParagraph.
-        :return: A Paragraph instance.
-        """
-        if p.GetChildCount() == 1:
-            if not p.GetChild(0).GetText():
-                # Empty paragraphs are considered empty lines and html paragraph ends. Return None as a special
-                # delimiter which marks where to join paragraphs.
-                return None
-
-        # A paragraph consists of a list of instances of Text, Break and Link. Breaks are added above when paragraphs
-        # are joined together.
-        new_paragraph = Paragraph()
-        for child in p.GetChildren():
-            child: rt.RichTextPlainText
-            attrs: rt.RichTextAttr = child.GetAttributes()
-
-            text: str = child.GetText()
-            bold: bool = False
-            if attrs.GetFontWeight() == wx.FONTWEIGHT_BOLD:
-                bold = True
-            color = None
-            # Color is irrelevant for links.
-            if not attrs.HasURL():
-                color = self._css_document.translate_color_str(attrs.GetTextColour())
-
-            if attrs.HasURL():
-                # This will be a link
-                stored_link: Link = self._doc.find_link(attrs.GetURL())
-                if not stored_link:
-                    # There is a red unfinished link in the document, save it but keep it incorrect and turn the
-                    # document red.
-                    stored_link = Link(text, attrs.GetURL(), text, self._doc.get_other_articles(),
-                                       self._doc.get_working_directory())
-                    stored_link.seo_test_self(self._config_manager.get_online_test())
-                    self._doc.add_link(stored_link)
-                # Update the text of the link from the current document.
-                stored_link.set_text(text)
-                new_paragraph.add_element(stored_link)
-            else:
-                # Ordinary text
-                new_paragraph.add_element(Text(text, bold, color))
-        return new_paragraph
 
 
 class RichTextFrame(wx.Frame):
     def __init__(self, *args, **kw):
         wx.Frame.__init__(self, *args, **kw)
-        self.rtc = CustomRichText()
+        self.rtc = rt.RichTextCtrl(self, -1)
         self._main_sizer = wx.BoxSizer(wx.VERTICAL)
         self._controls_sizer = wx.BoxSizer(wx.HORIZONTAL)
 
@@ -1565,8 +1294,8 @@ class RichTextFrame(wx.Frame):
         stl_heading_4: rt.RichTextAttr = rt.RichTextAttr()
         stl_heading_4.SetAlignment(wx.TEXT_ALIGNMENT_LEFT)
         stl_heading_4.SetFontWeight(wx.FONTWEIGHT_BOLD)
-        stl_heading_4.SetParagraphSpacingBefore(Numbers.paragraph_spacing / 2)
-        stl_heading_4.SetParagraphSpacingAfter(Numbers.paragraph_spacing / 2)
+        stl_heading_4.SetParagraphSpacingBefore(int(Numbers.paragraph_spacing / 2))
+        stl_heading_4.SetParagraphSpacingAfter(int(Numbers.paragraph_spacing / 2))
 
         stl_heading_4.SetBackgroundColour(wx.BLUE)
 
@@ -1655,18 +1384,56 @@ class RichTextFrame(wx.Frame):
         attr.SetTextColour(wx.Colour(234, 134, 88))
         self.rtc.SetStyleEx(r, attr, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO)
 
-    def _change_bold(self, evt: wx.CommandEvent) -> None:
+    # noinspection PyUnusedLocal
+    def _change_bold(self, event: wx.CommandEvent) -> None:
         """
         Make text bold and vice versa.
-        :param evt: Not used
+        :param event: Not used
         :return: None
         """
-        if self.rtc.HasSelection():
-            bold_range = self.rtc.GetSelectionRange()
-            attr = rt.RichTextAttr()
-            attr.SetFlags(wx.TEXT_ATTR_FONT_WEIGHT)
-            attr.SetFontWeight(wx.FONTWEIGHT_BOLD)
-            self.rtc.SetStyleEx(bold_range, attr, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO)
+        if self.HasSelection():
+            self.BeginBatchUndo(Strings.undo_bold)
+            self.BeginBold()
+            bold_range = self.GetSelectionRange()
+            for char in range(bold_range[0], bold_range[1]):
+                if char + 1 > bold_range[1] + 1:
+                    break
+                single_range = rt.RichTextRange(char, char + 1)
+                # Get the attributes of the single char range and modify them in place. Otherwise changing paragraph.
+                # style is broken since the attributes are reset for the range.
+                attr = rt.RichTextAttr()
+                self.GetStyleForRange(single_range, attr)
+                font_face = attr.GetFontFaceName()
+                # Ignore links and headings.
+                if font_face == Strings.style_heading_3 or font_face == Strings.style_heading_4 or \
+                        font_face == Strings.style_image:
+                    continue
+                if attr.HasURL():
+                    continue
+                # Switch bold to normal and normal to bold.
+                if attr.GetFontWeight() == wx.FONTWEIGHT_NORMAL:
+                    attr.SetFontWeight(wx.FONTWEIGHT_BOLD)
+                else:
+                    attr.SetFontWeight(wx.FONTWEIGHT_NORMAL)
+                self.SetStyleEx(single_range, attr, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO)
+                self.SelectNone()
+            self.EndBatchUndo()
+            self._doc.set_modified(True)
+            color_evt = wx.CommandEvent(wx.wxEVT_COLOUR_CHANGED, self.GetId())
+            color_evt.SetEventObject(self)
+            wx.PostEvent(self.GetEventHandler(), color_evt)
+        else:
+            # Prevent beginning bold inside urls and headings.
+            position = self.GetAdjustedCaretPosition(self.GetCaretPosition())
+            par_style, char_style = self.get_style_at_pos(self.GetBuffer(), position)
+            if char_style == Strings.style_url:
+                return
+            elif par_style == Strings.style_heading_3 or par_style == Strings.style_heading_4:
+                return
+            if not self.IsSelectionBold():
+                self.BeginBold()
+            else:
+                self.EndBold()
 
     def _change_paragraph_style(self, new_style: rt.RichTextAttr, paragraphs_only: bool,
                                 remove: bool, position=None) -> None:
