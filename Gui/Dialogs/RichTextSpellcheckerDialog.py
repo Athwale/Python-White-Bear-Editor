@@ -2,7 +2,7 @@ import wx
 from enchant.checker import SpellChecker
 from Gui.Panels.CustomRichText import CustomRichText
 
-from Constants.Constants import Strings, Numbers
+from Constants.Constants import Strings, Numbers, Events
 
 
 class RichTextSpellCheckerDialog(wx.Dialog):
@@ -161,12 +161,11 @@ class RichTextSpellCheckerDialog(wx.Dialog):
             self._checker.add()
             self._go_to_next()
         elif button_id == wx.ID_CLOSE:
-            # Send an event to the main gui to signal document color change
-            # TODO create a new custom event, and one for color changed too.
-            done_evt = wx.CommandEvent(wx.wxEVT_, self.GetId())
-            done_evt.SetEventObject(self)
-            wx.PostEvent(self.GetEventHandler(), done_evt)
-            # TODO destroy on event received in main gui.
+            # Send an event to the main gui to signal document color change.
+            done_evt = Events.SpellcheckEvent(self.GetId())
+            # Dialog has its own event handler, so use the parent.
+            wx.PostEvent(self.GetParent().GetEventHandler(), done_evt)
+            self.Destroy()
 
     # noinspection PyUnusedLocal
     def list_select_handler(self, event: wx.CommandEvent) -> None:

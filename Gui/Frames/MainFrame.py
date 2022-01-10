@@ -564,6 +564,8 @@ class MainFrame(wx.Frame):
 
         # Bind a handler that changes selected document color if an edit happens in other controls.
         self.Bind(Events.EVT_DOCUMENT_CHANGED, self._text_area_edit_handler)
+        # Bind a handler to the spell check event to allow enabling editor without spellcheck being a modal dialog.
+        self.Bind(Events.EVT_SPELLCHECK_DONE, self._spellcheck_done_handler)
 
         # Bind menu item clicks
         self.Bind(wx.EVT_MENU, self._about_button_handler, self._help_menu_item_about)
@@ -1737,17 +1739,24 @@ class MainFrame(wx.Frame):
     # noinspection PyUnusedLocal
     def _spellcheck_handler(self, event: wx.CommandEvent) -> None:
         """
-        Handle spellcheck dialog,
+        Handle spellcheck dialog.
         :param event: Not used.
         :return: None
         """
+        # TODO this.
         dlg = RichTextSpellCheckerDialog(self, self._spellchecker, self._main_text_area)
         self._disable_editor(True, all_menu=True)
         dlg.Show()
-        # TODO send event from dialog to enable editor.
-        #self._disable_editor(False)
         print(self._spellchecker.get_text())
         print(enchant.list_languages())
         print(self._spellchecker.dict.provider)
         print(Path(enchant.get_user_config_dir() / Path(self._spellchecker.lang)))
-        # TODO gray out text area
+
+    # noinspection PyUnusedLocal
+    def _spellcheck_done_handler(self, event: wx.CommandEvent) -> None:
+        """
+        Handle enabling the editor when spell checking dialog is closed.
+        :param event: Not used.
+        :return: None
+        """
+        self._disable_editor(False)
