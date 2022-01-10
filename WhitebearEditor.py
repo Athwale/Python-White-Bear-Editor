@@ -7,7 +7,7 @@ OnInit must be overridden here.
 # TODO spellcheck.
 # TODO viz wx forum copy paste reply.
 # TODO switch to pathlib, Path.home(), exists... https://naucse.python.cz/2019/pyladies-brno-podzim-st/intro/pathlib/
-# TODO switch to python gtk3
+# TODO show some interesting information rich text GetNumberOfLines
 # TODO use example.com for testing purposes.
 # TODO plaintext editor for styles and robots.
 # TODO move config to home .config

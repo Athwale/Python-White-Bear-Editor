@@ -1378,7 +1378,6 @@ class MainFrame(wx.Frame):
         :param event: Not used.
         :return: None
         """
-        print(type(event))
         # Force repeating search because the text has changed and indexes would no longer match.
         self._text_changed = True
         if not self._ignore_change:
@@ -1497,6 +1496,8 @@ class MainFrame(wx.Frame):
         :param text: The string to search for.
         :return: True if something was found.
         """
+        # TODO the bounds are off a little somewhere, might be because the string does not contain images and so on.
+        # TODO with the new method broken in first paragraph.
         self._search_term = text
         self._search_results.clear()
         if not self._search_term:
@@ -1506,7 +1507,7 @@ class MainFrame(wx.Frame):
             self._set_status_text(Strings.status_ready, 3)
             return False
 
-        text_content: str = self._main_text_area.GetValue().lower()
+        text_content: str = self._main_text_area.get_text().lower()
         start_index: int = text_content.find(self._search_term, 0)
         while start_index != -1:
             # At least one was found
@@ -1739,10 +1740,10 @@ class MainFrame(wx.Frame):
         dlg = RichTextSpellCheckerDialog(self, self._spellchecker, self._main_text_area)
         self._disable_editor(True, all_menu=True)
         dlg.Show()
-        print(self._spellchecker.get_text())
-        print(enchant.list_languages())
-        print(self._spellchecker.dict.provider)
-        print(Path(enchant.get_user_config_dir() / Path(self._spellchecker.lang)))
+        # print(self._spellchecker.get_text())
+        # print(enchant.list_languages())
+        # print(self._spellchecker.dict.provider)
+        # print(Path(enchant.get_user_config_dir() / Path(self._spellchecker.lang)))
 
     # noinspection PyUnusedLocal
     def _spellcheck_done_handler(self, event: wx.CommandEvent) -> None:
@@ -1752,3 +1753,4 @@ class MainFrame(wx.Frame):
         :return: None
         """
         self._disable_editor(False)
+        self._main_text_area.SelectNone()

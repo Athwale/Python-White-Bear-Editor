@@ -118,6 +118,15 @@ class RichTextSpellCheckerDialog(wx.Dialog):
         self.suggestions_list.Set(suggestions)
         self.replace_with_field.SetValue(suggestions[0] if suggestions else '')
         self.enable_buttons()
+
+        # TODO highlight the word in the control.
+        # TODO try getting a string with substitute uncheckable characters for images and videos.
+        # TODO does undo work after spellcheck?
+        word_bounds = (self._checker.wordpos, self._checker.wordpos + len(self._checker.word) + 1)
+        print(self._checker.word, word_bounds)
+        self._text_area.SelectWord(self._checker.wordpos + 1)
+        self._text_area.ShowPosition(self._checker.wordpos + 1)
+        #print(self._text_area.GetValue())
         return True
 
     def _replace(self) -> None:
@@ -127,7 +136,7 @@ class RichTextSpellCheckerDialog(wx.Dialog):
         """
         replacement = self.replace_with_field.GetValue()
         if replacement:
-            # TODO replace text inside the rich text control.
+            # TODO replace text inside the rich text control as well as in the checker's text.
             self._checker.replace(replacement)
         self._go_to_next()
 
@@ -200,5 +209,5 @@ class RichTextSpellCheckerDialog(wx.Dialog):
         Run spellchecker using the text area given to it.
         :return: None.
         """
-        self._checker.set_text(self._text_area.GetValue())
+        self._checker.set_text(self._text_area.get_text())
         self._go_to_next()

@@ -1360,6 +1360,19 @@ class CustomRichText(rt.RichTextCtrl):
             else:
                 self.EndBold()
 
+    def get_text(self) -> str:
+        """
+        Returns the contents of the text field as a string with new lines in place of images and videos.
+        This helps with searching in the field based on index because the GetValue method omits images and videos.
+        :return: The contents of the text field as a string with new line characters in place of images and videos.
+        """
+        full_text = ''
+        buffer: rt.RichTextBuffer = self.GetBuffer()
+        paragraphs: List[rt.RichTextParagraph] = buffer.GetChildren()
+        for p in paragraphs:
+            full_text = full_text + '\n' + p.GetTextForRange(p.GetRange())
+        return full_text
+
     def convert_document(self) -> None:
         """
         Create an internal representation of the document using the article elements classes.
@@ -1389,7 +1402,7 @@ class CustomRichText(rt.RichTextCtrl):
                     if next_p:
                         # Do not append empty paragraphs.
                         new_text_elements.append(next_p)
-                    # Skip multiple empty paragraphs which are translated to breaks.
+                    # Skip multiple empty paragraphs which are translated to line breaks.
                     if p.GetTextForRange(p.GetRange()):
                         last_was_paragraph = True
             elif par_style == Strings.style_heading_3 or par_style == Strings.style_heading_4:
