@@ -1082,22 +1082,14 @@ class MainFrame(wx.Frame):
         self._update_file_color()
         edit_dialog.Destroy()
 
-    # noinspection PyUnusedLocal
-    def _quit_button_handler(self, event: wx.CommandEvent) -> None:
-        """
-        Handles clicks to the Quit button in File menu. Calls Close function which sends EVT_CLOSE and triggers
-        close_button_handler() which does all the saving work.
-        :param event: Not used
-        :return: None
-        """
-        self.Close(force=False)
-
     def _close_button_handler(self, event: wx.CloseEvent):
         """
         Handle user exit from the editor. Save last known window position, size and last opened document.
         :param event: CloseEvent, if CanVeto is False the window must be destroyed the system is forcing it.
         :return: None
         """
+        if not self._enabled:
+            return
         if event.CanVeto():
             # Save window position
             self._config_manager.store_window_position(self.GetScreenPosition())
@@ -1121,7 +1113,7 @@ class MainFrame(wx.Frame):
                         event.Veto()
                         return
             else:
-                # If the built in close function is not called, destroy must be called explicitly, calling Close runs
+                # If the built-in close function is not called, destroy must be called explicitly, calling Close runs
                 # the close handler.
                 self.Destroy()
 
@@ -1201,8 +1193,8 @@ class MainFrame(wx.Frame):
 
     def _list_item_click_handler(self, event):
         """
-        Handler function for clicking a page name in the web page list. Revalidates the document against schema. If
-        errors are discovered, disables editor and shows a message.
+        Handler for clicking a page name in the web page list. Revalidates the document against schema. If errors are
+        discovered, disables editor and shows a message.
         :param event: wx event, brings the selected string from the menu.
         :return: None
         """
