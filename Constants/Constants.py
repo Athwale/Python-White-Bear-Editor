@@ -9,6 +9,7 @@ class Numbers:
     DARK_GREEN_COLOR = Colour(21, 112, 49)
     YELLOW_COLOR = Colour(250, 255, 196)
     BLUE_COLOR = Colour(145, 207, 255)
+    LIGHT_GREY_COLOR = Colour(235, 235, 235)
 
     blank_character = '\u2800'
     private_key_permissions: oct = 0o600
@@ -412,6 +413,8 @@ class Strings:
                                   'directory.\nExisting files on server are overwritten.'
     label_server_overwrite: str = 'Existing files on server are overwritten.'
     label_article_public: str = 'Enable article'
+    label_replace_with: str = 'Replace with:'
+    label_unrecognized_word: str = 'Unrecognized word:'
 
     status_loading: str = 'Loading and testing'
     status_ready: str = 'Ready'
@@ -456,6 +459,11 @@ class Strings:
     button_save: str = 'Save'
     button_add: str = 'Add'
     button_upload: str = 'Upload'
+    button_ignore: str = 'Ignore'
+    button_ignore_all: str = 'Ignore all'
+    button_replace: str = 'Replace'
+    button_replace_all: str = 'Replace all'
+    button_add_to_dict: str = 'Add to dictionary'
 
     undo_last_action: str = 'Last action'
     undo_bold: str = 'Undo bold text'

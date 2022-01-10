@@ -5,6 +5,7 @@ from typing import Dict, List
 import enchant
 import wx
 import wx.richtext as rt
+import wx.lib.newevent
 
 from Constants.Constants import Numbers
 from Constants.Constants import Strings
@@ -18,7 +19,7 @@ from Gui.Dialogs.EditMenuDialog import EditMenuDialog
 from Gui.Dialogs.EditMenuItemDialog import EditMenuItemDialog
 from Gui.Dialogs.NewFileDialog import NewFileDialog
 from Gui.Dialogs.UploadDialog import UploadDialog
-from Gui.Dialogs.SpellcheckerDialog import SpellCheckerDialog
+from Gui.Dialogs.RichTextSpellcheckerDialog import RichTextSpellCheckerDialog
 from Gui.Panels.AsideImagePanel import AsideImagePanel
 from Gui.Panels.CustomRichText import CustomRichText
 from Resources.Fetch import Fetch
@@ -44,6 +45,9 @@ class MainFrame(wx.Frame):
     """
     VIDEO_TOOL_ID: int = wx.NewId()
     IMAGE_TOOL_ID: int = wx.NewId()
+
+    ColorEvent, EVT_DOCUMENT_CHANGED = wx.lib.newevent.NewEvent()
+    SpellcheckEvent, EVT_SPELLCHECK_DONE = wx.lib.newevent.NewEvent()
 
     def __init__(self):
         """
@@ -653,7 +657,7 @@ class MainFrame(wx.Frame):
         self.Enable()
         if state:
             # Disabling the editor (disable editor True)
-            self._main_text_area.SetBackgroundColour(wx.LIGHT_GREY)
+            self._main_text_area.SetBackgroundColour(Numbers.LIGHT_GREY_COLOR)
             if not leave_files:
                 self._split_screen.Disable()
                 self._file_list.SetBackgroundColour(wx.LIGHT_GREY)
@@ -1740,8 +1744,11 @@ class MainFrame(wx.Frame):
         :param event: Not used.
         :return: None
         """
-        dlg = SpellCheckerDialog(self, self._spellchecker, self._main_text_area)
+        dlg = RichTextSpellCheckerDialog(self, self._spellchecker, self._main_text_area)
+        self._disable_editor(True, all_menu=True)
         dlg.Show()
+        # TODO send event from dialog to enable editor.
+        #self._disable_editor(False)
         print(self._spellchecker.get_text())
         print(enchant.list_languages())
         print(self._spellchecker.dict.provider)

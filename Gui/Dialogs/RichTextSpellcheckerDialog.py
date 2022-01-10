@@ -5,16 +5,16 @@ from Gui.Panels.CustomRichText import CustomRichText
 from Constants.Constants import Strings, Numbers
 
 
-class SpellCheckerDialog(wx.Dialog):
+class RichTextSpellCheckerDialog(wx.Dialog):
     """
-    Spellchecker.
-    # TODO work with richtextctrl
-    # TODO replace strings with Constants variables.
+    Spellchecker dialog that works with a customized rich text control. It uses an external instance of
+    enchant spellchecker.
+    # TODO make this a subclass of a string based dialog used in all other fields in dialogs.
     """
 
     def __init__(self, parent, checker: SpellChecker, text_area: CustomRichText) -> None:
         """
-        Spellchecker constructor
+        Spellchecker dialog constructor.
         :param parent: Dialog parent.
         :param checker: SpellChecker instance.
         :param text_area: RichTextCtrl instance to work with.
@@ -28,7 +28,8 @@ class SpellCheckerDialog(wx.Dialog):
         self._context_chars = Numbers.context_chars
         self._buttons = []
 
-        self.mistake_preview_field = wx.TextCtrl(self, -1, style=wx.TE_MULTILINE | wx.TE_READONLY | wx.TE_RICH)
+        self.mistake_preview_field = wx.TextCtrl(self, -1, size=wx.Size(-1, 76),
+                                                 style=wx.TE_MULTILINE | wx.TE_READONLY | wx.TE_RICH)
         self.replace_with_field = wx.TextCtrl(self, -1, style=wx.TE_PROCESS_ENTER)
         self.suggestions_list = wx.ListBox(self, -1, style=wx.LB_SINGLE)
         self._init_layout()
@@ -42,32 +43,31 @@ class SpellCheckerDialog(wx.Dialog):
         Initialize layout.
         :return: None
         """
-        # TODO fix layout.
-        size = (150, -1)
+        size = wx.Size(150, -1)
         main_sizer = wx.BoxSizer(wx.HORIZONTAL)
         text_fields_sizer = wx.BoxSizer(wx.VERTICAL)
         buttons_sizer = wx.BoxSizer(wx.VERTICAL)
         replace_with_sizer = wx.BoxSizer(wx.HORIZONTAL)
 
-        replace_with_sizer.Add(wx.StaticText(self, -1, 'Replace with:'), 0, wx.ALL | wx.ALIGN_CENTER_VERTICAL,
-                               Numbers.widget_border_size)
+        replace_with_sizer.Add(wx.StaticText(self, -1, Strings.label_replace_with), 0,
+                               wx.ALL | wx.ALIGN_CENTER_VERTICAL, Numbers.widget_border_size)
         replace_with_sizer.Add(self.replace_with_field, 1, wx.ALL | wx.ALIGN_CENTER_VERTICAL,
                                Numbers.widget_border_size)
 
-        mistakes_label = wx.StaticText(self, -1, 'Unrecognised word:')
+        mistakes_label = wx.StaticText(self, -1, Strings.label_unrecognized_word)
         text_fields_sizer.Add(mistakes_label, 0, wx.LEFT | wx.TOP, Numbers.widget_border_size)
-        text_fields_sizer.Add(self.mistake_preview_field, 1, wx.ALL | wx.EXPAND, Numbers.widget_border_size)
+        text_fields_sizer.Add(self.mistake_preview_field, 0, wx.ALL | wx.EXPAND, Numbers.widget_border_size)
         text_fields_sizer.Add(replace_with_sizer, 0, wx.EXPAND, Numbers.widget_border_size)
-        text_fields_sizer.Add(self.suggestions_list, 1, wx.ALL | wx.EXPAND, Numbers.widget_border_size)
+        text_fields_sizer.Add(self.suggestions_list, 0, wx.ALL | wx.EXPAND, Numbers.widget_border_size)
 
         buttons_sizer.AddSpacer(mistakes_label.GetSize()[1] + Numbers.widget_border_size)
 
         counter: int = 1
-        for button_id, label, action in ((wx.ID_IGNORE, 'Ignore', self.buttons_handler),
-                                         (wx.ID_NOTOALL, 'Ignore all', self.buttons_handler),
-                                         (wx.ID_REPLACE, 'Replace', self.buttons_handler),
-                                         (wx.ID_REPLACE_ALL, 'Replace all', self.buttons_handler),
-                                         (wx.ID_ADD, 'Add to dictionary', self.buttons_handler)):
+        for button_id, label, action in ((wx.ID_IGNORE, Strings.button_ignore, self.buttons_handler),
+                                         (wx.ID_NOTOALL, Strings.button_ignore_all, self.buttons_handler),
+                                         (wx.ID_REPLACE, Strings.button_replace, self.buttons_handler),
+                                         (wx.ID_REPLACE_ALL, Strings.button_replace_all, self.buttons_handler),
+                                         (wx.ID_ADD, Strings.button_add_to_dict, self.buttons_handler)):
             button = wx.Button(self, button_id, label, size=size)
             buttons_sizer.Add(button, 0, wx.ALL, Numbers.widget_border_size)
             button.Bind(wx.EVT_BUTTON, action)
@@ -77,7 +77,7 @@ class SpellCheckerDialog(wx.Dialog):
             counter += 1
         buttons_sizer.Add(wx.StaticLine(self, -1, size=size), 0, wx.ALIGN_CENTER_HORIZONTAL)
         # Close button will never have to be disabled and therefore is not in _buttons.
-        close_button = wx.Button(self, wx.ID_CLOSE, 'Close', size=size)
+        close_button = wx.Button(self, wx.ID_CLOSE, Strings.button_close, size=size)
         buttons_sizer.Add(close_button, 0, wx.ALL, Numbers.widget_border_size)
         close_button.Bind(wx.EVT_BUTTON, self.buttons_handler)
 
@@ -126,6 +126,7 @@ class SpellCheckerDialog(wx.Dialog):
         """
         replacement = self.replace_with_field.GetValue()
         if replacement:
+            # TODO replace text inside the rich text control.
             self._checker.replace(replacement)
         self._go_to_next()
 
@@ -160,10 +161,12 @@ class SpellCheckerDialog(wx.Dialog):
             self._checker.add()
             self._go_to_next()
         elif button_id == wx.ID_CLOSE:
-            if self.IsModal():
-                self.EndModal(wx.ID_OK)
-            else:
-                self.Destroy()
+            # Send an event to the main gui to signal document color change
+            # TODO create a new custom event, and one for color changed too.
+            done_evt = wx.CommandEvent(wx.wxEVT_, self.GetId())
+            done_evt.SetEventObject(self)
+            wx.PostEvent(self.GetEventHandler(), done_evt)
+            # TODO destroy on event received in main gui.
 
     # noinspection PyUnusedLocal
     def list_select_handler(self, event: wx.CommandEvent) -> None:
