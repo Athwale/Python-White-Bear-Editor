@@ -36,6 +36,7 @@ class RichTextSpellCheckerDialog(wx.Dialog):
 
         self.Bind(wx.EVT_LISTBOX, self.list_select_handler, self.suggestions_list)
         self.Bind(wx.EVT_LISTBOX_DCLICK, self.list_doubleclick_handler, self.suggestions_list)
+        self.Bind(wx.EVT_CLOSE, self._close_button_handler, self)
         self._run()
 
     def _init_layout(self) -> None:
@@ -79,7 +80,7 @@ class RichTextSpellCheckerDialog(wx.Dialog):
         # Close button will never have to be disabled and therefore is not in _buttons.
         close_button = wx.Button(self, wx.ID_CLOSE, Strings.button_close, size=size)
         buttons_sizer.Add(close_button, 0, wx.ALL, Numbers.widget_border_size)
-        close_button.Bind(wx.EVT_BUTTON, self.buttons_handler)
+        close_button.Bind(wx.EVT_BUTTON, self._close_button_handler)
 
         main_sizer.Add(text_fields_sizer, 1, wx.EXPAND, Numbers.widget_border_size)
         main_sizer.Add(buttons_sizer, 0, wx.RIGHT, Numbers.widget_border_size)
@@ -160,12 +161,19 @@ class RichTextSpellCheckerDialog(wx.Dialog):
             # Add new word to dictionary.
             self._checker.add()
             self._go_to_next()
-        elif button_id == wx.ID_CLOSE:
-            # Send an event to the main gui to signal document color change.
-            done_evt = Events.SpellcheckEvent(self.GetId())
-            # Dialog has its own event handler, so use the parent.
-            wx.PostEvent(self.GetParent().GetEventHandler(), done_evt)
-            self.Destroy()
+
+    # noinspection PyUnusedLocal
+    def _close_button_handler(self, event: wx.CloseEvent) -> None:
+        """
+        Handle dialog closing.
+        :param event: Unused.
+        :return: None
+        """
+        # Send an event to the main gui to signal dialog closing.
+        done_evt = Events.SpellcheckEvent(self.GetId())
+        # Dialog has its own event handler, so use the parent.
+        wx.PostEvent(self.GetParent().GetEventHandler(), done_evt)
+        self.Destroy()
 
     # noinspection PyUnusedLocal
     def list_select_handler(self, event: wx.CommandEvent) -> None:

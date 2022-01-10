@@ -1083,7 +1083,7 @@ class MainFrame(wx.Frame):
         edit_dialog.Destroy()
 
     # noinspection PyUnusedLocal
-    def _quit_button_handler(self, event) -> None:
+    def _quit_button_handler(self, event: wx.CommandEvent) -> None:
         """
         Handles clicks to the Quit button in File menu. Calls Close function which sends EVT_CLOSE and triggers
         close_button_handler() which does all the saving work.
@@ -1092,7 +1092,7 @@ class MainFrame(wx.Frame):
         """
         self.Close(force=False)
 
-    def _close_button_handler(self, event):
+    def _close_button_handler(self, event: wx.CloseEvent):
         """
         Handle user exit from the editor. Save last known window position, size and last opened document.
         :param event: CloseEvent, if CanVeto is False the window must be destroyed the system is forcing it.
