@@ -1,6 +1,12 @@
 import os.path
 
 from wx import Colour
+import wx.lib.newevent
+
+
+class Events:
+    ColorEvent, EVT_DOCUMENT_CHANGED = wx.lib.newevent.NewCommandEvent()
+    SpellcheckEvent, EVT_SPELLCHECK_DONE = wx.lib.newevent.NewCommandEvent()
 
 
 class Numbers:

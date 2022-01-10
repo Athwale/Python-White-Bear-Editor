@@ -5,9 +5,8 @@ from typing import Dict, List
 import enchant
 import wx
 import wx.richtext as rt
-import wx.lib.newevent
 
-from Constants.Constants import Numbers
+from Constants.Constants import Numbers, Events
 from Constants.Constants import Strings
 from Exceptions.UnrecognizedFileException import UnrecognizedFileException
 from Gui.Dialogs.AboutDialog import AboutDialog
@@ -45,9 +44,6 @@ class MainFrame(wx.Frame):
     """
     VIDEO_TOOL_ID: int = wx.NewId()
     IMAGE_TOOL_ID: int = wx.NewId()
-
-    ColorEvent, EVT_DOCUMENT_CHANGED = wx.lib.newevent.NewEvent()
-    SpellcheckEvent, EVT_SPELLCHECK_DONE = wx.lib.newevent.NewEvent()
 
     def __init__(self):
         """
@@ -559,7 +555,7 @@ class MainFrame(wx.Frame):
         :return: None
         """
         # Binding an event to a handler function, the last parameter is the source of the event. In case of for
-        # example buttons, all buttons will create EVT_BUTTON and we will not know which handler to use unless
+        # example buttons, all buttons will create EVT_BUTTON, and we will not know which handler to use unless
         # the source is set.
         # Bind window close events, X button and emergency quit
         self.Bind(wx.EVT_CLOSE, self._close_button_handler, self)
@@ -567,7 +563,7 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_QUERY_END_SESSION, self._close_button_handler)
 
         # Bind a handler that changes selected document color if an edit happens in other controls.
-        self.Bind(wx.EVT_COLOUR_CHANGED, self._text_area_edit_handler)
+        self.Bind(Events.EVT_DOCUMENT_CHANGED, self._text_area_edit_handler)
 
         # Bind menu item clicks
         self.Bind(wx.EVT_MENU, self._about_button_handler, self._help_menu_item_about)
@@ -1381,13 +1377,14 @@ class MainFrame(wx.Frame):
             self._update_file_color()
 
     # noinspection PyUnusedLocal
-    def _text_area_edit_handler(self, event: wx.CommandEvent) -> None:
+    def _text_area_edit_handler(self, event) -> None:
         """
         Handle special events that signal that the color of the selected item in the filelist should be updated.
         This happens when an edit has been made to the document.
         :param event: Not used.
         :return: None
         """
+        print(type(event))
         # Force repeating search because the text has changed and indexes would no longer match.
         self._text_changed = True
         if not self._ignore_change:
