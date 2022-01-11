@@ -1366,11 +1366,22 @@ class CustomRichText(rt.RichTextCtrl):
         This helps with searching in the field based on index because the GetValue method omits images and videos.
         :return: The contents of the text field as a string with new line characters in place of images and videos.
         """
-        full_text = ''
+        full_text: str = ''
         buffer: rt.RichTextBuffer = self.GetBuffer()
         paragraphs: List[rt.RichTextParagraph] = buffer.GetChildren()
-        for p in paragraphs:
-            full_text = full_text + '\n' + p.GetTextForRange(p.GetRange())
+        if paragraphs:
+            if isinstance(paragraphs[0].GetChild(0), rt.RichTextField):
+                # For some reason when the first paragraph is a field the special character is not necessary.
+                full_text = '\n'
+            else:
+                full_text = paragraphs[0].GetTextForRange(paragraphs[0].GetRange())
+        for p in list(paragraphs)[1:]:
+            if isinstance(p.GetChild(0), rt.RichTextField):
+                # Images and videos are Fields and these paragraph contain no characters and throw off index.
+                # Use a special unsearchable character.
+                full_text = full_text + Numbers.blank_character + '\n'
+            else:
+                full_text = full_text + '\n' + p.GetTextForRange(p.GetRange())
         return full_text
 
     def convert_document(self) -> None:
