@@ -1496,8 +1496,6 @@ class MainFrame(wx.Frame):
         :param text: The string to search for.
         :return: True if something was found.
         """
-        # TODO the bounds are off a little somewhere, might be because the string does not contain images and so on.
-        # TODO with the new method broken in first paragraph.
         self._search_term = text
         self._search_results.clear()
         if not self._search_term:

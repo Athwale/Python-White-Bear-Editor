@@ -1,6 +1,7 @@
 import wx
 from enchant.checker import SpellChecker
 from Gui.Panels.CustomRichText import CustomRichText
+from wx.richtext import RichTextSelection
 
 from Constants.Constants import Strings, Numbers, Events
 
@@ -119,14 +120,10 @@ class RichTextSpellCheckerDialog(wx.Dialog):
         self.replace_with_field.SetValue(suggestions[0] if suggestions else '')
         self.enable_buttons()
 
-        # TODO highlight the word in the control.
-        # TODO try getting a string with substitute uncheckable characters for images and videos.
-        # TODO does undo work after spellcheck?
-        word_bounds = (self._checker.wordpos, self._checker.wordpos + len(self._checker.word) + 1)
-        print(self._checker.word, word_bounds)
-        self._text_area.SelectWord(self._checker.wordpos + 1)
+        # TODO try replacements inside lists, links and tiles.
+        self._text_area.SelectWord(self._checker.wordpos)
+        # The +1 ensures we always display a line even if it is the last line in currently visible portion of document.
         self._text_area.ShowPosition(self._checker.wordpos + 1)
-        #print(self._text_area.GetValue())
         return True
 
     def _replace(self) -> None:
@@ -136,8 +133,13 @@ class RichTextSpellCheckerDialog(wx.Dialog):
         """
         replacement = self.replace_with_field.GetValue()
         if replacement:
-            # TODO replace text inside the rich text control as well as in the checker's text.
+            # Replace text inside the rich text control as well as in the checker's text which the checker uses
+            # internally.
             self._checker.replace(replacement)
+            selection: RichTextSelection = self._text_area.GetSelection()
+            selection_range = selection.GetRange()
+            # Range is one char off for some reason.
+            self._text_area.Replace(selection_range[0], selection_range[1] + 1, self.replace_with_field.GetValue())
         self._go_to_next()
 
     def enable_buttons(self, state: bool = True) -> None:
