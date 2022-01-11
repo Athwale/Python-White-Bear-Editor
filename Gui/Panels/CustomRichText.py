@@ -1085,10 +1085,10 @@ class CustomRichText(rt.RichTextCtrl):
         :return: None
         """
         selection: rt.RichTextSelection = self.GetSelection()
-        selection_range = selection.GetRange()
+        selection_range = rt.RichTextRange(selection.GetRange()[0], selection.GetRange()[1] + 1)
         # Range is one char off for some reason.
-        # TODO replacement breaks text color in pars, lists and titles, url.
-        self.Replace(selection_range[0], selection_range[1] + 1, replacement)
+        self.Delete(selection_range)
+        self.WriteText(replacement)
 
     def _write_list(self, ul: UnorderedList) -> None:
         """
