@@ -1078,6 +1078,18 @@ class CustomRichText(rt.RichTextCtrl):
         # Set focus to the text area.
         wx.CallLater(100, self.SetFocus)
 
+    def replace_with_style(self, replacement: str) -> None:
+        """
+        Replace selected string in the control with a different string and keep the style.
+        :param replacement: New string
+        :return: None
+        """
+        selection: rt.RichTextSelection = self.GetSelection()
+        selection_range = selection.GetRange()
+        # Range is one char off for some reason.
+        # TODO replacement breaks text color in pars, lists and titles, url.
+        self.Replace(selection_range[0], selection_range[1] + 1, replacement)
+
     def _write_list(self, ul: UnorderedList) -> None:
         """
         Write an UnorderedList into the text area.

@@ -1,7 +1,6 @@
 import wx
 from enchant.checker import SpellChecker
 from Gui.Panels.CustomRichText import CustomRichText
-from wx.richtext import RichTextSelection
 
 from Constants.Constants import Strings, Numbers, Events
 
@@ -65,10 +64,10 @@ class RichTextSpellCheckerDialog(wx.Dialog):
         buttons_sizer.AddSpacer(mistakes_label.GetSize()[1] + Numbers.widget_border_size)
 
         counter: int = 1
-        for button_id, label, action in ((wx.ID_IGNORE, Strings.button_ignore, self.buttons_handler),
-                                         (wx.ID_NOTOALL, Strings.button_ignore_all, self.buttons_handler),
-                                         (wx.ID_REPLACE, Strings.button_replace, self.buttons_handler),
+        for button_id, label, action in ((wx.ID_REPLACE, Strings.button_replace, self.buttons_handler),
                                          (wx.ID_REPLACE_ALL, Strings.button_replace_all, self.buttons_handler),
+                                         (wx.ID_IGNORE, Strings.button_ignore, self.buttons_handler),
+                                         (wx.ID_NOTOALL, Strings.button_ignore_all, self.buttons_handler),
                                          (wx.ID_ADD, Strings.button_add_to_dict, self.buttons_handler)):
             button = wx.Button(self, button_id, label, size=size)
             buttons_sizer.Add(button, 0, wx.ALL, Numbers.widget_border_size)
@@ -120,7 +119,6 @@ class RichTextSpellCheckerDialog(wx.Dialog):
         self.replace_with_field.SetValue(suggestions[0] if suggestions else '')
         self.enable_buttons()
 
-        # TODO try replacements inside lists, links and tiles.
         self._text_area.SelectWord(self._checker.wordpos)
         # The +1 ensures we always display a line even if it is the last line in currently visible portion of document.
         self._text_area.ShowPosition(self._checker.wordpos + 1)
@@ -136,10 +134,7 @@ class RichTextSpellCheckerDialog(wx.Dialog):
             # Replace text inside the rich text control as well as in the checker's text which the checker uses
             # internally.
             self._checker.replace(replacement)
-            selection: RichTextSelection = self._text_area.GetSelection()
-            selection_range = selection.GetRange()
-            # Range is one char off for some reason.
-            self._text_area.Replace(selection_range[0], selection_range[1] + 1, self.replace_with_field.GetValue())
+            self._text_area.replace_with_style(replacement)
         self._go_to_next()
 
     def enable_buttons(self, state: bool = True) -> None:
