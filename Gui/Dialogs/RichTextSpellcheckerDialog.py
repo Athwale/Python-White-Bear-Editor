@@ -134,7 +134,7 @@ class RichTextSpellCheckerDialog(wx.Dialog):
             # Replace text inside the rich text control as well as in the checker's text which the checker uses
             # internally.
             self._checker.replace(replacement)
-            self._text_area.replace_with_style(replacement)
+            self._text_area.replace_string_with_style(replacement)
         self._go_to_next()
 
     def enable_buttons(self, state: bool = True) -> None:

@@ -1078,15 +1078,15 @@ class CustomRichText(rt.RichTextCtrl):
         # Set focus to the text area.
         wx.CallLater(100, self.SetFocus)
 
-    def replace_with_style(self, replacement: str) -> None:
+    def replace_string_with_style(self, replacement: str) -> None:
         """
         Replace selected string in the control with a different string and keep the style.
         :param replacement: New string
         :return: None
         """
         selection: rt.RichTextSelection = self.GetSelection()
-        selection_range = rt.RichTextRange(selection.GetRange()[0], selection.GetRange()[1] + 1)
         # Range is one char off for some reason.
+        selection_range = rt.RichTextRange(selection.GetRange()[0], selection.GetRange()[1] + 1)
         self.Delete(selection_range)
         self.WriteText(replacement)
 
