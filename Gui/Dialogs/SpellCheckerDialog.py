@@ -1,29 +1,26 @@
 import wx
 from enchant.checker import SpellChecker
-from Gui.Panels.CustomRichText import CustomRichText
-
 from Constants.Constants import Strings, Numbers, Events
 
 
 class RichTextSpellCheckerDialog(wx.Dialog):
     """
-    Spellchecker dialog that works with a customized rich text control. It uses an external instance of
-    enchant spellchecker.
-    # TODO make this a subclass of SpellCheckerDialog
+    Spellchecker dialog that works with a string. It uses an external instance of enchant spellchecker.
+    To get the fixed string back use the checker instance passed into the dialog.
     """
 
-    def __init__(self, parent, checker: SpellChecker, text_area: CustomRichText) -> None:
+    def __init__(self, parent, checker: SpellChecker, text: str) -> None:
         """
         Spellchecker dialog constructor.
         :param parent: Dialog parent.
         :param checker: SpellChecker instance.
-        :param text_area: RichTextCtrl instance to work with.
+        :param text: String to work with.
         """
         wx.Dialog.__init__(self, parent, title=Strings.label_dialog_spellcheck,
                            size=(Numbers.spellcheck_dialog_width, Numbers.spellcheck_dialog_height),
                            style=wx.DEFAULT_DIALOG_STYLE)
         self._checker = checker
-        self._text_area = text_area
+        self._text = text
         # How much of the text around current mistake is shown.
         self._context_chars = Numbers.context_chars
         self._buttons = []
@@ -118,10 +115,6 @@ class RichTextSpellCheckerDialog(wx.Dialog):
         self.suggestions_list.Set(suggestions)
         self.replace_with_field.SetValue(suggestions[0] if suggestions else '')
         self.enable_buttons()
-
-        self._text_area.SelectWord(self._checker.wordpos)
-        # The +1 ensures we always display a line even if it is the last line in currently visible portion of document.
-        self._text_area.ShowPosition(self._checker.wordpos + 1)
         return True
 
     def _replace(self) -> None:
@@ -131,10 +124,7 @@ class RichTextSpellCheckerDialog(wx.Dialog):
         """
         replacement = self.replace_with_field.GetValue()
         if replacement:
-            # Replace text inside the rich text control as well as in the checker's text which the checker uses
-            # internally.
             self._checker.replace(replacement)
-            self._text_area.replace_string_with_style(replacement)
         self._go_to_next()
 
     def enable_buttons(self, state: bool = True) -> None:
@@ -206,5 +196,5 @@ class RichTextSpellCheckerDialog(wx.Dialog):
         Run spellchecker using the text area given to it.
         :return: None.
         """
-        self._checker.set_text(self._text_area.get_text())
+        self._checker.set_text(self._text)
         self._go_to_next()
