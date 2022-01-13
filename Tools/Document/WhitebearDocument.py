@@ -219,16 +219,7 @@ class WhitebearDocument:
         :param keywords: The keywords to check.
         :return: Return False, error string and new status color if incorrect.
         """
-        keywords_error_message = Strings.status_ok
-        result = True
-        color = Numbers.GREEN_COLOR
-        if not self._spell_check(keywords):
-            keywords_error_message = Strings.spelling_error
-            result = False
-
-        if not result:
-            color = Numbers.RED_COLOR
-        return result, keywords_error_message, color
+        return self._spell_check(keywords)
 
     def spell_check_description(self, description: str) -> (bool, str, wx.Colour):
         """
@@ -236,30 +227,29 @@ class WhitebearDocument:
         :param description: The description to check.
         :return: Return False, error string and new status color if incorrect.
         """
-        description_error_message = Strings.status_ok
-        result = True
-        color = Numbers.GREEN_COLOR
-        if not self._spell_check(description):
-            description_error_message = Strings.spelling_error
-            result = False
+        return self._spell_check(description)
 
-        if not result:
-            color = Numbers.RED_COLOR
-        return result, description_error_message, color
+    def spell_check_name(self, name: str) -> (bool, str, wx.Colour):
+        """
+        Do a spellcheck on the article name.
+        :param name: The article name to check.
+        :return: Return False, error string and new status color if incorrect.
+        """
+        return self._spell_check(name)
 
-    def _spell_check(self, text: str) -> bool:
+    def _spell_check(self, text: str) -> (bool, str, wx.Colour):
         """
         Do a spellcheck on the text.
         :param text: Text to check.
-        :return: True if no spelling problem is found.
+        :return: Return False, error string and new status color if incorrect.
         """
         self._spellchecker.set_text(text)
         try:
             self._spellchecker.next()
-            return False
+            return False, Strings.spelling_error, Numbers.RED_COLOR
         except StopIteration:
             # Next raises exception if no mistake is found.
-            return True
+            return True, Strings.status_ok, Numbers.GREEN_COLOR
 
     # Boolean functions ------------------------------------------------------------------------------------------------
     def is_valid(self) -> bool:

@@ -21,6 +21,7 @@
       <option name="ignoredIdentifiers">
         <list>
           <option value="dict.provider" />
+          <option value="bs4.element.PageElement.*" />
         </list>
       </option>
     </inspection_tool>

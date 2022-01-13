@@ -126,9 +126,15 @@ class WhitebearDocumentArticle(WhitebearDocument):
         # Clear all errors on every new test
         self._date_error_message: str = ''
 
-        # Check page name length must be at least 3 and must not be default
+        # Check page name length must be at least 3 and must not be default.
         name_result, message, color = self.seo_test_name(self._page_name)
         # Message may contain OK if seo passed.
+        self._page_name_error_message = message
+        if not name_result:
+            self.set_status_color(color)
+
+        # Spellcheck name
+        name_result, message, color = self.spell_check_name(self._page_name)
         self._page_name_error_message = message
         if not name_result:
             self.set_status_color(color)
@@ -295,6 +301,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
         """
         unordered_list = UnorderedList()
         for li in ul.children:
+            li: Tag
             paragraph = self._process_p(li)
             unordered_list.append_paragraph(paragraph)
         return unordered_list
@@ -308,6 +315,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
         paragraph = Paragraph()
         for child in p.children:
             # These can be text, span, strong, a, br
+            child: Tag
             if not self._process_visual_tags(child, paragraph, False):
                 if child.name == 'a':
                     link = Link(str(child.string), child.attrs['href'], child.attrs['title'], self._articles,
@@ -335,7 +343,6 @@ class WhitebearDocumentArticle(WhitebearDocument):
             return_value = True
             color = parent_element.attrs['class'][0]
             for child in parent_element.children:
-                print(type(child))
                 if child.name == 'br':
                     paragraph.add_element(Break())
                 else:
@@ -347,6 +354,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
             return_value = True
             # These can also contain colored spans and br, recursively call self
             for child in parent_element.children:
+                child: Tag
                 self._process_visual_tags(child, paragraph, True)
         return return_value
 
@@ -356,7 +364,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
         :return: None
         """
         article = self._parsed_html.find(name='article', attrs={'class': 'textPage'})
-        name = article.h2.string
+        name = str(article.h2.string)
         self._page_name = name if name else ''
 
     def _parse_date(self) -> None:
@@ -364,7 +372,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
         Parse the date stamp of this document and save it into an instance variable.
         :return: None
         """
-        self._date = self._parsed_html.find(name='p', attrs={'id': 'date'}).string
+        self._date = str(self._parsed_html.find(name='p', attrs={'id': 'date'}).string)
 
     def _parse_main_article_image(self) -> None:
         """
