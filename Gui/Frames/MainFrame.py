@@ -35,12 +35,11 @@ from Tools.Document.WhitebearDocumentMenu import WhitebearDocumentMenu
 from Tools.Tools import Tools
 from enchant.checker import SpellChecker
 from enchant.tokenize import EmailFilter, URLFilter
-from pathlib import Path
 
 
 class MainFrame(wx.Frame):
     """
-    Main GUI controlling class. The Frame is actually the on screen window.
+    Main GUI controlling class. The Frame is actually the on the screen window.
     """
     VIDEO_TOOL_ID: int = wx.NewId()
     IMAGE_TOOL_ID: int = wx.NewId()
@@ -270,7 +269,7 @@ class MainFrame(wx.Frame):
 
     def _init_top_tool_bar(self) -> None:
         """
-        Set up top tool bar for the frame.
+        Set up top toolbar for the frame.
         :return: None
         """
         self.tool_bar: wx.ToolBar = self.CreateToolBar(style=wx.TB_DEFAULT_STYLE)
@@ -327,7 +326,7 @@ class MainFrame(wx.Frame):
 
     def _init_toolbar_controls(self) -> None:
         """
-        Add search box into the top tool bar.
+        Add search box into the top toolbar.
         :return: None
         """
         if not self.tool_bar.FindById(wx.ID_FIND):
@@ -547,7 +546,6 @@ class MainFrame(wx.Frame):
                                         border=Numbers.widget_border_size)
         # Update file color on change.
         self.Bind(wx.EVT_TEXT, self._text_area_edit_handler, self._main_text_area)
-        # --------------------------------------------------------------------------------------------------------------
 
     def _bind_handlers(self) -> None:
         """
@@ -1734,7 +1732,7 @@ class MainFrame(wx.Frame):
         :param event: Not used.
         :return: None
         """
-        # TODO this.
+        # TODO make spellcheck run on all for testing when saving.
         dlg = RichTextSpellCheckerDialog(self, self._spellchecker, self._main_text_area)
         self._disable_editor(True, all_menu=True)
         dlg.Show()

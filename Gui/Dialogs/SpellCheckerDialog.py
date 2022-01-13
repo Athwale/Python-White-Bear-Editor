@@ -3,7 +3,7 @@ from enchant.checker import SpellChecker
 from Constants.Constants import Strings, Numbers, Events
 
 
-class RichTextSpellCheckerDialog(wx.Dialog):
+class SpellCheckerDialog(wx.Dialog):
     """
     Spellchecker dialog that works with a string. It uses an external instance of enchant spellchecker.
     To get the fixed string back use the checker instance passed into the dialog.

@@ -2,6 +2,7 @@ import os
 from typing import Tuple, Dict, List
 
 import yaml
+import enchant
 from yaml.parser import ParserError
 from yaml.scanner import ScannerError
 
@@ -20,6 +21,7 @@ class ConfigManager:
     CONF_LAST: str = 'last'
     CONF_POSITION: str = 'pos'
     CONF_SIZE: str = 'size'
+    CONF_LANG: str = 'spellLang'
 
     CONF_GLOBAL_TITLE: str = 'title'
     CONF_AUTHOR: str = 'author'
@@ -40,7 +42,9 @@ class ConfigManager:
 
     @staticmethod
     def get_instance():
-        """ Static access method. """
+        """
+        Static access method.
+        """
         if ConfigManager.__instance is None:
             ConfigManager()
         return ConfigManager.__instance
@@ -78,6 +82,7 @@ class ConfigManager:
                 self.CONF_USER: '',
                 self.CONF_KEYFILE: '',
                 self.CONF_ONLINE_TEST: '1',
+                self.CONF_LANG: '',
                 self.CONF_LAST_IMG_DIR: Strings.home_directory,
                 self.CONF_NEWS: str(Numbers.default_news),
                 self.CONF_UNUPLOADED: []}
@@ -148,6 +153,11 @@ class ConfigManager:
         # If last img dir is not present, reset it to home dir.
         if self.CONF_LAST_IMG_DIR not in self._dir_conf.keys():
             self._dir_conf[self.CONF_LAST_IMG_DIR] = Strings.home_directory
+
+        # If spelling language is not set, use default.
+        default_language = enchant.get_default_language()
+        if self.CONF_LANG not in self._dir_conf.keys():
+            self._dir_conf[self.CONF_LANG] = default_language
 
         return correct
 
@@ -341,6 +351,22 @@ class ConfigManager:
         :return: List of documents which are modified but not uploaded.
         """
         return self._dir_conf[self.CONF_UNUPLOADED]
+
+    def get_spelling_language(self) -> str:
+        """
+        Get spelling language for spellchecker.
+        :return: Spelling language code for spellchecker.
+        """
+        return self._dir_conf[self.CONF_LANG]
+
+    def store_spelling_language(self, lang: str) -> None:
+        """
+        Save new spelling language setting.
+        :param lang: New spelling language code.
+        :return: None
+        """
+        self._dir_conf[self.CONF_LANG] = lang
+        self.save_config_file()
 
     def store_not_uploaded(self, file: str) -> None:
         """

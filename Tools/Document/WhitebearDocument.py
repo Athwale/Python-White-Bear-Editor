@@ -27,7 +27,7 @@ class WhitebearDocument:
         self._path = path
         self._working_directory = os.path.dirname(path)
         self._modified = False
-        # We create instances of documents after validation so we already know they are valid.
+        # We create instances of documents after validation, so we already know they are valid.
         self._valid = True
         self._status_color = None
         self._config_manager: ConfigManager = ConfigManager.get_instance()
