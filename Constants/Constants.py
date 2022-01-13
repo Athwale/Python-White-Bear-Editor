@@ -222,6 +222,8 @@ class Strings:
     seo_error_video_size_wrong: str = 'The size of the video element is incorrect'
     seo_check: str = 'SEO Check:'
 
+    spelling_error: str = 'Spellcheck warning'
+
     warning_name_incorrect: str = 'Incorrect name\nDo not use file extension\nDo not use special characters'
     warning_file_exists_overwrite: str = 'File already exists. Overwrite?'
     warning_file_exists: str = 'File already exists'

@@ -34,6 +34,7 @@ class WhitebearDocument:
         self._status_color = None
         self._config_manager: ConfigManager = ConfigManager.get_instance()
         # TODO spellcheck as separate method runs once on document check.
+        # TODO return error if spelling wrong, color red, run spell dialog once for all 3 on upload.
         self._spellchecker = SpellChecker(self._config_manager.get_spelling_lang(), filters=[EmailFilter, URLFilter])
 
         # Page data
@@ -196,9 +197,69 @@ class WhitebearDocument:
         if not description_result:
             self.set_status_color(color)
 
+        # Spellcheck meta keywords
+        keywords_result, message, color = self.spell_check_keywords(', '.join(self._meta_keywords))
+        self._keywords_error_message = message
+        if not keywords_result:
+            self.set_status_color(color)
+
+        # Spellcheck meta description
+        description_result, message, color = self.spell_check_description(self._meta_description)
+        self._description_error_message = message
+        if not description_result:
+            self.set_status_color(color)
+
         if self.get_status_color() == Numbers.RED_COLOR:
             return False
         return True
+
+    def spell_check_keywords(self, keywords: str) -> (bool, str, wx.Colour):
+        """
+        Do a spellcheck on the article keywords.
+        :param keywords: The keywords to check.
+        :return: Return False, error string and new status color if incorrect.
+        """
+        keywords_error_message = Strings.status_ok
+        result = True
+        color = Numbers.GREEN_COLOR
+        if not self._spell_check(keywords):
+            keywords_error_message = Strings.spelling_error
+            result = False
+
+        if not result:
+            color = Numbers.RED_COLOR
+        return result, keywords_error_message, color
+
+    def spell_check_description(self, description: str) -> (bool, str, wx.Colour):
+        """
+        Do a spellcheck on the article meta description.
+        :param description: The description to check.
+        :return: Return False, error string and new status color if incorrect.
+        """
+        description_error_message = Strings.status_ok
+        result = True
+        color = Numbers.GREEN_COLOR
+        if not self._spell_check(description):
+            description_error_message = Strings.spelling_error
+            result = False
+
+        if not result:
+            color = Numbers.RED_COLOR
+        return result, description_error_message, color
+
+    def _spell_check(self, text: str) -> bool:
+        """
+        Do a spellcheck on the text.
+        :param text: Text to check.
+        :return: True if no spelling problem is found.
+        """
+        self._spellchecker.set_text(text)
+        try:
+            self._spellchecker.next()
+            return False
+        except StopIteration:
+            # Next raises exception if no mistake is found.
+            return True
 
     # Boolean functions ------------------------------------------------------------------------------------------------
     def is_valid(self) -> bool:

@@ -335,6 +335,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
             return_value = True
             color = parent_element.attrs['class'][0]
             for child in parent_element.children:
+                print(type(child))
                 if child.name == 'br':
                     paragraph.add_element(Break())
                 else:
