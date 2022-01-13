@@ -82,7 +82,7 @@ class ConfigManager:
                 self.CONF_USER: '',
                 self.CONF_KEYFILE: '',
                 self.CONF_ONLINE_TEST: '1',
-                self.CONF_LANG: '',
+                self.CONF_LANG: enchant.get_default_language(),
                 self.CONF_LAST_IMG_DIR: Strings.home_directory,
                 self.CONF_NEWS: str(Numbers.default_news),
                 self.CONF_UNUPLOADED: []}
@@ -352,7 +352,7 @@ class ConfigManager:
         """
         return self._dir_conf[self.CONF_UNUPLOADED]
 
-    def get_spelling_language(self) -> str:
+    def get_spelling_lang(self) -> str:
         """
         Get spelling language for spellchecker.
         :return: Spelling language code for spellchecker.

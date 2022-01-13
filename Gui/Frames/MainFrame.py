@@ -89,9 +89,6 @@ class MainFrame(wx.Frame):
         self._init_top_tool_bar()
         self._setup_main_text_area()
 
-        # TODO make a new menu for selecting language, set from config manager.
-        self._spellchecker = SpellChecker('cs_CZ', filters=[EmailFilter, URLFilter])
-
         # Set minimal size of the frame on screen, smaller frame would squish GUI too much.
         self.SetMinClientSize(wx.Size(Numbers.minimal_window_size_width, Numbers.minimal_window_size_height))
 
@@ -105,6 +102,8 @@ class MainFrame(wx.Frame):
             self._file_menu.Check(wx.ID_NETWORK, self._config_manager.get_online_test())
         else:
             self._disable_editor(True)
+
+        self._spellchecker = SpellChecker(self._config_manager.get_spelling_lang(), filters=[EmailFilter, URLFilter])
 
         # Load last window position and size
         self.SetPosition((self._config_manager.get_window_position()))
