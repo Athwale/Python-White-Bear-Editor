@@ -16,7 +16,7 @@ class Uploader:
         :param parent: The gui object that should receive the results.
         :param ip: Server IPv4 address.
         :param port: SFTP port.
-        :param user: SFTP user name.
+        :param user: SFTP username.
         :param key: RSA private SFTP key file.
         :param passphrase: RSA key passphrase.
         """
@@ -31,11 +31,11 @@ class Uploader:
 
     def connect(self) -> None:
         """
-        Connect to a SFTP server using a SSH RSA key.
+        Connect to a SFTP server using an SSH RSA key.
         :return: None
         """
         # Public part of the user's RSA keys must be in the right place on the proftpd SFTP server.
-        # The SFTP server has it's own RSA private and public (host) key used to authenticate it self to the client.
+        # The SFTP server has its own RSA private and public (host) key used to authenticate itself to the client.
         # The public SFTP key must be added to known hosts using ssh key scan.
         try:
             if self._passphrase:

@@ -10,6 +10,7 @@ from Tools.Document.AsideImage import AsideImage
 from Tools.Document.WhitebearDocumentArticle import WhitebearDocumentArticle
 from Constants.Constants import Events
 
+
 class AsideImagePanel(wx.lib.scrolledpanel.ScrolledPanel):
     """
     This class displays a scrollable panel which contains aside images of a loaded whitebear article.

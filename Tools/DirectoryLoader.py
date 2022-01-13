@@ -121,7 +121,7 @@ class DirectoryLoader:
         :raises UnrecognizedFileException if the file can not be validated
         """
         file: str
-        # Parse CSS so we can send the instance into articles for color translation.
+        # Parse CSS, so we can send the instance into articles for color translation.
         file = os.path.join(path, 'styles.css')
         if os.path.isfile(file):
             if not os.access(file, os.R_OK) or not os.access(file, os.W_OK):
@@ -157,7 +157,7 @@ class DirectoryLoader:
                             self._index_document = WhitebearDocumentIndex(file_path, self._menu_documents,
                                                                           self._article_documents)
                         else:
-                            # Skip known non editable files
+                            # Skip known non-editable files
                             if 'google' in filename or '404' in filename:
                                 continue
                             else:

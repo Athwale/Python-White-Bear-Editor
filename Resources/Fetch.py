@@ -19,7 +19,7 @@ class Fetch:
         :raise FileNotFoundError: if resource is not found
         """
         if os.path.exists(name):
-            # If the name is a path that already leads to a file return that as a absolute path.
+            # If the name is a path that already leads to a file return that as an absolute path.
             return os.path.abspath(name)
         else:
             # Assume it is a resource from the Resources folder.

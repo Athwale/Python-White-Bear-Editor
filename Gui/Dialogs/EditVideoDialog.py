@@ -13,7 +13,7 @@ class EditVideoDialog(wx.Dialog):
         """
         Display a dialog with information about the video where the user can edit it.
         :param parent: Parent frame.
-        :param video: Video instance being edited by tis dialog.
+        :param video: Video instance being edited by this dialog.
         """
         wx.Dialog.__init__(self, parent, title=Strings.label_dialog_edit_video, size=(Numbers.edit_video_dialog_width,
                                                                                       Numbers.edit_video_dialog_height),
@@ -106,7 +106,7 @@ class EditVideoDialog(wx.Dialog):
 
     def _seo_test(self, return_value: int) -> None:
         """
-        Run a url seo test in a separate thread and wait for result from a callback method.
+        Run an url seo test in a separate thread and wait for result from a callback method.
         Display a waiting message.
         :param return_value: wx return code to end this dialog with when the thread finishes.
         :return: None

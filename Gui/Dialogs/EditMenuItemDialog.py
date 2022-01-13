@@ -14,7 +14,7 @@ class EditMenuItemDialog(wx.Dialog):
         """
         Display a dialog with information about the image where the user can edit it.
         :param parent: Parent frame.
-        :param item: MenuItem instance being edited by tis dialog.
+        :param item: MenuItem instance being edited by this dialog.
         :param work_dir: Working directory of the editor.
         """
         wx.Dialog.__init__(self, parent, title=Strings.label_dialog_edit_menu_item,

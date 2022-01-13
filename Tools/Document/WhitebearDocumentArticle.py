@@ -197,7 +197,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
         :return: None
         """
         # Find a section tag with both classes, if such is present, the article is disabled.
-        # This returns true when the disabled class is present, so it has to be negated.
+        # Returns true when the disabled class is present, so it has to be negated.
         self._enabled = not (bool(self._parsed_html.select('section.mainText.disabled')))
 
     def _parse_main_text(self) -> None:
@@ -783,7 +783,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
     def find_in_text_image(self, image_id: int) -> ImageInText:
         """
         Find and return an ImageInText instance based on the image's thumbnail disk path.
-        :param image_id: Id of the image.
+        :param image_id: ID of the image.
         :return: A ImageInText instance.
         """
         for img in self._text_images:
@@ -794,7 +794,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
     def find_video(self, video_id: int) -> Video:
         """
         Find and return a Video instance based on the url of the video.
-        :param video_id: Id of the video.
+        :param video_id: ID of the video.
         :return: A Video instance.
         """
         for video in self._videos:

@@ -14,7 +14,7 @@ class EditTextImageDialog(wx.Dialog):
         """
         Display a dialog with information about the image where the user can edit it.
         :param parent: Parent frame.
-        :param image: ImageInText instance being edited by tis dialog.
+        :param image: ImageInText instance being edited by this dialog.
         :param working_dir: Working directory of the editor
         """
         wx.Dialog.__init__(self, parent, title=Strings.label_dialog_edit_image,
@@ -313,7 +313,7 @@ class EditTextImageDialog(wx.Dialog):
         if thumb_path:
             self._content_image_thumbnail_path.SetLabelText(thumb_path)
         else:
-            # Show which picture is should have been.
+            # Show which picture it should have been.
             self._content_image_thumbnail_path.SetLabelText(self._image_copy.get_thumbnail_filename())
 
         # Adapt dialog size to the new image, use default if missing thumbnail.

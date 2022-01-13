@@ -46,7 +46,7 @@ class MainFrame(wx.Frame):
 
     def __init__(self):
         """
-        Constructor for the GUI of the editor. This is the main frame so we pass None as the parent.
+        Constructor for the GUI of the editor. This is the main frame, so we pass None as the parent.
         """
         # -1 is a special ID which generates a random wx ID
         super(MainFrame, self).__init__(None, -1, title=Strings.editor_name + ' - ' + Strings.status_loading,
@@ -103,6 +103,7 @@ class MainFrame(wx.Frame):
         else:
             self._disable_editor(True)
 
+        # TODO create a settings dialog for spellchecker with additional information.
         self._spellchecker = SpellChecker(self._config_manager.get_spelling_lang(), filters=[EmailFilter, URLFilter])
 
         # Load last window position and size
@@ -735,7 +736,7 @@ class MainFrame(wx.Frame):
 
     def on_css_parsed(self, css: WhitebearDocumentCSS) -> None:
         """
-        Generates text color tools in tool bar once css is parsed.
+        Generates text color tools in toolbar once css is parsed.
         :param css: The parsed css file.
         :return: None
         """
@@ -846,7 +847,7 @@ class MainFrame(wx.Frame):
                 if char + 1 > color_range[1] + 1:
                     break
                 single_range = rt.RichTextRange(char, char + 1)
-                # Get the attributes of the single char range and modify them in place. Otherwise changing paragraph.
+                # Get the attributes of the single char range and modify them in place. Otherwise, changing paragraph.
                 # style is broken since the attributes are reset for the range.
                 attr = rt.RichTextAttr()
                 self._main_text_area.GetStyleForRange(single_range, attr)
@@ -1124,14 +1125,14 @@ class MainFrame(wx.Frame):
         """
         dlg = wx.DirDialog(self, Strings.label_dialog_choose_wb_dir, Strings.home_directory,
                            wx.DD_DIR_MUST_EXIST | wx.DD_CHANGE_DIR)
-        # Modal means the user is locked into this dialog an can not use the rest of the application
+        # Modal means the user is locked into this dialog and can not use the rest of the application
         if dlg.ShowModal() == wx.ID_OK:
             if not self._config_manager.set_active_dir(dlg.GetPath()):
                 self._config_manager.add_directory(dlg.GetPath())
                 self._config_manager.set_active_dir(dlg.GetPath())
             self._current_document_instance = None
             self._load_working_directory(self._config_manager.get_working_dir())
-        # This must be called, the dialog stays in memory so you can retrieve data and would not be destroyed.
+        # This must be called, the dialog stays in memory, so you can retrieve data and would not be destroyed.
         dlg.Destroy()
 
     # noinspection PyUnusedLocal
@@ -1159,7 +1160,7 @@ class MainFrame(wx.Frame):
         :param leave_files: Leave the filelist uncleared.
         :return: None
         """
-        # Ignore changes to article metadata so it is not saved into the file.
+        # Ignore changes to article metadata, so it is not saved into the file.
         self._ignore_change = True
         self.SetTitle(Strings.editor_name)
         placeholder_logo_image = wx.Image(Numbers.menu_logo_image_size, Numbers.menu_logo_image_size)
@@ -1654,7 +1655,7 @@ class MainFrame(wx.Frame):
                     self._current_document_name = ''
                     self._clear_editor(leave_files=False)
                     self._file_menu_item_delete.Enable(False)
-                    # If nothing is left there will be no threads and so we can enable the files and new file here.
+                    # If nothing is left there will be no threads, and so we can enable the files and new file here.
                     self._disable_editor(True, True)
                     return
                 # If there are any other documents enable the editor and continue with the next document.

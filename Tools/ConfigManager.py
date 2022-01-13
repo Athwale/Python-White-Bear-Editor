@@ -116,7 +116,7 @@ class ConfigManager:
         Save the configuration onto disk drive in user's home.
         :return: None
         """
-        # At this point after constructor, the config file exists and is full or empty but it is writeable.
+        # At this point after constructor, the config file exists and is full or empty, but it is writeable.
         # This clears the file and writes new contents.
         with open(Strings.editor_config_file, 'w') as file:
             yaml.dump(self._whole_conf, file)
@@ -551,7 +551,7 @@ class ConfigManager:
 
     def store_number_of_news(self, news: int) -> None:
         """
-        Save the the number of latest articles to display into the dictionary.
+        Save the number of the latest articles to display into the dictionary.
         :param news: The number of articles.
         :return: None
         """

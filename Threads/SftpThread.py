@@ -23,7 +23,7 @@ class SftpThread(threading.Thread):
         :param parent: The gui object that should receive the result.
         :param ip: Server IPv4 address.
         :param port: SFTP port.
-        :param user: SFTP user name.
+        :param user: SFTP username.
         :param key: RSA private SFTP key file.
         :param password: RSA passphrase.
         :param files: List of file paths to upload

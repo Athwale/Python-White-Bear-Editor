@@ -9,7 +9,7 @@ from Resources.Fetch import Fetch
 
 class Video:
     """
-    Represents a placeholder for a youtube video in the text of the page.
+    Represents a placeholder for a YouTube video in the text of the page.
     """
 
     count: int = 1
@@ -43,7 +43,7 @@ class Video:
         :param online: Do online url test.
         :return: True if no error is found.
         """
-        # Disk paths have to be checked by the sub classes.
+        # Disk paths have to be checked by the subclasses.
         # Clear all error before each retest
         self._link_title_error_message = ''
         self._url_error_message = ''

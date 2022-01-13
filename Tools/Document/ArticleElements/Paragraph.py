@@ -5,7 +5,7 @@ from Tools.Document.ArticleElements.Link import Link
 
 class Paragraph:
     """
-    This class represents one paragraph in a article. A paragraph consists of a list of instances of text, break and
+    This class represents one paragraph in an article. A paragraph consists of a list of instances of text, break and
     link.
     """
 

@@ -12,7 +12,7 @@ White-bear website editor written in Python 3.
 - Automatically generate index page.  
 - Automatically generate menu pages.  
 - Check common SEO issues.
-- Use HTML structure set by the original hand-written white-bear pages.
+- Use HTML structure set by the original handwritten white-bear pages.
 - Simplify adding/converting various types of text and side images.
 - Simplify article logo management.
 - Validate pages against xsd templates.

@@ -8,6 +8,8 @@ from Constants.Constants import Numbers
 from Constants.Constants import Strings
 from Exceptions.WrongFormatException import WrongFormatException
 from Tools.ConfigManager import ConfigManager
+from enchant.checker import SpellChecker
+from enchant.tokenize import EmailFilter, URLFilter
 
 
 class WhitebearDocument:
@@ -31,6 +33,8 @@ class WhitebearDocument:
         self._valid = True
         self._status_color = None
         self._config_manager: ConfigManager = ConfigManager.get_instance()
+        # TODO spellcheck as separate method runs once on document check.
+        self._spellchecker = SpellChecker(self._config_manager.get_spelling_lang(), filters=[EmailFilter, URLFilter])
 
         # Page data
         self._parsed_html = None
@@ -44,7 +48,7 @@ class WhitebearDocument:
     def parse_self(self) -> None:
         """
         Parse this document and fill internal variables with content. Only call this after the subclass has validated
-        it self.
+        itself.
         :return: None
         :raises WrongFormatException: if there is a problem with parsing the document.
         """
@@ -70,7 +74,7 @@ class WhitebearDocument:
         """
         Parse the meta keywords of this document and save it into an instance variable.
         :return: None
-        :raises WrongFormatException: if there are more than one keywords tags.
+        :raises WrongFormatException: if there are more than one keyword tags.
         """
         keywords = self._parsed_html.find_all(name='meta', attrs={'name': 'keywords', 'content': True})
         if len(keywords) == 1:

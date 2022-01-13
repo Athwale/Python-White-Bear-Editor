@@ -37,7 +37,7 @@ class WhitebearDocumentMenu(WhitebearDocument):
         :return: None
         :raises WrongFormatException: if there is a problem with parsing the document.
         """
-        # In case of menu, we create the instances only if the source file is valid and we only parse them once.
+        # In case of menu, we create the instances only if the source file is valid, and we only parse them once.
         super(WhitebearDocumentMenu, self).parse_self()
         self._parse_page_name()
         self._parse_menu_items()

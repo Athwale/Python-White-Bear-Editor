@@ -49,7 +49,7 @@ class BaseImage:
         warning image.
         :return: True if test is ok, False otherwise
         """
-        # Disk paths have to be checked by the sub classes.
+        # Disk paths have to be checked by the subclasses.
         # Clear all error before each retest
         self._link_title_error_message = ''
         self._image_alt_error_message = ''

@@ -15,7 +15,7 @@ class EditAsideImageDialog(wx.Dialog):
         """
         Display a dialog with information about the image where the user can edit it.
         :param parent: Parent frame.
-        :param image: AsideImage instance being edited by tis dialog.
+        :param image: AsideImage instance being edited by this dialog.
         :param work_dir: The working directory of the editor.
         """
         wx.Dialog.__init__(self, parent, title=Strings.label_dialog_edit_image,
