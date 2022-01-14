@@ -931,6 +931,8 @@ class MainFrame(wx.Frame):
         :param disable: Leave the editor disabled after threads finish.
         :return: None.
         """
+        # TODO Make spellcheck manual.
+        # TODO show spelling error message somewhere.
         self._set_status_text(Strings.label_saving + ': ' + doc.get_filename(), 3)
         # Editor will be enabled when the thread finishes.
         if self._enabled:

@@ -133,12 +133,6 @@ class WhitebearDocumentArticle(WhitebearDocument):
         if not name_result:
             self.set_status_color(color)
 
-        # Spellcheck name
-        name_result, message, color = self.spell_check_name(self._page_name)
-        self._page_name_error_message = message
-        if not name_result:
-            self.set_status_color(color)
-
         # Check date format
         date_result, message, color = self.seo_test_date(self._date)
         self._date_error_message = message
