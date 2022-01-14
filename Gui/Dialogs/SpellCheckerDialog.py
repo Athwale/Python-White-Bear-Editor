@@ -1,6 +1,8 @@
 import wx
 from enchant.checker import SpellChecker
 from Constants.Constants import Strings, Numbers, Events
+from enchant.tokenize import EmailFilter, URLFilter
+from Tools.ConfigManager import ConfigManager
 
 
 class SpellCheckerDialog(wx.Dialog):
@@ -9,21 +11,24 @@ class SpellCheckerDialog(wx.Dialog):
     To get the fixed string back use the checker instance passed into the dialog.
     """
 
-    def __init__(self, parent, checker: SpellChecker, text: str) -> None:
+    def __init__(self, parent, title, text: str) -> None:
         """
         Spellchecker dialog constructor.
         :param parent: Dialog parent.
-        :param checker: SpellChecker instance.
+        :param title: Dialog title.
         :param text: String to work with.
         """
-        wx.Dialog.__init__(self, parent, title=Strings.label_dialog_spellcheck,
+        wx.Dialog.__init__(self, parent, title=title,
                            size=(Numbers.spellcheck_dialog_width, Numbers.spellcheck_dialog_height),
                            style=wx.DEFAULT_DIALOG_STYLE)
-        self._checker = checker
+        # TODO do this in the other dialog or inherit.
+        self._config_manager: ConfigManager = ConfigManager.get_instance()
+        self._checker = SpellChecker(self._config_manager.get_spelling_lang(), filters=[EmailFilter, URLFilter])
         self._text = text
         # How much of the text around current mistake is shown.
         self._context_chars = Numbers.context_chars
         self._buttons = []
+        self._found_mistake = False
 
         self.mistake_preview_field = wx.TextCtrl(self, -1, size=wx.Size(-1, 76),
                                                  style=wx.TE_MULTILINE | wx.TE_READONLY | wx.TE_RICH)
@@ -169,7 +174,10 @@ class SpellCheckerDialog(wx.Dialog):
         done_evt = Events.SpellcheckEvent(self.GetId())
         # Dialog has its own event handler, so use the parent.
         wx.PostEvent(self.GetParent().GetEventHandler(), done_evt)
-        self.Destroy()
+        if self.IsModal():
+            self.EndModal(wx.ID_OK)
+        else:
+            self.Destroy()
 
     # noinspection PyUnusedLocal
     def list_select_handler(self, event: wx.CommandEvent) -> None:
@@ -191,10 +199,24 @@ class SpellCheckerDialog(wx.Dialog):
         """
         self._replace()
 
+    def get_fixed_text(self) -> str:
+        """
+        Returns the checked and fixed string.
+        :return: Returns the checked and fixed string.
+        """
+        return self._checker.get_text()
+
+    def found_mistake(self) -> bool:
+        """
+        Return True if the first run of the checker found a mistake in the text.
+        :return: True if the first run of the checker found a mistake in the text.
+        """
+        return self._found_mistake
+
     def _run(self) -> None:
         """
         Run spellchecker using the text area given to it.
         :return: None.
         """
         self._checker.set_text(self._text)
-        self._go_to_next()
+        self._found_mistake = self._go_to_next()

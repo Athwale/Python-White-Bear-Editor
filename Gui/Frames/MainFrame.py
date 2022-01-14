@@ -17,6 +17,7 @@ from Gui.Dialogs.EditDefaultValuesDialog import EditDefaultValuesDialog
 from Gui.Dialogs.EditMenuDialog import EditMenuDialog
 from Gui.Dialogs.EditMenuItemDialog import EditMenuItemDialog
 from Gui.Dialogs.NewFileDialog import NewFileDialog
+from Gui.Dialogs.SpellCheckerDialog import SpellCheckerDialog
 from Gui.Dialogs.UploadDialog import UploadDialog
 from Gui.Dialogs.RichTextSpellcheckerDialog import RichTextSpellCheckerDialog
 from Gui.Panels.AsideImagePanel import AsideImagePanel
@@ -33,8 +34,6 @@ from Tools.Document.WhitebearDocumentCSS import WhitebearDocumentCSS
 from Tools.Document.WhitebearDocumentIndex import WhitebearDocumentIndex
 from Tools.Document.WhitebearDocumentMenu import WhitebearDocumentMenu
 from Tools.Tools import Tools
-from enchant.checker import SpellChecker
-from enchant.tokenize import EmailFilter, URLFilter
 
 
 class MainFrame(wx.Frame):
@@ -104,7 +103,7 @@ class MainFrame(wx.Frame):
             self._disable_editor(True)
 
         # TODO create a settings dialog for spellchecker with additional information.
-        self._spellchecker = SpellChecker(self._config_manager.get_spelling_lang(), filters=[EmailFilter, URLFilter])
+        # TODO show spelling error message somewhere.
 
         # Load last window position and size
         self.SetPosition((self._config_manager.get_window_position()))
@@ -931,8 +930,6 @@ class MainFrame(wx.Frame):
         :param disable: Leave the editor disabled after threads finish.
         :return: None.
         """
-        # TODO Make spellcheck manual.
-        # TODO show spelling error message somewhere.
         self._set_status_text(Strings.label_saving + ': ' + doc.get_filename(), 3)
         # Editor will be enabled when the thread finishes.
         if self._enabled:
@@ -1734,10 +1731,23 @@ class MainFrame(wx.Frame):
         :param event: Not used.
         :return: None
         """
-        # TODO make spellcheck run on all for testing when saving.
-        dlg = RichTextSpellCheckerDialog(self, self._spellchecker, self._main_text_area)
+        # TODO Make spellcheck manual run on all metadata and main text.
+        # First run spellcheck dialog on metadata and article name if needed.
+        for field, name in ((self._field_article_keywords, Strings.label_article_keywords),
+                            (self._field_article_description, Strings.label_article_description),
+                            (self._field_article_name, Strings.label_article_title)):
+            text = field.GetValue()
+            dlg = SpellCheckerDialog(self, Strings.label_dialog_spellcheck + ': ' + name, field.GetValue())
+            if dlg.found_mistake():
+                if dlg.ShowModal() == wx.ID_OK:
+                    # Replace text in field and recheck seo again as a result of it.
+                    field.SetValue(dlg.get_fixed_text())
+                    dlg.Destroy()
+
         self._disable_editor(True, all_menu=True)
-        dlg.Show()
+        #dlg = RichTextSpellCheckerDialog(self, self._spellchecker, self._main_text_area)
+        #dlg.Show()
+        # TODO show this somewhere.
         # print(self._spellchecker.get_text())
         # print(enchant.list_languages())
         # print(self._spellchecker.dict.provider)
