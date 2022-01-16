@@ -27,32 +27,7 @@ class RichTextSpellCheckerDialog(SpellCheckerDialog):
         surrounding context, as well as listing the suggested replacements.
         :return: False if there is nothing to advance to.
         """
-        # Go to next mistake, disable buttons except Close if no mistake is found.
-        try:
-            self._checker.next()
-        except StopIteration:
-            self.enable_buttons(False)
-            self.mistake_preview_field.Clear()
-            self.replace_with_field.Clear()
-            self.suggestions_list.Clear()
-            return False
-        # Display mistake context with wrong word in red.
-        self.mistake_preview_field.Clear()
-        # Write leading context in black:
-        self.mistake_preview_field.SetDefaultStyle(wx.TextAttr(wx.BLACK))
-        self.mistake_preview_field.AppendText(self._checker.leading_context(self._context_chars))
-        # Write the wrong word in red:
-        self.mistake_preview_field.SetDefaultStyle(wx.TextAttr(wx.RED))
-        self.mistake_preview_field.AppendText(self._checker.word)
-        # Write trailing context in black:
-        self.mistake_preview_field.SetDefaultStyle(wx.TextAttr(wx.BLACK))
-        self.mistake_preview_field.AppendText(self._checker.trailing_context(self._context_chars))
-        # Display suggestions in the replacements list
-        suggestions = self._checker.suggest()
-        self.suggestions_list.Set(suggestions)
-        self.replace_with_field.SetValue(suggestions[0] if suggestions else '')
-        self.enable_buttons()
-
+        super(RichTextSpellCheckerDialog, self).go_to_next()
         self._text_area.SelectWord(self._checker.wordpos)
         # The +1 ensures we always display a line even if it is the last line in currently visible portion of document.
         self._text_area.ShowPosition(self._checker.wordpos + 1)
