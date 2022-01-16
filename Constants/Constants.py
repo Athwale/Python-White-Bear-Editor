@@ -471,8 +471,8 @@ class Strings:
     button_ignore: str = 'Ignore'
     button_ignore_all: str = 'Ignore all'
     button_replace: str = 'Replace'
-    button_replace_all: str = 'Replace all'
     button_add_to_dict: str = 'Add to dictionary'
+    button_settings: str = 'Settings'
 
     undo_last_action: str = 'Last action'
     undo_bold: str = 'Undo bold text'

@@ -1745,10 +1745,12 @@ class MainFrame(wx.Frame):
                     field.SetValue(dlg.get_fixed_text())
                     dlg.Destroy()
 
+        # Run main text spellcheck.
         self._disable_editor(True, all_menu=True)
         dlg = RichTextSpellCheckerDialog(self, self._main_text_area)
         dlg.run()
-        dlg.Show()
+        if dlg.found_mistake():
+            dlg.Show()
         # TODO show this somewhere.
         # print(self._spellchecker.get_text())
         # print(enchant.list_languages())

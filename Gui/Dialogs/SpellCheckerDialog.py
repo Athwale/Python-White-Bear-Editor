@@ -65,10 +65,10 @@ class SpellCheckerDialog(wx.Dialog):
 
         counter: int = 1
         for button_id, label, action in ((wx.ID_REPLACE, Strings.button_replace, self.buttons_handler),
-                                         (wx.ID_REPLACE_ALL, Strings.button_replace_all, self.buttons_handler),
                                          (wx.ID_IGNORE, Strings.button_ignore, self.buttons_handler),
                                          (wx.ID_NOTOALL, Strings.button_ignore_all, self.buttons_handler),
-                                         (wx.ID_ADD, Strings.button_add_to_dict, self.buttons_handler)):
+                                         (wx.ID_ADD, Strings.button_add_to_dict, self.buttons_handler),
+                                         (wx.ID_SETUP, Strings.button_settings, self.buttons_handler)):
             button = wx.Button(self, button_id, label, size=size)
             buttons_sizer.Add(button, 0, wx.ALL, Numbers.widget_border_size)
             button.Bind(wx.EVT_BUTTON, action)
@@ -76,7 +76,6 @@ class SpellCheckerDialog(wx.Dialog):
             if (counter % 2) == 0:
                 buttons_sizer.Add(wx.StaticLine(self, -1, size=size), 0, wx.ALIGN_CENTER_HORIZONTAL)
             counter += 1
-        buttons_sizer.Add(wx.StaticLine(self, -1, size=size), 0, wx.ALIGN_CENTER_HORIZONTAL)
         # Close button will never have to be disabled and therefore is not in _buttons.
         close_button = wx.Button(self, wx.ID_CLOSE, Strings.button_close, size=size)
         buttons_sizer.Add(close_button, 0, wx.ALL, Numbers.widget_border_size)
@@ -153,14 +152,13 @@ class SpellCheckerDialog(wx.Dialog):
             self.go_to_next()
         elif button_id == wx.ID_REPLACE:
             self._replace()
-        elif button_id == wx.ID_REPLACE_ALL:
-            # TODO this???
-            self._checker.replace_always(self.replace_with_field.GetValue())
-            self.go_to_next()
         elif button_id == wx.ID_ADD:
             # Add new word to dictionary.
             self._checker.add()
             self.go_to_next()
+        elif button_id == wx.ID_SETUP:
+            # todo this.
+            print('todo settings dialog')
 
     # noinspection PyUnusedLocal
     def _close_button_handler(self, event: wx.CloseEvent) -> None:
