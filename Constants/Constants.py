@@ -327,6 +327,7 @@ class Strings:
     label_dialog_new_document: str = 'New document'
     label_dialog_edit_menu: str = 'Edit menu'
     label_dialog_spellcheck: str = 'Spellcheck'
+    label_dialog_spellcheck_main: str = 'Spellcheck: main text'
 
     label_article_menu_logo: str = 'Menu logo'
     label_article_menu_logo_name_placeholder: str = 'Menu item name'

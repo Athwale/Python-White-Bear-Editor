@@ -1738,6 +1738,7 @@ class MainFrame(wx.Frame):
                             (self._field_article_name, Strings.label_article_title)):
             text = field.GetValue()
             dlg = SpellCheckerDialog(self, Strings.label_dialog_spellcheck + ': ' + name, field.GetValue())
+            dlg.run()
             if dlg.found_mistake():
                 if dlg.ShowModal() == wx.ID_OK:
                     # Replace text in field and recheck seo again as a result of it.
@@ -1745,8 +1746,9 @@ class MainFrame(wx.Frame):
                     dlg.Destroy()
 
         self._disable_editor(True, all_menu=True)
-        #dlg = RichTextSpellCheckerDialog(self, self._spellchecker, self._main_text_area)
-        #dlg.Show()
+        dlg = RichTextSpellCheckerDialog(self, self._main_text_area)
+        dlg.run()
+        dlg.Show()
         # TODO show this somewhere.
         # print(self._spellchecker.get_text())
         # print(enchant.list_languages())

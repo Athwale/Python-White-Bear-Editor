@@ -1,6 +1,6 @@
 import wx
 from enchant.checker import SpellChecker
-from Constants.Constants import Strings, Numbers, Events
+from Constants.Constants import Strings, Numbers
 from enchant.tokenize import EmailFilter, URLFilter
 from Tools.ConfigManager import ConfigManager
 
@@ -21,7 +21,6 @@ class SpellCheckerDialog(wx.Dialog):
         wx.Dialog.__init__(self, parent, title=title,
                            size=(Numbers.spellcheck_dialog_width, Numbers.spellcheck_dialog_height),
                            style=wx.DEFAULT_DIALOG_STYLE)
-        # TODO do this in the other dialog or inherit.
         self._config_manager: ConfigManager = ConfigManager.get_instance()
         self._checker = SpellChecker(self._config_manager.get_spelling_lang(), filters=[EmailFilter, URLFilter])
         self._text = text
@@ -39,7 +38,6 @@ class SpellCheckerDialog(wx.Dialog):
         self.Bind(wx.EVT_LISTBOX, self.list_select_handler, self.suggestions_list)
         self.Bind(wx.EVT_LISTBOX_DCLICK, self.list_doubleclick_handler, self.suggestions_list)
         self.Bind(wx.EVT_CLOSE, self._close_button_handler, self)
-        self._run()
 
     def _init_layout(self) -> None:
         """
@@ -89,7 +87,7 @@ class SpellCheckerDialog(wx.Dialog):
         # We are using a set dialog size, so Fit method is not needed.
         self.SetSizer(main_sizer)
 
-    def _go_to_next(self) -> bool:
+    def go_to_next(self) -> bool:
         """
         Moves the SpellChecker to the next mistake, if there is one. It then displays the mistake and some
         surrounding context, as well as listing the suggested replacements.
@@ -130,7 +128,7 @@ class SpellCheckerDialog(wx.Dialog):
         replacement = self.replace_with_field.GetValue()
         if replacement:
             self._checker.replace(replacement)
-        self._go_to_next()
+        self.go_to_next()
 
     def enable_buttons(self, state: bool = True) -> None:
         """
@@ -149,19 +147,20 @@ class SpellCheckerDialog(wx.Dialog):
         """
         button_id = event.GetId()
         if button_id == wx.ID_IGNORE:
-            self._go_to_next()
+            self.go_to_next()
         elif button_id == wx.ID_NOTOALL:
             self._checker.ignore_always()
-            self._go_to_next()
+            self.go_to_next()
         elif button_id == wx.ID_REPLACE:
             self._replace()
         elif button_id == wx.ID_REPLACE_ALL:
+            # TODO this???
             self._checker.replace_always(self.replace_with_field.GetValue())
-            self._go_to_next()
+            self.go_to_next()
         elif button_id == wx.ID_ADD:
             # Add new word to dictionary.
             self._checker.add()
-            self._go_to_next()
+            self.go_to_next()
 
     # noinspection PyUnusedLocal
     def _close_button_handler(self, event: wx.CloseEvent) -> None:
@@ -170,10 +169,6 @@ class SpellCheckerDialog(wx.Dialog):
         :param event: Unused.
         :return: None
         """
-        # Send an event to the main gui to signal dialog closing.
-        done_evt = Events.SpellcheckEvent(self.GetId())
-        # Dialog has its own event handler, so use the parent.
-        wx.PostEvent(self.GetParent().GetEventHandler(), done_evt)
         if self.IsModal():
             self.EndModal(wx.ID_OK)
         else:
@@ -213,10 +208,10 @@ class SpellCheckerDialog(wx.Dialog):
         """
         return self._found_mistake
 
-    def _run(self) -> None:
+    def run(self) -> None:
         """
-        Run spellchecker using the text area given to it.
+        Run spellchecker using the text given to it.
         :return: None.
         """
         self._checker.set_text(self._text)
-        self._found_mistake = self._go_to_next()
+        self._found_mistake = self.go_to_next()
