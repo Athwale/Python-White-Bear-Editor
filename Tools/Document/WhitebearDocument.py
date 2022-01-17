@@ -7,12 +7,10 @@ from bs4 import BeautifulSoup
 from Constants.Constants import Numbers
 from Constants.Constants import Strings
 from Exceptions.WrongFormatException import WrongFormatException
-from Tools.ConfigManager import ConfigManager
-from enchant.checker import SpellChecker
-from enchant.tokenize import EmailFilter, URLFilter
+from Tools.SpellCheckedObject import SpellCheckedObject
 
 
-class WhitebearDocument:
+class WhitebearDocument(SpellCheckedObject):
     """
     This class represents a file belonging to the whitebear website. It contains all information associated
     with the file along with getters and setters for easy access and methods for working with the file.
@@ -25,6 +23,7 @@ class WhitebearDocument:
         :param path: Full path on disk to the file
         """
         # File properties
+        super().__init__()
         self._file_name = os.path.basename(path)
         self._path = path
         self._working_directory = os.path.dirname(path)
@@ -32,8 +31,6 @@ class WhitebearDocument:
         # We create instances of documents after validation, so we already know they are valid.
         self._valid = True
         self._status_color = None
-        self._config_manager: ConfigManager = ConfigManager.get_instance()
-        self._spellchecker = SpellChecker(self._config_manager.get_spelling_lang(), filters=[EmailFilter, URLFilter])
 
         # Page data
         self._parsed_html = None
@@ -207,20 +204,6 @@ class WhitebearDocument:
         if self.get_status_color() == Numbers.RED_COLOR:
             return False
         return True
-
-    def _spell_check(self, text: str) -> bool:
-        """
-        Do a spellcheck on the text.
-        :param text: Text to check.
-        :return: Return False if incorrect.
-        """
-        self._spellchecker.set_text(text)
-        try:
-            self._spellchecker.next()
-            return False
-        except StopIteration:
-            # Next raises exception if no mistake is found.
-            return True
 
     # Boolean functions ------------------------------------------------------------------------------------------------
     def is_valid(self) -> bool:

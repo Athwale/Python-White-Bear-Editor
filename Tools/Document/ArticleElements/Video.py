@@ -5,9 +5,10 @@ import wx
 
 from Constants.Constants import Numbers, Strings
 from Resources.Fetch import Fetch
+from Tools.SpellCheckedObject import SpellCheckedObject
 
 
-class Video:
+class Video(SpellCheckedObject):
     """
     Represents a placeholder for a YouTube video in the text of the page.
     """
@@ -22,6 +23,7 @@ class Video:
         :param height: The height of the element.
         :param url: The url of the video
         """
+        super().__init__()
         self._link_title = title
         self._link_title_error_message: str = ''
         self._width = width
@@ -89,6 +91,20 @@ class Video:
         if not result:
             self._status_color = wx.RED
         return result
+
+    def _spell_check(self, text: str) -> bool:
+        """
+        Do a spellcheck on the text.
+        :param text: Text to check.
+        :return: Return False if incorrect.
+        """
+        self._spellchecker.set_text(text)
+        try:
+            self._spellchecker.next()
+            return False
+        except StopIteration:
+            # Next raises exception if no mistake is found.
+            return True
 
     # Getters ----------------------------------------------------------------------------------------------------------
     def get_id(self) -> str:

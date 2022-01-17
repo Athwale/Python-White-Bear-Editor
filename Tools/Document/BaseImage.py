@@ -5,20 +5,18 @@ import wx
 from Constants.Constants import Numbers
 from Constants.Constants import Strings
 from Resources.Fetch import Fetch
-from Tools.ConfigManager import ConfigManager
-from enchant.checker import SpellChecker
-from enchant.tokenize import EmailFilter, URLFilter
+from Tools.SpellCheckedObject import SpellCheckedObject
 
 
-class BaseImage:
+class BaseImage(SpellCheckedObject):
     """
     Base class for AsideImage and ImageInText.
     """
 
     count: int = 1
 
-    def __init__(self, title: str, image_alt: str, original_image_path: str, thumbnail_path: str,
-                 full_filename: str, thumbnail_filename: str):
+    def __init__(self, title: str, image_alt: str, original_image_path: str, thumbnail_path: str, full_filename: str,
+                 thumbnail_filename: str):
         """
         Constructor for a base image instance.
         :param title: html title of the link element.
@@ -28,6 +26,7 @@ class BaseImage:
         :param full_filename: file name of the full image
         :param thumbnail_filename: file name of the thumbnail image
         """
+        super().__init__()
         self._link_title = title
         self._link_title_error_message: str = ''
         self._image_alt = image_alt
@@ -41,9 +40,6 @@ class BaseImage:
         self._thumbnail_size = (0, 0)
         self._original_size = (0, 0)
         self._modified = False
-
-        self._config_manager: ConfigManager = ConfigManager.get_instance()
-        self._spellchecker = SpellChecker(self._config_manager.get_spelling_lang(), filters=[EmailFilter, URLFilter])
 
         # Create a unique ID.
         self._image_id = str(BaseImage.count)
@@ -94,20 +90,6 @@ class BaseImage:
         if not result:
             self._status_color = wx.RED
         return result
-
-    def _spell_check(self, text: str) -> bool:
-        """
-        Do a spellcheck on the text.
-        :param text: Text to check.
-        :return: Return False if incorrect.
-        """
-        self._spellchecker.set_text(text)
-        try:
-            self._spellchecker.next()
-            return False
-        except StopIteration:
-            # Next raises exception if no mistake is found.
-            return True
 
     # Getters ----------------------------------------------------------------------------------------------------------
     def get_id(self) -> str:
