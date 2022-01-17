@@ -88,6 +88,11 @@ class Video(SpellCheckedObject):
             finally:
                 h.close()
 
+        # Spell check
+        if not self._spell_check(self._link_title):
+            self._link_title_error_message = Strings.spelling_error
+            result = False
+
         if not result:
             self._status_color = wx.RED
         return result
