@@ -5,6 +5,7 @@ import wx
 
 from Constants.Constants import Strings, Numbers
 from Gui.Dialogs.AddImageDialog import AddImageDialog
+from Gui.Dialogs.SpellCheckerDialog import SpellCheckerDialog
 from Tools.Document.AsideImage import AsideImage
 from Tools.Tools import Tools
 
@@ -243,6 +244,27 @@ class EditAsideImageDialog(wx.Dialog):
         else:
             # Leave the old image as it is and do not do anything.
             event.Skip()
+
+    def _run_spellcheck(self) -> bool:
+        """
+        Checks spelling on all fields that require it.
+        :return: True if mistakes were found.
+        """
+        # TODO spellcheck on elements the same way it is done for document???
+        # TODO global spellcheck method in master dialog subclass.
+        again = False
+        for field, name in ((self._field_image_caption, Strings.label_article_keywords),
+                            (self._field_image_link_title, Strings.label_article_description),
+                            (self._field_image_alt, Strings.label_article_title)):
+            dlg = SpellCheckerDialog(self, Strings.label_dialog_spellcheck + ': ' + name, field.GetValue())
+            dlg.run()
+            if dlg.found_mistake():
+                if dlg.ShowModal() == wx.ID_OK:
+                    # Replace text in field and recheck seo again as a result of it.
+                    field.SetValue(dlg.get_fixed_text())
+                    dlg.Destroy()
+                again = True
+        return again
 
     def _ask_for_image(self) -> (str, str):
         """

@@ -33,8 +33,6 @@ class WhitebearDocument:
         self._valid = True
         self._status_color = None
         self._config_manager: ConfigManager = ConfigManager.get_instance()
-        # TODO prevent dialog closing until spellcheck is satisfied.
-        # TODO return error if spelling wrong, color red, run spell dialog once for all 3 on upload.
         self._spellchecker = SpellChecker(self._config_manager.get_spelling_lang(), filters=[EmailFilter, URLFilter])
 
         # Page data

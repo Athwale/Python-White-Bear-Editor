@@ -13,6 +13,7 @@ class AddImageDialog(wx.Dialog):
 
     def __init__(self, parent, work_dir: str):
         """
+        This dialog helps with adding a new image to the website folder structure.
         Display a dialog with information about the image where the user can edit it.
         :param parent: Parent frame.
         :param work_dir: The working directory of the editor.

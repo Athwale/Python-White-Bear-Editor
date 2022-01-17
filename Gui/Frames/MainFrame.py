@@ -1736,7 +1736,6 @@ class MainFrame(wx.Frame):
         for field, name in ((self._field_article_keywords, Strings.label_article_keywords),
                             (self._field_article_description, Strings.label_article_description),
                             (self._field_article_name, Strings.label_article_title)):
-            text = field.GetValue()
             dlg = SpellCheckerDialog(self, Strings.label_dialog_spellcheck + ': ' + name, field.GetValue())
             dlg.run()
             if dlg.found_mistake():
@@ -1752,6 +1751,7 @@ class MainFrame(wx.Frame):
         if dlg.found_mistake():
             dlg.Show()
         # TODO show this somewhere.
+        # TODO spellcheck for dialogs, use validator class???
         # print(self._spellchecker.get_text())
         # print(enchant.list_languages())
         # print(self._spellchecker.dict.provider)

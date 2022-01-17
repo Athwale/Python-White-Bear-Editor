@@ -320,7 +320,7 @@ class Strings:
     label_dialog_edit_link: str = 'Edit link'
     label_dialog_edit_video: str = 'Edit video'
     label_dialog_edit_menu_item: str = 'Edit menu item'
-    label_dialog_add_image: str = 'Add image'
+    label_dialog_add_image: str = 'Add image to collection'
     label_dialog_add_logo: str = 'Add menu logo'
     label_dialog_save_file: str = 'Save file'
     label_dialog_page_setup: str = 'Page setup and default values'

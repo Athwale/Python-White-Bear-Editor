@@ -5,6 +5,9 @@ import wx
 from Constants.Constants import Numbers
 from Constants.Constants import Strings
 from Resources.Fetch import Fetch
+from Tools.ConfigManager import ConfigManager
+from enchant.checker import SpellChecker
+from enchant.tokenize import EmailFilter, URLFilter
 
 
 class BaseImage:
@@ -38,6 +41,9 @@ class BaseImage:
         self._thumbnail_size = (0, 0)
         self._original_size = (0, 0)
         self._modified = False
+
+        self._config_manager: ConfigManager = ConfigManager.get_instance()
+        self._spellchecker = SpellChecker(self._config_manager.get_spelling_lang(), filters=[EmailFilter, URLFilter])
 
         # Create a unique ID.
         self._image_id = str(BaseImage.count)
@@ -76,9 +82,32 @@ class BaseImage:
             self._image_alt_error_message = Strings.seo_error_default_value
             result = False
 
+        # Spell checks
+        if not self._spell_check(self._link_title):
+            self._link_title_error_message = Strings.spelling_error
+            result = False
+
+        if not self._spell_check(self._image_alt):
+            self._image_alt_error_message = Strings.spelling_error
+            result = False
+
         if not result:
             self._status_color = wx.RED
         return result
+
+    def _spell_check(self, text: str) -> bool:
+        """
+        Do a spellcheck on the text.
+        :param text: Text to check.
+        :return: Return False if incorrect.
+        """
+        self._spellchecker.set_text(text)
+        try:
+            self._spellchecker.next()
+            return False
+        except StopIteration:
+            # Next raises exception if no mistake is found.
+            return True
 
     # Getters ----------------------------------------------------------------------------------------------------------
     def get_id(self) -> str:
