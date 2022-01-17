@@ -91,6 +91,7 @@ class Video(SpellCheckedObject):
         # Spell check
         if not self._spell_check(self._link_title):
             self._link_title_error_message = Strings.spelling_error
+            self._image = wx.Image(Fetch.get_resource_path('video_seo_error.png'), wx.BITMAP_TYPE_PNG)
             result = False
 
         if not result:

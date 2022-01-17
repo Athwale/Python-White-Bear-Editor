@@ -6,9 +6,10 @@ import httplib2
 import wx
 
 from Constants.Constants import Numbers, Strings
+from Tools.SpellCheckedObject import SpellCheckedObject
 
 
-class Link:
+class Link(SpellCheckedObject):
     """
     Represents a link inside text.
     """
@@ -25,6 +26,7 @@ class Link:
         :param working_directory: The working directory of the editor.
         """
         # All link target blank page except links in menus which we do not parse here.
+        super().__init__()
         self._link_id: str = ''
         self._text = text
         self._text_error_message = ''
@@ -97,6 +99,15 @@ class Link:
                     pass
                 finally:
                     h.close()
+
+        # Spell checks
+        if not self._spell_check(self._link_title):
+            self._link_title_error_message = Strings.spelling_error
+            result = False
+
+        if not self._spell_check(self._text):
+            self._text_error_message = Strings.spelling_error
+            result = False
 
         if not result:
             self._status_color = wx.RED
