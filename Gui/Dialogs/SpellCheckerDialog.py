@@ -127,7 +127,8 @@ class SpellCheckerDialog(wx.Dialog):
         replacement = self.replace_with_field.GetValue()
         if replacement:
             self._checker.replace(replacement)
-        self.go_to_next()
+        if not self.go_to_next():
+            self._close()
 
     def enable_buttons(self, state: bool = True) -> None:
         """
@@ -163,8 +164,15 @@ class SpellCheckerDialog(wx.Dialog):
     # noinspection PyUnusedLocal
     def _close_button_handler(self, event: wx.CloseEvent) -> None:
         """
-        Handle dialog closing.
+        Handle dialog closing with Close and X buttons.
         :param event: Unused.
+        :return: None
+        """
+        self._close()
+
+    def _close(self) -> None:
+        """
+        Close self.
         :return: None
         """
         if self.IsModal():

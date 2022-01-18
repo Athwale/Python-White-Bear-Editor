@@ -232,6 +232,7 @@ class EditAsideImageDialog(SpellCheckedDialog):
                 self._display_dialog_contents()
                 # Spellcheck dialog only appears if a mistake is found.
                 # TODO reshow color in fields after spellcheck.
+                # TODO close spelling dialog if no more mistakes are found.
                 self._run_spellcheck(((self._field_image_caption, Strings.label_article_image_caption),
                                       (self._field_image_link_title, Strings.label_link_title),
                                       (self._field_image_alt, Strings.label_alt_description)))
