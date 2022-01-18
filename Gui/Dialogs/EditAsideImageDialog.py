@@ -211,6 +211,10 @@ class EditAsideImageDialog(SpellCheckedDialog):
                 self._change_image(new_path, new_name)
                 self._ok_button.SetDefault()
         elif event.GetId() == wx.ID_OK:
+            # Spellcheck dialog only appears if a mistake is found.
+            self._run_spellcheck(((self._field_image_caption, Strings.label_article_image_caption),
+                                  (self._field_image_link_title, Strings.label_link_title),
+                                  (self._field_image_alt, Strings.label_alt_description)))
             # Save new information into image and rerun seo test.
             self._image_copy.set_caption(self._field_image_caption.GetValue())
             self._image_copy.set_link_title(self._field_image_link_title.GetValue())
@@ -229,13 +233,8 @@ class EditAsideImageDialog(SpellCheckedDialog):
                 event.Skip()
                 return
             else:
-                self._display_dialog_contents()
-                # Spellcheck dialog only appears if a mistake is found.
                 # TODO reshow color in fields after spellcheck.
-                # TODO close spelling dialog if no more mistakes are found.
-                self._run_spellcheck(((self._field_image_caption, Strings.label_article_image_caption),
-                                      (self._field_image_link_title, Strings.label_link_title),
-                                      (self._field_image_alt, Strings.label_alt_description)))
+                self._display_dialog_contents()
         elif event.GetId() == wx.ID_ADD:
             dlg = AddImageDialog(self, self._work_dir)
             saved = dlg.ShowModal()
