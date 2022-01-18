@@ -5,12 +5,12 @@ import wx
 
 from Constants.Constants import Strings, Numbers
 from Gui.Dialogs.AddImageDialog import AddImageDialog
-from Gui.Dialogs.SpellCheckerDialog import SpellCheckerDialog
+from Gui.Dialogs.SpellCheckedDialog import SpellCheckedDialog
 from Tools.Document.AsideImage import AsideImage
 from Tools.Tools import Tools
 
 
-class EditAsideImageDialog(wx.Dialog):
+class EditAsideImageDialog(SpellCheckedDialog):
 
     def __init__(self, parent, image: AsideImage, work_dir: str):
         """
@@ -19,10 +19,9 @@ class EditAsideImageDialog(wx.Dialog):
         :param image: AsideImage instance being edited by this dialog.
         :param work_dir: The working directory of the editor.
         """
-        wx.Dialog.__init__(self, parent, title=Strings.label_dialog_edit_image,
-                           size=(Numbers.edit_aside_image_dialog_width, Numbers.edit_aside_image_dialog_height),
-                           style=wx.DEFAULT_DIALOG_STYLE)
-
+        super().__init__(parent, title=Strings.label_dialog_edit_image,
+                         size=(Numbers.edit_aside_image_dialog_width, Numbers.edit_aside_image_dialog_height),
+                         style=wx.DEFAULT_DIALOG_STYLE)
         self._work_dir = work_dir
         self._original_image: AsideImage = image
         self._image_copy: AsideImage = self._original_image.copy()
@@ -231,6 +230,11 @@ class EditAsideImageDialog(wx.Dialog):
                 return
             else:
                 self._display_dialog_contents()
+                # Spellcheck dialog only appears if a mistake is found.
+                # TODO reshow color in fields after spellcheck.
+                self._run_spellcheck(((self._field_image_caption, Strings.label_article_image_caption),
+                                      (self._field_image_link_title, Strings.label_link_title),
+                                      (self._field_image_alt, Strings.label_alt_description)))
         elif event.GetId() == wx.ID_ADD:
             dlg = AddImageDialog(self, self._work_dir)
             saved = dlg.ShowModal()
@@ -244,27 +248,6 @@ class EditAsideImageDialog(wx.Dialog):
         else:
             # Leave the old image as it is and do not do anything.
             event.Skip()
-
-    def _run_spellcheck(self) -> bool:
-        """
-        Checks spelling on all fields that require it.
-        :return: True if mistakes were found.
-        """
-        # TODO spellcheck on elements the same way it is done for document???
-        # TODO global spellcheck method in master dialog subclass.
-        again = False
-        for field, name in ((self._field_image_caption, Strings.label_article_keywords),
-                            (self._field_image_link_title, Strings.label_article_description),
-                            (self._field_image_alt, Strings.label_article_title)):
-            dlg = SpellCheckerDialog(self, Strings.label_dialog_spellcheck + ': ' + name, field.GetValue())
-            dlg.run()
-            if dlg.found_mistake():
-                if dlg.ShowModal() == wx.ID_OK:
-                    # Replace text in field and recheck seo again as a result of it.
-                    field.SetValue(dlg.get_fixed_text())
-                    dlg.Destroy()
-                again = True
-        return again
 
     def _ask_for_image(self) -> (str, str):
         """
