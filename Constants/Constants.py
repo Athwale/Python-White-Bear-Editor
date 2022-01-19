@@ -473,6 +473,7 @@ class Strings:
     button_replace: str = 'Replace'
     button_add_to_dict: str = 'Add to dictionary'
     button_settings: str = 'Settings'
+    button_spellcheck: str = 'Spellcheck'
 
     undo_last_action: str = 'Last action'
     undo_bold: str = 'Undo bold text'
