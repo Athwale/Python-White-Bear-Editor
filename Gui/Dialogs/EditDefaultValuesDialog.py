@@ -1,12 +1,13 @@
 import wx
 
 from Constants.Constants import Strings, Numbers
+from Gui.Dialogs.SpellCheckedDialog import SpellCheckedDialog
 from Tools.ConfigManager import ConfigManager
 from Tools.Document.WhitebearDocument import WhitebearDocument
 from Tools.Tools import Tools
 
 
-class EditDefaultValuesDialog(wx.Dialog):
+class EditDefaultValuesDialog(SpellCheckedDialog):
 
     def __init__(self, parent, no_cancel: bool = False):
         """
@@ -15,9 +16,9 @@ class EditDefaultValuesDialog(wx.Dialog):
         :param parent: The parent frame.
         :param no_cancel: Do not display cancel button. Used to force page setup completion.
         """
-        wx.Dialog.__init__(self, parent, title=Strings.label_dialog_page_setup,
-                           size=(Numbers.page_setup_dialog_width, Numbers.page_setup_dialog_height),
-                           style=wx.CAPTION)
+        super().__init__(parent, title=Strings.label_dialog_page_setup,
+                         size=(Numbers.page_setup_dialog_width, Numbers.page_setup_dialog_height),
+                         style=wx.CAPTION)
 
         self._config_manager: ConfigManager = ConfigManager.get_instance()
         # This is used just for seo testing keywords and description.
@@ -169,26 +170,8 @@ class EditDefaultValuesDialog(wx.Dialog):
         # Bind handlers
         self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._ok_button)
         self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._cancel_button)
-        for field in [self._field_global_title, self._field_author, self._field_contact, self._field_script,
-                      self._field_black_text, self._field_red_text, self._field_meta_keywords,
-                      self._field_meta_description, self._field_url]:
-            self.Bind(wx.EVT_TEXT, self._text_handler, field)
 
         self._display_dialog_contents()
-
-    # noinspection PyUnusedLocal
-    def _text_handler(self, event: wx.CommandEvent) -> None:
-        """
-        Run seo test on keywords and description when the text changes and prevent saving the values if seo fails.
-        :param event: Not used.
-        :return: None
-        """
-        if not self._seo_test():
-            self._ok_button.Disable()
-            self._cancel_button.Disable()
-        else:
-            self._ok_button.Enable()
-            self._cancel_button.Enable()
 
     def _handle_buttons(self, event: wx.CommandEvent) -> None:
         """
@@ -196,24 +179,36 @@ class EditDefaultValuesDialog(wx.Dialog):
         :param event: The button event
         :return: None
         """
-        event.Skip()
         if event.GetId() == wx.ID_OK:
-            # In these cases all documents must be re-exported to reflect the change.
-            result = self._config_manager.store_global_title(self._field_global_title.GetValue())
-            self._save_all = self._save_all or result
-            result = self._config_manager.store_author(self._field_author.GetValue())
-            self._save_all = self._save_all or result
-            result = self._config_manager.store_script(self._field_script.GetValue())
-            self._save_all = self._save_all or result
+            # Run spellcheck then run seo test, then save if ok.
+            self._run_spellcheck(((self._field_global_title, Strings.label_global_title),
+                                 (self._field_author, Strings.label_author),
+                                 (self._field_meta_keywords, Strings.label_default_keywords),
+                                 (self._field_meta_description, Strings.label_main_meta_description),
+                                 (self._field_black_text, Strings.label_main_page_text),
+                                 (self._field_red_text, Strings.label_main_page_warning)))
+            if self._seo_test():
+                # In these cases all documents must be re-exported to reflect the change.
+                result = self._config_manager.store_global_title(self._field_global_title.GetValue())
+                self._save_all = self._save_all or result
+                result = self._config_manager.store_author(self._field_author.GetValue())
+                self._save_all = self._save_all or result
+                result = self._config_manager.store_script(self._field_script.GetValue())
+                self._save_all = self._save_all or result
 
-            # Keywords can be individual for each page. The global value is for new articles.
-            self._config_manager.store_url(self._field_url.GetValue())
-            self._config_manager.store_global_keywords(self._field_meta_keywords.GetValue())
-            self._config_manager.store_contact(self._field_contact.GetValue())
-            self._config_manager.store_main_page_description(self._field_meta_description.GetValue())
-            self._config_manager.store_black_text(self._field_black_text.GetValue())
-            self._config_manager.store_red_text(self._field_red_text.GetValue())
-            self._config_manager.store_number_of_news(self._news_spinner.GetValue())
+                # Keywords can be individual for each page. The global value is for new articles.
+                self._config_manager.store_url(self._field_url.GetValue())
+                self._config_manager.store_global_keywords(self._field_meta_keywords.GetValue())
+                self._config_manager.store_contact(self._field_contact.GetValue())
+                self._config_manager.store_main_page_description(self._field_meta_description.GetValue())
+                self._config_manager.store_black_text(self._field_black_text.GetValue())
+                self._config_manager.store_red_text(self._field_red_text.GetValue())
+                self._config_manager.store_number_of_news(self._news_spinner.GetValue())
+                event.Skip()
+            else:
+                self._display_dialog_contents()
+        elif event.GetId() == wx.ID_CANCEL:
+            event.Skip()
 
     def _display_dialog_contents(self) -> None:
         """
