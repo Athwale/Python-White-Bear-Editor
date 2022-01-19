@@ -1745,10 +1745,10 @@ class MainFrame(wx.Frame):
                     dlg.Destroy()
 
         # Run main text spellcheck.
-        self._disable_editor(True, all_menu=True)
         dlg = RichTextSpellCheckerDialog(self, self._main_text_area)
         dlg.run()
         if dlg.found_mistake():
+            self._disable_editor(True, all_menu=True)
             dlg.Show()
         # TODO show this somewhere.
         # TODO spellcheck for dialogs, use validator class???

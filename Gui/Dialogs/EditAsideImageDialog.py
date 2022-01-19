@@ -233,7 +233,6 @@ class EditAsideImageDialog(SpellCheckedDialog):
                 event.Skip()
                 return
             else:
-                # TODO reshow color in fields after spellcheck.
                 self._display_dialog_contents()
         elif event.GetId() == wx.ID_ADD:
             dlg = AddImageDialog(self, self._work_dir)

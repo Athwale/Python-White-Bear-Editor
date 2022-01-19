@@ -5,6 +5,7 @@ Starting class for the whitebear editor GUI. This class is necessary and must be
 OnInit must be overridden here.
 # TODO fix bugs and package this into a binary. Package into rpm Ponorme se do pythonu nebo youtube.
 # TODO spellcheck.
+# TODO hover hint on document color and font meaning.
 # TODO viz wx forum copy paste reply.
 # TODO switch to pathlib, Path.home(), exists... https://naucse.python.cz/2019/pyladies-brno-podzim-st/intro/pathlib/
 # TODO show some interesting information rich text GetNumberOfLines

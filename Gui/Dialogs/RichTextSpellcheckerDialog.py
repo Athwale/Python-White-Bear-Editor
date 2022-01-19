@@ -27,11 +27,12 @@ class RichTextSpellCheckerDialog(SpellCheckerDialog):
         surrounding context, as well as listing the suggested replacements.
         :return: False if there is nothing to advance to.
         """
-        super(RichTextSpellCheckerDialog, self).go_to_next()
-        self._text_area.SelectWord(self._checker.wordpos)
-        # The +1 ensures we always display a line even if it is the last line in currently visible portion of document.
-        self._text_area.ShowPosition(self._checker.wordpos + 1)
-        return True
+        if super(RichTextSpellCheckerDialog, self).go_to_next():
+            self._text_area.SelectWord(self._checker.wordpos)
+            # The +1 ensures we always display a line even if it is the last line in currently visible document.
+            self._text_area.ShowPosition(self._checker.wordpos + 1)
+            return True
+        return False
 
     def _replace(self) -> None:
         """
