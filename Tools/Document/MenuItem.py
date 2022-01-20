@@ -3,15 +3,15 @@ import wx
 from Constants.Constants import Numbers
 from Constants.Constants import Strings
 from Resources.Fetch import Fetch
+from Tools.SpellCheckedObject import SpellCheckedObject
 
 
-class MenuItem:
+class MenuItem(SpellCheckedObject):
     """
     Carrier class for a parsed menu item.
     """
 
-    def __init__(self, name: str, title: str, image_alt: str, href: str, disk_path: str,
-                 img_filename: str):
+    def __init__(self, name: str, title: str, image_alt: str, href: str, disk_path: str, img_filename: str):
         """
         Constructor for a menu item.
         :param name: Name of the article in the menu.
@@ -21,6 +21,7 @@ class MenuItem:
         :param disk_path: path to the menu image.
         :param img_filename: The filename of the menu image
         """
+        super().__init__()
         self._article_name = name
         self._article_name_error_message: str = ''
         self._link_title = title
@@ -101,6 +102,20 @@ class MenuItem:
         if self._image_alt == Strings.label_article_image_alt:
             self._image_alt_error_message = Strings.seo_error_default_value
             result = False
+
+        # Spellchecks
+        if not self._spell_check(self._article_name):
+            self._article_name_error_message = Strings.spelling_error
+            result = False
+
+        if not self._spell_check(self._link_title):
+            self._link_title_error_message = Strings.spelling_error
+            result = False
+
+        if not self._spell_check(self._image_alt):
+            self._image_alt_error_message = Strings.spelling_error
+            result = False
+
         if not result:
             self._status_color = wx.RED
         return result

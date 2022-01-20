@@ -1751,7 +1751,8 @@ class MainFrame(wx.Frame):
             self._disable_editor(True, all_menu=True)
             dlg.Show()
         # TODO show this somewhere.
-        # TODO spellcheck for dialogs, use validator class???
+        # TODO what happens when uploading a spell wrong/seo failed menu?
+
         # print(self._spellchecker.get_text())
         # print(enchant.list_languages())
         # print(self._spellchecker.dict.provider)
