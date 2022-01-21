@@ -1,13 +1,14 @@
 import wx
 
 from Constants.Constants import Strings, Numbers
+from Gui.Dialogs.SpellCheckedDialog import SpellCheckedDialog
 from Threads.WorkerThread import WorkerThread
 from Tools.ConfigManager import ConfigManager
 from Tools.Document.ArticleElements.Video import Video
 from Tools.Tools import Tools
 
 
-class EditVideoDialog(wx.Dialog):
+class EditVideoDialog(SpellCheckedDialog):
 
     def __init__(self, parent, video: Video):
         """
@@ -15,9 +16,9 @@ class EditVideoDialog(wx.Dialog):
         :param parent: Parent frame.
         :param video: Video instance being edited by this dialog.
         """
-        wx.Dialog.__init__(self, parent, title=Strings.label_dialog_edit_video, size=(Numbers.edit_video_dialog_width,
-                                                                                      Numbers.edit_video_dialog_height),
-                           style=wx.DEFAULT_DIALOG_STYLE)
+        super().__init__(parent, title=Strings.label_dialog_edit_video,
+                         size=(Numbers.edit_video_dialog_width, Numbers.edit_video_dialog_height),
+                         style=wx.DEFAULT_DIALOG_STYLE)
         self._video = video
         self._config_manager = ConfigManager.get_instance()
 
@@ -91,6 +92,8 @@ class EditVideoDialog(wx.Dialog):
         :return: None
         """
         if event.GetId() == wx.ID_OK:
+            # Spellcheck dialog only appears if a mistake is found.
+            self._run_spellcheck(((self._field_video_link_title, Strings.label_video_link_title),))
             # Save new information into image and rerun seo test.
             self._video.set_title(self._field_video_link_title.GetValue())
             self._video.set_url(self._field_video_url.GetValue())
