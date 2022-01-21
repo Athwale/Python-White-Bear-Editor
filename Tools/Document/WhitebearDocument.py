@@ -7,10 +7,10 @@ from bs4 import BeautifulSoup
 from Constants.Constants import Numbers
 from Constants.Constants import Strings
 from Exceptions.WrongFormatException import WrongFormatException
-from Tools.ConfigManager import ConfigManager
+from Tools.SpellCheckedObject import SpellCheckedObject
 
 
-class WhitebearDocument:
+class WhitebearDocument(SpellCheckedObject):
     """
     This class represents a file belonging to the whitebear website. It contains all information associated
     with the file along with getters and setters for easy access and methods for working with the file.
@@ -23,14 +23,14 @@ class WhitebearDocument:
         :param path: Full path on disk to the file
         """
         # File properties
+        super().__init__()
         self._file_name = os.path.basename(path)
         self._path = path
         self._working_directory = os.path.dirname(path)
         self._modified = False
-        # We create instances of documents after validation so we already know they are valid.
+        # We create instances of documents after validation, so we already know they are valid.
         self._valid = True
         self._status_color = None
-        self._config_manager: ConfigManager = ConfigManager.get_instance()
 
         # Page data
         self._parsed_html = None
@@ -44,7 +44,7 @@ class WhitebearDocument:
     def parse_self(self) -> None:
         """
         Parse this document and fill internal variables with content. Only call this after the subclass has validated
-        it self.
+        itself.
         :return: None
         :raises WrongFormatException: if there is a problem with parsing the document.
         """
@@ -70,7 +70,7 @@ class WhitebearDocument:
         """
         Parse the meta keywords of this document and save it into an instance variable.
         :return: None
-        :raises WrongFormatException: if there are more than one keywords tags.
+        :raises WrongFormatException: if there are more than one keyword tags.
         """
         keywords = self._parsed_html.find_all(name='meta', attrs={'name': 'keywords', 'content': True})
         if len(keywords) == 1:
@@ -93,8 +93,7 @@ class WhitebearDocument:
             # Does not preserve &nbsp
             self._parsed_html = BeautifulSoup(minimized, 'html5lib')
 
-    @staticmethod
-    def seo_test_keywords(keywords: str) -> (bool, str, wx.Colour):
+    def seo_test_keywords(self, keywords: str) -> (bool, str, wx.Colour):
         """
         SEO test keywords and return False, error string and new status color if incorrect.
         :param keywords: The keywords to check.
@@ -119,12 +118,15 @@ class WhitebearDocument:
                     keywords_error_message = Strings.seo_error_keywords_length
                     result = False
 
+        if not self._spell_check(keywords):
+            keywords_error_message = Strings.spelling_error
+            result = False
+
         if not result:
             color = Numbers.RED_COLOR
         return result, keywords_error_message, color
 
-    @staticmethod
-    def seo_test_description(description: str) -> (bool, str, wx.Colour):
+    def seo_test_description(self, description: str) -> (bool, str, wx.Colour):
         """
         SEO test description and return False, error string and new status color if incorrect.
         :param description: The description to check
@@ -141,12 +143,15 @@ class WhitebearDocument:
             description_error_message = Strings.seo_error_default_value
             result = False
 
+        if not self._spell_check(description):
+            description_error_message = Strings.spelling_error
+            result = False
+
         if not result:
             color = Numbers.RED_COLOR
         return result, description_error_message, color
 
-    @staticmethod
-    def seo_test_name(name: str) -> (bool, str, wx.Colour):
+    def seo_test_name(self, name: str) -> (bool, str, wx.Colour):
         """
         SEO test article name and return False, error string and new status color if incorrect.
         :param name: The name to check
@@ -160,6 +165,10 @@ class WhitebearDocument:
             result = False
         if name == Strings.label_article_title:
             page_name_error_message = Strings.seo_error_default_value
+            result = False
+
+        if not self._spell_check(name):
+            page_name_error_message = Strings.spelling_error
             result = False
 
         if not result:

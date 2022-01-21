@@ -34,7 +34,7 @@ class ImageTextField(RichTextFieldTypeStandard):
 
     def GetPropertiesMenuLabel(self, obj: RichTextField) -> str:
         """
-        Returns the label to be used for the properties context menu item.
+        Returns the label to be used for the properties' context menu item.
         :param obj: Unused
         :return: Label for the context menu.
         """

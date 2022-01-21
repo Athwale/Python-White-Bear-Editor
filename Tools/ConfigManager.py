@@ -2,6 +2,7 @@ import os
 from typing import Tuple, Dict, List
 
 import yaml
+import enchant
 from yaml.parser import ParserError
 from yaml.scanner import ScannerError
 
@@ -20,6 +21,7 @@ class ConfigManager:
     CONF_LAST: str = 'last'
     CONF_POSITION: str = 'pos'
     CONF_SIZE: str = 'size'
+    CONF_LANG: str = 'spellLang'
 
     CONF_GLOBAL_TITLE: str = 'title'
     CONF_AUTHOR: str = 'author'
@@ -40,7 +42,9 @@ class ConfigManager:
 
     @staticmethod
     def get_instance():
-        """ Static access method. """
+        """
+        Static access method.
+        """
         if ConfigManager.__instance is None:
             ConfigManager()
         return ConfigManager.__instance
@@ -78,6 +82,7 @@ class ConfigManager:
                 self.CONF_USER: '',
                 self.CONF_KEYFILE: '',
                 self.CONF_ONLINE_TEST: '1',
+                self.CONF_LANG: enchant.get_default_language(),
                 self.CONF_LAST_IMG_DIR: Strings.home_directory,
                 self.CONF_NEWS: str(Numbers.default_news),
                 self.CONF_UNUPLOADED: []}
@@ -111,7 +116,7 @@ class ConfigManager:
         Save the configuration onto disk drive in user's home.
         :return: None
         """
-        # At this point after constructor, the config file exists and is full or empty but it is writeable.
+        # At this point after constructor, the config file exists and is full or empty, but it is writeable.
         # This clears the file and writes new contents.
         with open(Strings.editor_config_file, 'w') as file:
             yaml.dump(self._whole_conf, file)
@@ -148,6 +153,11 @@ class ConfigManager:
         # If last img dir is not present, reset it to home dir.
         if self.CONF_LAST_IMG_DIR not in self._dir_conf.keys():
             self._dir_conf[self.CONF_LAST_IMG_DIR] = Strings.home_directory
+
+        # If spelling language is not set, use default.
+        default_language = enchant.get_default_language()
+        if self.CONF_LANG not in self._dir_conf.keys():
+            self._dir_conf[self.CONF_LANG] = default_language
 
         return correct
 
@@ -342,6 +352,22 @@ class ConfigManager:
         """
         return self._dir_conf[self.CONF_UNUPLOADED]
 
+    def get_spelling_lang(self) -> str:
+        """
+        Get spelling language for spellchecker.
+        :return: Spelling language code for spellchecker.
+        """
+        return self._dir_conf[self.CONF_LANG]
+
+    def store_spelling_language(self, lang: str) -> None:
+        """
+        Save new spelling language setting.
+        :param lang: New spelling language code.
+        :return: None
+        """
+        self._dir_conf[self.CONF_LANG] = lang
+        self.save_config_file()
+
     def store_not_uploaded(self, file: str) -> None:
         """
         Add a file name to the not yet uploaded file list if not in it already.
@@ -525,7 +551,7 @@ class ConfigManager:
 
     def store_number_of_news(self, news: int) -> None:
         """
-        Save the the number of latest articles to display into the dictionary.
+        Save the number of the latest articles to display into the dictionary.
         :param news: The number of articles.
         :return: None
         """

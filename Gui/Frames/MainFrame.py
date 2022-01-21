@@ -2,11 +2,11 @@ import os
 from datetime import datetime
 from shutil import copyfile
 from typing import Dict, List
-
+import enchant
 import wx
 import wx.richtext as rt
 
-from Constants.Constants import Numbers
+from Constants.Constants import Numbers, Events
 from Constants.Constants import Strings
 from Exceptions.UnrecognizedFileException import UnrecognizedFileException
 from Gui.Dialogs.AboutDialog import AboutDialog
@@ -17,7 +17,9 @@ from Gui.Dialogs.EditDefaultValuesDialog import EditDefaultValuesDialog
 from Gui.Dialogs.EditMenuDialog import EditMenuDialog
 from Gui.Dialogs.EditMenuItemDialog import EditMenuItemDialog
 from Gui.Dialogs.NewFileDialog import NewFileDialog
+from Gui.Dialogs.SpellCheckerDialog import SpellCheckerDialog
 from Gui.Dialogs.UploadDialog import UploadDialog
+from Gui.Dialogs.RichTextSpellcheckerDialog import RichTextSpellCheckerDialog
 from Gui.Panels.AsideImagePanel import AsideImagePanel
 from Gui.Panels.CustomRichText import CustomRichText
 from Resources.Fetch import Fetch
@@ -36,14 +38,14 @@ from Tools.Tools import Tools
 
 class MainFrame(wx.Frame):
     """
-    Main GUI controlling class. The Frame is actually the on screen window.
+    Main GUI controlling class. The Frame is actually the on the screen window.
     """
     VIDEO_TOOL_ID: int = wx.NewId()
     IMAGE_TOOL_ID: int = wx.NewId()
 
     def __init__(self):
         """
-        Constructor for the GUI of the editor. This is the main frame so we pass None as the parent.
+        Constructor for the GUI of the editor. This is the main frame, so we pass None as the parent.
         """
         # -1 is a special ID which generates a random wx ID
         super(MainFrame, self).__init__(None, -1, title=Strings.editor_name + ' - ' + Strings.status_loading,
@@ -99,6 +101,9 @@ class MainFrame(wx.Frame):
             self._file_menu.Check(wx.ID_NETWORK, self._config_manager.get_online_test())
         else:
             self._disable_editor(True)
+
+        # TODO create a settings dialog for spellchecker with additional information.
+        # TODO show spelling error message somewhere.
 
         # Load last window position and size
         self.SetPosition((self._config_manager.get_window_position()))
@@ -203,6 +208,10 @@ class MainFrame(wx.Frame):
                                                       Strings.label_menu_item_select_all,
                                                       Strings.label_menu_item_select_all_hint)
         self._disableable_menu_items.append(self._edit_menu_item_select_all)
+        self._edit_menu_item_spellcheck = wx.MenuItem(self._edit_menu, wx.ID_SPELL_CHECK,
+                                                      Strings.label_menu_item_spellcheck,
+                                                      Strings.label_menu_item_spellcheck_hint)
+        self._disableable_menu_items.append(self._edit_menu_item_spellcheck)
 
         self._edit_menu.Append(self._edit_menu_item_undo)
         self._edit_menu.Append(self._edit_menu_item_redo)
@@ -210,6 +219,7 @@ class MainFrame(wx.Frame):
         self._edit_menu.Append(self._edit_menu_item_cut)
         self._edit_menu.Append(self._edit_menu_item_paste)
         self._edit_menu.Append(self._edit_menu_item_select_all)
+        self._edit_menu.Append(self._edit_menu_item_spellcheck)
 
         # Add menu ---------------------------------------------------------------------------------------------------
         self._add_menu_item_add_image = wx.MenuItem(self._add_menu, wx.ID_ADD, Strings.label_menu_item_add_text_image,
@@ -258,7 +268,7 @@ class MainFrame(wx.Frame):
 
     def _init_top_tool_bar(self) -> None:
         """
-        Set up top tool bar for the frame.
+        Set up top toolbar for the frame.
         :return: None
         """
         self.tool_bar: wx.ToolBar = self.CreateToolBar(style=wx.TB_DEFAULT_STYLE)
@@ -315,7 +325,7 @@ class MainFrame(wx.Frame):
 
     def _init_toolbar_controls(self) -> None:
         """
-        Add search box into the top tool bar.
+        Add search box into the top toolbar.
         :return: None
         """
         if not self.tool_bar.FindById(wx.ID_FIND):
@@ -535,7 +545,6 @@ class MainFrame(wx.Frame):
                                         border=Numbers.widget_border_size)
         # Update file color on change.
         self.Bind(wx.EVT_TEXT, self._text_area_edit_handler, self._main_text_area)
-        # --------------------------------------------------------------------------------------------------------------
 
     def _bind_handlers(self) -> None:
         """
@@ -543,7 +552,7 @@ class MainFrame(wx.Frame):
         :return: None
         """
         # Binding an event to a handler function, the last parameter is the source of the event. In case of for
-        # example buttons, all buttons will create EVT_BUTTON and we will not know which handler to use unless
+        # example buttons, all buttons will create EVT_BUTTON, and we will not know which handler to use unless
         # the source is set.
         # Bind window close events, X button and emergency quit
         self.Bind(wx.EVT_CLOSE, self._close_button_handler, self)
@@ -551,7 +560,9 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_QUERY_END_SESSION, self._close_button_handler)
 
         # Bind a handler that changes selected document color if an edit happens in other controls.
-        self.Bind(wx.EVT_COLOUR_CHANGED, self._text_area_edit_handler)
+        self.Bind(Events.EVT_DOCUMENT_CHANGED, self._text_area_edit_handler)
+        # Bind a handler to the spell check event to allow enabling editor without spellcheck being a modal dialog.
+        self.Bind(Events.EVT_SPELLCHECK_DONE, self._spellcheck_done_handler)
 
         # Bind menu item clicks
         self.Bind(wx.EVT_MENU, self._about_button_handler, self._help_menu_item_about)
@@ -562,6 +573,7 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self._forward_event, self._edit_menu_item_undo)
         self.Bind(wx.EVT_MENU, self._forward_event, self._edit_menu_item_redo)
         self.Bind(wx.EVT_MENU, self._forward_event, self._edit_menu_item_select_all)
+        self.Bind(wx.EVT_MENU, self._spellcheck_handler, self._edit_menu_item_spellcheck)
         self.Bind(wx.EVT_MENU, self._add_image_handler, self._add_menu_item_add_image)
         self.Bind(wx.EVT_MENU, self._insert_aside_image_handler, self._add_menu_item_side_image)
         self.Bind(wx.EVT_MENU, self._add_menu_logo_handler, self._add_menu_item_add_logo)
@@ -640,7 +652,7 @@ class MainFrame(wx.Frame):
         self.Enable()
         if state:
             # Disabling the editor (disable editor True)
-            self._main_text_area.SetBackgroundColour(wx.LIGHT_GREY)
+            self._main_text_area.SetBackgroundColour(Numbers.LIGHT_GREY_COLOR)
             if not leave_files:
                 self._split_screen.Disable()
                 self._file_list.SetBackgroundColour(wx.LIGHT_GREY)
@@ -723,7 +735,7 @@ class MainFrame(wx.Frame):
 
     def on_css_parsed(self, css: WhitebearDocumentCSS) -> None:
         """
-        Generates text color tools in tool bar once css is parsed.
+        Generates text color tools in toolbar once css is parsed.
         :param css: The parsed css file.
         :return: None
         """
@@ -834,7 +846,7 @@ class MainFrame(wx.Frame):
                 if char + 1 > color_range[1] + 1:
                     break
                 single_range = rt.RichTextRange(char, char + 1)
-                # Get the attributes of the single char range and modify them in place. Otherwise changing paragraph.
+                # Get the attributes of the single char range and modify them in place. Otherwise, changing paragraph.
                 # style is broken since the attributes are reset for the range.
                 attr = rt.RichTextAttr()
                 self._main_text_area.GetStyleForRange(single_range, attr)
@@ -1067,22 +1079,14 @@ class MainFrame(wx.Frame):
         self._update_file_color()
         edit_dialog.Destroy()
 
-    # noinspection PyUnusedLocal
-    def _quit_button_handler(self, event) -> None:
-        """
-        Handles clicks to the Quit button in File menu. Calls Close function which sends EVT_CLOSE and triggers
-        close_button_handler() which does all the saving work.
-        :param event: Not used
-        :return: None
-        """
-        self.Close(force=False)
-
-    def _close_button_handler(self, event):
+    def _close_button_handler(self, event: wx.CloseEvent):
         """
         Handle user exit from the editor. Save last known window position, size and last opened document.
         :param event: CloseEvent, if CanVeto is False the window must be destroyed the system is forcing it.
         :return: None
         """
+        if not self._enabled:
+            return
         if event.CanVeto():
             # Save window position
             self._config_manager.store_window_position(self.GetScreenPosition())
@@ -1106,7 +1110,7 @@ class MainFrame(wx.Frame):
                         event.Veto()
                         return
             else:
-                # If the built in close function is not called, destroy must be called explicitly, calling Close runs
+                # If the built-in close function is not called, destroy must be called explicitly, calling Close runs
                 # the close handler.
                 self.Destroy()
 
@@ -1120,14 +1124,14 @@ class MainFrame(wx.Frame):
         """
         dlg = wx.DirDialog(self, Strings.label_dialog_choose_wb_dir, Strings.home_directory,
                            wx.DD_DIR_MUST_EXIST | wx.DD_CHANGE_DIR)
-        # Modal means the user is locked into this dialog an can not use the rest of the application
+        # Modal means the user is locked into this dialog and can not use the rest of the application
         if dlg.ShowModal() == wx.ID_OK:
             if not self._config_manager.set_active_dir(dlg.GetPath()):
                 self._config_manager.add_directory(dlg.GetPath())
                 self._config_manager.set_active_dir(dlg.GetPath())
             self._current_document_instance = None
             self._load_working_directory(self._config_manager.get_working_dir())
-        # This must be called, the dialog stays in memory so you can retrieve data and would not be destroyed.
+        # This must be called, the dialog stays in memory, so you can retrieve data and would not be destroyed.
         dlg.Destroy()
 
     # noinspection PyUnusedLocal
@@ -1155,7 +1159,7 @@ class MainFrame(wx.Frame):
         :param leave_files: Leave the filelist uncleared.
         :return: None
         """
-        # Ignore changes to article metadata so it is not saved into the file.
+        # Ignore changes to article metadata, so it is not saved into the file.
         self._ignore_change = True
         self.SetTitle(Strings.editor_name)
         placeholder_logo_image = wx.Image(Numbers.menu_logo_image_size, Numbers.menu_logo_image_size)
@@ -1186,8 +1190,8 @@ class MainFrame(wx.Frame):
 
     def _list_item_click_handler(self, event):
         """
-        Handler function for clicking a page name in the web page list. Revalidates the document against schema. If
-        errors are discovered, disables editor and shows a message.
+        Handler for clicking a page name in the web page list. Revalidates the document against schema. If errors are
+        discovered, disables editor and shows a message.
         :param event: wx event, brings the selected string from the menu.
         :return: None
         """
@@ -1364,7 +1368,7 @@ class MainFrame(wx.Frame):
             self._update_file_color()
 
     # noinspection PyUnusedLocal
-    def _text_area_edit_handler(self, event: wx.CommandEvent) -> None:
+    def _text_area_edit_handler(self, event) -> None:
         """
         Handle special events that signal that the color of the selected item in the filelist should be updated.
         This happens when an edit has been made to the document.
@@ -1498,7 +1502,7 @@ class MainFrame(wx.Frame):
             self._set_status_text(Strings.status_ready, 3)
             return False
 
-        text_content: str = self._main_text_area.GetValue().lower()
+        text_content: str = self._main_text_area.get_text().lower()
         start_index: int = text_content.find(self._search_term, 0)
         while start_index != -1:
             # At least one was found
@@ -1650,7 +1654,7 @@ class MainFrame(wx.Frame):
                     self._current_document_name = ''
                     self._clear_editor(leave_files=False)
                     self._file_menu_item_delete.Enable(False)
-                    # If nothing is left there will be no threads and so we can enable the files and new file here.
+                    # If nothing is left there will be no threads, and so we can enable the files and new file here.
                     self._disable_editor(True, True)
                     return
                 # If there are any other documents enable the editor and continue with the next document.
@@ -1719,3 +1723,47 @@ class MainFrame(wx.Frame):
             self._config_manager.store_online_test(True)
         else:
             self._config_manager.store_online_test(False)
+
+    # noinspection PyUnusedLocal
+    def _spellcheck_handler(self, event: wx.CommandEvent) -> None:
+        """
+        Handle spellcheck dialog.
+        :param event: Not used.
+        :return: None
+        """
+        # TODO Make spellcheck manual run on all metadata and main text.
+        # First run spellcheck dialog on metadata and article name if needed.
+        for field, name in ((self._field_article_keywords, Strings.label_article_keywords),
+                            (self._field_article_description, Strings.label_article_description),
+                            (self._field_article_name, Strings.label_article_title)):
+            dlg = SpellCheckerDialog(self, Strings.label_dialog_spellcheck + ': ' + name, field.GetValue())
+            dlg.run()
+            if dlg.found_mistake():
+                if dlg.ShowModal() == wx.ID_OK:
+                    # Replace text in field and recheck seo again as a result of it.
+                    field.SetValue(dlg.get_fixed_text())
+                    dlg.Destroy()
+
+        # Run main text spellcheck.
+        dlg = RichTextSpellCheckerDialog(self, self._main_text_area)
+        dlg.run()
+        if dlg.found_mistake():
+            self._disable_editor(True, all_menu=True)
+            dlg.Show()
+        # TODO show this somewhere.
+        # TODO what happens when uploading a spell wrong/seo failed menu?
+
+        # print(self._spellchecker.get_text())
+        # print(enchant.list_languages())
+        # print(self._spellchecker.dict.provider)
+        # print(Path(enchant.get_user_config_dir() / Path(self._spellchecker.lang)))
+
+    # noinspection PyUnusedLocal
+    def _spellcheck_done_handler(self, event: wx.CommandEvent) -> None:
+        """
+        Handle enabling the editor when spell checking dialog is closed.
+        :param event: Not used.
+        :return: None
+        """
+        self._disable_editor(False)
+        self._main_text_area.SelectNone()

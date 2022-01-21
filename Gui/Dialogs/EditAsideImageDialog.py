@@ -5,23 +5,23 @@ import wx
 
 from Constants.Constants import Strings, Numbers
 from Gui.Dialogs.AddImageDialog import AddImageDialog
+from Gui.Dialogs.SpellCheckedDialog import SpellCheckedDialog
 from Tools.Document.AsideImage import AsideImage
 from Tools.Tools import Tools
 
 
-class EditAsideImageDialog(wx.Dialog):
+class EditAsideImageDialog(SpellCheckedDialog):
 
     def __init__(self, parent, image: AsideImage, work_dir: str):
         """
         Display a dialog with information about the image where the user can edit it.
         :param parent: Parent frame.
-        :param image: AsideImage instance being edited by tis dialog.
+        :param image: AsideImage instance being edited by this dialog.
         :param work_dir: The working directory of the editor.
         """
-        wx.Dialog.__init__(self, parent, title=Strings.label_dialog_edit_image,
-                           size=(Numbers.edit_aside_image_dialog_width, Numbers.edit_aside_image_dialog_height),
-                           style=wx.DEFAULT_DIALOG_STYLE)
-
+        super().__init__(parent, title=Strings.label_dialog_edit_image,
+                         size=(Numbers.edit_aside_image_dialog_width, Numbers.edit_aside_image_dialog_height),
+                         style=wx.DEFAULT_DIALOG_STYLE)
         self._work_dir = work_dir
         self._original_image: AsideImage = image
         self._image_copy: AsideImage = self._original_image.copy()
@@ -211,6 +211,10 @@ class EditAsideImageDialog(wx.Dialog):
                 self._change_image(new_path, new_name)
                 self._ok_button.SetDefault()
         elif event.GetId() == wx.ID_OK:
+            # Spellcheck dialog only appears if a mistake is found.
+            self._run_spellcheck(((self._field_image_caption, Strings.label_article_image_caption),
+                                  (self._field_image_link_title, Strings.label_link_title),
+                                  (self._field_image_alt, Strings.label_alt_description)))
             # Save new information into image and rerun seo test.
             self._image_copy.set_caption(self._field_image_caption.GetValue())
             self._image_copy.set_link_title(self._field_image_link_title.GetValue())

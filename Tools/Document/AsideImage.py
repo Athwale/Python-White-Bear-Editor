@@ -82,6 +82,11 @@ class AsideImage(BaseImage):
                 self._image = wx.Image(Fetch.get_resource_path('main_image_missing.png'), wx.BITMAP_TYPE_PNG)
                 result = False
 
+        # Spell check
+        if not self._spell_check(self._caption):
+            self._caption_error_message = Strings.spelling_error
+            result = False
+
         if not result:
             self._status_color = wx.RED
         return result

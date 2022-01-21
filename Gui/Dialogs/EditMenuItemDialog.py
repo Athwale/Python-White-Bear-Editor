@@ -4,20 +4,21 @@ import wx
 
 from Constants.Constants import Strings, Numbers
 from Gui.Dialogs.AddLogoDialog import AddLogoDialog
+from Gui.Dialogs.SpellCheckedDialog import SpellCheckedDialog
 from Tools.Document.MenuItem import MenuItem
 from Tools.Tools import Tools
 
 
-class EditMenuItemDialog(wx.Dialog):
+class EditMenuItemDialog(SpellCheckedDialog):
 
     def __init__(self, parent, item: MenuItem, work_dir: str):
         """
         Display a dialog with information about the image where the user can edit it.
         :param parent: Parent frame.
-        :param item: MenuItem instance being edited by tis dialog.
+        :param item: MenuItem instance being edited by this dialog.
         :param work_dir: Working directory of the editor.
         """
-        wx.Dialog.__init__(self, parent, title=Strings.label_dialog_edit_menu_item,
+        super().__init__(parent, title=Strings.label_dialog_edit_menu_item,
                            size=(Numbers.edit_aside_image_dialog_width, Numbers.edit_menu_item_dialog_height),
                            style=wx.DEFAULT_DIALOG_STYLE)
 
@@ -201,15 +202,23 @@ class EditMenuItemDialog(wx.Dialog):
             self._field_item_name_tip.EnableTip(True)
         else:
             self._content_item_name.SetBackgroundColour(wx.NullColour)
-            self._field_item_name.SetBackgroundColour(Numbers.GREEN_COLOR)
-            self._field_item_name_tip.SetMessage(Strings.seo_check + '\n' + Strings.status_ok)
-            self._field_item_name_tip.DoHideNow()
-            self._ok_button.Enable()
+            self._item_copy.set_article_name(text)
+            self._item_copy.seo_test_self()
+            if self._item_copy.get_article_name()[1]:
+                # There is an error message for article name.
+                self._field_item_name.SetBackgroundColour(Numbers.RED_COLOR)
+                self._field_item_name_tip.SetMessage(Strings.seo_check + '\n' + self._item_copy.get_article_name()[1])
+                self._field_item_name_tip.EnableTip(True)
+            else:
+                self._field_item_name.SetBackgroundColour(Numbers.GREEN_COLOR)
+                self._field_item_name_tip.SetMessage(Strings.seo_check + '\n' + Strings.status_ok)
+                self._field_item_name_tip.DoHideNow()
+                self._ok_button.Enable()
 
     def _handle_buttons(self, event: wx.CommandEvent) -> None:
         """
         Handle button clicks, run seo check on the new values and display results. Prevent closing if seo failed.
-        :param event: The button event
+        :param event: The button event.
         :return: None
         """
         if event.GetId() == wx.ID_OPEN:
@@ -223,6 +232,9 @@ class EditMenuItemDialog(wx.Dialog):
                 self._ok_button.SetDefault()
         elif event.GetId() == wx.ID_OK:
             # Save new information into image and rerun seo test.
+            self._run_spellcheck(((self._field_item_name, Strings.label_menu_item_name),
+                                  (self._field_image_link_title, Strings.label_link_title),
+                                  (self._field_image_alt, Strings.label_alt_description)))
             self._item_copy.set_article_name(self._field_item_name.GetValue())
             self._item_copy.set_link_title(self._field_image_link_title.GetValue())
             self._item_copy.set_image_alt(self._field_image_alt.GetValue())

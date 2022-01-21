@@ -34,7 +34,7 @@ class Tools:
     @staticmethod
     def validate(html_string: str, schema: str) -> (bool, List[str]):
         """
-        Validate a document against an xml schema.
+        Validate a document against a xml schema.
         :param html_string: Html document as string.
         :param schema: The name of the schema to use.
         :return: Tuple of boolean validation result and optional list of error messages.

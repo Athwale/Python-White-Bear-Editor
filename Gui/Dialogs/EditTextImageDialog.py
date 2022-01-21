@@ -4,22 +4,23 @@ import wx
 
 from Constants.Constants import Strings, Numbers
 from Gui.Dialogs.AddImageDialog import AddImageDialog
+from Gui.Dialogs.SpellCheckedDialog import SpellCheckedDialog
 from Tools.Document.ArticleElements.ImageInText import ImageInText
 from Tools.Tools import Tools
 
 
-class EditTextImageDialog(wx.Dialog):
+class EditTextImageDialog(SpellCheckedDialog):
 
     def __init__(self, parent, image: ImageInText, working_dir: str):
         """
         Display a dialog with information about the image where the user can edit it.
         :param parent: Parent frame.
-        :param image: ImageInText instance being edited by tis dialog.
+        :param image: ImageInText instance being edited by this dialog.
         :param working_dir: Working directory of the editor
         """
-        wx.Dialog.__init__(self, parent, title=Strings.label_dialog_edit_image,
-                           size=(Numbers.edit_text_image_dialog_width, Numbers.edit_text_image_dialog_height),
-                           style=wx.DEFAULT_DIALOG_STYLE)
+        super().__init__(parent, title=Strings.label_dialog_edit_image,
+                         size=(Numbers.edit_text_image_dialog_width, Numbers.edit_text_image_dialog_height),
+                         style=wx.DEFAULT_DIALOG_STYLE)
         self._work_dir = working_dir
         self._original_image: ImageInText = image
         self._image_copy: ImageInText = self._original_image.copy()
@@ -197,6 +198,8 @@ class EditTextImageDialog(wx.Dialog):
                     self._change_image(*dlg.get_thumbnail_location())
             dlg.Destroy()
         elif event.GetId() == wx.ID_OK:
+            self._run_spellcheck(((self._field_image_link_title, Strings.label_link_title),
+                                  (self._field_image_alt, Strings.label_alt_description)))
             # Save new information into the copy of the image and rerun seo test.
             self._image_copy.set_link_title(self._field_image_link_title.GetValue())
             self._image_copy.set_alt(self._field_image_alt.GetValue())
@@ -313,7 +316,7 @@ class EditTextImageDialog(wx.Dialog):
         if thumb_path:
             self._content_image_thumbnail_path.SetLabelText(thumb_path)
         else:
-            # Show which picture is should have been.
+            # Show which picture it should have been.
             self._content_image_thumbnail_path.SetLabelText(self._image_copy.get_thumbnail_filename())
 
         # Adapt dialog size to the new image, use default if missing thumbnail.

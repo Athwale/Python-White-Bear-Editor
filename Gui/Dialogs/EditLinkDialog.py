@@ -1,13 +1,14 @@
 import wx
 
 from Constants.Constants import Strings, Numbers
+from Gui.Dialogs.SpellCheckedDialog import SpellCheckedDialog
 from Threads.WorkerThread import WorkerThread
 from Tools.ConfigManager import ConfigManager
 from Tools.Document.ArticleElements.Link import Link
 from Tools.Tools import Tools
 
 
-class EditLinkDialog(wx.Dialog):
+class EditLinkDialog(SpellCheckedDialog):
 
     def __init__(self, parent, link: Link):
         """
@@ -15,9 +16,9 @@ class EditLinkDialog(wx.Dialog):
         :param parent: Parent frame.
         :param link: the Link instance to display.
         """
-        wx.Dialog.__init__(self, parent, title=Strings.label_dialog_edit_link,
-                           size=(Numbers.edit_link_dialog_width, Numbers.edit_link_dialog_height),
-                           style=wx.DEFAULT_DIALOG_STYLE)
+        super().__init__(parent, title=Strings.label_dialog_edit_link,
+                         size=(Numbers.edit_link_dialog_width, Numbers.edit_link_dialog_height),
+                         style=wx.DEFAULT_DIALOG_STYLE)
         self._link = link
         self._config_manager = ConfigManager.get_instance()
 
@@ -114,6 +115,8 @@ class EditLinkDialog(wx.Dialog):
             event.Skip()
             self.EndModal(wx.ID_DELETE)
         elif event.GetId() == wx.ID_OK:
+            self._run_spellcheck(((self._field_link_title, Strings.label_link_title),
+                                  (self._field_link_text, Strings.label_text)))
             # Save new information into image and rerun seo test.
             self._link.set_text(self._field_link_text.GetValue())
             self._link.set_title(self._field_link_title.GetValue())

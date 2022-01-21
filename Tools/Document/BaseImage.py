@@ -5,17 +5,18 @@ import wx
 from Constants.Constants import Numbers
 from Constants.Constants import Strings
 from Resources.Fetch import Fetch
+from Tools.SpellCheckedObject import SpellCheckedObject
 
 
-class BaseImage:
+class BaseImage(SpellCheckedObject):
     """
     Base class for AsideImage and ImageInText.
     """
 
     count: int = 1
 
-    def __init__(self, title: str, image_alt: str, original_image_path: str, thumbnail_path: str,
-                 full_filename: str, thumbnail_filename: str):
+    def __init__(self, title: str, image_alt: str, original_image_path: str, thumbnail_path: str, full_filename: str,
+                 thumbnail_filename: str):
         """
         Constructor for a base image instance.
         :param title: html title of the link element.
@@ -25,6 +26,7 @@ class BaseImage:
         :param full_filename: file name of the full image
         :param thumbnail_filename: file name of the thumbnail image
         """
+        super().__init__()
         self._link_title = title
         self._link_title_error_message: str = ''
         self._image_alt = image_alt
@@ -49,7 +51,7 @@ class BaseImage:
         warning image.
         :return: True if test is ok, False otherwise
         """
-        # Disk paths have to be checked by the sub classes.
+        # Disk paths have to be checked by the subclasses.
         # Clear all error before each retest
         self._link_title_error_message = ''
         self._image_alt_error_message = ''
@@ -74,6 +76,15 @@ class BaseImage:
 
         if self._image_alt == Strings.label_article_image_alt:
             self._image_alt_error_message = Strings.seo_error_default_value
+            result = False
+
+        # Spell checks
+        if not self._spell_check(self._link_title):
+            self._link_title_error_message = Strings.spelling_error
+            result = False
+
+        if not self._spell_check(self._image_alt):
+            self._image_alt_error_message = Strings.spelling_error
             result = False
 
         if not result:

@@ -5,11 +5,12 @@ import wx
 
 from Constants.Constants import Numbers, Strings
 from Resources.Fetch import Fetch
+from Tools.SpellCheckedObject import SpellCheckedObject
 
 
-class Video:
+class Video(SpellCheckedObject):
     """
-    Represents a placeholder for a youtube video in the text of the page.
+    Represents a placeholder for a YouTube video in the text of the page.
     """
 
     count: int = 1
@@ -22,6 +23,7 @@ class Video:
         :param height: The height of the element.
         :param url: The url of the video
         """
+        super().__init__()
         self._link_title = title
         self._link_title_error_message: str = ''
         self._width = width
@@ -43,7 +45,7 @@ class Video:
         :param online: Do online url test.
         :return: True if no error is found.
         """
-        # Disk paths have to be checked by the sub classes.
+        # Disk paths have to be checked by the subclasses.
         # Clear all error before each retest
         self._link_title_error_message = ''
         self._url_error_message = ''
@@ -86,9 +88,29 @@ class Video:
             finally:
                 h.close()
 
+        # Spell check
+        if not self._spell_check(self._link_title):
+            self._link_title_error_message = Strings.spelling_error
+            self._image = wx.Image(Fetch.get_resource_path('video_seo_error.png'), wx.BITMAP_TYPE_PNG)
+            result = False
+
         if not result:
             self._status_color = wx.RED
         return result
+
+    def _spell_check(self, text: str) -> bool:
+        """
+        Do a spellcheck on the text.
+        :param text: Text to check.
+        :return: Return False if incorrect.
+        """
+        self._spellchecker.set_text(text)
+        try:
+            self._spellchecker.next()
+            return False
+        except StopIteration:
+            # Next raises exception if no mistake is found.
+            return True
 
     # Getters ----------------------------------------------------------------------------------------------------------
     def get_id(self) -> str:

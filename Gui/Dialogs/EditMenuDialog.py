@@ -4,12 +4,13 @@ from typing import Dict
 import wx
 
 from Constants.Constants import Strings, Numbers
+from Gui.Dialogs.SpellCheckedDialog import SpellCheckedDialog
 from Tools.ConfigManager import ConfigManager
 from Tools.Document.WhitebearDocumentMenu import WhitebearDocumentMenu
 from Tools.Tools import Tools
 
 
-class EditMenuDialog(wx.Dialog):
+class EditMenuDialog(SpellCheckedDialog):
 
     def __init__(self, parent, menus: Dict[str, WhitebearDocumentMenu], work_dir: str):
         """
@@ -19,9 +20,8 @@ class EditMenuDialog(wx.Dialog):
         :param menus: A dictionary of filename.html, WhitebearDocumentMenu
         :param work_dir: Working directory of the editor.
         """
-        wx.Dialog.__init__(self, parent, title=Strings.label_dialog_edit_menu,
-                           size=(Numbers.edit_menu_dialog_width, Numbers.edit_menu_dialog_height),
-                           style=wx.CAPTION)
+        super().__init__(parent, title=Strings.label_dialog_edit_menu,
+                         size=(Numbers.edit_menu_dialog_width, Numbers.edit_menu_dialog_height), style=wx.CAPTION)
 
         self._config_manager: ConfigManager = ConfigManager.get_instance()
         self._menus = menus
@@ -66,7 +66,7 @@ class EditMenuDialog(wx.Dialog):
         self._meta_keywords_sub_sizer.Add(self._field_meta_keywords, proportion=1)
         self._information_sizer.Add(self._meta_keywords_sub_sizer, flag=wx.EXPAND | wx.TOP,
                                     border=Numbers.widget_border_size)
-        self._field_keywords_tip = Tools.get_warning_tip(self._field_meta_keywords, Strings.label_article_keywords)
+        self._field_keywords_tip = Tools.get_warning_tip(self._field_meta_keywords, Strings.label_menu_meta_keywords)
         self._field_keywords_tip.SetMessage(Strings.label_menu_meta_keywords)
 
         # --------------------------------------------------------------------------------------------------------------
@@ -89,9 +89,12 @@ class EditMenuDialog(wx.Dialog):
         self._ok_button = wx.Button(self, wx.ID_OK, Strings.button_save)
         self._cancel_button = wx.Button(self, wx.ID_CANCEL, Strings.button_cancel)
         self._ok_button.SetDefault()
+        self._spellcheck_button = wx.Button(self, wx.ID_SPELL_CHECK, Strings.button_spellcheck)
         grouping_sizer.Add(self._ok_button)
         grouping_sizer.Add((Numbers.widget_border_size, Numbers.widget_border_size))
         grouping_sizer.Add(self._cancel_button)
+        grouping_sizer.Add((Numbers.widget_border_size, Numbers.widget_border_size))
+        grouping_sizer.Add(self._spellcheck_button)
         self._button_sizer.Add(grouping_sizer, flag=wx.ALIGN_CENTER_HORIZONTAL)
 
         # Putting the sizers together
@@ -106,6 +109,7 @@ class EditMenuDialog(wx.Dialog):
         # Bind handlers
         self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._ok_button)
         self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._cancel_button)
+        self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._spellcheck_button)
         self.Bind(wx.EVT_BUTTON, self._handle_new_menu_button, self._add_button)
         self.Bind(wx.EVT_LISTBOX, self._menu_list_handler, self._menu_list)
         for field in [self._field_page_name, self._field_meta_keywords, self._field_meta_description]:
@@ -127,14 +131,18 @@ class EditMenuDialog(wx.Dialog):
         :param event: Not used.
         :return: None
         """
-        if not self._seo_test():
+        seo, spelling = self._seo_test()
+        if not seo:
             self._ok_button.Disable()
             self._menu_list.Disable()
             self._add_button.Disable()
+            if not spelling:
+                self._spellcheck_button.Enable()
         else:
             self._ok_button.Enable()
             self._menu_list.Enable()
             self._add_button.Enable()
+            self._spellcheck_button.Disable()
 
     def _handle_buttons(self, event: wx.CommandEvent) -> None:
         """
@@ -145,6 +153,10 @@ class EditMenuDialog(wx.Dialog):
         event.Skip()
         if event.GetId() == wx.ID_OK:
             self._save()
+        elif event.GetId() == wx.ID_SPELL_CHECK:
+            self._run_spellcheck(((self._field_page_name, Strings.label_menu_name),
+                                  (self._field_meta_keywords, Strings.label_menu_meta_keywords),
+                                  (self._field_meta_description, Strings.label_menu_meta_description)))
 
     def _save(self) -> None:
         """
@@ -185,31 +197,38 @@ class EditMenuDialog(wx.Dialog):
             self._seo_test()
             self.Enable()
 
-    def _seo_test(self) -> bool:
+    def _seo_test(self) -> (bool, bool):
         """
         SEO test meta keywords and meta description.
-        :return: True if seo is ok.
+        :return: True, True if seo and spelling is ok. (SEO, Spellcheck)
         """
-        result = True
+        seo_result = True
+        spelling_result = True
         # Keywords test.
         correct, message, color = self._menu.seo_test_keywords(self._field_meta_keywords.GetValue())
-        result = result and correct
+        seo_result = seo_result and correct
+        if message == Strings.spelling_error:
+            spelling_result = False
         self._field_meta_keywords.SetBackgroundColour(color)
         self._field_keywords_tip.SetMessage(Strings.seo_check + '\n' + message)
 
         # Description test.
         correct, message, color = self._menu.seo_test_description(self._field_meta_description.GetValue())
-        result = result and correct
+        seo_result = seo_result and correct
+        if message == Strings.spelling_error:
+            spelling_result = False
         self._set_field_background(self._field_meta_description, color)
         self._field_description_tip.SetMessage(Strings.seo_check + '\n' + message)
 
         # Test name
         correct, message, color = self._menu.seo_test_name(self._field_page_name.GetValue())
-        result = result and correct
+        seo_result = seo_result and correct
+        if message == Strings.spelling_error:
+            spelling_result = False
         self._field_page_name.SetBackgroundColour(color)
         self._field_page_name_tip.SetMessage(Strings.seo_check + '\n' + message)
 
-        return result
+        return seo_result, spelling_result
 
     @staticmethod
     def _set_field_background(field: wx.TextCtrl, color: wx.Colour) -> None:

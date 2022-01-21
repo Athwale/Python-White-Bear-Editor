@@ -27,14 +27,14 @@ class CustomRichText(rt.RichTextCtrl):
     def __init__(self, img_tool_id: int, video_tool_id: int, style_control: wx.ListBox, parent, style):
         """
         Constructor for the custom rich text control.
-        :param img_tool_id: Id of the insert image tool.
-        :param video_tool_id: Id of the insert video tool.
+        :param img_tool_id: ID of the insert image tool.
+        :param video_tool_id: ID of the insert video tool.
         :param style_control: Style control from gui.
         :param parent: Parent of this control.
         :param style: wx style attributes.
         """
         super().__init__(parent, -1, style=style)
-        # Required for copy paste to work and retain text attributes.
+        # Required for copy/paste to work and retain text attributes.
         rt.RichTextBuffer.AddHandler(rt.RichTextXMLHandler())
         self._parent = parent
         self._doc = None
@@ -339,7 +339,7 @@ class CustomRichText(rt.RichTextCtrl):
             # Only links can be underlined, it is safe to remove it here.
             attrs.SetFontUnderlined(style.GetFontUnderlined())
             if attrs.HasURL():
-                # If any child has a url flag, remove it and set font color to normal.
+                # If any child has an url flag, remove it and set font color to normal.
                 attrs.SetURL('')
                 attrs.SetFlags(attrs.GetFlags() ^ wx.TEXT_ATTR_URL)
                 attrs.SetTextColour(style.GetTextColour())
@@ -349,7 +349,7 @@ class CustomRichText(rt.RichTextCtrl):
     def _apply_paragraph_style(buffer: rt.RichTextBuffer, position: int, preserve_url: bool) -> None:
         """
         Changes current paragraph under the cursor into the paragraph style defined for normal text.
-        Retains links, text weight and color.
+        Keeps link attr, text weight and color.
         :param buffer: The rich text buffer to work with.
         :param position: The position of the caret.
         :param preserve_url: True to preserve urls.
@@ -422,7 +422,7 @@ class CustomRichText(rt.RichTextCtrl):
         for child in p.GetChildren():
             child: rt.RichTextPlainText
             saved_attrs = {}
-            # The built in wx Copy method causes the children to disappear for a wtf reason.
+            # The built-in wx Copy method causes the children to disappear for a wtf reason.
             attrs: rt.RichTextAttr = child.GetAttributes()
             if attrs.GetFontFaceName() == Strings.style_heading_3 or attrs.GetFontFaceName() == Strings.style_heading_4:
                 # Do not save bold font weight from heading style.
@@ -754,7 +754,7 @@ class CustomRichText(rt.RichTextCtrl):
                 # if the first style is image, paste on new line if we are not on an empty line to preserve style.
                 p = ctrl_buffer.GetParagraphAtPosition(self.GetAdjustedCaretPosition(self.GetCaretPosition()))
                 if p.GetChild(0).GetText():
-                    # This messes up the caret position because of the self so we must restore it.
+                    # This messes up the caret position because of the self, so we must restore it.
                     # Set the style to the current style before adding the new line, otherwise the current line changes.
                     paste_buffer.SetDefaultStyle(paste_buffer.GetStyleSheet().FindStyle(current_style[0]).GetStyle())
                     if current_style[0] == Strings.style_list:
@@ -826,8 +826,8 @@ class CustomRichText(rt.RichTextCtrl):
                         child.SetFieldType(new_field.get_id())
             if len(paste_buffer.GetChildren()) > 1:
                 # Add empty paragraph after the pasted text. This paragraph retains the original style from the point of
-                # paste. The paragraph will be removed later if empty. Catches images because a field has an empty line
-                # added to the front.
+                # paste. The paragraph will be removed later if empty. Catches image fields because a field has an
+                # empty line added to the front.
                 paste_buffer.AddParagraph('')
             elif paste_buffer.GetChildCount() == 1 and isinstance(paste_buffer.GetChild(0).GetChild(0),
                                                                   rt.RichTextField):
@@ -880,7 +880,7 @@ class CustomRichText(rt.RichTextCtrl):
     # noinspection PyUnusedLocal
     def _paste_finish(self, event: rt.RichTextEvent) -> None:
         """
-        Finish pasting a new text. Delete the additional empty paragraph to workaround the weird behavior of last
+        Finish pasting a new text. Delete the additional empty paragraph to work around the weird behavior of last
         paragraph being pasted in the style of the paste start point.
         :param event: Not used.
         :return: None
@@ -1077,6 +1077,18 @@ class CustomRichText(rt.RichTextCtrl):
         self._load_indicator = True
         # Set focus to the text area.
         wx.CallLater(100, self.SetFocus)
+
+    def replace_string_with_style(self, replacement: str) -> None:
+        """
+        Replace selected string in the control with a different string and keep the style.
+        :param replacement: New string
+        :return: None
+        """
+        selection: rt.RichTextSelection = self.GetSelection()
+        # Range is one char off for some reason.
+        selection_range = rt.RichTextRange(selection.GetRange()[0], selection.GetRange()[1] + 1)
+        self.Delete(selection_range)
+        self.WriteText(replacement)
 
     def _write_list(self, ul: UnorderedList) -> None:
         """
@@ -1324,7 +1336,7 @@ class CustomRichText(rt.RichTextCtrl):
                 if char + 1 > bold_range[1] + 1:
                     break
                 single_range = rt.RichTextRange(char, char + 1)
-                # Get the attributes of the single char range and modify them in place. Otherwise changing paragraph.
+                # Get the attributes of the single char range and modify them in place. Otherwise, changing paragraph.
                 # style is broken since the attributes are reset for the range.
                 attr = rt.RichTextAttr()
                 self.GetStyleForRange(single_range, attr)
@@ -1360,6 +1372,30 @@ class CustomRichText(rt.RichTextCtrl):
             else:
                 self.EndBold()
 
+    def get_text(self) -> str:
+        """
+        Returns the contents of the text field as a string with new lines in place of images and videos.
+        This helps with searching in the field based on index because the GetValue method omits images and videos.
+        :return: The contents of the text field as a string with new line characters in place of images and videos.
+        """
+        full_text: str = ''
+        buffer: rt.RichTextBuffer = self.GetBuffer()
+        paragraphs: List[rt.RichTextParagraph] = buffer.GetChildren()
+        if paragraphs:
+            if isinstance(paragraphs[0].GetChild(0), rt.RichTextField):
+                # For some reason when the first paragraph is a field the special character is not necessary.
+                full_text = '\n'
+            else:
+                full_text = paragraphs[0].GetTextForRange(paragraphs[0].GetRange())
+        for p in list(paragraphs)[1:]:
+            if isinstance(p.GetChild(0), rt.RichTextField):
+                # Images and videos are Fields and these paragraph contain no characters and throw off index.
+                # Use a special unsearchable character.
+                full_text = full_text + Numbers.blank_character + '\n'
+            else:
+                full_text = full_text + '\n' + p.GetTextForRange(p.GetRange())
+        return full_text
+
     def convert_document(self) -> None:
         """
         Create an internal representation of the document using the article elements classes.
@@ -1389,7 +1425,7 @@ class CustomRichText(rt.RichTextCtrl):
                     if next_p:
                         # Do not append empty paragraphs.
                         new_text_elements.append(next_p)
-                    # Skip multiple empty paragraphs which are translated to breaks.
+                    # Skip multiple empty paragraphs which are translated to line breaks.
                     if p.GetTextForRange(p.GetRange()):
                         last_was_paragraph = True
             elif par_style == Strings.style_heading_3 or par_style == Strings.style_heading_4:

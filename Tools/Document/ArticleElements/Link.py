@@ -6,9 +6,10 @@ import httplib2
 import wx
 
 from Constants.Constants import Numbers, Strings
+from Tools.SpellCheckedObject import SpellCheckedObject
 
 
-class Link:
+class Link(SpellCheckedObject):
     """
     Represents a link inside text.
     """
@@ -21,10 +22,11 @@ class Link:
         :param text: The visible text of the link.
         :param url: The URL of the link.
         :param title: The html title of the link.
-        :param loaded_pages: A dictionary of all other loaded pages.
+        :param loaded_pages: A dictionary of all loaded pages.
         :param working_directory: The working directory of the editor.
         """
         # All link target blank page except links in menus which we do not parse here.
+        super().__init__()
         self._link_id: str = ''
         self._text = text
         self._text_error_message = ''
@@ -49,7 +51,7 @@ class Link:
         :param online: Do online url test.
         :return: True if no error is found.
         """
-        # Disk paths have to be checked by the sub classes.
+        # Disk paths have to be checked by the subclasses.
         # Clear all error before each retest
         self._link_title_error_message = ''
         self._url_error_message = ''
@@ -98,6 +100,15 @@ class Link:
                 finally:
                     h.close()
 
+        # Spell checks
+        if not self._spell_check(self._link_title):
+            self._link_title_error_message = Strings.spelling_error
+            result = False
+
+        if not self._spell_check(self._text):
+            self._text_error_message = Strings.spelling_error
+            result = False
+
         if not result:
             self._status_color = wx.RED
         return result
@@ -133,8 +144,8 @@ class Link:
 
     def get_loaded_pages(self) -> List[str]:
         """
-        Return a list of all other loaded whitebear page names.
-        :return: a list of all other loaded whitebear page names.
+        Return a list of all loaded whitebear page names.
+        :return: a list of all loaded whitebear page names.
         """
         return list(self._loaded_pages.keys())
 

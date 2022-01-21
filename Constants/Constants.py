@@ -1,6 +1,12 @@
 import os.path
 
 from wx import Colour
+import wx.lib.newevent
+
+
+class Events:
+    ColorEvent, EVT_DOCUMENT_CHANGED = wx.lib.newevent.NewCommandEvent()
+    SpellcheckEvent, EVT_SPELLCHECK_DONE = wx.lib.newevent.NewCommandEvent()
 
 
 class Numbers:
@@ -9,12 +15,14 @@ class Numbers:
     DARK_GREEN_COLOR = Colour(21, 112, 49)
     YELLOW_COLOR = Colour(250, 255, 196)
     BLUE_COLOR = Colour(145, 207, 255)
+    LIGHT_GREY_COLOR = Colour(235, 235, 235)
 
     blank_character = '\u2800'
     private_key_permissions: oct = 0o600
     connection_timeout: int = 5
     put_timeout: int = 20
     online_test_timeout: int = 10
+    context_chars: int = 40
 
     three_click_timeout: int = 600
     photo_ratio: float = 4 / 3
@@ -60,6 +68,8 @@ class Numbers:
     color_icon_width: int = 15
     color_icon_height: int = 15
     splashscreen_dialog_size: (int, int) = (350, 350)
+    spellcheck_dialog_width: int = 500
+    spellcheck_dialog_height: int = 357
 
     # Styling
     main_heading_size = 18
@@ -212,6 +222,8 @@ class Strings:
     seo_error_video_size_wrong: str = 'The size of the video element is incorrect'
     seo_check: str = 'SEO Check:'
 
+    spelling_error: str = 'Spellcheck warning'
+
     warning_name_incorrect: str = 'Incorrect name\nDo not use file extension\nDo not use special characters'
     warning_file_exists_overwrite: str = 'File already exists. Overwrite?'
     warning_file_exists: str = 'File already exists'
@@ -286,6 +298,8 @@ class Strings:
     label_menu_item_paste_hint: str = 'Paste'
     label_menu_item_select_all: str = 'Select all\tctrl+a'
     label_menu_item_select_all_hint: str = 'Select all'
+    label_menu_item_spellcheck: str = 'Check spelling\tctrl+t'
+    label_menu_item_spellcheck_hint: str = 'Run spellcheck'
 
     label_menu_add: str = 'Add'
     label_menu_item_add_text_image: str = 'Add image to collection\tctrl+i'
@@ -306,12 +320,14 @@ class Strings:
     label_dialog_edit_link: str = 'Edit link'
     label_dialog_edit_video: str = 'Edit video'
     label_dialog_edit_menu_item: str = 'Edit menu item'
-    label_dialog_add_image: str = 'Add image'
+    label_dialog_add_image: str = 'Add image to collection'
     label_dialog_add_logo: str = 'Add menu logo'
     label_dialog_save_file: str = 'Save file'
     label_dialog_page_setup: str = 'Page setup and default values'
     label_dialog_new_document: str = 'New document'
     label_dialog_edit_menu: str = 'Edit menu'
+    label_dialog_spellcheck: str = 'Spellcheck'
+    label_dialog_spellcheck_main: str = 'Spellcheck: main text'
 
     label_article_menu_logo: str = 'Menu logo'
     label_article_menu_logo_name_placeholder: str = 'Menu item name'
@@ -406,6 +422,8 @@ class Strings:
                                   'directory.\nExisting files on server are overwritten.'
     label_server_overwrite: str = 'Existing files on server are overwritten.'
     label_article_public: str = 'Enable article'
+    label_replace_with: str = 'Replace with:'
+    label_unrecognized_word: str = 'Unrecognized word:'
 
     status_loading: str = 'Loading and testing'
     status_ready: str = 'Ready'
@@ -450,6 +468,12 @@ class Strings:
     button_save: str = 'Save'
     button_add: str = 'Add'
     button_upload: str = 'Upload'
+    button_ignore: str = 'Ignore'
+    button_ignore_all: str = 'Ignore all'
+    button_replace: str = 'Replace'
+    button_add_to_dict: str = 'Add to dictionary'
+    button_settings: str = 'Settings'
+    button_spellcheck: str = 'Spellcheck'
 
     undo_last_action: str = 'Last action'
     undo_bold: str = 'Undo bold text'
