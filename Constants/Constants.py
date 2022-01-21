@@ -300,6 +300,8 @@ class Strings:
     label_menu_item_select_all_hint: str = 'Select all'
     label_menu_item_spellcheck: str = 'Check spelling\tctrl+t'
     label_menu_item_spellcheck_hint: str = 'Run spellcheck'
+    label_menu_item_spellcheck_setup: str = 'Spellcheck settings'
+    label_menu_item_spellcheck_setup_hint: str = 'Spellcheck settings'
 
     label_menu_add: str = 'Add'
     label_menu_item_add_text_image: str = 'Add image to collection\tctrl+i'
@@ -328,6 +330,7 @@ class Strings:
     label_dialog_edit_menu: str = 'Edit menu'
     label_dialog_spellcheck: str = 'Spellcheck'
     label_dialog_spellcheck_main: str = 'Spellcheck: main text'
+    label_dialog_spellcheck_setup: str = 'Spelling setup'
 
     label_article_menu_logo: str = 'Menu logo'
     label_article_menu_logo_name_placeholder: str = 'Menu item name'

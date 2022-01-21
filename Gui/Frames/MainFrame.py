@@ -17,6 +17,7 @@ from Gui.Dialogs.EditDefaultValuesDialog import EditDefaultValuesDialog
 from Gui.Dialogs.EditMenuDialog import EditMenuDialog
 from Gui.Dialogs.EditMenuItemDialog import EditMenuItemDialog
 from Gui.Dialogs.NewFileDialog import NewFileDialog
+from Gui.Dialogs.SpellCheckSetupDialog import SpellCheckSetupDialog
 from Gui.Dialogs.SpellCheckerDialog import SpellCheckerDialog
 from Gui.Dialogs.UploadDialog import UploadDialog
 from Gui.Dialogs.RichTextSpellcheckerDialog import RichTextSpellCheckerDialog
@@ -212,6 +213,10 @@ class MainFrame(wx.Frame):
                                                       Strings.label_menu_item_spellcheck,
                                                       Strings.label_menu_item_spellcheck_hint)
         self._disableable_menu_items.append(self._edit_menu_item_spellcheck)
+        self._edit_menu_item_spellcheck_setup = wx.MenuItem(self._edit_menu, wx.ID_EDIT,
+                                                            Strings.label_menu_item_spellcheck_setup,
+                                                            Strings.label_menu_item_spellcheck_setup_hint)
+        self._disableable_menu_items.append(self._edit_menu_item_spellcheck_setup)
 
         self._edit_menu.Append(self._edit_menu_item_undo)
         self._edit_menu.Append(self._edit_menu_item_redo)
@@ -220,6 +225,7 @@ class MainFrame(wx.Frame):
         self._edit_menu.Append(self._edit_menu_item_paste)
         self._edit_menu.Append(self._edit_menu_item_select_all)
         self._edit_menu.Append(self._edit_menu_item_spellcheck)
+        self._edit_menu.Append(self._edit_menu_item_spellcheck_setup)
 
         # Add menu ---------------------------------------------------------------------------------------------------
         self._add_menu_item_add_image = wx.MenuItem(self._add_menu, wx.ID_ADD, Strings.label_menu_item_add_text_image,
@@ -574,6 +580,7 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self._forward_event, self._edit_menu_item_redo)
         self.Bind(wx.EVT_MENU, self._forward_event, self._edit_menu_item_select_all)
         self.Bind(wx.EVT_MENU, self._spellcheck_handler, self._edit_menu_item_spellcheck)
+        self.Bind(wx.EVT_MENU, self._spellcheck_setup_handler, self._edit_menu_item_spellcheck_setup)
         self.Bind(wx.EVT_MENU, self._add_image_handler, self._add_menu_item_add_image)
         self.Bind(wx.EVT_MENU, self._insert_aside_image_handler, self._add_menu_item_side_image)
         self.Bind(wx.EVT_MENU, self._add_menu_logo_handler, self._add_menu_item_add_logo)
@@ -1723,6 +1730,17 @@ class MainFrame(wx.Frame):
             self._config_manager.store_online_test(True)
         else:
             self._config_manager.store_online_test(False)
+
+    # noinspection PyUnusedLocal
+    def _spellcheck_setup_handler(self, event: wx.CommandEvent) -> None:
+        """
+        Handle spellcheck setup dialog.
+        :param event: Not used.
+        :return: None
+        """
+        dlg = SpellCheckSetupDialog(self)
+        dlg.ShowModal()
+        dlg.Destroy()
 
     # noinspection PyUnusedLocal
     def _spellcheck_handler(self, event: wx.CommandEvent) -> None:
