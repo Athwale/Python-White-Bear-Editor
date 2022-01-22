@@ -354,10 +354,14 @@ class ConfigManager:
 
     def get_spelling_lang(self) -> str:
         """
-        Get spelling language for spellchecker.
+        Get spelling language for spellchecker or default language if the required is not found.
         :return: Spelling language code for spellchecker.
         """
-        return self._dir_conf[self.CONF_LANG]
+        language: str = self._dir_conf[self.CONF_LANG]
+        if language not in enchant.list_languages():
+            language = enchant.get_default_language()
+            self.store_spelling_language(language)
+        return language
 
     def store_spelling_language(self, lang: str) -> None:
         """

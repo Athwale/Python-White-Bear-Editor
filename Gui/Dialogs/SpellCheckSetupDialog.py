@@ -108,6 +108,5 @@ class SpellCheckSetupDialog(wx.Dialog):
         """
         self._content_provider.SetLabelText(str(self._checker.dict.provider))
         self._content_path.SetLabelText(str(Path(enchant.get_user_config_dir() / Path(self._checker.lang))))
-        # todo what if not found?
         selection = self._language_list.FindString(self._config_manager.get_spelling_lang())
         self._language_list.SetSelection(selection)
