@@ -2,7 +2,6 @@ import os
 from datetime import datetime
 from shutil import copyfile
 from typing import Dict, List
-import enchant
 import wx
 import wx.richtext as rt
 
@@ -1768,13 +1767,7 @@ class MainFrame(wx.Frame):
         if dlg.found_mistake():
             self._disable_editor(True, all_menu=True)
             dlg.Show()
-        # TODO show this somewhere.
         # TODO what happens when uploading a spell wrong/seo failed menu?
-
-        # print(self._spellchecker.get_text())
-        # print(enchant.list_languages())
-        # print(self._spellchecker.dict.provider)
-        # print(Path(enchant.get_user_config_dir() / Path(self._spellchecker.lang)))
 
     # noinspection PyUnusedLocal
     def _spellcheck_done_handler(self, event: wx.CommandEvent) -> None:

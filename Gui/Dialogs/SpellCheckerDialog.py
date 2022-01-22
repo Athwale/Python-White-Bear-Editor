@@ -2,6 +2,8 @@ import wx
 from enchant.checker import SpellChecker
 from Constants.Constants import Strings, Numbers
 from enchant.tokenize import EmailFilter, URLFilter
+
+from Gui.Dialogs.SpellCheckSetupDialog import SpellCheckSetupDialog
 from Tools.ConfigManager import ConfigManager
 
 
@@ -158,8 +160,9 @@ class SpellCheckerDialog(wx.Dialog):
             self._checker.add()
             self.go_to_next()
         elif button_id == wx.ID_SETUP:
-            # todo this.
-            print('todo settings dialog')
+            dlg = SpellCheckSetupDialog(self)
+            dlg.ShowModal()
+            dlg.Destroy()
 
     # noinspection PyUnusedLocal
     def _close_button_handler(self, event: wx.CloseEvent) -> None:

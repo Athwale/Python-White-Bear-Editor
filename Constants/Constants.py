@@ -427,6 +427,9 @@ class Strings:
     label_article_public: str = 'Enable article'
     label_replace_with: str = 'Replace with:'
     label_unrecognized_word: str = 'Unrecognized word:'
+    label_dictionary_provider: str = 'Dictionary provider'
+    label_dictionary_location: str = 'Personal dictionary'
+    label_spelling_language: str = 'Spelling language'
 
     status_loading: str = 'Loading and testing'
     status_ready: str = 'Ready'
