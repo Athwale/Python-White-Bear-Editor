@@ -282,7 +282,7 @@ class Strings:
     label_menu_item_online_test_hint: str = 'Test url existence online'
 
     label_menu_help: str = 'Help'
-    label_menu_item_about: str = 'About'
+    label_menu_item_about: str = 'About...'
     label_menu_item_about_hint: str = 'About whitebear editor'
 
     label_menu_edit: str = 'Edit'
@@ -298,17 +298,17 @@ class Strings:
     label_menu_item_paste_hint: str = 'Paste'
     label_menu_item_select_all: str = 'Select all\tctrl+a'
     label_menu_item_select_all_hint: str = 'Select all'
-    label_menu_item_spellcheck: str = 'Check spelling\tctrl+t'
+    label_menu_item_spellcheck: str = 'Check spelling...\tctrl+t'
     label_menu_item_spellcheck_hint: str = 'Run spellcheck'
-    label_menu_item_spellcheck_setup: str = 'Spellcheck settings'
+    label_menu_item_spellcheck_setup: str = 'Spellcheck settings...'
     label_menu_item_spellcheck_setup_hint: str = 'Spellcheck settings'
 
     label_menu_add: str = 'Add'
-    label_menu_item_add_text_image: str = 'Add image to collection\tctrl+i'
+    label_menu_item_add_text_image: str = 'Add image to collection...\tctrl+i'
     label_menu_item_add_text_image_hint: str = 'Add text image'
-    label_menu_item_add_logo: str = 'Add menu logo to collection\tctrl+l'
-    label_menu_item_add_logo_hint: str = 'Add menu logo'
-    label_menu_item_add_side_image: str = 'Add aside image into document\tctrl+p'
+    label_menu_item_add_logo: str = 'Add menu logo to collection...\tctrl+l'
+    label_menu_item_add_logo_hint: str = 'Add menu logo...'
+    label_menu_item_add_side_image: str = 'Add aside image into document...\tctrl+p'
     label_menu_item_add_side_image_hint: str = 'Insert aside image'
 
     # Pop up menu items
@@ -430,6 +430,7 @@ class Strings:
     label_dictionary_provider: str = 'Dictionary provider'
     label_dictionary_location: str = 'Personal dictionary'
     label_spelling_language: str = 'Spelling language'
+    label_restart_required: str = 'Restart editor to apply changes'
 
     status_loading: str = 'Loading and testing'
     status_ready: str = 'Ready'

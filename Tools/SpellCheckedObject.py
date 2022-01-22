@@ -1,3 +1,5 @@
+import enchant.errors
+
 from Tools.ConfigManager import ConfigManager
 from enchant.checker import SpellChecker
 from enchant.tokenize import EmailFilter, URLFilter
@@ -11,7 +13,11 @@ class SpellCheckedObject:
         Sets up spellchecker.
         """
         self._config_manager: ConfigManager = ConfigManager.get_instance()
-        self._spellchecker = SpellChecker(self._config_manager.get_spelling_lang(), filters=[EmailFilter, URLFilter])
+        try:
+            self._spellchecker = SpellChecker(self._config_manager.get_spelling_lang(),
+                                              filters=[EmailFilter, URLFilter])
+        except enchant.errors.DefaultLanguageNotFoundError:
+
 
     def _spell_check(self, text: str) -> bool:
         """
