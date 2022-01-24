@@ -102,9 +102,6 @@ class MainFrame(wx.Frame):
         else:
             self._disable_editor(True)
 
-        # TODO create a settings dialog for spellchecker with additional information.
-        # TODO show spelling error message somewhere.
-
         # Load last window position and size
         self.SetPosition((self._config_manager.get_window_position()))
         size = self._config_manager.get_window_size()
@@ -174,13 +171,15 @@ class MainFrame(wx.Frame):
 
         # Put menu items into the menu buttons
         self._file_menu.Append(self._file_menu_item_open)
+        self._file_menu.AppendSeparator()
         self._file_menu.Append(self._file_menu_item_new)
         self._file_menu.Append(self._file_menu_item_save)
         self._file_menu.Append(self._file_menu_item_save_as)
+        self._file_menu.Append(self._file_menu_item_delete)
+        self._file_menu.AppendSeparator()
         self._file_menu.Append(self._file_menu_item_upload)
         self._file_menu.Append(self._file_menu_item_export_all)
         self._file_menu.AppendSeparator()
-        self._file_menu.Append(self._file_menu_item_delete)
         self._file_menu.Append(self._file_menu_item_new_dir)
         self._file_menu.AppendSeparator()
         self._file_menu.Append(self._file_menu_item_setup)
@@ -219,11 +218,14 @@ class MainFrame(wx.Frame):
 
         self._edit_menu.Append(self._edit_menu_item_undo)
         self._edit_menu.Append(self._edit_menu_item_redo)
+        self._edit_menu.AppendSeparator()
         self._edit_menu.Append(self._edit_menu_item_copy)
         self._edit_menu.Append(self._edit_menu_item_cut)
         self._edit_menu.Append(self._edit_menu_item_paste)
         self._edit_menu.Append(self._edit_menu_item_select_all)
+        self._edit_menu.AppendSeparator()
         self._edit_menu.Append(self._edit_menu_item_spellcheck)
+        self._edit_menu.AppendSeparator()
         self._edit_menu.Append(self._edit_menu_item_spellcheck_setup)
 
         # Add menu ---------------------------------------------------------------------------------------------------
@@ -1748,7 +1750,8 @@ class MainFrame(wx.Frame):
         :param event: Not used.
         :return: None
         """
-        # TODO Make spellcheck manual run on all metadata and main text.
+        # TODO show spelling error message somewhere.
+        # TODO what happens when uploading a spell wrong/seo failed menu?
         # First run spellcheck dialog on metadata and article name if needed.
         for field, name in ((self._field_article_keywords, Strings.label_article_keywords),
                             (self._field_article_description, Strings.label_article_description),
@@ -1767,7 +1770,6 @@ class MainFrame(wx.Frame):
         if dlg.found_mistake():
             self._disable_editor(True, all_menu=True)
             dlg.Show()
-        # TODO what happens when uploading a spell wrong/seo failed menu?
 
     # noinspection PyUnusedLocal
     def _spellcheck_done_handler(self, event: wx.CommandEvent) -> None:

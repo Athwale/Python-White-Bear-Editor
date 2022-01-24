@@ -17,10 +17,9 @@ class SpellCheckSetupDialog(wx.Dialog):
         Spellchecker dialog constructor.
         :param parent: Dialog parent.
         """
-        # TODO what if hunspell is not installed
-        # TODO fix layout
+        # Gnome shell requires hunspell which can not be uninstalled.
         wx.Dialog.__init__(self, parent, title=Strings.label_dialog_spellcheck_setup,
-                           size=(Numbers.spellcheck_dialog_width, Numbers.spellcheck_dialog_height),
+                           size=(Numbers.spellcheck_setup_dialog_width, Numbers.spellcheck_setup_dialog_height),
                            style=wx.DEFAULT_DIALOG_STYLE)
         self._config_manager: ConfigManager = ConfigManager.get_instance()
         self._checker = SpellChecker(self._config_manager.get_spelling_lang())
@@ -106,6 +105,7 @@ class SpellCheckSetupDialog(wx.Dialog):
         Display the information in the dialog.
         :return: None
         """
+        print(self._checker.dict.provider)
         self._content_provider.SetLabelText(str(self._checker.dict.provider))
         self._content_path.SetLabelText(str(Path(enchant.get_user_config_dir() / Path(self._checker.lang))))
         selection = self._language_list.FindString(self._config_manager.get_spelling_lang())
