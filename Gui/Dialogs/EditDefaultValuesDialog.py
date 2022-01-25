@@ -183,8 +183,6 @@ class EditDefaultValuesDialog(SpellCheckedObject, SpellCheckedDialog):
         :return: None
         """
         if event.GetId() == wx.ID_OK:
-            # TODO spellcheck does not work as expected, mistake is not highlighted. Closing the dialog saves it anyway.
-            # TODO make a copy as with the other objects???
             # Run spellcheck then run seo test, then save if ok.
             self._run_spellcheck(((self._field_global_title, Strings.label_global_title),
                                  (self._field_author, Strings.label_author),
@@ -254,34 +252,31 @@ class EditDefaultValuesDialog(SpellCheckedObject, SpellCheckedDialog):
                                                Strings.seo_check + '\n' + message)
 
         # Check emptiness.
-        # TODO emptiness test does not show tip
-        # TODO improve tip descriptions
-        for field in [self._field_script, self._field_black_text, self._field_red_text]:
-            if not field.GetValue():
-                result = False
-                Tools.set_field_background(field, Numbers.RED_COLOR)
-            else:
-                Tools.set_field_background(field, Numbers.GREEN_COLOR)
-
         # Check length and spelling.
-        # TODO test: save correct values, save incorrect values, change but cancel, load incorrect values.
-        for sp, field, tip, msg in [(True, self._field_global_title, self._field_global_title_tip,
-                                     Strings.label_global_title),
+        for sp, field, tip, msg in ((True, self._field_global_title, self._field_global_title_tip,
+                                     Strings.label_main_title_tip),
                                     (True, self._field_author, self._field_author_tip,
                                      Strings.label_author_tip),
                                     (False, self._field_contact, self._field_contact_tip,
                                      Strings.label_contact_tip),
                                     (False, self._field_url, self._field_url_tip,
                                      Strings.label_website_url_tip),
+                                    (False, self._field_script, self._field_script_tip,
+                                     Strings.label_script_tip),
                                     (True, self._field_black_text, self._field_black_text_tip,
-                                     Strings.label_main_page_text),
+                                     Strings.label_main_page_text_tip),
                                     (True, self._field_red_text, self._field_red_text_tip,
-                                     Strings.label_main_page_warning)]:
-            if len(field.GetValue()) > Numbers.default_max_length or len(field.GetValue()) < 1:
+                                     Strings.label_main_page_warning_tip)):
+            if field in (self._field_global_title, self._field_author, self._field_contact, self._field_url) and \
+                    (len(field.GetValue()) > Numbers.default_max_length or len(field.GetValue()) < 1):
                 result = False
                 Tools.set_field_background(field, Numbers.RED_COLOR)
                 tip.SetMessage(msg + '\n\n' + Strings.seo_check + '\n' + Strings.seo_error_length + ': 1 - ' +
                                str(Numbers.default_max_length))
+            elif field in (self._field_script, self._field_black_text, self._field_red_text) and not field.GetValue():
+                result = False
+                Tools.set_field_background(field, Numbers.RED_COLOR)
+                tip.SetMessage(msg + '\n\n' + Strings.seo_check + '\n' + Strings.seo_error_not_empty)
             elif not self._spell_check(field.GetValue()) and sp:
                 # Run spellcheck on this field.
                 # In other cases spellcheck is done by the object copy and error messages are set in it.
