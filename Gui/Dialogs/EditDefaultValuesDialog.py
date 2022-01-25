@@ -4,10 +4,11 @@ from Constants.Constants import Strings, Numbers
 from Gui.Dialogs.SpellCheckedDialog import SpellCheckedDialog
 from Tools.ConfigManager import ConfigManager
 from Tools.Document.WhitebearDocument import WhitebearDocument
+from Tools.SpellCheckedObject import SpellCheckedObject
 from Tools.Tools import Tools
 
 
-class EditDefaultValuesDialog(SpellCheckedDialog):
+class EditDefaultValuesDialog(SpellCheckedObject, SpellCheckedDialog):
 
     def __init__(self, parent, no_cancel: bool = False):
         """
@@ -16,9 +17,11 @@ class EditDefaultValuesDialog(SpellCheckedDialog):
         :param parent: The parent frame.
         :param no_cancel: Do not display cancel button. Used to force page setup completion.
         """
-        super().__init__(parent, title=Strings.label_dialog_page_setup,
-                         size=(Numbers.page_setup_dialog_width, Numbers.page_setup_dialog_height),
-                         style=wx.CAPTION)
+        super().__init__()
+        super(SpellCheckedDialog, self).__init__(parent, title=Strings.label_dialog_page_setup,
+                                                 size=(Numbers.page_setup_dialog_width,
+                                                       Numbers.page_setup_dialog_height),
+                                                 style=wx.CAPTION)
 
         self._config_manager: ConfigManager = ConfigManager.get_instance()
         # This is used just for seo testing keywords and description.
@@ -207,8 +210,6 @@ class EditDefaultValuesDialog(SpellCheckedDialog):
                 self._config_manager.store_red_text(self._field_red_text.GetValue())
                 self._config_manager.store_number_of_news(self._news_spinner.GetValue())
                 event.Skip()
-            else:
-                self._display_dialog_contents()
         elif event.GetId() == wx.ID_CANCEL:
             event.Skip()
 
@@ -238,6 +239,7 @@ class EditDefaultValuesDialog(SpellCheckedDialog):
         """
         result = True
         # Keywords test.
+        # Spellcheck here is a part of the seo tests.
         correct, message, color = self._test_doc.seo_test_keywords(self._field_meta_keywords.GetValue())
         result = result and correct
         self._field_meta_keywords.SetBackgroundColour(color)
@@ -252,6 +254,8 @@ class EditDefaultValuesDialog(SpellCheckedDialog):
                                                Strings.seo_check + '\n' + message)
 
         # Check emptiness.
+        # TODO emptiness test does not show tip
+        # TODO improve tip descriptions
         for field in [self._field_script, self._field_black_text, self._field_red_text]:
             if not field.GetValue():
                 result = False
@@ -259,19 +263,37 @@ class EditDefaultValuesDialog(SpellCheckedDialog):
             else:
                 Tools.set_field_background(field, Numbers.GREEN_COLOR)
 
-        # Check length
-        for field, tip, msg in [(self._field_global_title, self._field_global_title_tip, Strings.label_global_title),
-                                (self._field_author, self._field_author_tip, Strings.label_author_tip),
-                                (self._field_contact, self._field_contact_tip, Strings.label_contact_tip),
-                                (self._field_url, self._field_url_tip, Strings.label_website_url_tip)]:
+        # Check length and spelling.
+        # TODO test: save correct values, save incorrect values, change but cancel, load incorrect values.
+        for sp, field, tip, msg in [(True, self._field_global_title, self._field_global_title_tip,
+                                     Strings.label_global_title),
+                                    (True, self._field_author, self._field_author_tip,
+                                     Strings.label_author_tip),
+                                    (False, self._field_contact, self._field_contact_tip,
+                                     Strings.label_contact_tip),
+                                    (False, self._field_url, self._field_url_tip,
+                                     Strings.label_website_url_tip),
+                                    (True, self._field_black_text, self._field_black_text_tip,
+                                     Strings.label_main_page_text),
+                                    (True, self._field_red_text, self._field_red_text_tip,
+                                     Strings.label_main_page_warning)]:
             if len(field.GetValue()) > Numbers.default_max_length or len(field.GetValue()) < 1:
                 result = False
                 Tools.set_field_background(field, Numbers.RED_COLOR)
-                tip.SetMessage(msg + '\n\n' + Strings.seo_check + '\n' + Strings.seo_error_length + ': 1-' +
+                tip.SetMessage(msg + '\n\n' + Strings.seo_check + '\n' + Strings.seo_error_length + ': 1 - ' +
                                str(Numbers.default_max_length))
+            elif not self._spell_check(field.GetValue()) and sp:
+                # Run spellcheck on this field.
+                # In other cases spellcheck is done by the object copy and error messages are set in it.
+                # Here we do not have the copy and have to do it as part of this method again.
+                # Keywords and description already have a spellcheck in their builtin seo test.
+                result = False
+                Tools.set_field_background(field, Numbers.RED_COLOR)
+                tip.SetMessage(msg + '\n\n' + Strings.seo_check + '\n' + Strings.spelling_error)
             else:
                 Tools.set_field_background(field, Numbers.GREEN_COLOR)
                 tip.SetMessage(msg + '\n\n' + Strings.seo_check + '\n' + Strings.status_ok)
+
         return result
 
     def save_all(self) -> bool:

@@ -82,20 +82,29 @@ class WhitebearDocumentIndex(WhitebearDocument):
         self._valid, errors = Tools.validate(html_string, 'schema_index.xsd')
         return self._valid, errors
 
-    def seo_test_self(self, online: bool) -> bool:
+    def seo_test_self(self) -> bool:
         """
         Perform a SEO test on this document.
-        :param online: Do online test of urls.
         :return: True if seo test passed.
         """
         # Check name, meta keywords and description
         super(WhitebearDocumentIndex, self).seo_test_self_basic()
 
-        for text in (self._global_title, self._author, self._contact, self._url, self._script, self._black_text,
-                     self._red_text):
-            # Check lengths.
+        for text in (self._global_title, self._author, self._contact, self._url):
+            # Check not empty, otherwise these can be very long.
+            if not text:
+                self._index_error_message = Strings.seo_error_index_empty
+                self.set_status_color(Numbers.RED_COLOR)
+
+            # Spellcheck
+            if not self._spell_check(text):
+                self._index_error_message = Strings.spelling_error
+                self.set_status_color(Numbers.RED_COLOR)
+
+        for text in (self._script, self._black_text, self._red_text):
+            # Check reasonable lengths.
             if len(text) > Numbers.default_max_length or len(text) < 1:
-                self._index_error_message = Strings.seo_error_index_fail
+                self._index_error_message = Strings.seo_error_index_length
                 self.set_status_color(Numbers.RED_COLOR)
 
             # Spellcheck

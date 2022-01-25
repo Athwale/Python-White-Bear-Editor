@@ -45,7 +45,8 @@ class ConvertorThread(threading.Thread):
         elif isinstance(self._doc, WhitebearDocumentMenu):
             self._doc.seo_test_self_basic()
         elif isinstance(self._doc, WhitebearDocumentIndex):
-            self._doc.seo_test_self(self._config_manager.get_online_test())
+            # TODO test this.
+            self._doc.seo_test_self()
         try:
             self._doc.convert_to_html()
             wx.CallAfter(self._parent.on_conversion_done, self, self._doc, self._save_as, self._disable)

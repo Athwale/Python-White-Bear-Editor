@@ -210,7 +210,7 @@ class Strings:
         Numbers.menu_name_max_length) + ' characters long'
     seo_error_default_value: str = 'Default value can not be used'
     seo_error_date_format: str = 'Date format incorrect (example: 31. Ledna 2020)'
-    seo_error_date_format_day: str = 'Date format incorrect, day must be: 1-31'
+    seo_error_date_format_day: str = 'Date format incorrect, day must be: 1 - 31'
     seo_error_date_format_year: str = 'Date format incorrect, year must be: ' + str(Numbers.year_min) + ' - ' + str(
         Numbers.year_max)
     seo_error_image_caption_length: str = 'Length must be: ' + str(Numbers.article_image_caption_min) + ' - ' + str(
@@ -222,8 +222,9 @@ class Strings:
     seo_error_url_nonexistent: str = 'Target page does not exist'
     seo_error_url_malformed: str = 'Url syntax error'
     seo_error_video_size_wrong: str = 'The size of the video element is incorrect'
-    seo_error_index_fail: str = 'Index page seo error text length wrong'
-    seo_check: str = 'SEO Check:'
+    seo_error_index_length: str = 'Index page seo error text length wrong'
+    seo_error_index_empty: str = 'Index page seo error text not set'
+    seo_check: str = 'Check result:'
 
     spelling_error: str = 'Spellcheck warning'
 
@@ -386,7 +387,7 @@ class Strings:
     label_author: str = 'Author'
     label_author_tip: str = 'Contents of meta author tag'
     label_contact: str = 'Contact'
-    label_contact_tip: str = 'Will be displayed as\nimage on home page'
+    label_contact_tip: str = 'Will be displayed as an\nimage on home page'
     label_default_keywords: str = 'Keywords'
     label_default_keywords_tip: str = 'Default global meta keywords'
     label_main_meta_description: str = 'Home page meta description'
