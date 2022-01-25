@@ -33,6 +33,14 @@ class WhitebearDocumentIndex(WhitebearDocument):
         self._articles = articles
         self._html = None
         self._index_error_message: str = ''
+        self._update_content()
+
+    def _update_content(self) -> None:
+        """
+        Updates the content of the page from config manager. This is used to initially fill the information and then
+        update it when generating html in case the user changed it in the setup dialog.
+        :return: None
+        """
         # This comes from config manager because when setting a new directory, there would be no index to parse it from.
         self._global_title = self._config_manager.get_global_title()
         self._meta_description = self._config_manager.get_main_meta_description()
@@ -108,6 +116,7 @@ class WhitebearDocumentIndex(WhitebearDocument):
         :raise UnrecognizedFileException if generated html fails validation.
         :raises UnrecognizedFileException if xml schema is incorrect.
         """
+        self._update_content()
         with open(Fetch.get_resource_path('index_template.html'), 'r') as template:
             template_string = template.read()
         is_valid, errors = Tools.validate(template_string, 'schema_index_template.xsd')
