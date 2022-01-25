@@ -32,15 +32,18 @@ class WhitebearDocumentIndex(WhitebearDocument):
         self._menus = menus
         self._articles = articles
         self._html = None
+        self._index_error_message: str = ''
+        # This comes from config manager because when setting a new directory, there would be no index to parse it from.
         self._global_title = self._config_manager.get_global_title()
-        self._main_meta_description = self._config_manager.get_main_meta_description()
-        self._main_meta_keywords = self._config_manager.get_global_keywords()
+        self._meta_description = self._config_manager.get_main_meta_description()
+        self._meta_keywords = self._config_manager.get_global_keywords()
         self._author = self._config_manager.get_author()
         self._contact = self._config_manager.get_contact()
         self._black_text = self._config_manager.get_main_page_black_text()
         self._red_text = self._config_manager.get_main_page_red_text()
         self._script = self._config_manager.get_script()
         self._number_of_news = self._config_manager.get_number_of_news()
+        self._url = self._config_manager.get_url()
 
     def parse_self(self) -> None:
         """
@@ -77,7 +80,23 @@ class WhitebearDocumentIndex(WhitebearDocument):
         :param online: Do online test of urls.
         :return: True if seo test passed.
         """
-        # TODO this
+        # Check name, meta keywords and description
+        super(WhitebearDocumentIndex, self).seo_test_self_basic()
+
+        for text in (self._global_title, self._author, self._contact, self._url, self._script, self._black_text,
+                     self._red_text):
+            # Check lengths.
+            if len(text) > Numbers.default_max_length or len(text) < 1:
+                self._index_error_message = Strings.seo_error_index_fail
+                self.set_status_color(Numbers.RED_COLOR)
+
+            # Spellcheck
+            if not self._spell_check(text):
+                self._index_error_message = Strings.spelling_error
+                self.set_status_color(Numbers.RED_COLOR)
+
+        if self.get_status_color() == Numbers.RED_COLOR:
+            return False
         return True
 
     def convert_to_html(self) -> None:
@@ -105,14 +124,14 @@ class WhitebearDocumentIndex(WhitebearDocument):
         # Fill description.
         description = parsed_template.find_all(name='meta', attrs={'name': 'description', 'content': True})
         if len(description) == 1:
-            description[0]['content'] = self._main_meta_description
+            description[0]['content'] = self._meta_description
         else:
             raise UnrecognizedFileException(Strings.exception_parse_multiple_descriptions)
 
         # Fill keywords.
         keywords = parsed_template.find_all(name='meta', attrs={'name': 'keywords', 'content': True})
         if len(keywords) == 1:
-            keywords[0]['content'] = self._main_meta_keywords
+            keywords[0]['content'] = self._meta_keywords
         else:
             raise UnrecognizedFileException(Strings.exception_parse_multiple_authors)
 
@@ -245,3 +264,10 @@ class WhitebearDocumentIndex(WhitebearDocument):
         :return: String HTML of the page or none if the document was not converted yet.
         """
         return self._html
+
+    def get_seo_error(self) -> str:
+        """
+        Returns a seo error string or an empty string.
+        :return: A seo error string or an empty string.
+        """
+        return self._index_error_message

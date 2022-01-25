@@ -45,8 +45,7 @@ class ConvertorThread(threading.Thread):
         elif isinstance(self._doc, WhitebearDocumentMenu):
             self._doc.seo_test_self_basic()
         elif isinstance(self._doc, WhitebearDocumentIndex):
-            # TODO seo/spell test other main index page texts, title, author, black text, red text
-            self._doc.seo_test_self_basic()
+            self._doc.seo_test_self(self._config_manager.get_online_test())
         try:
             self._doc.convert_to_html()
             wx.CallAfter(self._parent.on_conversion_done, self, self._doc, self._save_as, self._disable)

@@ -222,6 +222,7 @@ class Strings:
     seo_error_url_nonexistent: str = 'Target page does not exist'
     seo_error_url_malformed: str = 'Url syntax error'
     seo_error_video_size_wrong: str = 'The size of the video element is incorrect'
+    seo_error_index_fail: str = 'Index page seo error text length wrong'
     seo_check: str = 'SEO Check:'
 
     spelling_error: str = 'Spellcheck warning'
