@@ -171,21 +171,21 @@ class MainFrame(wx.Frame):
 
         # Put menu items into the menu buttons
         self._file_menu.Append(self._file_menu_item_open)
+        self._file_menu.Append(self._file_menu_item_new_dir)
         self._file_menu.AppendSeparator()
         self._file_menu.Append(self._file_menu_item_new)
         self._file_menu.Append(self._file_menu_item_save)
         self._file_menu.Append(self._file_menu_item_save_as)
         self._file_menu.Append(self._file_menu_item_delete)
         self._file_menu.AppendSeparator()
+        self._file_menu.Append(self._file_menu_item_edit_menu)
+        self._file_menu.Append(self._file_menu_item_setup)
+        self._file_menu.AppendSeparator()
         self._file_menu.Append(self._file_menu_item_upload)
         self._file_menu.Append(self._file_menu_item_export_all)
         self._file_menu.AppendSeparator()
-        self._file_menu.Append(self._file_menu_item_new_dir)
-        self._file_menu.AppendSeparator()
-        self._file_menu.Append(self._file_menu_item_setup)
         self._file_menu.AppendCheckItem(wx.ID_NETWORK, Strings.label_menu_item_online_test,
                                         Strings.label_menu_item_online_test_hint)
-        self._file_menu.Append(self._file_menu_item_edit_menu)
 
         # Edit menu ----------------------------------------------------------------------------------------------------
         self._edit_menu_item_undo = wx.MenuItem(self._edit_menu, wx.ID_UNDO, Strings.label_menu_item_undo,
@@ -225,7 +225,6 @@ class MainFrame(wx.Frame):
         self._edit_menu.Append(self._edit_menu_item_select_all)
         self._edit_menu.AppendSeparator()
         self._edit_menu.Append(self._edit_menu_item_spellcheck)
-        self._edit_menu.AppendSeparator()
         self._edit_menu.Append(self._edit_menu_item_spellcheck_setup)
 
         # Add menu ---------------------------------------------------------------------------------------------------

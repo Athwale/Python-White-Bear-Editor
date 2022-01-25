@@ -32,6 +32,15 @@ class WhitebearDocumentIndex(WhitebearDocument):
         self._menus = menus
         self._articles = articles
         self._html = None
+        self._global_title = self._config_manager.get_global_title()
+        self._main_meta_description = self._config_manager.get_main_meta_description()
+        self._main_meta_keywords = self._config_manager.get_global_keywords()
+        self._author = self._config_manager.get_author()
+        self._contact = self._config_manager.get_contact()
+        self._black_text = self._config_manager.get_main_page_black_text()
+        self._red_text = self._config_manager.get_main_page_red_text()
+        self._script = self._config_manager.get_script()
+        self._number_of_news = self._config_manager.get_number_of_news()
 
     def parse_self(self) -> None:
         """
@@ -62,6 +71,15 @@ class WhitebearDocumentIndex(WhitebearDocument):
         self._valid, errors = Tools.validate(html_string, 'schema_index.xsd')
         return self._valid, errors
 
+    def seo_test_self(self, online: bool) -> bool:
+        """
+        Perform a SEO test on this document.
+        :param online: Do online test of urls.
+        :return: True if seo test passed.
+        """
+        # TODO this
+        return True
+
     def convert_to_html(self) -> None:
         """
         Converts this document into a html white bear article page.
@@ -82,38 +100,38 @@ class WhitebearDocumentIndex(WhitebearDocument):
 
         # Fill title.
         title: Tag = parsed_template.find(name='title')
-        title.string = self._page_name + ' | ' + self._config_manager.get_global_title()
+        title.string = self._page_name + ' | ' + self._global_title
 
         # Fill description.
         description = parsed_template.find_all(name='meta', attrs={'name': 'description', 'content': True})
         if len(description) == 1:
-            description[0]['content'] = self._config_manager.get_main_meta_description()
+            description[0]['content'] = self._main_meta_description
         else:
             raise UnrecognizedFileException(Strings.exception_parse_multiple_descriptions)
 
         # Fill keywords.
         keywords = parsed_template.find_all(name='meta', attrs={'name': 'keywords', 'content': True})
         if len(keywords) == 1:
-            keywords[0]['content'] = self._config_manager.get_global_keywords()
+            keywords[0]['content'] = self._main_meta_keywords
         else:
             raise UnrecognizedFileException(Strings.exception_parse_multiple_authors)
 
         # Fill author.
         author = parsed_template.find_all(name='meta', attrs={'name': 'author', 'content': True})
         if len(author) == 1:
-            author[0]['content'] = self._config_manager.get_author()
+            author[0]['content'] = self._author
         else:
             raise UnrecognizedFileException(Strings.exception_parse_multiple_descriptions)
 
         # Fill script.
         script = parsed_template.find(name='script')
-        script.string = self._config_manager.get_script()
+        script.string = self._script
 
         # Fill global title.
         figure = parsed_template.find(name='header').figure
-        figure.figcaption.string = self._config_manager.get_global_title()
+        figure.figcaption.string = self._global_title
         heading = parsed_template.find(name='h1', attrs={'id': 'heading'})
-        heading.string = self._config_manager.get_global_title()
+        heading.string = self._global_title
 
         # Activate correct menu, generate menu items according to menus.
         menu_container = parsed_template.find(name='nav')
@@ -131,11 +149,11 @@ class WhitebearDocumentIndex(WhitebearDocument):
 
         # Fill text.
         new_black_p = parsed_template.new_tag('p')
-        new_black_p.string = self._config_manager.get_main_page_black_text()
+        new_black_p.string = self._black_text
 
         new_red_p = parsed_template.new_tag('p')
         new_strong = parsed_template.new_tag('strong', attrs={'class': 'red'})
-        new_strong.string = self._config_manager.get_main_page_red_text()
+        new_strong.string = self._red_text
         new_red_p.append(new_strong)
 
         article.h2.insert_after(new_red_p)
@@ -146,7 +164,7 @@ class WhitebearDocumentIndex(WhitebearDocument):
         # Sort all articles by date.
         sorted_articles = sorted(self._articles.values(), key=lambda x: x.get_computable_date(), reverse=True)
         new_ul = parsed_template.new_tag('ul')
-        limit = self._config_manager.get_number_of_news()
+        limit = self._number_of_news
         for index, item in enumerate(sorted_articles):
             if index >= limit:
                 break
@@ -169,7 +187,7 @@ class WhitebearDocumentIndex(WhitebearDocument):
         # Fill contact.
         contact = parsed_template.find(name='h3', attrs={'id': 'contact'})
         # Insert the author's contact as an image.
-        image: wx.Bitmap = Tools.create_image(self._config_manager.get_contact())
+        image: wx.Bitmap = Tools.create_image(self._contact)
         image_path = os.path.join(self._working_directory, Strings.folder_images, Strings.contact_file)
         image.SaveFile(image_path, wx.BITMAP_TYPE_PNG)
         src = os.path.join(Strings.folder_images, Strings.contact_file)
@@ -179,7 +197,7 @@ class WhitebearDocumentIndex(WhitebearDocument):
 
         # Fill design.
         new_p = parsed_template.new_tag('p')
-        new_p.string = 'Web design: ' + self._config_manager.get_author()
+        new_p.string = 'Web design: ' + self._author
         new_img.insert_after(new_p)
 
         # Fill aside images from the newest articles.
@@ -227,5 +245,3 @@ class WhitebearDocumentIndex(WhitebearDocument):
         :return: String HTML of the page or none if the document was not converted yet.
         """
         return self._html
-
-    # Setters ----------------------------------------------------------------------------------------------------------

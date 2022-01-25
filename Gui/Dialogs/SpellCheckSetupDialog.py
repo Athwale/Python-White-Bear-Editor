@@ -105,8 +105,8 @@ class SpellCheckSetupDialog(wx.Dialog):
         Display the information in the dialog.
         :return: None
         """
-        print(self._checker.dict.provider)
-        self._content_provider.SetLabelText(str(self._checker.dict.provider))
+        provider: enchant.ProviderDesc = self._checker.dict.provider
+        self._content_provider.SetLabelText(str(provider.name))
         self._content_path.SetLabelText(str(Path(enchant.get_user_config_dir() / Path(self._checker.lang))))
         selection = self._language_list.FindString(self._config_manager.get_spelling_lang())
         self._language_list.SetSelection(selection)

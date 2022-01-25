@@ -6,6 +6,8 @@ from Constants.Constants import Numbers
 from Exceptions.UnrecognizedFileException import UnrecognizedFileException
 from Tools.ConfigManager import ConfigManager
 from Tools.Document.WhitebearDocumentArticle import WhitebearDocumentArticle
+from Tools.Document.WhitebearDocumentIndex import WhitebearDocumentIndex
+from Tools.Document.WhitebearDocumentMenu import WhitebearDocumentMenu
 
 
 class ConvertorThread(threading.Thread):
@@ -39,6 +41,12 @@ class ConvertorThread(threading.Thread):
         # upload.
         if isinstance(self._doc, WhitebearDocumentArticle):
             self._doc.seo_test_self(self._config_manager.get_online_test())
+            # TODO fail upload if seo error is detected.
+        elif isinstance(self._doc, WhitebearDocumentMenu):
+            self._doc.seo_test_self_basic()
+        elif isinstance(self._doc, WhitebearDocumentIndex):
+            # TODO seo/spell test other main index page texts, title, author, black text, red text
+            self._doc.seo_test_self_basic()
         try:
             self._doc.convert_to_html()
             wx.CallAfter(self._parent.on_conversion_done, self, self._doc, self._save_as, self._disable)
