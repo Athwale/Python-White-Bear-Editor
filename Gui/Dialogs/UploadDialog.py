@@ -33,7 +33,7 @@ class UploadDialog(wx.Dialog):
         self._index = index
         self._css = css
         # Contains unique id and disk path for each file in the file list even those unchecked.
-        self._upload_dict: Dict[int, str] = {}
+        self._upload_dict: Dict[int, Tuple[str, bool]] = {}
         self._counter = 0
         self._sftp_thread = None
 
@@ -315,7 +315,7 @@ class UploadDialog(wx.Dialog):
                 break
             elif self._file_list.IsItemChecked(item):
                 # Item data carries a key into the dictionary of all files in the list.
-                local_path = self._upload_dict[self._file_list.GetItem(item).GetData()]
+                local_path = self._upload_dict[self._file_list.GetItem(item).GetData()][0]
                 ftp_path = os.path.join('.', os.path.relpath(local_path, start=self._config_manager.get_working_dir()))
                 files_to_upload.append((local_path, ftp_path))
             # Reset item background color
@@ -372,8 +372,10 @@ class UploadDialog(wx.Dialog):
                 else:
                     if path not in self._upload_dict.values():
                         file_id = self._get_id()
-                        self._upload_dict[file_id] = path
-                        self._append_into_list(file_id, path, disabled=False)
+                        # Extra files are assumed to be correct and their seo status is not checked,
+                        # they may not be html.
+                        self._upload_dict[file_id] = (path, True)
+                        self._append_into_list(file_id, path, enabled=True)
         elif event.GetId() == wx.ID_OPEN:
             path = self._ask_for_file(Strings.home_directory)
             if path:
@@ -428,7 +430,7 @@ class UploadDialog(wx.Dialog):
             item_id = event.GetItem().GetData()
             if item_id > 0:
                 # Items with ID -1 are disabled, prevent checking.
-                path = self._upload_dict[item_id]
+                path = self._upload_dict[item_id][0]
                 if not os.access(path, os.R_OK) or not os.path.exists(path):
                     wx.MessageBox(Strings.warning_file_inaccessible + ':\n' + path,
                                   Strings.status_warning, wx.OK | wx.ICON_WARNING)
@@ -460,16 +462,18 @@ class UploadDialog(wx.Dialog):
         """
         # TODO prevent upload if seo error is discovered in index or menu. Red articles are excluded automatically.
         # TODO add red articles too, but disable them and show red.
+        # TODO hover over red to see error message?
         self.Disable()
         for filename, document in self._articles.items():
-            # Add article files
-            if document.get_html_to_save() and document.is_seo_ok():
+            if document.get_html_to_save():
+                # TODO show bad articles as red and do not include their parts.
+                # TODO implement document.is_seo_ok() for index and menu.
                 # Add all that belongs to this document into the list and check it.
                 # Add the menu of this document to the list too.
-                self._add_if_not_in(document.get_menu_section().get_path())
                 self._add_if_not_in(document.get_path())
                 self._add_if_not_in(document.get_article_image().get_original_image_path())
                 self._add_if_not_in(document.get_article_image().get_thumbnail_image_path())
+                self._add_if_not_in(document.get_menu_section().get_path())
                 self._add_if_not_in(document.get_menu_item().get_image_path())
                 for image in document.get_aside_images():
                     # Add all aside images and thumbnails
@@ -486,12 +490,12 @@ class UploadDialog(wx.Dialog):
         if self._upload_dict:
             # If any files were changed, add index, robots and sitemap.
             self._add_if_not_in(self._index.get_path())
-            self._add_if_not_in(self._css.get_path())
-            self._add_if_not_in(os.path.join(self._config_manager.get_working_dir(), Strings.robots_file))
-            self._add_if_not_in(os.path.join(self._config_manager.get_working_dir(), Strings.sitemap_file))
+            self._add_if_not_in(self._css.get_path(), True)
+            self._add_if_not_in(os.path.join(self._config_manager.get_working_dir(), Strings.robots_file), True)
+            self._add_if_not_in(os.path.join(self._config_manager.get_working_dir(), Strings.sitemap_file), True)
 
-        for item_id, file in sorted(self._upload_dict.items()):
-            self._append_into_list(item_id, file, disabled=True)
+        for item_id, (file, seo_status) in sorted(self._upload_dict.items()):
+            self._append_into_list(item_id, file, enabled=seo_status)
 
         # Fill SFTP config
         self._field_ip_port.SetValue(self._config_manager.get_ip_port())
@@ -500,17 +504,18 @@ class UploadDialog(wx.Dialog):
         self.Enable()
         self._add_button.SetFocus()
 
-    def _add_if_not_in(self, new_path: str) -> None:
+    def _add_if_not_in(self, new_path: str, seo_result: bool) -> None:
         """
         Add file_id and file path to upload dict if it is not there already.
         :param new_path: The file path
+        :param seo_result: Last know seo result, used to disable broken files.
         :return: None
         """
         for _, file_path in sorted(self._upload_dict.items()):
             if file_path == new_path:
                 return
         # Add the new file with a new id.
-        self._upload_dict[self._get_id()] = new_path
+        self._upload_dict[self._get_id()] = (new_path, seo_result)
 
     def _validate_fields(self) -> bool:
         """
@@ -583,12 +588,12 @@ class UploadDialog(wx.Dialog):
             self._upload_button.Enable()
         return result
 
-    def _append_into_list(self, item_id: int, path: str, disabled: bool) -> None:
+    def _append_into_list(self, item_id: int, path: str, enabled: bool) -> None:
         """
         Append a file into the file list.
         :param item_id: Int id.
         :param path: Disk path.
-        :param disabled: True if the item in the list is disabled. Such items are red and can not be checked.
+        :param enabled: True if the item in the list is enabled. Disabled items are red and can not be checked.
         :return: None
         """
         index = self._file_list.InsertItem(self._file_list.GetItemCount(),
@@ -598,8 +603,8 @@ class UploadDialog(wx.Dialog):
         if not path.startswith(os.path.join(self._config_manager.get_working_dir(), Strings.folder_images)):
             # Make html pages bold for better clarity.
             self._file_list.SetItemFont(index, self.bold_small_font)
-        if disabled:
+        if enabled:
+            self._file_list.CheckItem(index, True)
+        else:
             self._file_list.SetItemData(index, -1)
             self._file_list.SetItemBackgroundColour(index, Numbers.RED_COLOR)
-        else:
-            self._file_list.CheckItem(index, True)
