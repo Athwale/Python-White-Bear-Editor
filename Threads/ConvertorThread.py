@@ -41,11 +41,7 @@ class ConvertorThread(threading.Thread):
         # upload.
         if isinstance(self._doc, WhitebearDocumentArticle):
             self._doc.seo_test_self(self._config_manager.get_online_test())
-            # TODO fail upload if seo error is detected.
-        elif isinstance(self._doc, WhitebearDocumentMenu):
-            self._doc.seo_test_self_basic()
-        elif isinstance(self._doc, WhitebearDocumentIndex):
-            # TODO test this.
+        else:
             self._doc.seo_test_self()
         try:
             self._doc.convert_to_html()

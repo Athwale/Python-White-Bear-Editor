@@ -225,7 +225,7 @@ class Strings:
     seo_error_index_length: str = 'Index page seo error text length wrong'
     seo_error_index_empty: str = 'Index page seo error text not set'
     seo_error_not_empty: str = 'Can not be empty'
-    seo_check: str = 'Test result:'
+    seo_check: str = 'Test:'
 
     spelling_error: str = 'Spellcheck warning'
 

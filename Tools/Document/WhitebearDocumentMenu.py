@@ -42,6 +42,15 @@ class WhitebearDocumentMenu(WhitebearDocument):
         self._parse_page_name()
         self._parse_menu_items()
 
+    def seo_test_self(self) -> bool:
+        """
+        Perform a SEO test on this document.
+        :return: True if seo test passed.
+        """
+        # Check name, meta keywords and description
+        # Menu items are seo tested by articles.
+        return super(WhitebearDocumentMenu, self).seo_test_self_basic()
+
     def _parse_menu_items(self) -> None:
         """
         Parse the menu items of this menu and save them into an instance variable. Image path is None if the file

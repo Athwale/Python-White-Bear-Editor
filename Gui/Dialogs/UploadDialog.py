@@ -48,6 +48,7 @@ class UploadDialog(wx.Dialog):
         self._file_list.SetFont(self.small_font)
         self._file_list.InsertColumn(0, Strings.label_files_to_upload, format=wx.LIST_FORMAT_LEFT)
         self._file_list.SetColumnWidth(0, Numbers.upload_filelist_width)
+        # TODO Scrolling is slow because of checked checkboxes, empty boxes are ok.
         self._file_list.EnableCheckBoxes()
         self._add_button = wx.Button(self, wx.ID_ADD, Strings.button_add)
         self._filelist_sizer.Add(self._file_list, flag=wx.EXPAND, border=Numbers.widget_border_size, proportion=1)
@@ -372,7 +373,7 @@ class UploadDialog(wx.Dialog):
                     if path not in self._upload_dict.values():
                         file_id = self._get_id()
                         self._upload_dict[file_id] = path
-                        self._append_into_list(file_id, path)
+                        self._append_into_list(file_id, path, disabled=False)
         elif event.GetId() == wx.ID_OPEN:
             path = self._ask_for_file(Strings.home_directory)
             if path:
@@ -425,10 +426,14 @@ class UploadDialog(wx.Dialog):
         """
         if self._file_list.IsItemChecked(event.GetIndex()):
             item_id = event.GetItem().GetData()
-            path = self._upload_dict[item_id]
-            if not os.access(path, os.R_OK) or not os.path.exists(path):
-                wx.MessageBox(Strings.warning_file_inaccessible + ':\n' + path,
-                              Strings.status_warning, wx.OK | wx.ICON_WARNING)
+            if item_id > 0:
+                # Items with ID -1 are disabled, prevent checking.
+                path = self._upload_dict[item_id]
+                if not os.access(path, os.R_OK) or not os.path.exists(path):
+                    wx.MessageBox(Strings.warning_file_inaccessible + ':\n' + path,
+                                  Strings.status_warning, wx.OK | wx.ICON_WARNING)
+                    self._file_list.CheckItem(event.GetIndex(), False)
+            else:
                 self._file_list.CheckItem(event.GetIndex(), False)
         self._content_num_files.SetLabelText(str(self._count_checked_files()))
         self._validate_fields()
@@ -453,6 +458,8 @@ class UploadDialog(wx.Dialog):
         Display the contents of dialog.
         :return: None
         """
+        # TODO prevent upload if seo error is discovered in index or menu. Red articles are excluded automatically.
+        # TODO add red articles too, but disable them and show red.
         self.Disable()
         for filename, document in self._articles.items():
             # Add article files
@@ -484,7 +491,7 @@ class UploadDialog(wx.Dialog):
             self._add_if_not_in(os.path.join(self._config_manager.get_working_dir(), Strings.sitemap_file))
 
         for item_id, file in sorted(self._upload_dict.items()):
-            self._append_into_list(item_id, file)
+            self._append_into_list(item_id, file, disabled=True)
 
         # Fill SFTP config
         self._field_ip_port.SetValue(self._config_manager.get_ip_port())
@@ -576,11 +583,12 @@ class UploadDialog(wx.Dialog):
             self._upload_button.Enable()
         return result
 
-    def _append_into_list(self, item_id: int, path: str) -> None:
+    def _append_into_list(self, item_id: int, path: str, disabled: bool) -> None:
         """
         Append a file into the file list.
         :param item_id: Int id.
         :param path: Disk path.
+        :param disabled: True if the item in the list is disabled. Such items are red and can not be checked.
         :return: None
         """
         index = self._file_list.InsertItem(self._file_list.GetItemCount(),
@@ -588,5 +596,10 @@ class UploadDialog(wx.Dialog):
         self._file_list.SetItemData(index, item_id)
 
         if not path.startswith(os.path.join(self._config_manager.get_working_dir(), Strings.folder_images)):
+            # Make html pages bold for better clarity.
             self._file_list.SetItemFont(index, self.bold_small_font)
-        self._file_list.CheckItem(index, True)
+        if disabled:
+            self._file_list.SetItemData(index, -1)
+            self._file_list.SetItemBackgroundColour(index, Numbers.RED_COLOR)
+        else:
+            self._file_list.CheckItem(index, True)
