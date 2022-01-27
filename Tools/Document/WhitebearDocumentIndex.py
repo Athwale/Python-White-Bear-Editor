@@ -62,6 +62,7 @@ class WhitebearDocumentIndex(WhitebearDocument):
         """
         super(WhitebearDocumentIndex, self).parse_self()
         self._parse_page_name()
+        self.seo_test_self()
 
     def _parse_page_name(self) -> None:
         """

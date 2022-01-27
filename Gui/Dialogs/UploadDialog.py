@@ -457,7 +457,7 @@ class UploadDialog(wx.Dialog):
 
     def _display_dialog_contents(self) -> None:
         """
-        Display the contents of dialog.
+        Display the contents of the dialog.
         :return: None
         """
         # TODO prevent upload if seo error is discovered in index or menu. Red articles are excluded automatically.
@@ -468,24 +468,33 @@ class UploadDialog(wx.Dialog):
             if document.get_html_to_save():
                 # TODO show bad articles as red and do not include their parts.
                 # TODO implement document.is_seo_ok() for index and menu.
-                # Add all that belongs to this document into the list and check it.
+                # Add all that belongs to this document into the list.
+                if document.is_seo_ok():
+                    self._add_if_not_in(document.get_path(), enabled=True)
+                    self._add_if_not_in(document.get_article_image().get_original_image_path())
+                    self._add_if_not_in(document.get_article_image().get_thumbnail_image_path())
+                    for image in document.get_aside_images():
+                        # Add all aside images and thumbnails
+                        self._add_if_not_in(image.get_original_image_path())
+                        self._add_if_not_in(image.get_thumbnail_image_path())
+                    for image in document.get_text_images():
+                        self._add_if_not_in(image.get_original_image_path())
+                        self._add_if_not_in(image.get_thumbnail_image_path())
+                    for link in document.get_links():
+                        # Add all files and images that are linked from the article
+                        if link.get_url()[0].startswith(Strings.folder_files):
+                            self._add_if_not_in(os.path.join(self._config_manager.get_working_dir(), link.get_url()[0]))
+                else:
+                    # Show this document as disabled and red when seo did not pass.
+                    self._add_if_not_in(document.get_path(), enabled=False)
+
                 # Add the menu of this document to the list too.
-                self._add_if_not_in(document.get_path())
-                self._add_if_not_in(document.get_article_image().get_original_image_path())
-                self._add_if_not_in(document.get_article_image().get_thumbnail_image_path())
-                self._add_if_not_in(document.get_menu_section().get_path())
-                self._add_if_not_in(document.get_menu_item().get_image_path())
-                for image in document.get_aside_images():
-                    # Add all aside images and thumbnails
-                    self._add_if_not_in(image.get_original_image_path())
-                    self._add_if_not_in(image.get_thumbnail_image_path())
-                for image in document.get_text_images():
-                    self._add_if_not_in(image.get_original_image_path())
-                    self._add_if_not_in(image.get_thumbnail_image_path())
-                for link in document.get_links():
-                    # Add all files and images that are linked from the article
-                    if link.get_url()[0].startswith(Strings.folder_files):
-                        self._add_if_not_in(os.path.join(self._config_manager.get_working_dir(), link.get_url()[0]))
+                if document.get_menu_section().is_seo_ok():
+                    # TODO menus are added several times for some reason
+                    self._add_if_not_in(document.get_menu_section().get_path())
+                    self._add_if_not_in(document.get_menu_item().get_image_path())
+                else:
+                    self._add_if_not_in(document.get_menu_section().get_path(), enabled=False)
 
         if self._upload_dict:
             # If any files were changed, add index, robots and sitemap.
@@ -504,18 +513,19 @@ class UploadDialog(wx.Dialog):
         self.Enable()
         self._add_button.SetFocus()
 
-    def _add_if_not_in(self, new_path: str, seo_result: bool) -> None:
+    def _add_if_not_in(self, new_path: str, enabled: bool = True) -> None:
         """
         Add file_id and file path to upload dict if it is not there already.
         :param new_path: The file path
-        :param seo_result: Last know seo result, used to disable broken files.
+        :param enabled: Used to disable broken files.
         :return: None
         """
         for _, file_path in sorted(self._upload_dict.items()):
+            print(new_path)
             if file_path == new_path:
                 return
         # Add the new file with a new id.
-        self._upload_dict[self._get_id()] = (new_path, seo_result)
+        self._upload_dict[self._get_id()] = (new_path, enabled)
 
     def _validate_fields(self) -> bool:
         """

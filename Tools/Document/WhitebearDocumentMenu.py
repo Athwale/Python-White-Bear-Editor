@@ -41,6 +41,7 @@ class WhitebearDocumentMenu(WhitebearDocument):
         super(WhitebearDocumentMenu, self).parse_self()
         self._parse_page_name()
         self._parse_menu_items()
+        self.seo_test_self()
 
     def seo_test_self(self) -> bool:
         """
