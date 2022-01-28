@@ -33,9 +33,19 @@ class WhitebearDocumentIndex(WhitebearDocument):
         self._articles = articles
         self._html = None
         self._index_error_message: str = ''
-        self._update_content()
 
-    def _update_content(self) -> None:
+        self._global_title: str = ''
+        self._author: str = ''
+        self._contact: str = ''
+        self._black_text: str = ''
+        self._red_text: str = ''
+        self._script: str = ''
+        self._number_of_news: str = ''
+        self._url: str = ''
+
+        self.update_content()
+
+    def update_content(self) -> None:
         """
         Updates the content of the page from config manager. This is used to initially fill the information and then
         update it when generating html in case the user changed it in the setup dialog.
@@ -43,8 +53,8 @@ class WhitebearDocumentIndex(WhitebearDocument):
         """
         # This comes from config manager because when setting a new directory, there would be no index to parse it from.
         self._global_title = self._config_manager.get_global_title()
-        self._meta_description = self._config_manager.get_main_meta_description()
-        self._meta_keywords = self._config_manager.get_global_keywords()
+        self.set_description(self._config_manager.get_main_meta_description())
+        self.set_keywords(self._config_manager.get_global_keywords().split(','))
         self._author = self._config_manager.get_author()
         self._contact = self._config_manager.get_contact()
         self._black_text = self._config_manager.get_main_page_black_text()
@@ -91,24 +101,19 @@ class WhitebearDocumentIndex(WhitebearDocument):
         # Check name, meta keywords and description
         super(WhitebearDocumentIndex, self).seo_test_self_basic()
 
-        for text in (self._global_title, self._author, self._contact, self._url):
+        for text in (self._script, self._black_text, self._red_text):
             # Check not empty, otherwise these can be very long.
             if not text:
                 self._index_error_message = Strings.seo_error_index_empty
                 self.set_status_color(Numbers.RED_COLOR)
 
-            # Spellcheck
-            if not self._spell_check(text):
-                self._index_error_message = Strings.spelling_error
-                self.set_status_color(Numbers.RED_COLOR)
-
-        for text in (self._script, self._black_text, self._red_text):
+        for text in (self._global_title, self._author, self._contact, self._url):
             # Check reasonable lengths.
             if len(text) > Numbers.default_max_length or len(text) < 1:
                 self._index_error_message = Strings.seo_error_index_length
                 self.set_status_color(Numbers.RED_COLOR)
 
-            # Spellcheck
+        for text in (self._global_title, self._author, self._red_text, self._black_text):
             if not self._spell_check(text):
                 self._index_error_message = Strings.spelling_error
                 self.set_status_color(Numbers.RED_COLOR)
@@ -126,7 +131,7 @@ class WhitebearDocumentIndex(WhitebearDocument):
         :raise UnrecognizedFileException if generated html fails validation.
         :raises UnrecognizedFileException if xml schema is incorrect.
         """
-        self._update_content()
+        self.update_content()
         with open(Fetch.get_resource_path('index_template.html'), 'r') as template:
             template_string = template.read()
         is_valid, errors = Tools.validate(template_string, 'schema_index_template.xsd')
