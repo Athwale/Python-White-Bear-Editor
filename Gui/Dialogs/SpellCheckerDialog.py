@@ -20,6 +20,7 @@ class SpellCheckerDialog(wx.Dialog):
         :param title: Dialog title.
         :param text: String to work with.
         """
+        # todo fix modal layout
         wx.Dialog.__init__(self, parent, title=title,
                            size=(Numbers.spellcheck_dialog_width, Numbers.spellcheck_dialog_height),
                            style=wx.DEFAULT_DIALOG_STYLE)
@@ -54,37 +55,34 @@ class SpellCheckerDialog(wx.Dialog):
 
         replace_with_sizer.Add(wx.StaticText(self, -1, Strings.label_replace_with), 0,
                                wx.ALL | wx.ALIGN_CENTER_VERTICAL, Numbers.widget_border_size)
-        replace_with_sizer.Add(self.replace_with_field, 1, wx.ALL | wx.ALIGN_CENTER_VERTICAL,
-                               Numbers.widget_border_size)
+        replace_with_sizer.Add(self.replace_with_field, 1, wx.ALIGN_CENTER_VERTICAL)
 
         mistakes_label = wx.StaticText(self, -1, Strings.label_unrecognized_word)
-        text_fields_sizer.Add(mistakes_label, 0, wx.LEFT | wx.TOP, Numbers.widget_border_size)
-        text_fields_sizer.Add(self.mistake_preview_field, 0, wx.ALL | wx.EXPAND, Numbers.widget_border_size)
-        text_fields_sizer.Add(replace_with_sizer, 0, wx.EXPAND, Numbers.widget_border_size)
-        text_fields_sizer.Add(self.suggestions_list, 0, wx.ALL | wx.EXPAND, Numbers.widget_border_size)
+        text_fields_sizer.Add(mistakes_label, 0, wx.BOTTOM, Numbers.widget_border_size)
+        text_fields_sizer.Add(self.mistake_preview_field, 0, wx.EXPAND)
+        text_fields_sizer.Add(replace_with_sizer, 0, wx.EXPAND | wx.TOP, Numbers.widget_border_size)
+        text_fields_sizer.Add(self.suggestions_list, 0, wx.EXPAND | wx.TOP, Numbers.widget_border_size)
 
         buttons_sizer.AddSpacer(mistakes_label.GetSize()[1] + Numbers.widget_border_size)
-
-        counter: int = 1
         for button_id, label, action in ((wx.ID_REPLACE, Strings.button_replace, self.buttons_handler),
-                                         (wx.ID_IGNORE, Strings.button_ignore, self.buttons_handler),
-                                         (wx.ID_NOTOALL, Strings.button_ignore_all, self.buttons_handler),
-                                         (wx.ID_ADD, Strings.button_add_to_dict, self.buttons_handler),
-                                         (wx.ID_SETUP, Strings.button_settings, self.buttons_handler)):
+                                         (wx.ID_ADD, Strings.button_add_to_dict, self.buttons_handler)):
             button = wx.Button(self, button_id, label, size=size)
-            buttons_sizer.Add(button, 0, wx.ALL, Numbers.widget_border_size)
+            buttons_sizer.Add(button, 0, wx.TOP, Numbers.widget_border_size)
             button.Bind(wx.EVT_BUTTON, action)
             self._buttons.append(button)
-            if (counter % 2) == 0:
-                buttons_sizer.Add(wx.StaticLine(self, -1, size=size), 0, wx.ALIGN_CENTER_HORIZONTAL)
-            counter += 1
-        # Close button will never have to be disabled and therefore is not in _buttons.
+
+        buttons_sizer.AddStretchSpacer()
+        # Close and settings buttons will never have to be disabled and therefore is not in _buttons.
+        settings_button = wx.Button(self, wx.ID_SETUP, Strings.button_settings, size=size)
+        buttons_sizer.Add(settings_button, 0)
+        settings_button.Bind(wx.EVT_BUTTON, self._close_button_handler)
+
         close_button = wx.Button(self, wx.ID_CLOSE, Strings.button_close, size=size)
-        buttons_sizer.Add(close_button, 0, wx.ALL, Numbers.widget_border_size)
+        buttons_sizer.Add(close_button, 0, wx.TOP, Numbers.widget_border_size)
         close_button.Bind(wx.EVT_BUTTON, self._close_button_handler)
 
-        main_sizer.Add(text_fields_sizer, 1, wx.EXPAND, Numbers.widget_border_size)
-        main_sizer.Add(buttons_sizer, 0, wx.RIGHT, Numbers.widget_border_size)
+        main_sizer.Add(text_fields_sizer, 1, wx.EXPAND | wx.ALL, Numbers.widget_border_size)
+        main_sizer.Add(buttons_sizer, 0, wx.EXPAND | wx.RIGHT | wx.BOTTOM, Numbers.widget_border_size)
         # We are using a set dialog size, so Fit method is not needed.
         self.SetSizer(main_sizer)
 
@@ -148,12 +146,7 @@ class SpellCheckerDialog(wx.Dialog):
         :return: None
         """
         button_id = event.GetId()
-        if button_id == wx.ID_IGNORE:
-            self.go_to_next()
-        elif button_id == wx.ID_NOTOALL:
-            self._checker.ignore_always()
-            self.go_to_next()
-        elif button_id == wx.ID_REPLACE:
+        if button_id == wx.ID_REPLACE:
             self._replace()
         elif button_id == wx.ID_ADD:
             # Add new word to dictionary.

@@ -1750,8 +1750,6 @@ class MainFrame(wx.Frame):
         :return: None
         """
         # TODO show spelling error message somewhere.
-        # TODO what happens when uploading a spell wrong/seo failed menu?
-        # TODO what happens to ignored words? Independent spellcheck will fail?
         # First run spellcheck dialog on metadata and article name if needed.
         for field, name in ((self._field_article_keywords, Strings.label_article_keywords),
                             (self._field_article_description, Strings.label_article_description),
