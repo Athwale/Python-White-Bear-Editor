@@ -59,7 +59,7 @@ class Numbers:
     about_dialog_width: int = 410
     about_dialog_height: int = 250
     saving_dialog_width: int = 350
-    upload_dialog_height: int = 600
+    upload_dialog_height: int = 630
     upload_dialog_width: int = 800
     upload_filelist_width: int = 300
     saving_dialog_height: int = 85
@@ -261,6 +261,7 @@ class Strings:
     warning_upload_unfinished: str = 'Upload has not finished.\nDo you want to force disconnect?\nThis may ' \
                                      'leave damaged files on the server.'
     warning_paste_into_url: str = 'Can not paste multiple paragraphs into url'
+    warning_fatal_invalidity: str = '(Some required file(s) invalid)'
 
     label_menu_file: str = 'File'
     label_menu_item_new: str = 'New document...\tctrl+n'
@@ -413,6 +414,7 @@ class Strings:
     label_saving: str = 'Saved'
     label_upload: str = 'Upload changes'
     label_files_to_upload: str = 'Files to upload'
+    label_invalid_files: str = 'Invalid files'
     label_ip_port: str = 'IP:port'
     label_ip_port_tip: str = 'SFTP server IPv4:Port'
     label_sftp: str = 'SFTP - SSH file transfer protocol IPv4 configuration'

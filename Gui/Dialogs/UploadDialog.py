@@ -34,8 +34,11 @@ class UploadDialog(wx.Dialog):
         self._css = css
         # Contains unique id and disk path for each file in the file list even those unchecked.
         self._upload_dict: Dict[int, Tuple[str, bool]] = {}
-        self._counter = 0
+        self._id_counter = 0
+        self._invalid_files = 0
         self._sftp_thread = None
+        # If a menu or index is invalid, upload must be prevented until the user fixes it in a different dialog.
+        self._prevent_upload = False
 
         self._main_horizontal_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self._right_vertical_sizer = wx.BoxSizer(wx.VERTICAL)
@@ -48,7 +51,7 @@ class UploadDialog(wx.Dialog):
         self._file_list.SetFont(self.small_font)
         self._file_list.InsertColumn(0, Strings.label_files_to_upload, format=wx.LIST_FORMAT_LEFT)
         self._file_list.SetColumnWidth(0, Numbers.upload_filelist_width)
-        # TODO Scrolling is slow because of checked checkboxes, empty boxes are ok.
+        # Scrolling is slow because of checked checkboxes, empty boxes are ok.
         self._file_list.EnableCheckBoxes()
         self._add_button = wx.Button(self, wx.ID_ADD, Strings.button_add)
         self._filelist_sizer.Add(self._file_list, flag=wx.EXPAND, border=Numbers.widget_border_size, proportion=1)
@@ -107,6 +110,16 @@ class UploadDialog(wx.Dialog):
         self._content_connection = wx.StaticText(self, -1, Strings.status_none)
         self._info_left_sizer.Add(self._label_connection, flag=wx.BOTTOM | wx.LEFT, border=Numbers.widget_border_size)
         self._info_right_sizer.Add(self._content_connection, flag=wx.BOTTOM, border=Numbers.widget_border_size)
+
+        self._label_num_invalid_files = wx.StaticText(self, -1, Strings.label_invalid_files + ':')
+        self._content_num_invalid_files = wx.StaticText(self, -1, '0')
+        self._content_num_invalid_files.SetForegroundColour(wx.RED)
+        font: wx.Font = self._content_num_invalid_files.GetFont()
+        font.SetWeight(wx.BOLD)
+        self._content_num_invalid_files.SetFont(font)
+        self._info_left_sizer.Add(self._label_num_invalid_files, flag=wx.BOTTOM | wx.LEFT,
+                                  border=Numbers.widget_border_size)
+        self._info_right_sizer.Add(self._content_num_invalid_files, flag=wx.BOTTOM, border=Numbers.widget_border_size)
 
         self._label_num_files = wx.StaticText(self, -1, Strings.label_files_to_upload + ':')
         self._content_num_files = wx.StaticText(self, -1, '0')
@@ -345,8 +358,8 @@ class UploadDialog(wx.Dialog):
         Return a new unique int id.
         :return: A new unique int id.
         """
-        self._counter = self._counter + 1
-        return self._counter
+        self._id_counter = self._id_counter + 1
+        return self._id_counter
 
     # noinspection PyUnusedLocal
     def _handle_fields(self, event: wx.ListEvent) -> None:
@@ -460,14 +473,9 @@ class UploadDialog(wx.Dialog):
         Display the contents of the dialog.
         :return: None
         """
-        # TODO prevent upload if seo error is discovered in index or menu. Red articles are excluded automatically.
-        # TODO add red articles too, but disable them and show red.
-        # TODO hover over red to see error message?
         self.Disable()
         for filename, document in self._articles.items():
             if document.get_html_to_save():
-                # TODO show bad articles as red and do not include their parts.
-                # TODO implement document.is_seo_ok() for index and menu.
                 # Add all that belongs to this document into the list.
                 if document.is_seo_ok():
                     self._add_if_not_in(document.get_path(), enabled=True)
@@ -484,21 +492,26 @@ class UploadDialog(wx.Dialog):
                         # Add all files and images that are linked from the article
                         if link.get_url()[0].startswith(Strings.folder_files):
                             self._add_if_not_in(os.path.join(self._config_manager.get_working_dir(), link.get_url()[0]))
+
+                    # Add the menu of this document to the list too.
+                    if document.get_menu_section().is_seo_ok():
+                        self._add_if_not_in(document.get_menu_section().get_path())
+                        self._add_if_not_in(document.get_menu_item().get_image_path())
+                    else:
+                        self._add_if_not_in(document.get_menu_section().get_path(), enabled=False)
+                        self._prevent_upload = True
                 else:
                     # Show this document as disabled and red when seo did not pass.
                     self._add_if_not_in(document.get_path(), enabled=False)
 
-                # Add the menu of this document to the list too.
-                if document.get_menu_section().is_seo_ok():
-                    # TODO menus are added several times for some reason
-                    self._add_if_not_in(document.get_menu_section().get_path())
-                    self._add_if_not_in(document.get_menu_item().get_image_path())
-                else:
-                    self._add_if_not_in(document.get_menu_section().get_path(), enabled=False)
-
         if self._upload_dict:
             # If any files were changed, add index, robots and sitemap.
-            self._add_if_not_in(self._index.get_path())
+            if self._index.is_seo_ok():
+                self._add_if_not_in(self._index.get_path())
+            else:
+                self._add_if_not_in(self._index.get_path(), enabled=False)
+                self._prevent_upload = True
+
             self._add_if_not_in(self._css.get_path(), True)
             self._add_if_not_in(os.path.join(self._config_manager.get_working_dir(), Strings.robots_file), True)
             self._add_if_not_in(os.path.join(self._config_manager.get_working_dir(), Strings.sitemap_file), True)
@@ -521,11 +534,13 @@ class UploadDialog(wx.Dialog):
         :return: None
         """
         for _, file_path in sorted(self._upload_dict.items()):
-            print(new_path)
-            if file_path == new_path:
+            if file_path[0] == new_path:
                 return
         # Add the new file with a new id.
         self._upload_dict[self._get_id()] = (new_path, enabled)
+        if not enabled:
+            self._invalid_files += 1
+            self._content_num_invalid_files.SetLabelText(str(self._invalid_files))
 
     def _validate_fields(self) -> bool:
         """
@@ -592,8 +607,11 @@ class UploadDialog(wx.Dialog):
             Tools.set_field_background(self._field_keyfile, Numbers.GREEN_COLOR)
             self._config_manager.store_keyfile(self._field_keyfile.GetValue())
 
-        if not result or self._count_checked_files() == 0:
+        if not result or self._count_checked_files() == 0 or self._prevent_upload:
             self._upload_button.Disable()
+            if self._prevent_upload:
+                self._content_num_invalid_files.SetLabelText(str(self._invalid_files) + ' - ' +
+                                                             Strings.warning_fatal_invalidity)
         else:
             self._upload_button.Enable()
         return result
