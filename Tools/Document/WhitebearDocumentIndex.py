@@ -42,7 +42,6 @@ class WhitebearDocumentIndex(WhitebearDocument):
         self._script: str = ''
         self._number_of_news: str = ''
         self._url: str = ''
-
         self.update_content()
 
     def update_content(self) -> None:
@@ -54,7 +53,7 @@ class WhitebearDocumentIndex(WhitebearDocument):
         # This comes from config manager because when setting a new directory, there would be no index to parse it from.
         self._global_title = self._config_manager.get_global_title()
         self.set_description(self._config_manager.get_main_meta_description())
-        self.set_keywords(self._config_manager.get_global_keywords().split(','))
+        self.set_keywords([word.strip() for word in self._config_manager.get_global_keywords().split(',')])
         self._author = self._config_manager.get_author()
         self._contact = self._config_manager.get_contact()
         self._black_text = self._config_manager.get_main_page_black_text()

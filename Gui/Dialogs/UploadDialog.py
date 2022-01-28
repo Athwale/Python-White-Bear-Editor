@@ -115,7 +115,7 @@ class UploadDialog(wx.Dialog):
         self._content_num_invalid_files = wx.StaticText(self, -1, '0')
         self._content_num_invalid_files.SetForegroundColour(wx.RED)
         font: wx.Font = self._content_num_invalid_files.GetFont()
-        font.SetWeight(wx.BOLD)
+        font.SetWeight(wx.FONTWEIGHT_BOLD)
         self._content_num_invalid_files.SetFont(font)
         self._info_left_sizer.Add(self._label_num_invalid_files, flag=wx.BOTTOM | wx.LEFT,
                                   border=Numbers.widget_border_size)
@@ -506,7 +506,6 @@ class UploadDialog(wx.Dialog):
 
         if self._upload_dict:
             # If any files were changed, add index, robots and sitemap.
-            # TODO test spelling mistake loaded in fom file.
             # This must be done here, the setup dialog may not have a physical index file on disk yet.
             self._index.update_content()
             self._index.seo_test_self()
