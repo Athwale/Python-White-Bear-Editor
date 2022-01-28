@@ -20,7 +20,6 @@ class SpellCheckerDialog(wx.Dialog):
         :param title: Dialog title.
         :param text: String to work with.
         """
-        # todo fix modal layout
         wx.Dialog.__init__(self, parent, title=title,
                            size=(Numbers.spellcheck_dialog_width, Numbers.spellcheck_dialog_height),
                            style=wx.DEFAULT_DIALOG_STYLE)
@@ -32,7 +31,7 @@ class SpellCheckerDialog(wx.Dialog):
         self._buttons = []
         self._found_mistake = False
 
-        self.mistake_preview_field = wx.TextCtrl(self, -1, size=wx.Size(-1, 76),
+        self.mistake_preview_field = wx.TextCtrl(self, -1, size=wx.Size(-1, 71),
                                                  style=wx.TE_MULTILINE | wx.TE_READONLY | wx.TE_RICH)
         self.replace_with_field = wx.TextCtrl(self, -1, style=wx.TE_PROCESS_ENTER)
         self.suggestions_list = wx.ListBox(self, -1, style=wx.LB_SINGLE)
@@ -61,7 +60,7 @@ class SpellCheckerDialog(wx.Dialog):
         text_fields_sizer.Add(mistakes_label, 0, wx.BOTTOM, Numbers.widget_border_size)
         text_fields_sizer.Add(self.mistake_preview_field, 0, wx.EXPAND)
         text_fields_sizer.Add(replace_with_sizer, 0, wx.EXPAND | wx.TOP, Numbers.widget_border_size)
-        text_fields_sizer.Add(self.suggestions_list, 0, wx.EXPAND | wx.TOP, Numbers.widget_border_size)
+        text_fields_sizer.Add(self.suggestions_list, 1, wx.EXPAND | wx.TOP, Numbers.widget_border_size)
 
         buttons_sizer.AddSpacer(mistakes_label.GetSize()[1] + Numbers.widget_border_size)
         for button_id, label, action in ((wx.ID_REPLACE, Strings.button_replace, self.buttons_handler),
