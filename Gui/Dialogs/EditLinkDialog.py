@@ -106,7 +106,7 @@ class EditLinkDialog(SpellCheckedDialog):
 
     def _handle_buttons(self, event: wx.CommandEvent) -> None:
         """
-        Handle button clicks, run seo check on the new values and display results. Prevent closing if seo failed.
+        Handle button clicks, run seo check on the new values and display results.
         :param event: The button event
         :return: None
         """
@@ -148,6 +148,7 @@ class EditLinkDialog(SpellCheckedDialog):
         self.Disable()
         self.SetTitle(Strings.status_seo + ': ' + Strings.status_testing_link)
 
+    # noinspection PyUnusedLocal
     def on_seo_done(self, result: bool, return_value: int) -> None:
         """
         Receive the result of the link's SEO test. This is used when closing the dialog.
@@ -157,10 +158,7 @@ class EditLinkDialog(SpellCheckedDialog):
         """
         self.Enable()
         self.SetTitle(Strings.label_dialog_edit_link)
-        if result and self._link.get_status_color() != Numbers.RED_COLOR:
-            self.EndModal(return_value)
-        else:
-            self._display_dialog_contents()
+        self.EndModal(return_value)
 
     # noinspection PyUnusedLocal
     def _combobox_handler(self, event: wx.CommandEvent) -> None:
