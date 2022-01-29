@@ -12,7 +12,6 @@ OnInit must be overridden here.
 # TODO use example.com for testing purposes whether net is available.
 # TODO use tuples instead of lists in for loops.
 # TODO plaintext editor for styles and robots.
-# TODO move config to home .config
 # TODO check that youtube link is an embedded video
 # TODO add index into page menu in url edit.
 # TODO open in browser button.

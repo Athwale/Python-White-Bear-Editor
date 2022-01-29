@@ -142,7 +142,7 @@ class Strings:
     html_wildcard: str = 'HTML files (*' + extension_html + ')|*' + extension_html
     default_file: str = 'untitled'
     home_directory: str = os.path.expanduser('~')
-    editor_config_file: str = os.path.join(home_directory, '.whitebearEditor.yml')
+    editor_config_file: str = os.path.join(home_directory, '.config', '.whitebearEditor.yml')
     editor_output_debug_file: str = os.path.join(home_directory, 'whitebearEditor.log')
     editor_name: str = 'Whitebear editor'
     page_name: str = 'white-bear'
