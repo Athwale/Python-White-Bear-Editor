@@ -30,8 +30,9 @@ class EditLinkDialog(SpellCheckedDialog):
         # Link URL sub sizer
         self._url_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self._label_url = wx.StaticText(self, -1, Strings.label_url + ': ')
-        self._field_url = wx.ComboBox(self, -1, choices=self._link.get_loaded_pages(),
-                                      style=wx.CB_DROPDOWN | wx.CB_SORT)
+        choices = self._link.get_loaded_pages()
+        choices.append(Strings.index + Strings.extension_html)
+        self._field_url = wx.ComboBox(self, -1, choices=choices, style=wx.CB_DROPDOWN | wx.CB_SORT)
         # Fires when you type in the box
         self.Bind(wx.EVT_TEXT, self._combobox_handler, self._field_url)
 
