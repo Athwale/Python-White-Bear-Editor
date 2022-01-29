@@ -479,7 +479,7 @@ class MainFrame(wx.Frame):
         # --------------------------------------------------------------------------------------------------------------
 
         # File list section --------------------------------------------------------------------------------------------
-        self._style_picker = wx.ListBox(self._left_panel, -1, size=(-1, 160))
+        self._style_picker = wx.ListBox(self._left_panel, -1, size=(-1, 102))
         self._style_sizer.Add(self._style_picker, 1, flag=wx.EXPAND)
         self._file_list = wx.ListCtrl(self._left_panel, -1, style=wx.LC_REPORT | wx.LC_SINGLE_SEL | wx.LC_HRULES)
         self._file_list.SetFont(self.small_font)
@@ -1749,7 +1749,6 @@ class MainFrame(wx.Frame):
         :param event: Not used.
         :return: None
         """
-        # TODO show spelling error message somewhere.
         # First run spellcheck dialog on metadata and article name if needed.
         for field, name in ((self._field_article_keywords, Strings.label_article_keywords),
                             (self._field_article_description, Strings.label_article_description),
