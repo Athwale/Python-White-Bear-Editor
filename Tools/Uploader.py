@@ -87,11 +87,11 @@ class Uploader:
         :return: True if no repairs were done.
         """
         result = True
-        for folder in [os.path.join('.', Strings.folder_images),
+        for folder in (os.path.join('.', Strings.folder_images),
                        os.path.join('.', Strings.folder_files),
                        os.path.join('.', Strings.folder_images, Strings.folder_logos),
                        os.path.join('.', Strings.folder_images, Strings.folder_originals),
-                       os.path.join('.', Strings.folder_images, Strings.folder_thumbnails)]:
+                       os.path.join('.', Strings.folder_images, Strings.folder_thumbnails)):
             try:
                 self._sftp_connection.listdir(folder)
             except FileNotFoundError as _:

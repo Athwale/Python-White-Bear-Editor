@@ -112,7 +112,7 @@ class EditMenuDialog(SpellCheckedDialog):
         self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._spellcheck_button)
         self.Bind(wx.EVT_BUTTON, self._handle_new_menu_button, self._add_button)
         self.Bind(wx.EVT_LISTBOX, self._menu_list_handler, self._menu_list)
-        for field in [self._field_page_name, self._field_meta_keywords, self._field_meta_description]:
+        for field in (self._field_page_name, self._field_meta_keywords, self._field_meta_description):
             self.Bind(wx.EVT_TEXT, self._text_handler, field)
 
         if not self._menus:

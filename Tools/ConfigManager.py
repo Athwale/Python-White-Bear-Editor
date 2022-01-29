@@ -127,9 +127,9 @@ class ConfigManager:
         :return: False if any value is missing.
         """
         correct = True
-        for name in [self.CONF_WORKING_DIR, self.CONF_GLOBAL_TITLE, self.CONF_AUTHOR, self.CONF_CONTACT,
+        for name in (self.CONF_WORKING_DIR, self.CONF_GLOBAL_TITLE, self.CONF_AUTHOR, self.CONF_CONTACT,
                      self.CONF_KEYWORDS, self.CONF_DESCRIPTION, self.CONF_SCRIPT, self.CONF_BLACK_TXT,
-                     self.CONF_RED_TXT, self.CONF_NEWS, self.CONF_PAGE_URL]:
+                     self.CONF_RED_TXT, self.CONF_NEWS, self.CONF_PAGE_URL):
             try:
                 if not self._dir_conf[name]:
                     correct = False
@@ -140,7 +140,7 @@ class ConfigManager:
                 self._dir_conf[name] = ''
 
         # Repair uncritical values if missing, set to empty.
-        for name in [self.CONF_IP, self.CONF_USER, self.CONF_KEYFILE]:
+        for name in (self.CONF_IP, self.CONF_USER, self.CONF_KEYFILE):
             if name not in self._dir_conf.keys():
                 self._dir_conf[name] = ''
         if self.CONF_UNUPLOADED not in self._dir_conf.keys():

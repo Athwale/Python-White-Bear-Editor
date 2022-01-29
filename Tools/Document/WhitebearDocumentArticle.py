@@ -700,7 +700,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
         :return: True if this file was modified in the editor.
         """
         # Check links, videos and images
-        for list_var in [self._aside_images, self._text_images, self._links, self._videos]:
+        for list_var in (self._aside_images, self._text_images, self._links, self._videos):
             for content in list_var:
                 if content.is_modified():
                     self.set_modified(True)
@@ -914,7 +914,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
         """
         super(WhitebearDocumentArticle, self).set_modified(modified)
         if not modified:
-            for list_var in [self._aside_images, self._text_images, self._links, self._videos]:
+            for list_var in (self._aside_images, self._text_images, self._links, self._videos):
                 for content in list_var:
                     content.set_modified(False)
             self._article_image.set_modified(False)

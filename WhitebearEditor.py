@@ -4,6 +4,7 @@
 Starting class for the whitebear editor GUI. This class is necessary and must be in all wx python programs.
 OnInit must be overridden here.
 # TODO fix bugs and package this into a binary. Package into rpm Ponorme se do pythonu nebo youtube.
+# TODO https://www.blog.pythonlibrary.org/2019/03/19/distributing-a-wxpython-application/
 
 # TODO hover hint on document color and font meaning.
 # TODO viz wx forum copy paste reply.
@@ -17,7 +18,6 @@ OnInit must be overridden here.
 # TODO open in browser button.
 # TODO escape can close menu edit dialog or other dialogs, disable that if needed.
 # TODO look at cookies from whitebear pomoci requests headers bacha ba presmerovani, set cookie warning
-# TODO https://www.blog.pythonlibrary.org/2019/03/19/distributing-a-wxpython-application/
 """
 
 import wx
