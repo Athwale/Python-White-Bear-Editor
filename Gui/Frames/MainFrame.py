@@ -1,9 +1,10 @@
 import os
 from datetime import datetime
 from shutil import copyfile
-from typing import Dict, List
+from typing import Dict, List, Callable
 import wx
 import wx.richtext as rt
+from wx.lib.agw.supertooltip import SuperToolTip
 
 from Constants.Constants import Numbers, Events
 from Constants.Constants import Strings
@@ -1312,9 +1313,8 @@ class MainFrame(wx.Frame):
         :return: None
         """
         if not self._ignore_change:
-            correct, message, color = self._current_document_instance.seo_test_name(self._field_article_name.GetValue())
-            self._field_article_name.SetBackgroundColour(color)
-            self._field_article_name_tip.SetMessage(Strings.seo_check + '\n' + message)
+            self._update_field_color(self._field_article_name, self._field_article_name_tip,
+                                     self._current_document_instance.seo_test_name)
             self._current_document_instance.set_page_name(self._field_article_name.GetValue())
             self._current_document_instance.clear_converted_html()
             self._update_file_color()
@@ -1327,9 +1327,8 @@ class MainFrame(wx.Frame):
         :return: None
         """
         if not self._ignore_change:
-            correct, message, color = self._current_document_instance.seo_test_date(self._field_article_date.GetValue())
-            self._field_article_date.SetBackgroundColour(color)
-            self._field_article_date_tip.SetMessage(Strings.seo_check + '\n' + message)
+            self._update_field_color(self._field_article_date, self._field_article_date_tip,
+                                     self._current_document_instance.seo_test_date)
             self._current_document_instance.set_date(self._field_article_date.GetValue())
             self._current_document_instance.clear_converted_html()
             self._update_file_color()
@@ -1342,10 +1341,8 @@ class MainFrame(wx.Frame):
         :return: None
         """
         if not self._ignore_change:
-            keywords = self._field_article_keywords.GetValue()
-            correct, message, color = self._current_document_instance.seo_test_keywords(keywords)
-            self._field_article_keywords.SetBackgroundColour(color)
-            self._field_article_keywords_tip.SetMessage(Strings.seo_check + '\n' + message)
+            self._update_field_color(self._field_article_keywords, self._field_article_keywords_tip,
+                                     self._current_document_instance.seo_test_keywords)
             keywords_list = [word.strip() for word in self._field_article_keywords.GetValue().split(',')]
             self._current_document_instance.set_keywords(keywords_list)
             self._current_document_instance.clear_converted_html()
@@ -1359,20 +1356,38 @@ class MainFrame(wx.Frame):
         :return: None
         """
         if not self._ignore_change:
-            correct, message, color = self._current_document_instance.seo_test_description(
-                self._field_article_description.GetValue())
-
-            # Set color
-            self._field_article_description.SetBackgroundColour(color)
-            style_carrier = wx.TextAttr()
-
-            # Set color for the current text separately, it does not work with just background color
-            Tools.set_field_background(self._field_article_description, color)
-
-            self._field_article_description_tip.SetMessage(Strings.seo_check + '\n' + message)
+            self._update_description_color()
             self._current_document_instance.set_description(self._field_article_description.GetValue())
             self._current_document_instance.clear_converted_html()
             self._update_file_color()
+
+    @staticmethod
+    def _update_field_color(field: wx.TextCtrl, tip: SuperToolTip, seo_test: Callable) -> None:
+        """
+        Set field color and tip based on the result of it's seo test.
+        :param field: The field to work with.
+        :param tip: The corresponding tip.
+        :param seo_test: The seo method to run.
+        :return: None
+        """
+        correct, message, color = seo_test(field.GetValue())
+        field.SetBackgroundColour(color)
+        tip.SetMessage(Strings.seo_check + '\n' + message)
+
+    def _update_description_color(self) -> None:
+        """
+        Set meta description field color and tip based on the result of it's seo test.
+        :return: None
+        """
+        correct, message, color = self._current_document_instance.seo_test_description(
+            self._field_article_description.GetValue())
+
+        # Set color
+        self._field_article_description.SetBackgroundColour(color)
+        # Set color for the current text separately, it does not work with just background color
+        Tools.set_field_background(self._field_article_description, color)
+
+        self._field_article_description_tip.SetMessage(Strings.seo_check + '\n' + message)
 
     # noinspection PyUnusedLocal
     def _text_area_edit_handler(self, event) -> None:
@@ -1761,6 +1776,15 @@ class MainFrame(wx.Frame):
                     field.SetValue(dlg.get_fixed_text())
                     dlg.Destroy()
 
+        # Trigger fields color update.
+        self._update_field_color(self._field_article_date, self._field_article_date_tip,
+                                 self._current_document_instance.seo_test_date)
+        self._update_field_color(self._field_article_name, self._field_article_name_tip,
+                                 self._current_document_instance.seo_test_name)
+        self._update_field_color(self._field_article_keywords, self._field_article_keywords_tip,
+                                 self._current_document_instance.seo_test_keywords)
+        self._update_description_color()
+        self._update_file_color()
         # Run main text spellcheck.
         dlg = RichTextSpellCheckerDialog(self, self._main_text_area)
         dlg.run()
@@ -1777,3 +1801,4 @@ class MainFrame(wx.Frame):
         """
         self._disable_editor(False)
         self._main_text_area.SelectNone()
+        self._update_file_color()
