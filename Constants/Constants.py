@@ -61,6 +61,8 @@ class Numbers:
     saving_dialog_width: int = 350
     upload_dialog_height: int = 630
     upload_dialog_width: int = 800
+    plain_text_dialog_height: int = 630
+    plain_text_dialog_width: int = 800
     upload_filelist_width: int = 300
     saving_dialog_height: int = 85
     icon_width: int = 30
@@ -133,6 +135,7 @@ class Strings:
     extension_jpg: str = '.jpg'
     extension_png: str = '.png'
     extension_html: str = '.html'
+    extension_dict: str = '.dic'
     contact_file: str = 'contact.png'
     contact_default_alt: str = 'kontakt'
     home_page: str = 'Hlavní strana'
@@ -337,6 +340,7 @@ class Strings:
     label_dialog_spellcheck: str = 'Spellcheck'
     label_dialog_spellcheck_main: str = 'Spellcheck: main text'
     label_dialog_spellcheck_setup: str = 'Spelling setup'
+    label_dialog_edit_file: str = 'Edit file'
 
     label_article_menu_logo: str = 'Menu logo'
     label_article_menu_logo_name_placeholder: str = 'Menu item name'
@@ -488,6 +492,7 @@ class Strings:
     button_add_to_dict: str = 'Add to dictionary'
     button_settings: str = 'Settings'
     button_spellcheck: str = 'Spellcheck'
+    button_edit_dictionary: str = 'Edit dictionary'
 
     undo_last_action: str = 'Last action'
     undo_bold: str = 'Undo bold text'

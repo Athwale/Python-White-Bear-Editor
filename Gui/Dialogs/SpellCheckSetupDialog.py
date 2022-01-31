@@ -1,6 +1,7 @@
 import enchant
 import wx
 from Constants.Constants import Numbers, Strings
+from Gui.Dialogs.PlainTextEditDialog import PlainTextEditDialog
 from Tools.ConfigManager import ConfigManager
 from pathlib import Path
 from enchant.checker import SpellChecker
@@ -53,9 +54,11 @@ class SpellCheckSetupDialog(wx.Dialog):
         self._language_list = wx.ComboBox(self, -1, choices=choices,
                                           style=wx.CB_DROPDOWN | wx.CB_SORT | wx.CB_READONLY)
         self._language_list.SetSelection(0)
+        self._edit_button = wx.Button(self, wx.ID_EDIT, Strings.button_edit_dictionary)
         self._selection_sub_sizer.Add(self._label_language, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
         self._selection_sub_sizer.Add(11, -1)
         self._selection_sub_sizer.Add(self._language_list, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
+        self._selection_sub_sizer.Add(self._edit_button, flag=wx.LEFT, border=Numbers.widget_border_size)
         self._information_sizer.Add(self._selection_sub_sizer, flag=wx.EXPAND | wx.TOP,
                                     border=Numbers.widget_border_size)
 
@@ -89,6 +92,7 @@ class SpellCheckSetupDialog(wx.Dialog):
         # Bind handlers
         self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._ok_button)
         self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._cancel_button)
+        self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._edit_button)
         self.Bind(wx.EVT_COMBOBOX, self._handle_combo_box, self._language_list)
 
     def _handle_buttons(self, event: wx.CommandEvent) -> None:
@@ -97,9 +101,14 @@ class SpellCheckSetupDialog(wx.Dialog):
         :param event: The button event
         :return: None
         """
-        event.Skip()
         if event.GetId() == wx.ID_OK:
             self._config_manager.store_spelling_language(self._language_list.GetValue())
+            event.Skip()
+        elif event.GetId() == wx.ID_EDIT:
+            dictionary_path = Path(enchant.get_user_config_dir() / Path(self._checker.lang))
+            dlg = PlainTextEditDialog(self, dictionary_path.with_suffix(Strings.extension_dict))
+            dlg.ShowModal()
+            dlg.Destroy()
 
     # noinspection PyUnusedLocal
     def _handle_combo_box(self, event: wx.CommandEvent) -> None:
