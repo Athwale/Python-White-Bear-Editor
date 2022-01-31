@@ -89,6 +89,7 @@ class SpellCheckSetupDialog(wx.Dialog):
         # Bind handlers
         self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._ok_button)
         self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._cancel_button)
+        self.Bind(wx.EVT_COMBOBOX, self._handle_combo_box, self._language_list)
 
     def _handle_buttons(self, event: wx.CommandEvent) -> None:
         """
@@ -99,6 +100,17 @@ class SpellCheckSetupDialog(wx.Dialog):
         event.Skip()
         if event.GetId() == wx.ID_OK:
             self._config_manager.store_spelling_language(self._language_list.GetValue())
+
+    # noinspection PyUnusedLocal
+    def _handle_combo_box(self, event: wx.CommandEvent) -> None:
+        """
+        Handle language selection and rewrite dialog contents.
+        :param event: Unused.
+        :return: None
+        """
+        self._config_manager.store_spelling_language(self._language_list.GetValue())
+        self._checker = SpellChecker(self._config_manager.get_spelling_lang())
+        self._display_dialog_contents()
 
     def _display_dialog_contents(self) -> None:
         """
