@@ -1757,6 +1757,15 @@ class MainFrame(wx.Frame):
         dlg.ShowModal()
         dlg.Destroy()
 
+    def _update_colors(self) -> None:
+        """
+        Update the color of items based on their seo test results.
+        :return: None
+        """
+        main_image: AsideImage = self._current_document_instance.get_article_image()
+        self._update_article_image_sizer(main_image)
+        self._side_photo_panel.update_image_backgrounds()
+
     # noinspection PyUnusedLocal
     def _spellcheck_handler(self, event: wx.CommandEvent) -> None:
         """
@@ -1773,8 +1782,12 @@ class MainFrame(wx.Frame):
             dlg.run()
             if dlg.found_mistake():
                 if dlg.ShowModal() == wx.ID_OK:
-                    # Replace text in field and recheck seo again as a result of it.
+                    # Replace text in field and recheck all seo again as a result of it. The spellchecker may have
+                    # learned some new words.
                     field.SetValue(dlg.get_fixed_text())
+                    self._current_document_instance.seo_test_self(self._config_manager.get_online_test())
+                    # TODO trigger redraw of red objects.
+                    self._update_colors()
                     dlg.Destroy()
 
         # Trigger fields color update.

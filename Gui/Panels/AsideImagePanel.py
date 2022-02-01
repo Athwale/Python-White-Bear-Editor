@@ -113,3 +113,12 @@ class AsideImagePanel(wx.lib.scrolledpanel.ScrolledPanel):
         self.SetupScrolling(scroll_x=False, scrollIntoView=True, scrollToTop=False)
         # This makes the scrollbar space on the right disappear while the collapsible scrollbar still appears.
         self.SetScrollbar(wx.VERTICAL, 0, 0, 0)
+
+    def update_image_backgrounds(self) -> None:
+        """
+        Update background color of all images based on their seo status.
+        :return: None
+        """
+        for child in self.GetChildren():
+            child: ImagePanel
+            child.update_image()

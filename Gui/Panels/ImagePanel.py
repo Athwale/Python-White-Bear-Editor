@@ -76,6 +76,13 @@ class ImagePanel(wx.Panel):
         """
         self._image = image
         self._label.SetLabelText(self._image.get_caption()[0])
+        self.update_image()
+        self.Layout()
+
+    def update_image(self) -> None:
+        """
+        Update the color from the status color of the image.
+        :return: None
+        """
         self._bitmap_button.SetBitmap(wx.Bitmap(self._image.get_image()))
         self.SetBackgroundColour(self._image.get_status_color())
-        self.Layout()
