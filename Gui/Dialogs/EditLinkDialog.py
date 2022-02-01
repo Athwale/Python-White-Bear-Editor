@@ -158,6 +158,7 @@ class EditLinkDialog(SpellCheckedDialog):
         """
         if return_value == wx.ID_CANCEL:
             self.EndModal(return_value)
+            return
         self.Enable()
         self.SetTitle(Strings.label_dialog_edit_link)
         if result and self._link.get_status_color() != Numbers.RED_COLOR:

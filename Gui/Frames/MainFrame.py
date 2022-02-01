@@ -1757,15 +1757,6 @@ class MainFrame(wx.Frame):
         dlg.ShowModal()
         dlg.Destroy()
 
-    def _update_colors(self) -> None:
-        """
-        Update the color of items based on their seo test results.
-        :return: None
-        """
-        main_image: AsideImage = self._current_document_instance.get_article_image()
-        self._update_article_image_sizer(main_image)
-        self._side_photo_panel.update_image_backgrounds()
-
     # noinspection PyUnusedLocal
     def _spellcheck_handler(self, event: wx.CommandEvent) -> None:
         """
@@ -1786,8 +1777,10 @@ class MainFrame(wx.Frame):
                     # learned some new words.
                     field.SetValue(dlg.get_fixed_text())
                     self._current_document_instance.seo_test_self(self._config_manager.get_online_test())
-                    # TODO trigger redraw of red objects.
-                    self._update_colors()
+                    # TODO trigger redraw of red objects. Do this in document and also on returns from dialogs.
+                    self._update_article_image_sizer(self._current_document_instance.get_article_image())
+                    self._side_photo_panel.update_image_backgrounds()
+                    self._update_menu_sizer(self._current_document_instance.get_menu_item())
                     dlg.Destroy()
 
         # Trigger fields color update.
