@@ -1286,28 +1286,13 @@ class CustomRichText(rt.RichTextCtrl):
         self.EndURL()
         self.EndStyle()
 
-    def _set_red_background(self, link_start: int, link_end: int, link: Link) -> None:
-        """
-        Turn red background on or off on a link.
-        :param link_start: Start index of the link.
-        :param link_end: End index of the link.
-        :param link: The Link object.
-        :return: None
-        """
-        # for some reason changing style on a link does not work, starting before the link does, but destroys the
-        # style. So instead we replace the whole link.
-        # TODO undo kind of broken
-        self.Remove(link_start, link_end + 1)
-        self._insert_link(link.get_text()[0], link.get_id(), link.get_status_color())
-
     def update_seo_colors(self) -> None:
         """
         Update the color of all links in this document based on their seo status.
         :return: None.
         """
-        # TODO this
-        # Changing paragraph style inside the loop changes it's address in memory and causes segfault. Create a list of
-        # ranges to change and change the colors in a separate paragraph independent loop.
+        # Changing paragraph style inside the loop changes address in memory and causes segfault. Create a list of
+        # ranges to change and change the colors in a separate loop.
         ranges_list: List[Tuple[Tuple[int, int], Link]] = []
         buffer: rt.RichTextBuffer = self.GetBuffer()
         paragraphs: List[rt.RichTextParagraph] = buffer.GetChildren()
@@ -1321,11 +1306,18 @@ class CustomRichText(rt.RichTextCtrl):
                     if attrs.HasURL():
                         stored_link: Link = self._doc.find_link(attrs.GetURL())
                         if stored_link:
-                            ranges_list.append(((child.GetRange()[0], child.GetRange()[1]), stored_link))
+                            ranges_list.append((child.GetRange(), stored_link))
         for link_range, link in ranges_list:
-            # Changing the link somehow disrupts the other ranges is rt.RichTextRange is used,
-            # so we pass it as regular integers.
-            self._set_red_background(link_range[0], link_range[1], link)
+            # for some reason changing style on a link does not work, starting before the link does, but destroys the
+            # style. So instead we replace the whole link.
+            self.BeginSuppressUndo()
+            self.Remove(link_range[0], link_range[1] + 1)
+            self._insert_link(link.get_text()[0], link.get_id(), link.get_status_color())
+            # If the refresh is not there, font breaks if you use undo and the spellcheck again.
+            self.MoveLeft(0)
+            self.Invalidate()
+            self.Refresh()
+            self.EndSuppressUndo()
 
     def _on_insert_tool(self, evt: wx.CommandEvent) -> None:
         """
