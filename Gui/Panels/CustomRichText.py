@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Tuple
 
 import wx
 import wx.richtext as rt
@@ -1202,26 +1202,6 @@ class CustomRichText(rt.RichTextCtrl):
         elif isinstance(element, Link):
             self._insert_link(element.get_text()[0], element.get_id(), element.get_status_color())
 
-    def _insert_link(self, text: str, link_id: str, color: wx.Colour) -> None:
-        """
-        Insert a link into text at current position.
-        :param text: The visible text.
-        :param link_id: The ID of the link
-        :param color: The color of the background of the link.
-        :return: None
-        """
-        url_style: rt.RichTextAttr = self._stylesheet.FindCharacterStyle(Strings.style_url).GetStyle()
-        if color == wx.RED:
-            url_style.SetBackgroundColour(wx.RED)
-        else:
-            url_style.SetBackgroundColour(wx.WHITE)
-
-        self.BeginStyle(url_style)
-        self.BeginURL(link_id)
-        self.WriteText(text)
-        self.EndURL()
-        self.EndStyle()
-
     def _url_in_text_click_handler(self, evt: wx.TextUrlEvent) -> None:
         """
         Handles click on url links inside text.
@@ -1285,6 +1265,78 @@ class CustomRichText(rt.RichTextCtrl):
         color_evt = wx.CommandEvent(wx.wxEVT_COLOUR_CHANGED, self.GetId())
         color_evt.SetEventObject(self)
         wx.PostEvent(self.GetEventHandler(), color_evt)
+
+    def _insert_link(self, text: str, link_id: str, color: wx.Colour) -> None:
+        """
+        Insert a link into text at current position.
+        :param text: The visible text.
+        :param link_id: The ID of the link
+        :param color: The color of the background of the link.
+        :return: None
+        """
+        url_style: rt.RichTextAttr = self._stylesheet.FindCharacterStyle(Strings.style_url).GetStyle()
+        if color == wx.RED:
+            url_style.SetBackgroundColour(wx.RED)
+        else:
+            url_style.SetBackgroundColour(wx.WHITE)
+
+        self.BeginStyle(url_style)
+        self.BeginURL(link_id)
+        self.WriteText(text)
+        self.EndURL()
+        self.EndStyle()
+
+    def _set_red_background(self, style_range: rt.RichTextRange, red: bool) -> None:
+        """
+        Turn red background on a text range on or off.
+        :param style_range: Range of text.
+        :param red: True to make red.
+        :return: None
+        """
+        # TODO try the ignore always button, does it have a list too?
+        # TODO have it both ways, editing the dictionary might turn a link red again.
+        color = wx.YELLOW
+        if red:
+            color = wx.RED
+        for char in range(style_range[0], style_range[1]):
+            if char + 1 > style_range[1] + 1:
+                break
+            single_range = rt.RichTextRange(char, char + 1)
+            print(red, single_range)
+            # Get the attributes of the single char range and modify them in place. Otherwise, changing paragraph.
+            # style is broken since the attributes are reset for the range.
+            attr = rt.RichTextAttr()
+            self.GetStyleForRange(single_range, attr)
+            attr.SetBackgroundColour(color)
+            # TODO We do this without undo, test undo
+            self.SetStyleEx(single_range, attr)
+
+    def update_seo_colors(self) -> None:
+        """
+        Update the color of all links in this document based on their seo status.
+        :return: None.
+        """
+        # TODO this
+        # Changing paragraph style inside the loop changes it's address in memory and causes segfault. Create a list of
+        # ranges to change and change the colors in a separate paragraph independent loop.
+        ranges_list: List[Tuple[rt.RichTextRange, bool]] = []
+        buffer: rt.RichTextBuffer = self.GetBuffer()
+        paragraphs: List[rt.RichTextParagraph] = buffer.GetChildren()
+        for p in paragraphs:
+            par_style: str = p.GetAttributes().GetFontFaceName()
+            # Update links.
+            if par_style == Strings.style_paragraph or par_style == Strings.style_list:
+                for child in p.GetChildren():
+                    child: rt.RichTextPlainText
+                    attrs: rt.RichTextAttr = child.GetAttributes()
+                    if attrs.HasURL():
+                        stored_link: Link = self._doc.find_link(attrs.GetURL())
+                        if stored_link:
+                            print(child.GetText(), child.GetRange())
+                            ranges_list.append((child.GetRange(), stored_link.get_status_color() == wx.RED))
+
+        for link_range, state in ranges_list:
+            self._set_red_background(link_range, state)
 
     def _on_insert_tool(self, evt: wx.CommandEvent) -> None:
         """

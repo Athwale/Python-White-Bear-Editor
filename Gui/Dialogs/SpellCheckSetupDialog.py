@@ -109,6 +109,8 @@ class SpellCheckSetupDialog(wx.Dialog):
             dlg = PlainTextEditDialog(self, dictionary_path.with_suffix(Strings.extension_dict))
             dlg.ShowModal()
             dlg.Destroy()
+        elif event.GetId() == wx.ID_CANCEL:
+            event.Skip()
 
     # noinspection PyUnusedLocal
     def _handle_combo_box(self, event: wx.CommandEvent) -> None:

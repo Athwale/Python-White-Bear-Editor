@@ -1781,8 +1781,10 @@ class MainFrame(wx.Frame):
                     self._update_article_image_sizer(self._current_document_instance.get_article_image())
                     self._side_photo_panel.update_image_backgrounds()
                     self._update_menu_sizer(self._current_document_instance.get_menu_item())
+                    self._main_text_area.update_seo_colors()
                     dlg.Destroy()
 
+        # TODO cancel button in spellcheck setup does not work
         # Trigger fields color update.
         self._update_field_color(self._field_article_date, self._field_article_date_tip,
                                  self._current_document_instance.seo_test_date)
