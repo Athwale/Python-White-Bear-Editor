@@ -1278,7 +1278,7 @@ class CustomRichText(rt.RichTextCtrl):
         if color == wx.RED:
             url_style.SetBackgroundColour(wx.RED)
         else:
-            url_style.SetBackgroundColour(wx.WHITE)
+            url_style.SetBackgroundColour(self._default_style.GetBackgroundColour())
 
         self.BeginStyle(url_style)
         self.BeginURL(link_id)
@@ -1286,30 +1286,19 @@ class CustomRichText(rt.RichTextCtrl):
         self.EndURL()
         self.EndStyle()
 
-    def _set_red_background(self, style_range: rt.RichTextRange, red: bool) -> None:
+    def _set_red_background(self, link_start: int, link_end: int, link: Link) -> None:
         """
-        Turn red background on a text range on or off.
-        :param style_range: Range of text.
-        :param red: True to make red.
+        Turn red background on or off on a link.
+        :param link_start: Start index of the link.
+        :param link_end: End index of the link.
+        :param link: The Link object.
         :return: None
         """
-        # TODO try the ignore always button, does it have a list too?
-        # TODO have it both ways, editing the dictionary might turn a link red again.
-        color = wx.YELLOW
-        if red:
-            color = wx.RED
-        for char in range(style_range[0], style_range[1]):
-            if char + 1 > style_range[1] + 1:
-                break
-            single_range = rt.RichTextRange(char, char + 1)
-            print(red, single_range)
-            # Get the attributes of the single char range and modify them in place. Otherwise, changing paragraph.
-            # style is broken since the attributes are reset for the range.
-            attr = rt.RichTextAttr()
-            self.GetStyleForRange(single_range, attr)
-            attr.SetBackgroundColour(color)
-            # TODO We do this without undo, test undo
-            self.SetStyleEx(single_range, attr)
+        # for some reason changing style on a link does not work, starting before the link does, but destroys the
+        # style. So instead we replace the whole link.
+        # TODO undo kind of broken
+        self.Remove(link_start, link_end + 1)
+        self._insert_link(link.get_text()[0], link.get_id(), link.get_status_color())
 
     def update_seo_colors(self) -> None:
         """
@@ -1319,7 +1308,7 @@ class CustomRichText(rt.RichTextCtrl):
         # TODO this
         # Changing paragraph style inside the loop changes it's address in memory and causes segfault. Create a list of
         # ranges to change and change the colors in a separate paragraph independent loop.
-        ranges_list: List[Tuple[rt.RichTextRange, bool]] = []
+        ranges_list: List[Tuple[Tuple[int, int], Link]] = []
         buffer: rt.RichTextBuffer = self.GetBuffer()
         paragraphs: List[rt.RichTextParagraph] = buffer.GetChildren()
         for p in paragraphs:
@@ -1332,11 +1321,11 @@ class CustomRichText(rt.RichTextCtrl):
                     if attrs.HasURL():
                         stored_link: Link = self._doc.find_link(attrs.GetURL())
                         if stored_link:
-                            print(child.GetText(), child.GetRange())
-                            ranges_list.append((child.GetRange(), stored_link.get_status_color() == wx.RED))
-
-        for link_range, state in ranges_list:
-            self._set_red_background(link_range, state)
+                            ranges_list.append(((child.GetRange()[0], child.GetRange()[1]), stored_link))
+        for link_range, link in ranges_list:
+            # Changing the link somehow disrupts the other ranges is rt.RichTextRange is used,
+            # so we pass it as regular integers.
+            self._set_red_background(link_range[0], link_range[1], link)
 
     def _on_insert_tool(self, evt: wx.CommandEvent) -> None:
         """

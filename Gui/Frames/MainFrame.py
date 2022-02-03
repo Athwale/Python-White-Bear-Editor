@@ -1764,6 +1764,7 @@ class MainFrame(wx.Frame):
         :param event: Not used.
         :return: None
         """
+        # TODO try the ignore always button, does it have a list too?
         # TODO rerun spellcheck on all after each dialog and update colors because we may have learned new words.
         # First run spellcheck dialog on metadata and article name if needed.
         for field, name in ((self._field_article_keywords, Strings.label_article_keywords),
@@ -1784,7 +1785,6 @@ class MainFrame(wx.Frame):
                     self._main_text_area.update_seo_colors()
                     dlg.Destroy()
 
-        # TODO cancel button in spellcheck setup does not work
         # Trigger fields color update.
         self._update_field_color(self._field_article_date, self._field_article_date_tip,
                                  self._current_document_instance.seo_test_date)
