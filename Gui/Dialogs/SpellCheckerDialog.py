@@ -148,8 +148,7 @@ class SpellCheckerDialog(wx.Dialog):
         if button_id == wx.ID_REPLACE:
             self._replace()
         elif button_id == wx.ID_IGNORE:
-            # TODO does not work. Can we preserve the list? Load the list in for loop every time or have one instance
-            # TODO that loads it.
+            # TODO does not work. Can we preserve the list? Load the list in for loop every time.
             self._checker.ignore_always()
             self.go_to_next()
         elif button_id == wx.ID_ADD:
