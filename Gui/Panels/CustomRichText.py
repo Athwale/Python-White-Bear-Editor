@@ -1310,14 +1310,17 @@ class CustomRichText(rt.RichTextCtrl):
         for link_range, link in ranges_list:
             # for some reason changing style on a link does not work, starting before the link does, but destroys the
             # style. So instead we replace the whole link.
-            self.BeginSuppressUndo()
-            self.Remove(link_range[0], link_range[1] + 1)
-            self._insert_link(link.get_text()[0], link.get_id(), link.get_status_color())
-            # If the refresh is not there, font breaks if you use undo and the spellcheck again.
-            self.MoveLeft(0)
-            self.Invalidate()
-            self.Refresh()
-            self.EndSuppressUndo()
+            attr = rt.RichTextAttr()
+            self.GetStyleForRange(link_range, attr)
+            if attr.GetBackgroundColour() != link.get_status_color():
+                self.BeginSuppressUndo()
+                self.Remove(link_range[0], link_range[1] + 1)
+                self._insert_link(link.get_text()[0], link.get_id(), link.get_status_color())
+                # If the refresh is not there, font breaks if you use undo and the spellcheck again.
+                self.MoveLeft(0)
+                self.Invalidate()
+                self.Refresh()
+                self.EndSuppressUndo()
 
     def _on_insert_tool(self, evt: wx.CommandEvent) -> None:
         """
