@@ -1,6 +1,5 @@
 from Tools.ConfigManager import ConfigManager
 from enchant.checker import SpellChecker
-from enchant.tokenize import EmailFilter, URLFilter
 
 
 class SpellCheckedObject:
@@ -11,7 +10,7 @@ class SpellCheckedObject:
         Sets up spellchecker.
         """
         self._config_manager: ConfigManager = ConfigManager.get_instance()
-        self._spellchecker = SpellChecker(self._config_manager.get_spelling_lang(), filters=[EmailFilter, URLFilter])
+        self._checker: SpellChecker = self._config_manager.get_spellchecker()
 
     def _spell_check(self, text: str) -> bool:
         """
@@ -19,9 +18,9 @@ class SpellCheckedObject:
         :param text: Text to check.
         :return: Return False if incorrect.
         """
-        self._spellchecker.set_text(text)
+        self._checker.set_text(text)
         try:
-            self._spellchecker.next()
+            self._checker.next()
             return False
         except StopIteration:
             # Next raises exception if no mistake is found.

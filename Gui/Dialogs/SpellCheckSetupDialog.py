@@ -23,7 +23,7 @@ class SpellCheckSetupDialog(wx.Dialog):
                            size=(Numbers.spellcheck_setup_dialog_width, Numbers.spellcheck_setup_dialog_height),
                            style=wx.DEFAULT_DIALOG_STYLE)
         self._config_manager: ConfigManager = ConfigManager.get_instance()
-        self._checker = SpellChecker(self._config_manager.get_spelling_lang())
+        self._checker: SpellChecker = self._config_manager.get_spellchecker()
 
         self._main_vertical_sizer = wx.BoxSizer(wx.VERTICAL)
         self._information_sizer = wx.BoxSizer(wx.VERTICAL)

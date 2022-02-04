@@ -1765,7 +1765,6 @@ class MainFrame(wx.Frame):
         :return: None
         """
         # TODO try the ignore always button, does it have a list too?
-        # TODO rerun spellcheck on all after each dialog and update colors because we may have learned new words.
         # First run spellcheck dialog on metadata and article name if needed.
         for field, name in ((self._field_article_keywords, Strings.label_article_keywords),
                             (self._field_article_description, Strings.label_article_description),
@@ -1778,7 +1777,7 @@ class MainFrame(wx.Frame):
                     # learned some new words.
                     field.SetValue(dlg.get_fixed_text())
                     self._current_document_instance.seo_test_self(self._config_manager.get_online_test())
-                    # TODO trigger redraw of red objects. Do this in document and also on returns from dialogs.
+                    # TODO Do this also on returns from edit dialogs and main spellcheck dialog.
                     self._update_article_image_sizer(self._current_document_instance.get_article_image())
                     self._side_photo_panel.update_image_backgrounds()
                     self._update_menu_sizer(self._current_document_instance.get_menu_item())

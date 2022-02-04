@@ -1,7 +1,6 @@
 import wx
-from enchant.checker import SpellChecker
 from Constants.Constants import Strings, Numbers
-from enchant.tokenize import EmailFilter, URLFilter
+from enchant.checker import SpellChecker
 
 from Gui.Dialogs.SpellCheckSetupDialog import SpellCheckSetupDialog
 from Tools.ConfigManager import ConfigManager
@@ -24,7 +23,7 @@ class SpellCheckerDialog(wx.Dialog):
                            size=(Numbers.spellcheck_dialog_width, Numbers.spellcheck_dialog_height),
                            style=wx.DEFAULT_DIALOG_STYLE)
         self._config_manager: ConfigManager = ConfigManager.get_instance()
-        self._checker = SpellChecker(self._config_manager.get_spelling_lang(), filters=[EmailFilter, URLFilter])
+        self._checker: SpellChecker = self._config_manager.get_spellchecker()
         self._text = text
         # How much of the text around current mistake is shown.
         self._context_chars = Numbers.context_chars
@@ -64,7 +63,8 @@ class SpellCheckerDialog(wx.Dialog):
 
         buttons_sizer.AddSpacer(mistakes_label.GetSize()[1] + Numbers.widget_border_size)
         for button_id, label, action in ((wx.ID_REPLACE, Strings.button_replace, self.buttons_handler),
-                                         (wx.ID_ADD, Strings.button_add_to_dict, self.buttons_handler)):
+                                         (wx.ID_ADD, Strings.button_add_to_dict, self.buttons_handler),
+                                         (wx.ID_IGNORE, Strings.button_ignore_all, self.buttons_handler)):
             button = wx.Button(self, button_id, label, size=size)
             buttons_sizer.Add(button, 0, wx.TOP, Numbers.widget_border_size)
             button.Bind(wx.EVT_BUTTON, action)
@@ -147,6 +147,11 @@ class SpellCheckerDialog(wx.Dialog):
         button_id = event.GetId()
         if button_id == wx.ID_REPLACE:
             self._replace()
+        elif button_id == wx.ID_IGNORE:
+            # TODO does not work. Can we preserve the list? Load the list in for loop every time or have one instance
+            # TODO that loads it.
+            self._checker.ignore_always()
+            self.go_to_next()
         elif button_id == wx.ID_ADD:
             # Add new word to dictionary.
             self._checker.add()

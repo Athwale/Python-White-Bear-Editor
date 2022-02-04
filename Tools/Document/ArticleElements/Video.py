@@ -104,9 +104,9 @@ class Video(SpellCheckedObject):
         :param text: Text to check.
         :return: Return False if incorrect.
         """
-        self._spellchecker.set_text(text)
+        self._checker.set_text(text)
         try:
-            self._spellchecker.next()
+            self._checker.next()
             return False
         except StopIteration:
             # Next raises exception if no mistake is found.
