@@ -63,6 +63,13 @@ class ImageTextField(RichTextFieldTypeStandard):
             wx.PostEvent(parent.GetEventHandler(), color_evt)
         edit_dialog.Destroy()
 
+        self.update_image()
+        return result
+
+    def update_image(self) -> None:
+        """
+        Redraw the image according to the seo status.
+        :return: None
+        """
         self.SetBorderColour(self._element.get_status_color())
         self.SetBitmap(wx.Bitmap(self._element.get_image()))
-        return result

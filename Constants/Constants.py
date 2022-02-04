@@ -498,5 +498,6 @@ class Strings:
     undo_bold: str = 'Undo bold text'
 
     field_type: str = 'type'
+    field_name: str = 'name'
     field_video: str = 'video'
     field_image: str = 'image'

@@ -1136,7 +1136,6 @@ class CustomRichText(rt.RichTextCtrl):
         field: rt.RichTextField = buffer.InsertFieldWithUndo(self.GetBuffer(), position, new_field.GetName(),
                                                              rt.RichTextProperties(), self, rt.RICHTEXT_INSERT_NONE,
                                                              rt.RichTextAttr())
-
         # Set property of the field to distinguish between image and video.
         if isinstance(element, Video):
             field_type = Strings.field_video
@@ -1144,6 +1143,8 @@ class CustomRichText(rt.RichTextCtrl):
             field_type = Strings.field_image
         properties: rt.RichTextProperties = field.GetProperties()
         properties.SetProperty(Strings.field_type, field_type)
+        # Used to store field ID/name for later updates from spellchecking.
+        properties.SetProperty(Strings.field_name, new_field.GetName())
         self.EndBatchUndo()
 
     def _register_field(self, element) -> ImageTextField:
@@ -1307,6 +1308,13 @@ class CustomRichText(rt.RichTextCtrl):
                         stored_link: Link = self._doc.find_link(attrs.GetURL())
                         if stored_link:
                             ranges_list.append((child.GetRange(), stored_link))
+            else:
+                if isinstance(p.GetChild(0), rt.RichTextField):
+                    field: rt.RichTextField = p.GetChild(0)
+                    properties: rt.RichTextProperties = field.GetProperties()
+                    field: ImageTextField = rt.RichTextBuffer.FindFieldType(properties.GetProperty(Strings.field_name))
+                    field.update_image()
+
         for link_range, link in ranges_list:
             # for some reason changing style on a link does not work, starting before the link does, but destroys the
             # style. So instead we replace the whole link.
