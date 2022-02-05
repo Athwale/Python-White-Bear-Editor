@@ -1,3 +1,5 @@
+import os.path
+
 import wx
 from Constants.Constants import Strings, Numbers
 from enchant.checker import SpellChecker
@@ -167,8 +169,16 @@ class SpellCheckerDialog(wx.Dialog):
         :param word: The word to ignore.
         :return: None
         """
-        with open(Strings.ignored_words_file, 'a') as file:
-            file.write(word + '\n')
+        if os.path.exists(Strings.ignored_words_file):
+            with open(Strings.ignored_words_file, 'r') as file:
+                ignored_words = set([word.strip() for word in file.readlines()])
+        else:
+            ignored_words = set()
+
+        ignored_words.add(word)
+        with open(Strings.ignored_words_file, 'w') as file:
+            for word in ignored_words:
+                file.write(word + '\n')
 
     # noinspection PyUnusedLocal
     def _close_button_handler(self, event: wx.CloseEvent) -> None:

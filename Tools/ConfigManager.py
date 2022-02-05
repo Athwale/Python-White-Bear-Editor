@@ -374,7 +374,12 @@ class ConfigManager:
         if not self._spellchecker:
             # Initialize spellchecker once here, it can not be initialized in constructor for some reason.
             self._spellchecker = SpellChecker(self.get_spelling_lang(), filters=[EmailFilter, URLFilter])
-            # TODO load a global list of ignored words.
+            if os.path.exists(Strings.ignored_words_file):
+                with open(Strings.ignored_words_file, 'r') as file:
+                    for line in file:
+                        self._spellchecker.ignore_always(line.strip())
+            # TODO Add edit button into settings
+            # TODO document wants to be saved after spellcheck??? Why?
         return self._spellchecker
 
     def store_spelling_language(self, lang: str) -> None:

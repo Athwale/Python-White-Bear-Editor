@@ -488,7 +488,7 @@ class Strings:
     button_add: str = 'Add'
     button_upload: str = 'Upload'
     button_ignore: str = 'Ignore'
-    button_ignore_all: str = 'Ignore all'
+    button_ignore_all: str = 'Ignore always'
     button_replace: str = 'Replace'
     button_add_to_dict: str = 'Add to dictionary'
     button_settings: str = 'Settings'
