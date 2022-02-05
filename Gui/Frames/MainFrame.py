@@ -1764,7 +1764,6 @@ class MainFrame(wx.Frame):
         :param event: Not used.
         :return: None
         """
-        # TODO document wants to be saved after spellcheck? Probably because the text controls set text.
         # First run spellcheck dialog on metadata and article name if needed.
         for field, name in ((self._field_article_keywords, Strings.label_article_keywords),
                             (self._field_article_description, Strings.label_article_description),
@@ -1775,16 +1774,20 @@ class MainFrame(wx.Frame):
                 if dlg.ShowModal() == wx.ID_OK:
                     # Replace text in field and recheck all seo again as a result of it. The spellchecker may have
                     # learned some new words.
-                    field.SetValue(dlg.get_fixed_text())
+                    if field.GetValue() != dlg.get_fixed_text():
+                        field.SetValue(dlg.get_fixed_text())
                     self._current_document_instance.seo_test_self(self._config_manager.get_online_test())
                     # TODO Do this also on returns from edit dialogs and main spellcheck dialog.
                     self._update_article_image_sizer(self._current_document_instance.get_article_image())
                     self._side_photo_panel.update_image_backgrounds()
                     self._update_menu_sizer(self._current_document_instance.get_menu_item())
+                    # TODO this causes the document to want to re-save, only do that if something has changed
+                    # TODO probably because of links
                     self._main_text_area.update_seo_colors()
                     dlg.Destroy()
 
         # Trigger fields color update.
+        return
         self._update_field_color(self._field_article_date, self._field_article_date_tip,
                                  self._current_document_instance.seo_test_date)
         self._update_field_color(self._field_article_name, self._field_article_name_tip,

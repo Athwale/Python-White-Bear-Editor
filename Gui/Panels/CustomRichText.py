@@ -1280,7 +1280,7 @@ class CustomRichText(rt.RichTextCtrl):
             url_style.SetBackgroundColour(wx.RED)
         else:
             # Using a transparent color does not work sometimes, so use white.
-            url_style.SetBackgroundColour(wx.WHITE)
+            url_style.SetBackgroundColour(wx.NullColour)
 
         self.BeginStyle(url_style)
         self.BeginURL(link_id)
