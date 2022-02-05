@@ -148,8 +148,8 @@ class SpellCheckerDialog(wx.Dialog):
         if button_id == wx.ID_REPLACE:
             self._replace()
         elif button_id == wx.ID_IGNORE:
-            # TODO does not work. Can we preserve the list? Load the list in for loop every time.
             self._checker.ignore_always()
+            self._save_ignored_word(self._checker.word)
             self.go_to_next()
         elif button_id == wx.ID_ADD:
             # Add new word to dictionary.
@@ -159,6 +159,16 @@ class SpellCheckerDialog(wx.Dialog):
             dlg = SpellCheckSetupDialog(self)
             dlg.ShowModal()
             dlg.Destroy()
+
+    @staticmethod
+    def _save_ignored_word(word: str) -> None:
+        """
+        Append another ignored word to the ignored words file.
+        :param word: The word to ignore.
+        :return: None
+        """
+        with open(Strings.ignored_words_file, 'a') as file:
+            file.write(word + '\n')
 
     # noinspection PyUnusedLocal
     def _close_button_handler(self, event: wx.CloseEvent) -> None:

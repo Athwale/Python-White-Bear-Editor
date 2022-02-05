@@ -374,6 +374,7 @@ class ConfigManager:
         if not self._spellchecker:
             # Initialize spellchecker once here, it can not be initialized in constructor for some reason.
             self._spellchecker = SpellChecker(self.get_spelling_lang(), filters=[EmailFilter, URLFilter])
+            # TODO load a global list of ignored words.
         return self._spellchecker
 
     def store_spelling_language(self, lang: str) -> None:
