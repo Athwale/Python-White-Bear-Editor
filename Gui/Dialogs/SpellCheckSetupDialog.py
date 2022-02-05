@@ -47,6 +47,15 @@ class SpellCheckSetupDialog(wx.Dialog):
         self._information_sizer.Add(self._dictionary_sub_sizer, flag=wx.EXPAND | wx.TOP,
                                     border=Numbers.widget_border_size)
 
+        # Dictionary location
+        self._ignored_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self._label_ignored_path = wx.StaticText(self, -1, Strings.label_ignored_location + ': ')
+        self._content_ignored_path = wx.StaticText(self, -1, Strings.label_none)
+        self._ignored_sub_sizer.Add(self._label_ignored_path, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
+        self._ignored_sub_sizer.Add(self._content_ignored_path, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
+        self._information_sizer.Add(self._ignored_sub_sizer, flag=wx.EXPAND | wx.TOP,
+                                    border=Numbers.widget_border_size)
+
         # Dictionary selection
         choices = enchant.list_languages() if enchant.list_languages() else ['-']
         self._selection_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
@@ -55,10 +64,12 @@ class SpellCheckSetupDialog(wx.Dialog):
                                           style=wx.CB_DROPDOWN | wx.CB_SORT | wx.CB_READONLY)
         self._language_list.SetSelection(0)
         self._edit_button = wx.Button(self, wx.ID_EDIT, Strings.button_edit_dictionary)
+        self._edit_ignored_button = wx.Button(self, wx.ID_IGNORE, Strings.button_edit_ignored_list)
         self._selection_sub_sizer.Add(self._label_language, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
         self._selection_sub_sizer.Add(11, -1)
         self._selection_sub_sizer.Add(self._language_list, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
         self._selection_sub_sizer.Add(self._edit_button, flag=wx.LEFT, border=Numbers.widget_border_size)
+        self._selection_sub_sizer.Add(self._edit_ignored_button, flag=wx.LEFT, border=Numbers.widget_border_size)
         self._information_sizer.Add(self._selection_sub_sizer, flag=wx.EXPAND | wx.TOP,
                                     border=Numbers.widget_border_size)
 
@@ -93,6 +104,7 @@ class SpellCheckSetupDialog(wx.Dialog):
         self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._ok_button)
         self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._cancel_button)
         self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._edit_button)
+        self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._edit_ignored_button)
         self.Bind(wx.EVT_COMBOBOX, self._handle_combo_box, self._language_list)
 
     def _handle_buttons(self, event: wx.CommandEvent) -> None:
@@ -107,6 +119,11 @@ class SpellCheckSetupDialog(wx.Dialog):
         elif event.GetId() == wx.ID_EDIT:
             dictionary_path = Path(enchant.get_user_config_dir() / Path(self._checker.lang))
             dlg = PlainTextEditDialog(self, dictionary_path.with_suffix(Strings.extension_dict))
+            dlg.ShowModal()
+            dlg.Destroy()
+        elif event.GetId() == wx.ID_IGNORE:
+            ignored_words_file = Path(Strings.ignored_words_file)
+            dlg = PlainTextEditDialog(self, ignored_words_file)
             dlg.ShowModal()
             dlg.Destroy()
         elif event.GetId() == wx.ID_CANCEL:
@@ -131,5 +148,6 @@ class SpellCheckSetupDialog(wx.Dialog):
         provider: enchant.ProviderDesc = self._checker.dict.provider
         self._content_provider.SetLabelText(str(provider.name))
         self._content_path.SetLabelText(str(Path(enchant.get_user_config_dir() / Path(self._checker.lang))))
+        self._content_ignored_path.SetLabelText(Strings.ignored_words_file)
         selection = self._language_list.FindString(self._config_manager.get_spelling_lang())
         self._language_list.SetSelection(selection)

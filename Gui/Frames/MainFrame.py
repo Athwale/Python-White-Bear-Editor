@@ -1764,7 +1764,7 @@ class MainFrame(wx.Frame):
         :param event: Not used.
         :return: None
         """
-        # TODO try the ignore always button, does it have a list too?
+        # TODO document wants to be saved after spellcheck? Probably because the text controls set text.
         # First run spellcheck dialog on metadata and article name if needed.
         for field, name in ((self._field_article_keywords, Strings.label_article_keywords),
                             (self._field_article_description, Strings.label_article_description),

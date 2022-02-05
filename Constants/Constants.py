@@ -72,8 +72,8 @@ class Numbers:
     splashscreen_dialog_size: (int, int) = (350, 350)
     spellcheck_dialog_width: int = 500
     spellcheck_dialog_height: int = 357
-    spellcheck_setup_dialog_width: int = 500
-    spellcheck_setup_dialog_height: int = 235
+    spellcheck_setup_dialog_width: int = 570
+    spellcheck_setup_dialog_height: int = 257
 
     # Styling
     main_heading_size = 18
@@ -441,6 +441,7 @@ class Strings:
     label_unrecognized_word: str = 'Unrecognized word:'
     label_dictionary_provider: str = 'Dictionary provider'
     label_dictionary_location: str = 'Personal dictionary'
+    label_ignored_location: str = 'Ignored words'
     label_spelling_language: str = 'Spelling language'
     label_restart_required: str = 'Restart editor to apply changes'
 
@@ -494,6 +495,7 @@ class Strings:
     button_settings: str = 'Settings'
     button_spellcheck: str = 'Spellcheck'
     button_edit_dictionary: str = 'Edit dictionary'
+    button_edit_ignored_list: str = 'Edit ignored words'
 
     undo_last_action: str = 'Last action'
     undo_bold: str = 'Undo bold text'
