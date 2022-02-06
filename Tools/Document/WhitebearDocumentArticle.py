@@ -65,7 +65,9 @@ class WhitebearDocumentArticle(WhitebearDocument):
 
         self._date = ''
         self._date_error_message: str = ''
+        self._spelling_error_message: str = ''
         self._main_text = None
+        self._plain_text: str = ''
 
         self._article_image = None
         self._html = ''
@@ -125,6 +127,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
         super(WhitebearDocumentArticle, self).seo_test_self_basic()
         # Clear all errors on every new test
         self._date_error_message: str = ''
+        self._spelling_error_message: str = ''
 
         # Check page name length must be at least 3 and must not be default.
         name_result, message, color = self.seo_test_name(self._page_name)
@@ -166,6 +169,11 @@ class WhitebearDocumentArticle(WhitebearDocument):
         for link in self._links:
             if not link.seo_test_self(online):
                 self.set_status_color(Numbers.RED_COLOR)
+
+        # TODO spellcheck text
+        if not self._spell_check(self._plain_text):
+            self._spelling_error_message = Strings.spelling_error
+            self.set_status_color(Numbers.RED_COLOR)
 
         if not self._enabled:
             self.set_status_color(Numbers.RED_COLOR)
@@ -232,8 +240,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
             else:
                 raise WrongFormatException(Strings.exception_html_syntax_error)
 
-    @staticmethod
-    def _process_iframe(div: Tag) -> Video:
+    def _process_iframe(self, div: Tag) -> Video:
         """
         Process a video.
         :param div: The beautiful soup div element containing a video.
@@ -243,6 +250,8 @@ class WhitebearDocumentArticle(WhitebearDocument):
         width = int(div.iframe['width'])
         src = div.iframe['src']
         title = div.iframe['title']
+        self._plain_text += '\n'
+
         return Video(title, width, height, src)
 
     def _process_img(self, div: Tag):
@@ -255,6 +264,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
         title = div.a['title']
         alt = div.img['alt']
         full_thumbnail_path = os.path.join(self._working_directory, div.img['src'])
+        self._plain_text += '\n'
 
         if not os.path.exists(full_original_image_path) or not os.access(full_original_image_path, os.R_OK) \
                 or not os.access(full_original_image_path, os.W_OK):
@@ -266,8 +276,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
 
         return ImageInText(title, alt, full_original_image_path, full_thumbnail_path, div.a['href'], div.img['src'])
 
-    @staticmethod
-    def _process_h(h: Tag) -> Heading:
+    def _process_h(self, h: Tag) -> Heading:
         """
         Process a 'h' tag in the text.
         :param h: The beautiful soup h element.
@@ -285,6 +294,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
             raise WrongFormatException(Strings.exception_html_syntax_error)
         if h.has_attr('class'):
             color = h.attrs['class'][0]
+        self._plain_text += text + '\n'
         return Heading(Text(text, color=color), size)
 
     def _process_ul(self, ul: Tag) -> UnorderedList:
@@ -297,6 +307,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
         for li in ul.children:
             li: Tag
             paragraph = self._process_p(li)
+            self._plain_text += '\n'
             unordered_list.append_paragraph(paragraph)
         return unordered_list
 
@@ -312,6 +323,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
             child: Tag
             if not self._process_visual_tags(child, paragraph, False):
                 if child.name == 'a':
+                    self._plain_text += child.string
                     link = Link(str(child.string), child.attrs['href'], child.attrs['title'], self._articles,
                                 self._working_directory)
                     paragraph.add_element(link)
@@ -331,6 +343,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
         return_value = False
         if isinstance(parent_element, NavigableString):
             return_value = True
+            self._plain_text += str(parent_element)
             paragraph.add_element(Text(str(parent_element), bold=bold))
         elif parent_element.name == 'span':
             # These can contain br
@@ -338,11 +351,14 @@ class WhitebearDocumentArticle(WhitebearDocument):
             color = parent_element.attrs['class'][0]
             for child in parent_element.children:
                 if child.name == 'br':
+                    self._plain_text += '\n'
                     paragraph.add_element(Break())
                 else:
+                    self._plain_text += child.string
                     paragraph.add_element(Text(str(child.string), bold=bold, color=color))
         elif parent_element.name == 'br':
             return_value = True
+            self._plain_text += '\n'
             paragraph.add_element(Break())
         elif parent_element.name == 'strong':
             return_value = True
@@ -636,6 +652,13 @@ class WhitebearDocumentArticle(WhitebearDocument):
         return container
 
     # Getters ----------------------------------------------------------------------------------------------------------
+    def get_plain_text(self) -> str:
+        """
+        Get the text of the page excluding images and videos.
+        :return: The text of the page excluding images and videos.
+        """
+        return self._plain_text
+
     def get_html_to_save(self) -> str:
         """
         Returns the last converted string HTML code of this article. Run convert_to_html() before calling this method.

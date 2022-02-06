@@ -1785,7 +1785,6 @@ class MainFrame(wx.Frame):
         :return: None
         """
         # Todo display no mistake found, include images make it a self test.
-        mistakes_found = False
         # First run spellcheck dialog on metadata and article name if needed.
         for field, name in ((self._field_article_keywords, Strings.label_article_keywords),
                             (self._field_article_description, Strings.label_article_description),
@@ -1807,11 +1806,26 @@ class MainFrame(wx.Frame):
         dlg = RichTextSpellCheckerDialog(self, self._main_text_area)
         dlg.run()
         if dlg.found_mistake():
-            mistakes_found = True
             self._disable_editor(True, all_menu=True)
             dlg.Show()
-        if not mistakes_found:
+        else:
+            self._show_test_report()
+
+    def _show_test_report(self) -> None:
+        """
+        Show an error list of red items in the document.
+        :return: None
+        """
+        # TODO find out whether anything is red, This must run after spellchecks
+        # TODO spellcheck does not run on main text on load.
+        error_report = ''
+        if self._current_document_instance.get_status_color() == Numbers.RED_COLOR:
+            error_report += Strings.warning_errors_in_document + '\n'
+
+        if not error_report:
             wx.MessageBox(Strings.warning_no_mistake, Strings.label_dialog_self_test, wx.OK | wx.ICON_INFORMATION)
+        else:
+            wx.MessageBox(error_report, Strings.label_dialog_self_test, wx.OK | wx.ICON_INFORMATION)
 
     # noinspection PyUnusedLocal
     def _spellcheck_done_handler(self, event: wx.CommandEvent) -> None:
@@ -1823,3 +1837,4 @@ class MainFrame(wx.Frame):
         self._disable_editor(False)
         self._main_text_area.SelectNone()
         self._update_seo_colors()
+        self._show_test_report()

@@ -267,6 +267,7 @@ class Strings:
     warning_paste_into_url: str = 'Can not paste multiple paragraphs into url'
     warning_fatal_invalidity: str = '(Some required file(s) invalid)'
     warning_no_mistake: str = 'No errors found'
+    warning_errors_in_document: str = 'Errors found in current document'
 
     label_menu_file: str = 'File'
     label_menu_item_new: str = 'New document...\tctrl+n'
