@@ -266,6 +266,7 @@ class Strings:
                                      'leave damaged files on the server.'
     warning_paste_into_url: str = 'Can not paste multiple paragraphs into url'
     warning_fatal_invalidity: str = '(Some required file(s) invalid)'
+    warning_no_mistake: str = 'No errors found'
 
     label_menu_file: str = 'File'
     label_menu_item_new: str = 'New document...\tctrl+n'
@@ -342,6 +343,7 @@ class Strings:
     label_dialog_spellcheck_main: str = 'Spellcheck: main text'
     label_dialog_spellcheck_setup: str = 'Spelling setup'
     label_dialog_edit_file: str = 'Edit file'
+    label_dialog_self_test: str = 'Self test'
 
     label_article_menu_logo: str = 'Menu logo'
     label_article_menu_logo_name_placeholder: str = 'Menu item name'

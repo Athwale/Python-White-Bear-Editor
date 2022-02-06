@@ -61,7 +61,6 @@ class ConfigManager:
         self._dir_conf = {}
         self._whole_conf = {}
         self._load()
-        # TODO this is broken probably because it happens before constructor is finished.
         self._spellchecker = None
 
     def _create_new_dir_config(self) -> Dict[str, object]:

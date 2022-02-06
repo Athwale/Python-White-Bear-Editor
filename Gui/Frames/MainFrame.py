@@ -580,7 +580,7 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self._forward_event, self._edit_menu_item_undo)
         self.Bind(wx.EVT_MENU, self._forward_event, self._edit_menu_item_redo)
         self.Bind(wx.EVT_MENU, self._forward_event, self._edit_menu_item_select_all)
-        self.Bind(wx.EVT_MENU, self._spellcheck_handler, self._edit_menu_item_spellcheck)
+        self.Bind(wx.EVT_MENU, self._self_test_handler, self._edit_menu_item_spellcheck)
         self.Bind(wx.EVT_MENU, self._spellcheck_setup_handler, self._edit_menu_item_spellcheck_setup)
         self.Bind(wx.EVT_MENU, self._add_image_handler, self._add_menu_item_add_image)
         self.Bind(wx.EVT_MENU, self._insert_aside_image_handler, self._add_menu_item_side_image)
@@ -1757,37 +1757,17 @@ class MainFrame(wx.Frame):
         dlg.ShowModal()
         dlg.Destroy()
 
-    # noinspection PyUnusedLocal
-    def _spellcheck_handler(self, event: wx.CommandEvent) -> None:
+    def _update_seo_colors(self) -> None:
         """
-        Handle spellcheck dialog.
-        :param event: Not used.
+        Update the background color of all items in the loaded document.
         :return: None
         """
-        # First run spellcheck dialog on metadata and article name if needed.
-        for field, name in ((self._field_article_keywords, Strings.label_article_keywords),
-                            (self._field_article_description, Strings.label_article_description),
-                            (self._field_article_name, Strings.label_article_title)):
-            dlg = SpellCheckerDialog(self, Strings.label_dialog_spellcheck + ': ' + name, field.GetValue())
-            dlg.run()
-            if dlg.found_mistake():
-                if dlg.ShowModal() == wx.ID_OK:
-                    # Replace text in field and recheck all seo again as a result of it. The spellchecker may have
-                    # learned some new words.
-                    if field.GetValue() != dlg.get_fixed_text():
-                        field.SetValue(dlg.get_fixed_text())
-                    self._current_document_instance.seo_test_self(self._config_manager.get_online_test())
-                    # TODO Do this also on returns from edit dialogs and main spellcheck dialog.
-                    self._update_article_image_sizer(self._current_document_instance.get_article_image())
-                    self._side_photo_panel.update_image_backgrounds()
-                    self._update_menu_sizer(self._current_document_instance.get_menu_item())
-                    # TODO this causes the document to want to re-save, only do that if something has changed
-                    # TODO probably because of links
-                    self._main_text_area.update_seo_colors()
-                    dlg.Destroy()
-
-        # Trigger fields color update.
-        return
+        self._current_document_instance.seo_test_self(self._config_manager.get_online_test())
+        # TODO Do this also on returns from edit dialogs and main spellcheck dialog.
+        self._update_article_image_sizer(self._current_document_instance.get_article_image())
+        self._side_photo_panel.update_image_backgrounds()
+        self._update_menu_sizer(self._current_document_instance.get_menu_item())
+        self._main_text_area.update_seo_colors()
         self._update_field_color(self._field_article_date, self._field_article_date_tip,
                                  self._current_document_instance.seo_test_date)
         self._update_field_color(self._field_article_name, self._field_article_name_tip,
@@ -1796,12 +1776,42 @@ class MainFrame(wx.Frame):
                                  self._current_document_instance.seo_test_keywords)
         self._update_description_color()
         self._update_file_color()
+
+    # noinspection PyUnusedLocal
+    def _self_test_handler(self, event: wx.CommandEvent) -> None:
+        """
+        Handle spellcheck dialog.
+        :param event: Not used.
+        :return: None
+        """
+        # Todo display no mistake found, include images make it a self test.
+        mistakes_found = False
+        # First run spellcheck dialog on metadata and article name if needed.
+        for field, name in ((self._field_article_keywords, Strings.label_article_keywords),
+                            (self._field_article_description, Strings.label_article_description),
+                            (self._field_article_name, Strings.label_article_title)):
+            dlg = SpellCheckerDialog(self, Strings.label_dialog_spellcheck + ': ' + name, field.GetValue())
+            dlg.run()
+            if dlg.found_mistake():
+                mistakes_found = True
+                if dlg.ShowModal() == wx.ID_OK:
+                    # Replace text in field and recheck all seo again as a result of it. The spellchecker may have
+                    # learned some new words.
+                    if field.GetValue() != dlg.get_fixed_text():
+                        field.SetValue(dlg.get_fixed_text())
+                    self._update_seo_colors()
+                    dlg.Destroy()
+        # Update again in case no mistake in the metadata fields is found.
+        self._update_seo_colors()
         # Run main text spellcheck.
         dlg = RichTextSpellCheckerDialog(self, self._main_text_area)
         dlg.run()
         if dlg.found_mistake():
+            mistakes_found = True
             self._disable_editor(True, all_menu=True)
             dlg.Show()
+        if not mistakes_found:
+            wx.MessageBox(Strings.warning_no_mistake, Strings.label_dialog_self_test, wx.OK | wx.ICON_INFORMATION)
 
     # noinspection PyUnusedLocal
     def _spellcheck_done_handler(self, event: wx.CommandEvent) -> None:
@@ -1812,4 +1822,4 @@ class MainFrame(wx.Frame):
         """
         self._disable_editor(False)
         self._main_text_area.SelectNone()
-        self._update_file_color()
+        self._update_seo_colors()
