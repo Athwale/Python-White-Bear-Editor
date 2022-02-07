@@ -33,14 +33,14 @@ class ImageInText(BaseImage):
         return ImageInText(self.get_link_title()[0], self.get_image_alt()[0], self.get_original_image_path(),
                            self.get_thumbnail_image_path(), self.get_full_filename(), self.get_thumbnail_filename())
 
-    def seo_test_self(self) -> bool:
+    def test_self(self) -> bool:
         """
         SEO test self for alt and link title. If the image and thumbnail is not accessible on disk, set a
         special warning image.
         :return: True if test is ok, False otherwise
         """
         # First test the base class seo attributes
-        result = super(ImageInText, self).seo_test_self()
+        result = super(ImageInText, self).test_self()
 
         # Check thumbnail image disk path
         if not self._thumbnail_path or not os.path.exists(self._thumbnail_path):

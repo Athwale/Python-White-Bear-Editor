@@ -45,7 +45,7 @@ class BaseImage(SpellCheckedObject):
         self._image_id = str(BaseImage.count)
         BaseImage.count = BaseImage.count + 1
 
-    def seo_test_self(self) -> bool:
+    def test_self(self) -> bool:
         """
         SEO test self for alt and link title. If the image and thumbnail is not accessible on disk, set a special
         warning image.

@@ -10,6 +10,7 @@ class SpellCheckedObject:
         Sets up spellchecker.
         """
         self._config_manager: ConfigManager = ConfigManager.get_instance()
+        # TODO single instance breaks while saving in threads. How to have multiple checkers with one file?
         self._checker: SpellChecker = self._config_manager.get_spellchecker()
 
     def _spell_check(self, text: str) -> bool:

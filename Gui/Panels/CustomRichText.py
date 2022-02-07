@@ -786,7 +786,7 @@ class CustomRichText(rt.RichTextCtrl):
                             new_link = Link(stored_link.get_text()[0], stored_link.get_url()[0],
                                             stored_link.get_title()[0], self._doc.get_other_articles(),
                                             self._doc.get_working_directory())
-                            new_link.seo_test_self(self._config_manager.get_online_test())
+                            new_link.test_self(self._config_manager.get_online_test())
                             self._doc.add_link(new_link)
                             # Set the new id to the pasted url to differentiate them.
                             attrs.SetURL(new_link.get_id())
@@ -813,14 +813,14 @@ class CustomRichText(rt.RichTextCtrl):
                                                     stored_element.get_thumbnail_image_path(),
                                                     stored_element.get_full_filename(),
                                                     stored_element.get_thumbnail_filename())
-                            new_field.seo_test_self()
+                            new_field.test_self()
                             self._doc.add_image(new_field)
                         elif isinstance(stored_element, Video):
                             new_field = Video(stored_element.get_title()[0],
                                               stored_element.get_size()[0],
                                               stored_element.get_size()[1],
                                               stored_element.get_url()[0])
-                            new_field.seo_test_self(self._config_manager.get_online_test())
+                            new_field.test_self(self._config_manager.get_online_test())
                             self._doc.add_video(new_field)
                         self._register_field(new_field)
                         child.SetFieldType(new_field.get_id())
@@ -1216,7 +1216,7 @@ class CustomRichText(rt.RichTextCtrl):
             # Create a new link
             link = Link(link_text, url, link_text, self._doc.get_other_articles(),
                         self._doc.get_working_directory())
-            link.seo_test_self(self._config_manager.get_online_test())
+            link.test_self(self._config_manager.get_online_test())
 
         link.set_text(link_text)
         edit_dialog = EditLinkDialog(self, link)
@@ -1321,7 +1321,6 @@ class CustomRichText(rt.RichTextCtrl):
             # style. So instead we replace the whole link.
             attr = rt.RichTextAttr()
             self.GetStyleForRange(link_range, attr)
-            print(attr.GetBackgroundColour())
             if attr.GetBackgroundColour() != link.get_status_color():
                 self.BeginSuppressUndo()
                 self.Remove(link_range[0], link_range[1] + 1)
@@ -1343,10 +1342,10 @@ class CustomRichText(rt.RichTextCtrl):
         if evt.GetId() == self._img_tool_id:
             new_element = ImageInText('', '', '', '', Strings.status_none, Strings.status_none)
             # This will set the image internal state to missing image placeholder.
-            new_element.seo_test_self()
+            new_element.test_self()
         else:
             new_element = Video('', Numbers.video_width, Numbers.video_height, Strings.url_stub)
-            new_element.seo_test_self(self._config_manager.get_online_test())
+            new_element.test_self(self._config_manager.get_online_test())
         # Open edit dialog.
         if evt.GetId() == self._img_tool_id:
             edit_dialog = EditTextImageDialog(self._parent, new_element, self._doc.get_working_directory())
@@ -1554,7 +1553,7 @@ class CustomRichText(rt.RichTextCtrl):
                     # document red.
                     stored_link = Link(text, attrs.GetURL(), text, self._doc.get_other_articles(),
                                        self._doc.get_working_directory())
-                    stored_link.seo_test_self(self._config_manager.get_online_test())
+                    stored_link.test_self(self._config_manager.get_online_test())
                     self._doc.add_link(stored_link)
                 # Update the text of the link from the current document.
                 stored_link.set_text(text)

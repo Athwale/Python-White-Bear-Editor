@@ -41,16 +41,16 @@ class WhitebearDocumentMenu(WhitebearDocument):
         super(WhitebearDocumentMenu, self).parse_self()
         self._parse_page_name()
         self._parse_menu_items()
-        self.seo_test_self()
+        self.test_self()
 
-    def seo_test_self(self) -> bool:
+    def test_self(self) -> bool:
         """
         Perform a SEO test on this document.
         :return: True if seo test passed.
         """
         # Check name, meta keywords and description
         # Menu items are seo tested by articles.
-        return super(WhitebearDocumentMenu, self).seo_test_self_basic()
+        return super(WhitebearDocumentMenu, self).test_self_basic()
 
     def _parse_menu_items(self) -> None:
         """
@@ -169,7 +169,7 @@ class WhitebearDocumentMenu(WhitebearDocument):
             if not item.get_article():
                 # Skip deleted articles.
                 continue
-            if not item.get_article().seo_test_self(self._config_manager.get_online_test()):
+            if not item.get_article().test_self(self._config_manager.get_online_test()):
                 # Hide this menu item because this article is not yet finished or is deleted. The item will be available
                 # for future parsing though so the editor will load the menu item correctly for the unfinished article.
                 attrs['class'] = 'link hidden'

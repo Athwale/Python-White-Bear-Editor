@@ -569,7 +569,7 @@ class MainFrame(wx.Frame):
         # Bind a handler that changes selected document color if an edit happens in other controls of the text area.
         self.Bind(Events.EVT_DOCUMENT_TEXT_CHANGED, self._text_area_edit_handler)
         # Bind color changing event to the side panel.
-        self.Bind(Events.EVT_DOCUMENT_IMAGES_CHANGED, self._side_panel_edit_handler)
+        self.Bind(Events.EVT_DOCUMENT_IMAGES_CHANGED, self._text_area_edit_handler)
         # Bind a handler to the spell check event to allow enabling editor without spellcheck being a modal dialog.
         self.Bind(Events.EVT_SPELLCHECK_DONE, self._spellcheck_done_handler)
 
@@ -1234,7 +1234,7 @@ class MainFrame(wx.Frame):
             return
         self._file_menu_item_delete.Enable(True)
         # If the document is correct, now we can show it.
-        self._current_document_instance.seo_test_self(self._config_manager.get_online_test())
+        self._current_document_instance.test_self(self._config_manager.get_online_test())
         self._fill_editor(self._current_document_instance)
 
     def _fill_editor(self, doc: WhitebearDocumentArticle) -> None:
@@ -1394,22 +1394,8 @@ class MainFrame(wx.Frame):
         """
         Handle special events that signal that the color of the selected item in the filelist should be updated.
         This happens when an edit has been made to the document main text within dialogs like link, image and video
-        edit and style/font weight which do not add any text that otherwise fires TEXT_CHANGE events.
-        :param event: Not used.
-        :return: None
-        """
-        # Force repeating search because the text has changed and indexes would no longer match.
-        self._text_changed = True
-        if not self._ignore_change:
-            self._current_document_instance.clear_converted_html()
-            # TODO do we need seo color update?
-            self._update_file_color()
-
-    # noinspection PyUnusedLocal
-    def _side_panel_edit_handler(self, event: wx.CommandEvent) -> None:
-        """
-        Handle special events that signal that the color of the selected item in the filelist should be updated.
-        This happens when an edit has been made to the side images.
+        edit and style/font weight which do not add any text that otherwise fires TEXT_CHANGE events. Also
+        happens when an edit has been made to the side images.
         :param event: Not used.
         :return: None
         """
@@ -1479,7 +1465,7 @@ class MainFrame(wx.Frame):
         # Create a new placeholder text image or video
         new_image = AsideImage('', '', '', '', '', Strings.status_none, Strings.status_none)
         # This will set the image internal state to missing image placeholder.
-        new_image.seo_test_self()
+        new_image.test_self()
         # Open edit dialog.
         edit_dialog = EditAsideImageDialog(self, new_image, self._current_document_instance.get_working_directory())
         result = edit_dialog.ShowModal()
@@ -1782,8 +1768,10 @@ class MainFrame(wx.Frame):
         :return: None
         """
         # Replace the plain text version of the page in the document first from the edited but not yet saved text field.
+        # Reset status color and calculate it again.
+        # TODO build the test method so that it always updates color from white to correct.
         self._current_document_instance.set_plain_text(self._main_text_area.get_text())
-        self._current_document_instance.seo_test_self(self._config_manager.get_online_test())
+        self._current_document_instance.test_self(self._config_manager.get_online_test())
         self._update_article_image_sizer(self._current_document_instance.get_article_image())
         self._side_photo_panel.update_image_backgrounds()
         self._update_menu_sizer(self._current_document_instance.get_menu_item())
@@ -1795,6 +1783,8 @@ class MainFrame(wx.Frame):
         self._update_field_color(self._field_article_keywords, self._field_article_keywords_tip,
                                  self._current_document_instance.seo_test_keywords)
         self._update_description_color()
+        # TODO color broken, does not turn blue and requests save after spellcheck with no changes.
+        # TODO spellcheck fails on different things each save, single instance across threads?
         self._update_file_color()
         # TODO update file color does not seem to work try on document where we just add stuff to dictionary.
 
@@ -1805,6 +1795,8 @@ class MainFrame(wx.Frame):
         :param event: Not used.
         :return: None
         """
+        # We must run this at least once to find errors.
+        self._update_seo_colors()
         # First run spellcheck dialog on metadata and article name if needed.
         for field, name in ((self._field_article_keywords, Strings.label_article_keywords),
                             (self._field_article_description, Strings.label_article_description),
@@ -1821,9 +1813,8 @@ class MainFrame(wx.Frame):
                     self._update_seo_colors()
                     dlg.Destroy()
         # Run main text spellcheck.
-        # TODO Link edits from inside text area
-        # TODO do not trigger color changes if they do link reinsert triggers repeated spellchecks.
-        self._update_seo_colors()
+        # TODO test that image fix reloads color on all other items.
+        # TODO word added from link edit dialog still is reported as mistake because seo test preserves red color
         dlg = RichTextSpellCheckerDialog(self, self._main_text_area)
         dlg.run()
         if dlg.found_mistake():

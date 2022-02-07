@@ -39,7 +39,7 @@ class Video(SpellCheckedObject):
         self._video_id = str(Video.count)
         Video.count = Video.count + 1
 
-    def seo_test_self(self, online: bool) -> bool:
+    def test_self(self, online: bool) -> bool:
         """
         SEO check self for correct title, url and dimensions.
         :param online: Do online url test.

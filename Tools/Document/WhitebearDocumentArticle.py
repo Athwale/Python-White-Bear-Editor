@@ -87,7 +87,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
         self._parse_aside_images()
         self._parse_main_text()
         self._parse_enabled_attribute()
-        self.seo_test_self(self._config_manager.get_online_test())
+        self.test_self(self._config_manager.get_online_test())
 
     def seo_test_date(self, date: str) -> (bool, str, wx.Colour):
         """
@@ -117,14 +117,19 @@ class WhitebearDocumentArticle(WhitebearDocument):
             color = Numbers.RED_COLOR
         return result, date_error_message, color
 
-    def seo_test_self(self, online: bool) -> bool:
+    def test_self(self, online: bool) -> bool:
         """
         Perform a SEO test on this document.
+        RED documents have errors, BLUE are modified, BOLD are not uploaded yet.
         :param online: Do online test of urls.
         :return: True if seo test passed.
         """
-        # Check meta keywords and description
-        super(WhitebearDocumentArticle, self).seo_test_self_basic()
+        # Check meta keywords and description. Resets color to white in the beginning.
+        super(WhitebearDocumentArticle, self).test_self_basic()
+        # If the basic test is ok, make document blue if it is modified. It is turned blue only if it is not red.
+        if 'Projekt krátkého wiki filmu' in self.get_page_name()[0]:
+            print('basic ', str(self.get_status_color()), self.get_page_name())
+        self.is_modified()
         # Clear all errors on every new test
         self._date_error_message: str = ''
         self._spelling_error_message: str = ''
@@ -134,48 +139,69 @@ class WhitebearDocumentArticle(WhitebearDocument):
         # Message may contain OK if seo passed.
         self._page_name_error_message = message
         if not name_result:
+            if 'Projekt krátkého wiki filmu' in self.get_page_name()[0]:
+                print('name')
             self.set_status_color(color)
 
         # Check date format
         date_result, message, color = self.seo_test_date(self._date)
         self._date_error_message = message
         if not date_result:
+            if 'Projekt krátkého wiki filmu' in self.get_page_name()[0]:
+                print('date')
             self.set_status_color(color)
 
         # Test main image
-        if not self._article_image.seo_test_self():
+        if not self._article_image.test_self():
+            if 'Projekt krátkého wiki filmu' in self.get_page_name()[0]:
+                print('main img')
             self.set_status_color(Numbers.RED_COLOR)
 
         # Test menu item
-        if not self._menu_item.seo_test_self():
+        if not self._menu_item.test_self():
+            if 'Projekt krátkého wiki filmu' in self.get_page_name()[0]:
+                print('menu')
             self.set_status_color(Numbers.RED_COLOR)
 
         # Test aside images
         for aside_image in self._aside_images:
-            if not aside_image.seo_test_self():
+            if not aside_image.test_self():
+                if 'Projekt krátkého wiki filmu' in self.get_page_name()[0]:
+                    print('aside')
                 self.set_status_color(Numbers.RED_COLOR)
 
         # Test videos
         for video in self._videos:
-            if not video.seo_test_self(online):
+            if not video.test_self(online):
+                if 'Projekt krátkého wiki filmu' in self.get_page_name()[0]:
+                    print('video')
                 self.set_status_color(Numbers.RED_COLOR)
 
         # Test in text images
         for image in self._text_images:
-            if not image.seo_test_self():
+            if not image.test_self():
+                if 'Projekt krátkého wiki filmu' in self.get_page_name()[0]:
+                    print('imgs')
                 self.set_status_color(Numbers.RED_COLOR)
 
         # Test links
         for link in self._links:
-            if not link.seo_test_self(online):
+            if not link.test_self(online):
+                if 'Projekt krátkého wiki filmu' in self.get_page_name()[0]:
+                    print('links')
                 self.set_status_color(Numbers.RED_COLOR)
 
         if not self._spell_check(self._plain_text):
             self._spelling_error_message = Strings.spelling_error
+            if 'Projekt krátkého wiki filmu' in self.get_page_name()[0]:
+                print('spell')
             self.set_status_color(Numbers.RED_COLOR)
 
         if not self._enabled:
             self.set_status_color(Numbers.RED_COLOR)
+
+        if 'Projekt krátkého wiki filmu' in self.get_page_name()[0]:
+            print('end ', str(self.get_status_color()), self.get_page_name())
 
         if self.get_status_color() == Numbers.RED_COLOR:
             return False
@@ -718,7 +744,8 @@ class WhitebearDocumentArticle(WhitebearDocument):
 
     def is_modified(self) -> bool:
         """
-        Return True if this file or it's images, links or videos were modified in the editor.
+        Return True if this file or it's images, links or videos were modified in the editor. And triggers color change
+        to blue.
         :return: True if this file was modified in the editor.
         """
         # Check links, videos and images

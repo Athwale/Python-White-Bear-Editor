@@ -45,7 +45,7 @@ class Link(SpellCheckedObject):
         self._link_id = str(Link.count)
         Link.count = Link.count + 1
 
-    def seo_test_self(self, online: bool):
+    def test_self(self, online: bool):
         """
         SEO check self for correct title, url and text.
         :param online: Do online url test.

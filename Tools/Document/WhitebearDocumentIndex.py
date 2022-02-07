@@ -71,7 +71,7 @@ class WhitebearDocumentIndex(WhitebearDocument):
         """
         super(WhitebearDocumentIndex, self).parse_self()
         self._parse_page_name()
-        self.seo_test_self()
+        self.test_self()
 
     def _parse_page_name(self) -> None:
         """
@@ -92,13 +92,13 @@ class WhitebearDocumentIndex(WhitebearDocument):
         self._valid, errors = Tools.validate(html_string, 'schema_index.xsd')
         return self._valid, errors
 
-    def seo_test_self(self) -> bool:
+    def test_self(self) -> bool:
         """
         Perform a SEO test on this document.
         :return: True if seo test passed.
         """
         # Check name, meta keywords and description
-        super(WhitebearDocumentIndex, self).seo_test_self_basic()
+        super(WhitebearDocumentIndex, self).test_self_basic()
 
         for text in (self._script, self._black_text, self._red_text):
             # Check not empty, otherwise these can be very long.
@@ -210,7 +210,7 @@ class WhitebearDocumentIndex(WhitebearDocument):
         for index, item in enumerate(sorted_articles):
             if index >= limit:
                 break
-            if item.seo_test_self(self._config_manager.get_online_test()):
+            if item.test_self(self._config_manager.get_online_test()):
                 new_li = parsed_template.new_tag('li')
                 href = item.get_filename()
                 title = item.get_page_name()[0]

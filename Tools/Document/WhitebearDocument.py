@@ -175,7 +175,7 @@ class WhitebearDocument(SpellCheckedObject):
             color = Numbers.RED_COLOR
         return result, page_name_error_message, color
 
-    def seo_test_self_basic(self) -> bool:
+    def test_self_basic(self) -> bool:
         """
         Perform basic SEO self test and change internal instance state accordingly. If description or
         keywords are incorrect, change valid to False and the color of the file list item to red.
@@ -186,8 +186,7 @@ class WhitebearDocument(SpellCheckedObject):
         self._page_name_error_message: str = ''
         self._keywords_error_message: str = ''
         self._description_error_message: str = ''
-        if not self._status_color:
-            self._status_color = wx.WHITE
+        self._status_color = wx.WHITE
 
         # Check meta keywords
         keywords_result, message, color = self.seo_test_keywords(', '.join(self._meta_keywords))
@@ -339,7 +338,7 @@ class WhitebearDocument(SpellCheckedObject):
 
     def set_modified(self, modified: bool) -> None:
         """
-        Set the modified attribute.
+        Set the modified attribute and blue color.
         :raises TypeError if the new modified parameter is not bool.
         :param modified: New modified attribute state.
         :return: None

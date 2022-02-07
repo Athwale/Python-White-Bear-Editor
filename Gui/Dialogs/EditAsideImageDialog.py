@@ -25,7 +25,7 @@ class EditAsideImageDialog(SpellCheckedDialog):
         self._work_dir = work_dir
         self._original_image: AsideImage = image
         self._image_copy: AsideImage = self._original_image.copy()
-        self._image_copy.seo_test_self()
+        self._image_copy.test_self()
 
         self._alt_lock = False
         self._title_lock = False
@@ -220,7 +220,7 @@ class EditAsideImageDialog(SpellCheckedDialog):
             self._image_copy.set_link_title(self._field_image_link_title.GetValue())
             self._image_copy.set_alt(self._field_image_alt.GetValue())
 
-            if self._image_copy.seo_test_self():
+            if self._image_copy.test_self():
                 # If the seo test is good, transfer all information into the original image.
                 self._original_image.set_caption(self._image_copy.get_caption()[0])
                 self._original_image.set_link_title(self._image_copy.get_link_title()[0])
@@ -229,7 +229,7 @@ class EditAsideImageDialog(SpellCheckedDialog):
                 self._original_image.set_thumbnail_image_path(self._image_copy.get_thumbnail_image_path())
                 self._original_image.set_full_filename(self._image_copy.get_full_filename())
                 self._original_image.set_thumbnail_filename(self._image_copy.get_thumbnail_filename())
-                self._original_image.seo_test_self()
+                self._original_image.test_self()
                 event.Skip()
                 return
             else:
@@ -295,7 +295,7 @@ class EditAsideImageDialog(SpellCheckedDialog):
                                                                                 Strings.folder_originals),
                                           html_thumbnail_filename)
             # Initializes all internal variables.
-            self._image_copy.seo_test_self()
+            self._image_copy.test_self()
             self._display_dialog_contents()
 
     def _display_dialog_contents(self) -> None:

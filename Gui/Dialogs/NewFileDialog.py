@@ -146,7 +146,7 @@ class NewFileDialog(wx.Dialog):
             self._doc.set_article_image(self._article_image)
             self._doc.set_date(self._get_current_date())
             self._doc.set_keywords(self._config_manager.get_global_keywords().split(', '))
-            self._doc.seo_test_self(online=False)
+            self._doc.test_self(online=False)
 
     @staticmethod
     def _get_current_date() -> str:
@@ -195,7 +195,7 @@ class NewFileDialog(wx.Dialog):
                                                href=self._field_name.GetValue() + Strings.extension_html,
                                                disk_path='',
                                                img_filename=Strings.status_none)
-                menu_item.seo_test_self()
+                menu_item.test_self()
             else:
                 menu_item = self._menu_item
             edit_dialog = EditMenuItemDialog(self, menu_item, self._config_manager.get_working_dir())
@@ -220,7 +220,7 @@ class NewFileDialog(wx.Dialog):
                                    original_image_path='',
                                    thumbnail_path='', full_filename=Strings.status_none,
                                    thumbnail_filename=Strings.status_none)
-                image.seo_test_self()
+                image.test_self()
             else:
                 image = self._article_image
             edit_dialog = EditAsideImageDialog(self, image, self._config_manager.get_working_dir())

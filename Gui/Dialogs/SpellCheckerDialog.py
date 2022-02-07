@@ -150,8 +150,7 @@ class SpellCheckerDialog(wx.Dialog):
         if button_id == wx.ID_REPLACE:
             self._replace()
         elif button_id == wx.ID_IGNORE:
-            self._checker.ignore_always()
-            self._save_ignored_word(self._checker.word)
+            self._checker.save_ignored_word(self._checker.word)
             self.go_to_next()
         elif button_id == wx.ID_ADD:
             # Add new word to dictionary.
@@ -161,24 +160,6 @@ class SpellCheckerDialog(wx.Dialog):
             dlg = SpellCheckSetupDialog(self)
             dlg.ShowModal()
             dlg.Destroy()
-
-    @staticmethod
-    def _save_ignored_word(word: str) -> None:
-        """
-        Append another ignored word to the ignored words file.
-        :param word: The word to ignore.
-        :return: None
-        """
-        if os.path.exists(Strings.ignored_words_file):
-            with open(Strings.ignored_words_file, 'r') as file:
-                ignored_words = set([word.strip() for word in file.readlines()])
-        else:
-            ignored_words = set()
-
-        ignored_words.add(word)
-        with open(Strings.ignored_words_file, 'w') as file:
-            for word in ignored_words:
-                file.write(word + '\n')
 
     # noinspection PyUnusedLocal
     def _close_button_handler(self, event: wx.CloseEvent) -> None:

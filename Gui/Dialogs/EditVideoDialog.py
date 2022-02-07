@@ -115,7 +115,7 @@ class EditVideoDialog(SpellCheckedDialog):
         :return: None
         """
         thread = WorkerThread(self,
-                              function=self._video.seo_test_self,
+                              function=self._video.test_self,
                               args=(self._config_manager.get_online_test(),),
                               callback=self.on_seo_done,
                               passing_arg=return_value)

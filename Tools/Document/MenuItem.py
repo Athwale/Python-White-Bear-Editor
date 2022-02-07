@@ -44,7 +44,7 @@ class MenuItem(SpellCheckedObject):
         return MenuItem(self.get_article_name()[0], self.get_link_title()[0], self.get_image_alt()[0],
                         self.get_link_href(), self.get_image_path(), self.get_filename())
 
-    def seo_test_self(self) -> bool:
+    def test_self(self) -> bool:
         """
         SEO test self for page name, alt and link title. If the menu image is not accessible on disk, set a special
         warning image.

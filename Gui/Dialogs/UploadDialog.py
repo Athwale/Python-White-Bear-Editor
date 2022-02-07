@@ -508,7 +508,7 @@ class UploadDialog(wx.Dialog):
             # If any files were changed, add index, robots and sitemap.
             # This must be done here, the setup dialog may not have a physical index file on disk yet.
             self._index.update_content()
-            self._index.seo_test_self()
+            self._index.test_self()
             if self._index.is_seo_ok():
                 self._add_if_not_in(self._index.get_path())
             else:

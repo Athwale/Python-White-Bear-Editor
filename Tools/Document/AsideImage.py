@@ -39,7 +39,7 @@ class AsideImage(BaseImage):
                           self.get_original_image_path(), self.get_thumbnail_image_path(), self.get_full_filename(),
                           self.get_thumbnail_filename())
 
-    def seo_test_self(self) -> bool:
+    def test_self(self) -> bool:
         """
         SEO test self for caption, alt and link title. If the image and thumbnail is not accessible on disk, set a
         special warning image.
@@ -49,7 +49,7 @@ class AsideImage(BaseImage):
         self._caption_error_message: str = ''
 
         # First test the base class seo attributes
-        result = super(AsideImage, self).seo_test_self()
+        result = super(AsideImage, self).test_self()
 
         # Check caption length must be at least 3 and must not be default
         if len(self._caption) < Numbers.article_image_caption_min or len(

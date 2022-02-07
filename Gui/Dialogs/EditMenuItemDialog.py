@@ -25,7 +25,7 @@ class EditMenuItemDialog(SpellCheckedDialog):
         self._work_dir = work_dir
         self._original_item: MenuItem = item
         self._item_copy: MenuItem = self._original_item.copy()
-        self._item_copy.seo_test_self()
+        self._item_copy.test_self()
 
         self._alt_lock = False
         self._title_lock = False
@@ -203,7 +203,7 @@ class EditMenuItemDialog(SpellCheckedDialog):
         else:
             self._content_item_name.SetBackgroundColour(wx.NullColour)
             self._item_copy.set_article_name(text)
-            self._item_copy.seo_test_self()
+            self._item_copy.test_self()
             if self._item_copy.get_article_name()[1]:
                 # There is an error message for article name.
                 self._field_item_name.SetBackgroundColour(Numbers.RED_COLOR)
@@ -239,14 +239,14 @@ class EditMenuItemDialog(SpellCheckedDialog):
             self._item_copy.set_link_title(self._field_image_link_title.GetValue())
             self._item_copy.set_image_alt(self._field_image_alt.GetValue())
 
-            if self._item_copy.seo_test_self():
+            if self._item_copy.test_self():
                 self._original_item.set_article_name(self._item_copy.get_article_name()[0])
                 self._original_item.set_link_title(self._item_copy.get_link_title()[0])
                 self._original_item.set_image_alt(self._item_copy.get_image_alt()[0])
                 self._original_item.set_href(self._item_copy.get_link_href())
                 self._original_item.set_image_path(self._item_copy.get_image_path())
                 self._original_item.set_filename(self._item_copy.get_filename())
-                self._original_item.seo_test_self()
+                self._original_item.test_self()
                 event.Skip()
                 return
             else:
@@ -306,7 +306,7 @@ class EditMenuItemDialog(SpellCheckedDialog):
                                        path,
                                        html_image_filename)
             # Initializes all internal variables.
-            self._item_copy.seo_test_self()
+            self._item_copy.test_self()
             self.display_dialog_contents()
 
     def display_dialog_contents(self) -> None:

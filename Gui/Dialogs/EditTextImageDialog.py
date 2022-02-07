@@ -24,7 +24,7 @@ class EditTextImageDialog(SpellCheckedDialog):
         self._work_dir = working_dir
         self._original_image: ImageInText = image
         self._image_copy: ImageInText = self._original_image.copy()
-        self._image_copy.seo_test_self()
+        self._image_copy.test_self()
 
         self._alt_lock = False
 
@@ -204,7 +204,7 @@ class EditTextImageDialog(SpellCheckedDialog):
             self._image_copy.set_link_title(self._field_image_link_title.GetValue())
             self._image_copy.set_alt(self._field_image_alt.GetValue())
 
-            if self._image_copy.seo_test_self():
+            if self._image_copy.test_self():
                 # If the seo test is good, transfer all information into the original image.
                 self._original_image.set_link_title(self._image_copy.get_link_title()[0])
                 self._original_image.set_alt(self._image_copy.get_image_alt()[0])
@@ -213,7 +213,7 @@ class EditTextImageDialog(SpellCheckedDialog):
                 self._original_image.set_full_filename(self._image_copy.get_full_filename())
                 self._original_image.set_thumbnail_filename(self._image_copy.get_thumbnail_filename())
                 # Reinitialize internal variables after changes, this should never fail as the test was done on the copy
-                self._original_image.seo_test_self()
+                self._original_image.test_self()
                 event.Skip()
                 return
             else:
@@ -246,7 +246,7 @@ class EditTextImageDialog(SpellCheckedDialog):
                                                                                  Strings.folder_originals),
                                            html_thumbnail_filename)
             # Initializes all internal variables.
-            self._image_copy.seo_test_self()
+            self._image_copy.test_self()
             self._display_dialog_contents()
 
     def _ask_for_image(self) -> (str, str):

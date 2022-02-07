@@ -5,8 +5,6 @@ import yaml
 import enchant
 from yaml.parser import ParserError
 from yaml.scanner import ScannerError
-from enchant.checker import SpellChecker
-from enchant.tokenize import EmailFilter, URLFilter
 from Constants.Constants import Numbers
 from Constants.Constants import Strings
 
@@ -364,20 +362,6 @@ class ConfigManager:
             language = enchant.get_default_language()
             self.store_spelling_language(language)
         return language
-
-    def get_spellchecker(self) -> SpellChecker:
-        """
-        Return a global instance of spellchecker intended to be used everywhere.
-        :return: Instance of SpellChecker
-        """
-        if not self._spellchecker:
-            # Initialize spellchecker once here, it can not be initialized in constructor for some reason.
-            self._spellchecker = SpellChecker(self.get_spelling_lang(), filters=[EmailFilter, URLFilter])
-            if os.path.exists(Strings.ignored_words_file):
-                with open(Strings.ignored_words_file, 'r') as file:
-                    for line in file:
-                        self._spellchecker.ignore_always(line.strip())
-        return self._spellchecker
 
     def store_spelling_language(self, lang: str) -> None:
         """
