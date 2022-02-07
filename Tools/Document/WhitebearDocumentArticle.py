@@ -170,7 +170,6 @@ class WhitebearDocumentArticle(WhitebearDocument):
             if not link.seo_test_self(online):
                 self.set_status_color(Numbers.RED_COLOR)
 
-        # TODO spellcheck text
         if not self._spell_check(self._plain_text):
             self._spelling_error_message = Strings.spelling_error
             self.set_status_color(Numbers.RED_COLOR)
@@ -876,6 +875,14 @@ class WhitebearDocumentArticle(WhitebearDocument):
         self.set_modified(True)
 
     # Setters ----------------------------------------------------------------------------------------------------------
+    def set_plain_text(self, text: str) -> None:
+        """
+        Set new plain text.
+        :param text: New plain text.
+        :return: None
+        """
+        self._plain_text = text
+
     def clear_converted_html(self) -> None:
         """
         Set converted html string to None.

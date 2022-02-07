@@ -1762,6 +1762,8 @@ class MainFrame(wx.Frame):
         Update the background color of all items in the loaded document.
         :return: None
         """
+        # Replace the plain text version of the page in the document first from the edited but not yet saved text field.
+        self._current_document_instance.set_plain_text(self._main_text_area.get_text())
         self._current_document_instance.seo_test_self(self._config_manager.get_online_test())
         # TODO Do this also on returns from edit dialogs and main spellcheck dialog.
         self._update_article_image_sizer(self._current_document_instance.get_article_image())
@@ -1776,6 +1778,7 @@ class MainFrame(wx.Frame):
                                  self._current_document_instance.seo_test_keywords)
         self._update_description_color()
         self._update_file_color()
+        # TODO upldate file color does not seem to work try on document where we just add stuff to dictionary.
 
     # noinspection PyUnusedLocal
     def _self_test_handler(self, event: wx.CommandEvent) -> None:
@@ -1817,7 +1820,6 @@ class MainFrame(wx.Frame):
         :return: None
         """
         # TODO find out whether anything is red, This must run after spellchecks
-        # TODO spellcheck does not run on main text on load.
         error_report = ''
         if self._current_document_instance.get_status_color() == Numbers.RED_COLOR:
             error_report += Strings.warning_errors_in_document + '\n'
