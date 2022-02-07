@@ -320,7 +320,7 @@ class MainFrame(wx.Frame):
     def _public_checkbox_handler(self, event: wx.CommandEvent) -> None:
         """
         Handle enabling and disabling article publication.
-        :param event:
+        :param event: Used to get the checkbox state.
         :return: None
         """
         if event.IsChecked():
@@ -566,8 +566,10 @@ class MainFrame(wx.Frame):
         # This calls the quit method if the user logs off the computer
         self.Bind(wx.EVT_QUERY_END_SESSION, self._close_button_handler)
 
-        # Bind a handler that changes selected document color if an edit happens in other controls.
-        self.Bind(Events.EVT_DOCUMENT_CHANGED, self._text_area_edit_handler)
+        # Bind a handler that changes selected document color if an edit happens in other controls of the text area.
+        self.Bind(Events.EVT_DOCUMENT_TEXT_CHANGED, self._text_area_edit_handler)
+        # Bind color changing event to the side panel.
+        self.Bind(Events.EVT_DOCUMENT_IMAGES_CHANGED, self._side_panel_edit_handler)
         # Bind a handler to the spell check event to allow enabling editor without spellcheck being a modal dialog.
         self.Bind(Events.EVT_SPELLCHECK_DONE, self._spellcheck_done_handler)
 
@@ -1064,9 +1066,8 @@ class MainFrame(wx.Frame):
         main_image: AsideImage = self._current_document_instance.get_article_image()
         edit_dialog = EditAsideImageDialog(self, main_image, self._current_document_instance.get_working_directory())
         edit_dialog.ShowModal()
-        self._update_article_image_sizer(main_image)
         self._current_document_instance.clear_converted_html()
-        self._update_file_color()
+        self._update_seo_colors()
         edit_dialog.Destroy()
 
     # noinspection PyUnusedLocal
@@ -1082,9 +1083,8 @@ class MainFrame(wx.Frame):
         edit_dialog.Show()
         edit_dialog.display_dialog_contents()
         edit_dialog.ShowModal()
-        self._update_menu_sizer(menu_item)
         self._current_document_instance.clear_converted_html()
-        self._update_file_color()
+        self._update_seo_colors()
         edit_dialog.Destroy()
 
     def _close_button_handler(self, event: wx.CloseEvent):
@@ -1390,10 +1390,11 @@ class MainFrame(wx.Frame):
         self._field_article_description_tip.SetMessage(Strings.seo_check + '\n' + message)
 
     # noinspection PyUnusedLocal
-    def _text_area_edit_handler(self, event) -> None:
+    def _text_area_edit_handler(self, event: wx.CommandEvent) -> None:
         """
         Handle special events that signal that the color of the selected item in the filelist should be updated.
-        This happens when an edit has been made to the document.
+        This happens when an edit has been made to the document main text within dialogs like link, image and video
+        edit and style/font weight which do not add any text that otherwise fires TEXT_CHANGE events.
         :param event: Not used.
         :return: None
         """
@@ -1401,7 +1402,22 @@ class MainFrame(wx.Frame):
         self._text_changed = True
         if not self._ignore_change:
             self._current_document_instance.clear_converted_html()
+            # TODO do we need seo color update?
             self._update_file_color()
+
+    # noinspection PyUnusedLocal
+    def _side_panel_edit_handler(self, event: wx.CommandEvent) -> None:
+        """
+        Handle special events that signal that the color of the selected item in the filelist should be updated.
+        This happens when an edit has been made to the side images.
+        :param event: Not used.
+        :return: None
+        """
+        # Force repeating search because the text has changed and indexes would no longer match.
+        self._text_changed = True
+        if not self._ignore_change:
+            self._current_document_instance.clear_converted_html()
+            self._update_seo_colors()
 
     def _update_file_color(self, index: int = -1) -> None:
         """
@@ -1471,7 +1487,7 @@ class MainFrame(wx.Frame):
             self._current_document_instance.add_aside_image(new_image)
             self._side_photo_panel.load_document_images(self._current_document_instance)
             self._current_document_instance.clear_converted_html()
-            self._update_file_color()
+        self._update_seo_colors()
         edit_dialog.Destroy()
         event.Skip()
         # Return focus to the text area.
@@ -1600,6 +1616,7 @@ class MainFrame(wx.Frame):
             # Add to list
             self._file_list.InsertItem(0, new_document.get_filename())
             self._set_status_text(Strings.status_articles + ' ' + str(len(self._articles)), 2)
+        self._update_seo_colors()
         dlg.Destroy()
 
     # noinspection PyUnusedLocal
@@ -1634,6 +1651,7 @@ class MainFrame(wx.Frame):
                 # In case just menu description or keywords were changed, the rest of the documents do not need to be
                 # saved again.
                 self._save(menu, save_as=False, disable=(not bool(self._current_document_instance)))
+        self._update_seo_colors()
         dlg.Destroy()
 
     # noinspection PyUnusedLocal
@@ -1651,6 +1669,7 @@ class MainFrame(wx.Frame):
             else:
                 # Index might have changed so re-export it.
                 self._save(self._index_document)
+        self._update_seo_colors()
         dlg.Destroy()
 
     # noinspection PyUnusedLocal
@@ -1762,10 +1781,10 @@ class MainFrame(wx.Frame):
         Update the background color of all items in the loaded document.
         :return: None
         """
+        # TODO links do not turn white
         # Replace the plain text version of the page in the document first from the edited but not yet saved text field.
         self._current_document_instance.set_plain_text(self._main_text_area.get_text())
         self._current_document_instance.seo_test_self(self._config_manager.get_online_test())
-        # TODO Do this also on returns from edit dialogs and main spellcheck dialog.
         self._update_article_image_sizer(self._current_document_instance.get_article_image())
         self._side_photo_panel.update_image_backgrounds()
         self._update_menu_sizer(self._current_document_instance.get_menu_item())
@@ -1778,7 +1797,7 @@ class MainFrame(wx.Frame):
                                  self._current_document_instance.seo_test_keywords)
         self._update_description_color()
         self._update_file_color()
-        # TODO upldate file color does not seem to work try on document where we just add stuff to dictionary.
+        # TODO update file color does not seem to work try on document where we just add stuff to dictionary.
 
     # noinspection PyUnusedLocal
     def _self_test_handler(self, event: wx.CommandEvent) -> None:
@@ -1787,7 +1806,6 @@ class MainFrame(wx.Frame):
         :param event: Not used.
         :return: None
         """
-        # Todo display no mistake found, include images make it a self test.
         # First run spellcheck dialog on metadata and article name if needed.
         for field, name in ((self._field_article_keywords, Strings.label_article_keywords),
                             (self._field_article_description, Strings.label_article_description),
@@ -1803,8 +1821,6 @@ class MainFrame(wx.Frame):
                         field.SetValue(dlg.get_fixed_text())
                     self._update_seo_colors()
                     dlg.Destroy()
-        # Update again in case no mistake in the metadata fields is found.
-        self._update_seo_colors()
         # Run main text spellcheck.
         dlg = RichTextSpellCheckerDialog(self, self._main_text_area)
         dlg.run()
@@ -1819,7 +1835,7 @@ class MainFrame(wx.Frame):
         Show an error list of red items in the document.
         :return: None
         """
-        # TODO find out whether anything is red, This must run after spellchecks
+        # TODO find out whether anything is red and generate report, This must run after spellchecks
         error_report = ''
         if self._current_document_instance.get_status_color() == Numbers.RED_COLOR:
             error_report += Strings.warning_errors_in_document + '\n'

@@ -5,7 +5,8 @@ import wx.lib.newevent
 
 
 class Events:
-    ColorEvent, EVT_DOCUMENT_CHANGED = wx.lib.newevent.NewCommandEvent()
+    TextChangedEvent, EVT_DOCUMENT_TEXT_CHANGED = wx.lib.newevent.NewCommandEvent()
+    SidepanelChangedEvent, EVT_DOCUMENT_IMAGES_CHANGED = wx.lib.newevent.NewCommandEvent()
     SpellcheckEvent, EVT_SPELLCHECK_DONE = wx.lib.newevent.NewCommandEvent()
 
 

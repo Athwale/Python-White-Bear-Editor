@@ -64,10 +64,9 @@ class AsideImagePanel(wx.lib.scrolledpanel.ScrolledPanel):
             edit_dialog.Destroy()
         self.show_images()
         # Pass the event into the main frame to change document color in the file list to blue.
-        if self._doc.is_modified():
-            # Send a custom event to the main gui to signal document color change.
-            color_evt = Events.ColorEvent(self.GetId())
-            wx.PostEvent(self.GetEventHandler(), color_evt)
+        # Send a custom event to the main gui to signal document color change.
+        color_evt = Events.SidepanelChangedEvent(self.GetId())
+        wx.PostEvent(self.GetEventHandler(), color_evt)
 
     def load_document_images(self, doc: WhitebearDocumentArticle) -> None:
         """
@@ -120,5 +119,7 @@ class AsideImagePanel(wx.lib.scrolledpanel.ScrolledPanel):
         :return: None
         """
         for child in self.GetChildren():
-            child: ImagePanel
-            child.update_image()
+            # The child can also be the edit dialog fi this method is run while it is open.
+            if isinstance(child, ImagePanel):
+                child: ImagePanel
+                child.update_image()
