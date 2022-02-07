@@ -56,7 +56,7 @@ class Link(SpellCheckedObject):
         self._link_title_error_message = ''
         self._url_error_message = ''
         self._text_error_message = ''
-        self._status_color = wx.NullColour
+        self._status_color = wx.WHITE
 
         result = True
         # Check link title

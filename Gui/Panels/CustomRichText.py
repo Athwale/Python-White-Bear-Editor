@@ -1279,8 +1279,8 @@ class CustomRichText(rt.RichTextCtrl):
         if color == wx.RED:
             url_style.SetBackgroundColour(wx.RED)
         else:
-            # Using a transparent color does not work sometimes, so use white.
-            url_style.SetBackgroundColour(wx.NullColour)
+            # Links do not turn white with null color so use white.
+            url_style.SetBackgroundColour(wx.WHITE)
 
         self.BeginStyle(url_style)
         self.BeginURL(link_id)
@@ -1321,6 +1321,7 @@ class CustomRichText(rt.RichTextCtrl):
             # style. So instead we replace the whole link.
             attr = rt.RichTextAttr()
             self.GetStyleForRange(link_range, attr)
+            print(attr.GetBackgroundColour())
             if attr.GetBackgroundColour() != link.get_status_color():
                 self.BeginSuppressUndo()
                 self.Remove(link_range[0], link_range[1] + 1)

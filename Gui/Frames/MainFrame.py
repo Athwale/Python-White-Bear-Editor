@@ -1781,7 +1781,6 @@ class MainFrame(wx.Frame):
         Update the background color of all items in the loaded document.
         :return: None
         """
-        # TODO links do not turn white
         # Replace the plain text version of the page in the document first from the edited but not yet saved text field.
         self._current_document_instance.set_plain_text(self._main_text_area.get_text())
         self._current_document_instance.seo_test_self(self._config_manager.get_online_test())
@@ -1822,6 +1821,9 @@ class MainFrame(wx.Frame):
                     self._update_seo_colors()
                     dlg.Destroy()
         # Run main text spellcheck.
+        # TODO Link edits from inside text area
+        # TODO do not trigger color changes if they do link reinsert triggers repeated spellchecks.
+        self._update_seo_colors()
         dlg = RichTextSpellCheckerDialog(self, self._main_text_area)
         dlg.run()
         if dlg.found_mistake():
