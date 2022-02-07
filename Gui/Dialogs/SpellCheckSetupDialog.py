@@ -6,6 +6,8 @@ from Tools.ConfigManager import ConfigManager
 from pathlib import Path
 from enchant.checker import SpellChecker
 
+from Tools.SpellCheckerWithIgnoredList import SpellCheckerWithIgnoreList
+
 
 class SpellCheckSetupDialog(wx.Dialog):
     """
@@ -23,7 +25,7 @@ class SpellCheckSetupDialog(wx.Dialog):
                            size=(Numbers.spellcheck_setup_dialog_width, Numbers.spellcheck_setup_dialog_height),
                            style=wx.DEFAULT_DIALOG_STYLE)
         self._config_manager: ConfigManager = ConfigManager.get_instance()
-        self._checker: SpellChecker = self._config_manager.get_spellchecker()
+        self._checker = SpellCheckerWithIgnoreList(self._config_manager.get_spelling_lang())
 
         self._main_vertical_sizer = wx.BoxSizer(wx.VERTICAL)
         self._information_sizer = wx.BoxSizer(wx.VERTICAL)

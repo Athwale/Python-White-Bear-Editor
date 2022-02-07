@@ -1,11 +1,9 @@
-import os.path
-
 import wx
 from Constants.Constants import Strings, Numbers
-from enchant.checker import SpellChecker
 
 from Gui.Dialogs.SpellCheckSetupDialog import SpellCheckSetupDialog
 from Tools.ConfigManager import ConfigManager
+from Tools.SpellCheckerWithIgnoredList import SpellCheckerWithIgnoreList
 
 
 class SpellCheckerDialog(wx.Dialog):
@@ -25,7 +23,7 @@ class SpellCheckerDialog(wx.Dialog):
                            size=(Numbers.spellcheck_dialog_width, Numbers.spellcheck_dialog_height),
                            style=wx.DEFAULT_DIALOG_STYLE)
         self._config_manager: ConfigManager = ConfigManager.get_instance()
-        self._checker: SpellChecker = self._config_manager.get_spellchecker()
+        self._checker = SpellCheckerWithIgnoreList(self._config_manager.get_spelling_lang())
         self._text = text
         # How much of the text around current mistake is shown.
         self._context_chars = Numbers.context_chars

@@ -19,8 +19,8 @@ class EditMenuItemDialog(SpellCheckedDialog):
         :param work_dir: Working directory of the editor.
         """
         super().__init__(parent, title=Strings.label_dialog_edit_menu_item,
-                           size=(Numbers.edit_aside_image_dialog_width, Numbers.edit_menu_item_dialog_height),
-                           style=wx.DEFAULT_DIALOG_STYLE)
+                         size=(Numbers.edit_aside_image_dialog_width, Numbers.edit_menu_item_dialog_height),
+                         style=wx.DEFAULT_DIALOG_STYLE)
 
         self._work_dir = work_dir
         self._original_item: MenuItem = item

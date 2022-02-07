@@ -1,5 +1,6 @@
 from Tools.ConfigManager import ConfigManager
-from enchant.checker import SpellChecker
+
+from Tools.SpellCheckerWithIgnoredList import SpellCheckerWithIgnoreList
 
 
 class SpellCheckedObject:
@@ -10,8 +11,7 @@ class SpellCheckedObject:
         Sets up spellchecker.
         """
         self._config_manager: ConfigManager = ConfigManager.get_instance()
-        # TODO single instance breaks while saving in threads. How to have multiple checkers with one file?
-        self._checker: SpellChecker = self._config_manager.get_spellchecker()
+        self._checker = SpellCheckerWithIgnoreList(self._config_manager.get_spelling_lang())
 
     def _spell_check(self, text: str) -> bool:
         """

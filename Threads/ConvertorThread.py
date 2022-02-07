@@ -6,8 +6,6 @@ from Constants.Constants import Numbers
 from Exceptions.UnrecognizedFileException import UnrecognizedFileException
 from Tools.ConfigManager import ConfigManager
 from Tools.Document.WhitebearDocumentArticle import WhitebearDocumentArticle
-from Tools.Document.WhitebearDocumentIndex import WhitebearDocumentIndex
-from Tools.Document.WhitebearDocumentMenu import WhitebearDocumentMenu
 
 
 class ConvertorThread(threading.Thread):
