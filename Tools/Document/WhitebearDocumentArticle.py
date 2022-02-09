@@ -119,17 +119,26 @@ class WhitebearDocumentArticle(WhitebearDocument):
 
     def test_self(self, online: bool) -> bool:
         """
-        Perform a SEO test on this document.
+        Perform a SEO test on this document and set it's status color.
         RED documents have errors, BLUE are modified, BOLD are not uploaded yet.
+        # TODO new colors:
+        # white - ok, saved, uploaded
+        # blue - ok, not uploaded, not saved
+        # red - error, turns to blue when fixed.
+        # bold - modified and not saved.
         :param online: Do online test of urls.
         :return: True if seo test passed.
         """
-        # Check meta keywords and description. Resets color to white in the beginning.
-        super(WhitebearDocumentArticle, self).test_self_basic()
-        # If the basic test is ok, make document blue if it is modified. It is turned blue only if it is not red.
+        # Check meta keywords and description. Resets color to white in the beginning. Result color might be red.
+        basic_result: bool = super(WhitebearDocumentArticle, self).test_self_basic()
+        if basic_result and self.is_modified():
+            self.set_status_color(Numbers.BLUE_COLOR)
         if 'Projekt krátkého wiki filmu' in self.get_page_name()[0]:
             print('basic ', str(self.get_status_color()), self.get_page_name())
-        self.is_modified()
+        # TODO What about setting modified from somewhere else?
+        # TODO run this method from the document changed event handler and redraw colors of all uploaded once done.
+        if 'Projekt krátkého wiki filmu' in self.get_page_name()[0]:
+            print('modified: ', self._modified, self.get_status_color())
         # Clear all errors on every new test
         self._date_error_message: str = ''
         self._spelling_error_message: str = ''
@@ -201,7 +210,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
             self.set_status_color(Numbers.RED_COLOR)
 
         if 'Projekt krátkého wiki filmu' in self.get_page_name()[0]:
-            print('end ', str(self.get_status_color()), self.get_page_name())
+            print('end ', str(self.get_status_color()), self.get_page_name(), '\n')
 
         if self.get_status_color() == Numbers.RED_COLOR:
             return False
@@ -217,7 +226,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
             self._menu_item = menu.find_item_by_file_name(self.get_filename())
             if self._menu_item:
                 self._menu_item.set_article(self)
-                # We do not want the items to start as modified when the document is loaded.
+                # We do not want the items to start as modified when the document is loaded, but set makes them modified
                 self._menu_item.set_modified(False)
                 self._menu_section = menu
                 break
@@ -686,7 +695,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
 
     def get_html_to_save(self) -> str:
         """
-        Returns the last converted string HTML code of this article. Run convert_to_html() before calling this method.
+        Returns the last converted string HTML code of this page. Run convert_to_html() before calling this method.
         :return: String HTML of the article or none if the document was not converted yet.
         """
         return self._html
@@ -744,10 +753,10 @@ class WhitebearDocumentArticle(WhitebearDocument):
 
     def is_modified(self) -> bool:
         """
-        Return True if this file or it's images, links or videos were modified in the editor. And triggers color change
-        to blue.
+        Return True if this file or it's images, links or videos were modified in the editor.
         :return: True if this file was modified in the editor.
         """
+        # TODO here
         # Check links, videos and images
         for list_var in (self._aside_images, self._text_images, self._links, self._videos):
             for content in list_var:
@@ -904,26 +913,11 @@ class WhitebearDocumentArticle(WhitebearDocument):
     # Setters ----------------------------------------------------------------------------------------------------------
     def set_plain_text(self, text: str) -> None:
         """
-        Set new plain text.
+        Set new plain text. This does not change modified state because this is just used for spellcheck test.
         :param text: New plain text.
         :return: None
         """
         self._plain_text = text
-
-    def clear_converted_html(self) -> None:
-        """
-        Set converted html string to None.
-        :return: None
-        """
-        self._html = ''
-
-    def set_html(self, html: str) -> None:
-        """
-        Set the html to be saved.
-        :param html: The html code.
-        :return: None
-        """
-        self._html = html
 
     def set_enabled(self, enabled: bool) -> None:
         """
@@ -932,6 +926,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
         :return: None
         """
         self._enabled = enabled
+        self.set_modified(True)
 
     def set_index_document(self, index: WhitebearDocumentIndex) -> None:
         """

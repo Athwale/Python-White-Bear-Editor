@@ -29,7 +29,6 @@ class WhitebearDocumentMenu(WhitebearDocument):
         super().__init__(path)
         self._menu_items = []
         self._menus = menus
-        self._html = None
 
     def parse_self(self) -> None:
         """

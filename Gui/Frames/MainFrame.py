@@ -1399,6 +1399,7 @@ class MainFrame(wx.Frame):
         :param event: Not used.
         :return: None
         """
+        # todo here
         # Force repeating search because the text has changed and indexes would no longer match.
         self._text_changed = True
         if not self._ignore_change:
@@ -1783,10 +1784,10 @@ class MainFrame(wx.Frame):
         self._update_field_color(self._field_article_keywords, self._field_article_keywords_tip,
                                  self._current_document_instance.seo_test_keywords)
         self._update_description_color()
-        # TODO color broken, does not turn blue and requests save after spellcheck with no changes.
-        # TODO spellcheck fails on different things each save, single instance across threads?
         self._update_file_color()
-        # TODO update file color does not seem to work try on document where we just add stuff to dictionary.
+        # TODO test file colors.
+        # TODO test adding words to lists.
+        # TODO why does spellcheck run so many times?
 
     # noinspection PyUnusedLocal
     def _self_test_handler(self, event: wx.CommandEvent) -> None:
@@ -1814,7 +1815,6 @@ class MainFrame(wx.Frame):
                     dlg.Destroy()
         # Run main text spellcheck.
         # TODO test that image fix reloads color on all other items.
-        # TODO word added from link edit dialog still is reported as mistake because seo test preserves red color
         dlg = RichTextSpellCheckerDialog(self, self._main_text_area)
         dlg.run()
         if dlg.found_mistake():

@@ -27,13 +27,17 @@ class WhitebearDocument(SpellCheckedObject):
         self._file_name = os.path.basename(path)
         self._path = path
         self._working_directory = os.path.dirname(path)
+
         self._modified = False
+        self._saved = True
+        self._uploaded = True
         # We create instances of documents after validation, so we already know they are valid.
         self._valid = True
         self._status_color = None
 
         # Page data
         self._parsed_html = None
+        self._html = ''
         self._page_name: str = ''
         self._page_name_error_message: str = ''
         self._meta_keywords: str = ''
@@ -290,6 +294,29 @@ class WhitebearDocument(SpellCheckedObject):
         """
         return self._status_color
 
+    def get_saved(self) -> bool:
+        """
+        True when the document was saved and not changed since. Modified attribute is different, saved documents are
+        still modified until they are uploaded.
+        :return: True when the document was saved and not changed since.
+        """
+        return self._saved
+
+    def get_uploaded(self) -> bool:
+        """
+        True when the document was uploaded and not changed since.
+        :return: True when the document was uploaded and not changed since.
+        """
+        return self._uploaded
+
+    def set_html(self, html: str) -> None:
+        """
+        Set the html to be saved.
+        :param html: The html code.
+        :return: None
+        """
+        self._html = html
+
     # Setters ----------------------------------------------------------------------------------------------------------
     def set_page_name(self, name: str) -> bool:
         """
@@ -344,8 +371,6 @@ class WhitebearDocument(SpellCheckedObject):
         :return: None
         """
         self._modified = modified
-        if modified and not self._status_color == Numbers.RED_COLOR:
-            self.set_status_color(Numbers.BLUE_COLOR)
 
     def set_filename(self, name: str) -> None:
         """
@@ -366,6 +391,29 @@ class WhitebearDocument(SpellCheckedObject):
         self._status_color = new_color
         if new_color == Numbers.RED_COLOR:
             self._valid = False
+
+    def set_saved(self, saved: bool) -> None:
+        """
+        Set saved attribute to True or False. Initial value = True, loaded documents are from disk.
+        :param saved: New saved value.
+        :return: None
+        """
+        self._saved = saved
+
+    def set_uploaded(self, uploaded: bool) -> None:
+        """
+        Set uploaded attribute to True or False. Initial value = True, loaded documents are considered last version.
+        :param uploaded: New saved value.
+        :return: None
+        """
+        self._uploaded = uploaded
+
+    def clear_converted_html(self) -> None:
+        """
+        Set converted html string to None.
+        :return: None
+        """
+        self._html = ''
 
     def __str__(self) -> str:
         return "White bear file {}, Modified {}, Path {}, Title {}, Keywords {}, Description {}". \

@@ -31,7 +31,6 @@ class WhitebearDocumentIndex(WhitebearDocument):
         super().__init__(path)
         self._menus = menus
         self._articles = articles
-        self._html = None
         self._index_error_message: str = ''
 
         self._global_title: str = ''
