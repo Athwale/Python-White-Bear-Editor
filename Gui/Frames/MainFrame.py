@@ -1066,7 +1066,6 @@ class MainFrame(wx.Frame):
         main_image: AsideImage = self._current_document_instance.get_article_image()
         edit_dialog = EditAsideImageDialog(self, main_image, self._current_document_instance.get_working_directory())
         edit_dialog.ShowModal()
-        self._current_document_instance.clear_converted_html()
         self._update_seo_colors()
         edit_dialog.Destroy()
 
@@ -1083,7 +1082,6 @@ class MainFrame(wx.Frame):
         edit_dialog.Show()
         edit_dialog.display_dialog_contents()
         edit_dialog.ShowModal()
-        self._current_document_instance.clear_converted_html()
         self._update_seo_colors()
         edit_dialog.Destroy()
 
@@ -1316,7 +1314,6 @@ class MainFrame(wx.Frame):
             self._update_field_color(self._field_article_name, self._field_article_name_tip,
                                      self._current_document_instance.seo_test_name)
             self._current_document_instance.set_page_name(self._field_article_name.GetValue())
-            self._current_document_instance.clear_converted_html()
             self._update_file_color()
 
     # noinspection PyUnusedLocal
@@ -1330,7 +1327,6 @@ class MainFrame(wx.Frame):
             self._update_field_color(self._field_article_date, self._field_article_date_tip,
                                      self._current_document_instance.seo_test_date)
             self._current_document_instance.set_date(self._field_article_date.GetValue())
-            self._current_document_instance.clear_converted_html()
             self._update_file_color()
 
     # noinspection PyUnusedLocal
@@ -1345,7 +1341,6 @@ class MainFrame(wx.Frame):
                                      self._current_document_instance.seo_test_keywords)
             keywords_list = [word.strip() for word in self._field_article_keywords.GetValue().split(',')]
             self._current_document_instance.set_keywords(keywords_list)
-            self._current_document_instance.clear_converted_html()
             self._update_file_color()
 
     # noinspection PyUnusedLocal
@@ -1358,7 +1353,6 @@ class MainFrame(wx.Frame):
         if not self._ignore_change:
             self._update_description_color()
             self._current_document_instance.set_description(self._field_article_description.GetValue())
-            self._current_document_instance.clear_converted_html()
             self._update_file_color()
 
     @staticmethod
@@ -1403,7 +1397,8 @@ class MainFrame(wx.Frame):
         # Force repeating search because the text has changed and indexes would no longer match.
         self._text_changed = True
         if not self._ignore_change:
-            self._current_document_instance.clear_converted_html()
+            print('modified')
+            self._current_document_instance.set_modified(True)
             self._update_seo_colors()
 
     def _update_file_color(self, index: int = -1) -> None:
@@ -1473,7 +1468,6 @@ class MainFrame(wx.Frame):
         if result == wx.ID_OK:
             self._current_document_instance.add_aside_image(new_image)
             self._side_photo_panel.load_document_images(self._current_document_instance)
-            self._current_document_instance.clear_converted_html()
         self._update_seo_colors()
         edit_dialog.Destroy()
         event.Skip()

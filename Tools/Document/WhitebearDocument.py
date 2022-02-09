@@ -181,9 +181,10 @@ class WhitebearDocument(SpellCheckedObject):
 
     def test_self_basic(self) -> bool:
         """
-        Perform basic SEO self test and change internal instance state accordingly. If description or
-        keywords are incorrect, change valid to False and the color of the file list item to red.
-        Errors found in the validation are saved are then returned along with the data by getter methods.
+        Perform basic self test and change internal instance state accordingly. If description, keywords or name are
+        incorrect, change valid to False with set_status_color and change the color of the file list item to red, clear
+        last known converted html. Errors found in the validation are saved are then returned along with the data by
+        getter methods.
         :return: False if seo test failed.
         """
         # Clear all error on each retest
@@ -205,6 +206,7 @@ class WhitebearDocument(SpellCheckedObject):
             self.set_status_color(color)
 
         if self.get_status_color() == Numbers.RED_COLOR:
+            self.clear_converted_html()
             return False
         return True
 
@@ -371,6 +373,7 @@ class WhitebearDocument(SpellCheckedObject):
         :return: None
         """
         self._modified = modified
+        self.clear_converted_html()
 
     def set_filename(self, name: str) -> None:
         """

@@ -1,7 +1,7 @@
 import wx
 from wx.richtext import RichTextField, RichTextCtrl, RichTextBuffer, RichTextFieldTypeStandard
 
-from Constants.Constants import Strings
+from Constants.Constants import Strings, Events
 from Gui.Dialogs.EditTextImageDialog import EditTextImageDialog
 from Gui.Dialogs.EditVideoDialog import EditVideoDialog
 from Tools.Document.ArticleElements.ImageInText import ImageInText
@@ -58,7 +58,7 @@ class ImageTextField(RichTextFieldTypeStandard):
         result = edit_dialog.ShowModal()
         if result == wx.ID_OK:
             # Send an event to the main gui to signal document color change
-            color_evt = wx.CommandEvent(wx.wxEVT_COLOUR_CHANGED, parent.GetId())
+            color_evt = Events.TextChangedEvent(parent.GetId())
             color_evt.SetEventObject(self)
             wx.PostEvent(parent.GetEventHandler(), color_evt)
         edit_dialog.Destroy()

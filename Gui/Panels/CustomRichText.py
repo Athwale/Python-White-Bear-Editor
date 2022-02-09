@@ -3,7 +3,7 @@ from typing import List, Tuple
 import wx
 import wx.richtext as rt
 
-from Constants.Constants import Strings, Numbers
+from Constants.Constants import Strings, Numbers, Events
 from Gui.Dialogs.EditLinkDialog import EditLinkDialog
 from Gui.Dialogs.EditTextImageDialog import EditTextImageDialog
 from Gui.Dialogs.EditVideoDialog import EditVideoDialog
@@ -97,13 +97,13 @@ class CustomRichText(rt.RichTextCtrl):
     # noinspection PyUnusedLocal
     def _modification_handler(self, event: wx.CommandEvent) -> None:
         """
-        Set document to modified state when anything is written.
+        Set document to modified state when anything is written by sending the event to the main frame
+        _text_area_edit_handler.
         :param event: Not used
         :return: None
         """
         if self._load_indicator:
             event.Skip()
-            self._doc.set_modified(True)
 
     def _refresh(self, evt: wx.CommandEvent) -> None:
         """
@@ -948,8 +948,7 @@ class CustomRichText(rt.RichTextCtrl):
         else:
             self._change_style(self.GetBuffer(), evt.GetString(), position=-1)
 
-        self._doc.set_modified(True)
-        color_evt = wx.CommandEvent(wx.wxEVT_COLOUR_CHANGED, self.GetId())
+        color_evt = Events.TextChangedEvent(self.GetId())
         color_evt.SetEventObject(self)
         wx.PostEvent(self.GetEventHandler(), color_evt)
         self.EndBatchUndo()
@@ -1263,7 +1262,7 @@ class CustomRichText(rt.RichTextCtrl):
             self.EndBatchUndo()
 
         # Send an event to the main gui to signal document color change
-        color_evt = wx.CommandEvent(wx.wxEVT_COLOUR_CHANGED, self.GetId())
+        color_evt = Events.TextChangedEvent(self.GetId())
         color_evt.SetEventObject(self)
         wx.PostEvent(self.GetEventHandler(), color_evt)
 
@@ -1359,7 +1358,8 @@ class CustomRichText(rt.RichTextCtrl):
             else:
                 self._doc.add_video(new_element)
             self._write_field(new_element, from_button=True)
-            color_evt = wx.CommandEvent(wx.wxEVT_COLOUR_CHANGED, self.GetId())
+
+            color_evt = Events.TextChangedEvent(self.GetId())
             color_evt.SetEventObject(self)
             wx.PostEvent(self.GetEventHandler(), color_evt)
         edit_dialog.Destroy()
@@ -1400,8 +1400,7 @@ class CustomRichText(rt.RichTextCtrl):
                 self.SetStyleEx(single_range, attr, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO)
                 self.SelectNone()
             self.EndBatchUndo()
-            self._doc.set_modified(True)
-            color_evt = wx.CommandEvent(wx.wxEVT_COLOUR_CHANGED, self.GetId())
+            color_evt = Events.TextChangedEvent(self.GetId())
             color_evt.SetEventObject(self)
             wx.PostEvent(self.GetEventHandler(), color_evt)
         else:

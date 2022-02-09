@@ -213,6 +213,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
             print('end ', str(self.get_status_color()), self.get_page_name(), '\n')
 
         if self.get_status_color() == Numbers.RED_COLOR:
+            self.clear_converted_html()
             return False
         return True
 
@@ -960,11 +961,13 @@ class WhitebearDocumentArticle(WhitebearDocument):
 
     def set_modified(self, modified: bool) -> None:
         """
-        Set modification status for the document. If false then all parts of the document are set to not be modified.
+        Set modification status for the document. If False then all parts of the document are set to not be modified.
+        Clear last known converted html since something has changed.
         :param modified: The new state.
         :return: None
         """
         super(WhitebearDocumentArticle, self).set_modified(modified)
+        self.clear_converted_html()
         if not modified:
             for list_var in (self._aside_images, self._text_images, self._links, self._videos):
                 for content in list_var:
