@@ -984,7 +984,6 @@ class MainFrame(wx.Frame):
                                         file_path)
             # Set modified false for all doc parts it was saved and does not need to be asked for save until changed.
             # TODO set modified false after upload
-            # TODO ask for save only if not saved
             doc.set_saved(True)
             doc.set_uploaded(False)
             self._set_status_text(Strings.label_saving + ': ' + file_name, 3)
@@ -1202,7 +1201,7 @@ class MainFrame(wx.Frame):
         :param event: wx event, brings the selected string from the menu.
         :return: None
         """
-        if self._current_document_instance and self._current_document_instance.is_modified():
+        if self._current_document_instance and not self._current_document_instance.is_saved():
             # Only ask to save if there is a document already opened in the editor and saving is allowed.
             self._save_current_doc(confirm=True)
 

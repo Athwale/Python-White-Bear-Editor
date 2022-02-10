@@ -3,7 +3,7 @@ from typing import List
 import wx
 from lxml import etree
 from lxml import html
-from lxml.etree import XMLSyntaxError, XMLSchemaParseError
+from lxml.etree import XMLSyntaxError, XMLSchemaParseError, ParserError
 from wx.lib.agw.supertooltip import SuperToolTip
 
 from Constants.Constants import Numbers
@@ -49,6 +49,8 @@ class Tools:
         except XMLSchemaParseError as e:
             raise UnrecognizedFileException(Strings.exception_schema_syntax_error + ':\n' + str(e))
         except XMLSyntaxError as e:
+            raise UnrecognizedFileException(Strings.exception_html_syntax_error + ':\n' + str(e))
+        except ParserError as e:
             raise UnrecognizedFileException(Strings.exception_html_syntax_error + ':\n' + str(e))
         for error in xmlschema.error_log:
             errors.append(error.message)
