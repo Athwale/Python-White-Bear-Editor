@@ -33,10 +33,6 @@ class ConvertorThread(threading.Thread):
         Overrides Thread.run. Don't call this directly its called internally when you call Thread.start().
         :return: None, this method calls the wx.CallAfter to pass a list of website names back into GUI.
         """
-        # We know here that the document is modified because we are saving it.
-        self._doc.set_status_color(Numbers.BLUE_COLOR)
-        # This would turn the document red if something is wrong, but seo fail should not prevent save to disk, only
-        # upload.
         if isinstance(self._doc, WhitebearDocumentArticle):
             self._doc.test_self(self._config_manager.get_online_test())
         else:

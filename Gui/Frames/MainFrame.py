@@ -780,7 +780,6 @@ class MainFrame(wx.Frame):
                 # right after load ready for upload and if changed then they have to be saved again which regenerates
                 # them.
                 self._articles[document_name].set_modified(True)
-                self._articles[document_name].set_modified(False)
                 # Set html code to something not False because at this point we have the final html on disk.
                 self._articles[document_name].set_html('current html on disk')
             self._file_list.InsertItem(0, document_name)
@@ -958,9 +957,6 @@ class MainFrame(wx.Frame):
         :return: None
         """
         last_save = datetime.now().strftime("%H:%M:%S")
-        if isinstance(doc, WhitebearDocumentArticle):
-            self._update_file_color(self._file_list.FindItem(-1, doc.get_filename()))
-
         file_path = doc.get_path()
         file_name = doc.get_filename()
         if isinstance(doc, WhitebearDocumentArticle):
@@ -986,9 +982,14 @@ class MainFrame(wx.Frame):
             except IOError:
                 self._show_error_dialog(Strings.warning_can_not_save + '\n' + Strings.exception_access_html + '\n' +
                                         file_path)
-            # Set modified false for all docu parts it was saved and does not need to be asked for save until changed.
-            doc.set_modified(False)
+            # Set modified false for all doc parts it was saved and does not need to be asked for save until changed.
+            # TODO set modified false after upload
+            # TODO ask for save only if not saved
+            doc.set_saved(True)
+            doc.set_uploaded(False)
             self._set_status_text(Strings.label_saving + ': ' + file_name, 3)
+        if isinstance(doc, WhitebearDocumentArticle):
+            self._update_file_color(self._file_list.FindItem(-1, doc.get_filename()))
         # Clean thread list off stopped threads.
         self._thread_queue.remove(thread)
         if not self._thread_queue and not disable:
@@ -1327,7 +1328,7 @@ class MainFrame(wx.Frame):
             self._update_field_color(self._field_article_date, self._field_article_date_tip,
                                      self._current_document_instance.seo_test_date)
             self._current_document_instance.set_date(self._field_article_date.GetValue())
-            self._update_file_color()
+            self._update_seo_colors()
 
     # noinspection PyUnusedLocal
     def _handle_keywords_change(self, event: wx.CommandEvent) -> None:
@@ -1341,7 +1342,7 @@ class MainFrame(wx.Frame):
                                      self._current_document_instance.seo_test_keywords)
             keywords_list = [word.strip() for word in self._field_article_keywords.GetValue().split(',')]
             self._current_document_instance.set_keywords(keywords_list)
-            self._update_file_color()
+            self._update_seo_colors()
 
     # noinspection PyUnusedLocal
     def _handle_description_change(self, event: wx.CommandEvent) -> None:
@@ -1353,7 +1354,7 @@ class MainFrame(wx.Frame):
         if not self._ignore_change:
             self._update_description_color()
             self._current_document_instance.set_description(self._field_article_description.GetValue())
-            self._update_file_color()
+            self._update_seo_colors()
 
     @staticmethod
     def _update_field_color(field: wx.TextCtrl, tip: SuperToolTip, seo_test: Callable) -> None:
@@ -1393,11 +1394,9 @@ class MainFrame(wx.Frame):
         :param event: Not used.
         :return: None
         """
-        # todo here
         # Force repeating search because the text has changed and indexes would no longer match.
         self._text_changed = True
         if not self._ignore_change:
-            print('modified')
             self._current_document_instance.set_modified(True)
             self._update_seo_colors()
 
@@ -1414,7 +1413,8 @@ class MainFrame(wx.Frame):
             return
         doc = self._articles[self._file_list.GetItemText(index)]
         new_color = doc.get_status_color()
-        if doc.get_html_to_save():
+        print(doc.is_modified(), doc.is_saved())
+        if doc.is_modified and not doc.is_saved():
             # Only exported documents have this.
             self._file_list.SetItemFont(index, self.bold_small_font)
         else:
@@ -1782,6 +1782,7 @@ class MainFrame(wx.Frame):
         # TODO test file colors.
         # TODO test adding words to lists.
         # TODO why does spellcheck run so many times?
+        # TODO test new file colors
 
     # noinspection PyUnusedLocal
     def _self_test_handler(self, event: wx.CommandEvent) -> None:

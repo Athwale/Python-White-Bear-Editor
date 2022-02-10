@@ -120,10 +120,9 @@ class WhitebearDocumentArticle(WhitebearDocument):
     def test_self(self, online: bool) -> bool:
         """
         Perform a SEO test on this document and set it's status color.
-        RED documents have errors, BLUE are modified, BOLD are not uploaded yet.
         # TODO new colors:
         # white - ok, saved, uploaded
-        # blue - ok, not uploaded, not saved
+        # blue - ok, not uploaded
         # red - error, turns to blue when fixed.
         # bold - modified and not saved.
         :param online: Do online test of urls.
@@ -136,9 +135,12 @@ class WhitebearDocumentArticle(WhitebearDocument):
         if 'Projekt krátkého wiki filmu' in self.get_page_name()[0]:
             print('basic ', str(self.get_status_color()), self.get_page_name())
         # TODO What about setting modified from somewhere else?
-        # TODO run this method from the document changed event handler and redraw colors of all uploaded once done.
+        # TODO Redraw colors of all uploaded once done.
+        # TODO implement bold
+        # TODO test upload turning documents white
         if 'Projekt krátkého wiki filmu' in self.get_page_name()[0]:
             print('modified: ', self._modified, self.get_status_color())
+            print('saved: ', self.is_saved())
         # Clear all errors on every new test
         self._date_error_message: str = ''
         self._spelling_error_message: str = ''
@@ -757,7 +759,6 @@ class WhitebearDocumentArticle(WhitebearDocument):
         Return True if this file or it's images, links or videos were modified in the editor.
         :return: True if this file was modified in the editor.
         """
-        # TODO here
         # Check links, videos and images
         for list_var in (self._aside_images, self._text_images, self._links, self._videos):
             for content in list_var:
@@ -968,6 +969,8 @@ class WhitebearDocumentArticle(WhitebearDocument):
         """
         super(WhitebearDocumentArticle, self).set_modified(modified)
         self.clear_converted_html()
+        if modified:
+            self.set_saved(False)
         if not modified:
             for list_var in (self._aside_images, self._text_images, self._links, self._videos):
                 for content in list_var:

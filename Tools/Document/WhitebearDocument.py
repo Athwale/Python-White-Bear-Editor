@@ -232,6 +232,21 @@ class WhitebearDocument(SpellCheckedObject):
         """
         return self._status_color != Numbers.RED_COLOR
 
+    def is_saved(self) -> bool:
+        """
+        True when the document was saved and not changed since. Modified attribute is different, saved documents are
+        still modified until they are uploaded.
+        :return: True when the document was saved and not changed since.
+        """
+        return self._saved
+
+    def is_uploaded(self) -> bool:
+        """
+        True when the document was uploaded and not changed since.
+        :return: True when the document was uploaded and not changed since.
+        """
+        return self._uploaded
+
     # Getters ----------------------------------------------------------------------------------------------------------
     def get_filename(self) -> str:
         """
@@ -295,21 +310,6 @@ class WhitebearDocument(SpellCheckedObject):
         :return: Return the status color of this document. White if ok, Red if SEO check failed, Blue if modified.
         """
         return self._status_color
-
-    def get_saved(self) -> bool:
-        """
-        True when the document was saved and not changed since. Modified attribute is different, saved documents are
-        still modified until they are uploaded.
-        :return: True when the document was saved and not changed since.
-        """
-        return self._saved
-
-    def get_uploaded(self) -> bool:
-        """
-        True when the document was uploaded and not changed since.
-        :return: True when the document was uploaded and not changed since.
-        """
-        return self._uploaded
 
     def set_html(self, html: str) -> None:
         """
