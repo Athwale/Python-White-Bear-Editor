@@ -136,7 +136,6 @@ class WhitebearDocumentArticle(WhitebearDocument):
             print('basic ', str(self.get_status_color()), self.get_page_name())
         # TODO What about setting modified from somewhere else?
         # TODO Redraw colors of all uploaded once done.
-        # TODO implement bold
         # TODO test upload turning documents white
         if 'Projekt krátkého wiki filmu' in self.get_page_name()[0]:
             print('modified: ', self._modified, self.get_status_color())
