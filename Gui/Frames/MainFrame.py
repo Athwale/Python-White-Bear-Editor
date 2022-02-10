@@ -888,6 +888,7 @@ class MainFrame(wx.Frame):
         :param disable: Leave the editor disabled after threads finish.
         :return: False if save canceled.
         """
+        print('a')
         self._main_text_area.convert_document()
         # Force save current document.
         if confirm:
@@ -1241,7 +1242,6 @@ class MainFrame(wx.Frame):
         :param doc:
         :return: None
         """
-        self._disable_editor(True)
         self._ignore_change = True
         self._update_file_color()
         if doc.get_status_color() == Numbers.RED_COLOR:
@@ -1412,7 +1412,6 @@ class MainFrame(wx.Frame):
             return
         doc = self._articles[self._file_list.GetItemText(index)]
         new_color = doc.get_status_color()
-        print(doc.is_modified(), doc.is_saved())
         if doc.is_modified and not doc.is_saved():
             # Only exported documents have this.
             self._file_list.SetItemFont(index, self.bold_small_font)

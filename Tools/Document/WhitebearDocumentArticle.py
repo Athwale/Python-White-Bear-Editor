@@ -215,7 +215,6 @@ class WhitebearDocumentArticle(WhitebearDocument):
             print('end ', str(self.get_status_color()), self.get_page_name(), '\n')
 
         if self.get_status_color() == Numbers.RED_COLOR:
-            self.clear_converted_html()
             return False
         return True
 
