@@ -120,7 +120,6 @@ class WhitebearDocumentArticle(WhitebearDocument):
     def test_self(self, online: bool) -> bool:
         """
         Perform a SEO test on this document and set it's status color.
-        # TODO new colors:
         # white - ok, saved, uploaded
         # blue - ok, not uploaded
         # red - error, turns to blue when fixed.
@@ -137,6 +136,8 @@ class WhitebearDocumentArticle(WhitebearDocument):
         # TODO What about setting modified from somewhere else?
         # TODO Redraw colors of all uploaded once done.
         # TODO test upload turning documents white
+        # TODO test modifying and saving from everywhere.
+        # TODO other modified document are not turning blue on load
         if 'Projekt krátkého wiki filmu' in self.get_page_name()[0]:
             print('modified: ', self._modified, self.get_status_color())
             print('saved: ', self.is_saved())

@@ -782,6 +782,8 @@ class MainFrame(wx.Frame):
                 self._articles[document_name].set_uploaded(False)
                 # Set html code to something not False because at this point we have the final html on disk.
                 self._articles[document_name].set_html('current html on disk')
+                # Rerun self test because document attributes were changed.
+                self._articles[document_name].test_self(self._config_manager.get_online_test())
             self._file_list.InsertItem(0, document_name)
             self._update_file_color(0)
 
@@ -1762,7 +1764,6 @@ class MainFrame(wx.Frame):
         """
         # Replace the plain text version of the page in the document first from the edited but not yet saved text field.
         # Reset status color and calculate it again.
-        # TODO build the test method so that it always updates color from white to correct.
         self._current_document_instance.set_plain_text(self._main_text_area.get_text())
         self._current_document_instance.test_self(self._config_manager.get_online_test())
         self._update_article_image_sizer(self._current_document_instance.get_article_image())
@@ -1780,7 +1781,7 @@ class MainFrame(wx.Frame):
         # TODO test file colors.
         # TODO test adding words to lists.
         # TODO why does spellcheck run so many times?
-        # TODO test new file colors
+        # TODO test new file colors when creating a new document.
 
     # noinspection PyUnusedLocal
     def _self_test_handler(self, event: wx.CommandEvent) -> None:
