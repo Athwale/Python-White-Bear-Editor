@@ -986,7 +986,6 @@ class MainFrame(wx.Frame):
                 self._show_error_dialog(Strings.warning_can_not_save + '\n' + Strings.exception_access_html + '\n' +
                                         file_path)
             # Set modified false for all doc parts it was saved and does not need to be asked for save until changed.
-            # TODO set modified false after upload
             doc.set_saved(True)
             doc.set_uploaded(False)
             self._set_status_text(Strings.label_saving + ': ' + file_name, 3)

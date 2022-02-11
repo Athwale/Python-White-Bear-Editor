@@ -274,6 +274,8 @@ class UploadDialog(wx.Dialog):
         :param fail: True if transfer failed.
         :return: None
         """
+        # TODO set document uploaded to true
+        # TODO set document modified false after upload
         if fail:
             color = Numbers.RED_COLOR
         else:
@@ -475,7 +477,7 @@ class UploadDialog(wx.Dialog):
         """
         self.Disable()
         for filename, document in self._articles.items():
-            if document.get_html_to_save():
+            if document.get_html_to_save() and document.is_saved() and document.is_modified() and document.is_valid():
                 # Add all that belongs to this document into the list.
                 if document.is_seo_ok():
                     self._add_if_not_in(document.get_path(), enabled=True)
