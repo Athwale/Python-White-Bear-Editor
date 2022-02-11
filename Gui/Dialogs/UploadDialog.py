@@ -274,14 +274,18 @@ class UploadDialog(wx.Dialog):
         :param fail: True if transfer failed.
         :return: None
         """
-        # TODO set document uploaded to true
-        # TODO set document modified false after upload
         if fail:
             color = Numbers.RED_COLOR
         else:
             color = Numbers.GREEN_COLOR
+            filename = os.path.basename(file)
+            # Documents after upload should appear white, they are saved on disk and now the same copy is online.
+            if filename in self._articles.keys():
+                # Only do this for documents, ignore images...
+                self._articles[filename].set_uploaded(True)
+                self._articles[filename].set_modified(False)
             # Remove successful uploads from the list of unuploaded files.
-            self._config_manager.remove_uploaded(os.path.basename(file))
+            self._config_manager.remove_uploaded(filename)
         index = self._file_list.FindItem(0, os.path.relpath(file, start=self._config_manager.get_working_dir()))
         if index > -1:
             self._file_list.SetItemBackgroundColour(index, color)

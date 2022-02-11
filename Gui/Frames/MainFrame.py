@@ -1732,6 +1732,7 @@ class MainFrame(wx.Frame):
         """
         dlg = UploadDialog(self, self._articles, self._index_document, self._css_document)
         dlg.ShowModal()
+        # TODO update the color of uploaded documents in the list
         dlg.Destroy()
 
     def _online_test_handler(self, event: wx.CommandEvent) -> None:
