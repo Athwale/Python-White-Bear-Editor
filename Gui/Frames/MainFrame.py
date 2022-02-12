@@ -61,8 +61,11 @@ class MainFrame(wx.Frame):
         # Prepare data objects
         try:
             self._config_manager: ConfigManager = ConfigManager.get_instance()
+            # TODO validate yaml
+            self._config_manager.validate_yaml()
         except PermissionError as e:
             self._show_error_dialog(Strings.exception_conf_inaccessible + '\n' + str(e))
+
         self._tool_ids = []
         self._disableable_menu_items = []
         self._thread_queue = []
@@ -806,7 +809,7 @@ class MainFrame(wx.Frame):
 
         # Store this as last known open directory.
         self._config_manager.store_working_dir(self._index_document.get_working_directory())
-        if not self._config_manager.check_config():
+        if not self._config_manager.check_set_config_values():
             # Check that no default values are missing.
             self._show_error_dialog(Strings.exception_default_value_not_set)
             # Open defaults dialog if anything is missing.
@@ -1108,7 +1111,8 @@ class MainFrame(wx.Frame):
             if selected_page != wx.NOT_FOUND:
                 self._config_manager.store_last_open_document(self._file_list.GetItemText(selected_page, 0))
             for doc in self._articles.values():
-                if doc.is_modified() and not doc.get_html_to_save():
+                doc: WhitebearDocumentArticle
+                if doc.is_modified() and not doc.is_saved():
                     result = wx.MessageBox(Strings.warning_unsaved, Strings.status_warning, wx.YES_NO | wx.ICON_WARNING)
                     if result == wx.YES:
                         self.Destroy()
@@ -1778,6 +1782,8 @@ class MainFrame(wx.Frame):
                                  self._current_document_instance.seo_test_keywords)
         self._update_description_color()
         self._update_file_color()
+        # TODO aluminotermie is red but does not have errors?
+
         # TODO test file colors.
         # TODO test adding words to lists.
         # TODO why does spellcheck run so many times?

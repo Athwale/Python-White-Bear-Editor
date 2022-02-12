@@ -119,7 +119,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
 
     def test_self(self, online: bool) -> bool:
         """
-        Perform a SEO test on this document and set it's status color.
+        Perform a SEO test on this document and set new status color.
         # white - ok, saved, uploaded
         # blue - ok, not uploaded
         # red - error, turns to blue when fixed.
@@ -131,16 +131,6 @@ class WhitebearDocumentArticle(WhitebearDocument):
         basic_result: bool = super(WhitebearDocumentArticle, self).test_self_basic()
         if basic_result and self.is_modified():
             self.set_status_color(Numbers.BLUE_COLOR)
-        if 'Projekt krátkého wiki filmu' in self.get_page_name()[0]:
-            print('basic ', str(self.get_status_color()), self.get_page_name())
-        # TODO What about setting modified from somewhere else?
-        # TODO Redraw colors of all uploaded once done.
-        # TODO test upload turning documents white
-        # TODO test modifying and saving from everywhere.
-        # TODO other modified document are not turning blue on load
-        if 'Projekt krátkého wiki filmu' in self.get_page_name()[0]:
-            print('modified: ', self._modified, self.get_status_color())
-            print('saved: ', self.is_saved())
         # Clear all errors on every new test
         self._date_error_message: str = ''
         self._spelling_error_message: str = ''
@@ -150,69 +140,48 @@ class WhitebearDocumentArticle(WhitebearDocument):
         # Message may contain OK if seo passed.
         self._page_name_error_message = message
         if not name_result:
-            if 'Projekt krátkého wiki filmu' in self.get_page_name()[0]:
-                print('name')
             self.set_status_color(color)
 
         # Check date format
         date_result, message, color = self.seo_test_date(self._date)
         self._date_error_message = message
         if not date_result:
-            if 'Projekt krátkého wiki filmu' in self.get_page_name()[0]:
-                print('date')
             self.set_status_color(color)
 
         # Test main image
         if not self._article_image.test_self():
-            if 'Projekt krátkého wiki filmu' in self.get_page_name()[0]:
-                print('main img')
             self.set_status_color(Numbers.RED_COLOR)
 
         # Test menu item
         if not self._menu_item.test_self():
-            if 'Projekt krátkého wiki filmu' in self.get_page_name()[0]:
-                print('menu')
             self.set_status_color(Numbers.RED_COLOR)
 
         # Test aside images
         for aside_image in self._aside_images:
             if not aside_image.test_self():
-                if 'Projekt krátkého wiki filmu' in self.get_page_name()[0]:
-                    print('aside')
                 self.set_status_color(Numbers.RED_COLOR)
 
         # Test videos
         for video in self._videos:
             if not video.test_self(online):
-                if 'Projekt krátkého wiki filmu' in self.get_page_name()[0]:
-                    print('video')
                 self.set_status_color(Numbers.RED_COLOR)
 
         # Test in text images
         for image in self._text_images:
             if not image.test_self():
-                if 'Projekt krátkého wiki filmu' in self.get_page_name()[0]:
-                    print('imgs')
                 self.set_status_color(Numbers.RED_COLOR)
 
         # Test links
         for link in self._links:
             if not link.test_self(online):
-                if 'Projekt krátkého wiki filmu' in self.get_page_name()[0]:
-                    print('links')
                 self.set_status_color(Numbers.RED_COLOR)
 
         if not self._spell_check(self._plain_text):
             self._spelling_error_message = Strings.spelling_error
-            if 'Projekt krátkého wiki filmu' in self.get_page_name()[0]:
-                print('spell')
             self.set_status_color(Numbers.RED_COLOR)
 
         if not self._enabled:
             self.set_status_color(Numbers.RED_COLOR)
-
-        if 'Projekt krátkého wiki filmu' in self.get_page_name()[0]:
-            print('end ', str(self.get_status_color()), self.get_page_name(), '\n')
 
         if self.get_status_color() == Numbers.RED_COLOR:
             return False

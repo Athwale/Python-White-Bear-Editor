@@ -111,6 +111,20 @@ class ConfigManager:
             # Create a new default valid yaml config file.
             self._init_config()
 
+    def validate_yaml(self) -> bool:
+        """
+        Validate the structure of the loaded yaml config.
+        :return: False if the config is malformed.
+        """
+        # todo this
+        correct = True
+        if len(self._whole_conf.keys()) < 2:
+            correct = False
+        if ConfigManager.CONF_LAST_DIR not in self._whole_conf.keys():
+            correct = False
+
+        return correct
+
     def save_config_file(self) -> None:
         """
         Save the configuration onto disk drive in user's home.
@@ -121,11 +135,13 @@ class ConfigManager:
         with open(Strings.editor_config_file, 'w') as file:
             yaml.dump(self._whole_conf, file)
 
-    def check_config(self) -> bool:
+    def check_set_config_values(self) -> bool:
         """
-        Check the loaded config for missing values.
+        Check the loaded config for missing values. And repair missing uncritical values to default.
         :return: False if any value is missing.
         """
+        # TODO rewrite config manager to repair itself and return default values for uncritical things and use this
+        # TODO to check the critical values.
         correct = True
         for name in (self.CONF_WORKING_DIR, self.CONF_GLOBAL_TITLE, self.CONF_AUTHOR, self.CONF_CONTACT,
                      self.CONF_KEYWORDS, self.CONF_DESCRIPTION, self.CONF_SCRIPT, self.CONF_BLACK_TXT,
@@ -138,26 +154,6 @@ class ConfigManager:
                 # These values are necessary.
                 correct = False
                 self._dir_conf[name] = ''
-
-        # Repair uncritical values if missing, set to empty.
-        for name in (self.CONF_IP, self.CONF_USER, self.CONF_KEYFILE):
-            if name not in self._dir_conf.keys():
-                self._dir_conf[name] = ''
-        if self.CONF_UNUPLOADED not in self._dir_conf.keys():
-            self._dir_conf[self.CONF_UNUPLOADED] = []
-
-        # If online test value is not recognized, set to 1.
-        if self.CONF_ONLINE_TEST not in self._dir_conf.keys():
-            self._dir_conf[self.CONF_ONLINE_TEST] = '1'
-
-        # If last img dir is not present, reset it to home dir.
-        if self.CONF_LAST_IMG_DIR not in self._dir_conf.keys():
-            self._dir_conf[self.CONF_LAST_IMG_DIR] = Strings.home_directory
-
-        # If spelling language is not set, use default.
-        default_language = enchant.get_default_language()
-        if self.CONF_LANG not in self._dir_conf.keys():
-            self._dir_conf[self.CONF_LANG] = default_language
 
         return correct
 
@@ -185,6 +181,8 @@ class ConfigManager:
         new_config[self.CONF_WORKING_DIR] = path
         self._whole_conf[path] = new_config
 
+    # Getters ----------------------------------------------------------------------------------------------------------
+
     def get_last_directory(self) -> str:
         """
         Return the path to the last known opened whitebear directory.
@@ -205,39 +203,6 @@ class ConfigManager:
         :return: String url of the website.
         """
         return self._dir_conf[self.CONF_PAGE_URL]
-
-    def get_window_position(self) -> object:
-        """
-        Get the last saved window position on screen.
-        :return: Tuple of (x, y) position last saved when exiting the editor.
-        """
-        try:
-            position = self._dir_conf[self.CONF_POSITION].split(',', 1)
-        except KeyError:
-            # Config damaged, return a default position.
-            position = (0, 0)
-        return int(position[0]), int(position[1])
-
-    def get_window_size(self) -> object:
-        """
-        Get the last saved window size on screen.
-        :return: Tuple of (x, y) size last saved when exiting the editor.
-        """
-        try:
-            size = self._dir_conf[self.CONF_SIZE].split(',', 1)
-        except KeyError:
-            # Config damaged, return a default size.
-            size = (Numbers.minimal_window_size_width, Numbers.minimal_window_size_height)
-        return int(size[0]), int(size[1])
-
-    def get_last_document(self) -> object:
-        """
-        Get the last opened document.
-        :return: String name of the last opened document when exiting the editor. If no document was open, returns None.
-        """
-        if self.CONF_LAST not in self._dir_conf:
-            return None
-        return self._dir_conf[self.CONF_LAST]
 
     def get_global_title(self) -> str:
         """
@@ -295,11 +260,48 @@ class ConfigManager:
         """
         return self._dir_conf[self.CONF_RED_TXT]
 
+    # Uncritical values ------------------------------------------------------------------------------------------------
+
+    def get_window_position(self) -> object:
+        """
+        Get the last saved window position on screen.
+        :return: Tuple of (x, y) position last saved when exiting the editor.
+        """
+        try:
+            position = self._dir_conf[self.CONF_POSITION].split(',', 1)
+        except KeyError:
+            # Config damaged, return a default position.
+            position = (0, 0)
+        return int(position[0]), int(position[1])
+
+    def get_window_size(self) -> object:
+        """
+        Get the last saved window size on screen.
+        :return: Tuple of (x, y) size last saved when exiting the editor.
+        """
+        try:
+            size = self._dir_conf[self.CONF_SIZE].split(',', 1)
+        except KeyError:
+            # Config damaged, return a default size.
+            size = (Numbers.minimal_window_size_width, Numbers.minimal_window_size_height)
+        return int(size[0]), int(size[1])
+
+    def get_last_document(self) -> object:
+        """
+        Get the last opened document.
+        :return: String name of the last opened document when exiting the editor. If no document was open, returns None.
+        """
+        if self.CONF_LAST not in self._dir_conf:
+            return None
+        return self._dir_conf[self.CONF_LAST]
+
     def get_ip_port(self) -> str:
         """
         Get the server ip and port.
         :return: The server ip and port.
         """
+        if self.CONF_IP not in self._dir_conf.keys():
+            self._dir_conf[self.CONF_IP] = ''
         return self._dir_conf[self.CONF_IP]
 
     def get_user(self) -> str:
@@ -307,6 +309,8 @@ class ConfigManager:
         Get the server user.
         :return: The server user.
         """
+        if self.CONF_USER not in self._dir_conf.keys():
+            self._dir_conf[self.CONF_USER] = ''
         return self._dir_conf[self.CONF_USER]
 
     def get_keyfile(self) -> str:
@@ -314,6 +318,8 @@ class ConfigManager:
         Get the SFTP keyfile path.
         :return: The server keyfile path.
         """
+        if self.CONF_KEYFILE not in self._dir_conf.keys():
+            self._dir_conf[self.CONF_KEYFILE] = ''
         return self._dir_conf[self.CONF_KEYFILE]
 
     def get_number_of_news(self) -> int:
@@ -343,6 +349,8 @@ class ConfigManager:
         Get the last used image directory.
         :return: String directory path to the last used image directory.
         """
+        if self.CONF_LAST_IMG_DIR not in self._dir_conf.keys():
+            self._dir_conf[self.CONF_LAST_IMG_DIR] = Strings.home_directory
         return self._dir_conf[self.CONF_LAST_IMG_DIR]
 
     def get_not_uploaded(self) -> List[str]:
@@ -350,6 +358,8 @@ class ConfigManager:
         Get a list of documents which are modified but not uploaded.
         :return: List of documents which are modified but not uploaded.
         """
+        if self.CONF_UNUPLOADED not in self._dir_conf.keys():
+            self._dir_conf[self.CONF_UNUPLOADED] = []
         return self._dir_conf[self.CONF_UNUPLOADED]
 
     def get_spelling_lang(self) -> str:
@@ -357,11 +367,18 @@ class ConfigManager:
         Get spelling language for spellchecker or default language if the required is not found.
         :return: Spelling language code for spellchecker.
         """
+        # If spelling language is not set, use default.
+        default_language = enchant.get_default_language()
+        if self.CONF_LANG not in self._dir_conf.keys():
+            self._dir_conf[self.CONF_LANG] = default_language
+
+        # Use default language if the language package set in config is not installed.
         language: str = self._dir_conf[self.CONF_LANG]
         if language not in enchant.list_languages():
-            language = enchant.get_default_language()
             self.store_spelling_language(language)
         return language
+
+    # Setters ----------------------------------------------------------------------------------------------------------
 
     def store_spelling_language(self, lang: str) -> None:
         """
