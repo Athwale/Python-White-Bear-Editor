@@ -140,12 +140,10 @@ class ConfigManager:
         Check the loaded config for missing values. And repair missing uncritical values to default.
         :return: False if any value is missing.
         """
-        # TODO rewrite config manager to repair itself and return default values for uncritical things and use this
-        # TODO to check the critical values.
         correct = True
-        for name in (self.CONF_WORKING_DIR, self.CONF_GLOBAL_TITLE, self.CONF_AUTHOR, self.CONF_CONTACT,
-                     self.CONF_KEYWORDS, self.CONF_DESCRIPTION, self.CONF_SCRIPT, self.CONF_BLACK_TXT,
-                     self.CONF_RED_TXT, self.CONF_NEWS, self.CONF_PAGE_URL):
+        for name in (self.CONF_GLOBAL_TITLE, self.CONF_AUTHOR, self.CONF_CONTACT, self.CONF_KEYWORDS,
+                     self.CONF_DESCRIPTION, self.CONF_SCRIPT, self.CONF_BLACK_TXT, self.CONF_RED_TXT, self.CONF_NEWS,
+                     self.CONF_PAGE_URL):
             try:
                 if not self._dir_conf[name]:
                     correct = False
@@ -189,13 +187,6 @@ class ConfigManager:
         :return: The path to the last known opened whitebear directory.
         """
         return self._whole_conf[self.CONF_LAST_DIR]
-
-    def get_working_dir(self) -> str:
-        """
-        Get the working directory name.
-        :return: String directory path to the working directory.
-        """
-        return self._dir_conf[self.CONF_WORKING_DIR]
 
     def get_url(self) -> str:
         """
@@ -261,6 +252,15 @@ class ConfigManager:
         return self._dir_conf[self.CONF_RED_TXT]
 
     # Uncritical values ------------------------------------------------------------------------------------------------
+
+    def get_working_dir(self) -> str:
+        """
+        Get the working directory name.
+        :return: String directory path to the working directory.
+        """
+        if self.CONF_WORKING_DIR not in self._dir_conf.keys():
+            self._dir_conf[self.CONF_WORKING_DIR] = Strings.home_directory
+        return self._dir_conf[self.CONF_WORKING_DIR]
 
     def get_window_position(self) -> object:
         """

@@ -697,6 +697,9 @@ class MainFrame(wx.Frame):
         if all_menu:
             menu_items_to_disable.append(self._file_menu_item_open)
             menu_items_to_disable.append(self._file_menu_item_new_dir)
+        else:
+            self._file_menu_item_open.Enable()
+            self._file_menu_item_new_dir.Enable()
         for menu_item in menu_items_to_disable:
             menu_item.Enable(not state)
         if leave_files:
@@ -720,15 +723,6 @@ class MainFrame(wx.Frame):
         file_list_thread = FileListThread(self, str(path))
         file_list_thread.start()
 
-    def _show_error_dialog(self, error: str) -> None:
-        """
-        Display an error dialog with the error text. Set error state into the status bar.
-        :param error: The error to display in the dialog.
-        :return: None
-        """
-        wx.MessageBox(error, Strings.status_error, wx.OK | wx.ICON_ERROR)
-        self._set_status_text(Strings.status_error, 2)
-
     def on_filelist_load_fail(self, path: str, e: Exception) -> None:
         """
         If the loading of a supposed whitebear directory fails, this method is called, it shows the error and disables
@@ -737,14 +731,24 @@ class MainFrame(wx.Frame):
         :param e: Exception that caused the call of this method.
         :return: None
         """
+        print('a')
         self._loading_screen_on(False)
         self._show_error_dialog(str(e))
-        self._disable_editor(True)
+        self._disable_editor(state=True, all_menu=False)
         self._side_photo_panel.reset()
         self._clear_editor(leave_files=False)
         # Only remove config if index is missing.
         if path:
             self._config_manager.remove_config_dir(path)
+
+    def _show_error_dialog(self, error: str) -> None:
+        """
+        Display an error dialog with the error text. Set error state into the status bar.
+        :param error: The error to display in the dialog.
+        :return: None
+        """
+        wx.MessageBox(error, Strings.status_error, wx.OK | wx.ICON_ERROR)
+        self._set_status_text(Strings.status_error, 2)
 
     def on_css_parsed(self, css: WhitebearDocumentCSS) -> None:
         """
