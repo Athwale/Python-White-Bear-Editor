@@ -890,7 +890,6 @@ class MainFrame(wx.Frame):
         :param disable: Leave the editor disabled after threads finish.
         :return: False if save canceled.
         """
-        print('a')
         self._main_text_area.convert_document()
         # Force save current document.
         if confirm:
@@ -1732,7 +1731,8 @@ class MainFrame(wx.Frame):
         """
         dlg = UploadDialog(self, self._articles, self._index_document, self._css_document)
         dlg.ShowModal()
-        # TODO update the color of uploaded documents in the list
+        for file in dlg.get_uploaded():
+            self._update_file_color(self._file_list.FindItem(-1, file))
         dlg.Destroy()
 
     def _online_test_handler(self, event: wx.CommandEvent) -> None:

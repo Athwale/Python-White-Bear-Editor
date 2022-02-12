@@ -34,6 +34,7 @@ class UploadDialog(wx.Dialog):
         self._css = css
         # Contains unique id and disk path for each file in the file list even those unchecked.
         self._upload_dict: Dict[int, Tuple[str, bool]] = {}
+        self._finished_uploads: List[str] = []
         self._id_counter = 0
         self._invalid_files = 0
         self._sftp_thread = None
@@ -284,6 +285,9 @@ class UploadDialog(wx.Dialog):
                 # Only do this for documents, ignore images...
                 self._articles[filename].set_uploaded(True)
                 self._articles[filename].set_modified(False)
+                # Update the file color.
+                self._articles[filename].test_self(self._config_manager.get_online_test())
+                self._finished_uploads.append(filename)
             # Remove successful uploads from the list of unuploaded files.
             self._config_manager.remove_uploaded(filename)
         index = self._file_list.FindItem(0, os.path.relpath(file, start=self._config_manager.get_working_dir()))
@@ -645,3 +649,10 @@ class UploadDialog(wx.Dialog):
         else:
             self._file_list.SetItemData(index, -1)
             self._file_list.SetItemBackgroundColour(index, Numbers.RED_COLOR)
+
+    def get_uploaded(self) -> List[str]:
+        """
+        Returns a list of file names of documents that were uploaded.
+        :return: A list of file names of documents that were uploaded.
+        """
+        return self._finished_uploads
