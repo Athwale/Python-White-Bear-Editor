@@ -1785,16 +1785,14 @@ class MainFrame(wx.Frame):
         self._update_description_color()
         self._update_file_color()
 
-        # TODO removing something from ignored words and rechecking does not turn things red/green again.
-        # TODO sometimes after ignore always things stay red.
-        # Removing a word from the list does not remove it from the internal set. We have to restart the editor.
-        # TODO try using the enchant exclude list
-
         # TODO test that image fix reloads color on all other items.
         # TODO test file colors.
         # TODO test adding words to lists.
-        # TODO why does spellcheck run so many times?
         # TODO test new file colors when creating a new document.
+
+        # TODO recolor all documents when spellcheck is done, we might have learned new words.
+        # TODO recolor after changes in spellcheck settings
+        # TODO what about online enabled? Is it going to slow things down?
 
     # noinspection PyUnusedLocal
     def _self_test_handler(self, event: wx.CommandEvent) -> None:

@@ -352,3 +352,10 @@ class EditAsideImageDialog(SpellCheckedDialog):
             self._content_image_thumbnail_path.SetLabelText(thumb_path)
         else:
             self._content_image_thumbnail_path.SetLabelText(self._image_copy.get_thumbnail_filename())
+
+    def was_modified(self) -> bool:
+        """
+        Returns True if the image was modified in the dialog in any way.
+        :return: True if the image was modified in the dialog in any way.
+        """
+        return self._original_image.is_modified()

@@ -37,6 +37,8 @@ class AsideImagePanel(wx.lib.scrolledpanel.ScrolledPanel):
         moved.
         :return: None
         """
+        # TODO only send event if something has been modified.
+        set_modified = False
         self._img_index = self._images.index(event.GetClientData())
         # Rearrange the images in the list
         if event.GetId() == wx.ID_UP:
@@ -44,29 +46,31 @@ class AsideImagePanel(wx.lib.scrolledpanel.ScrolledPanel):
                 return
             self._images[self._img_index], self._images[self._img_index - 1] = \
                 self._images[self._img_index - 1], self._images[self._img_index]
-            self._doc.set_modified(True)
+            set_modified = True
         elif event.GetId() == wx.ID_DOWN:
             if self._img_index + 1 == len(self._images):
                 return
             self._images[self._img_index], self._images[self._img_index + 1] = \
                 self._images[self._img_index + 1], self._images[self._img_index]
-            self._doc.set_modified(True)
+            set_modified = True
         # Remove image from list
         elif event.GetId() == wx.ID_DELETE:
             result = wx.MessageBox(Strings.text_remove_image, Strings.status_warning, wx.YES_NO | wx.ICON_WARNING)
             if result == wx.YES:
                 del self._images[self._img_index]
-            self._doc.set_modified(True)
+            set_modified = True
         else:
             # Modify image data
             edit_dialog = EditAsideImageDialog(self, self._images[self._img_index], self._doc.get_working_directory())
-            _ = edit_dialog.ShowModal()
+            edit_dialog.ShowModal()
+            set_modified = edit_dialog.was_modified()
             edit_dialog.Destroy()
         self.show_images()
-        # Pass the event into the main frame to change document color in the file list to blue.
-        # Send a custom event to the main gui to signal document color change.
-        color_evt = Events.SidepanelChangedEvent(self.GetId())
-        wx.PostEvent(self.GetEventHandler(), color_evt)
+        if set_modified:
+            # Pass the event into the main frame to change document color in the file list to blue.
+            # Send a custom event to the main gui to signal document color change.
+            color_evt = Events.SidepanelChangedEvent(self.GetId())
+            wx.PostEvent(self.GetEventHandler(), color_evt)
 
     def load_document_images(self, doc: WhitebearDocumentArticle) -> None:
         """
