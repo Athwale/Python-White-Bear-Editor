@@ -19,6 +19,8 @@ class SpellCheckedObject:
         :param text: Text to check.
         :return: Return False if incorrect.
         """
+        # Reload ignored words, these internal instances would not otherwise know about new words added to the list.
+        self._checker.reload_ignored()
         self._checker.set_text(text)
         try:
             self._checker.next()

@@ -61,8 +61,6 @@ class MainFrame(wx.Frame):
         # Prepare data objects
         try:
             self._config_manager: ConfigManager = ConfigManager.get_instance()
-            # TODO validate yaml
-            self._config_manager.validate_yaml()
         except PermissionError as e:
             self._show_error_dialog(Strings.exception_conf_inaccessible + '\n' + str(e))
 
@@ -1786,8 +1784,13 @@ class MainFrame(wx.Frame):
                                  self._current_document_instance.seo_test_keywords)
         self._update_description_color()
         self._update_file_color()
-        # TODO aluminotermie is red but does not have errors?
 
+        # TODO removing something from ignored words and rechecking does not turn things red/green again.
+        # TODO sometimes after ignore always things stay red.
+        # Removing a word from the list does not remove it from the internal set. We have to restart the editor.
+        # TODO try using the enchant exclude list
+
+        # TODO test that image fix reloads color on all other items.
         # TODO test file colors.
         # TODO test adding words to lists.
         # TODO why does spellcheck run so many times?
@@ -1818,7 +1821,6 @@ class MainFrame(wx.Frame):
                     self._update_seo_colors()
                     dlg.Destroy()
         # Run main text spellcheck.
-        # TODO test that image fix reloads color on all other items.
         dlg = RichTextSpellCheckerDialog(self, self._main_text_area)
         dlg.run()
         if dlg.found_mistake():

@@ -22,6 +22,8 @@
         <list>
           <option value="dict.provider" />
           <option value="bs4.element.PageElement.*" />
+          <option value="dict.is_removed" />
+          <option value="dict.remove" />
         </list>
       </option>
     </inspection_tool>

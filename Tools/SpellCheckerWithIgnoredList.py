@@ -10,19 +10,31 @@ class SpellCheckerWithIgnoreList(SpellChecker):
     Subclass of SpellChecker that maintains a permanent list of ignored words.
     """
 
+    _IGNORED_WORDS = set()
+
     def __init__(self, lang: str):
         """
         Constructor for spellchecker with EmailFilter, URLFilter and ignore list built in.
         :param lang: Spelling language.
         """
         super().__init__(lang, filters=[EmailFilter, URLFilter])
+        return
+
         # Load ignored words.
-        self._ignored_words = set()
         if os.path.exists(Strings.ignored_words_file):
             with open(Strings.ignored_words_file, 'r') as file:
                 for line in file:
-                    self._ignored_words.add(line.strip())
-        for word in self._ignored_words:
+                    SpellCheckerWithIgnoreList._IGNORED_WORDS.add(line.strip())
+        for word in SpellCheckerWithIgnoreList._IGNORED_WORDS:
+            self.ignore_always(word)
+
+    def reload_ignored(self) -> None:
+        """
+        Reload ignored words from the internal class wide variable. This must be run from instances that are kept in
+        memory before checking spelling.
+        :return: None
+        """
+        for word in SpellCheckerWithIgnoreList._IGNORED_WORDS:
             self.ignore_always(word)
 
     def save_ignored_word(self, word: str) -> None:
@@ -32,7 +44,6 @@ class SpellCheckerWithIgnoreList(SpellChecker):
         :return: None
         """
         self.ignore_always(word)
-        self._ignored_words.add(word)
-        with open(Strings.ignored_words_file, 'w') as file:
-            for word in self._ignored_words:
-                file.write(word + '\n')
+        enchant_dict = self.dict
+        if not enchant_dict.is_removed(word):
+            enchant_dict.remove(word)

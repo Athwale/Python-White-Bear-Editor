@@ -137,6 +137,7 @@ class Strings:
     extension_png: str = '.png'
     extension_html: str = '.html'
     extension_dict: str = '.dic'
+    extension_excl: str = '.exc'
     contact_file: str = 'contact.png'
     contact_default_alt: str = 'kontakt'
     home_page: str = 'Hlavní strana'
@@ -147,7 +148,6 @@ class Strings:
     default_file: str = 'untitled'
     home_directory: str = os.path.expanduser('~')
     editor_config_file: str = os.path.join(home_directory, '.config', 'whitebearEditor.yml')
-    ignored_words_file: str = os.path.join(home_directory, '.config', 'wbIgnoredWords.txt')
     editor_output_debug_file: str = os.path.join(home_directory, 'whitebearEditor.log')
     editor_name: str = 'Whitebear editor'
     page_name: str = 'white-bear'

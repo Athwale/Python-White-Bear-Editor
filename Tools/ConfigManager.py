@@ -111,20 +111,6 @@ class ConfigManager:
             # Create a new default valid yaml config file.
             self._init_config()
 
-    def validate_yaml(self) -> bool:
-        """
-        Validate the structure of the loaded yaml config.
-        :return: False if the config is malformed.
-        """
-        # todo this
-        correct = True
-        if len(self._whole_conf.keys()) < 2:
-            correct = False
-        if ConfigManager.CONF_LAST_DIR not in self._whole_conf.keys():
-            correct = False
-
-        return correct
-
     def save_config_file(self) -> None:
         """
         Save the configuration onto disk drive in user's home.

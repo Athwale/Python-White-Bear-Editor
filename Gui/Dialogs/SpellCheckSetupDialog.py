@@ -27,6 +27,11 @@ class SpellCheckSetupDialog(wx.Dialog):
         self._config_manager: ConfigManager = ConfigManager.get_instance()
         self._checker = SpellCheckerWithIgnoreList(self._config_manager.get_spelling_lang())
 
+        self._user_dict = Path(enchant.get_user_config_dir() / Path(self._checker.lang)).with_suffix(
+            Strings.extension_dict)
+        self._user_exclusion_list = Path(enchant.get_user_config_dir() / Path(self._checker.lang)).with_suffix(
+            Strings.extension_excl)
+
         self._main_vertical_sizer = wx.BoxSizer(wx.VERTICAL)
         self._information_sizer = wx.BoxSizer(wx.VERTICAL)
 
@@ -119,13 +124,11 @@ class SpellCheckSetupDialog(wx.Dialog):
             self._config_manager.store_spelling_language(self._language_list.GetValue())
             event.Skip()
         elif event.GetId() == wx.ID_EDIT:
-            dictionary_path = Path(enchant.get_user_config_dir() / Path(self._checker.lang))
-            dlg = PlainTextEditDialog(self, dictionary_path.with_suffix(Strings.extension_dict))
+            dlg = PlainTextEditDialog(self, self._user_dict)
             dlg.ShowModal()
             dlg.Destroy()
         elif event.GetId() == wx.ID_IGNORE:
-            ignored_words_file = Path(Strings.ignored_words_file)
-            dlg = PlainTextEditDialog(self, ignored_words_file)
+            dlg = PlainTextEditDialog(self, self._user_exclusion_list)
             dlg.ShowModal()
             dlg.Destroy()
         elif event.GetId() == wx.ID_CANCEL:
@@ -149,7 +152,7 @@ class SpellCheckSetupDialog(wx.Dialog):
         """
         provider: enchant.ProviderDesc = self._checker.dict.provider
         self._content_provider.SetLabelText(str(provider.name))
-        self._content_path.SetLabelText(str(Path(enchant.get_user_config_dir() / Path(self._checker.lang))))
-        self._content_ignored_path.SetLabelText(Strings.ignored_words_file)
+        self._content_path.SetLabelText(str(self._user_dict))
+        self._content_ignored_path.SetLabelText(str(self._user_exclusion_list))
         selection = self._language_list.FindString(self._config_manager.get_spelling_lang())
         self._language_list.SetSelection(selection)
