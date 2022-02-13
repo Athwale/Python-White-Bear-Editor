@@ -936,7 +936,6 @@ class WhitebearDocumentArticle(WhitebearDocument):
         :return: None
         """
         super(WhitebearDocumentArticle, self).set_modified(modified)
-        self.clear_converted_html()
         if modified:
             self.set_saved(False)
         if not modified:

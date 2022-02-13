@@ -206,7 +206,6 @@ class WhitebearDocument(SpellCheckedObject):
             self.set_status_color(color)
 
         if self.get_status_color() == Numbers.RED_COLOR:
-            self.clear_converted_html()
             return False
         return True
 

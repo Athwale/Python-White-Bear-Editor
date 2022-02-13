@@ -1787,12 +1787,13 @@ class MainFrame(wx.Frame):
 
         # TODO test that image fix reloads color on all other items.
         # TODO test file colors.
-        # TODO test adding words to lists.
         # TODO test new file colors when creating a new document.
 
         # TODO recolor all documents when spellcheck is done, we might have learned new words.
         # TODO recolor after changes in spellcheck settings
         # TODO what about online enabled? Is it going to slow things down?
+
+        # TODO recoloring links is broken - aluminotermie
 
     # noinspection PyUnusedLocal
     def _self_test_handler(self, event: wx.CommandEvent) -> None:
