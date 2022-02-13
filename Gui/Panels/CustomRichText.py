@@ -1233,22 +1233,23 @@ class CustomRichText(rt.RichTextCtrl):
         :return: None
         """
         # Deleted links are not removed from the document to make undo work.
-        if not self.BatchingUndo():
-            self.BeginBatchUndo(Strings.undo_last_action)
         stored_link = self._doc.find_link(link.get_id())
-        if result == wx.ID_OK:
-            # Only add link that is not already in the list
-            if not stored_link:
-                self._doc.add_link(link)
-            # Replace the text with link
-            self.Remove(evt.GetURLStart(), evt.GetURLEnd() + 1)
-            self._insert_link(link.get_text()[0], link.get_id(), link.get_status_color())
-        elif result == wx.ID_DELETE or result == wx.ID_CANCEL:
-            if stored_link and result == wx.ID_CANCEL:
-                if self.BatchingUndo():
-                    self.EndBatchUndo()
-                return
-            else:
+        if stored_link and result == wx.ID_CANCEL:
+            # No change needed.
+            return
+
+        if link.is_modified() or result == wx.ID_DELETE:
+            if not self.BatchingUndo():
+                self.BeginBatchUndo(Strings.undo_last_action)
+            if result == wx.ID_OK:
+                # Only add link that is not already in the list
+                if not stored_link:
+                    self._doc.add_link(link)
+                # Replace the text with link
+                self.Remove(evt.GetURLStart(), evt.GetURLEnd() + 1)
+                self._insert_link(link.get_text()[0], link.get_id(), link.get_status_color())
+            elif result == wx.ID_DELETE:
+                # The DELETE button was pressed:
                 style: rt.RichTextAttr = self._stylesheet.FindCharacterStyle(Strings.style_url).GetStyle()
                 style_range = rt.RichTextRange(evt.GetURLStart(), evt.GetURLEnd() + 1)
                 # If it is a new link remove the link style from the text
@@ -1257,14 +1258,13 @@ class CustomRichText(rt.RichTextCtrl):
                 self.MoveLeft(0)
                 self.Invalidate()
                 self.Refresh()
+                # If the link is modified it is reinserted and the change event is sent by the text area edit event.
+                color_evt = Events.TextChangedEvent(self.GetId())
+                color_evt.SetEventObject(self)
+                wx.PostEvent(self.GetEventHandler(), color_evt)
 
         if self.BatchingUndo():
             self.EndBatchUndo()
-
-        # Send an event to the main gui to signal document color change
-        color_evt = Events.TextChangedEvent(self.GetId())
-        color_evt.SetEventObject(self)
-        wx.PostEvent(self.GetEventHandler(), color_evt)
 
     def _insert_link(self, text: str, link_id: str, color: wx.Colour) -> None:
         """
@@ -1292,6 +1292,7 @@ class CustomRichText(rt.RichTextCtrl):
         Update the color of all links in this document based on their seo status.
         :return: None.
         """
+        # TODO recoloring links is broken after spellcheck - aluminotermie, locksport
         # Changing paragraph style inside the loop changes address in memory and causes segfault. Create a list of
         # ranges to change and change the colors in a separate loop.
         ranges_list: List[Tuple[Tuple[int, int], Link]] = []

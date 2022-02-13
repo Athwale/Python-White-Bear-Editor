@@ -481,7 +481,7 @@ class MainFrame(wx.Frame):
         # --------------------------------------------------------------------------------------------------------------
 
         # File list section --------------------------------------------------------------------------------------------
-        self._style_picker = wx.ListBox(self._left_panel, -1, size=(-1, 102))
+        self._style_picker = wx.ListBox(self._left_panel, -1, size=(-1, 127))
         self._style_sizer.Add(self._style_picker, 1, flag=wx.EXPAND)
         self._file_list = wx.ListCtrl(self._left_panel, -1, style=wx.LC_REPORT | wx.LC_SINGLE_SEL | wx.LC_HRULES)
         self._file_list.SetFont(self.small_font)
@@ -1792,8 +1792,6 @@ class MainFrame(wx.Frame):
         # TODO recolor all documents when spellcheck is done, we might have learned new words.
         # TODO recolor after changes in spellcheck settings
         # TODO what about online enabled? Is it going to slow things down?
-
-        # TODO recoloring links is broken - aluminotermie
 
     # noinspection PyUnusedLocal
     def _self_test_handler(self, event: wx.CommandEvent) -> None:
