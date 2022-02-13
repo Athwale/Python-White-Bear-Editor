@@ -1,6 +1,9 @@
+from pathlib import Path
+from typing import Optional
+
+import enchant
 from enchant.checker import SpellChecker
 from enchant.tokenize import EmailFilter, URLFilter
-import os
 
 from Constants.Constants import Strings
 
@@ -10,40 +13,41 @@ class SpellCheckerWithIgnoreList(SpellChecker):
     Subclass of SpellChecker that maintains a permanent list of ignored words.
     """
 
-    _IGNORED_WORDS = set()
-
     def __init__(self, lang: str):
         """
         Constructor for spellchecker with EmailFilter, URLFilter and ignore list built in.
         :param lang: Spelling language.
         """
         super().__init__(lang, filters=[EmailFilter, URLFilter])
-        return
-
-        # Load ignored words.
-        if os.path.exists(Strings.ignored_words_file):
-            with open(Strings.ignored_words_file, 'r') as file:
-                for line in file:
-                    SpellCheckerWithIgnoreList._IGNORED_WORDS.add(line.strip())
-        for word in SpellCheckerWithIgnoreList._IGNORED_WORDS:
-            self.ignore_always(word)
+        self._user_exclusion_list = Path(enchant.get_user_config_dir() / Path(self.lang)).with_suffix(
+            Strings.extension_excl)
+        self.reload_ignored()
 
     def reload_ignored(self) -> None:
         """
-        Reload ignored words from the internal class wide variable. This must be run from instances that are kept in
-        memory before checking spelling.
+        Reload ignored words from disk. This must be run from instances kept in memory before checking spelling.
+        Otherwise, words removed from ignore list will not be updated in them.
         :return: None
         """
-        for word in SpellCheckerWithIgnoreList._IGNORED_WORDS:
-            self.ignore_always(word)
+        self._ignore_words.clear()
+        if self._user_exclusion_list.exists():
+            with open(self._user_exclusion_list, 'r') as file:
+                for line in file:
+                    self.ignore_always(line.strip())
 
-    def save_ignored_word(self, word: str) -> None:
+    def ignore_always(self, word: Optional[str] = None) -> None:
         """
-        Append another ignored word to the ignored words file and add it to the internal ignore list.
-        :param word: The word to ignore.
+        Overridden internal ignore method that also saves the words to disk.
+        :param word: Word to ignore
         :return: None
         """
-        self.ignore_always(word)
+        if word is None:
+            word = self.word
+        word = self.coerce_string(word)
+        if word not in self._ignore_words:
+            self._ignore_words[word] = True
+
+        # Save to disk into enchant exclusion list.
         enchant_dict = self.dict
         if not enchant_dict.is_removed(word):
             enchant_dict.remove(word)

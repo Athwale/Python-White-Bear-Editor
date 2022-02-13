@@ -148,9 +148,8 @@ class SpellCheckerDialog(wx.Dialog):
         if button_id == wx.ID_REPLACE:
             self._replace()
         elif button_id == wx.ID_IGNORE:
-            # TODO why is the exlusion file not loaded on next start?
-            # Put ignored words into the enchant exclusion file.
-            self._checker.save_ignored_word(self._checker.word)
+            # Put ignored words into to Enchant exclusion file.
+            self._checker.ignore_always(self._checker.word)
             self.go_to_next()
         elif button_id == wx.ID_ADD:
             # Add new word to dictionary.
