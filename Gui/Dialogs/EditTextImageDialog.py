@@ -326,3 +326,10 @@ class EditTextImageDialog(SpellCheckedDialog):
         self.SetSize(Numbers.edit_text_image_dialog_width, height + 140)
 
         self.Enable()
+
+    def was_modified(self) -> bool:
+        """
+        Returns True if the image was modified in the dialog in any way.
+        :return: True if the image was modified in the dialog in any way.
+        """
+        return self._original_image.is_modified()

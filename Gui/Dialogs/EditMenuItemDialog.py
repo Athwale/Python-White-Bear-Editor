@@ -362,3 +362,10 @@ class EditMenuItemDialog(SpellCheckedDialog):
             self._title_lock = True
         if self._field_image_alt.GetValue() != self._field_item_name.GetValue():
             self._alt_lock = True
+
+    def was_modified(self) -> bool:
+        """
+        Returns True if the item was modified in the dialog in any way.
+        :return: True if the item was modified in the dialog in any way.
+        """
+        return self._original_item.is_modified()

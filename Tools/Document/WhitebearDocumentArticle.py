@@ -722,22 +722,6 @@ class WhitebearDocumentArticle(WhitebearDocument):
         """
         return self._enabled
 
-    def is_modified(self) -> bool:
-        """
-        Return True if this file or it's images, links or videos were modified in the editor.
-        :return: True if this file was modified in the editor.
-        """
-        # Check links, videos and images
-        for list_var in (self._aside_images, self._text_images, self._links, self._videos):
-            for content in list_var:
-                if content.is_modified():
-                    self.set_modified(True)
-        if self._article_image.is_modified():
-            self.set_modified(True)
-        if self._menu_item.is_modified():
-            self.set_modified(True)
-        return self._modified
-
     def get_menu_section(self) -> WhitebearDocumentMenu:
         """
         Return to which menu section this article belongs.

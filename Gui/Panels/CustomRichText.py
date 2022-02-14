@@ -103,7 +103,10 @@ class CustomRichText(rt.RichTextCtrl):
         :return: None
         """
         if self._load_indicator:
-            event.Skip()
+            color_evt = Events.SidepanelChangedEvent(self.GetId())
+            # Indicate that document should be set modified.
+            color_evt.SetInt(1)
+            wx.PostEvent(self.GetEventHandler(), color_evt)
 
     def _refresh(self, evt: wx.CommandEvent) -> None:
         """

@@ -1072,6 +1072,8 @@ class MainFrame(wx.Frame):
         main_image: AsideImage = self._current_document_instance.get_article_image()
         edit_dialog = EditAsideImageDialog(self, main_image, self._current_document_instance.get_working_directory())
         edit_dialog.ShowModal()
+        if edit_dialog.was_modified():
+            self._current_document_instance.set_modified(True)
         self._update_seo_colors()
         edit_dialog.Destroy()
 
@@ -1088,6 +1090,8 @@ class MainFrame(wx.Frame):
         edit_dialog.Show()
         edit_dialog.display_dialog_contents()
         edit_dialog.ShowModal()
+        if edit_dialog.was_modified():
+            self._current_document_instance.set_modified(True)
         self._update_seo_colors()
         edit_dialog.Destroy()
 
@@ -1423,7 +1427,7 @@ class MainFrame(wx.Frame):
         doc = self._articles[self._file_list.GetItemText(index)]
         new_color = doc.get_status_color()
         if doc.is_modified and not doc.is_saved():
-            # Only exported documents have this.
+            # TODO this is somehow broken requires resaving even if the document was saved when clicking off it, true even for main image and icon, links, images and videos.
             self._file_list.SetItemFont(index, self.bold_small_font)
         else:
             self._file_list.SetItemFont(index, self.small_font)

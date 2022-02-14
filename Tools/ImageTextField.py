@@ -60,6 +60,10 @@ class ImageTextField(RichTextFieldTypeStandard):
             # Send an event to the main gui to signal document color change
             color_evt = Events.TextChangedEvent(parent.GetId())
             color_evt.SetEventObject(self)
+            if edit_dialog.was_modified():
+                color_evt.SetInt(1)
+            else:
+                color_evt.SetInt(0)
             wx.PostEvent(parent.GetEventHandler(), color_evt)
         edit_dialog.Destroy()
 

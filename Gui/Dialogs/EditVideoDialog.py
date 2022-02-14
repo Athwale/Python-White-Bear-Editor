@@ -164,3 +164,10 @@ class EditVideoDialog(SpellCheckedDialog):
         else:
             self._content_video_size.SetLabelText(Strings.status_error)
         self.Enable()
+
+    def was_modified(self) -> bool:
+        """
+        Returns True if the video was modified in the dialog in any way.
+        :return: True if the video was modified in the dialog in any way.
+        """
+        return self._video.is_modified()
