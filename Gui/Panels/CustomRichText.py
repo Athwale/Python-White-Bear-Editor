@@ -103,10 +103,23 @@ class CustomRichText(rt.RichTextCtrl):
         :return: None
         """
         if self._load_indicator:
-            color_evt = Events.SidepanelChangedEvent(self.GetId())
-            # Indicate that document should be set modified.
+            self._send_color_event(True)
+
+    def _send_color_event(self, modified: bool) -> None:
+        """
+        Send text changed event to the main gui to cause recoloring of the document and tell it whether the document
+        should be set modified. We may not want to make the document modified when we just learned more words in
+        spellcheck but did not change anything. This still needs to recolor the document though.
+        :param modified: True if the document should be set modified.
+        :return: None
+        """
+        color_evt = Events.TextChangedEvent(self.GetId())
+        # Indicate that document should be set modified.
+        if modified:
             color_evt.SetInt(1)
-            wx.PostEvent(self.GetEventHandler(), color_evt)
+        else:
+            color_evt.SetInt(0)
+        wx.PostEvent(self.GetEventHandler(), color_evt)
 
     def _refresh(self, evt: wx.CommandEvent) -> None:
         """
@@ -951,9 +964,7 @@ class CustomRichText(rt.RichTextCtrl):
         else:
             self._change_style(self.GetBuffer(), evt.GetString(), position=-1)
 
-        color_evt = Events.TextChangedEvent(self.GetId())
-        color_evt.SetEventObject(self)
-        wx.PostEvent(self.GetEventHandler(), color_evt)
+        self._send_color_event(True)
         self.EndBatchUndo()
         # Return focus back into the text area. The focus must happen a little later when the style picker is finished.
         wx.CallLater(100, self.SetFocus)
@@ -1261,13 +1272,9 @@ class CustomRichText(rt.RichTextCtrl):
                 self.MoveLeft(0)
                 self.Invalidate()
                 self.Refresh()
-                # If the link is modified it is reinserted and the change event is sent by the text area edit event.
-                color_evt = Events.TextChangedEvent(self.GetId())
-                color_evt.SetEventObject(self)
-                wx.PostEvent(self.GetEventHandler(), color_evt)
+                self._send_color_event(True)
         else:
-            # TODO this will update colors here but not in the whole window?
-            self.update_seo_colors()
+            self._send_color_event(link.is_modified())
 
         if self.BatchingUndo():
             self.EndBatchUndo()
@@ -1366,9 +1373,7 @@ class CustomRichText(rt.RichTextCtrl):
                 self._doc.add_video(new_element)
             self._write_field(new_element, from_button=True)
 
-            color_evt = Events.TextChangedEvent(self.GetId())
-            color_evt.SetEventObject(self)
-            wx.PostEvent(self.GetEventHandler(), color_evt)
+            self._send_color_event(True)
         edit_dialog.Destroy()
         # Return focus to the text area.
         wx.CallLater(100, self.SetFocus)
@@ -1407,9 +1412,7 @@ class CustomRichText(rt.RichTextCtrl):
                 self.SetStyleEx(single_range, attr, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO)
                 self.SelectNone()
             self.EndBatchUndo()
-            color_evt = Events.TextChangedEvent(self.GetId())
-            color_evt.SetEventObject(self)
-            wx.PostEvent(self.GetEventHandler(), color_evt)
+            self._send_color_event(True)
         else:
             # Prevent beginning bold inside urls and headings.
             position = self.GetAdjustedCaretPosition(self.GetCaretPosition())

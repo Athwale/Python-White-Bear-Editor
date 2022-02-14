@@ -205,3 +205,10 @@ class EditLinkDialog(SpellCheckedDialog):
         # Set checkbox local state
         self._checkbox_local.SetValue(self._link.is_local())
         self.Enable()
+
+    def was_modified(self) -> bool:
+        """
+        Returns True if the link was modified in the dialog in any way.
+        :return: True if the link was modified in the dialog in any way.
+        """
+        return self._link.is_modified()

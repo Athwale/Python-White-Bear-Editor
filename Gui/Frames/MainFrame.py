@@ -1404,7 +1404,7 @@ class MainFrame(wx.Frame):
         :return: None
         """
         # TODO only set modified if the event indicates something changed. but text edits should set true always.
-        # TODO use the same event.
+        # TODO changing a link reinserts it making the document modified even if nothing changed.
         # Force repeating search because the text has changed and indexes would no longer match.
         self._text_changed = True
         if not self._ignore_change:
@@ -1427,7 +1427,6 @@ class MainFrame(wx.Frame):
         doc = self._articles[self._file_list.GetItemText(index)]
         new_color = doc.get_status_color()
         if doc.is_modified and not doc.is_saved():
-            # TODO this is somehow broken requires resaving even if the document was saved when clicking off it, true even for main image and icon, links, images and videos.
             self._file_list.SetItemFont(index, self.bold_small_font)
         else:
             self._file_list.SetItemFont(index, self.small_font)
