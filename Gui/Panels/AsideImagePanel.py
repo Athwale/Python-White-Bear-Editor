@@ -37,8 +37,6 @@ class AsideImagePanel(wx.lib.scrolledpanel.ScrolledPanel):
         moved.
         :return: None
         """
-        # TODO only send event if something has been modified.
-        set_modified = False
         self._img_index = self._images.index(event.GetClientData())
         # Rearrange the images in the list
         if event.GetId() == wx.ID_UP:
@@ -66,11 +64,16 @@ class AsideImagePanel(wx.lib.scrolledpanel.ScrolledPanel):
             set_modified = edit_dialog.was_modified()
             edit_dialog.Destroy()
         self.show_images()
+
+        # Pass the event into the main frame to change document color in the file list. Always send the event because
+        # that runs spellcheck on the rest of the frame in case we learned new words, but indicate whether we made
+        # any changes to set the document modified.
+        color_evt = Events.SidepanelChangedEvent(self.GetId())
         if set_modified:
-            # Pass the event into the main frame to change document color in the file list to blue.
-            # Send a custom event to the main gui to signal document color change.
-            color_evt = Events.SidepanelChangedEvent(self.GetId())
-            wx.PostEvent(self.GetEventHandler(), color_evt)
+            color_evt.SetInt(1)
+        else:
+            color_evt.SetInt(0)
+        wx.PostEvent(self.GetEventHandler(), color_evt)
 
     def load_document_images(self, doc: WhitebearDocumentArticle) -> None:
         """

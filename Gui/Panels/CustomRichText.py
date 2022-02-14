@@ -1262,6 +1262,9 @@ class CustomRichText(rt.RichTextCtrl):
                 color_evt = Events.TextChangedEvent(self.GetId())
                 color_evt.SetEventObject(self)
                 wx.PostEvent(self.GetEventHandler(), color_evt)
+        else:
+            # TODO this will update colors here but not in the whole window?
+            self.update_seo_colors()
 
         if self.BatchingUndo():
             self.EndBatchUndo()

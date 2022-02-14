@@ -1399,10 +1399,14 @@ class MainFrame(wx.Frame):
         :param event: Not used.
         :return: None
         """
+        # TODO only set modified if the event indicates something changed. but text edits should set true always.
+        # TODO use the same event.
         # Force repeating search because the text has changed and indexes would no longer match.
         self._text_changed = True
         if not self._ignore_change:
-            self._current_document_instance.set_modified(True)
+            if event.GetInt():
+                # The event will have int 1 set if change has occurred
+                self._current_document_instance.set_modified(True)
             self._update_seo_colors()
 
     def _update_file_color(self, index: int = -1) -> None:
