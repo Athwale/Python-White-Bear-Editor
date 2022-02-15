@@ -1403,8 +1403,6 @@ class MainFrame(wx.Frame):
         :param event: Not used.
         :return: None
         """
-        # TODO only set modified if the event indicates something changed. but text edits should set true always.
-        # TODO changing a link reinserts it making the document modified even if nothing changed.
         # Force repeating search because the text has changed and indexes would no longer match.
         self._text_changed = True
         if not self._ignore_change:
@@ -1779,6 +1777,9 @@ class MainFrame(wx.Frame):
         # Reset status color and calculate it again.
         self._current_document_instance.set_plain_text(self._main_text_area.get_text())
         self._current_document_instance.test_self(self._config_manager.get_online_test())
+        self._current_document_instance.get_index_document().test_self()
+        self._current_document_instance.get_menu_section().test_self()
+
         self._update_article_image_sizer(self._current_document_instance.get_article_image())
         self._side_photo_panel.update_image_backgrounds()
         self._update_menu_sizer(self._current_document_instance.get_menu_item())
@@ -1798,7 +1799,7 @@ class MainFrame(wx.Frame):
 
         # TODO recolor all documents when spellcheck is done, we might have learned new words.
         # TODO recolor after changes in spellcheck settings
-        # TODO what about online enabled? Is it going to slow things down?
+        # TODO what about online enabled? Is it going to slow things down? Run only on load and before upload?
 
     # noinspection PyUnusedLocal
     def _self_test_handler(self, event: wx.CommandEvent) -> None:
@@ -1839,9 +1840,49 @@ class MainFrame(wx.Frame):
         :return: None
         """
         # TODO find out whether anything is red and generate report, This must run after spellchecks
+        # TODO add name, desc...
+        # TODO add check for menu and index.
         error_report = ''
         if self._current_document_instance.get_status_color() == Numbers.RED_COLOR:
-            error_report += Strings.warning_errors_in_document + '\n'
+            error_report += Strings.warning_errors_in_document + ':\n\n'
+            # Keywords, date, description, title
+            for field, name in ((self._field_article_keywords, Strings.label_article_keywords),
+                                (self._field_article_description, Strings.label_article_description),
+                                (self._field_article_date, Strings.label_article_date),
+                                (self._field_article_name, Strings.label_article_title)):
+                if field.GetBackgroundColour() == Numbers.RED_COLOR:
+                    error_report += name + '\n'
+            # Menu item
+            if self._current_document_instance.get_menu_item().get_status_color() == wx.RED:
+                error_report += Strings.warning_menu_item + '\n'
+            # Main image
+            if self._current_document_instance.get_article_image().get_status_color() == wx.RED:
+                error_report += Strings.warning_main_image + '\n'
+            # Aside images
+            for img in self._current_document_instance.get_aside_images():
+                if img.get_status_color() == wx.RED:
+                    error_report += Strings.warning_aside_image + ': ' + img.get_caption()[0] + '\n'
+            # Text images
+            for img in self._current_document_instance.get_text_images():
+                if img.get_status_color() == wx.RED:
+                    error_report += Strings.warning_text_image + ': ' + img.get_link_title()[0] + '\n'
+            # Text videos
+            for vid in self._current_document_instance.get_videos():
+                if vid.get_status_color() == wx.RED:
+                    error_report += Strings.warning_text_video + ': ' + vid.get_title()[0] + '\n'
+            # Text links
+            for link in self._current_document_instance.get_links():
+                if link.get_status_color() == wx.RED:
+                    error_report += Strings.warning_text_link + ': ' + link.get_text()[0] + '\n'
+            # Main text spellcheck
+            if not self._current_document_instance.is_spellcheck_ok():
+                error_report += Strings.warning_text_spelling + '\n'
+            # Menu page
+            if self._current_document_instance.get_menu_section().get_status_color() == Numbers.RED_COLOR:
+                error_report += Strings.warning_menu_page + '\n'
+            # Index page
+            if self._current_document_instance.get_index_document().get_status_color() == Numbers.RED_COLOR:
+                error_report += Strings.warning_index + '\n'
 
         if not error_report:
             wx.MessageBox(Strings.warning_no_mistake, Strings.label_dialog_self_test, wx.OK | wx.ICON_INFORMATION)

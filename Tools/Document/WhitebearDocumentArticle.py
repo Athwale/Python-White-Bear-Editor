@@ -722,6 +722,13 @@ class WhitebearDocumentArticle(WhitebearDocument):
         """
         return self._enabled
 
+    def is_spellcheck_ok(self) -> bool:
+        """
+        Returns True when last spellcheck did not find any errors.
+        :return: True when last spellcheck did not find any errors.
+        """
+        return bool(self._spelling_error_message)
+
     def get_menu_section(self) -> WhitebearDocumentMenu:
         """
         Return to which menu section this article belongs.
@@ -756,6 +763,13 @@ class WhitebearDocumentArticle(WhitebearDocument):
         :return: A list of all images in text which are in current text elements
         """
         return self._text_images
+
+    def get_videos(self) -> List[Video]:
+        """
+        Return a list of all videos in text which are in current text elements.
+        :return: A list of all videos in text which are in current text elements
+        """
+        return self._videos
 
     def get_other_articles(self) -> Dict:
         """

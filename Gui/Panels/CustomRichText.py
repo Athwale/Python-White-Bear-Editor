@@ -3,6 +3,7 @@ from typing import List, Tuple
 import wx
 import wx.richtext as rt
 
+from contextlib import contextmanager
 from Constants.Constants import Strings, Numbers, Events
 from Gui.Dialogs.EditLinkDialog import EditLinkDialog
 from Gui.Dialogs.EditTextImageDialog import EditTextImageDialog
@@ -93,6 +94,20 @@ class CustomRichText(rt.RichTextCtrl):
         self._add_text_handlers()
         self._create_styles()
         self._fill_style_picker()
+
+    @contextmanager
+    def load_indicator_manager(self) -> None:
+        """
+        Automatically manages load indicator that controls whether the document is fully loaded and modifications should
+        make the document modified in the main gui.
+        :return: None
+        """
+        # This happens before executing the managed code inside with.
+        self._load_indicator = False
+        # Here the code inside with is executed.
+        yield
+        # This happens after executing the managed code inside with.
+        self._load_indicator = True
 
     # noinspection PyUnusedLocal
     def _modification_handler(self, event: wx.CommandEvent) -> None:
@@ -1305,7 +1320,6 @@ class CustomRichText(rt.RichTextCtrl):
         Update the color of all links in this document based on their seo status.
         :return: None.
         """
-        # TODO recoloring links is broken after spellcheck - aluminotermie, locksport
         # Changing paragraph style inside the loop changes address in memory and causes segfault. Create a list of
         # ranges to change and change the colors in a separate loop.
         ranges_list: List[Tuple[Tuple[int, int], Link]] = []
@@ -1336,8 +1350,9 @@ class CustomRichText(rt.RichTextCtrl):
             self.GetStyleForRange(link_range, attr)
             if attr.GetBackgroundColour() != link.get_status_color():
                 self.BeginSuppressUndo()
-                self.Remove(link_range[0], link_range[1] + 1)
-                self._insert_link(link.get_text()[0], link.get_id(), link.get_status_color())
+                with self.load_indicator_manager():
+                    self.Remove(link_range[0], link_range[1] + 1)
+                    self._insert_link(link.get_text()[0], link.get_id(), link.get_status_color())
                 # If the refresh is not there, font breaks if you use undo and the spellcheck again.
                 self.MoveLeft(0)
                 self.Invalidate()

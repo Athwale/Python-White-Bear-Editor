@@ -190,6 +190,13 @@ class MenuItem(SpellCheckedObject):
         """
         return self._article
 
+    def get_status_color(self) -> wx.Colour:
+        """
+        Return the status color of this item.
+        :return: Return the status color of this menu item.
+        """
+        return self._status_color
+
     def is_modified(self) -> bool:
         """
         Return true if this instance was modified.
