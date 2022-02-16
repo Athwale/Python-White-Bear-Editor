@@ -1793,7 +1793,6 @@ class MainFrame(wx.Frame):
         self._update_description_color()
         self._update_file_color()
 
-        # TODO test that image fix reloads color on all other items.
         # TODO test file colors.
         # TODO test new file colors when creating a new document.
 
@@ -1839,9 +1838,6 @@ class MainFrame(wx.Frame):
         Show an error list of red items in the document.
         :return: None
         """
-        # TODO find out whether anything is red and generate report, This must run after spellchecks
-        # TODO add name, desc...
-        # TODO add check for menu and index.
         error_report = ''
         if self._current_document_instance.get_status_color() == Numbers.RED_COLOR:
             error_report += Strings.warning_errors_in_document + ':\n\n'

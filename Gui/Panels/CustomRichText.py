@@ -62,6 +62,8 @@ class CustomRichText(rt.RichTextCtrl):
         self._link_lookaside = []
         self._image_lookaside = set()
         self._video_lookaside = set()
+        # Registered fields are used to easily update colors of images and videos on spellcheck dictionary change
+        self._fields = []
 
         # Used for three click select.
         self._timer = wx.Timer(self)
@@ -1037,6 +1039,7 @@ class CustomRichText(rt.RichTextCtrl):
         :return: None
         """
         self._load_indicator = False
+        self._fields.clear()
         # Set default attributes. Copied from wxPython source code.
         self.SetFont(wx.SystemSettings.GetFont(wx.SYS_DEFAULT_GUI_FONT))
         attrs: rt.RichTextAttr = rt.RichTextAttr()
@@ -1171,8 +1174,6 @@ class CustomRichText(rt.RichTextCtrl):
             field_type = Strings.field_image
         properties: rt.RichTextProperties = field.GetProperties()
         properties.SetProperty(Strings.field_type, field_type)
-        # Used to store field ID/name for later updates from spellchecking.
-        properties.SetProperty(Strings.field_name, new_field.GetName())
         self.EndBatchUndo()
 
     def _register_field(self, element) -> ImageTextField:
@@ -1182,6 +1183,7 @@ class CustomRichText(rt.RichTextCtrl):
         :return: None
         """
         field_type = ImageTextField(element, self._doc.get_working_directory())
+        self._fields.append(field_type)
         rt.RichTextBuffer.AddFieldType(field_type)
         return field_type
 
@@ -1336,12 +1338,6 @@ class CustomRichText(rt.RichTextCtrl):
                         stored_link: Link = self._doc.find_link(attrs.GetURL())
                         if stored_link:
                             ranges_list.append((child.GetRange(), stored_link))
-            else:
-                if isinstance(p.GetChild(0), rt.RichTextField):
-                    field: rt.RichTextField = p.GetChild(0)
-                    properties: rt.RichTextProperties = field.GetProperties()
-                    field: ImageTextField = rt.RichTextBuffer.FindFieldType(properties.GetProperty(Strings.field_name))
-                    field.update_image()
 
         for link_range, link in ranges_list:
             # for some reason changing style on a link does not work, starting before the link does, but destroys the
@@ -1358,6 +1354,10 @@ class CustomRichText(rt.RichTextCtrl):
                 self.Invalidate()
                 self.Refresh()
                 self.EndSuppressUndo()
+
+        # Update images and videos
+        for field in self._fields:
+            field.update_image()
 
     def _on_insert_tool(self, evt: wx.CommandEvent) -> None:
         """

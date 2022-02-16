@@ -57,7 +57,7 @@ class Numbers:
     new_file_dialog_height: int = 440
     edit_menu_dialog_width: int = 600
     edit_menu_dialog_height: int = 352
-    about_dialog_width: int = 410
+    about_dialog_width: int = 550
     about_dialog_height: int = 250
     saving_dialog_width: int = 350
     upload_dialog_height: int = 630
@@ -151,7 +151,6 @@ class Strings:
     editor_output_debug_file: str = os.path.join(home_directory, 'whitebearEditor.log')
     editor_name: str = 'Whitebear editor'
     page_name: str = 'white-bear'
-    editor_version: str = '0.1'
     url_stub: str = 'https://www.'
     folder_images: str = 'images'
     folder_logos: str = 'logos'
@@ -172,6 +171,7 @@ class Strings:
     sitemap_xmlns: str = 'http://www.sitemaps.org/schemas/sitemap/0.9'
     change_frequency: str = 'monthly'
 
+    editor_version: str = '0.2'
     text_about_contents: str = '<p>Unfinished whitebear web editor.<br>' \
                                '<i>https://github.com/Athwale/Python-White-Bear-Editor</i><br>' \
                                'version: <b>' + editor_version + '</b></p>'
@@ -514,6 +514,5 @@ class Strings:
     undo_bold: str = 'Undo bold text'
 
     field_type: str = 'type'
-    field_name: str = 'name'
     field_video: str = 'video'
     field_image: str = 'image'
