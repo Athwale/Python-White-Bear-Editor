@@ -727,7 +727,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
         Returns True when last spellcheck did not find any errors.
         :return: True when last spellcheck did not find any errors.
         """
-        return bool(self._spelling_error_message)
+        return not bool(self._spelling_error_message)
 
     def get_menu_section(self) -> WhitebearDocumentMenu:
         """

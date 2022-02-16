@@ -950,6 +950,8 @@ class MainFrame(wx.Frame):
         # Editor will be enabled when the thread finishes.
         if self._enabled:
             self._disable_editor(True)
+        # Runs seo/spellcheck test on everything when saving a document. This hides red documents from menus online.
+        # The spellcheck is run when creating menu items.
         convertor_thread = ConvertorThread(self, doc, save_as, disable)
         self._thread_queue.append(convertor_thread)
         convertor_thread.start()
@@ -1468,7 +1470,7 @@ class MainFrame(wx.Frame):
         :return: None
         """
         # Create a new placeholder text image or video
-        new_image = AsideImage('', '', '', '', '', Strings.status_none, Strings.status_none)
+        new_image = AsideImage('', '', '', '', '', Strings.label_none, Strings.label_none)
         # This will set the image internal state to missing image placeholder.
         new_image.test_self()
         # Open edit dialog.
@@ -1793,7 +1795,7 @@ class MainFrame(wx.Frame):
         self._update_description_color()
         self._update_file_color()
 
-        # TODO test file colors.
+        # TODO saving a new file makes it white when it should be red sometimes, only when all fields are empty
         # TODO test new file colors when creating a new document.
 
         # TODO recolor all documents when spellcheck is done, we might have learned new words.

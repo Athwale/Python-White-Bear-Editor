@@ -108,7 +108,7 @@ class UploadDialog(wx.Dialog):
         self._info_right_sizer = wx.BoxSizer(wx.VERTICAL)
 
         self._label_connection = wx.StaticText(self, -1, Strings.label_connection + ':')
-        self._content_connection = wx.StaticText(self, -1, Strings.status_none)
+        self._content_connection = wx.StaticText(self, -1, Strings.label_none)
         self._info_left_sizer.Add(self._label_connection, flag=wx.BOTTOM | wx.LEFT, border=Numbers.widget_border_size)
         self._info_right_sizer.Add(self._content_connection, flag=wx.BOTTOM, border=Numbers.widget_border_size)
 

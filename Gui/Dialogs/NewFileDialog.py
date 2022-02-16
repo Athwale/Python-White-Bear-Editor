@@ -194,7 +194,7 @@ class NewFileDialog(wx.Dialog):
                                                image_alt='',
                                                href=self._field_name.GetValue() + Strings.extension_html,
                                                disk_path='',
-                                               img_filename=Strings.status_none)
+                                               img_filename=Strings.label_none)
                 menu_item.test_self()
             else:
                 menu_item = self._menu_item
@@ -218,8 +218,8 @@ class NewFileDialog(wx.Dialog):
                                    title='',
                                    image_alt='',
                                    original_image_path='',
-                                   thumbnail_path='', full_filename=Strings.status_none,
-                                   thumbnail_filename=Strings.status_none)
+                                   thumbnail_path='', full_filename=Strings.label_none,
+                                   thumbnail_filename=Strings.label_none)
                 image.test_self()
             else:
                 image = self._article_image

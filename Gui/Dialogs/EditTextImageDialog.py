@@ -310,7 +310,7 @@ class EditTextImageDialog(SpellCheckedDialog):
             self._content_image_original_size.SetLabelText(
                 str(original_size[0]) + ' x ' + str(original_size[1]) + ' px')
         else:
-            self._content_image_original_size.SetLabelText(Strings.status_none)
+            self._content_image_original_size.SetLabelText(Strings.label_none)
 
         thumb_path = self._image_copy.get_thumbnail_image_path()
         if thumb_path:

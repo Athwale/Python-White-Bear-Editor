@@ -337,7 +337,7 @@ class EditAsideImageDialog(SpellCheckedDialog):
             self._content_image_original_size.SetLabelText(
                 str(original_size[0]) + ' x ' + str(original_size[1]) + ' px')
         else:
-            self._content_image_original_size.SetLabelText(Strings.status_none)
+            self._content_image_original_size.SetLabelText(Strings.label_none)
 
         # Set disk paths
         full_path = self._image_copy.get_original_image_path()

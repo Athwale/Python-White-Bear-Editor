@@ -466,7 +466,6 @@ class Strings:
     status_invalid: str = 'Invalid:'
     status_articles: str = 'Articles:'
     status_ok: str = 'Ok'
-    status_none: str = 'None'
     status_found: str = 'Found'
     status_saved: str = 'Saved'
     status_established: str = 'Established'
