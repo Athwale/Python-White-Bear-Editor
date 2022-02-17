@@ -1,4 +1,5 @@
 import os
+import time
 from datetime import datetime
 from shutil import copyfile
 from typing import Dict, List, Callable
@@ -30,6 +31,7 @@ from Threads.SitemapThread import SitemapThread
 from Tools.ConfigManager import ConfigManager
 from Tools.Document.AsideImage import AsideImage
 from Tools.Document.MenuItem import MenuItem
+from Tools.Document.WhitebearDocument import WhitebearDocument
 from Tools.Document.WhitebearDocumentArticle import WhitebearDocumentArticle
 from Tools.Document.WhitebearDocumentCSS import WhitebearDocumentCSS
 from Tools.Document.WhitebearDocumentIndex import WhitebearDocumentIndex
@@ -729,7 +731,6 @@ class MainFrame(wx.Frame):
         :param e: Exception that caused the call of this method.
         :return: None
         """
-        print('a')
         self._loading_screen_on(False)
         self._show_error_dialog(str(e))
         self._disable_editor(state=True, all_menu=False)
@@ -896,16 +897,14 @@ class MainFrame(wx.Frame):
         :return: False if save canceled.
         """
         self._main_text_area.convert_document()
-        # Force save current document.
         if confirm:
             result = wx.MessageBox(Strings.label_menu_item_save_hint, Strings.toolbar_save, wx.YES_NO | wx.ICON_WARNING)
             if result == wx.NO:
                 return False
         # Save article, corresponding menu and index.
-        self._save_sitemap(disable)
-        self._save(self._current_document_instance, save_as, disable)
-        self._save(self._current_document_instance.get_menu_section(), save_as, disable)
-        self._save(self._current_document_instance.get_index_document(), save_as, disable)
+        save_list = [self._current_document_instance, self._current_document_instance.get_menu_section(),
+                     self._current_document_instance.get_index_document()]
+        self._save(save_list, save_as, disable)
         return True
 
     def _save_all(self, disable: bool = False) -> None:
@@ -914,15 +913,10 @@ class MainFrame(wx.Frame):
         :param disable: Leave the editor disabled after threads finish.
         :return: None
         """
-        self._save_sitemap(disable)
-        for doc in self._articles.values():
-            # Save all articles.
-            self._save(doc, False, disable)
-        for menu in self._menus.values():
-            # Save all menus.
-            self._save(menu, False, disable)
-        # Save index.
-        self._save(self._index_document, False, disable)
+        save_list = list(self._articles.values())
+        save_list.extend(list(self._menus.values()))
+        save_list.append(self._index_document)
+        self._save(save_list, False, disable)
 
     def _save_sitemap(self, disable: bool) -> None:
         """
@@ -930,31 +924,43 @@ class MainFrame(wx.Frame):
         :param disable: Leave the editor disabled after threads finish.
         :return: None
         """
+        # TODO check functional
+        # TODO check save as functionality
+        # TODO check that disable still works.
         pages = [Strings.index + Strings.extension_html]
-        articles = list(self._articles.keys())
-        menus = list(self._menus.keys())
-        pages.extend(articles)
-        pages.extend(menus)
+        pages.extend(list(self._articles.keys()))
+        pages.extend(list(self._menus.keys()))
         sitemap_thread = SitemapThread(self, pages, self._config_manager.get_working_dir(), disable)
         self._thread_queue.append(sitemap_thread)
         sitemap_thread.start()
 
-    def _save(self, doc, save_as: bool = False, disable: bool = False) -> None:
+    def _save(self, save_list: List[WhitebearDocument], save_as: bool = False, disable: bool = False) -> None:
         """
         Save current document onto disk.
-        :param doc: The document to save.
+        :param save_list: List of documents to save.
         :param disable: Leave the editor disabled after threads finish.
         :return: None.
         """
-        self._set_status_text(Strings.label_saving + ': ' + doc.get_filename(), 3)
-        # Editor will be enabled when the thread finishes.
+        # TODO on a new document after save the color is sometimes white, some sort of thread timing problem.
+        # TODO menu saving thread might be changing the seo color while this file is being saved.
+        self._save_sitemap(disable)
+        # Separate document types.
+        menus = [doc for doc in save_list if isinstance(doc, WhitebearDocumentMenu)]
+        # Index can go together with articles
+        articles = [doc for doc in save_list if not isinstance(doc, WhitebearDocumentMenu)]
         if self._enabled:
+            # Editor will be enabled when all threads finish.
             self._disable_editor(True)
-        # Runs seo/spellcheck test on everything when saving a document. This hides red documents from menus online.
+        # Runs seo/spellcheck test from menu saving thread on everything. This hides red documents from menus online.
         # The spellcheck is run when creating menu items.
-        convertor_thread = ConvertorThread(self, doc, save_as, disable)
-        self._thread_queue.append(convertor_thread)
-        convertor_thread.start()
+        # TODO run menus first then the rest. Use thread lock in menus to block until all menus are done? probably
+        # todo prevents menus from being saved simultaneously.
+        # TODO use another callback for menus and pass the document list along. This could break saving separate menus, enable the editor from there if document list is empty.
+        for menu in menus:
+            self._set_status_text(Strings.label_saving + ': ' + menu.get_filename(), 3)
+            convertor_thread = ConvertorThread(self, menu, save_as, disable)
+            self._thread_queue.append(convertor_thread)
+            convertor_thread.start()
 
     def on_conversion_done(self, thread: ConvertorThread, doc, save_as: bool, disable: bool) -> None:
         """
@@ -995,10 +1001,14 @@ class MainFrame(wx.Frame):
             doc.set_saved(True)
             doc.set_uploaded(False)
             self._set_status_text(Strings.label_saving + ': ' + file_name, 3)
-        if isinstance(doc, WhitebearDocumentArticle):
-            self._update_file_color(self._file_list.FindItem(-1, doc.get_filename()))
         # Clean thread list off stopped threads.
         self._thread_queue.remove(thread)
+        if isinstance(doc, WhitebearDocumentArticle):
+            # TODO here
+            time.sleep(0.2)
+            print('out ', doc.get_status_color(), '\n')
+            self._update_file_color(self._file_list.FindItem(-1, doc.get_filename()))
+        # TOdo threading.activeCount() ???
         if not self._thread_queue and not disable:
             # Enable only when all threads have finished and enabling is allowed.
             self._disable_editor(False)
@@ -1795,7 +1805,7 @@ class MainFrame(wx.Frame):
         self._update_description_color()
         self._update_file_color()
 
-        # TODO saving a new file makes it white when it should be red sometimes, only when all fields are empty
+        # TODO saving a new file makes it white when it should be red sometimes
         # TODO test new file colors when creating a new document.
 
         # TODO recolor all documents when spellcheck is done, we might have learned new words.

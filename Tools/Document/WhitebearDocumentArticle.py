@@ -182,7 +182,9 @@ class WhitebearDocumentArticle(WhitebearDocument):
 
         if not self._enabled:
             self.set_status_color(Numbers.RED_COLOR)
-
+        # TODO here
+        if self._file_name == 'test.html':
+            print('in ', self.get_status_color())
         if self.get_status_color() == Numbers.RED_COLOR:
             return False
         return True
@@ -379,15 +381,22 @@ class WhitebearDocumentArticle(WhitebearDocument):
         :return: None
         """
         article = self._parsed_html.find(name='article', attrs={'class': 'textPage'})
-        name = str(article.h2.string)
-        self._page_name = name if name else ''
+        name = article.h2.string
+        if name:
+            self._page_name = str(name)
+        else:
+            self._page_name = ''
 
     def _parse_date(self) -> None:
         """
         Parse the date stamp of this document and save it into an instance variable.
         :return: None
         """
-        self._date = str(self._parsed_html.find(name='p', attrs={'id': 'date'}).string)
+        date = self._parsed_html.find(name='p', attrs={'id': 'date'}).string
+        if date:
+            self._date = str(date)
+        else:
+            self._date = ''
 
     def _parse_main_article_image(self) -> None:
         """
