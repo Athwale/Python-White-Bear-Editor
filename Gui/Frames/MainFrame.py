@@ -1,4 +1,5 @@
 import os
+import threading
 import time
 from datetime import datetime
 from shutil import copyfile
@@ -944,21 +945,14 @@ class MainFrame(wx.Frame):
         # TODO on a new document after save the color is sometimes white, some sort of thread timing problem.
         # TODO menu saving thread might be changing the seo color while this file is being saved.
         self._save_sitemap(disable)
-        # Separate document types.
-        menus = [doc for doc in save_list if isinstance(doc, WhitebearDocumentMenu)]
-        # Index can go together with articles
-        articles = [doc for doc in save_list if not isinstance(doc, WhitebearDocumentMenu)]
         if self._enabled:
             # Editor will be enabled when all threads finish.
             self._disable_editor(True)
         # Runs seo/spellcheck test from menu saving thread on everything. This hides red documents from menus online.
         # The spellcheck is run when creating menu items.
-        # TODO run menus first then the rest. Use thread lock in menus to block until all menus are done? probably
-        # todo prevents menus from being saved simultaneously.
-        # TODO use another callback for menus and pass the document list along. This could break saving separate menus, enable the editor from there if document list is empty.
-        for menu in menus:
-            self._set_status_text(Strings.label_saving + ': ' + menu.get_filename(), 3)
-            convertor_thread = ConvertorThread(self, menu, save_as, disable)
+        for doc in save_list:
+            self._set_status_text(Strings.label_saving + ': ' + doc.get_filename(), 3)
+            convertor_thread = ConvertorThread(self, doc, save_as, disable)
             self._thread_queue.append(convertor_thread)
             convertor_thread.start()
 
@@ -1007,9 +1001,11 @@ class MainFrame(wx.Frame):
             # TODO here
             time.sleep(0.2)
             print('out ', doc.get_status_color(), '\n')
+            # TODO Update file color on all once all threads are done. Menu saving thread runs seo on
+            # TODO all documents in that menu. Updating while threads are still running sometimes breaks colors
+            # TODO because of concurrent run.
             self._update_file_color(self._file_list.FindItem(-1, doc.get_filename()))
-        # TOdo threading.activeCount() ???
-        if not self._thread_queue and not disable:
+        if not threading.active_count() == 0 and not disable:
             # Enable only when all threads have finished and enabling is allowed.
             self._disable_editor(False)
             if file_path:
