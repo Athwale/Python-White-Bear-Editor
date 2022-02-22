@@ -1,9 +1,8 @@
 import wx
 
+from Constants.Constants import Strings, Events
 from Gui.Dialogs.SpellCheckerDialog import SpellCheckerDialog
 from Gui.Panels.CustomRichText import CustomRichText
-
-from Constants.Constants import Strings, Events
 
 
 class RichTextSpellCheckerDialog(SpellCheckerDialog):

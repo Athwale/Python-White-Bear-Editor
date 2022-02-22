@@ -185,11 +185,11 @@ class EditDefaultValuesDialog(SpellCheckedObject, SpellCheckedDialog):
         if event.GetId() == wx.ID_OK:
             # Run spellcheck then run seo test, then save if ok.
             self._run_spellcheck(((self._field_global_title, Strings.label_global_title),
-                                 (self._field_author, Strings.label_author),
-                                 (self._field_meta_keywords, Strings.label_default_keywords),
-                                 (self._field_meta_description, Strings.label_main_meta_description),
-                                 (self._field_black_text, Strings.label_main_page_text),
-                                 (self._field_red_text, Strings.label_main_page_warning)))
+                                  (self._field_author, Strings.label_author),
+                                  (self._field_meta_keywords, Strings.label_default_keywords),
+                                  (self._field_meta_description, Strings.label_main_meta_description),
+                                  (self._field_black_text, Strings.label_main_page_text),
+                                  (self._field_red_text, Strings.label_main_page_warning)))
             if self._seo_test():
                 # In these cases all documents must be re-exported to reflect the change.
                 result = self._config_manager.store_global_title(self._field_global_title.GetValue())

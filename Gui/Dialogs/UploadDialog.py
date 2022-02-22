@@ -437,7 +437,7 @@ class UploadDialog(wx.Dialog):
         :return: File path or empty string if canceled.
         """
         with wx.FileDialog(self, Strings.label_select_file, path, style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST |
-                           wx.FD_PREVIEW) as dlg:
+                                                                        wx.FD_PREVIEW) as dlg:
             if dlg.ShowModal() == wx.ID_OK:
                 dlg: wx.FileDialog
                 return dlg.GetPath()

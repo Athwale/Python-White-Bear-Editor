@@ -1,9 +1,9 @@
+from contextlib import contextmanager
 from typing import List, Tuple
 
 import wx
 import wx.richtext as rt
 
-from contextlib import contextmanager
 from Constants.Constants import Strings, Numbers, Events
 from Gui.Dialogs.EditLinkDialog import EditLinkDialog
 from Gui.Dialogs.EditTextImageDialog import EditTextImageDialog
@@ -352,7 +352,7 @@ class CustomRichText(rt.RichTextCtrl):
             buffer.BeginBatchUndo(Strings.undo_last_action)
             end_batch = True
         buffer.SetStyle(p_range, style, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_PARAGRAPHS_ONLY |
-                        rt.RICHTEXT_SETSTYLE_RESET)
+                                              rt.RICHTEXT_SETSTYLE_RESET)
         if end_batch:
             buffer.EndBatchUndo()
 
@@ -412,7 +412,7 @@ class CustomRichText(rt.RichTextCtrl):
             buffer.BeginBatchUndo(Strings.undo_last_action)
             end_batch = True
         buffer.SetStyle(p_range, style, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_PARAGRAPHS_ONLY |
-                        rt.RICHTEXT_SETSTYLE_RESET)
+                                              rt.RICHTEXT_SETSTYLE_RESET)
         if end_batch:
             buffer.EndBatchUndo()
 
@@ -471,9 +471,9 @@ class CustomRichText(rt.RichTextCtrl):
             buffer.BeginBatchUndo(Strings.undo_last_action)
             end_batch = True
         buffer.SetStyle(p_range, style, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_PARAGRAPHS_ONLY |
-                        rt.RICHTEXT_SETSTYLE_RESET)
+                                              rt.RICHTEXT_SETSTYLE_RESET)
         buffer.SetListStyle(p_range, style_def, specifiedLevel=0, flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO |
-                            rt.RICHTEXT_SETSTYLE_SPECIFY_LEVEL)
+                                                                        rt.RICHTEXT_SETSTYLE_SPECIFY_LEVEL)
         if end_batch:
             buffer.EndBatchUndo()
 

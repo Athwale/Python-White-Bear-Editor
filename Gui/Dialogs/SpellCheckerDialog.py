@@ -1,6 +1,6 @@
 import wx
-from Constants.Constants import Strings, Numbers
 
+from Constants.Constants import Strings, Numbers
 from Gui.Dialogs.SpellCheckSetupDialog import SpellCheckSetupDialog
 from Tools.ConfigManager import ConfigManager
 from Tools.SpellCheckerWithIgnoredList import SpellCheckerWithIgnoreList

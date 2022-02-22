@@ -3,12 +3,12 @@ from typing import List
 import wx
 import wx.lib.scrolledpanel
 
+from Constants.Constants import Events
 from Constants.Constants import Strings
 from Gui.Dialogs.EditAsideImageDialog import EditAsideImageDialog
 from Gui.Panels.ImagePanel import ImagePanel
 from Tools.Document.AsideImage import AsideImage
 from Tools.Document.WhitebearDocumentArticle import WhitebearDocumentArticle
-from Constants.Constants import Events
 
 
 class AsideImagePanel(wx.lib.scrolledpanel.ScrolledPanel):

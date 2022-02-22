@@ -3,6 +3,7 @@ import threading
 from datetime import datetime
 from shutil import copyfile
 from typing import Dict, List, Callable
+
 import wx
 import wx.richtext as rt
 from wx.lib.agw.supertooltip import SuperToolTip
@@ -18,10 +19,10 @@ from Gui.Dialogs.EditDefaultValuesDialog import EditDefaultValuesDialog
 from Gui.Dialogs.EditMenuDialog import EditMenuDialog
 from Gui.Dialogs.EditMenuItemDialog import EditMenuItemDialog
 from Gui.Dialogs.NewFileDialog import NewFileDialog
+from Gui.Dialogs.RichTextSpellcheckerDialog import RichTextSpellCheckerDialog
 from Gui.Dialogs.SpellCheckSetupDialog import SpellCheckSetupDialog
 from Gui.Dialogs.SpellCheckerDialog import SpellCheckerDialog
 from Gui.Dialogs.UploadDialog import UploadDialog
-from Gui.Dialogs.RichTextSpellcheckerDialog import RichTextSpellCheckerDialog
 from Gui.Panels.AsideImagePanel import AsideImagePanel
 from Gui.Panels.CustomRichText import CustomRichText
 from Resources.Fetch import Fetch

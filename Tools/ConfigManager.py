@@ -1,10 +1,11 @@
 import os
 from typing import Tuple, Dict, List
 
-import yaml
 import enchant
+import yaml
 from yaml.parser import ParserError
 from yaml.scanner import ScannerError
+
 from Constants.Constants import Numbers
 from Constants.Constants import Strings
 

@@ -2,7 +2,6 @@ import threading
 
 import wx
 
-from Constants.Constants import Numbers
 from Exceptions.UnrecognizedFileException import UnrecognizedFileException
 from Tools.ConfigManager import ConfigManager
 from Tools.Document.WhitebearDocumentArticle import WhitebearDocumentArticle

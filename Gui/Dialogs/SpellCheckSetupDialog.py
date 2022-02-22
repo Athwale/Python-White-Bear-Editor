@@ -1,11 +1,12 @@
+from pathlib import Path
+
 import enchant
 import wx
+from enchant.checker import SpellChecker
+
 from Constants.Constants import Numbers, Strings
 from Gui.Dialogs.PlainTextEditDialog import PlainTextEditDialog
 from Tools.ConfigManager import ConfigManager
-from pathlib import Path
-from enchant.checker import SpellChecker
-
 from Tools.SpellCheckerWithIgnoredList import SpellCheckerWithIgnoreList
 
 

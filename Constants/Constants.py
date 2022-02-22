@@ -1,7 +1,7 @@
 import os.path
 
-from wx import Colour
 import wx.lib.newevent
+from wx import Colour
 
 
 class Events:
