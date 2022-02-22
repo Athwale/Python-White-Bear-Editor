@@ -1590,6 +1590,7 @@ class MainFrame(wx.Frame):
         :param event: Not used.
         :return: None
         """
+        # TODO test disable here on an empty file list
         dlg = NewFileDialog(self, self._menus, self._articles, self._css_document, self._index_document)
         if dlg.ShowModal() == wx.ID_OK:
             new_document = dlg.get_new_document()
@@ -1597,13 +1598,11 @@ class MainFrame(wx.Frame):
             new_document.convert_to_html()
             if self._file_list.GetFirstSelected() == -1:
                 # When no document is selected leave editor disabled after save.
-                self._save(new_document, save_as=False, disable=True)
-                self._save(new_document.get_menu_section(), save_as=False, disable=True)
-                self._save(new_document.get_index_document(), save_as=False, disable=True)
+                save_list = [new_document, new_document.get_menu_section(), new_document.get_index_document()]
+                self._save(save_list, save_as=False, disable=True)
             else:
-                self._save(new_document, save_as=False)
-                self._save(new_document.get_menu_section(), save_as=False)
-                self._save(new_document.get_index_document(), save_as=False)
+                save_list = [new_document, new_document.get_menu_section(), new_document.get_index_document()]
+                self._save(save_list, save_as=False)
             # Add to list
             self._file_list.InsertItem(0, new_document.get_filename())
             self._set_status_text(Strings.status_articles + ' ' + str(len(self._articles)), 2)
@@ -1729,7 +1728,7 @@ class MainFrame(wx.Frame):
                 new_index = WhitebearDocumentIndex(os.path.join(path, 'index.html'), {}, {})
                 new_index.set_page_name(Strings.home_page)
                 # Disable only if editor empty.
-                self._save(new_index, disable=(not bool(self._current_document_instance)))
+                self._save([new_index], disable=(not bool(self._current_document_instance)))
                 wx.MessageBox(Strings.warning_new_dir_created, Strings.status_warning, wx.OK | wx.ICON_WARNING)
             else:
                 wx.MessageBox(Strings.warning_must_be_empty, Strings.status_error, wx.OK | wx.ICON_ERROR)
