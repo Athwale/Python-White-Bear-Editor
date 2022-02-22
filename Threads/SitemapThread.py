@@ -32,4 +32,4 @@ class SitemapThread(threading.Thread):
         :return: None, this method calls the wx.CallAfter to pass results back into GUI.
         """
         sitemap = self._generator.create_sitemap()
-        wx.CallAfter(self._parent.on_sitemap_done, self, sitemap, self._disable)
+        wx.CallAfter(self._parent.on_sitemap_done, sitemap, self._disable)

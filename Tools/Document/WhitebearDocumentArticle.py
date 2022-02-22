@@ -182,9 +182,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
 
         if not self._enabled:
             self.set_status_color(Numbers.RED_COLOR)
-        # TODO here
-        if self._file_name == 'test.html':
-            print('in ', self.get_status_color())
+
         if self.get_status_color() == Numbers.RED_COLOR:
             return False
         return True

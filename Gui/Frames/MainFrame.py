@@ -1,6 +1,5 @@
 import os
 import threading
-import time
 from datetime import datetime
 from shutil import copyfile
 from typing import Dict, List, Callable
@@ -69,7 +68,6 @@ class MainFrame(wx.Frame):
 
         self._tool_ids = []
         self._disableable_menu_items = []
-        self._thread_queue = []
         self._articles = {}
         self._menus = {}
         self._index_document = None
@@ -79,6 +77,7 @@ class MainFrame(wx.Frame):
         self._ignore_change = False
         self._no_save = False
         self._enabled = True
+        self._saved_documents = []
 
         self._search_term = None
         self._search_results: List[int] = []
@@ -932,7 +931,6 @@ class MainFrame(wx.Frame):
         pages.extend(list(self._articles.keys()))
         pages.extend(list(self._menus.keys()))
         sitemap_thread = SitemapThread(self, pages, self._config_manager.get_working_dir(), disable)
-        self._thread_queue.append(sitemap_thread)
         sitemap_thread.start()
 
     def _save(self, save_list: List[WhitebearDocument], save_as: bool = False, disable: bool = False) -> None:
@@ -942,8 +940,6 @@ class MainFrame(wx.Frame):
         :param disable: Leave the editor disabled after threads finish.
         :return: None.
         """
-        # TODO on a new document after save the color is sometimes white, some sort of thread timing problem.
-        # TODO menu saving thread might be changing the seo color while this file is being saved.
         self._save_sitemap(disable)
         if self._enabled:
             # Editor will be enabled when all threads finish.
@@ -953,13 +949,11 @@ class MainFrame(wx.Frame):
         for doc in save_list:
             self._set_status_text(Strings.label_saving + ': ' + doc.get_filename(), 3)
             convertor_thread = ConvertorThread(self, doc, save_as, disable)
-            self._thread_queue.append(convertor_thread)
             convertor_thread.start()
 
-    def on_conversion_done(self, thread: ConvertorThread, doc, save_as: bool, disable: bool) -> None:
+    def on_conversion_done(self, doc, save_as: bool, disable: bool) -> None:
         """
         Called when ConvertorThread finishes converting documents to html.
-        :param thread: The thread that calls this method.
         :param doc: The document that was processed by the thread.
         :param save_as: Open file dialog for the article and menu, otherwise save into the current filename.
         :param disable: Leave the editor disabled after threads finish.
@@ -996,24 +990,24 @@ class MainFrame(wx.Frame):
             doc.set_uploaded(False)
             self._set_status_text(Strings.label_saving + ': ' + file_name, 3)
         # Clean thread list off stopped threads.
-        self._thread_queue.remove(thread)
         if isinstance(doc, WhitebearDocumentArticle):
-            # TODO here
-            time.sleep(0.2)
-            print('out ', doc.get_status_color(), '\n')
-            # TODO Update file color on all once all threads are done. Menu saving thread runs seo on
-            # TODO all documents in that menu. Updating while threads are still running sometimes breaks colors
-            # TODO because of concurrent run.
-            self._update_file_color(self._file_list.FindItem(-1, doc.get_filename()))
-        if not threading.active_count() == 0 and not disable:
+            # This is used after all threads are done to update the color of all saved documents.
+            self._saved_documents.append(doc)
+        # The last thread is the main thread.
+        if threading.active_count() == 1 and not disable:
+            for doc in self._saved_documents:
+                # Update file color on all saved once all threads are done. Menu saving thread runs self test on all
+                # documents in that menu. Updating color while threads are still running sometimes breaks colors
+                # because of concurrent run.
+                self._update_file_color(self._file_list.FindItem(-1, doc.get_filename()))
+            self._saved_documents.clear()
             # Enable only when all threads have finished and enabling is allowed.
             self._disable_editor(False)
             if file_path:
                 self._set_status_text(Strings.status_saved + ': ' + last_save, 3)
 
-    def on_sitemap_done(self, thread: SitemapThread, sitemap: str, disable: bool) -> None:
+    def on_sitemap_done(self, sitemap: str, disable: bool) -> None:
         """
-        :param thread: The thread that called this method.
         :param sitemap: The sitemap xml as string.
         :param disable: Leave the editor disabled after threads finish.
         :return: None
@@ -1036,9 +1030,8 @@ class MainFrame(wx.Frame):
         except IOError:
             self._show_error_dialog(Strings.warning_can_not_save + '\n' + Strings.exception_access_html + '\n' +
                                     sitemap_file)
-        # Clean thread list off stopped threads.
-        self._thread_queue.remove(thread)
-        if not self._thread_queue and not disable:
+        # The last thread is the main thread.
+        if threading.active_count() == 1 and not disable:
             # Enable only when all threads have finished.
             self._disable_editor(False)
 
