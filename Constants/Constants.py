@@ -246,7 +246,7 @@ class Strings:
     warning_can_not_save: str = 'Can not save to disk.'
     warning_empty: str = 'Name can not be empty'
     warning_last_document_not_found: str = 'Last document not found'
-    warning_delete_document: str = 'Delete file'
+    warning_delete_document: str = 'Delete file:'
     warning_can_not_delete: str = 'Unable to delete'
     warning_must_be_empty: str = 'New directory must be empty'
     warning_new_dir_created: str = 'New directory created.\n' \
@@ -468,6 +468,7 @@ class Strings:
     status_ok: str = 'Ok'
     status_found: str = 'Found'
     status_saved: str = 'Saved'
+    status_delete: str = 'Delete'
     status_established: str = 'Established'
     status_failed: str = 'Failed'
     status_connecting: str = 'Connecting...'

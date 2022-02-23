@@ -925,9 +925,6 @@ class MainFrame(wx.Frame):
         :param disable: Leave the editor disabled after threads finish.
         :return: None
         """
-        # TODO check functional
-        # TODO check save as functionality
-        # TODO check that disable still works.
         pages = [Strings.index + Strings.extension_html]
         pages.extend(list(self._articles.keys()))
         pages.extend(list(self._menus.keys()))
@@ -1591,7 +1588,6 @@ class MainFrame(wx.Frame):
         :param event: Not used.
         :return: None
         """
-        # TODO test disable here on an empty file list
         dlg = NewFileDialog(self, self._menus, self._articles, self._css_document, self._index_document)
         if dlg.ShowModal() == wx.ID_OK:
             new_document = dlg.get_new_document()
@@ -1671,7 +1667,7 @@ class MainFrame(wx.Frame):
         :return: None
         """
         result = wx.MessageBox(Strings.warning_delete_document + '\n' + self._current_document_name + '?',
-                               Strings.toolbar_save, wx.YES_NO | wx.ICON_WARNING)
+                               Strings.status_delete, wx.YES_NO | wx.ICON_WARNING)
         if result == wx.YES:
             path = self._current_document_instance.get_path()
             if os.path.exists(path) and os.access(path, os.R_OK) and os.access(path, os.W_OK):
@@ -1680,6 +1676,7 @@ class MainFrame(wx.Frame):
                 self._config_manager.remove_uploaded(self._current_document_name)
                 self._articles.pop(self._current_document_name)
                 self._file_list.DeleteItem(self._file_list.FindItem(-1, self._current_document_instance.get_filename()))
+                # TODO editor is not disabled
                 self._save_all(disable=True)
                 if self._file_list.GetItemCount() == 0:
                     self._current_document_instance = None
@@ -1794,11 +1791,9 @@ class MainFrame(wx.Frame):
         self._update_description_color()
         self._update_file_color()
 
-        # TODO saving a new file makes it white when it should be red sometimes
-        # TODO test new file colors when creating a new document.
-
         # TODO recolor all documents when spellcheck is done, we might have learned new words.
         # TODO recolor after changes in spellcheck settings
+
         # TODO what about online enabled? Is it going to slow things down? Run only on load and before upload?
 
     # noinspection PyUnusedLocal
