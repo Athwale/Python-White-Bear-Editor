@@ -2,7 +2,7 @@ from typing import Tuple
 
 import wx
 
-from Constants.Constants import Strings
+from Constants.Constants import Strings, Events
 from Gui.Dialogs.SpellCheckerDialog import SpellCheckerDialog
 
 
@@ -18,15 +18,15 @@ class SpellCheckedDialog(wx.Dialog):
         :param style: Style parameters
         """
         wx.Dialog.__init__(self, parent, title=title, size=size, style=style)
+        self._word_lists_changed = False
 
-    def _run_spellcheck(self, fields: Tuple[Tuple[wx.TextCtrl, str], ...]) -> bool:
+    def _run_spellcheck(self, fields: Tuple[Tuple[wx.TextCtrl, str], ...]) -> None:
         """
         Checks spelling on all fields passed into it. Opens a spellcheck dialog if mistakes are found and replaces
         the text in the field.
         :param fields: Tuple of wx.TextCtrl and their names.
-        :return: True if mistakes were found.
+        :return: None
         """
-        again = False
         for field, name in fields:
             dlg = SpellCheckerDialog(self, Strings.label_dialog_spellcheck + ': ' + name, field.GetValue())
             dlg.run()
@@ -34,6 +34,10 @@ class SpellCheckedDialog(wx.Dialog):
                 if dlg.ShowModal() == wx.ID_OK:
                     # Replace text in field and recheck seo again as a result of it.
                     field.SetValue(dlg.get_fixed_text())
+                    self._word_lists_changed = dlg.word_lists_changed()
                     dlg.Destroy()
-                again = True
-        return again
+        if self._word_lists_changed:
+            # Send an event to the main gui to signal that all documents should be retested and recolored.
+            recolor_evt = Events.RecolorAllEvent(self.GetId())
+            # Dialog has its own event handler, so use the parent.
+            wx.PostEvent(self.GetParent().GetEventHandler(), recolor_evt)

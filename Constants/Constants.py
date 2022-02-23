@@ -8,6 +8,7 @@ class Events:
     TextChangedEvent, EVT_DOCUMENT_TEXT_CHANGED = wx.lib.newevent.NewCommandEvent()
     SidepanelChangedEvent, EVT_DOCUMENT_IMAGES_CHANGED = wx.lib.newevent.NewCommandEvent()
     SpellcheckEvent, EVT_SPELLCHECK_DONE = wx.lib.newevent.NewCommandEvent()
+    RecolorAllEvent, EVT_RECOLOR_ALL = wx.lib.newevent.NewCommandEvent()
 
 
 class Numbers:

@@ -29,6 +29,7 @@ class SpellCheckerDialog(wx.Dialog):
         self._context_chars = Numbers.context_chars
         self._buttons = []
         self._found_mistake = False
+        self._word_lists_changed = False
 
         self.mistake_preview_field = wx.TextCtrl(self, -1, size=wx.Size(-1, 71),
                                                  style=wx.TE_MULTILINE | wx.TE_READONLY | wx.TE_RICH)
@@ -150,10 +151,12 @@ class SpellCheckerDialog(wx.Dialog):
         elif button_id == wx.ID_IGNORE:
             # Put ignored words into to Enchant exclusion file.
             self._checker.ignore_always(self._checker.word)
+            self._word_lists_changed = True
             self.go_to_next()
         elif button_id == wx.ID_ADD:
             # Add new word to dictionary.
             self._checker.add()
+            self._word_lists_changed = True
             self.go_to_next()
         elif button_id == wx.ID_SETUP:
             dlg = SpellCheckSetupDialog(self)
@@ -212,6 +215,13 @@ class SpellCheckerDialog(wx.Dialog):
         :return: True if the first run of the checker found a mistake in the text.
         """
         return self._found_mistake
+
+    def word_lists_changed(self) -> bool:
+        """
+        Return True if the dictionary or ignore list were changed in this dialog.
+        :return: True if the dictionary or ignore list were changed in this dialog.
+        """
+        return self._word_lists_changed
 
     def run(self) -> None:
         """

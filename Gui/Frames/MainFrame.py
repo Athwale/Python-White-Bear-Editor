@@ -576,6 +576,8 @@ class MainFrame(wx.Frame):
         self.Bind(Events.EVT_DOCUMENT_IMAGES_CHANGED, self._text_area_edit_handler)
         # Bind a handler to the spell check event to allow enabling editor without spellcheck being a modal dialog.
         self.Bind(Events.EVT_SPELLCHECK_DONE, self._spellcheck_done_handler)
+        # Special event that signals that dictionary or ignore list changed and all spellchecks should rerun.
+        self.Bind(Events.EVT_RECOLOR_ALL, self._recolor_handler)
 
         # Bind menu item clicks
         self.Bind(wx.EVT_MENU, self._about_button_handler, self._help_menu_item_about)
@@ -1762,13 +1764,35 @@ class MainFrame(wx.Frame):
         :param event: Not used.
         :return: None
         """
+        # TODO recolor if lists changed
         dlg = SpellCheckSetupDialog(self)
         dlg.ShowModal()
         dlg.Destroy()
 
+    # noinspection PyUnusedLocal
+    def _recolor_handler(self, event: wx.CommandEvent) -> None:
+        """
+        Run self test on all documents and update their color in the file list.
+        :param event: Not used.
+        :return: None
+        """
+        print('a')
+        # TODO Thread it
+        # TODO after any spellcheck is done if new words were added to dictionary or ignore list.
+        # TODO test all: setup, images, logo, links, videos, im text images, main spellcheck.
+        # TODO test all aspects for example recolor if the new learned word is in the image.
+        self._disable_editor(True, all_menu=True)
+        # TODO include menus and index and test that they become ok.
+        for article in self._articles.values():
+            article: WhitebearDocumentArticle
+            article.test_self(self._config_manager.get_online_test())
+            for i in range(0, self._file_list.GetItemCount()):
+                self._update_file_color(i)
+        self._disable_editor(False)
+
     def _update_seo_colors(self) -> None:
         """
-        Update the background color of all items in the loaded document.
+        Run self test on currently shown document and update the background color of all items in the loaded document.
         :return: None
         """
         # Replace the plain text version of the page in the document first from the edited but not yet saved text field.
