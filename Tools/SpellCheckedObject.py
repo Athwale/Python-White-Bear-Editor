@@ -20,7 +20,7 @@ class SpellCheckedObject:
         :return: Return False if incorrect.
         """
         # Reload ignored words, these internal instances would not otherwise know about new words added to the list.
-        self._checker.reload_ignored()
+        self._checker.reload_language()
         self._checker.set_text(text)
         try:
             self._checker.next()

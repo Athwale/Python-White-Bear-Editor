@@ -6,6 +6,7 @@ from enchant.checker import SpellChecker
 from enchant.tokenize import EmailFilter, URLFilter
 
 from Constants.Constants import Strings
+from Tools.ConfigManager import ConfigManager
 
 
 class SpellCheckerWithIgnoreList(SpellChecker):
@@ -19,19 +20,22 @@ class SpellCheckerWithIgnoreList(SpellChecker):
         :param lang: Spelling language.
         """
         super().__init__(lang, filters=[EmailFilter, URLFilter])
-        self._user_exclusion_list = Path(enchant.get_user_config_dir() / Path(self.lang)).with_suffix(
-            Strings.extension_excl)
-        self.reload_ignored()
+        self._config_manager: ConfigManager = ConfigManager.get_instance()
+        self.reload_language()
 
-    def reload_ignored(self) -> None:
+    def reload_language(self) -> None:
         """
         Reload ignored words from disk. This must be run from instances kept in memory before checking spelling.
         Otherwise, words removed from ignore list will not be updated in them.
         :return: None
         """
+        self.lang = self._config_manager.get_spelling_lang()
+        self.dict = enchant.Dict(self.lang)
+        user_exclusion_list = Path(enchant.get_user_config_dir() / Path(self.lang)).with_suffix(
+            Strings.extension_excl)
         self._ignore_words.clear()
-        if self._user_exclusion_list.exists():
-            with open(self._user_exclusion_list, 'r') as file:
+        if user_exclusion_list.exists():
+            with open(user_exclusion_list, 'r') as file:
                 for line in file:
                     self.ignore_always(line.strip())
 
