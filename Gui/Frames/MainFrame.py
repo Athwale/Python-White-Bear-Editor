@@ -29,6 +29,7 @@ from Resources.Fetch import Fetch
 from Threads.ConvertorThread import ConvertorThread
 from Threads.FileListThread import FileListThread
 from Threads.SitemapThread import SitemapThread
+from Threads.WorkerThread import WorkerThread
 from Tools.ConfigManager import ConfigManager
 from Tools.Document.AsideImage import AsideImage
 from Tools.Document.MenuItem import MenuItem
@@ -1764,7 +1765,8 @@ class MainFrame(wx.Frame):
         :param event: Not used.
         :return: None
         """
-        # TODO recolor if lists changed
+        # TODO recolor if lists changed or language changed.
+        # TODO rerun complete spellcheck on current document.
         dlg = SpellCheckSetupDialog(self)
         dlg.ShowModal()
         dlg.Destroy()
@@ -1776,18 +1778,38 @@ class MainFrame(wx.Frame):
         :param event: Not used.
         :return: None
         """
-        print('a')
-        # TODO Thread it
+        def retest_all(documents: List) -> None:
+            """
+            Special function that runs self test on all documents inside a thread while the editor is disabled.
+            :param documents: Documents to test.
+            :return: None
+            """
+            for doc in documents:
+                doc.test_self()
+
         # TODO after any spellcheck is done if new words were added to dictionary or ignore list.
         # TODO test all: setup, images, logo, links, videos, im text images, main spellcheck.
         # TODO test all aspects for example recolor if the new learned word is in the image.
-        self._disable_editor(True, all_menu=True)
         # TODO include menus and index and test that they become ok.
-        for article in self._articles.values():
-            article: WhitebearDocumentArticle
-            article.test_self(self._config_manager.get_online_test())
-            for i in range(0, self._file_list.GetItemCount()):
-                self._update_file_color(i)
+
+        self._disable_editor(True, all_menu=True)
+        document_list = list(self._articles.values())
+        document_list.extend(list(self._menus.values()))
+        document_list.append(self._index_document)
+        thread = WorkerThread(self, function=retest_all, args=(document_list,),
+                              callback=self.on_recolor_done, passing_arg=None)
+        thread.start()
+
+    # noinspection PyUnusedLocal
+    def on_recolor_done(self, result, return_value) -> None:
+        """
+        Receive the result of the link's SEO test. This is used when closing the dialog.
+        :param result: None, not used
+        :param return_value: None, not used.
+        :return: None
+        """
+        for i in range(0, self._file_list.GetItemCount()):
+            self._update_file_color(i)
         self._disable_editor(False)
 
     def _update_seo_colors(self) -> None:

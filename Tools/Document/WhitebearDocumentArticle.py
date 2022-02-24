@@ -117,7 +117,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
             color = Numbers.RED_COLOR
         return result, date_error_message, color
 
-    def test_self(self, online: bool) -> bool:
+    def test_self(self, online=False) -> bool:
         """
         Perform a SEO test on this document and set new status color.
         # white - ok, saved, uploaded
