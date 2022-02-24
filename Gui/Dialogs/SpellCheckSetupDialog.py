@@ -27,6 +27,8 @@ class SpellCheckSetupDialog(wx.Dialog):
                            style=wx.DEFAULT_DIALOG_STYLE)
         self._config_manager: ConfigManager = ConfigManager.get_instance()
         self._checker = SpellCheckerWithIgnoreList(self._config_manager.get_spelling_lang())
+        # If the user changes anything in the lists or the language we return True to the main frame.
+        self._rerun_spellchecks = False
 
         self._user_dict = Path(enchant.get_user_config_dir() / Path(self._checker.lang)).with_suffix(
             Strings.extension_dict)
@@ -121,16 +123,19 @@ class SpellCheckSetupDialog(wx.Dialog):
         :param event: The button event
         :return: None
         """
+        # TODO detect change and pass it to main thread to rerun spellcheck if anything changed.
         if event.GetId() == wx.ID_OK:
             self._config_manager.store_spelling_language(self._language_list.GetValue())
             event.Skip()
         elif event.GetId() == wx.ID_EDIT:
             dlg = PlainTextEditDialog(self, self._user_dict)
             dlg.ShowModal()
+            self._rerun_spellchecks = True
             dlg.Destroy()
         elif event.GetId() == wx.ID_IGNORE:
             dlg = PlainTextEditDialog(self, self._user_exclusion_list)
             dlg.ShowModal()
+            self._rerun_spellchecks = True
             dlg.Destroy()
         elif event.GetId() == wx.ID_CANCEL:
             event.Skip()
@@ -144,6 +149,7 @@ class SpellCheckSetupDialog(wx.Dialog):
         """
         self._config_manager.store_spelling_language(self._language_list.GetValue())
         self._checker = SpellChecker(self._config_manager.get_spelling_lang())
+        self._rerun_spellchecks = True
         self._display_dialog_contents()
 
     def _display_dialog_contents(self) -> None:
@@ -157,3 +163,10 @@ class SpellCheckSetupDialog(wx.Dialog):
         self._content_ignored_path.SetLabelText(str(self._user_exclusion_list))
         selection = self._language_list.FindString(self._config_manager.get_spelling_lang())
         self._language_list.SetSelection(selection)
+
+    def rerun_spellchecks(self) -> bool:
+        """
+        Returns True if the user touched the language selector or words lists.
+        :return: True if the user touched the language selector or words lists.
+        """
+        return self._rerun_spellchecks

@@ -1769,13 +1769,14 @@ class MainFrame(wx.Frame):
         # TODO rerun complete spellcheck on current document.
         dlg = SpellCheckSetupDialog(self)
         dlg.ShowModal()
+        if dlg.rerun_spellchecks():
+            self._recolor_all_documents()
+            self._update_seo_colors()
         dlg.Destroy()
 
-    # noinspection PyUnusedLocal
-    def _recolor_handler(self, event: wx.CommandEvent) -> None:
+    def _recolor_all_documents(self) -> None:
         """
-        Run self test on all documents and update their color in the file list.
-        :param event: Not used.
+        Run self test on all documents and update their color in the file list. Including menus and index.
         :return: None
         """
         def retest_all(documents: List) -> None:
@@ -1788,9 +1789,10 @@ class MainFrame(wx.Frame):
                 doc.test_self()
 
         # TODO after any spellcheck is done if new words were added to dictionary or ignore list.
-        # TODO test all: setup, images, logo, links, videos, im text images, main spellcheck.
+        # TODO test all: setup, images, logo, links-done, videos, im text images, main spellcheck.
         # TODO test all aspects for example recolor if the new learned word is in the image.
         # TODO include menus and index and test that they become ok.
+        # TODO language change is not reflected in new retest.
 
         self._disable_editor(True, all_menu=True)
         document_list = list(self._articles.values())
@@ -1799,6 +1801,16 @@ class MainFrame(wx.Frame):
         thread = WorkerThread(self, function=retest_all, args=(document_list,),
                               callback=self.on_recolor_done, passing_arg=None)
         thread.start()
+
+    # noinspection PyUnusedLocal
+    def _recolor_handler(self, event: wx.CommandEvent) -> None:
+        """
+        Handles callbacks from edit dialogs that require all documents to be retested because spellchecker learned new
+        words.
+        :param event: Not used.
+        :return: None
+        """
+        self._recolor_all_documents()
 
     # noinspection PyUnusedLocal
     def on_recolor_done(self, result, return_value) -> None:
