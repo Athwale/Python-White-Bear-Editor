@@ -123,7 +123,6 @@ class SpellCheckSetupDialog(wx.Dialog):
         :param event: The button event
         :return: None
         """
-        # TODO detect change and pass it to main thread to rerun spellcheck if anything changed.
         if event.GetId() == wx.ID_OK:
             self._config_manager.store_spelling_language(self._language_list.GetValue())
             event.Skip()
@@ -149,6 +148,10 @@ class SpellCheckSetupDialog(wx.Dialog):
         """
         self._config_manager.store_spelling_language(self._language_list.GetValue())
         self._checker = SpellChecker(self._config_manager.get_spelling_lang())
+        self._user_dict = Path(enchant.get_user_config_dir() / Path(self._checker.lang)).with_suffix(
+            Strings.extension_dict)
+        self._user_exclusion_list = Path(enchant.get_user_config_dir() / Path(self._checker.lang)).with_suffix(
+            Strings.extension_excl)
         self._rerun_spellchecks = True
         self._display_dialog_contents()
 
