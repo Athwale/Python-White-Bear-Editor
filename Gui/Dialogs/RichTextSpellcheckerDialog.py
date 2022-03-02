@@ -55,6 +55,11 @@ class RichTextSpellCheckerDialog(SpellCheckerDialog):
         """
         # Send an event to the main gui to signal dialog closing.
         done_evt = Events.SpellcheckEvent(self.GetId())
+        if self.word_lists_changed():
+            # Signal whether to recolor all other documents.
+            done_evt.SetInt(1)
+        else:
+            done_evt.SetInt(0)
         # Dialog has its own event handler, so use the parent.
         wx.PostEvent(self.GetParent().GetEventHandler(), done_evt)
         self.Destroy()

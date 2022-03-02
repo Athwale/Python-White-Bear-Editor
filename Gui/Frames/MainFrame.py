@@ -1669,6 +1669,8 @@ class MainFrame(wx.Frame):
         :param event: Not used.
         :return: None
         """
+        # TODO editor is not disabled
+
         result = wx.MessageBox(Strings.warning_delete_document + '\n' + self._current_document_name + '?',
                                Strings.status_delete, wx.YES_NO | wx.ICON_WARNING)
         if result == wx.YES:
@@ -1679,7 +1681,6 @@ class MainFrame(wx.Frame):
                 self._config_manager.remove_uploaded(self._current_document_name)
                 self._articles.pop(self._current_document_name)
                 self._file_list.DeleteItem(self._file_list.FindItem(-1, self._current_document_instance.get_filename()))
-                # TODO editor is not disabled
                 self._save_all(disable=True)
                 if self._file_list.GetItemCount() == 0:
                     self._current_document_instance = None
@@ -1786,12 +1787,8 @@ class MainFrame(wx.Frame):
             for doc in documents:
                 doc.test_self()
 
-        # TODO after any spellcheck is done if new words were added to dictionary or ignore list.
-        # TODO test all: setup-done, images, logo, links-done, videos, im text images, main spellcheck.
-        # TODO test ok on green dialogs
-        # TODO test that setup dialog turns green after retest
-        # TODO test all aspects for example recolor if the new learned word is in the image.
-        # TODO include menus and index and test that they become ok.
+        # TODO what about online enabled? Is it going to slow things down? Run only on load and before upload?
+        # TODO test that menus become ok when a new word is learned.
 
         self._disable_editor(True, all_menu=True)
         document_list = list(self._articles.values())
@@ -1847,11 +1844,6 @@ class MainFrame(wx.Frame):
                                  self._current_document_instance.seo_test_keywords)
         self._update_description_color()
         self._update_file_color()
-
-        # TODO recolor all documents when spellcheck is done, we might have learned new words.
-        # TODO recolor after changes in spellcheck settings
-
-        # TODO what about online enabled? Is it going to slow things down? Run only on load and before upload?
 
     # noinspection PyUnusedLocal
     def _self_test_handler(self, event: wx.CommandEvent) -> None:
@@ -1938,14 +1930,16 @@ class MainFrame(wx.Frame):
         else:
             wx.MessageBox(error_report, Strings.label_dialog_self_test, wx.OK | wx.ICON_INFORMATION)
 
-    # noinspection PyUnusedLocal
     def _spellcheck_done_handler(self, event: wx.CommandEvent) -> None:
         """
         Handle enabling the editor when spell checking dialog is closed.
-        :param event: Not used.
+        :param event: Used to recolor all documents if the word lists changed in the dialog.
         :return: None
         """
-        self._disable_editor(False)
         self._main_text_area.SelectNone()
+        if event.GetInt() == 1:
+            self._recolor_all_documents()
+        else:
+            self._disable_editor(False)
         self._update_seo_colors()
         self._show_test_report()
