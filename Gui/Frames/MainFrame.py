@@ -1658,7 +1658,7 @@ class MainFrame(wx.Frame):
                 self._save_all()
             else:
                 # Index might have changed so re-export it.
-                self._save(self._index_document)
+                self._save([self._index_document])
         self._update_seo_colors()
         dlg.Destroy()
 
@@ -1765,8 +1765,6 @@ class MainFrame(wx.Frame):
         :param event: Not used.
         :return: None
         """
-        # TODO recolor if lists changed or language changed.
-        # TODO rerun complete spellcheck on current document.
         dlg = SpellCheckSetupDialog(self)
         dlg.ShowModal()
         if dlg.rerun_spellchecks():
@@ -1789,10 +1787,11 @@ class MainFrame(wx.Frame):
                 doc.test_self()
 
         # TODO after any spellcheck is done if new words were added to dictionary or ignore list.
-        # TODO test all: setup, images, logo, links-done, videos, im text images, main spellcheck.
+        # TODO test all: setup-done, images, logo, links-done, videos, im text images, main spellcheck.
+        # TODO test ok on green dialogs
+        # TODO test that setup dialog turns green after retest
         # TODO test all aspects for example recolor if the new learned word is in the image.
         # TODO include menus and index and test that they become ok.
-        # TODO language change is not reflected in new retest.
 
         self._disable_editor(True, all_menu=True)
         document_list = list(self._articles.values())

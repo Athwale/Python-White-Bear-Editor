@@ -4,11 +4,11 @@ from Constants.Constants import Strings, Numbers
 from Gui.Dialogs.SpellCheckedDialog import SpellCheckedDialog
 from Tools.ConfigManager import ConfigManager
 from Tools.Document.WhitebearDocument import WhitebearDocument
-from Tools.SpellCheckedObject import SpellCheckedObject
+from Tools.SpellCheckerWithIgnoredList import SpellCheckerWithIgnoreList
 from Tools.Tools import Tools
 
 
-class EditDefaultValuesDialog(SpellCheckedObject, SpellCheckedDialog):
+class EditDefaultValuesDialog(SpellCheckedDialog):
 
     def __init__(self, parent, no_cancel: bool = False):
         """
@@ -17,13 +17,12 @@ class EditDefaultValuesDialog(SpellCheckedObject, SpellCheckedDialog):
         :param parent: The parent frame.
         :param no_cancel: Do not display cancel button. Used to force page setup completion.
         """
-        super().__init__()
-        super(SpellCheckedDialog, self).__init__(parent, title=Strings.label_dialog_page_setup,
-                                                 size=(Numbers.page_setup_dialog_width,
-                                                       Numbers.page_setup_dialog_height),
-                                                 style=wx.CAPTION)
+        super().__init__(parent, title=Strings.label_dialog_page_setup, size=(Numbers.page_setup_dialog_width,
+                         Numbers.page_setup_dialog_height), style=wx.CAPTION)
 
         self._config_manager: ConfigManager = ConfigManager.get_instance()
+        # Multiple inheritance with spellchecked object was causing trouble, so we have our own method.
+        self._checker = SpellCheckerWithIgnoreList(self._config_manager.get_spelling_lang())
         # This is used just for seo testing keywords and description.
         self._test_doc: WhitebearDocument = WhitebearDocument('')
         self._save_all = False
@@ -290,6 +289,22 @@ class EditDefaultValuesDialog(SpellCheckedObject, SpellCheckedDialog):
                 tip.SetMessage(msg + '\n\n' + Strings.seo_check + '\n' + Strings.status_ok)
 
         return result
+
+    def _spell_check(self, text: str) -> bool:
+        """
+        Do a spellcheck on the text.
+        :param text: Text to check.
+        :return: Return False if incorrect.
+        """
+        # Reload ignored words, these internal instances would not otherwise know about new words added to the list.
+        self._checker.reload_language()
+        self._checker.set_text(text)
+        try:
+            self._checker.next()
+            return False
+        except StopIteration:
+            # Next raises exception if no mistake is found.
+            return True
 
     def save_all(self) -> bool:
         """
