@@ -32,4 +32,5 @@ class WorkerThread(threading.Thread):
         :return: None, this method calls the wx.CallAfter to pass the result back into GUI.
         """
         result = self._function(*self._args)
-        wx.CallAfter(self._callback, result, self._passing_arg)
+        if self._callback:
+            wx.CallAfter(self._callback, result, self._passing_arg)
