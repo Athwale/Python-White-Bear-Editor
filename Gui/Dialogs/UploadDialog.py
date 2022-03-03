@@ -485,7 +485,7 @@ class UploadDialog(wx.Dialog):
         """
         self.Disable()
         for filename, document in self._articles.items():
-            if document.get_html_to_save() and document.is_saved() and document.is_modified() and document.is_valid():
+            if document.get_html_to_save() and document.is_saved() and not document.is_uploaded():
                 # Add all that belongs to this document into the list.
                 if document.is_seo_ok():
                     self._add_if_not_in(document.get_path(), enabled=True)
