@@ -127,7 +127,6 @@ class WhitebearDocumentArticle(WhitebearDocument):
         :param online: Do online test of urls.
         :return: True if seo test passed.
         """
-        # TODO export all and then upload forgets dymovnice and does not show anything in upload dialog until we save the documents individually.
         # Check meta keywords and description. Resets color to white in the beginning. Result color might be red.
         basic_result: bool = super(WhitebearDocumentArticle, self).test_self_basic()
         if basic_result and (self.is_modified() or not self.is_uploaded()):

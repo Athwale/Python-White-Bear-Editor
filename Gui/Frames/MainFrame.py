@@ -986,9 +986,6 @@ class MainFrame(wx.Frame):
             except IOError:
                 self._show_error_dialog(Strings.warning_can_not_save + '\n' + Strings.exception_access_html + '\n' +
                                         file_path)
-            # Set modified false for all doc parts it was saved and does not need to be asked for save until changed.
-            doc.set_saved(True)
-            doc.set_uploaded(False)
             self._set_status_text(Strings.label_saving + ': ' + file_name, 3)
         # Clean thread list off stopped threads.
         if isinstance(doc, WhitebearDocumentArticle):
@@ -1426,8 +1423,6 @@ class MainFrame(wx.Frame):
             return
         doc = self._articles[self._file_list.GetItemText(index)]
         new_color = doc.get_status_color()
-        if 'core' in doc.get_filename():
-            print(new_color)
         if doc.is_modified and not doc.is_saved():
             self._file_list.SetItemFont(index, self.bold_small_font)
         else:
@@ -1635,7 +1630,6 @@ class MainFrame(wx.Frame):
         dlg = EditMenuDialog(self, self._menus, self._config_manager.get_working_dir())
         dlg.ShowModal()
         if dlg.save_all():
-            # TODO why does this not recolor all articles to blue?
             self._save_all(disable=(not bool(self._current_document_instance)))
             self._file_menu_item_new.Enable(True)
             self.tool_bar.EnableTool(wx.ID_NEW, True)
@@ -1672,7 +1666,6 @@ class MainFrame(wx.Frame):
         :return: None
         """
         # TODO editor is not disabled
-
         result = wx.MessageBox(Strings.warning_delete_document + '\n' + self._current_document_name + '?',
                                Strings.status_delete, wx.YES_NO | wx.ICON_WARNING)
         if result == wx.YES:
@@ -1792,7 +1785,6 @@ class MainFrame(wx.Frame):
         # TODO what about online enabled? Is it going to slow things down? Run only on load and before upload?
         # TODO why this does not work with Lockpicking, problem with the same word in dictionary and ignore list
         # TODO empty ignore list throws errors
-        # TODO resave from edit menu does not turn documents blue
 
         self._disable_editor(True, all_menu=True)
         document_list = list(self._articles.values())
