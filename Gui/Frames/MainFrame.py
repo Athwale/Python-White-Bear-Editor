@@ -1637,10 +1637,9 @@ class MainFrame(wx.Frame):
             self._file_menu_item_new.Enable(True)
             self.tool_bar.EnableTool(wx.ID_NEW, True)
         else:
-            for menu in self._menus.values():
-                # In case just menu description or keywords were changed, the rest of the documents do not need to be
-                # saved again.
-                self._save(menu, save_as=False, disable=(not bool(self._current_document_instance)))
+            # In case just menu description or keywords were changed, the rest of the documents do not need to be
+            # saved again.
+            self._save(list(self._menus.values()), save_as=False, disable=(not bool(self._current_document_instance)))
         self._update_seo_colors()
         dlg.Destroy()
 
@@ -1788,7 +1787,9 @@ class MainFrame(wx.Frame):
                 doc.test_self()
 
         # TODO what about online enabled? Is it going to slow things down? Run only on load and before upload?
-        # TODO test that menus become ok when a new word is learned.
+        # TODO why this does not work with Lockpicking, problem with the same word in dictionary and ignore list
+        # TODO empty ignore list throws errors
+        # TODO files only appear in upload list after we click on them after resave from menu dialog.
 
         self._disable_editor(True, all_menu=True)
         document_list = list(self._articles.values())

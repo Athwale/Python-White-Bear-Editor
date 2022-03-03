@@ -4,7 +4,7 @@ from typing import List
 from bs4 import BeautifulSoup
 from bs4.element import Tag
 
-from Constants.Constants import Strings
+from Constants.Constants import Strings, Numbers
 from Exceptions.UnrecognizedFileException import UnrecognizedFileException
 from Resources.Fetch import Fetch
 from Tools.Document.MenuItem import MenuItem
@@ -49,7 +49,18 @@ class WhitebearDocumentMenu(WhitebearDocument):
         """
         # Check name, meta keywords and description
         # Menu items are seo tested by articles.
-        return super(WhitebearDocumentMenu, self).test_self_basic()
+        super(WhitebearDocumentMenu, self).test_self_basic()
+
+        # Check page name length must be at least 3 and must not be default.
+        name_result, message, color = self.seo_test_name(self._page_name)
+        # Message may contain OK if seo passed.
+        self._page_name_error_message = message
+        if not name_result:
+            self.set_status_color(color)
+
+        if self.get_status_color() == Numbers.RED_COLOR:
+            return False
+        return True
 
     def _parse_menu_items(self) -> None:
         """
@@ -80,7 +91,11 @@ class WhitebearDocumentMenu(WhitebearDocument):
         :return: None
         """
         article = self._parsed_html.find(name='article', attrs={'class': 'menuPage'})
-        self._page_name = article.h2.string
+        name = article.h2.string
+        if name:
+            self._page_name = str(name)
+        else:
+            self._page_name = ''
 
     def validate_self(self) -> (bool, List[str]):
         """

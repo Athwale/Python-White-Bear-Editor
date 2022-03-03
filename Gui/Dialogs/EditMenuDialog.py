@@ -204,6 +204,15 @@ class EditMenuDialog(SpellCheckedDialog):
         """
         seo_result = True
         spelling_result = True
+
+        # Test name
+        correct, message, color = self._menu.seo_test_name(self._field_page_name.GetValue())
+        seo_result = seo_result and correct
+        if message == Strings.spelling_error:
+            spelling_result = False
+        self._field_page_name.SetBackgroundColour(color)
+        self._field_page_name_tip.SetMessage(Strings.seo_check + '\n' + message)
+
         # Keywords test.
         correct, message, color = self._menu.seo_test_keywords(self._field_meta_keywords.GetValue())
         seo_result = seo_result and correct
@@ -219,14 +228,6 @@ class EditMenuDialog(SpellCheckedDialog):
             spelling_result = False
         self._set_field_background(self._field_meta_description, color)
         self._field_description_tip.SetMessage(Strings.seo_check + '\n' + message)
-
-        # Test name
-        correct, message, color = self._menu.seo_test_name(self._field_page_name.GetValue())
-        seo_result = seo_result and correct
-        if message == Strings.spelling_error:
-            spelling_result = False
-        self._field_page_name.SetBackgroundColour(color)
-        self._field_page_name_tip.SetMessage(Strings.seo_check + '\n' + message)
 
         return seo_result, spelling_result
 
