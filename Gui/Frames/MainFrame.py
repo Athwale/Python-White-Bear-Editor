@@ -989,15 +989,16 @@ class MainFrame(wx.Frame):
             # This is used after all threads are done to update the color of all saved documents.
             self._saved_documents.append(doc)
         # The last thread is the main thread.
-        if threading.active_count() == 1 and not disable:
+        if threading.active_count() == 1:
             for doc in self._saved_documents:
                 # Update file color on all saved once all threads are done. Menu saving thread runs self test on all
                 # documents in that menu. Updating color while threads are still running sometimes breaks colors
                 # because of concurrent run.
                 self._update_file_color(self._file_list.FindItem(-1, doc.get_filename()))
             self._saved_documents.clear()
-            # Enable only when all threads have finished and enabling is allowed.
-            self._disable_editor(False)
+            if not disable:
+                # Enable only when all threads have finished and enabling is allowed.
+                self._disable_editor(False)
             if file_path:
                 self._set_status_text(Strings.status_saved + ': ' + last_save, 3)
 
