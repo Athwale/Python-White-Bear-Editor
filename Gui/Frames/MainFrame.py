@@ -1097,8 +1097,6 @@ class MainFrame(wx.Frame):
         :param event: CloseEvent, if CanVeto is False the window must be destroyed the system is forcing it.
         :return: None
         """
-        if not self._enabled:
-            return
         if event.CanVeto():
             # Save window position
             self._config_manager.store_window_position(self.GetScreenPosition())
