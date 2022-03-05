@@ -30,7 +30,7 @@ class ConvertorThread(threading.Thread):
     def run(self) -> None:
         """
         Overrides Thread.run. Don't call this directly its called internally when you call Thread.start().
-        :return: None, this method calls the wx.CallAfter to pass a list of website names back into GUI.
+        :return: None, this method calls the wx.CallAfter to pass results back into GUI.
         """
         self._doc.set_uploaded(False)
         if isinstance(self._doc, WhitebearDocumentArticle):
@@ -40,6 +40,6 @@ class ConvertorThread(threading.Thread):
         try:
             self._doc.convert_to_html()
             self._doc.set_saved(True)
-            wx.CallAfter(self._parent.on_conversion_done, self._doc, self._save_as, self._disable)
+            self._parent.conversion_done(self._doc, self._save_as, self._disable)
         except UnrecognizedFileException as e:
-            wx.CallAfter(self._parent.on_conversion_fail, e)
+            self._parent.conversion_fail(e)

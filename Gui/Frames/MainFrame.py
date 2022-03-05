@@ -26,8 +26,8 @@ from Gui.Dialogs.UploadDialog import UploadDialog
 from Gui.Panels.AsideImagePanel import AsideImagePanel
 from Gui.Panels.CustomRichText import CustomRichText
 from Resources.Fetch import Fetch
-from Threads.ConvertorThread import ConvertorThread
 from Threads.FileListThread import FileListThread
+from Threads.SavingThread import SavingThread
 from Threads.SitemapThread import SitemapThread
 from Threads.WorkerThread import WorkerThread
 from Tools.ConfigManager import ConfigManager
@@ -946,11 +946,8 @@ class MainFrame(wx.Frame):
             self._disable_editor(True)
 
         self._save_sitemap(disable)
-        for doc in save_list:
-            # Starting a lot of threads delays when the disable_editor shows in GUI.
-            self._set_status_text(Strings.label_saving + ': ' + doc.get_filename(), 3)
-            convertor_thread = ConvertorThread(self, doc, save_as, disable)
-            convertor_thread.start()
+        saving_thread = SavingThread(self, save_list, save_as, disable)
+        saving_thread.start()
 
     def on_conversion_done(self, doc, save_as: bool, disable: bool) -> None:
         """
@@ -1782,8 +1779,6 @@ class MainFrame(wx.Frame):
             """
             for doc in documents:
                 doc.test_self()
-
-        # TODO
 
         self._disable_editor(True, all_menu=True)
         document_list = list(self._articles.values())
