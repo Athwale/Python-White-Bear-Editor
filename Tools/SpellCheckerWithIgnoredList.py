@@ -55,3 +55,11 @@ class SpellCheckerWithIgnoreList(SpellChecker):
         enchant_dict = self.dict
         if not enchant_dict.is_removed(word):
             enchant_dict.remove(word)
+
+    def next(self) -> None:
+        """
+        Overridden next mistake method, allows stopping spellcheck if spellcheck is disabled.
+        :return: None
+        """
+        # TODO here
+        raise StopIteration

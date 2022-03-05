@@ -941,26 +941,16 @@ class MainFrame(wx.Frame):
         :param disable: Leave the editor disabled after threads finish.
         :return: None.
         """
-        def save_all(documents: List) -> None:
-            """
-            Special function that runs saves all documents from a worker thread. This offloads thread creation from the
-            main thread and allows disable_editor to happen faster.
-            :param documents: Documents to save.
-            :return: None
-            """
-            for doc in documents:
-                self._set_status_text(Strings.label_saving + ': ' + doc.get_filename(), 3)
-                convertor_thread = ConvertorThread(self, doc, save_as, disable)
-                convertor_thread.start()
-
         if self._enabled:
             # Editor will be enabled when all threads finish.
             self._disable_editor(True)
-        self._save_sitemap(disable)
 
-        thread = WorkerThread(self, function=save_all, args=(save_list,),
-                              callback=None, passing_arg=None)
-        thread.start()
+        self._save_sitemap(disable)
+        for doc in save_list:
+            # Starting a lot of threads delays when the disable_editor shows in GUI.
+            self._set_status_text(Strings.label_saving + ': ' + doc.get_filename(), 3)
+            convertor_thread = ConvertorThread(self, doc, save_as, disable)
+            convertor_thread.start()
 
     def on_conversion_done(self, doc, save_as: bool, disable: bool) -> None:
         """
@@ -1792,9 +1782,8 @@ class MainFrame(wx.Frame):
             for doc in documents:
                 doc.test_self()
 
-        # TODO what about online enabled? Is it going to slow things down? Run only on load and before upload?
-        # TODO why this does not work with Lockpicking, problem with the same word in dictionary and ignore list, remove duplicate words, prefer dictionary
-        # TODO empty ignore list throws errors
+        # TODO what about online enabled? Remove online test, it is not always functional probably because of ddos
+        # TODO replace with spellcheck enabled/disabled
 
         self._disable_editor(True, all_menu=True)
         document_list = list(self._articles.values())
