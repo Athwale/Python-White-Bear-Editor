@@ -459,7 +459,7 @@ class Strings:
     label_spelling_language: str = 'Spelling language'
     label_restart_required: str = 'Restart editor to apply changes'
 
-    status_loading: str = 'Loading and testing'
+    status_loading: str = 'Loading and testing...'
     status_ready: str = 'Ready'
     status_error: str = 'Error'
     status_warning: str = 'Warning'

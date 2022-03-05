@@ -1242,7 +1242,8 @@ class MainFrame(wx.Frame):
             return
         self._file_menu_item_delete.Enable(True)
         # If the document is correct, now we can show it.
-        self._current_document_instance.test_self(self._config_manager.get_online_test())
+        # Do not do online test, this slows down load.
+        self._current_document_instance.test_self()
         self._fill_editor(self._current_document_instance)
 
     def _fill_editor(self, doc: WhitebearDocumentArticle) -> None:
@@ -1782,8 +1783,7 @@ class MainFrame(wx.Frame):
             for doc in documents:
                 doc.test_self()
 
-        # TODO what about online enabled? Remove online test, it is not always functional probably because of ddos
-        # TODO replace with spellcheck enabled/disabled
+        # TODO
 
         self._disable_editor(True, all_menu=True)
         document_list = list(self._articles.values())
@@ -1823,7 +1823,8 @@ class MainFrame(wx.Frame):
         # Replace the plain text version of the page in the document first from the edited but not yet saved text field.
         # Reset status color and calculate it again.
         self._current_document_instance.set_plain_text(self._main_text_area.get_text())
-        self._current_document_instance.test_self(self._config_manager.get_online_test())
+        # Do not run online test which is slow.
+        self._current_document_instance.test_self()
         self._current_document_instance.get_index_document().test_self()
         self._current_document_instance.get_menu_section().test_self()
 
