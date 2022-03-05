@@ -230,6 +230,8 @@ class MainFrame(wx.Frame):
         self._edit_menu.Append(self._edit_menu_item_paste)
         self._edit_menu.Append(self._edit_menu_item_select_all)
         self._edit_menu.AppendSeparator()
+        self._edit_menu.AppendCheckItem(wx.ID_FILE6, Strings.label_menu_item_spelling_test,
+                                        Strings.label_menu_item_spelling_test_hint)
         self._edit_menu.Append(self._edit_menu_item_spellcheck)
         self._edit_menu.Append(self._edit_menu_item_spellcheck_setup)
 
@@ -1662,7 +1664,7 @@ class MainFrame(wx.Frame):
         :param event: Not used.
         :return: None
         """
-        # TODO editor is not disabled
+        # TODO editor is not disabled immediately, same as with menu edit.
         result = wx.MessageBox(Strings.warning_delete_document + '\n' + self._current_document_name + '?',
                                Strings.status_delete, wx.YES_NO | wx.ICON_WARNING)
         if result == wx.YES:

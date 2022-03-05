@@ -61,5 +61,5 @@ class SpellCheckerWithIgnoreList(SpellChecker):
         Overridden next mistake method, allows stopping spellcheck if spellcheck is disabled.
         :return: None
         """
-        # TODO here implement checkbox for disabling
+        # TODO here implement checkbox for disabling, rerun on state change
         raise StopIteration
