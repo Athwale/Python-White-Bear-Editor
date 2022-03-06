@@ -105,6 +105,7 @@ class MainFrame(wx.Frame):
             self._load_working_directory(self._config_manager.get_working_dir())
             # Load online test state.
             self._file_menu.Check(wx.ID_NETWORK, self._config_manager.get_online_test())
+            self._edit_menu.Check(wx.ID_FILE6, self._config_manager.get_spellcheck_test())
         else:
             self._disable_editor(True)
 
@@ -606,6 +607,7 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self._new_dir_handler, self._file_menu_item_new_dir)
         self.Bind(wx.EVT_MENU, self._upload_handler, self._file_menu_item_upload)
         self.Bind(wx.EVT_MENU, self._online_test_handler, id=wx.ID_NETWORK)
+        self.Bind(wx.EVT_MENU, self._spellcheck_test_handler, id=wx.ID_FILE6)
 
         # Bind other controls clicks
         self.Bind(wx.EVT_LIST_ITEM_SELECTED, self._list_item_click_handler, self._file_list)
@@ -698,6 +700,7 @@ class MainFrame(wx.Frame):
         # Disable menu items
         self._public_checkbox.Enable(not state)
         self._file_menu.Enable(wx.ID_NETWORK, not state)
+        self._edit_menu.Enable(wx.ID_FILE6, not state)
         menu_items_to_disable = []
         menu_items_to_disable.extend(self._disableable_menu_items)
         if all_menu:
@@ -1752,6 +1755,17 @@ class MainFrame(wx.Frame):
             self._config_manager.store_online_test(True)
         else:
             self._config_manager.store_online_test(False)
+
+    def _spellcheck_test_handler(self, event: wx.CommandEvent) -> None:
+        """
+        Handle changes to the check menu item for enabling spellcheck. Store the value in config manager.
+        :param event: Used to get value.
+        :return: None
+        """
+        if event.IsChecked():
+            self._config_manager.store_spellcheck_test(True)
+        else:
+            self._config_manager.store_spellcheck_test(False)
 
     # noinspection PyUnusedLocal
     def _spellcheck_setup_handler(self, event: wx.CommandEvent) -> None:

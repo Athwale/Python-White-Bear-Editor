@@ -62,4 +62,7 @@ class SpellCheckerWithIgnoreList(SpellChecker):
         :return: None
         """
         # TODO here implement checkbox for disabling, rerun on state change
-        raise StopIteration
+        if not self._config_manager.get_spellcheck_test():
+            raise StopIteration
+        else:
+            super(SpellChecker, self).next()

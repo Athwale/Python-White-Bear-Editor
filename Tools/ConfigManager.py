@@ -318,7 +318,7 @@ class ConfigManager:
         """
         try:
             return int(self._dir_conf[self.CONF_NEWS])
-        except ValueError as _:
+        except (ValueError, KeyError) as _:
             self._dir_conf[self.CONF_NEWS] = str(Numbers.default_news)
             return Numbers.default_news
 
@@ -329,7 +329,7 @@ class ConfigManager:
         """
         try:
             return bool(int(self._dir_conf[self.CONF_ONLINE_TEST]))
-        except ValueError as _:
+        except (ValueError, KeyError) as _:
             self._dir_conf[self.CONF_ONLINE_TEST] = '1'
             return True
 
@@ -340,7 +340,7 @@ class ConfigManager:
         """
         try:
             return bool(int(self._dir_conf[self.CONF_SPELLCHECK_TEST]))
-        except ValueError as _:
+        except (ValueError, KeyError) as _:
             self._dir_conf[self.CONF_SPELLCHECK_TEST] = '1'
             return True
 
