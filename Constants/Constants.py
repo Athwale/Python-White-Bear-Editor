@@ -339,11 +339,10 @@ class Strings:
     label_menu_item_spellcheck_setup_hint: str = 'Spellcheck settings'
     label_menu_item_spelling_test: str = 'Enable spellcheck'
     label_menu_item_spelling_test_hint: str = 'Enable/disable spellcheck'
-    label_menu_item_edit_robots: str = 'Edit robots.txt'
+    label_menu_item_edit_robots: str = 'Edit robots.txt...'
     label_menu_item_edit_robots_hint: str = 'Edit robots.txt'
-    label_menu_item_edit_css: str = 'Edit Styles.css'
-    label_menu_item_edit_css_hint: str = 'Edit Styles.css'
-
+    label_menu_item_edit_css: str = 'Edit styles.css...'
+    label_menu_item_edit_css_hint: str = 'Edit styles.css'
 
     label_menu_add: str = 'Add'
     label_menu_item_add_text_image: str = 'Add image to collection...\tctrl+i'

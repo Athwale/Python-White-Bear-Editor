@@ -224,6 +224,14 @@ class MainFrame(wx.Frame):
                                                             Strings.label_menu_item_spellcheck_setup,
                                                             Strings.label_menu_item_spellcheck_setup_hint)
         self._disableable_menu_items.append(self._edit_menu_item_spellcheck_setup)
+        self._edit_menu_item_edit_robots = wx.MenuItem(self._edit_menu, Numbers.ID_EDIT_ROBOTS,
+                                                       Strings.label_menu_item_edit_robots,
+                                                       Strings.label_menu_item_edit_robots_hint)
+        self._disableable_menu_items.append(self._edit_menu_item_edit_robots)
+        self._edit_menu_item_edit_css = wx.MenuItem(self._edit_menu, Numbers.ID_EDIT_CSS,
+                                                    Strings.label_menu_item_edit_css,
+                                                    Strings.label_menu_item_edit_css_hint)
+        self._disableable_menu_items.append(self._edit_menu_item_edit_css)
         # TODO plaintext editor for styles and robots and css.
 
         self._edit_menu.Append(self._edit_menu_item_undo)
@@ -238,6 +246,9 @@ class MainFrame(wx.Frame):
                                         Strings.label_menu_item_spelling_test_hint)
         self._edit_menu.Append(self._edit_menu_item_spellcheck)
         self._edit_menu.Append(self._edit_menu_item_spellcheck_setup)
+        self._edit_menu.AppendSeparator()
+        self._edit_menu.Append(self._edit_menu_item_edit_robots)
+        self._edit_menu.Append(self._edit_menu_item_edit_css)
 
         # Add menu ---------------------------------------------------------------------------------------------------
         self._add_menu_item_add_image = wx.MenuItem(self._add_menu, wx.ID_ADD, Strings.label_menu_item_add_text_image,
@@ -612,6 +623,8 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self._upload_handler, self._file_menu_item_upload)
         self.Bind(wx.EVT_MENU, self._online_test_handler, id=wx.ID_NETWORK)
         self.Bind(wx.EVT_MENU, self._spellcheck_test_handler, id=Numbers.ID_SPELLCHECK_TEST)
+        self.Bind(wx.EVT_MENU, self._edit_robots_handler, id=Numbers.ID_EDIT_ROBOTS)
+        self.Bind(wx.EVT_MENU, self._edit_css_handler, id=Numbers.ID_EDIT_CSS)
 
         # Bind other controls clicks
         self.Bind(wx.EVT_LIST_ITEM_SELECTED, self._list_item_click_handler, self._file_list)
@@ -1954,3 +1967,21 @@ class MainFrame(wx.Frame):
             self._disable_editor(False)
         self._update_seo_colors()
         self._show_test_report()
+
+    # noinspection PyUnusedLocal
+    def _edit_robots_handler(self, event: wx.CommandEvent) -> None:
+        """
+        Handle edit robots.txt button.
+        :param event: Not used.
+        :return: None
+        """
+        print('robots')
+
+    # noinspection PyUnusedLocal
+    def _edit_css_handler(self, event: wx.CommandEvent) -> None:
+        """
+        Handle edit styles.css button.
+        :param event: Not used.
+        :return: None
+        """
+        print('css')
