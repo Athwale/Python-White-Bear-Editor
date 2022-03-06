@@ -1766,6 +1766,7 @@ class MainFrame(wx.Frame):
             self._config_manager.store_spellcheck_test(True)
         else:
             self._config_manager.store_spellcheck_test(False)
+        self._recolor_all_documents()
 
     # noinspection PyUnusedLocal
     def _spellcheck_setup_handler(self, event: wx.CommandEvent) -> None:
