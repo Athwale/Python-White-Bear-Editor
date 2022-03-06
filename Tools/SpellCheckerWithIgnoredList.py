@@ -56,13 +56,29 @@ class SpellCheckerWithIgnoreList(SpellChecker):
         if not enchant_dict.is_removed(word):
             enchant_dict.remove(word)
 
-    def next(self) -> None:
+    def next(self):
         """
         Overridden next mistake method, allows stopping spellcheck if spellcheck is disabled.
         :return: None
         """
-        # TODO here implement checkbox for disabling, rerun on state change
         if not self._config_manager.get_spellcheck_test():
             raise StopIteration
         else:
-            super(SpellChecker, self).next()
+            # Find the next spelling error.
+            # The uncaught StopIteration from next(self._tokens)
+            # will provide the StopIteration for this method
+            while True:
+                (word, pos) = next(self._tokens)
+                # decode back to a regular string
+                word = self._array_to_string(word)
+                if self.dict.check(word):
+                    continue
+                if word in self._ignore_words:
+                    continue
+                self.word = word
+                self.wordpos = pos
+                if word in self._replace_words:
+                    self.replace(self._replace_words[word])
+                    continue
+                break
+            return self
