@@ -105,7 +105,7 @@ class MainFrame(wx.Frame):
             self._load_working_directory(self._config_manager.get_working_dir())
             # Load online test state.
             self._file_menu.Check(wx.ID_NETWORK, self._config_manager.get_online_test())
-            self._edit_menu.Check(wx.ID_FILE6, self._config_manager.get_spellcheck_test())
+            self._edit_menu.Check(Numbers.ID_SPELLCHECK_TEST, self._config_manager.get_spellcheck_test())
         else:
             self._disable_editor(True)
 
@@ -142,7 +142,7 @@ class MainFrame(wx.Frame):
                                                Strings.label_menu_item_new_hint)
         self._disableable_menu_items.append(self._file_menu_item_new)
 
-        self._file_menu_item_new_dir = wx.MenuItem(self._file_menu, wx.ID_FILE7, Strings.label_menu_item_new_dir,
+        self._file_menu_item_new_dir = wx.MenuItem(self._file_menu, Numbers.ID_NEW_DIR, Strings.label_menu_item_new_dir,
                                                    Strings.label_menu_item_new_dir_hint)
 
         self._file_menu_item_open = wx.MenuItem(self._file_menu, wx.ID_OPEN, Strings.label_menu_item_open,
@@ -164,11 +164,13 @@ class MainFrame(wx.Frame):
                                                  Strings.label_menu_item_page_setup_hint)
         self._disableable_menu_items.append(self._file_menu_item_setup)
 
-        self._file_menu_item_edit_menu = wx.MenuItem(self._file_menu, wx.ID_FILE9, Strings.label_menu_item_edit_menu,
+        self._file_menu_item_edit_menu = wx.MenuItem(self._file_menu, Numbers.ID_MENU_LOGO,
+                                                     Strings.label_menu_item_edit_menu,
                                                      Strings.label_menu_item_edit_menu_hint)
         self._disableable_menu_items.append(self._file_menu_item_edit_menu)
 
-        self._file_menu_item_export_all = wx.MenuItem(self._file_menu, wx.ID_FILE8, Strings.label_menu_item_export_all,
+        self._file_menu_item_export_all = wx.MenuItem(self._file_menu, Numbers.ID_EXPORT_ALL,
+                                                      Strings.label_menu_item_export_all,
                                                       Strings.label_menu_item_export_all_hint)
         self._disableable_menu_items.append(self._file_menu_item_export_all)
 
@@ -222,6 +224,7 @@ class MainFrame(wx.Frame):
                                                             Strings.label_menu_item_spellcheck_setup,
                                                             Strings.label_menu_item_spellcheck_setup_hint)
         self._disableable_menu_items.append(self._edit_menu_item_spellcheck_setup)
+        # TODO plaintext editor for styles and robots and css.
 
         self._edit_menu.Append(self._edit_menu_item_undo)
         self._edit_menu.Append(self._edit_menu_item_redo)
@@ -231,7 +234,7 @@ class MainFrame(wx.Frame):
         self._edit_menu.Append(self._edit_menu_item_paste)
         self._edit_menu.Append(self._edit_menu_item_select_all)
         self._edit_menu.AppendSeparator()
-        self._edit_menu.AppendCheckItem(wx.ID_FILE6, Strings.label_menu_item_spelling_test,
+        self._edit_menu.AppendCheckItem(Numbers.ID_SPELLCHECK_TEST, Strings.label_menu_item_spelling_test,
                                         Strings.label_menu_item_spelling_test_hint)
         self._edit_menu.Append(self._edit_menu_item_spellcheck)
         self._edit_menu.Append(self._edit_menu_item_spellcheck_setup)
@@ -240,10 +243,11 @@ class MainFrame(wx.Frame):
         self._add_menu_item_add_image = wx.MenuItem(self._add_menu, wx.ID_ADD, Strings.label_menu_item_add_text_image,
                                                     Strings.label_menu_item_add_text_image_hint)
         self._disableable_menu_items.append(self._add_menu_item_add_image)
-        self._add_menu_item_add_logo = wx.MenuItem(self._add_menu, wx.ID_FILE1, Strings.label_menu_item_add_logo,
+        self._add_menu_item_add_logo = wx.MenuItem(self._add_menu, Numbers.ID_MENU_LOGO,
+                                                   Strings.label_menu_item_add_logo,
                                                    Strings.label_menu_item_add_logo_hint)
         self._disableable_menu_items.append(self._add_menu_item_add_logo)
-        self._add_menu_item_side_image = wx.MenuItem(self._add_menu, wx.ID_FILE2,
+        self._add_menu_item_side_image = wx.MenuItem(self._add_menu, Numbers.ID_SIDE_IMAGE,
                                                      Strings.label_menu_item_add_side_image,
                                                      Strings.label_menu_item_add_side_image_hint)
         self._disableable_menu_items.append(self._add_menu_item_side_image)
@@ -607,7 +611,7 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self._new_dir_handler, self._file_menu_item_new_dir)
         self.Bind(wx.EVT_MENU, self._upload_handler, self._file_menu_item_upload)
         self.Bind(wx.EVT_MENU, self._online_test_handler, id=wx.ID_NETWORK)
-        self.Bind(wx.EVT_MENU, self._spellcheck_test_handler, id=wx.ID_FILE6)
+        self.Bind(wx.EVT_MENU, self._spellcheck_test_handler, id=Numbers.ID_SPELLCHECK_TEST)
 
         # Bind other controls clicks
         self.Bind(wx.EVT_LIST_ITEM_SELECTED, self._list_item_click_handler, self._file_list)
@@ -700,7 +704,7 @@ class MainFrame(wx.Frame):
         # Disable menu items
         self._public_checkbox.Enable(not state)
         self._file_menu.Enable(wx.ID_NETWORK, not state)
-        self._edit_menu.Enable(wx.ID_FILE6, not state)
+        self._edit_menu.Enable(Numbers.ID_SPELLCHECK_TEST, not state)
         menu_items_to_disable = []
         menu_items_to_disable.extend(self._disableable_menu_items)
         if all_menu:

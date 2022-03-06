@@ -10,7 +10,7 @@ class PlainTextEditDialog(wx.Dialog):
 
     def __init__(self, parent, file: Path):
         """
-        Display a dialog with information about the link where the user can edit it.
+        Show a simple plain text editor with a file opened with the ability to save the file.
         :param parent: Parent frame.
         :param file: File to open and display.
         """

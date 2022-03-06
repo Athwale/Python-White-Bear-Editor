@@ -12,6 +12,18 @@ class Events:
 
 
 class Numbers:
+    ID_MENU_LOGO = wx.NewId()
+    ID_MAIN_IMAGE = wx.NewId()
+    ID_SIDE_IMAGE = wx.NewId()
+    ID_SPELLCHECK_TEST = wx.NewId()
+    ID_IMAGE_LINK = wx.NewId()
+    ID_IMAGE_ALT = wx.NewId()
+    ID_NEW_DIR = wx.NewId()
+    ID_UPLOAD = wx.NewId()
+    ID_EXPORT_ALL = wx.NewId()
+    ID_EDIT_ROBOTS = wx.NewId()
+    ID_EDIT_CSS = wx.NewId()
+
     RED_COLOR = Colour(242, 207, 206)
     GREEN_COLOR = Colour(201, 255, 199)
     DARK_GREEN_COLOR = Colour(21, 112, 49)
@@ -327,6 +339,11 @@ class Strings:
     label_menu_item_spellcheck_setup_hint: str = 'Spellcheck settings'
     label_menu_item_spelling_test: str = 'Enable spellcheck'
     label_menu_item_spelling_test_hint: str = 'Enable/disable spellcheck'
+    label_menu_item_edit_robots: str = 'Edit robots.txt'
+    label_menu_item_edit_robots_hint: str = 'Edit robots.txt'
+    label_menu_item_edit_css: str = 'Edit Styles.css'
+    label_menu_item_edit_css_hint: str = 'Edit Styles.css'
+
 
     label_menu_add: str = 'Add'
     label_menu_item_add_text_image: str = 'Add image to collection...\tctrl+i'

@@ -77,12 +77,12 @@ class NewFileDialog(wx.Dialog):
 
         # Image buttons
         self._image_buttons_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self._menu_logo_button = wx.Button(self, wx.ID_FILE1, style=wx.BU_EXACTFIT | wx.BORDER_NONE,
+        self._menu_logo_button = wx.Button(self, Numbers.ID_MENU_LOGO, style=wx.BU_EXACTFIT | wx.BORDER_NONE,
                                            size=wx.Size(Numbers.menu_logo_image_size, Numbers.menu_logo_image_size))
         self._menu_logo_button.Disable()
         self._menu_logo_button.SetBitmap(wx.Bitmap(wx.Image(Fetch.get_resource_path('menu_image.png'),
                                                             wx.BITMAP_TYPE_PNG)))
-        self._main_image_button = wx.Button(self, wx.ID_FILE2, style=wx.BU_EXACTFIT | wx.BORDER_NONE)
+        self._main_image_button = wx.Button(self, Numbers.ID_MAIN_IMAGE, style=wx.BU_EXACTFIT | wx.BORDER_NONE)
         self._main_image_button.Disable()
         self._main_image_button.SetBitmap(wx.Bitmap(wx.Image(Fetch.get_resource_path('article_image.png'),
                                                              wx.BITMAP_TYPE_PNG)))
@@ -186,7 +186,7 @@ class NewFileDialog(wx.Dialog):
         :return: None
         """
         event.Skip()
-        if event.GetId() == wx.ID_FILE1:
+        if event.GetId() == Numbers.ID_MENU_LOGO:
             # Create menu item.
             if not self._menu_item:
                 menu_item: MenuItem = MenuItem(name='',
@@ -211,7 +211,7 @@ class NewFileDialog(wx.Dialog):
                 self._box_menu.Disable()
                 self._main_image_button.Enable()
                 self._menu_item = menu_item
-        elif event.GetId() == wx.ID_FILE2:
+        elif event.GetId() == Numbers.ID_MAIN_IMAGE:
             # Create article image.
             if not self._article_image:
                 image = AsideImage(caption='',

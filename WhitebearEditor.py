@@ -11,7 +11,6 @@ OnInit must be overridden here.
 # TODO switch to pathlib, Path.home(), exists... https://naucse.python.cz/2019/pyladies-brno-podzim-st/intro/pathlib/
 # TODO show some interesting information rich text GetNumberOfLines
 # TODO use example.com for testing purposes whether net is available.
-# TODO plaintext editor for styles and robots.
 # TODO check that youtube link is an embedded video
 # TODO open in browser button.
 # TODO escape can close menu edit dialog or other dialogs, disable that if needed.

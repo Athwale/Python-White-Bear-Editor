@@ -91,7 +91,7 @@ class EditTextImageDialog(SpellCheckedDialog):
         # Image alt sub sizer
         self._alt_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self._label_image_alt = wx.StaticText(self, -1, Strings.label_alt_description + ': ')
-        self._field_image_alt = wx.TextCtrl(self, wx.ID_FILE2)
+        self._field_image_alt = wx.TextCtrl(self, Numbers.ID_IMAGE_ALT)
         self._alt_sub_sizer.Add(self._label_image_alt, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
         self._alt_sub_sizer.Add((5, -1))
         self._alt_sub_sizer.Add(self._field_image_alt, proportion=1)
@@ -169,7 +169,7 @@ class EditTextImageDialog(SpellCheckedDialog):
         :param event:
         :return: None
         """
-        if event.GetId() == wx.ID_FILE2:
+        if event.GetId() == Numbers.ID_IMAGE_ALT:
             if self._field_image_link_title.GetValue() != self._field_image_alt.GetValue():
                 self._alt_lock = True
 

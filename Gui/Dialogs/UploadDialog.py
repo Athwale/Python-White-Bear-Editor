@@ -156,7 +156,7 @@ class UploadDialog(wx.Dialog):
 
         # Upload button
         self._upload_button_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self._upload_button = wx.Button(self, wx.ID_FILE, Strings.button_upload, style=wx.BU_EXACTFIT)
+        self._upload_button = wx.Button(self, Numbers.ID_UPLOAD, Strings.button_upload, style=wx.BU_EXACTFIT)
         self._button_to_upload()
         self._upload_button_sizer.AddStretchSpacer()
         self._upload_button_sizer.Add(self._upload_button, flag=wx.ALIGN_CENTER)
@@ -403,7 +403,7 @@ class UploadDialog(wx.Dialog):
             path = self._ask_for_file(Strings.home_directory)
             if path:
                 self._field_keyfile.SetValue(path)
-        elif event.GetId() == wx.ID_FILE:
+        elif event.GetId() == Numbers.ID_UPLOAD:
             if self._upload_button.GetLabel() == Strings.button_upload:
                 self._upload_files()
             elif self._sftp_thread.is_alive():

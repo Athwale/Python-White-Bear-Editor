@@ -93,7 +93,7 @@ class EditAsideImageDialog(SpellCheckedDialog):
         # Image link title sub sizer
         self._title_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self._label_image_title = wx.StaticText(self, -1, Strings.label_link_title + ': ')
-        self._field_image_link_title = wx.TextCtrl(self, wx.ID_FILE1)
+        self._field_image_link_title = wx.TextCtrl(self, Numbers.ID_IMAGE_LINK)
         self._title_sub_sizer.Add(self._label_image_title, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
         self._title_sub_sizer.Add((44, -1))
         self._title_sub_sizer.Add(self._field_image_link_title, proportion=1)
@@ -104,7 +104,7 @@ class EditAsideImageDialog(SpellCheckedDialog):
         # Image alt sub sizer
         self._alt_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self._label_image_alt = wx.StaticText(self, -1, Strings.label_alt_description + ': ')
-        self._field_image_alt = wx.TextCtrl(self, wx.ID_FILE2)
+        self._field_image_alt = wx.TextCtrl(self, Numbers.ID_IMAGE_ALT)
         self._alt_sub_sizer.Add(self._label_image_alt, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
         self._alt_sub_sizer.Add((5, -1))
         self._alt_sub_sizer.Add(self._field_image_alt, proportion=1)
@@ -188,10 +188,10 @@ class EditAsideImageDialog(SpellCheckedDialog):
         :param event:
         :return: None
         """
-        if event.GetId() == wx.ID_FILE1:
+        if event.GetId() == Numbers.ID_IMAGE_LINK:
             if self._field_image_caption.GetValue() != self._field_image_link_title.GetValue():
                 self._title_lock = True
-        elif event.GetId() == wx.ID_FILE2:
+        elif event.GetId() == Numbers.ID_IMAGE_ALT:
             if self._field_image_caption.GetValue() != self._field_image_alt.GetValue():
                 self._alt_lock = True
 
