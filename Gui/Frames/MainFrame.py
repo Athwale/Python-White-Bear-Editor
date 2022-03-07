@@ -1,6 +1,7 @@
 import os
 import threading
 from datetime import datetime
+from pathlib import Path
 from shutil import copyfile
 from typing import Dict, List, Callable
 
@@ -19,6 +20,7 @@ from Gui.Dialogs.EditDefaultValuesDialog import EditDefaultValuesDialog
 from Gui.Dialogs.EditMenuDialog import EditMenuDialog
 from Gui.Dialogs.EditMenuItemDialog import EditMenuItemDialog
 from Gui.Dialogs.NewFileDialog import NewFileDialog
+from Gui.Dialogs.PlainTextEditDialog import PlainTextEditDialog
 from Gui.Dialogs.RichTextSpellcheckerDialog import RichTextSpellCheckerDialog
 from Gui.Dialogs.SpellCheckSetupDialog import SpellCheckSetupDialog
 from Gui.Dialogs.SpellCheckerDialog import SpellCheckerDialog
@@ -232,7 +234,6 @@ class MainFrame(wx.Frame):
                                                     Strings.label_menu_item_edit_css,
                                                     Strings.label_menu_item_edit_css_hint)
         self._disableable_menu_items.append(self._edit_menu_item_edit_css)
-        # TODO plaintext editor for styles and robots and css.
 
         self._edit_menu.Append(self._edit_menu_item_undo)
         self._edit_menu.Append(self._edit_menu_item_redo)
@@ -623,8 +624,8 @@ class MainFrame(wx.Frame):
         self.Bind(wx.EVT_MENU, self._upload_handler, self._file_menu_item_upload)
         self.Bind(wx.EVT_MENU, self._online_test_handler, id=wx.ID_NETWORK)
         self.Bind(wx.EVT_MENU, self._spellcheck_test_handler, id=Numbers.ID_SPELLCHECK_TEST)
-        self.Bind(wx.EVT_MENU, self._edit_robots_handler, id=Numbers.ID_EDIT_ROBOTS)
-        self.Bind(wx.EVT_MENU, self._edit_css_handler, id=Numbers.ID_EDIT_CSS)
+        self.Bind(wx.EVT_MENU, self._edit_text_file_handler, id=Numbers.ID_EDIT_ROBOTS)
+        self.Bind(wx.EVT_MENU, self._edit_text_file_handler, id=Numbers.ID_EDIT_CSS)
 
         # Bind other controls clicks
         self.Bind(wx.EVT_LIST_ITEM_SELECTED, self._list_item_click_handler, self._file_list)
@@ -1969,19 +1970,21 @@ class MainFrame(wx.Frame):
         self._show_test_report()
 
     # noinspection PyUnusedLocal
-    def _edit_robots_handler(self, event: wx.CommandEvent) -> None:
+    def _edit_text_file_handler(self, event: wx.CommandEvent) -> None:
         """
         Handle edit robots.txt button.
-        :param event: Not used.
+        :param event: Used to decide which file to open.
         :return: None
         """
-        print('robots')
+        file = None
+        if event.GetId() == Numbers.ID_EDIT_ROBOTS:
+            file = os.path.join(self._config_manager.get_working_dir(), Strings.robots_file)
+        elif event.GetId() == Numbers.ID_EDIT_CSS:
+            file = os.path.join(self._config_manager.get_working_dir(), Strings.css_file)
 
-    # noinspection PyUnusedLocal
-    def _edit_css_handler(self, event: wx.CommandEvent) -> None:
-        """
-        Handle edit styles.css button.
-        :param event: Not used.
-        :return: None
-        """
-        print('css')
+        if not os.path.exists(file):
+            self._show_error_dialog(Strings.warning_file_missing + '\n' + str(file))
+            return
+        editor = PlainTextEditDialog(self, Path(file))
+        editor.ShowModal()
+        editor.Destroy()

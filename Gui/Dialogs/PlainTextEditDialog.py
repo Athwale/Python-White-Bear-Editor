@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 import wx
@@ -17,7 +18,7 @@ class PlainTextEditDialog(wx.Dialog):
         wx.Dialog.__init__(self, parent, title=Strings.label_dialog_edit_link,
                            size=(Numbers.plain_text_dialog_width, Numbers.plain_text_dialog_height),
                            style=wx.DEFAULT_DIALOG_STYLE)
-        self._file_name = file
+        self._file_path = file
         self._config_manager = ConfigManager.get_instance()
 
         self._main_vertical_sizer = wx.BoxSizer(wx.VERTICAL)
@@ -50,7 +51,7 @@ class PlainTextEditDialog(wx.Dialog):
         self._main_vertical_sizer.Add(self._button_sizer, 0, flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM | wx.TOP,
                                       border=Numbers.widget_border_size)
         self.SetSizer(self._main_vertical_sizer)
-        self.SetTitle(Strings.label_dialog_edit_file + ': ' + str(self._file_name.name))
+        self.SetTitle(Strings.label_dialog_edit_file + ': ' + str(self._file_path.name))
         self._display_dialog_contents()
 
         # Bind handlers
@@ -65,13 +66,19 @@ class PlainTextEditDialog(wx.Dialog):
         """
         event.Skip()
         if event.GetId() == wx.ID_OK:
-            self._field_text.SaveFile(str(self._file_name))
+            self._field_text.SaveFile(str(self._file_path))
 
     def _display_dialog_contents(self) -> None:
         """
         Display the image that this dialog edits in the gui.
         :return: None
         """
-        self.Disable()
-        self._field_text.LoadFile(str(self._file_name))
-        self.Enable()
+        if not os.access(self._file_path, os.R_OK) or not os.access(self._file_path, os.W_OK):
+            wx.MessageBox(Strings.warning_file_inaccessible + ':\n' + str(self._file_path), Strings.status_error,
+                          wx.OK | wx.ICON_ERROR)
+            self._field_text.Disable()
+            self._save_button.Disable()
+        else:
+            self.Disable()
+            self._field_text.LoadFile(str(self._file_path))
+            self.Enable()

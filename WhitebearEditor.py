@@ -6,8 +6,8 @@ OnInit must be overridden here.
 # TODO fix bugs and package this into a binary. Package into rpm Ponorme se do pythonu nebo youtube.
 # TODO https://www.blog.pythonlibrary.org/2019/03/19/distributing-a-wxpython-application/
 
-# TODO hover hint on document color and font meaning.
 # TODO viz wx forum copy paste reply.
+# TODO show color file/font meaning somewhere interactively.
 # TODO switch to pathlib, Path.home(), exists... https://naucse.python.cz/2019/pyladies-brno-podzim-st/intro/pathlib/
 # TODO show some interesting information rich text GetNumberOfLines
 # TODO use example.com for testing purposes whether net is available.

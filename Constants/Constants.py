@@ -175,6 +175,7 @@ class Strings:
     index: str = 'index'
     file: str = 'File'
     robots_file: str = 'robots.txt'
+    css_file: str = 'styles.css'
     file_background: str = 'background.jpg'
     file_header: str = 'logo-nadpis.png'
 
@@ -291,6 +292,7 @@ class Strings:
     warning_text_spelling: str = 'Website text spellcheck'
     warning_menu_page: str = 'Menu page'
     warning_index: str = 'Index page (Page setup)'
+    warning_file_missing: str = 'File not found:'
 
     label_menu_file: str = 'File'
     label_menu_item_new: str = 'New document...\tctrl+n'
