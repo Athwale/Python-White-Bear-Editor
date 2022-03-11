@@ -72,7 +72,7 @@ class Link(SpellCheckedObject):
             result = False
 
         # Check url, if it is one of whitebear pages set local to True and do not try to download it.
-        if self._url in list(self._loaded_pages.keys()) or self._url == 'index.html':
+        if self._url in list(self._loaded_pages) or self._url == 'index.html':
             self._is_local = True
         elif self._url.startswith(Strings.folder_files):
             full_path = os.path.join(self._working_directory, self._url)
@@ -147,7 +147,7 @@ class Link(SpellCheckedObject):
         Return a list of all loaded whitebear page names.
         :return: a list of all loaded whitebear page names.
         """
-        return list(self._loaded_pages.keys())
+        return list(self._loaded_pages)
 
     def get_status_color(self) -> wx.Colour:
         """

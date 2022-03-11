@@ -35,7 +35,7 @@ class EditMenuDialog(SpellCheckedDialog):
         self._information_sizer = wx.BoxSizer(wx.VERTICAL)
 
         # Menu list
-        choices = list(self._menus.keys())
+        choices = list(self._menus)
         self._menu_list = wx.ListBox(self, -1, size=(Numbers.minimal_panel_size, -1), choices=choices,
                                      style=wx.LB_SINGLE)
         if self._menus:

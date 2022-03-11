@@ -281,7 +281,8 @@ class UploadDialog(wx.Dialog):
             color = Numbers.GREEN_COLOR
             filename = os.path.basename(file)
             # Documents after upload should appear white, they are saved on disk and now the same copy is online.
-            if filename in self._articles.keys():
+            # Keys are checked for belonging by default
+            if filename in self._articles:
                 # Only do this for documents, ignore images...
                 self._articles[filename].set_uploaded(True)
                 self._articles[filename].set_modified(False)

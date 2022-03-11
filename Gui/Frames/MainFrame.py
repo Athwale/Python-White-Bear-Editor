@@ -807,7 +807,7 @@ class MainFrame(wx.Frame):
         self._index_document = index
         self._clear_editor(leave_files=False)
         unuploaded = self._config_manager.get_not_uploaded()
-        for document_name in sorted(list(self._articles.keys()), reverse=True):
+        for document_name in sorted(list(self._articles), reverse=True):
             if document_name in unuploaded:
                 # Set blue color to documents have been modified but not uploaded yet.
                 self._articles[document_name].set_modified(True)
@@ -952,8 +952,8 @@ class MainFrame(wx.Frame):
         :return: None
         """
         pages = [Strings.index + Strings.extension_html]
-        pages.extend(list(self._articles.keys()))
-        pages.extend(list(self._menus.keys()))
+        pages.extend(list(self._articles))
+        pages.extend(list(self._menus))
         sitemap_thread = SitemapThread(self, pages, self._config_manager.get_working_dir(), disable)
         sitemap_thread.start()
 

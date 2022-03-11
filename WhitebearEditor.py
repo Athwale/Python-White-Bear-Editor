@@ -15,7 +15,8 @@ OnInit must be overridden here.
 # TODO open in browser button.
 # TODO escape can close menu edit dialog or other dialogs, disable that if needed.
 # TODO look at cookies from whitebear pomoci requests headers bacha ba presmerovani, set cookie warning
-"""
+# TODO switch string creation with + to {var}
+x"""
 
 import wx
 import wx.adv

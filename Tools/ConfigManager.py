@@ -247,7 +247,7 @@ class ConfigManager:
         Get the working directory name.
         :return: String directory path to the working directory.
         """
-        if self.CONF_WORKING_DIR not in self._dir_conf.keys():
+        if self.CONF_WORKING_DIR not in self._dir_conf:
             self._dir_conf[self.CONF_WORKING_DIR] = Strings.home_directory
         return self._dir_conf[self.CONF_WORKING_DIR]
 
@@ -289,7 +289,7 @@ class ConfigManager:
         Get the server ip and port.
         :return: The server ip and port.
         """
-        if self.CONF_IP not in self._dir_conf.keys():
+        if self.CONF_IP not in self._dir_conf:
             self._dir_conf[self.CONF_IP] = ''
         return self._dir_conf[self.CONF_IP]
 
@@ -298,7 +298,7 @@ class ConfigManager:
         Get the server user.
         :return: The server user.
         """
-        if self.CONF_USER not in self._dir_conf.keys():
+        if self.CONF_USER not in self._dir_conf:
             self._dir_conf[self.CONF_USER] = ''
         return self._dir_conf[self.CONF_USER]
 
@@ -307,7 +307,7 @@ class ConfigManager:
         Get the SFTP keyfile path.
         :return: The server keyfile path.
         """
-        if self.CONF_KEYFILE not in self._dir_conf.keys():
+        if self.CONF_KEYFILE not in self._dir_conf:
             self._dir_conf[self.CONF_KEYFILE] = ''
         return self._dir_conf[self.CONF_KEYFILE]
 
@@ -349,7 +349,7 @@ class ConfigManager:
         Get the last used image directory.
         :return: String directory path to the last used image directory.
         """
-        if self.CONF_LAST_IMG_DIR not in self._dir_conf.keys():
+        if self.CONF_LAST_IMG_DIR not in self._dir_conf:
             self._dir_conf[self.CONF_LAST_IMG_DIR] = Strings.home_directory
         return self._dir_conf[self.CONF_LAST_IMG_DIR]
 
@@ -358,7 +358,7 @@ class ConfigManager:
         Get a list of documents which are modified but not uploaded.
         :return: List of documents which are modified but not uploaded.
         """
-        if self.CONF_UNUPLOADED not in self._dir_conf.keys():
+        if self.CONF_UNUPLOADED not in self._dir_conf:
             self._dir_conf[self.CONF_UNUPLOADED] = []
         return self._dir_conf[self.CONF_UNUPLOADED]
 
@@ -369,7 +369,7 @@ class ConfigManager:
         """
         # If spelling language is not set, use default.
         default_language = enchant.get_default_language()
-        if self.CONF_LANG not in self._dir_conf.keys():
+        if self.CONF_LANG not in self._dir_conf:
             self._dir_conf[self.CONF_LANG] = default_language
 
         # Use default language if the language package set in config is not installed.
