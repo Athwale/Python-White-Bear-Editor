@@ -241,6 +241,7 @@ class Strings:
     seo_error_url_nonexistent: str = 'Target page does not exist'
     seo_error_url_malformed: str = 'Url syntax error'
     seo_error_video_size_wrong: str = 'The size of the video element is incorrect'
+    seo_error_video_embed: str = 'Url is not an embedded video'
     seo_error_index_length: str = 'Index page seo error text length wrong'
     seo_error_index_empty: str = 'Index page seo error text not set'
     seo_error_not_empty: str = 'Can not be empty'

@@ -67,6 +67,12 @@ class Video(SpellCheckedObject):
             self._image = wx.Image(Fetch.get_resource_path('video_size_incorrect.png'), wx.BITMAP_TYPE_PNG)
             result = False
 
+        # Check url is an embedded video
+        if '/embed/' not in self._url:
+            self._url_error_message = Strings.seo_error_video_embed
+            self._image = wx.Image(Fetch.get_resource_path('video_seo_error.png'), wx.BITMAP_TYPE_PNG)
+            result = False
+
         # Check url, if online test is not run on document switching this causes wrong results.
         if online:
             h = httplib2.Http(timeout=Numbers.online_test_timeout)

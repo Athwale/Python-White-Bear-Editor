@@ -10,7 +10,6 @@ OnInit must be overridden here.
 # TODO show color file/font meaning somewhere interactively.
 # TODO show some interesting information rich text GetNumberOfLines
 # TODO use example.com for testing purposes whether net is available.
-# TODO check that youtube link is an embedded video
 # TODO open in browser button.
 
 # TODO switch string creation with + to {var}
