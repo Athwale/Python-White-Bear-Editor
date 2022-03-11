@@ -230,7 +230,7 @@ class EditMenuItemDialog(SpellCheckedDialog):
             else:
                 self._change_image(new_path, new_name)
                 self._ok_button.SetDefault()
-        elif event.GetId() == wx.ID_OK:
+        elif event.GetId() == wx.ID_OK and self._ok_button.IsEnabled():
             # Save new information into image and rerun seo test.
             self._run_spellcheck(((self._field_item_name, Strings.label_menu_item_name),
                                   (self._field_image_link_title, Strings.label_link_title),

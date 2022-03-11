@@ -197,7 +197,7 @@ class EditTextImageDialog(SpellCheckedDialog):
                     # Parameter expansion, expands tuple into the two arguments needed by the function.
                     self._change_image(*dlg.get_thumbnail_location())
             dlg.Destroy()
-        elif event.GetId() == wx.ID_OK:
+        elif event.GetId() == wx.ID_OK and self._ok_button.IsEnabled():
             self._run_spellcheck(((self._field_image_link_title, Strings.label_link_title),
                                   (self._field_image_alt, Strings.label_alt_description)))
             # Save new information into the copy of the image and rerun seo test.

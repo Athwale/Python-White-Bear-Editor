@@ -210,7 +210,7 @@ class EditAsideImageDialog(SpellCheckedDialog):
             else:
                 self._change_image(new_path, new_name)
                 self._ok_button.SetDefault()
-        elif event.GetId() == wx.ID_OK:
+        elif event.GetId() == wx.ID_OK and self._ok_button.IsEnabled():
             # Spellcheck dialog only appears if a mistake is found.
             self._run_spellcheck(((self._field_image_caption, Strings.label_article_image_caption),
                                   (self._field_image_link_title, Strings.label_link_title),

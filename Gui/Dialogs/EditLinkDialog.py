@@ -115,7 +115,7 @@ class EditLinkDialog(SpellCheckedDialog):
             # Only OK and Cancel button close the dialog by default.
             event.Skip()
             self.EndModal(wx.ID_DELETE)
-        elif event.GetId() == wx.ID_OK:
+        elif event.GetId() == wx.ID_OK and self._ok_button.IsEnabled():
             self._run_spellcheck(((self._field_link_title, Strings.label_link_title),
                                   (self._field_link_text, Strings.label_text)))
             # Save new information into image and rerun seo test.

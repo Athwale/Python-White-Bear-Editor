@@ -91,7 +91,7 @@ class EditVideoDialog(SpellCheckedDialog):
         :param event: The button event
         :return: None
         """
-        if event.GetId() == wx.ID_OK:
+        if event.GetId() == wx.ID_OK and self._ok_button.IsEnabled():
             # Spellcheck dialog only appears if a mistake is found.
             self._run_spellcheck(((self._field_video_link_title, Strings.label_video_link_title),))
             # Save new information into image and rerun seo test.

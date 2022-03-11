@@ -13,8 +13,6 @@ OnInit must be overridden here.
 # TODO check that youtube link is an embedded video
 # TODO open in browser button.
 
-# TODO escape can close dialogs has ID_OK and can close dialogs that should not be closed
-
 # TODO switch string creation with + to {var}
 # TODO switch to pathlib, Path.home(), exists... https://naucse.python.cz/2019/pyladies-brno-podzim-st/intro/pathlib/
 # TODO look at cookies from whitebear pomoci requests headers bacha ba presmerovani, set cookie warning

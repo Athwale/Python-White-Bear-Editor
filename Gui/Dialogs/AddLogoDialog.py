@@ -144,7 +144,7 @@ class AddLogoDialog(wx.Dialog):
                 self._field_image_name.SetFocus()
             if self._menu_image:
                 self._save_button.Enable()
-        elif event.GetId() == wx.ID_OK:
+        elif event.GetId() == wx.ID_OK and self._save_button.IsEnabled():
             if self._save():
                 event.Skip()
         elif event.GetId() == wx.ID_CANCEL:

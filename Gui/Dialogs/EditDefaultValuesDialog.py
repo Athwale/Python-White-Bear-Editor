@@ -181,7 +181,7 @@ class EditDefaultValuesDialog(SpellCheckedDialog):
         :param event: The button event
         :return: None
         """
-        if event.GetId() == wx.ID_OK:
+        if event.GetId() == wx.ID_OK and self._ok_button.IsEnabled():
             # Run spellcheck then run seo test, then save if ok.
             self._run_spellcheck(((self._field_global_title, Strings.label_global_title),
                                   (self._field_author, Strings.label_author),
