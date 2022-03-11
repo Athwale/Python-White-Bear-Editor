@@ -8,15 +8,17 @@ OnInit must be overridden here.
 
 # TODO viz wx forum copy paste reply.
 # TODO show color file/font meaning somewhere interactively.
-# TODO switch to pathlib, Path.home(), exists... https://naucse.python.cz/2019/pyladies-brno-podzim-st/intro/pathlib/
 # TODO show some interesting information rich text GetNumberOfLines
 # TODO use example.com for testing purposes whether net is available.
 # TODO check that youtube link is an embedded video
 # TODO open in browser button.
-# TODO escape can close menu edit dialog or other dialogs, disable that if needed.
-# TODO look at cookies from whitebear pomoci requests headers bacha ba presmerovani, set cookie warning
+
+# TODO escape can close dialogs has ID_OK and can close dialogs that should not be closed
+
 # TODO switch string creation with + to {var}
-x"""
+# TODO switch to pathlib, Path.home(), exists... https://naucse.python.cz/2019/pyladies-brno-podzim-st/intro/pathlib/
+# TODO look at cookies from whitebear pomoci requests headers bacha ba presmerovani, set cookie warning
+"""
 
 import wx
 import wx.adv

@@ -150,8 +150,11 @@ class EditMenuDialog(SpellCheckedDialog):
         :param event: The button event
         :return: None
         """
-        event.Skip()
-        if event.GetId() == wx.ID_OK:
+        if event.GetId() == wx.ID_CANCEL and self._cancel_button.IsEnabled():
+            event.Skip()
+        elif event.GetId() == wx.ID_OK and self._ok_button.IsEnabled():
+            print('a')
+            event.Skip()
             self._save()
         elif event.GetId() == wx.ID_SPELL_CHECK:
             self._run_spellcheck(((self._field_page_name, Strings.label_menu_name),
