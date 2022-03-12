@@ -7,6 +7,7 @@ from typing import Dict, List, Callable
 
 import wx
 import wx.richtext as rt
+from wx.svg import SVGimage
 from wx.lib.agw.supertooltip import SuperToolTip
 
 from Constants.Constants import Numbers, Events
@@ -286,6 +287,7 @@ class MainFrame(wx.Frame):
         self._tool_ids.append(new_id)
         return new_id
 
+    # noinspection PyArgumentList
     @staticmethod
     def _scale_icon(name: str) -> wx.Bitmap:
         """
@@ -293,9 +295,8 @@ class MainFrame(wx.Frame):
         :return: The icon bitmap
         """
         path = Fetch.get_resource_path(name)
-        image = wx.Image(path, wx.BITMAP_TYPE_ANY)
-        image = image.Scale(Numbers.icon_width, Numbers.icon_height, wx.IMAGE_QUALITY_HIGH)
-        return wx.Bitmap(image)
+        svg_image = SVGimage.CreateFromFile(path)
+        return svg_image.ConvertToScaledBitmap(wx.Size(Numbers.icon_width, Numbers.icon_height))
 
     def _init_top_tool_bar(self) -> None:
         """
@@ -305,31 +306,37 @@ class MainFrame(wx.Frame):
         self.tool_bar: wx.ToolBar = self.CreateToolBar(style=wx.TB_DEFAULT_STYLE)
         # Add toolbar tools
         self._new_file_tool: wx.ToolBarToolBase = self.tool_bar.AddTool(wx.ID_NEW, Strings.toolbar_new_file,
-                                                                        self._scale_icon('new-file.png'),
+                                                                        self._scale_icon('new-file.svg'),
                                                                         Strings.toolbar_new_file)
         self._save_tool: wx.ToolBarToolBase = self.tool_bar.AddTool(self._add_tool_id(), Strings.toolbar_save,
-                                                                    self._scale_icon('save.png'),
+                                                                    self._scale_icon('save.svg'),
                                                                     Strings.toolbar_save)
         self._save_tool.SetLongHelp(Strings.toolbar_save)
         self.insert_img_tool: wx.ToolBarToolBase = self.tool_bar.AddTool(MainFrame.IMAGE_TOOL_ID,
                                                                          Strings.toolbar_insert_img,
-                                                                         self._scale_icon('insert-image.png'),
+                                                                         self._scale_icon('insert-image.svg'),
                                                                          Strings.toolbar_insert_img)
         self.insert_img_tool.SetLongHelp(Strings.toolbar_insert_img)
         self._tool_ids.append(MainFrame.IMAGE_TOOL_ID)
         self.insert_video_tool: wx.ToolBarToolBase = self.tool_bar.AddTool(MainFrame.VIDEO_TOOL_ID,
                                                                            Strings.toolbar_insert_video,
-                                                                           self._scale_icon('insert-video.png'),
+                                                                           self._scale_icon('insert-video.svg'),
                                                                            Strings.toolbar_insert_video)
         self.insert_video_tool.SetLongHelp(Strings.toolbar_insert_video)
         self._tool_ids.append(MainFrame.VIDEO_TOOL_ID)
         self.bold_tool: wx.ToolBarToolBase = self.tool_bar.AddTool(self._add_tool_id(), Strings.toolbar_bold,
-                                                                   self._scale_icon('bold.png'),
+                                                                   self._scale_icon('bold.svg'),
                                                                    Strings.toolbar_bold)
         self.bold_tool.SetLongHelp(Strings.toolbar_bold)
+        self._browser_tool: wx.ToolBarToolBase = self.tool_bar.AddTool(self._add_tool_id(), Strings.toolbar_browser,
+                                                                       self._scale_icon('web-browser.svg'),
+                                                                       Strings.toolbar_browser)
+        self._browser_tool.SetLongHelp(Strings.toolbar_browser)
+
         self.Bind(wx.EVT_MENU, self._forward_event, self.insert_img_tool)
         self.Bind(wx.EVT_MENU, self._forward_event, self.insert_video_tool)
         self.Bind(wx.EVT_MENU, self._forward_event, self.bold_tool)
+        self.Bind(wx.EVT_MENU, self._open_in_browser_handler, self._browser_tool)
         self.Bind(wx.EVT_MENU, self._save_document_handler, self._save_tool)
 
         self._search_box = wx.TextCtrl(self.tool_bar, wx.ID_FIND, style=wx.TE_PROCESS_ENTER)
@@ -1968,6 +1975,16 @@ class MainFrame(wx.Frame):
             self._disable_editor(False)
         self._update_seo_colors()
         self._show_test_report()
+
+    # noinspection PyUnusedLocal
+    def _open_in_browser_handler(self, event: wx.CommandEvent):
+        """
+        Handle open in browser button.
+        :param event: Unused.
+        :return: None
+        """
+        # TODO use svg icons in xwpython?
+        print('a')
 
     # noinspection PyUnusedLocal
     def _edit_text_file_handler(self, event: wx.CommandEvent) -> None:

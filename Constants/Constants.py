@@ -79,8 +79,8 @@ class Numbers:
     plain_text_dialog_width: int = 800
     upload_filelist_width: int = 300
     saving_dialog_height: int = 85
-    icon_width: int = 30
-    icon_height: int = 30
+    icon_width: int = 34
+    icon_height: int = 34
     color_icon_width: int = 15
     color_icon_height: int = 15
     splashscreen_dialog_size: (int, int) = (350, 350)
@@ -514,6 +514,7 @@ class Strings:
     toolbar_insert_link: str = 'Insert link'
     toolbar_save: str = 'Save'
     toolbar_color: str = 'Change color'
+    toolbar_browser: str = 'Open in browser'
 
     button_close: str = 'Close'
     button_cancel: str = 'Cancel'
