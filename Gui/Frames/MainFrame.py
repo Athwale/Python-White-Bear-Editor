@@ -1,5 +1,6 @@
 import os
 import threading
+import webbrowser
 from datetime import datetime
 from pathlib import Path
 from shutil import copyfile
@@ -1979,12 +1980,11 @@ class MainFrame(wx.Frame):
     # noinspection PyUnusedLocal
     def _open_in_browser_handler(self, event: wx.CommandEvent):
         """
-        Handle open in browser button.
+        Handle open in browser button. Opens currently shown document in the default web browser in a new tab.
         :param event: Unused.
         :return: None
         """
-        # TODO use svg icons in xwpython?
-        print('a')
+        webbrowser.open(self._current_document_instance.get_path(), new=2)
 
     # noinspection PyUnusedLocal
     def _edit_text_file_handler(self, event: wx.CommandEvent) -> None:
