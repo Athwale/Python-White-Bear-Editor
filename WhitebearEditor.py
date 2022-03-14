@@ -10,7 +10,6 @@ OnInit must be overridden here.
 # TODO show color file/font meaning somewhere interactively.
 # TODO show some interesting information rich text GetNumberOfLines
 # TODO use example.com for testing purposes whether net is available.
-# TODO open in browser button.
 
 # TODO switch string creation with + to {var}
 # TODO switch to pathlib, Path.home(), exists... https://naucse.python.cz/2019/pyladies-brno-podzim-st/intro/pathlib/

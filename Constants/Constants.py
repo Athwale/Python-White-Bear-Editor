@@ -81,8 +81,8 @@ class Numbers:
     saving_dialog_height: int = 85
     icon_width: int = 34
     icon_height: int = 34
-    color_icon_width: int = 15
-    color_icon_height: int = 15
+    color_icon_width: int = 20
+    color_icon_height: int = 20
     splashscreen_dialog_size: (int, int) = (350, 350)
     spellcheck_dialog_width: int = 500
     spellcheck_dialog_height: int = 357
@@ -483,9 +483,8 @@ class Strings:
     status_loading: str = 'Loading and testing...'
     status_ready: str = 'Ready'
     status_error: str = 'Error'
-    status_warning: str = 'Warning'
-    status_valid: str = 'Valid:'
-    status_invalid: str = 'Invalid:'
+    status_warning: str = 'Warning:'
+    status_valid: str = 'Self test OK:'
     status_articles: str = 'Articles:'
     status_ok: str = 'Ok'
     status_found: str = 'Found'

@@ -1249,7 +1249,7 @@ class MainFrame(wx.Frame):
         try:
             result = self._current_document_instance.validate_self()
             if not result[0]:
-                self._set_status_text(Strings.status_invalid + ' ' + self._current_document_name)
+                self._set_status_text(Strings.status_warning + ' ' + self._current_document_name)
                 # Prepare error string from all validation errors
                 error_string = Strings.exception_html_syntax_error + ': ' + self._current_document_name + '\n'
                 for message in result[1]:
@@ -1281,12 +1281,7 @@ class MainFrame(wx.Frame):
         """
         self._ignore_change = True
         self._update_file_color()
-        if doc.get_status_color() == Numbers.RED_COLOR:
-            self._set_status_text(
-                Strings.status_invalid + ' ' + doc.get_filename() + ' - ' + doc.get_menu_section().get_page_name()[0])
-        else:
-            self._set_status_text(
-                Strings.status_valid + ' ' + doc.get_filename() + ' - ' + doc.get_menu_section().get_page_name()[0])
+        self._update_file_status_description(doc)
 
         self.SetTitle(doc.get_filename())
         # Set article data
@@ -1456,6 +1451,18 @@ class MainFrame(wx.Frame):
         else:
             self._file_list.SetItemFont(index, self.small_font)
         self._file_list.SetItemBackgroundColour(index, new_color)
+
+    def _update_file_status_description(self, doc: WhitebearDocumentArticle) -> None:
+        """
+        Update string descriptions that show what state the file is in.
+        :return: None
+        """
+        if doc.get_status_color() == Numbers.RED_COLOR:
+            self._set_status_text(
+                Strings.status_warning + ' ' + doc.get_filename() + ' - ' + doc.get_menu_section().get_page_name()[0])
+        else:
+            self._set_status_text(
+                Strings.status_valid + ' ' + doc.get_filename() + ' - ' + doc.get_menu_section().get_page_name()[0])
 
     def _update_menu_sizer(self, menu_item: MenuItem) -> None:
         """
@@ -1877,6 +1884,7 @@ class MainFrame(wx.Frame):
                                  self._current_document_instance.seo_test_keywords)
         self._update_description_color()
         self._update_file_color()
+        self._update_file_status_description(self._current_document_instance)
 
     # noinspection PyUnusedLocal
     def _self_test_handler(self, event: wx.CommandEvent) -> None:
