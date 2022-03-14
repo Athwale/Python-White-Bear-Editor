@@ -7,7 +7,6 @@ OnInit must be overridden here.
 # TODO https://www.blog.pythonlibrary.org/2019/03/19/distributing-a-wxpython-application/
 
 # TODO viz wx forum copy paste reply.
-# TODO show color file/font meaning somewhere interactively.
 # TODO show some interesting information rich text GetNumberOfLines
 # TODO use example.com for testing purposes whether net is available.
 

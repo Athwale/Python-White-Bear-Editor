@@ -305,6 +305,13 @@ class MainFrame(wx.Frame):
         :return: None
         """
         self.tool_bar: wx.ToolBar = self.CreateToolBar(style=wx.TB_DEFAULT_STYLE)
+
+        # Document state information
+        self._stats_display = wx.TextCtrl(self.tool_bar, wx.ID_INFO, style=wx.TE_MULTILINE)
+        self._stats_display.SetSize(Numbers.initial_panel_size, -1)
+        self._stats_display.Disable()
+        self.tool_bar.AddControl(self._stats_display)
+
         # Add toolbar tools
         self._new_file_tool: wx.ToolBarToolBase = self.tool_bar.AddTool(wx.ID_NEW, Strings.toolbar_new_file,
                                                                         self._scale_icon('new-file.svg'),
@@ -1463,6 +1470,8 @@ class MainFrame(wx.Frame):
         else:
             self._set_status_text(
                 Strings.status_valid + ' ' + doc.get_filename() + ' - ' + doc.get_menu_section().get_page_name()[0])
+        # TODO show color file/font meaning somewhere interactively.
+        self._stats_display.SetValue('Document saved')
 
     def _update_menu_sizer(self, menu_item: MenuItem) -> None:
         """
