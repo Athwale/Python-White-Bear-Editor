@@ -66,8 +66,6 @@ class MainFrame(wx.Frame):
                                   wx.FONTWEIGHT_NORMAL, False)
         self.bold_small_font = wx.Font(Numbers.small_font_size, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL,
                                        wx.FONTWEIGHT_BOLD, False)
-        self.tiny_font = wx.Font(Numbers.tiny_font_size, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL,
-                                 wx.FONTWEIGHT_NORMAL, False)
         # Prepare data objects
         try:
             self._config_manager: ConfigManager = ConfigManager.get_instance()
@@ -311,7 +309,7 @@ class MainFrame(wx.Frame):
         # Document state information
         self._stats_display = wx.TextCtrl(self.tool_bar, wx.ID_INFO, style=wx.TE_MULTILINE)
         self._stats_display.SetSize(Numbers.initial_panel_size, -1)
-        self._stats_display.SetFont(self.tiny_font)
+        self._stats_display.SetFont(self.small_font)
         self._stats_display.SetForegroundColour(wx.BLACK)
         self._stats_display.Disable()
         self.tool_bar.AddControl(self._stats_display)
@@ -1469,22 +1467,23 @@ class MainFrame(wx.Frame):
         Update string descriptions that show what state the file is in.
         :return: None
         """
-        # TODO change color to black but do not enable for writing.
-        status_string = f'{Strings.status_document} {Strings.status_status.lower()}:'
+        status_string = f'{Strings.status_file}:'
         if doc.is_saved():
-            status_string += f'\n{Strings.status_saved}'
+            status_string += f'\t\t{Strings.status_saved}'
         else:
-            status_string += f'\n{Strings.status_modified}'
-        if doc.is_uploaded():
-            status_string += f'\n{Strings.status_uploaded}'
+            status_string += f'\t\t{Strings.status_modified}'
+        if doc.is_uploaded() and not doc.is_modified():
+            status_string += f'\n{Strings.status_state}:\t{Strings.status_uploaded}'
         else:
-            status_string += f'\n{Strings.status_unuploaded}'
+            status_string += f'\n{Strings.status_state}:\t{Strings.status_unuploaded}'
         if doc.get_status_color() == Numbers.RED_COLOR:
-            status_string += f'\n{Strings.status_self_test}: {Strings.status_warning}'
+            self._stats_display.SetForegroundColour(wx.RED)
+            status_string += f'\n{Strings.status_self_test}:\t{Strings.status_warning}'
             self._set_status_text(f'{Strings.status_warning}: {doc.get_filename()} - '
                                   f'{doc.get_menu_section().get_page_name()[0]}')
         else:
-            status_string += f'\n{Strings.status_self_test}: {Strings.status_ok}'
+            self._stats_display.SetForegroundColour(wx.BLACK)
+            status_string += f'\n{Strings.status_self_test}:\t{Strings.status_ok}'
             self._set_status_text(f'{Strings.status_valid} {doc.get_filename()} - '
                                   f'{doc.get_menu_section().get_page_name()[0]}')
         self._stats_display.SetValue(status_string)
