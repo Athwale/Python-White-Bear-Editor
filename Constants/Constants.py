@@ -48,7 +48,8 @@ class Numbers:
     initial_panel_size: int = 220
     minimal_panel_size: int = 150
     maximal_panel_size: int = 300
-    text_field_font_size: int = 9
+    small_font_size: int = 9
+    tiny_font_size: int = 7
     widget_border_size: int = 3
     photo_column_width: int = 306
     edit_aside_image_dialog_width: int = 900
@@ -483,7 +484,7 @@ class Strings:
     status_loading: str = 'Loading and testing...'
     status_ready: str = 'Ready'
     status_error: str = 'Error'
-    status_warning: str = 'Warning:'
+    status_warning: str = 'Warning'
     status_valid: str = 'Self test OK:'
     status_articles: str = 'Articles:'
     status_ok: str = 'Ok'
@@ -497,6 +498,12 @@ class Strings:
     status_finished: str = 'Finished'
     status_testing_link: str = 'Testing url'
     status_seo: str = 'SEO'
+    status_document: str = 'Document'
+    status_modified: str = 'Modified'
+    status_uploaded: str = 'Uploaded'
+    status_unuploaded: str = 'Unuploaded'
+    status_self_test: str = 'Self test'
+    status_status: str = 'Status'
 
     style_paragraph: str = 'Paragraph'
     style_heading_3: str = 'Title 3'

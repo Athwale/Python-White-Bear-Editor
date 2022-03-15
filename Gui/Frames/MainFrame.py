@@ -62,10 +62,12 @@ class MainFrame(wx.Frame):
 
         self.SetIcon(wx.Icon(Fetch.get_resource_path('icon.ico')))
         # Create fonts for text fields
-        self.small_font = wx.Font(Numbers.text_field_font_size, wx.FONTFAMILY_DEFAULT,
-                                  wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, False)
-        self.bold_small_font = wx.Font(Numbers.text_field_font_size, wx.FONTFAMILY_DEFAULT,
-                                       wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD, False)
+        self.small_font = wx.Font(Numbers.small_font_size, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL,
+                                  wx.FONTWEIGHT_NORMAL, False)
+        self.bold_small_font = wx.Font(Numbers.small_font_size, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL,
+                                       wx.FONTWEIGHT_BOLD, False)
+        self.tiny_font = wx.Font(Numbers.tiny_font_size, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL,
+                                 wx.FONTWEIGHT_NORMAL, False)
         # Prepare data objects
         try:
             self._config_manager: ConfigManager = ConfigManager.get_instance()
@@ -309,6 +311,8 @@ class MainFrame(wx.Frame):
         # Document state information
         self._stats_display = wx.TextCtrl(self.tool_bar, wx.ID_INFO, style=wx.TE_MULTILINE)
         self._stats_display.SetSize(Numbers.initial_panel_size, -1)
+        self._stats_display.SetFont(self.tiny_font)
+        self._stats_display.SetForegroundColour(wx.BLACK)
         self._stats_display.Disable()
         self.tool_bar.AddControl(self._stats_display)
 
@@ -1033,6 +1037,7 @@ class MainFrame(wx.Frame):
                 # documents in that menu. Updating color while threads are still running sometimes breaks colors
                 # because of concurrent run.
                 self._update_file_color(self._file_list.FindItem(-1, doc.get_filename()))
+            self._update_file_status_description(self._current_document_instance)
             self._saved_documents.clear()
             if not disable:
                 # Enable only when all threads have finished and enabling is allowed.
@@ -1256,7 +1261,7 @@ class MainFrame(wx.Frame):
         try:
             result = self._current_document_instance.validate_self()
             if not result[0]:
-                self._set_status_text(Strings.status_warning + ' ' + self._current_document_name)
+                self._set_status_text(Strings.status_warning + ': ' + self._current_document_name)
                 # Prepare error string from all validation errors
                 error_string = Strings.exception_html_syntax_error + ': ' + self._current_document_name + '\n'
                 for message in result[1]:
@@ -1464,14 +1469,25 @@ class MainFrame(wx.Frame):
         Update string descriptions that show what state the file is in.
         :return: None
         """
-        if doc.get_status_color() == Numbers.RED_COLOR:
-            self._set_status_text(
-                Strings.status_warning + ' ' + doc.get_filename() + ' - ' + doc.get_menu_section().get_page_name()[0])
+        # TODO change color to black but do not enable for writing.
+        status_string = f'{Strings.status_document} {Strings.status_status.lower()}:'
+        if doc.is_saved():
+            status_string += f'\n{Strings.status_saved}'
         else:
-            self._set_status_text(
-                Strings.status_valid + ' ' + doc.get_filename() + ' - ' + doc.get_menu_section().get_page_name()[0])
-        # TODO show color file/font meaning somewhere interactively.
-        self._stats_display.SetValue('Document saved')
+            status_string += f'\n{Strings.status_modified}'
+        if doc.is_uploaded():
+            status_string += f'\n{Strings.status_uploaded}'
+        else:
+            status_string += f'\n{Strings.status_unuploaded}'
+        if doc.get_status_color() == Numbers.RED_COLOR:
+            status_string += f'\n{Strings.status_self_test}: {Strings.status_warning}'
+            self._set_status_text(f'{Strings.status_warning}: {doc.get_filename()} - '
+                                  f'{doc.get_menu_section().get_page_name()[0]}')
+        else:
+            status_string += f'\n{Strings.status_self_test}: {Strings.status_ok}'
+            self._set_status_text(f'{Strings.status_valid} {doc.get_filename()} - '
+                                  f'{doc.get_menu_section().get_page_name()[0]}')
+        self._stats_display.SetValue(status_string)
 
     def _update_menu_sizer(self, menu_item: MenuItem) -> None:
         """

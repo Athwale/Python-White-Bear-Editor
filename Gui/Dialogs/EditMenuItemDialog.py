@@ -107,7 +107,7 @@ class EditMenuItemDialog(SpellCheckedDialog):
         self._bitmap = wx.StaticBitmap(self, -1, wx.Bitmap(placeholder_image))
 
         # Item name
-        menu_text_field_font = wx.Font(Numbers.text_field_font_size, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL,
+        menu_text_field_font = wx.Font(Numbers.small_font_size, wx.FONTFAMILY_DEFAULT, wx.FONTSTYLE_NORMAL,
                                        wx.FONTWEIGHT_NORMAL, False)
         self._content_item_name = wx.StaticText(self, -1, Strings.label_article_menu_logo_name_placeholder,
                                                 style=wx.ALIGN_CENTRE_HORIZONTAL)

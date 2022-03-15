@@ -24,9 +24,9 @@ class UploadDialog(wx.Dialog):
         """
         wx.Dialog.__init__(self, parent, style=wx.DEFAULT_DIALOG_STYLE, title=Strings.label_upload,
                            size=(Numbers.upload_dialog_width, Numbers.upload_dialog_height))
-        self.small_font = wx.Font(Numbers.text_field_font_size, wx.FONTFAMILY_DEFAULT,
+        self.small_font = wx.Font(Numbers.small_font_size, wx.FONTFAMILY_DEFAULT,
                                   wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_NORMAL, False)
-        self.bold_small_font = wx.Font(Numbers.text_field_font_size, wx.FONTFAMILY_DEFAULT,
+        self.bold_small_font = wx.Font(Numbers.small_font_size, wx.FONTFAMILY_DEFAULT,
                                        wx.FONTSTYLE_NORMAL, wx.FONTWEIGHT_BOLD, False)
         self._config_manager: ConfigManager = ConfigManager.get_instance()
         self._articles = articles
