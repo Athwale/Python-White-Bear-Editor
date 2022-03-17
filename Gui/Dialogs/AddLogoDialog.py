@@ -35,7 +35,7 @@ class AddLogoDialog(wx.Dialog):
 
         # Disk location
         self._original_disk_location_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self._label_image_original_path = wx.StaticText(self, -1, Strings.label_image + ': ')
+        self._label_image_original_path = wx.StaticText(self, -1, f'{Strings.label_image}: ')
         self._content_image_original_path = wx.StaticText(self, -1, Strings.label_none,
                                                           style=wx.ST_ELLIPSIZE_MIDDLE | wx.ST_NO_AUTORESIZE)
         self._original_disk_location_sub_sizer.Add(self._label_image_original_path,
@@ -46,7 +46,7 @@ class AddLogoDialog(wx.Dialog):
 
         # Original size
         self._image_original_size_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self._label_image_size = wx.StaticText(self, -1, Strings.label_size + ': ')
+        self._label_image_size = wx.StaticText(self, -1, f'{Strings.label_size}: ')
         self._content_image_size = wx.StaticText(self, -1, Strings.label_none,
                                                  style=wx.ST_ELLIPSIZE_MIDDLE | wx.ST_NO_AUTORESIZE)
         self._image_original_size_sub_sizer.Add(self._label_image_size,
@@ -58,7 +58,7 @@ class AddLogoDialog(wx.Dialog):
 
         # Image name sub sizer
         self._name_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self._label_image_name = wx.StaticText(self, -1, Strings.label_name + ': ')
+        self._label_image_name = wx.StaticText(self, -1, f'{Strings.label_name}: ')
         self._field_image_name = wx.TextCtrl(self, -1)
         self._field_image_name.Disable()
         self._name_sub_sizer.Add(self._label_image_name, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
@@ -179,7 +179,7 @@ class AddLogoDialog(wx.Dialog):
         self._logos_path: str = os.path.join(self._working_directory, Strings.folder_images, Strings.folder_logos)
         logo_file: str = os.path.join(self._logos_path, new_name)
         if os.path.exists(logo_file + Strings.extension_jpg):
-            result = wx.MessageBox(Strings.warning_file_exists_overwrite + ': \n' + logo_file, Strings.status_error,
+            result = wx.MessageBox(f'{Strings.warning_file_exists_overwrite}: \n{logo_file, Strings.status_error}',
                                    wx.YES_NO | wx.ICON_ERROR)
             if result == wx.NO:
                 return False
@@ -203,14 +203,13 @@ class AddLogoDialog(wx.Dialog):
 
         self._content_image_original_path.SetLabelText(self._image_path)
         image_name: str = os.path.splitext(self._image_name)[0]
-        self._field_image_name.SetValue(Strings.label_logo + image_name.capitalize())
+        self._field_image_name.SetValue(f'{Strings.label_logo}{image_name.capitalize()}')
         self._field_image_name.Enable()
 
         if self._menu_image.GetSize() != (Numbers.menu_logo_image_size, Numbers.menu_logo_image_size):
             self._menu_image.Rescale(Numbers.menu_logo_image_size, Numbers.menu_logo_image_size, wx.IMAGE_QUALITY_HIGH)
 
-        self._content_image_size.SetLabelText(str(self._menu_image.GetWidth()) + ' x ' +
-                                              str(self._menu_image.GetHeight()) + ' px')
+        self._content_image_size.SetLabelText(f'{self._menu_image.GetWidth()} x {self._menu_image.GetHeight()} px')
         # Show the image.
         self._bitmap.SetBitmap(wx.Bitmap(self._menu_image))
         self.Layout()

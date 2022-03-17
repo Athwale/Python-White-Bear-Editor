@@ -7,12 +7,12 @@ OnInit must be overridden here.
 # TODO https://www.blog.pythonlibrary.org/2019/03/19/distributing-a-wxpython-application/
 
 # TODO viz wx forum copy paste reply.
-# TODO show some interesting information rich text GetNumberOfLines
 # TODO use example.com for testing purposes whether net is available.
 
-# TODO switch string creation with + to {var}
+# TODO switch string creation with + to f'{var}'
 # TODO switch to pathlib, Path.home(), exists... https://naucse.python.cz/2019/pyladies-brno-podzim-st/intro/pathlib/
 # TODO look at cookies from whitebear pomoci requests headers bacha ba presmerovani, set cookie warning
+# TODO use unpack * to call functions with tuples
 """
 
 import wx

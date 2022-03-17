@@ -23,6 +23,7 @@ class Numbers:
     ID_EXPORT_ALL = wx.NewId()
     ID_EDIT_ROBOTS = wx.NewId()
     ID_EDIT_CSS = wx.NewId()
+    ID_EDIT_MENU = wx.NewId()
 
     RED_COLOR = Colour(242, 207, 206)
     GREEN_COLOR = Colour(201, 255, 199)

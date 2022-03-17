@@ -168,7 +168,7 @@ class MainFrame(wx.Frame):
                                                  Strings.label_menu_item_page_setup_hint)
         self._disableable_menu_items.append(self._file_menu_item_setup)
 
-        self._file_menu_item_edit_menu = wx.MenuItem(self._file_menu, Numbers.ID_MENU_LOGO,
+        self._file_menu_item_edit_menu = wx.MenuItem(self._file_menu, Numbers.ID_EDIT_MENU,
                                                      Strings.label_menu_item_edit_menu,
                                                      Strings.label_menu_item_edit_menu_hint)
         self._disableable_menu_items.append(self._file_menu_item_edit_menu)
