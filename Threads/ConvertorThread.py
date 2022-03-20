@@ -1,7 +1,5 @@
 import threading
 
-import wx
-
 from Exceptions.UnrecognizedFileException import UnrecognizedFileException
 from Tools.ConfigManager import ConfigManager
 from Tools.Document.WhitebearDocumentArticle import WhitebearDocumentArticle

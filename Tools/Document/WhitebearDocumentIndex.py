@@ -39,7 +39,7 @@ class WhitebearDocumentIndex(WhitebearDocument):
         self._black_text: str = ''
         self._red_text: str = ''
         self._script: str = ''
-        self._number_of_news: str = ''
+        self._number_of_news: int = 0
         self._url: str = ''
         self.update_content()
 
