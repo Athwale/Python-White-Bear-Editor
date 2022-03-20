@@ -35,7 +35,7 @@ class EditTextImageDialog(SpellCheckedDialog):
 
         # Disk locations
         self._full_disk_location_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self._label_image_full_path = wx.StaticText(self, -1, Strings.label_image_path + ': ')
+        self._label_image_full_path = wx.StaticText(self, -1, f'{Strings.label_image_path}: ')
         self._content_image_full_path = wx.StaticText(self, -1, Strings.label_none,
                                                       style=wx.ST_ELLIPSIZE_MIDDLE | wx.ST_NO_AUTORESIZE)
         self._full_disk_location_sub_sizer.Add(self._label_image_full_path,
@@ -45,7 +45,7 @@ class EditTextImageDialog(SpellCheckedDialog):
                                     border=Numbers.widget_border_size)
 
         self._thumb_disk_location_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self._label_image_thumbnail_path = wx.StaticText(self, -1, Strings.label_image_thumbnail_path + ': ')
+        self._label_image_thumbnail_path = wx.StaticText(self, -1, f'{Strings.label_image_thumbnail_path}: ')
         self._content_image_thumbnail_path = wx.StaticText(self, -1, Strings.label_none,
                                                            style=wx.ST_ELLIPSIZE_MIDDLE | wx.ST_NO_AUTORESIZE)
         self._thumb_disk_location_sub_sizer.Add(self._label_image_thumbnail_path,
@@ -56,7 +56,7 @@ class EditTextImageDialog(SpellCheckedDialog):
 
         # Original size
         self._image_original_size_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self._label_image_original_size = wx.StaticText(self, -1, Strings.label_original_size + ': ')
+        self._label_image_original_size = wx.StaticText(self, -1, f'{Strings.label_original_size}: ')
         self._content_image_original_size = wx.StaticText(self, -1, Strings.label_none)
         self._image_original_size_sub_sizer.Add(self._label_image_original_size,
                                                 flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
@@ -68,7 +68,7 @@ class EditTextImageDialog(SpellCheckedDialog):
 
         # Thumbnail size
         self._image_thumbnail_size_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self._label_image_thumbnail_size = wx.StaticText(self, -1, Strings.label_thumbnail_size + ': ')
+        self._label_image_thumbnail_size = wx.StaticText(self, -1, f'{Strings.label_thumbnail_size}: ')
         self._content_image_thumbnail_size = wx.StaticText(self, -1, Strings.label_none)
         self._image_thumbnail_size_sub_sizer.Add(self._label_image_thumbnail_size,
                                                  flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
@@ -79,7 +79,7 @@ class EditTextImageDialog(SpellCheckedDialog):
 
         # Image link title sub sizer
         self._title_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self._label_image_title = wx.StaticText(self, -1, Strings.label_link_title + ': ')
+        self._label_image_title = wx.StaticText(self, -1, f'{Strings.label_link_title}: ')
         self._field_image_link_title = wx.TextCtrl(self, -1)
         self._title_sub_sizer.Add(self._label_image_title, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
         self._title_sub_sizer.Add((44, -1))
@@ -90,7 +90,7 @@ class EditTextImageDialog(SpellCheckedDialog):
 
         # Image alt sub sizer
         self._alt_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self._label_image_alt = wx.StaticText(self, -1, Strings.label_alt_description + ': ')
+        self._label_image_alt = wx.StaticText(self, -1, f'{Strings.label_alt_description}: ')
         self._field_image_alt = wx.TextCtrl(self, Numbers.ID_IMAGE_ALT)
         self._alt_sub_sizer.Add(self._label_image_alt, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
         self._alt_sub_sizer.Add((5, -1))
@@ -277,11 +277,11 @@ class EditTextImageDialog(SpellCheckedDialog):
         for field, value in field_to_value.items():
             tip = value[1]
             if value[0][1]:
-                tip.SetMessage(Strings.seo_check + '\n' + value[0][1])
+                tip.SetMessage(f'{Strings.seo_check}\n{value[0][1]}')
                 tip.EnableTip(True)
                 field.SetBackgroundColour(Numbers.RED_COLOR)
             else:
-                tip.SetMessage(Strings.seo_check + '\n' + Strings.status_ok)
+                tip.SetMessage(f'{Strings.seo_check}\n{Strings.status_ok}')
                 tip.DoHideNow()
                 field.SetBackgroundColour(Numbers.GREEN_COLOR)
             field.SetValue(value[0][0])
@@ -290,7 +290,7 @@ class EditTextImageDialog(SpellCheckedDialog):
         self._bitmap.SetBitmap(wx.Bitmap(self._image_copy.get_image(normal=True)))
         # Set disk paths
         full_path = self._image_copy.get_original_image_path()
-        self.SetTitle(Strings.label_dialog_edit_image + ': ' + self._image_copy.get_full_filename())
+        self.SetTitle(f'{Strings.label_dialog_edit_image}: {self._image_copy.get_full_filename()}')
         if full_path:
             self._content_image_full_path.SetLabelText(full_path)
         else:
@@ -299,16 +299,14 @@ class EditTextImageDialog(SpellCheckedDialog):
         # Set thumbnail size
         thumbnail_size = self._image_copy.get_thumbnail_size()
         if thumbnail_size:
-            self._content_image_thumbnail_size.SetLabelText(
-                str(thumbnail_size[0]) + ' x ' + str(thumbnail_size[1]) + ' px')
+            self._content_image_thumbnail_size.SetLabelText(f'{thumbnail_size[0]} x {thumbnail_size[1]} px')
         else:
             self._content_image_thumbnail_size.SetLabelText(Strings.status_error)
 
         # Set original size
         original_size = self._image_copy.get_original_size()
         if original_size:
-            self._content_image_original_size.SetLabelText(
-                str(original_size[0]) + ' x ' + str(original_size[1]) + ' px')
+            self._content_image_original_size.SetLabelText(f'{original_size[0]} x {original_size[1]} px')
         else:
             self._content_image_original_size.SetLabelText(Strings.label_none)
 

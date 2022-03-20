@@ -37,7 +37,7 @@ class EditMenuItemDialog(SpellCheckedDialog):
 
         # Disk location
         self._full_disk_location_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self.label_image_full_path = wx.StaticText(self, -1, Strings.label_image + ': ')
+        self.label_image_full_path = wx.StaticText(self, -1, f'{Strings.label_image}: ')
         self.content_image_full_path = wx.StaticText(self, -1, Strings.label_none,
                                                      style=wx.ST_ELLIPSIZE_MIDDLE | wx.ST_NO_AUTORESIZE)
         self._full_disk_location_sub_sizer.Add(self.label_image_full_path,
@@ -48,7 +48,7 @@ class EditMenuItemDialog(SpellCheckedDialog):
 
         # Link href
         self._href_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self._label_href = wx.StaticText(self, -1, Strings.label_target + ': ')
+        self._label_href = wx.StaticText(self, -1, f'{Strings.label_target}: ')
         self._content_href = wx.StaticText(self, -1, Strings.label_none,
                                            style=wx.ST_ELLIPSIZE_MIDDLE | wx.ST_NO_AUTORESIZE)
         self._href_sub_sizer.Add(self._label_href, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
@@ -58,7 +58,7 @@ class EditMenuItemDialog(SpellCheckedDialog):
 
         # Original size
         self._image_size_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self._label_image_size = wx.StaticText(self, -1, Strings.label_size + ': ')
+        self._label_image_size = wx.StaticText(self, -1, f'{Strings.label_size}: ')
         self._content_image_size = wx.StaticText(self, -1, Strings.label_none)
         self._image_size_sub_sizer.Add(self._label_image_size,
                                        flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
@@ -70,7 +70,7 @@ class EditMenuItemDialog(SpellCheckedDialog):
 
         # Image name sub sizer
         self._name_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self._label_item_name = wx.StaticText(self, -1, Strings.label_menu_name + ': ')
+        self._label_item_name = wx.StaticText(self, -1, f'{Strings.label_menu_name}: ')
         self._field_item_name = wx.TextCtrl(self, -1)
         self._name_sub_sizer.Add(self._label_item_name, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
         self._name_sub_sizer.Add((22, -1))
@@ -81,7 +81,7 @@ class EditMenuItemDialog(SpellCheckedDialog):
 
         # Image link title sub sizer
         self._title_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self._label_image_title = wx.StaticText(self, -1, Strings.label_link_title + ': ')
+        self._label_image_title = wx.StaticText(self, -1, f'{Strings.label_link_title}: ')
         self._field_image_link_title = wx.TextCtrl(self, Numbers.ID_IMAGE_LINK)
         self._title_sub_sizer.Add(self._label_image_title, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
         self._title_sub_sizer.Add((44, -1))
@@ -92,7 +92,7 @@ class EditMenuItemDialog(SpellCheckedDialog):
 
         # Image alt sub sizer
         self._alt_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self._label_image_alt = wx.StaticText(self, -1, Strings.label_alt_description + ': ')
+        self._label_image_alt = wx.StaticText(self, -1, f'{Strings.label_alt_description}: ')
         self._field_image_alt = wx.TextCtrl(self, Numbers.ID_IMAGE_ALT)
         self._alt_sub_sizer.Add(self._label_image_alt, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
         self._alt_sub_sizer.Add((5, -1))
@@ -198,7 +198,7 @@ class EditMenuItemDialog(SpellCheckedDialog):
             self._ok_button.Disable()
             self._content_item_name.SetBackgroundColour(Numbers.RED_COLOR)
             self._field_item_name.SetBackgroundColour(Numbers.RED_COLOR)
-            self._field_item_name_tip.SetMessage(Strings.seo_check + '\n' + Strings.seo_error_menu_name_length)
+            self._field_item_name_tip.SetMessage(f'{Strings.seo_check}\n{Strings.seo_error_menu_name_length}')
             self._field_item_name_tip.EnableTip(True)
         else:
             self._content_item_name.SetBackgroundColour(wx.NullColour)
@@ -207,11 +207,11 @@ class EditMenuItemDialog(SpellCheckedDialog):
             if self._item_copy.get_article_name()[1]:
                 # There is an error message for article name.
                 self._field_item_name.SetBackgroundColour(Numbers.RED_COLOR)
-                self._field_item_name_tip.SetMessage(Strings.seo_check + '\n' + self._item_copy.get_article_name()[1])
+                self._field_item_name_tip.SetMessage(f'{Strings.seo_check}\n{self._item_copy.get_article_name()[1]}')
                 self._field_item_name_tip.EnableTip(True)
             else:
                 self._field_item_name.SetBackgroundColour(Numbers.GREEN_COLOR)
-                self._field_item_name_tip.SetMessage(Strings.seo_check + '\n' + Strings.status_ok)
+                self._field_item_name_tip.SetMessage(f'{Strings.seo_check}\n{Strings.status_ok}')
                 self._field_item_name_tip.DoHideNow()
                 self._ok_button.Enable()
 
@@ -323,11 +323,11 @@ class EditMenuItemDialog(SpellCheckedDialog):
         for field, value in field_to_value.items():
             tip = value[1]
             if value[0][1]:
-                tip.SetMessage(Strings.seo_check + '\n' + value[0][1])
+                tip.SetMessage(f'{Strings.seo_check}\n{value[0][1]}')
                 tip.EnableTip(True)
                 field.SetBackgroundColour(Numbers.RED_COLOR)
             else:
-                tip.SetMessage(Strings.seo_check + '\n' + Strings.status_ok)
+                tip.SetMessage(f'{Strings.seo_check}\n{Strings.status_ok}')
                 tip.DoHideNow()
                 field.SetBackgroundColour(Numbers.GREEN_COLOR)
             field.SetValue(value[0][0])
@@ -344,14 +344,13 @@ class EditMenuItemDialog(SpellCheckedDialog):
         # Set image size
         size = self._item_copy.get_image_size()
         if size:
-            self._content_image_size.SetLabelText(
-                str(size[0]) + ' x ' + str(size[1]) + ' px')
+            self._content_image_size.SetLabelText(f'{size[0]} x {size[1]} px')
         else:
             self._content_image_size.SetLabelText(Strings.status_error)
 
         # Set disk paths
         full_path = self._item_copy.get_image_path()
-        self.SetTitle(Strings.label_dialog_edit_menu_item + ': ' + self._item_copy.get_article_name()[0])
+        self.SetTitle(f'{Strings.label_dialog_edit_menu_item}: {self._item_copy.get_article_name()[0]}')
         if full_path:
             self.content_image_full_path.SetLabelText(full_path)
         else:

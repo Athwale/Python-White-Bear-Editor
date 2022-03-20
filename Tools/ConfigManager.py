@@ -70,7 +70,7 @@ class ConfigManager:
         """
         return {self.CONF_WORKING_DIR: Strings.home_directory,
                 self.CONF_POSITION: '0,0',
-                self.CONF_SIZE: str(Numbers.minimal_window_size_width) + ',' + str(Numbers.minimal_window_size_height),
+                self.CONF_SIZE: f'{Numbers.minimal_window_size_width},{Numbers.minimal_window_size_height}',
                 self.CONF_GLOBAL_TITLE: '',
                 self.CONF_AUTHOR: Strings.author,
                 self.CONF_CONTACT: '',
@@ -470,7 +470,7 @@ class ConfigManager:
         :return: None
         """
         x, y = pos1_pos2
-        self._dir_conf[self.CONF_POSITION] = str(x) + ',' + str(y)
+        self._dir_conf[self.CONF_POSITION] = f'{x},{y}'
         self.save_config_file()
 
     def store_window_size(self, size1_size2: Tuple[int, int]) -> None:
@@ -480,7 +480,7 @@ class ConfigManager:
         :return: None
         """
         x, y = size1_size2
-        self._dir_conf[self.CONF_SIZE] = str(x) + ',' + str(y)
+        self._dir_conf[self.CONF_SIZE] = f'{x},{y}'
         self.save_config_file()
 
     def store_last_open_document(self, name: str) -> None:

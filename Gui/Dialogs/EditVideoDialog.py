@@ -29,7 +29,7 @@ class EditVideoDialog(SpellCheckedDialog):
 
         # Title sub sizer
         self._title_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self._label_video_title = wx.StaticText(self, -1, Strings.label_link_title + ': ')
+        self._label_video_title = wx.StaticText(self, -1, f'{Strings.label_link_title}: ')
         self._field_video_link_title = wx.TextCtrl(self, -1)
         self._title_sub_sizer.Add(self._label_video_title, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
         self._title_sub_sizer.Add((5, -1))
@@ -40,7 +40,7 @@ class EditVideoDialog(SpellCheckedDialog):
 
         # Url sub sizer
         self._url_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self._label_video_url = wx.StaticText(self, -1, Strings.label_url + ': ')
+        self._label_video_url = wx.StaticText(self, -1, f'{Strings.label_url}: ')
         self._field_video_url = wx.TextCtrl(self, -1)
         self._url_sub_sizer.Add(self._label_video_url, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
         self._url_sub_sizer.Add((34, -1))
@@ -50,7 +50,7 @@ class EditVideoDialog(SpellCheckedDialog):
 
         # Size
         self._video_size_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self._label_video_size = wx.StaticText(self, -1, Strings.label_video_size + ': ')
+        self._label_video_size = wx.StaticText(self, -1, f'{Strings.label_video_size}: ')
         self._content_video_size = wx.StaticText(self, -1, Strings.label_none)
         self._video_size_sub_sizer.Add(self._label_video_size, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
         self._video_size_sub_sizer.Add(self._content_video_size, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
@@ -121,7 +121,7 @@ class EditVideoDialog(SpellCheckedDialog):
                               passing_arg=return_value)
         thread.start()
         self.Disable()
-        self.SetTitle(Strings.status_seo + ': ' + Strings.status_testing_link)
+        self.SetTitle(f'{Strings.status_seo}: {Strings.status_testing_link}')
 
     def on_seo_done(self, result: bool, return_value: int) -> None:
         """
@@ -149,18 +149,18 @@ class EditVideoDialog(SpellCheckedDialog):
         for field, value in field_to_value.items():
             tip = value[1]
             if value[0][1]:
-                tip.SetMessage(Strings.seo_check + '\n' + value[0][1])
+                tip.SetMessage(f'{Strings.seo_check}\n{value[0][1]}')
                 tip.EnableTip(True)
                 field.SetBackgroundColour(Numbers.RED_COLOR)
             else:
-                tip.SetMessage(Strings.seo_check + '\n' + Strings.status_ok)
+                tip.SetMessage(f'{Strings.seo_check}\n{Strings.status_ok}')
                 tip.DoHideNow()
                 field.SetBackgroundColour(Numbers.GREEN_COLOR)
             field.SetValue(value[0][0])
         # Set size
         size = self._video.get_size()
         if size:
-            self._content_video_size.SetLabelText(str(size[0]) + ' / ' + str(size[1]) + 'px')
+            self._content_video_size.SetLabelText(f'{size[0]} / {size[1]}px')
         else:
             self._content_video_size.SetLabelText(Strings.status_error)
         self.Enable()

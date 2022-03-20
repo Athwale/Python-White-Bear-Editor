@@ -52,7 +52,7 @@ class NewFileDialog(wx.Dialog):
 
         # Name sub sizer
         self._name_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self._label_file_name = wx.StaticText(self, -1, Strings.label_file_name + ': ')
+        self._label_file_name = wx.StaticText(self, -1, f'{Strings.label_file_name}: ')
         self._field_name = wx.TextCtrl(self, -1)
         self._name_sub_sizer.Add(self._label_file_name, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
         self._name_sub_sizer.Add(self._field_name, proportion=1)
@@ -65,7 +65,7 @@ class NewFileDialog(wx.Dialog):
         choices.append('-')
         # Category sub sizer
         self._category_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self._label_category = wx.StaticText(self, -1, Strings.label_target_section + ': ')
+        self._label_category = wx.StaticText(self, -1, f'{Strings.label_target_section}: ')
         self._box_menu = wx.ComboBox(self, -1, choices=choices, style=wx.CB_DROPDOWN | wx.CB_SORT | wx.CB_READONLY)
         self._box_menu.SetSelection(0)
         self._box_menu.SetBackgroundColour(Numbers.RED_COLOR)
@@ -159,7 +159,7 @@ class NewFileDialog(wx.Dialog):
         day = today.strftime("%-d")
         month = today.strftime("%-m")
         year = today.strftime("%Y")
-        return day + '. ' + month_dict[int(month)] + ' ' + year
+        return f'{day}. {month_dict[int(month)]} {year}'
 
     def _get_document_path(self) -> bool:
         """
@@ -192,7 +192,7 @@ class NewFileDialog(wx.Dialog):
                 menu_item: MenuItem = MenuItem(name='',
                                                title='',
                                                image_alt='',
-                                               href=self._field_name.GetValue() + Strings.extension_html,
+                                               href=f'{self._field_name.GetValue()}{Strings.extension_html}',
                                                disk_path='',
                                                img_filename=Strings.label_none)
                 menu_item.test_self()

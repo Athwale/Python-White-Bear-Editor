@@ -218,27 +218,26 @@ class Strings:
     exception_reserved_blue: str = 'Blue color reserved for urls detected in CSS'
 
     seo_error_length: str = 'Required length'
-    seo_error_keywords_length: str = 'Length must be: ' + str(Numbers.keywords_min_length) + ' - ' + str(
-        Numbers.keywords_max_length) + ' characters long'
+    seo_error_keywords_length: str = f'Length must be: {Numbers.keywords_min_length} - {Numbers.keywords_max_length} ' \
+                                     f'characters long'
     seo_error_keywords_format: str = 'Must be a comma separated list'
     seo_error_keywords_amount: str = 'Too few keywords'
-    seo_error_description_length: str = 'Length must be: ' + str(
-        Numbers.description_min_length) + ' - ' + str(Numbers.description_max_length) + ' characters long'
-    seo_error_name_length: str = 'Length must be: ' + str(Numbers.article_name_min_length) + ' - ' + str(
-        Numbers.article_name_max_length) + ' characters long'
-    seo_error_menu_name_length: str = 'Length must be: ' + str(Numbers.menu_name_min_length) + ' - ' + str(
-        Numbers.menu_name_max_length) + ' characters long'
+    seo_error_description_length: str = f'Length must be: {Numbers.description_min_length} - ' \
+                                        f'{Numbers.description_max_length} characters long'
+    seo_error_name_length: str = f'Length must be: {Numbers.article_name_min_length} - {Numbers.article_name_max_length}' \
+                                 f' characters long'
+    seo_error_menu_name_length: str = f'Length must be: {Numbers.menu_name_min_length} - {Numbers.menu_name_max_length}' \
+                                      f' characters long'
     seo_error_default_value: str = 'Default value can not be used'
     seo_error_date_format: str = 'Date format incorrect (example: 31. Ledna 2020)'
     seo_error_date_format_day: str = 'Date format incorrect, day must be: 1 - 31'
-    seo_error_date_format_year: str = 'Date format incorrect, year must be: ' + str(Numbers.year_min) + ' - ' + str(
-        Numbers.year_max)
-    seo_error_image_caption_length: str = 'Length must be: ' + str(Numbers.article_image_caption_min) + ' - ' + str(
-        Numbers.article_image_caption_max) + ' characters long'
-    seo_error_link_title_length: str = 'Length must be: ' + str(Numbers.article_image_title_min) + ' - ' + str(
-        Numbers.article_image_title_max) + ' characters long'
-    seo_error_image_alt_length: str = 'Length must be: ' + str(Numbers.article_image_alt_min) + ' - ' + str(
-        Numbers.article_image_alt_max) + ' characters long'
+    seo_error_date_format_year: str = f'Date format incorrect, year must be: {Numbers.year_min} - {Numbers.year_max}'
+    seo_error_image_caption_length: str = f'Length must be: {Numbers.article_image_caption_min} - ' \
+                                          f'{Numbers.article_image_caption_max} characters long'
+    seo_error_link_title_length: str = f'Length must be: {Numbers.article_image_title_min} - ' \
+                                       f'{Numbers.article_image_title_max} characters long'
+    seo_error_image_alt_length: str = f'Length must be: {Numbers.article_image_alt_min} - ' \
+                                      f'{Numbers.article_image_alt_max} characters long'
     seo_error_url_nonexistent: str = 'Target page does not exist'
     seo_error_url_malformed: str = 'Url syntax error'
     seo_error_video_size_wrong: str = 'The size of the video element is incorrect'
@@ -256,8 +255,7 @@ class Strings:
     warning_aside_impossible: str = 'Aspect ratio must be 4/3 for aside or main image'
     warning_wrong_image_folder: str = 'Images must come from whitebear thumbnails folder'
     warning_wrong_logo_folder: str = 'Menu image must come from whitebear logos folder'
-    warning_wrong_logo_size: str = 'Menu image must be ' + str(Numbers.menu_logo_image_size) + 'x' + \
-                                   str(Numbers.menu_logo_image_size) + 'px'
+    warning_wrong_logo_size: str = f'Menu image must be {Numbers.menu_logo_image_size}x{Numbers.menu_logo_image_size}px'
     warning_not_square: str = 'Menu image must be square'
     warning_can_not_save: str = 'Can not save to disk.'
     warning_empty: str = 'Name can not be empty'
@@ -419,9 +417,8 @@ class Strings:
     label_select_image: str = 'Select image'
     label_select_file: str = 'Select file'
     label_target_section: str = 'Section'
-    label_text_image: str = 'Text image (width ' + str(Numbers.text_image_max_size) + 'px)'
-    label_aside_image: str = 'Aside/Main image (' + str(Numbers.main_image_width) + 'x' + \
-                             str(Numbers.main_image_height) + 'px)'
+    label_text_image: str = f'Text image (width {Numbers.text_image_max_size}px)'
+    label_aside_image: str = f'Aside/Main image ({Numbers.main_image_width}x{Numbers.main_image_height}px)'
     label_image_name: str = 'Image name'
     label_url_error: str = 'URL Error'
     label_red_url_warning: str = 'Document contains incorrect URL'

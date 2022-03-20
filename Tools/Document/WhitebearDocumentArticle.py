@@ -202,7 +202,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
                 self._menu_section = menu
                 break
         if not self._menu_item:
-            raise WrongFormatException(Strings.exception_menu_item_missing + ' for: ' + self.get_filename())
+            raise WrongFormatException(f'{Strings.exception_menu_item_missing} for: {self.get_filename()}')
 
     def _parse_enabled_attribute(self) -> None:
         """
@@ -464,14 +464,13 @@ class WhitebearDocumentArticle(WhitebearDocument):
             template_string = template.read()
         is_valid, errors = Tools.validate(template_string, 'schema_article_template.xsd')
         if not is_valid:
-            raise UnrecognizedFileException(Strings.exception_html_syntax_error + '\n' + 'article_template.html ' +
-                                            str(errors))
+            raise UnrecognizedFileException(f'{Strings.exception_html_syntax_error}\narticle_template.html\n{errors}')
 
         parsed_template = BeautifulSoup(template_string, 'html5lib')
 
         # Fill title.
         title: Tag = parsed_template.find(name='title')
-        title.string = self._page_name + ' - ' + self._menu_section.get_section_name() + ' | ' + Strings.page_name
+        title.string = f'{self._page_name} - {self._menu_section.get_section_name()} | {Strings.page_name}'
 
         # Fill description.
         description = parsed_template.find_all(name='meta', attrs={'name': 'description', 'content': True})
@@ -607,7 +606,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
         output = str(parsed_template)
         is_valid, errors = Tools.validate(output, 'schema_article.xsd')
         if not is_valid:
-            raise UnrecognizedFileException(Strings.exception_bug + '\n' + self.get_filename() + ' \n' + str(errors))
+            raise UnrecognizedFileException(f'{Strings.exception_bug}\n{self.get_filename()} \n{errors}')
 
         self._html = output
         # Save the fact that this file is changed into the list of file that we need to upload. This survives editor
@@ -699,7 +698,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
             return 1
         year = self._date.split(' ', 2)[2]
         return time.mktime(datetime.datetime.
-                           strptime(str(day) + '/' + str(month) + '/' + str(year), "%d/%m/%Y").timetuple())
+                           strptime(f'{day}/{month}/{year}', "%d/%m/%Y").timetuple())
 
     def get_article_image(self) -> AsideImage:
         """

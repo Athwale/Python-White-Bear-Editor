@@ -37,7 +37,7 @@ class DirectoryLoader:
             self._xmlschema_article = etree.XMLSchema(etree.parse(Fetch.get_resource_path('schema_article.xsd')))
             self._xmlschema_menu = etree.XMLSchema(etree.parse(Fetch.get_resource_path('schema_menu.xsd')))
         except XMLSchemaParseError as ex:
-            raise UnrecognizedFileException(Strings.exception_schema_syntax_error + ':\n' + str(ex))
+            raise UnrecognizedFileException(f'{Strings.exception_schema_syntax_error}:\n{ex}')
 
     def get_directory(self) -> str:
         """
@@ -99,16 +99,16 @@ class DirectoryLoader:
             raise AccessException(Strings.exception_access)
 
         if not os.path.exists(os.path.join(path, 'index.html')):
-            raise FileNotFoundError(Strings.exception_index + ' ' + path)
+            raise FileNotFoundError(f'{Strings.exception_index} {path}')
         else:
             try:
                 xml_doc = html.parse(os.path.join(path, 'index.html'))
                 if not self._xmlschema_index.validate(xml_doc):
-                    raise IndexException(Strings.exception_not_white_bear + '\n' + str(self._xmlschema_index.error_log))
+                    raise IndexException(f'{Strings.exception_not_white_bear}\n{self._xmlschema_index.error_log}')
             except XMLSyntaxError as e:
-                raise IndexException(Strings.exception_html_syntax_error + '\n' + str(e) + ': index.html')
-            except ValueError as _:
-                raise IndexException(Strings.exception_html_syntax_error + ':\n' + 'index.html')
+                raise IndexException(f'{Strings.exception_html_syntax_error}:\n{e}:\nindex.html')
+            except ValueError as e:
+                raise IndexException(f'{Strings.exception_html_syntax_error}:\n{e}\nindex.html')
         return True
 
     def _prepare_documents(self, path: str) -> None:
@@ -125,7 +125,7 @@ class DirectoryLoader:
         file = os.path.join(path, 'styles.css')
         if os.path.isfile(file):
             if not os.access(file, os.R_OK) or not os.access(file, os.W_OK):
-                raise AccessException(Strings.exception_access_html + " " + file)
+                raise AccessException(f'{Strings.exception_access_html} {file}')
             else:
                 filename: str = os.path.basename(file)
                 file_path: str = os.path.realpath(file)
@@ -138,7 +138,7 @@ class DirectoryLoader:
             file = os.path.join(path, file)
             if os.path.isfile(file):
                 if not os.access(file, os.R_OK) or not os.access(file, os.W_OK):
-                    raise AccessException(Strings.exception_access_html + " " + file)
+                    raise AccessException(f'{Strings.exception_access_html} {file}')
                 else:
                     filename: str = os.path.basename(file)
                     file_path: str = os.path.realpath(file)
@@ -161,10 +161,9 @@ class DirectoryLoader:
                             if 'google' in filename or '404' in filename:
                                 continue
                             else:
-                                raise UnrecognizedFileException(Strings.exception_file_unrecognized + ' ' + filename)
+                                raise UnrecognizedFileException(f'{Strings.exception_file_unrecognized} {filename}')
                     except (XMLSyntaxError, ValueError) as e:
-                        raise UnrecognizedFileException(Strings.exception_html_syntax_error + '\n' + str(e) + '\n' +
-                                                        file)
+                        raise UnrecognizedFileException(f'{Strings.exception_html_syntax_error}\n{e}\n{file}')
 
         # Parse all articles after we have recognized and parsed all menu pages.
         for article in self._article_documents.values():
@@ -172,9 +171,9 @@ class DirectoryLoader:
                 article.parse_self()
                 article.set_index_document(self._index_document)
             except IndexError as _:
-                raise WrongFormatException(Strings.exception_broken_html + ': ' + article.get_path())
+                raise WrongFormatException(f'{Strings.exception_broken_html}: {article.get_path()}')
         try:
             # Parse index.
             self._index_document.parse_self()
         except IndexError as _:
-            raise WrongFormatException(Strings.exception_broken_html + ': ' + self._index_document.get_path())
+            raise WrongFormatException(f'{Strings.exception_broken_html}: {self._index_document.get_path()}')

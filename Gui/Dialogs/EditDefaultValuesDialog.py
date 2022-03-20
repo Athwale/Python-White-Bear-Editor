@@ -34,7 +34,7 @@ class EditDefaultValuesDialog(SpellCheckedDialog):
 
         # Title sub sizer
         self._title_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self._label_main_title = wx.StaticText(self, -1, Strings.label_global_title + ': ')
+        self._label_main_title = wx.StaticText(self, -1, f'{Strings.label_global_title}: ')
         self._field_global_title = wx.TextCtrl(self, -1)
         self._title_sub_sizer.Add(self._label_main_title, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
         self._title_sub_sizer.Add((2, -1))
@@ -45,7 +45,7 @@ class EditDefaultValuesDialog(SpellCheckedDialog):
 
         # Url sub sizer
         self._url_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self._label_url = wx.StaticText(self, -1, Strings.label_website_url + ': ')
+        self._label_url = wx.StaticText(self, -1, f'{Strings.label_website_url}: ')
         self._field_url = wx.TextCtrl(self, -1)
         self._url_sub_sizer.Add(self._label_url, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
         self._url_sub_sizer.Add((44, -1))
@@ -56,9 +56,9 @@ class EditDefaultValuesDialog(SpellCheckedDialog):
 
         # Author sub sizer
         self._author_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self._label_author = wx.StaticText(self, -1, Strings.label_author + ': ')
+        self._label_author = wx.StaticText(self, -1, f'{Strings.label_author}: ')
         self._field_author = wx.TextCtrl(self, -1)
-        self._label_news = wx.StaticText(self, -1, Strings.label_number_of_news + ': ')
+        self._label_news = wx.StaticText(self, -1, f'{Strings.label_number_of_news}: ')
         self._news_spinner = wx.SpinCtrl(self, -1, style=wx.SP_ARROW_KEYS, min=Numbers.min_news, max=Numbers.max_news,
                                          initial=Numbers.default_news)
         self._author_sub_sizer.Add(self._label_author, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
@@ -74,7 +74,7 @@ class EditDefaultValuesDialog(SpellCheckedDialog):
 
         # e-mail sub sizer
         self._contact_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self._label_contact = wx.StaticText(self, -1, Strings.label_contact + ': ')
+        self._label_contact = wx.StaticText(self, -1, f'{Strings.label_contact}: ')
         self._field_contact = wx.TextCtrl(self, -1)
         self._contact_sub_sizer.Add(self._label_contact, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
         self._contact_sub_sizer.Add((14, -1))
@@ -85,7 +85,7 @@ class EditDefaultValuesDialog(SpellCheckedDialog):
 
         # Keywords sub sizer
         self._meta_keywords_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self._label_meta_keywords = wx.StaticText(self, -1, Strings.label_default_keywords + ': ')
+        self._label_meta_keywords = wx.StaticText(self, -1, f'{Strings.label_default_keywords}: ')
         self._field_meta_keywords = wx.TextCtrl(self, -1)
         self._meta_keywords_sub_sizer.Add(self._label_meta_keywords, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
         self._meta_keywords_sub_sizer.Add(self._field_meta_keywords, proportion=1)
@@ -97,7 +97,7 @@ class EditDefaultValuesDialog(SpellCheckedDialog):
         # --------------------------------------------------------------------------------------------------------------
         # Description sub sizer
         self._meta_description_sub_sizer = wx.BoxSizer(wx.VERTICAL)
-        self._label_meta_description = wx.StaticText(self, -1, Strings.label_main_meta_description + ': ')
+        self._label_meta_description = wx.StaticText(self, -1, f'{Strings.label_main_meta_description}: ')
         self._field_meta_description = wx.TextCtrl(self, -1, size=wx.Size(-1, 60), style=wx.TE_MULTILINE)
         self._meta_description_sub_sizer.Add(self._label_meta_description, flag=wx.ALIGN_LEFT)
         self._meta_description_sub_sizer.Add(3, 3)
@@ -110,7 +110,7 @@ class EditDefaultValuesDialog(SpellCheckedDialog):
 
         # Script sub sizer
         self._script_sub_sizer = wx.BoxSizer(wx.VERTICAL)
-        self._label_script = wx.StaticText(self, -1, Strings.label_script + ': ')
+        self._label_script = wx.StaticText(self, -1, f'{Strings.label_script}: ')
         self._field_script = wx.TextCtrl(self, -1, size=wx.Size(-1, 135), style=wx.TE_MULTILINE)
         self._script_sub_sizer.Add(self._label_script, flag=wx.ALIGN_LEFT)
         self._script_sub_sizer.Add(3, 3)
@@ -122,7 +122,7 @@ class EditDefaultValuesDialog(SpellCheckedDialog):
 
         # Black text sub sizer
         self._black_text_sub_sizer = wx.BoxSizer(wx.VERTICAL)
-        self._label_black_text = wx.StaticText(self, -1, Strings.label_main_page_text + ': ')
+        self._label_black_text = wx.StaticText(self, -1, f'{Strings.label_main_page_text}: ')
         self._field_black_text = wx.TextCtrl(self, -1, size=wx.Size(-1, 135), style=wx.TE_MULTILINE)
         self._black_text_sub_sizer.Add(self._label_black_text, flag=wx.ALIGN_LEFT)
         self._black_text_sub_sizer.Add(3, 3)
@@ -134,7 +134,7 @@ class EditDefaultValuesDialog(SpellCheckedDialog):
 
         # Red text sub sizer
         self._red_text_sub_sizer = wx.BoxSizer(wx.VERTICAL)
-        self._label_red_text = wx.StaticText(self, -1, Strings.label_main_page_warning + ': ')
+        self._label_red_text = wx.StaticText(self, -1, f'{Strings.label_main_page_warning}: ')
         self._label_red_text.SetForegroundColour(wx.RED)
         self._field_red_text = wx.TextCtrl(self, -1, size=wx.Size(-1, 135), style=wx.TE_MULTILINE)
         self._field_red_text.SetForegroundColour(wx.RED)
@@ -240,15 +240,14 @@ class EditDefaultValuesDialog(SpellCheckedDialog):
         correct, message, color = self._test_doc.seo_test_keywords(self._field_meta_keywords.GetValue())
         result = result and correct
         self._field_meta_keywords.SetBackgroundColour(color)
-        self._field_keywords_tip.SetMessage(Strings.label_default_keywords_tip + '\n\n' +
-                                            Strings.seo_check + '\n' + message)
+        self._field_keywords_tip.SetMessage(f'{Strings.label_default_keywords_tip}\n\n{Strings.seo_check}\n{message}')
 
         # Description test.
         correct, message, color = self._test_doc.seo_test_description(self._field_meta_description.GetValue())
         result = result and correct
         Tools.set_field_background(self._field_meta_description, color)
-        self._field_description_tip.SetMessage(Strings.label_main_description_tip + '\n\n' +
-                                               Strings.seo_check + '\n' + message)
+        self._field_description_tip.SetMessage(f'{Strings.label_main_description_tip}\n\n{Strings.seo_check}\n'
+                                               f'{message}')
 
         # Check emptiness.
         # Check length and spelling.
@@ -270,12 +269,12 @@ class EditDefaultValuesDialog(SpellCheckedDialog):
                     (len(field.GetValue()) > Numbers.default_max_length or len(field.GetValue()) < 1):
                 result = False
                 Tools.set_field_background(field, Numbers.RED_COLOR)
-                tip.SetMessage(msg + '\n\n' + Strings.seo_check + '\n' + Strings.seo_error_length + ': 1 - ' +
-                               str(Numbers.default_max_length))
+                tip.SetMessage(f'{msg}\n\n{Strings.seo_check}\n{Strings.seo_error_length}: 1 - '
+                               f'{Numbers.default_max_length}')
             elif field in (self._field_script, self._field_black_text, self._field_red_text) and not field.GetValue():
                 result = False
                 Tools.set_field_background(field, Numbers.RED_COLOR)
-                tip.SetMessage(msg + '\n\n' + Strings.seo_check + '\n' + Strings.seo_error_not_empty)
+                tip.SetMessage(f'{msg}\n\n{Strings.seo_check}\n{Strings.seo_error_not_empty}')
             elif not self._spell_check(field.GetValue()) and sp:
                 # Run spellcheck on this field.
                 # In other cases spellcheck is done by the object copy and error messages are set in it.
@@ -283,10 +282,10 @@ class EditDefaultValuesDialog(SpellCheckedDialog):
                 # Keywords and description already have a spellcheck in their builtin seo test.
                 result = False
                 Tools.set_field_background(field, Numbers.RED_COLOR)
-                tip.SetMessage(msg + '\n\n' + Strings.seo_check + '\n' + Strings.spelling_error)
+                tip.SetMessage(f'{msg}\n\n{Strings.seo_check}\n{Strings.spelling_error}')
             else:
                 Tools.set_field_background(field, Numbers.GREEN_COLOR)
-                tip.SetMessage(msg + '\n\n' + Strings.seo_check + '\n' + Strings.status_ok)
+                tip.SetMessage(f'{msg}\n\n{Strings.seo_check}\n{Strings.status_ok}')
 
         return result
 

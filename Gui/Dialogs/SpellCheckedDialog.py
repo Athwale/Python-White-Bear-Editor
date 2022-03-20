@@ -28,7 +28,7 @@ class SpellCheckedDialog(wx.Dialog):
         :return: None
         """
         for field, name in fields:
-            dlg = SpellCheckerDialog(self, Strings.label_dialog_spellcheck + ': ' + name, field.GetValue())
+            dlg = SpellCheckerDialog(self, f'{Strings.label_dialog_spellcheck}: {name}', field.GetValue())
             dlg.run()
             if dlg.found_mistake():
                 if dlg.ShowModal() == wx.ID_OK:

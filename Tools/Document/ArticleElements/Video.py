@@ -37,7 +37,7 @@ class Video(SpellCheckedObject):
 
         # Create a unique ID.
         self._video_id = str(Video.count)
-        Video.count = Video.count + 1
+        Video.count += 1
 
     def test_self(self, online: bool) -> bool:
         """

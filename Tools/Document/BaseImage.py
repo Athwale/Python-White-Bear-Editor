@@ -43,7 +43,7 @@ class BaseImage(SpellCheckedObject):
 
         # Create a unique ID.
         self._image_id = str(BaseImage.count)
-        BaseImage.count = BaseImage.count + 1
+        BaseImage.count += 1
 
     def test_self(self) -> bool:
         """

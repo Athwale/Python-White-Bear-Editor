@@ -28,4 +28,4 @@ class Fetch:
             if os.path.exists(resource_path):
                 return resource_path
             else:
-                raise FileNotFoundError(Strings.exception_resource_not_found + ': ' + str(name))
+                raise FileNotFoundError(f'{Strings.exception_resource_not_found}: {name}')

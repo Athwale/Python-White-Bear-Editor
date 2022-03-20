@@ -38,7 +38,7 @@ class AddImageDialog(wx.Dialog):
 
         # Disk location
         self._original_disk_location_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self._label_image_original_path = wx.StaticText(self, -1, Strings.label_image + ': ')
+        self._label_image_original_path = wx.StaticText(self, -1, f'{Strings.label_image}: ')
         self._content_image_original_path = wx.StaticText(self, -1, Strings.label_none,
                                                           style=wx.ST_ELLIPSIZE_MIDDLE | wx.ST_NO_AUTORESIZE)
         self._original_disk_location_sub_sizer.Add(self._label_image_original_path,
@@ -49,7 +49,7 @@ class AddImageDialog(wx.Dialog):
 
         # Original size
         self._image_original_size_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self._label_image_original_size = wx.StaticText(self, -1, Strings.label_full_size + ': ')
+        self._label_image_original_size = wx.StaticText(self, -1, f'{Strings.label_full_size}: ')
         self._content_image_original_size = wx.StaticText(self, -1, Strings.label_none,
                                                           style=wx.ST_ELLIPSIZE_MIDDLE | wx.ST_NO_AUTORESIZE)
         self._image_original_size_sub_sizer.Add(self._label_image_original_size,
@@ -61,7 +61,7 @@ class AddImageDialog(wx.Dialog):
 
         # Thumbnail size
         self._image_thumbnail_size_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self._label_image_thumbnail_size = wx.StaticText(self, -1, Strings.label_thumbnail_size + ': ')
+        self._label_image_thumbnail_size = wx.StaticText(self, -1, f'{Strings.label_thumbnail_size}: ')
         self._content_image_thumbnail_size = wx.StaticText(self, -1, Strings.label_none,
                                                            style=wx.ST_ELLIPSIZE_MIDDLE | wx.ST_NO_AUTORESIZE)
         self._image_thumbnail_size_sub_sizer.Add(self._label_image_thumbnail_size,
@@ -72,7 +72,7 @@ class AddImageDialog(wx.Dialog):
 
         # Image name sub sizer
         self._name_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self._label_image_name = wx.StaticText(self, -1, Strings.label_name + ': ')
+        self._label_image_name = wx.StaticText(self, -1, f'{Strings.label_name}: ')
         self._field_image_name = wx.TextCtrl(self, -1)
         self._field_image_name.Disable()
         self._name_sub_sizer.Add(self._label_image_name, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
@@ -224,14 +224,14 @@ class AddImageDialog(wx.Dialog):
         self._thumbnail_path = self._thumbnail_path + file_extension.lower()
         full_file = full_file + file_extension.lower()
         if os.path.exists(self._thumbnail_path):
-            result = wx.MessageBox(Strings.warning_file_exists_overwrite + ': \n' + self._thumbnail_path,
+            result = wx.MessageBox(f'{Strings.warning_file_exists_overwrite}: \n{self._thumbnail_path}',
                                    Strings.status_error, wx.YES_NO | wx.ICON_ERROR)
             if result == wx.NO:
                 return False
         self._thumbnail.SaveFile(self._thumbnail_path, img_type)
 
         if os.path.exists(full_file):
-            result = wx.MessageBox(Strings.warning_file_exists_overwrite + ': \n' + full_file,
+            result = wx.MessageBox(f'{Strings.warning_file_exists_overwrite}: \n{full_file}',
                                    Strings.status_error, wx.YES_NO | wx.ICON_ERROR)
             if result == wx.NO:
                 return False
@@ -276,8 +276,8 @@ class AddImageDialog(wx.Dialog):
             self._full_image.Rescale(self._full_image.GetWidth() / 2, self._full_image.GetHeight() / 2,
                                      wx.IMAGE_QUALITY_HIGH)
         # Display the originals image width
-        self._content_image_original_size.SetLabelText(
-            str(self._full_image.GetWidth()) + ' x ' + str(self._full_image.GetHeight()) + ' px')
+        self._content_image_original_size.SetLabelText(f'{self._full_image.GetWidth()} x {self._full_image.GetHeight()}'
+                                                       f' px')
         # Create the thumbnail and show it.
         self._load_thumbnail()
 
@@ -296,8 +296,8 @@ class AddImageDialog(wx.Dialog):
             # The other option is aside or main image which must be exactly 300x225px.
             self._thumbnail.Rescale(Numbers.main_image_width, Numbers.main_image_height, wx.IMAGE_QUALITY_HIGH)
 
-        self._content_image_thumbnail_size.SetLabelText(str(self._thumbnail.GetWidth()) + ' x ' +
-                                                        str(self._thumbnail.GetHeight()) + ' px')
+        self._content_image_thumbnail_size.SetLabelText(f'{self._thumbnail.GetWidth()} x {self._thumbnail.GetHeight()}'
+                                                        f' px')
         self._bitmap.SetBitmap(wx.Bitmap(self._thumbnail))
         height = self._thumbnail.GetHeight()
         if height < Numbers.main_image_height:

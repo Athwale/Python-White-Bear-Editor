@@ -47,11 +47,11 @@ class Tools:
             xml_doc = html.fromstring(html_string)
             is_valid = xmlschema.validate(xml_doc)
         except XMLSchemaParseError as e:
-            raise UnrecognizedFileException(Strings.exception_schema_syntax_error + ':\n' + str(e))
+            raise UnrecognizedFileException(f'{Strings.exception_schema_syntax_error}:\n{e}')
         except XMLSyntaxError as e:
-            raise UnrecognizedFileException(Strings.exception_html_syntax_error + ':\n' + str(e))
+            raise UnrecognizedFileException(f'{Strings.exception_html_syntax_error}:\n{e}')
         except ParserError as e:
-            raise UnrecognizedFileException(Strings.exception_html_syntax_error + ':\n' + str(e))
+            raise UnrecognizedFileException(f'{Strings.exception_html_syntax_error}:\n{e}')
         for error in xmlschema.error_log:
             errors.append(error.message)
         return is_valid, errors

@@ -33,7 +33,7 @@ class SitemapGenerator:
             url_tag = self._soup.new_tag('url')
             # Location
             loc_tag = self._soup.new_tag('loc')
-            loc_tag.string = page_url + '/' + str(page)
+            loc_tag.string = f'{page_url}/{page}'
             url_tag.append(loc_tag)
             # Last modification
             lastmod_tag = self._soup.new_tag('lastmod')

@@ -57,7 +57,7 @@ class MainFrame(wx.Frame):
         Constructor for the GUI of the editor. This is the main frame, so we pass None as the parent.
         """
         # -1 is a special ID which generates a random wx ID
-        super(MainFrame, self).__init__(None, -1, title=Strings.editor_name + ' - ' + Strings.status_loading,
+        super(MainFrame, self).__init__(None, -1, title=f'{Strings.editor_name} - {Strings.status_loading}',
                                         style=wx.DEFAULT_FRAME_STYLE)
 
         self.SetIcon(wx.Icon(Fetch.get_resource_path('icon.ico')))
@@ -70,7 +70,7 @@ class MainFrame(wx.Frame):
         try:
             self._config_manager: ConfigManager = ConfigManager.get_instance()
         except PermissionError as e:
-            self._show_error_dialog(Strings.exception_conf_inaccessible + '\n' + str(e))
+            self._show_error_dialog(f'{Strings.exception_conf_inaccessible}\n{e}')
 
         self._tool_ids = []
         self._disableable_menu_items = []
@@ -399,7 +399,7 @@ class MainFrame(wx.Frame):
                 return
         bmp = self._make_bitmap(color)
         tool: wx.ToolBarToolBase = toolbar.AddTool(self._add_tool_id(), Strings.toolbar_color, bmp, name)
-        tool.SetLongHelp(Strings.toolbar_color + ': ' + name)
+        tool.SetLongHelp(f'{Strings.toolbar_color}: {name}')
         self.Bind(wx.EVT_MENU, self._change_color, tool)
 
     @staticmethod
@@ -693,7 +693,7 @@ class MainFrame(wx.Frame):
         :param position: Where to set the text, 0 is default
         :return: None
         """
-        to_set = '| ' + text
+        to_set = f'| {text}'
         self._status_bar.SetStatusText(to_set, position)
 
     def _disable_editor(self, state, leave_files: bool = False, all_menu: bool = False) -> None:
@@ -762,7 +762,7 @@ class MainFrame(wx.Frame):
         # Disable the gui until load is done
         self._disable_editor(True, leave_files=False, all_menu=True)
         self._set_status_text(Strings.status_loading, 3)
-        self._set_status_text(('Work dir: ' + str(path)), 1)
+        self._set_status_text(f'Work dir: {path}', 1)
         self._set_status_text(Strings.status_ready, 0)
         file_list_thread = FileListThread(self, str(path))
         file_list_thread.start()
@@ -845,13 +845,13 @@ class MainFrame(wx.Frame):
                 self._file_list.Select(index)
             else:
                 self._loading_screen_on(False)
-                self._show_error_dialog(Strings.warning_last_document_not_found + ':' + '\n' + str(last_document))
+                self._show_error_dialog(f'{Strings.warning_last_document_not_found}:\n{last_document}')
                 self._clear_editor(leave_files=True)
 
         os.chdir(self._config_manager.get_working_dir())
         # Enable GUI when the load is done
         self._set_status_text(Strings.status_ready, 3)
-        self._set_status_text(Strings.status_articles + ' ' + str(len(self._articles)), 2)
+        self._set_status_text(f'{Strings.status_articles} {(len(self._articles))}', 2)
         self._loading_screen_on(False)
 
         # Store this as last known open directory.
@@ -1010,8 +1010,7 @@ class MainFrame(wx.Frame):
 
         if os.path.exists(file_path):
             if not os.access(file_path, os.R_OK) or not os.access(file_path, os.W_OK):
-                self._show_error_dialog(Strings.warning_can_not_save + '\n' + Strings.exception_access_html + '\n' +
-                                        file_path)
+                self._show_error_dialog(f'{Strings.warning_can_not_save}\n{Strings.exception_access_html}\n{file_path}')
                 self._disable_editor(False)
                 return
         if save_as:
@@ -1021,9 +1020,8 @@ class MainFrame(wx.Frame):
                 with open(file_path, 'w', encoding='utf8') as file:
                     file.write(html_string)
             except IOError:
-                self._show_error_dialog(Strings.warning_can_not_save + '\n' + Strings.exception_access_html + '\n' +
-                                        file_path)
-            self._set_status_text(Strings.label_saving + ': ' + file_name, 3)
+                self._show_error_dialog(f'{Strings.warning_can_not_save}\n{Strings.exception_access_html}\n{file_path}')
+            self._set_status_text(f'{Strings.label_saving}: {file_name}', 3)
         # Clean thread list off stopped threads.
         if isinstance(doc, WhitebearDocumentArticle):
             # This is used after all threads are done to update the color of all saved documents.
@@ -1041,7 +1039,7 @@ class MainFrame(wx.Frame):
                 # Enable only when all threads have finished and enabling is allowed.
                 self._disable_editor(False)
             if file_path:
-                self._set_status_text(Strings.status_saved + ': ' + last_save, 3)
+                self._set_status_text(f'{Strings.status_saved}: {last_save}', 3)
 
     def on_sitemap_done(self, sitemap: str, disable: bool) -> None:
         """
@@ -1056,17 +1054,15 @@ class MainFrame(wx.Frame):
             # Save sitemap
             with open(sitemap_file, 'w', encoding='utf8') as file:
                 file.write(sitemap)
-                self._set_status_text(Strings.status_saved + ': ' + last_save, 3)
-                self._set_status_text(Strings.label_saving + ': ' + Strings.sitemap_file, 3)
+                self._set_status_text(f'{Strings.status_saved}: {last_save}', 3)
+                self._set_status_text(f'{Strings.label_saving}: {Strings.sitemap_file}', 3)
             # Save robots.txt if not present
             if not os.path.exists(robots_txt):
                 with open(robots_txt, 'w', encoding='utf8') as file:
-                    file.write(Strings.sitemap_keyword + ' ' + self._config_manager.get_url() + '/' +
-                               Strings.sitemap_file)
-                    self._set_status_text(Strings.label_saving + ': ' + Strings.robots_file, 3)
+                    file.write(f'{Strings.sitemap_keyword} {self._config_manager.get_url()}/{Strings.sitemap_file}')
+                    self._set_status_text(f'{Strings.label_saving}: {Strings.robots_file}', 3)
         except IOError:
-            self._show_error_dialog(Strings.warning_can_not_save + '\n' + Strings.exception_access_html + '\n' +
-                                    sitemap_file)
+            self._show_error_dialog(f'{Strings.warning_can_not_save}\n{Strings.exception_access_html}\n{sitemap_file}')
         # The last thread is the main thread.
         if threading.active_count() == 1 and not disable:
             # Enable only when all threads have finished.
@@ -1081,7 +1077,7 @@ class MainFrame(wx.Frame):
         with wx.FileDialog(self, Strings.label_dialog_save_file, wildcard=Strings.html_wildcard,
                            style=wx.FD_SAVE | wx.FD_OVERWRITE_PROMPT,
                            defaultDir=self._current_document_instance.get_working_directory(),
-                           defaultFile=Strings.default_file + '-' + suffix) as fileDialog:
+                           defaultFile=f'{Strings.default_file}-{suffix}') as fileDialog:
             if fileDialog.ShowModal() == wx.ID_OK:
                 new_path = fileDialog.GetPath()
                 # Add .html if necessary.
@@ -1097,7 +1093,7 @@ class MainFrame(wx.Frame):
         Shows an error message with the conversion problem.
         :return: None
         """
-        self._show_error_dialog(Strings.warning_can_not_save + '\n\n' + str(e))
+        self._show_error_dialog(f'{Strings.warning_can_not_save}\n\n{e}')
         self._disable_editor(False)
 
     # noinspection PyUnusedLocal
@@ -1259,11 +1255,11 @@ class MainFrame(wx.Frame):
         try:
             result = self._current_document_instance.validate_self()
             if not result[0]:
-                self._set_status_text(Strings.status_warning + ': ' + self._current_document_name)
+                self._set_status_text(f'{Strings.status_warning}: {self._current_document_name}')
                 # Prepare error string from all validation errors
-                error_string = Strings.exception_html_syntax_error + ': ' + self._current_document_name + '\n'
+                error_string = f'{Strings.exception_html_syntax_error}: {self._current_document_name}\n'
                 for message in result[1]:
-                    error_string = error_string + message + '\n'
+                    error_string += f'{message}\n'
                 self._show_error_dialog(error_string)
                 self._disable_editor(True)
                 self._clear_editor(leave_files=False)
@@ -1306,7 +1302,7 @@ class MainFrame(wx.Frame):
                     Tools.set_field_background(field, Numbers.GREEN_COLOR)
                 else:
                     Tools.set_field_background(field, Numbers.RED_COLOR)
-                tip.SetMessage(Strings.seo_check + '\n' + value[0][1])
+                tip.SetMessage(f'{Strings.seo_check}\n{value[0][1]}')
                 tip.EnableTip(True)
             field.SetValue(value[0][0])
 
@@ -1408,7 +1404,7 @@ class MainFrame(wx.Frame):
         """
         correct, message, color = seo_test(field.GetValue())
         field.SetBackgroundColour(color)
-        tip.SetMessage(Strings.seo_check + '\n' + message)
+        tip.SetMessage(f'{Strings.seo_check}\n{message}')
 
     def _update_description_color(self) -> None:
         """
@@ -1423,7 +1419,7 @@ class MainFrame(wx.Frame):
         # Set color for the current text separately, it does not work with just background color
         Tools.set_field_background(self._field_article_description, color)
 
-        self._field_article_description_tip.SetMessage(Strings.seo_check + '\n' + message)
+        self._field_article_description_tip.SetMessage(f'{Strings.seo_check}\n{message}')
 
     # noinspection PyUnusedLocal
     def _text_area_edit_handler(self, event: wx.CommandEvent) -> None:
@@ -1595,7 +1591,7 @@ class MainFrame(wx.Frame):
             self._search_results.append(start_index)
             # Find the next one after the current match.
             start_index = text_content.find(self._search_term, start_index + len(self._search_term))
-        self._set_status_text(Strings.status_found + ': ' + str(len(self._search_results)), 3)
+        self._set_status_text(f'{Strings.status_found}: {len(self._search_results)}', 3)
 
         if len(self._search_results) == 0:
             # Nothing has been found
@@ -1661,7 +1657,7 @@ class MainFrame(wx.Frame):
                 self._save(save_list, save_as=False)
             # Add to list
             self._file_list.InsertItem(0, new_document.get_filename())
-            self._set_status_text(Strings.status_articles + ' ' + str(len(self._articles)), 2)
+            self._set_status_text(f'{Strings.status_articles} {len(self._articles)}', 2)
         self._update_seo_colors()
         dlg.Destroy()
 
@@ -1725,7 +1721,7 @@ class MainFrame(wx.Frame):
         :return: None
         """
         # TODO editor is not disabled immediately, same as with menu edit.
-        result = wx.MessageBox(Strings.warning_delete_document + '\n' + self._current_document_name + '?',
+        result = wx.MessageBox(f'{Strings.warning_delete_document}\n{self._current_document_name}?',
                                Strings.status_delete, wx.YES_NO | wx.ICON_WARNING)
         if result == wx.YES:
             path = self._current_document_instance.get_path()
@@ -1747,9 +1743,9 @@ class MainFrame(wx.Frame):
                 # If there are any other documents enable the editor and continue with the next document.
                 self._file_list.Select(0)
                 self._disable_editor(False)
-                self._set_status_text(Strings.status_articles + ' ' + str(len(self._articles)), 2)
+                self._set_status_text(f'{Strings.status_articles} {len(self._articles)}', 2)
             else:
-                self._show_error_dialog(Strings.warning_can_not_delete + ':\n' + path)
+                self._show_error_dialog(f'{Strings.warning_can_not_delete}:\n{path}')
 
     # noinspection PyUnusedLocal
     def _new_dir_handler(self, event: wx.CommandEvent) -> None:
@@ -1923,7 +1919,7 @@ class MainFrame(wx.Frame):
         for field, name in ((self._field_article_keywords, Strings.label_article_keywords),
                             (self._field_article_description, Strings.label_article_description),
                             (self._field_article_name, Strings.label_article_title)):
-            dlg = SpellCheckerDialog(self, Strings.label_dialog_spellcheck + ': ' + name, field.GetValue())
+            dlg = SpellCheckerDialog(self, f'{Strings.label_dialog_spellcheck}: {name}', field.GetValue())
             dlg.run()
             if dlg.found_mistake():
                 mistakes_found = True
@@ -1950,45 +1946,45 @@ class MainFrame(wx.Frame):
         """
         error_report = ''
         if self._current_document_instance.get_status_color() == Numbers.RED_COLOR:
-            error_report += Strings.warning_errors_in_document + ':\n\n'
+            error_report += f'{Strings.warning_errors_in_document}:\n\n'
             # Keywords, date, description, title
             for field, name in ((self._field_article_keywords, Strings.label_article_keywords),
                                 (self._field_article_description, Strings.label_article_description),
                                 (self._field_article_date, Strings.label_article_date),
                                 (self._field_article_name, Strings.label_article_title)):
                 if field.GetBackgroundColour() == Numbers.RED_COLOR:
-                    error_report += name + '\n'
+                    error_report += f'{name}\n'
             # Menu item
             if self._current_document_instance.get_menu_item().get_status_color() == wx.RED:
-                error_report += Strings.warning_menu_item + '\n'
+                error_report += f'{Strings.warning_menu_item}\n'
             # Main image
             if self._current_document_instance.get_article_image().get_status_color() == wx.RED:
-                error_report += Strings.warning_main_image + '\n'
+                error_report += f'{Strings.warning_main_image}\n'
             # Aside images
             for img in self._current_document_instance.get_aside_images():
                 if img.get_status_color() == wx.RED:
-                    error_report += Strings.warning_aside_image + ': ' + img.get_caption()[0] + '\n'
+                    error_report += f'{Strings.warning_aside_image}: {img.get_caption()[0]}\n'
             # Text images
             for img in self._current_document_instance.get_text_images():
                 if img.get_status_color() == wx.RED:
-                    error_report += Strings.warning_text_image + ': ' + img.get_link_title()[0] + '\n'
+                    error_report += f'{Strings.warning_text_image}: {img.get_link_title()[0]}\n'
             # Text videos
             for vid in self._current_document_instance.get_videos():
                 if vid.get_status_color() == wx.RED:
-                    error_report += Strings.warning_text_video + ': ' + vid.get_title()[0] + '\n'
+                    error_report += f'{Strings.warning_text_video}: {vid.get_title()[0]}\n'
             # Text links
             for link in self._current_document_instance.get_links():
                 if link.get_status_color() == wx.RED:
-                    error_report += Strings.warning_text_link + ': ' + link.get_text()[0] + '\n'
+                    error_report += f'{Strings.warning_text_link}: {link.get_text()[0]}\n'
             # Main text spellcheck
             if not self._current_document_instance.is_spellcheck_ok():
-                error_report += Strings.warning_text_spelling + '\n'
+                error_report += f'{Strings.warning_text_spelling}\n'
             # Menu page
             if self._current_document_instance.get_menu_section().get_status_color() == Numbers.RED_COLOR:
-                error_report += Strings.warning_menu_page + '\n'
+                error_report += f'{Strings.warning_menu_page}\n'
             # Index page
             if self._current_document_instance.get_index_document().get_status_color() == Numbers.RED_COLOR:
-                error_report += Strings.warning_index + '\n'
+                error_report += f'{Strings.warning_index}\n'
 
         if not error_report:
             wx.MessageBox(Strings.warning_no_mistake, Strings.label_dialog_self_test, wx.OK | wx.ICON_INFORMATION)
@@ -2032,7 +2028,7 @@ class MainFrame(wx.Frame):
             file = os.path.join(self._config_manager.get_working_dir(), Strings.css_file)
 
         if not os.path.exists(file):
-            self._show_error_dialog(Strings.warning_file_missing + '\n' + str(file))
+            self._show_error_dialog(f'{Strings.warning_file_missing}\n{file}')
             return
         editor = PlainTextEditDialog(self, Path(file))
         editor.ShowModal()

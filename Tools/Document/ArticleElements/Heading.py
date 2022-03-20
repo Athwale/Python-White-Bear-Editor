@@ -33,4 +33,4 @@ class Heading:
         return self._size
 
     def __str__(self) -> str:
-        return 'Heading: ' + str(self._text) + ', size: ' + str(self._size)
+        return f'Heading: {self._text}, size: {self._size}'

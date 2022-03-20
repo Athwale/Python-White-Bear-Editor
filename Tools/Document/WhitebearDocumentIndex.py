@@ -134,14 +134,13 @@ class WhitebearDocumentIndex(WhitebearDocument):
             template_string = template.read()
         is_valid, errors = Tools.validate(template_string, 'schema_index_template.xsd')
         if not is_valid:
-            raise UnrecognizedFileException(Strings.exception_html_syntax_error + '\n' + 'index_template.html ' +
-                                            str(errors))
+            raise UnrecognizedFileException(f'{Strings.exception_html_syntax_error}\nindex_template.html\n{errors}')
 
         parsed_template = BeautifulSoup(template_string, 'html5lib')
 
         # Fill title.
         title: Tag = parsed_template.find(name='title')
-        title.string = self._page_name + ' | ' + self._global_title
+        title.string = f'{self._page_name} | {self._global_title}'
 
         # Fill description.
         description = parsed_template.find_all(name='meta', attrs={'name': 'description', 'content': True})
@@ -222,7 +221,7 @@ class WhitebearDocumentIndex(WhitebearDocument):
                 new_ul.append(new_li)
             else:
                 # Add the next article to news.
-                limit = limit + 1
+                limit += 1
         news.insert_after(new_ul)
 
         # Fill contact.
@@ -238,7 +237,7 @@ class WhitebearDocumentIndex(WhitebearDocument):
 
         # Fill design.
         new_p = parsed_template.new_tag('p')
-        new_p.string = 'Web design: ' + self._author
+        new_p.string = f'Web design: {self._author}'
         new_img.insert_after(new_p)
 
         # Fill aside images from the newest articles.
@@ -275,7 +274,7 @@ class WhitebearDocumentIndex(WhitebearDocument):
         output = str(parsed_template)
         is_valid, errors = Tools.validate(output, 'schema_index.xsd')
         if not is_valid:
-            raise UnrecognizedFileException(Strings.exception_bug + '\n' + self.get_filename() + ' \n' + str(errors))
+            raise UnrecognizedFileException(f'{Strings.exception_bug}\n{self.get_filename()}\n{errors}')
 
         self._html = output
 

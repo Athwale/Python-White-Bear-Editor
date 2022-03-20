@@ -61,7 +61,7 @@ class UploadDialog(wx.Dialog):
 
         # IP, port sizer
         self._ip_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self._label_ip_port = wx.StaticText(self, -1, Strings.label_ip_port + ': ')
+        self._label_ip_port = wx.StaticText(self, -1, f'{Strings.label_ip_port}: ')
         self._field_ip_port = wx.TextCtrl(self, -1)
         self._ip_sub_sizer.Add(self._label_ip_port, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
         self._ip_sub_sizer.Add(4, -1)
@@ -73,7 +73,7 @@ class UploadDialog(wx.Dialog):
 
         # User
         self._user_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self._label_user = wx.StaticText(self, -1, Strings.label_user + ': ')
+        self._label_user = wx.StaticText(self, -1, f'{Strings.label_user}: ')
         self._field_user = wx.TextCtrl(self, -1)
         self._user_sub_sizer.Add(self._label_user, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
         self._user_sub_sizer.Add(17, -1)
@@ -85,7 +85,7 @@ class UploadDialog(wx.Dialog):
 
         # Key file
         self._keyfile_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self._label_keyfile = wx.StaticText(self, -1, Strings.label_key_file + ': ')
+        self._label_keyfile = wx.StaticText(self, -1, f'{Strings.label_key_file}: ')
         self._field_keyfile = wx.TextCtrl(self, -1)
         self._keyfile_button = wx.Button(self, wx.ID_OPEN, Strings.button_browse)
         self._keyfile_sub_sizer.Add(self._label_keyfile, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
@@ -107,12 +107,12 @@ class UploadDialog(wx.Dialog):
         self._info_left_sizer = wx.BoxSizer(wx.VERTICAL)
         self._info_right_sizer = wx.BoxSizer(wx.VERTICAL)
 
-        self._label_connection = wx.StaticText(self, -1, Strings.label_connection + ':')
+        self._label_connection = wx.StaticText(self, -1, f'{Strings.label_connection}:')
         self._content_connection = wx.StaticText(self, -1, Strings.label_none)
         self._info_left_sizer.Add(self._label_connection, flag=wx.BOTTOM | wx.LEFT, border=Numbers.widget_border_size)
         self._info_right_sizer.Add(self._content_connection, flag=wx.BOTTOM, border=Numbers.widget_border_size)
 
-        self._label_num_invalid_files = wx.StaticText(self, -1, Strings.label_invalid_files + ':')
+        self._label_num_invalid_files = wx.StaticText(self, -1, f'{Strings.label_invalid_files}:')
         self._content_num_invalid_files = wx.StaticText(self, -1, '0')
         self._content_num_invalid_files.SetForegroundColour(wx.RED)
         font: wx.Font = self._content_num_invalid_files.GetFont()
@@ -122,24 +122,24 @@ class UploadDialog(wx.Dialog):
                                   border=Numbers.widget_border_size)
         self._info_right_sizer.Add(self._content_num_invalid_files, flag=wx.BOTTOM, border=Numbers.widget_border_size)
 
-        self._label_num_files = wx.StaticText(self, -1, Strings.label_files_to_upload + ':')
+        self._label_num_files = wx.StaticText(self, -1, f'{Strings.label_files_to_upload}:')
         self._content_num_files = wx.StaticText(self, -1, '0')
         self._info_left_sizer.Add(self._label_num_files, flag=wx.BOTTOM | wx.LEFT, border=Numbers.widget_border_size)
         self._info_right_sizer.Add(self._content_num_files, flag=wx.BOTTOM, border=Numbers.widget_border_size)
 
-        self._label_successful = wx.StaticText(self, -1, Strings.label_successful_uploads + ':')
+        self._label_successful = wx.StaticText(self, -1, f'{Strings.label_successful_uploads}:')
         self._content_successful = wx.StaticText(self, -1, '0')
         self._content_successful.SetForegroundColour(Numbers.DARK_GREEN_COLOR)
         self._info_left_sizer.Add(self._label_successful, flag=wx.BOTTOM | wx.LEFT, border=Numbers.widget_border_size)
         self._info_right_sizer.Add(self._content_successful, flag=wx.BOTTOM, border=Numbers.widget_border_size)
 
-        self._label_failed = wx.StaticText(self, -1, Strings.label_failed_uploads + ':')
+        self._label_failed = wx.StaticText(self, -1, f'{Strings.label_failed_uploads}:')
         self._content_failed = wx.StaticText(self, -1, '0')
         self._content_failed.SetForegroundColour(wx.RED)
         self._info_left_sizer.Add(self._label_failed, flag=wx.BOTTOM | wx.LEFT, border=Numbers.widget_border_size)
         self._info_right_sizer.Add(self._content_failed, flag=wx.BOTTOM, border=Numbers.widget_border_size)
 
-        self._label_current_file = wx.StaticText(self, -1, Strings.label_uploading_file + ':')
+        self._label_current_file = wx.StaticText(self, -1, f'{Strings.label_uploading_file}:')
         self._content_current_file = wx.StaticText(self, -1, Strings.label_none,
                                                    style=wx.ST_ELLIPSIZE_MIDDLE | wx.ST_NO_AUTORESIZE)
         self._info_left_sizer.Add(self._label_current_file, flag=wx.BOTTOM | wx.LEFT, border=Numbers.widget_border_size)
@@ -194,7 +194,7 @@ class UploadDialog(wx.Dialog):
         Ask the user for private key passphrase and restart the connection.
         :return: None
         """
-        dlg = wx.PasswordEntryDialog(self, Strings.label_rsa_passphrase + ':', Strings.warning_rsa_passphrase)
+        dlg = wx.PasswordEntryDialog(self, f'{Strings.label_rsa_passphrase}:', Strings.warning_rsa_passphrase)
         result = dlg.ShowModal()
         if result == wx.ID_OK:
             self._upload_files(dlg.GetValue())
@@ -303,9 +303,9 @@ class UploadDialog(wx.Dialog):
             if item == -1:
                 break
             elif self._file_list.GetItemBackgroundColour(item) == Numbers.GREEN_COLOR:
-                counter_green = counter_green + 1
+                counter_green += 1
             elif self._file_list.GetItemBackgroundColour(item) == Numbers.RED_COLOR:
-                counter_red = counter_red + 1
+                counter_red += 1
         self._content_successful.SetLabelText(str(counter_green))
         self._content_failed.SetLabelText(str(counter_red))
         self._upload_gauge.SetValue(counter_green)
@@ -317,7 +317,7 @@ class UploadDialog(wx.Dialog):
         :return: None
         """
         formatted = "{:4.1f}".format(percentage)
-        self._content_percentage.SetLabelText(formatted + ' %')
+        self._content_percentage.SetLabelText(f'{formatted} %')
 
     def _upload_files(self, password=None) -> None:
         """
@@ -391,7 +391,7 @@ class UploadDialog(wx.Dialog):
             path = self._ask_for_file(self._config_manager.get_working_dir())
             if path:
                 if not path.startswith(self._config_manager.get_working_dir()):
-                    wx.MessageBox(Strings.file + ':\n' + path + '\nNot in:\n' + self._config_manager.get_working_dir(),
+                    wx.MessageBox(f'{Strings.file}:\n{path}\nNot in:\n{self._config_manager.get_working_dir()}',
                                   Strings.status_error, wx.OK | wx.ICON_WARNING)
                 else:
                     if path not in self._upload_dict.values():
@@ -456,7 +456,7 @@ class UploadDialog(wx.Dialog):
                 # Items with ID -1 are disabled, prevent checking.
                 path = self._upload_dict[item_id][0]
                 if not os.access(path, os.R_OK) or not os.path.exists(path):
-                    wx.MessageBox(Strings.warning_file_inaccessible + ':\n' + path,
+                    wx.MessageBox(f'{Strings.warning_file_inaccessible}:\n{path}',
                                   Strings.status_warning, wx.OK | wx.ICON_WARNING)
                     self._file_list.CheckItem(event.GetIndex(), False)
             else:
@@ -476,7 +476,7 @@ class UploadDialog(wx.Dialog):
             if item == -1:
                 break
             elif self._file_list.IsItemChecked(item):
-                counter = counter + 1
+                counter += 1
         return counter
 
     def _display_dialog_contents(self) -> None:
@@ -598,7 +598,7 @@ class UploadDialog(wx.Dialog):
         # Check username
         username = self._field_user.GetValue()
         if len(username) > Numbers.default_max_length or len(username) < 1:
-            self._field_user_tip.SetMessage(Strings.seo_error_length + ': 1-' + str(Numbers.default_max_length))
+            self._field_user_tip.SetMessage(f'{Strings.seo_error_length}: 1-{Numbers.default_max_length}')
             Tools.set_field_background(self._field_user, Numbers.RED_COLOR)
             result = False
         else:
@@ -624,8 +624,8 @@ class UploadDialog(wx.Dialog):
         if not result or self._count_checked_files() == 0 or self._prevent_upload:
             self._upload_button.Disable()
             if self._prevent_upload:
-                self._content_num_invalid_files.SetLabelText(str(self._invalid_files) + ' - ' +
-                                                             Strings.warning_fatal_invalidity)
+                self._content_num_invalid_files.SetLabelText(f'{self._invalid_files} - '
+                                                             f'{Strings.warning_fatal_invalidity}')
         else:
             self._upload_button.Enable()
         return result

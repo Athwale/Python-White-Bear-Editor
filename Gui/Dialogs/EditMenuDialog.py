@@ -47,7 +47,7 @@ class EditMenuDialog(SpellCheckedDialog):
 
         # Page name sub sizer
         self._page_name_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self._label_page_name = wx.StaticText(self, -1, Strings.label_menu_name + ': ')
+        self._label_page_name = wx.StaticText(self, -1, f'{Strings.label_menu_name}: ')
         self._field_page_name = wx.TextCtrl(self, -1)
         self._page_name_sub_sizer.Add(self._label_page_name, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
         self._page_name_sub_sizer.Add((2, -1))
@@ -59,7 +59,7 @@ class EditMenuDialog(SpellCheckedDialog):
 
         # Keywords sub sizer
         self._meta_keywords_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self._label_meta_keywords = wx.StaticText(self, -1, Strings.label_default_keywords + ': ')
+        self._label_meta_keywords = wx.StaticText(self, -1, f'{Strings.label_default_keywords}: ')
         self._field_meta_keywords = wx.TextCtrl(self, -1)
         self._meta_keywords_sub_sizer.Add(self._label_meta_keywords, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
         self._meta_keywords_sub_sizer.Add((15, -1))
@@ -72,7 +72,7 @@ class EditMenuDialog(SpellCheckedDialog):
         # --------------------------------------------------------------------------------------------------------------
         # Description sub sizer
         self._meta_description_sub_sizer = wx.BoxSizer(wx.VERTICAL)
-        self._label_meta_description = wx.StaticText(self, -1, Strings.label_meta_description + ': ')
+        self._label_meta_description = wx.StaticText(self, -1, f'{Strings.label_meta_description}: ')
         self._field_meta_description = wx.TextCtrl(self, -1, size=(-1, 121), style=wx.TE_MULTILINE)
         self._meta_description_sub_sizer.Add(self._label_meta_description, flag=wx.ALIGN_LEFT)
         self._meta_description_sub_sizer.Add(3, 3)
@@ -213,7 +213,7 @@ class EditMenuDialog(SpellCheckedDialog):
         if message == Strings.spelling_error:
             spelling_result = False
         self._field_page_name.SetBackgroundColour(color)
-        self._field_page_name_tip.SetMessage(Strings.seo_check + '\n' + message)
+        self._field_page_name_tip.SetMessage(f'{Strings.seo_check}\n{message}')
 
         # Keywords test.
         correct, message, color = self._menu.seo_test_keywords(self._field_meta_keywords.GetValue())
@@ -221,7 +221,7 @@ class EditMenuDialog(SpellCheckedDialog):
         if message == Strings.spelling_error:
             spelling_result = False
         self._field_meta_keywords.SetBackgroundColour(color)
-        self._field_keywords_tip.SetMessage(Strings.seo_check + '\n' + message)
+        self._field_keywords_tip.SetMessage(f'{Strings.seo_check}\n{message}')
 
         # Description test.
         correct, message, color = self._menu.seo_test_description(self._field_meta_description.GetValue())
@@ -229,7 +229,7 @@ class EditMenuDialog(SpellCheckedDialog):
         if message == Strings.spelling_error:
             spelling_result = False
         self._set_field_background(self._field_meta_description, color)
-        self._field_description_tip.SetMessage(Strings.seo_check + '\n' + message)
+        self._field_description_tip.SetMessage(f'{Strings.seo_check}\n{message}')
 
         return seo_result, spelling_result
 
@@ -255,7 +255,7 @@ class EditMenuDialog(SpellCheckedDialog):
         :param event: Not used
         :return: None
         """
-        name_dialog = wx.TextEntryDialog(self, Strings.label_file_name + ':', caption=Strings.label_menu_file_name,
+        name_dialog = wx.TextEntryDialog(self, f'{Strings.label_file_name}:', caption=Strings.label_menu_file_name,
                                          value="")
         if name_dialog.ShowModal() == wx.ID_OK:
             file_name = name_dialog.GetValue()

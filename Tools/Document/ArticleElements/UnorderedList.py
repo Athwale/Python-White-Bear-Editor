@@ -30,4 +30,4 @@ class UnorderedList:
         return self._items
 
     def __str__(self) -> str:
-        return 'Unordered list: ' + str(self._items)
+        return f'Unordered list: {self._items}'

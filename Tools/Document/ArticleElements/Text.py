@@ -39,7 +39,7 @@ class Text:
         return self._bold
 
     def __str__(self) -> str:
-        return 'Text: ' + self._text + ', bold: ' + str(self._bold) + ', color: ' + self._color
+        return f'Text: {self._text}, bold: {self._bold}, color: {self._color}'
 
 
 class Break:

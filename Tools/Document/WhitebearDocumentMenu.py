@@ -121,14 +121,13 @@ class WhitebearDocumentMenu(WhitebearDocument):
             template_string = template.read()
         is_valid, errors = Tools.validate(template_string, 'schema_menu_template.xsd')
         if not is_valid:
-            raise UnrecognizedFileException(Strings.exception_html_syntax_error + '\n' + 'menu_template.html ' +
-                                            str(errors))
+            raise UnrecognizedFileException(f'{Strings.exception_html_syntax_error}\nmenu_template.html\n{errors}')
 
         parsed_template = BeautifulSoup(template_string, 'html5lib')
 
         # Fill title.
         title: Tag = parsed_template.find(name='title')
-        title.string = Strings.menu_title_stump + ' ' + self._page_name + ' | ' + Strings.page_name
+        title.string = f'{Strings.menu_title_stump} {self._page_name} | {Strings.page_name}'
 
         # Fill description.
         description = parsed_template.find_all(name='meta', attrs={'name': 'description', 'content': True})
@@ -208,7 +207,7 @@ class WhitebearDocumentMenu(WhitebearDocument):
         output = str(parsed_template)
         is_valid, errors = Tools.validate(output, 'schema_menu.xsd')
         if not is_valid:
-            raise UnrecognizedFileException(Strings.exception_bug + '\n' + self.get_filename() + ' \n' + str(errors))
+            raise UnrecognizedFileException(f'{Strings.exception_bug}\n{self.get_filename()}\n{errors}')
 
         self._html = output
 

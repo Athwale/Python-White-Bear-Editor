@@ -40,7 +40,7 @@ class SpellCheckSetupDialog(wx.Dialog):
 
         # Spelling package
         self._provider_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self._label_provider = wx.StaticText(self, -1, Strings.label_dictionary_provider + ': ')
+        self._label_provider = wx.StaticText(self, -1, f'{Strings.label_dictionary_provider}: ')
         self._content_provider = wx.StaticText(self, -1, Strings.label_none)
         self._provider_sub_sizer.Add(self._label_provider, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
         self._provider_sub_sizer.Add(1, -1)
@@ -50,7 +50,7 @@ class SpellCheckSetupDialog(wx.Dialog):
 
         # Dictionary location
         self._dictionary_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self._label_path = wx.StaticText(self, -1, Strings.label_dictionary_location + ': ')
+        self._label_path = wx.StaticText(self, -1, f'{Strings.label_dictionary_location}: ')
         self._content_path = wx.StaticText(self, -1, Strings.label_none)
         self._dictionary_sub_sizer.Add(self._label_path, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
         self._dictionary_sub_sizer.Add(self._content_path, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
@@ -59,7 +59,7 @@ class SpellCheckSetupDialog(wx.Dialog):
 
         # Dictionary location
         self._ignored_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self._label_ignored_path = wx.StaticText(self, -1, Strings.label_ignored_location + ': ')
+        self._label_ignored_path = wx.StaticText(self, -1, f'{Strings.label_ignored_location}: ')
         self._content_ignored_path = wx.StaticText(self, -1, Strings.label_none)
         self._ignored_sub_sizer.Add(self._label_ignored_path, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
         self._ignored_sub_sizer.Add(self._content_ignored_path, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
@@ -69,7 +69,7 @@ class SpellCheckSetupDialog(wx.Dialog):
         # Dictionary selection
         choices = enchant.list_languages() if enchant.list_languages() else ['-']
         self._selection_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self._label_language = wx.StaticText(self, -1, Strings.label_spelling_language + ': ')
+        self._label_language = wx.StaticText(self, -1, f'{Strings.label_spelling_language}: ')
         self._language_list = wx.ComboBox(self, -1, choices=choices,
                                           style=wx.CB_DROPDOWN | wx.CB_SORT | wx.CB_READONLY)
         self._language_list.SetSelection(0)

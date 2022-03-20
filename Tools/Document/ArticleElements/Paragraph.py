@@ -57,4 +57,4 @@ class Paragraph:
         self._elements_list.clear()
 
     def __str__(self) -> str:
-        return 'Paragraph: ' + str(self._elements_list)
+        return f'Paragraph: {self._elements_list}'

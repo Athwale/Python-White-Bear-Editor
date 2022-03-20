@@ -29,9 +29,9 @@ class EditLinkDialog(SpellCheckedDialog):
 
         # Link URL sub sizer
         self._url_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self._label_url = wx.StaticText(self, -1, Strings.label_url + ': ')
+        self._label_url = wx.StaticText(self, -1, f'{Strings.label_url}: ')
         choices = self._link.get_loaded_pages()
-        choices.append(Strings.index + Strings.extension_html)
+        choices.append(f'{Strings.index}{Strings.extension_html}')
         self._field_url = wx.ComboBox(self, -1, choices=choices, style=wx.CB_DROPDOWN | wx.CB_SORT)
         # Fires when you type in the box
         self.Bind(wx.EVT_TEXT, self._combobox_handler, self._field_url)
@@ -44,7 +44,7 @@ class EditLinkDialog(SpellCheckedDialog):
 
         # Link title sub sizer
         self._title_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self._label_link_title = wx.StaticText(self, -1, Strings.label_link_title + ': ')
+        self._label_link_title = wx.StaticText(self, -1, f'{Strings.label_link_title}: ')
         self._field_link_title = wx.TextCtrl(self, -1)
         self._title_sub_sizer.Add(self._label_link_title, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
         self._title_sub_sizer.Add((8, -1))
@@ -54,7 +54,7 @@ class EditLinkDialog(SpellCheckedDialog):
 
         # Link text sub sizer
         self._text_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
-        self._label_link_text = wx.StaticText(self, -1, Strings.label_text + ': ')
+        self._label_link_text = wx.StaticText(self, -1, f'{Strings.label_text}: ')
         self._field_link_text = wx.TextCtrl(self, -1)
         self._text_sub_sizer.Add(self._label_link_text, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
         self._text_sub_sizer.Add((35, -1))
@@ -147,7 +147,7 @@ class EditLinkDialog(SpellCheckedDialog):
                               passing_arg=return_value)
         thread.start()
         self.Disable()
-        self.SetTitle(Strings.status_seo + ': ' + Strings.status_testing_link)
+        self.SetTitle(f'{Strings.status_seo}: {Strings.status_testing_link}')
 
     def on_seo_done(self, result: bool, return_value: int) -> None:
         """
@@ -193,11 +193,11 @@ class EditLinkDialog(SpellCheckedDialog):
         for field, value in field_to_value.items():
             tip = value[1]
             if value[0][1]:
-                tip.SetMessage(Strings.seo_check + '\n' + value[0][1])
+                tip.SetMessage(f'{Strings.seo_check}\n{value[0][1]}')
                 tip.EnableTip(True)
                 field.SetBackgroundColour(Numbers.RED_COLOR)
             else:
-                tip.SetMessage(Strings.seo_check + '\n' + Strings.status_ok)
+                tip.SetMessage(f'{Strings.seo_check}\n{Strings.status_ok}')
                 tip.DoHideNow()
                 field.SetBackgroundColour(Numbers.GREEN_COLOR)
             field.SetValue(value[0][0])

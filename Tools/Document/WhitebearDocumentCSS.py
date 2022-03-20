@@ -50,7 +50,7 @@ class WhitebearDocumentCSS:
                     if dec_names == ['color', 'display']:
                         color = Colour(dec_color.red, dec_color.green, dec_color.blue)
                         if color == Colour(0, 0, 255, 255):
-                            raise WrongFormatException(Strings.exception_reserved_blue + ': ' + str(color))
+                            raise WrongFormatException(f'{Strings.exception_reserved_blue}: {color}')
                         self._str_to_color_dict[rule.selector.as_css().lstrip('.')] = color
 
     def get_colors(self) -> Dict[str, Colour]:
@@ -76,7 +76,7 @@ class WhitebearDocumentCSS:
         try:
             return self._str_to_color_dict[name]
         except KeyError as _:
-            raise WrongFormatException(Strings.exception_unrecognized_color + ': ' + str(name))
+            raise WrongFormatException(f'{Strings.exception_unrecognized_color}: {name}')
 
     def translate_color_str(self, color: Colour) -> str:
         """
@@ -94,4 +94,4 @@ class WhitebearDocumentCSS:
         for name, rgb in self._str_to_color_dict.items():
             if rgb == color:
                 return name
-        raise WrongFormatException(Strings.exception_unrecognized_color + ': ' + str(color))
+        raise WrongFormatException(f'{Strings.exception_unrecognized_color}: {color}')

@@ -43,7 +43,7 @@ class Link(SpellCheckedObject):
 
         # Create a unique ID.
         self._link_id = str(Link.count)
-        Link.count = Link.count + 1
+        Link.count += 1
 
     def test_self(self, online: bool):
         """
@@ -220,5 +220,4 @@ class Link(SpellCheckedObject):
         self._modified = modified
 
     def __str__(self) -> str:
-        return 'Link: id: ' + str(self._link_id) + ', text: ' + self._text + ', url: ' + self._url + ', title: ' + \
-               self._link_title
+        return f'Link: id: {self._link_id}, text: {self._text}, url: {self._url}, title: {self._link_title}'

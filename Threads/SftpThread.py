@@ -62,7 +62,7 @@ class SftpThread(threading.Thread):
             wx.CallAfter(self._parent.on_connection_closed, Strings.status_closed)
             wx.CallAfter(self._parent.on_file_upload_start, Strings.status_finished)
         except (socket.timeout, socket.error) as e:
-            wx.CallAfter(self._parent.on_connection_closed, Strings.status_failed + ': ' + str(e))
+            wx.CallAfter(self._parent.on_connection_closed, f'{Strings.status_failed}: {e}')
         except PasswordRequiredException as _:
             wx.CallAfter(self._parent.on_key_password_required)
         except AccessException as _:
