@@ -8,8 +8,6 @@ OnInit must be overridden here.
 
 # TODO viz wx forum copy paste reply.
 # TODO use example.com for testing purposes whether net is available.
-
-# TODO switch to pathlib, Path.home(), exists... https://naucse.python.cz/2019/pyladies-brno-podzim-st/intro/pathlib/
 # TODO look at cookies from whitebear pomoci requests headers bacha ba presmerovani, set cookie warning
 # TODO use unpack * to call functions with tuples
 """

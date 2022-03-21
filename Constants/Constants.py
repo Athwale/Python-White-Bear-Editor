@@ -218,16 +218,16 @@ class Strings:
     exception_reserved_blue: str = 'Blue color reserved for urls detected in CSS'
 
     seo_error_length: str = 'Required length'
-    seo_error_keywords_length: str = f'Length must be: {Numbers.keywords_min_length} - {Numbers.keywords_max_length} ' \
-                                     f'characters long'
+    seo_error_keywords_length: str = f'Length must be: {Numbers.keywords_min_length} -' \
+                                     f' {Numbers.keywords_max_length} characters long'
     seo_error_keywords_format: str = 'Must be a comma separated list'
     seo_error_keywords_amount: str = 'Too few keywords'
     seo_error_description_length: str = f'Length must be: {Numbers.description_min_length} - ' \
                                         f'{Numbers.description_max_length} characters long'
-    seo_error_name_length: str = f'Length must be: {Numbers.article_name_min_length} - {Numbers.article_name_max_length}' \
-                                 f' characters long'
-    seo_error_menu_name_length: str = f'Length must be: {Numbers.menu_name_min_length} - {Numbers.menu_name_max_length}' \
-                                      f' characters long'
+    seo_error_name_length: str = f'Length must be: {Numbers.article_name_min_length} - ' \
+                                 f'{Numbers.article_name_max_length} characters long'
+    seo_error_menu_name_length: str = f'Length must be: {Numbers.menu_name_min_length} - ' \
+                                      f'{Numbers.menu_name_max_length} characters long'
     seo_error_default_value: str = 'Default value can not be used'
     seo_error_date_format: str = 'Date format incorrect (example: 31. Ledna 2020)'
     seo_error_date_format_day: str = 'Date format incorrect, day must be: 1 - 31'
