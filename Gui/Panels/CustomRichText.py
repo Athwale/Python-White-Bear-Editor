@@ -52,6 +52,8 @@ class CustomRichText(rt.RichTextCtrl):
         self._config_manager = ConfigManager.get_instance()
         # This is used to control undo and redo
         self._command_processor: wx.CommandProcessor = self.GetCommandProcessor()
+        # Fix behavior on X11 server
+        wx.TheClipboard.UsePrimarySelection(False)
 
         self._stylesheet = rt.RichTextStyleSheet()
         self._stylesheet.SetName('Stylesheet')
