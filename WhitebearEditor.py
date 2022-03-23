@@ -5,9 +5,7 @@ Starting class for the whitebear editor GUI. This class is necessary and must be
 OnInit must be overridden here.
 # TODO fix bugs and package this into a binary. Package into rpm Ponorme se do pythonu nebo youtube.
 # TODO https://www.blog.pythonlibrary.org/2019/03/19/distributing-a-wxpython-application/
-
-# TODO viz wx forum copy paste reply.
-# TODO use example.com for testing purposes whether net is available.
+# TODO test network with example.com
 # TODO look at cookies from whitebear pomoci requests headers bacha ba presmerovani, set cookie warning
 """
 

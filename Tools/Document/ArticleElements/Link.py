@@ -95,7 +95,8 @@ class Link(SpellCheckedObject):
                 except (httplib2.ServerNotFoundError, httplib2.RelativeURIError, SSLCertVerificationError) as _:
                     self._url_error_message = Strings.seo_error_url_nonexistent
                     result = False
-                except ConnectionResetError as _:
+                except (ConnectionResetError, OSError) as _:
+                    # In case we do not have connectivity, ignore the online test. The result would not be relevant.
                     pass
                 finally:
                     h.close()

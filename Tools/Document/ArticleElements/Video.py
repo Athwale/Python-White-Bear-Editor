@@ -89,7 +89,8 @@ class Video(SpellCheckedObject):
                 self._url_error_message = Strings.seo_error_url_nonexistent
                 self._image = wx.Image(Fetch.get_resource_path('video_seo_error.png'), wx.BITMAP_TYPE_PNG)
                 result = False
-            except ConnectionResetError as _:
+            except (ConnectionResetError, OSError) as _:
+                # In case we do not have connectivity, ignore the online test. The result would not be relevant.
                 pass
             finally:
                 h.close()
