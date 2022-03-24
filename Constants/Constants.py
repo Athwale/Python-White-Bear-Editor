@@ -179,6 +179,7 @@ class Strings:
     css_file: str = 'styles.css'
     file_background: str = 'background.jpg'
     file_header: str = 'logo-nadpis.png'
+    test_url: str = 'http://www.example.com'
 
     # Sitemap settings
     sitemap_file: str = 'sitemap.xml'

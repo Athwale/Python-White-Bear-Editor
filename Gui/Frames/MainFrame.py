@@ -6,6 +6,7 @@ from pathlib import Path
 from shutil import copyfile
 from typing import Dict, List, Callable
 
+import httplib2
 import wx
 import wx.richtext as rt
 from wx.svg import SVGimage
@@ -106,6 +107,14 @@ class MainFrame(wx.Frame):
         self._set_status_text(Strings.status_loading, 3)
         # Find the last opened whitebear directory, switch config manager to it and load it.
         if self._config_manager.set_active_dir(self._config_manager.get_last_directory()):
+            # TODO Test network status before loading a directory and disable online test if network is unavailable.
+            h = httplib2.Http(timeout=Numbers.online_test_timeout)
+            try:
+                h.request(Strings.test_url, 'HEAD')
+            except (ConnectionResetError, OSError, httplib2.ServerNotFoundError) as _:
+                self._config_manager.store_online_test(False)
+            finally:
+                h.close()
             self._load_working_directory(self._config_manager.get_working_dir())
             # Load online test state.
             self._file_menu.Check(wx.ID_NETWORK, self._config_manager.get_online_test())
