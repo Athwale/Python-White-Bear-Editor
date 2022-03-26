@@ -6,7 +6,6 @@ OnInit must be overridden here.
 # TODO fix bugs and package this into a binary. Package into rpm Ponorme se do pythonu nebo youtube.
 # TODO https://www.blog.pythonlibrary.org/2019/03/19/distributing-a-wxpython-application/
 
-# TODO interactive underlining spellcheck
 # TODO look at cookies from whitebear pomoci requests headers bacha ba presmerovani, set cookie warning
 """
 

@@ -40,6 +40,7 @@ class Numbers:
     context_chars: int = 40
 
     three_click_timeout: int = 600
+    spellcheck_timeout: int = 600
     photo_ratio: float = 4 / 3
     photo_ratio_tolerance: float = 0.01
 

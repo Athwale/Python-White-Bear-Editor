@@ -55,7 +55,7 @@ class ConfigManager:
         Constructor for config manager.
         """
         if ConfigManager.__instance is not None:
-            raise Exception("This class is a singleton!")
+            raise Exception('This class is a singleton!')
         else:
             ConfigManager.__instance = self
         self._dir_conf = {}

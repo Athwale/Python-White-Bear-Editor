@@ -18,6 +18,7 @@ from Tools.Document.ArticleElements.UnorderedList import UnorderedList
 from Tools.Document.ArticleElements.Video import Video
 from Tools.Document.WhitebearDocumentArticle import WhitebearDocumentArticle
 from Tools.ImageTextField import ImageTextField
+from Tools.SpellCheckerWithIgnoredList import SpellCheckerWithIgnoreList
 
 
 class CustomRichText(rt.RichTextCtrl):
@@ -67,9 +68,15 @@ class CustomRichText(rt.RichTextCtrl):
         # Registered fields are used to easily update colors of images and videos on spellcheck dictionary change
         self._fields = []
 
-        # Used for three click select.
-        self._timer = wx.Timer(self)
-        self.Bind(wx.EVT_TIMER, self._on_click_timer, self._timer)
+        # Used for three click whole paragraph select.
+        self._three_click_timer = wx.Timer(self)
+        self.Bind(wx.EVT_TIMER, self._on_click_timer, self._three_click_timer)
+
+        # Todo this is called too early before the config manager has loaded the full config.
+        self._checker = SpellCheckerWithIgnoreList(self._config_manager.get_spelling_lang())
+        # Used for active spellcheck after modification.
+        self._spelling_timer = wx.Timer(self)
+        self.Bind(wx.EVT_TIMER, self._on_spelling_timer, self._spelling_timer)
 
         self._main_frame = wx.GetTopLevelParent(self)
         self.Bind(wx.EVT_LISTBOX, self._style_picker_handler, self._style_picker)
@@ -85,6 +92,7 @@ class CustomRichText(rt.RichTextCtrl):
 
         self.Bind(wx.EVT_KEY_DOWN, self._on_key_down)
         self.Bind(wx.EVT_KEY_UP, self._update_gui_handler)
+        self.Bind(wx.EVT_TEXT, self._spellcheck_timer_reset_handler)
         self.Bind(wx.EVT_COLOUR_CHANGED, self._refresh)
         # Text paste handling.
         self.Bind(wx.EVT_MENU, self._paste_handler, id=wx.ID_PASTE)
@@ -943,8 +951,8 @@ class CustomRichText(rt.RichTextCtrl):
         :return: None
         """
         self._update_style_picker()
-        if not self._timer.IsRunning():
-            self._timer.Start(Numbers.three_click_timeout)
+        if not self._three_click_timer.IsRunning():
+            self._three_click_timer.Start(Numbers.three_click_timeout)
         self._click_counter = self._click_counter + 1
         event.Skip()
 
@@ -960,7 +968,38 @@ class CustomRichText(rt.RichTextCtrl):
             p_range: rt.RichTextParagraph = self.GetFocusObject().GetParagraphAtPosition(position).GetRange()
             self.SetSelectionRange(p_range)
         self._click_counter = 0
-        self._timer.Stop()
+        self._three_click_timer.Stop()
+
+    # noinspection PyUnusedLocal
+    def _on_spelling_timer(self, event: wx.CommandEvent) -> None:
+        """
+        When the timer runs out and if three left click were made, select whole current paragraph.
+        :param event: Not used.
+        :return: None
+        """
+        # TODO why is this underlying everything?
+        # TODO will links be de-underlined?
+        # TODO run once when loaded.
+        print('timer')
+        self._spelling_timer.Stop()
+        self.BeginSuppressUndo()
+        self._checker.set_text(self.get_text())
+        for _ in self._checker.next():
+            self.SelectWord(self._checker.wordpos)
+            self.ApplyUnderlineToSelection()
+            self.SelectNone()
+        self.EndSuppressUndo()
+
+    # noinspection PyUnusedLocal
+    def _spellcheck_timer_reset_handler(self, event: wx.CommandEvent) -> None:
+        """
+        Reset active spellcheck timer when the text is modified.
+        :param event: Unused.
+        :return: None
+        """
+        if self._load_indicator:
+            if not self._spelling_timer.IsRunning():
+                self._spelling_timer.Start(Numbers.spellcheck_timeout)
 
     def _style_picker_handler(self, evt: wx.CommandEvent) -> None:
         """
