@@ -72,7 +72,8 @@ class CustomRichText(rt.RichTextCtrl):
         self._three_click_timer = wx.Timer(self)
         self.Bind(wx.EVT_TIMER, self._on_click_timer, self._three_click_timer)
 
-        # Todo this is called too early before the config manager has loaded the full config.
+        # This is called too early before the config manager has loaded the full config and returns default language.
+        # But language is updated when spellcheck runs since we can change language dynamically.
         self._checker = SpellCheckerWithIgnoreList(self._config_manager.get_spelling_lang())
         # Used for active spellcheck after modification.
         self._spelling_timer = wx.Timer(self)
@@ -977,12 +978,21 @@ class CustomRichText(rt.RichTextCtrl):
         :param event: Not used.
         :return: None
         """
+        self._run_spellcheck()
+
+    def _run_spellcheck(self) -> None:
+        """
+        Run spellcheck on text to underline bad words.
+        :return: None
+        """
         # TODO why is this underlying everything?
         # TODO will links be de-underlined?
         # TODO run once when loaded.
-        print('timer')
+        # TODO remove underline from fixed words.
+        # TODO underline does not work every time.
         self._spelling_timer.Stop()
         self.BeginSuppressUndo()
+        self._checker.reload_language()
         self._checker.set_text(self.get_text())
         for _ in self._checker.next():
             self.SelectWord(self._checker.wordpos)
@@ -1146,6 +1156,7 @@ class CustomRichText(rt.RichTextCtrl):
         self.LayoutContent()
         self.EndSuppressUndo()
         self._modify_text()
+        self._run_spellcheck()
         self._load_indicator = True
         # Set focus to the text area.
         wx.CallLater(100, self.SetFocus)
