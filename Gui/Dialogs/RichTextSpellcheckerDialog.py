@@ -44,7 +44,20 @@ class RichTextSpellCheckerDialog(SpellCheckerDialog):
             # internally.
             self._checker.replace(replacement)
             self._text_area.replace_string_with_style(replacement)
+            # Re-underline bad words.
+            self._text_area.run_spellcheck()
         self.go_to_next()
+
+    def buttons_handler(self, event: wx.CommandEvent) -> None:
+        """
+        Rerun spellcheck on text area when words are added to list to remove fixed underlines.
+        :param event: The button event.
+        :return: None
+        """
+        button_id = event.GetId()
+        if button_id == wx.ID_IGNORE or button_id == wx.ID_ADD:
+            self._text_area.run_spellcheck()
+        super(RichTextSpellCheckerDialog, self).buttons_handler(event)
 
     # noinspection PyUnusedLocal
     def _close_button_handler(self, event: wx.CloseEvent) -> None:
@@ -53,6 +66,8 @@ class RichTextSpellCheckerDialog(SpellCheckerDialog):
         :param event: Unused.
         :return: None
         """
+        # Remove all fixed underlines.
+        self._text_area.run_spellcheck()
         # Send an event to the main gui to signal dialog closing.
         done_evt = Events.SpellcheckEvent(self.GetId())
         if self.word_lists_changed():

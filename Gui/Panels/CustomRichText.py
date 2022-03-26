@@ -978,26 +978,32 @@ class CustomRichText(rt.RichTextCtrl):
         :param event: Not used.
         :return: None
         """
-        self._run_spellcheck()
+        self.run_spellcheck()
 
-    def _run_spellcheck(self) -> None:
+    def run_spellcheck(self) -> None:
         """
         Run spellcheck on text to underline bad words.
         :return: None
         """
-        # TODO why is this underlying everything?
         # TODO will links be de-underlined?
-        # TODO run once when loaded.
-        # TODO remove underline from fixed words.
         # TODO underline does not work every time.
+        # TODO underline on blue text looks like a link
+
         self._spelling_timer.Stop()
         self.BeginSuppressUndo()
+        position = self.GetCaretPosition()
+        # Remove underline before applying again, apply to all and second apply removes it.
+        self.SelectAll()
+        self.ApplyUnderlineToSelection()
+        self.ApplyUnderlineToSelection()
+        self.SelectNone()
         self._checker.reload_language()
         self._checker.set_text(self.get_text())
         for _ in self._checker.next():
             self.SelectWord(self._checker.wordpos)
             self.ApplyUnderlineToSelection()
             self.SelectNone()
+        self.SetCaretPosition(position)
         self.EndSuppressUndo()
 
     # noinspection PyUnusedLocal
@@ -1156,7 +1162,7 @@ class CustomRichText(rt.RichTextCtrl):
         self.LayoutContent()
         self.EndSuppressUndo()
         self._modify_text()
-        self._run_spellcheck()
+        self.run_spellcheck()
         self._load_indicator = True
         # Set focus to the text area.
         wx.CallLater(100, self.SetFocus)
@@ -1371,9 +1377,10 @@ class CustomRichText(rt.RichTextCtrl):
 
     def update_seo_colors(self) -> None:
         """
-        Update the color of all links in this document based on their seo status.
+        Update the color of all links in this document based on their seo status and underlines bad words.
         :return: None.
         """
+        self.run_spellcheck()
         # Changing paragraph style inside the loop changes address in memory and causes segfault. Create a list of
         # ranges to change and change the colors in a separate loop.
         ranges_list: List[Tuple[Tuple[int, int], Link]] = []
