@@ -1,3 +1,4 @@
+import time
 from contextlib import contextmanager
 from typing import List, Tuple
 
@@ -989,19 +990,45 @@ class CustomRichText(rt.RichTextCtrl):
         # TODO underline does not work every time.
         # TODO underline on blue text looks like a link
 
+        def apply_effect(rtc):
+            #rtc.ApplyTextEffectToSelection(wx.TEXT_ATTR_EFFECT_STRIKETHROUGH)
+            start = 2
+            end = 10
+            for f in (wx.TEXT_ATTR_EFFECT_NONE,
+                      wx.TEXT_ATTR_EFFECT_CAPITALS,
+                      wx.TEXT_ATTR_EFFECT_SMALL_CAPITALS,
+                      wx.TEXT_ATTR_EFFECT_STRIKETHROUGH,
+                      wx.TEXT_ATTR_EFFECT_DOUBLE_STRIKETHROUGH,
+                      wx.TEXT_ATTR_EFFECT_SHADOW,
+                      wx.TEXT_ATTR_EFFECT_EMBOSS,
+                      wx.TEXT_ATTR_EFFECT_OUTLINE,
+                      wx.TEXT_ATTR_EFFECT_ENGRAVE,
+                      wx.TEXT_ATTR_EFFECT_SUPERSCRIPT,
+                      wx.TEXT_ATTR_EFFECT_SUBSCRIPT,
+                      wx.TEXT_ATTR_EFFECT_RTL,
+                      wx.TEXT_ATTR_EFFECT_SUPPRESS_HYPHENATION):
+                self.SetSelection(start, end)
+                rtc.ApplyTextEffectToSelection(f)
+                self.SelectNone()
+                start = end + 1
+                end += 6
+
+        apply_effect(self)
+        return
+
         self._spelling_timer.Stop()
         self.BeginSuppressUndo()
         position = self.GetCaretPosition()
         # Remove underline before applying again, apply to all and second apply removes it.
         self.SelectAll()
-        self.ApplyUnderlineToSelection()
-        self.ApplyUnderlineToSelection()
+        apply_effect(self)
+        apply_effect(self)
         self.SelectNone()
         self._checker.reload_language()
         self._checker.set_text(self.get_text())
         for _ in self._checker.next():
             self.SelectWord(self._checker.wordpos)
-            self.ApplyUnderlineToSelection()
+            apply_effect(self)
             self.SelectNone()
         self.SetCaretPosition(position)
         self.EndSuppressUndo()
