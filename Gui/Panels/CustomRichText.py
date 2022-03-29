@@ -1,4 +1,3 @@
-import time
 from contextlib import contextmanager
 from typing import List, Tuple
 
@@ -94,7 +93,6 @@ class CustomRichText(rt.RichTextCtrl):
 
         self.Bind(wx.EVT_KEY_DOWN, self._on_key_down)
         self.Bind(wx.EVT_KEY_UP, self._update_gui_handler)
-        self.Bind(wx.EVT_TEXT, self._spellcheck_timer_reset_handler)
         self.Bind(wx.EVT_COLOUR_CHANGED, self._refresh)
         # Text paste handling.
         self.Bind(wx.EVT_MENU, self._paste_handler, id=wx.ID_PASTE)
@@ -133,6 +131,8 @@ class CustomRichText(rt.RichTextCtrl):
         """
         if self._load_indicator:
             self._send_color_event(True)
+            if not self._spelling_timer.IsRunning():
+                self._spelling_timer.Start(Numbers.spellcheck_timeout)
 
     def _send_color_event(self, modified: bool) -> None:
         """
@@ -176,7 +176,7 @@ class CustomRichText(rt.RichTextCtrl):
         :return: None
         """
         # Paragraph style
-        # Do not se specific font color, color is retained in each text object.
+        # Do not set specific font color, color is retained in each text object.
         stl_paragraph: rt.RichTextAttr = rt.RichTextAttr()
         stl_paragraph.SetFontSize(Numbers.paragraph_font_size)
         stl_paragraph.SetAlignment(wx.TEXT_ALIGNMENT_LEFT)
@@ -986,63 +986,27 @@ class CustomRichText(rt.RichTextCtrl):
         Run spellcheck on text to underline bad words.
         :return: None
         """
-        # TODO will links be de-underlined?
         # TODO underline does not work every time.
-        # TODO underline on blue text looks like a link
-
-        def apply_effect(rtc):
-            #rtc.ApplyTextEffectToSelection(wx.TEXT_ATTR_EFFECT_STRIKETHROUGH)
-            start = 2
-            end = 10
-            for f in (wx.TEXT_ATTR_EFFECT_NONE,
-                      wx.TEXT_ATTR_EFFECT_CAPITALS,
-                      wx.TEXT_ATTR_EFFECT_SMALL_CAPITALS,
-                      wx.TEXT_ATTR_EFFECT_STRIKETHROUGH,
-                      wx.TEXT_ATTR_EFFECT_DOUBLE_STRIKETHROUGH,
-                      wx.TEXT_ATTR_EFFECT_SHADOW,
-                      wx.TEXT_ATTR_EFFECT_EMBOSS,
-                      wx.TEXT_ATTR_EFFECT_OUTLINE,
-                      wx.TEXT_ATTR_EFFECT_ENGRAVE,
-                      wx.TEXT_ATTR_EFFECT_SUPERSCRIPT,
-                      wx.TEXT_ATTR_EFFECT_SUBSCRIPT,
-                      wx.TEXT_ATTR_EFFECT_RTL,
-                      wx.TEXT_ATTR_EFFECT_SUPPRESS_HYPHENATION):
-                self.SetSelection(start, end)
-                rtc.ApplyTextEffectToSelection(f)
-                self.SelectNone()
-                start = end + 1
-                end += 6
-
-        apply_effect(self)
-        return
+        def apply_effect():
+            # TODO switch to waved underline once available.
+            self.ApplyTextEffectToSelection(wx.TEXT_ATTR_EFFECT_STRIKETHROUGH)
 
         self._spelling_timer.Stop()
         self.BeginSuppressUndo()
         position = self.GetCaretPosition()
         # Remove underline before applying again, apply to all and second apply removes it.
         self.SelectAll()
-        apply_effect(self)
-        apply_effect(self)
+        apply_effect()
+        apply_effect()
         self.SelectNone()
         self._checker.reload_language()
         self._checker.set_text(self.get_text())
         for _ in self._checker.next():
             self.SelectWord(self._checker.wordpos)
-            apply_effect(self)
+            apply_effect()
             self.SelectNone()
         self.SetCaretPosition(position)
         self.EndSuppressUndo()
-
-    # noinspection PyUnusedLocal
-    def _spellcheck_timer_reset_handler(self, event: wx.CommandEvent) -> None:
-        """
-        Reset active spellcheck timer when the text is modified.
-        :param event: Unused.
-        :return: None
-        """
-        if self._load_indicator:
-            if not self._spelling_timer.IsRunning():
-                self._spelling_timer.Start(Numbers.spellcheck_timeout)
 
     def _style_picker_handler(self, evt: wx.CommandEvent) -> None:
         """
