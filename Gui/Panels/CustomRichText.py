@@ -986,22 +986,20 @@ class CustomRichText(rt.RichTextCtrl):
         Run spellcheck on text to underline bad words.
         :return: None
         """
-        # TODO underline does not work every time.
         def apply_effect():
-            # TODO switch to waved underline once available.
             self.ApplyTextEffectToSelection(wx.TEXT_ATTR_EFFECT_STRIKETHROUGH)
 
         self._spelling_timer.Stop()
         self.BeginSuppressUndo()
         position = self.GetCaretPosition()
-        # Remove underline before applying again, apply to all and second apply removes it.
+        # Apply twice to remove and reapply
         self.SelectAll()
         apply_effect()
         apply_effect()
         self.SelectNone()
         self._checker.reload_language()
         self._checker.set_text(self.get_text())
-        for _ in self._checker.next():
+        for _ in self._checker:
             self.SelectWord(self._checker.wordpos)
             apply_effect()
             self.SelectNone()
