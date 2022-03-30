@@ -18,6 +18,7 @@ from Tools.Document.ArticleElements.UnorderedList import UnorderedList
 from Tools.Document.ArticleElements.Video import Video
 from Tools.Document.WhitebearDocumentArticle import WhitebearDocumentArticle
 from Tools.ImageTextField import ImageTextField
+from Tools.SpellCheckerWithIgnoredList import SpellCheckerWithIgnoreList
 
 
 class CustomRichText(rt.RichTextCtrl):
@@ -67,9 +68,16 @@ class CustomRichText(rt.RichTextCtrl):
         # Registered fields are used to easily update colors of images and videos on spellcheck dictionary change
         self._fields = []
 
-        # Used for three click select.
-        self._timer = wx.Timer(self)
-        self.Bind(wx.EVT_TIMER, self._on_click_timer, self._timer)
+        # Used for three click whole paragraph select.
+        self._three_click_timer = wx.Timer(self)
+        self.Bind(wx.EVT_TIMER, self._on_click_timer, self._three_click_timer)
+
+        # This is called too early before the config manager has loaded the full config and returns default language.
+        # But language is updated when spellcheck runs since we can change language dynamically.
+        self._checker = SpellCheckerWithIgnoreList(self._config_manager.get_spelling_lang())
+        # Used for active spellcheck after modification.
+        self._spelling_timer = wx.Timer(self)
+        self.Bind(wx.EVT_TIMER, self._on_spelling_timer, self._spelling_timer)
 
         self._main_frame = wx.GetTopLevelParent(self)
         self.Bind(wx.EVT_LISTBOX, self._style_picker_handler, self._style_picker)
@@ -123,6 +131,8 @@ class CustomRichText(rt.RichTextCtrl):
         """
         if self._load_indicator:
             self._send_color_event(True)
+            if not self._spelling_timer.IsRunning():
+                self._spelling_timer.Start(Numbers.spellcheck_timeout)
 
     def _send_color_event(self, modified: bool) -> None:
         """
@@ -166,7 +176,7 @@ class CustomRichText(rt.RichTextCtrl):
         :return: None
         """
         # Paragraph style
-        # Do not se specific font color, color is retained in each text object.
+        # Do not set specific font color, color is retained in each text object.
         stl_paragraph: rt.RichTextAttr = rt.RichTextAttr()
         stl_paragraph.SetFontSize(Numbers.paragraph_font_size)
         stl_paragraph.SetAlignment(wx.TEXT_ALIGNMENT_LEFT)
@@ -943,8 +953,8 @@ class CustomRichText(rt.RichTextCtrl):
         :return: None
         """
         self._update_style_picker()
-        if not self._timer.IsRunning():
-            self._timer.Start(Numbers.three_click_timeout)
+        if not self._three_click_timer.IsRunning():
+            self._three_click_timer.Start(Numbers.three_click_timeout)
         self._click_counter = self._click_counter + 1
         event.Skip()
 
@@ -960,7 +970,41 @@ class CustomRichText(rt.RichTextCtrl):
             p_range: rt.RichTextParagraph = self.GetFocusObject().GetParagraphAtPosition(position).GetRange()
             self.SetSelectionRange(p_range)
         self._click_counter = 0
-        self._timer.Stop()
+        self._three_click_timer.Stop()
+
+    # noinspection PyUnusedLocal
+    def _on_spelling_timer(self, event: wx.CommandEvent) -> None:
+        """
+        When the timer runs out and if three left click were made, select whole current paragraph.
+        :param event: Not used.
+        :return: None
+        """
+        self.run_spellcheck()
+
+    def run_spellcheck(self) -> None:
+        """
+        Run spellcheck on text to underline bad words.
+        :return: None
+        """
+        def apply_effect():
+            self.ApplyTextEffectToSelection(wx.TEXT_ATTR_EFFECT_STRIKETHROUGH)
+
+        self._spelling_timer.Stop()
+        self.BeginSuppressUndo()
+        position = self.GetCaretPosition()
+        # Apply twice to remove and reapply
+        self.SelectAll()
+        apply_effect()
+        apply_effect()
+        self.SelectNone()
+        self._checker.reload_language()
+        self._checker.set_text(self.get_text())
+        for _ in self._checker:
+            self.SelectWord(self._checker.wordpos)
+            apply_effect()
+            self.SelectNone()
+        self.SetCaretPosition(position)
+        self.EndSuppressUndo()
 
     def _style_picker_handler(self, evt: wx.CommandEvent) -> None:
         """
@@ -1107,6 +1151,7 @@ class CustomRichText(rt.RichTextCtrl):
         self.LayoutContent()
         self.EndSuppressUndo()
         self._modify_text()
+        self.run_spellcheck()
         self._load_indicator = True
         # Set focus to the text area.
         wx.CallLater(100, self.SetFocus)
@@ -1321,9 +1366,10 @@ class CustomRichText(rt.RichTextCtrl):
 
     def update_seo_colors(self) -> None:
         """
-        Update the color of all links in this document based on their seo status.
+        Update the color of all links in this document based on their seo status and underlines bad words.
         :return: None.
         """
+        self.run_spellcheck()
         # Changing paragraph style inside the loop changes address in memory and causes segfault. Create a list of
         # ranges to change and change the colors in a separate loop.
         ranges_list: List[Tuple[Tuple[int, int], Link]] = []

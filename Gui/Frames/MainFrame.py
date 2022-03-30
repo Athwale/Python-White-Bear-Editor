@@ -107,7 +107,6 @@ class MainFrame(wx.Frame):
         self._set_status_text(Strings.status_loading, 3)
         # Find the last opened whitebear directory, switch config manager to it and load it.
         if self._config_manager.set_active_dir(self._config_manager.get_last_directory()):
-            # TODO Test network status before loading a directory and disable online test if network is unavailable.
             h = httplib2.Http(timeout=Numbers.online_test_timeout)
             try:
                 h.request(Strings.test_url, 'HEAD')
