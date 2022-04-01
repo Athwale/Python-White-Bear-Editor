@@ -986,6 +986,7 @@ class CustomRichText(rt.RichTextCtrl):
         Run spellcheck on text to underline bad words.
         :return: None
         """
+        # todo ignore links
         def apply_effect():
             self.ApplyTextEffectToSelection(wx.TEXT_ATTR_EFFECT_STRIKETHROUGH)
 
@@ -1366,10 +1367,9 @@ class CustomRichText(rt.RichTextCtrl):
 
     def update_seo_colors(self) -> None:
         """
-        Update the color of all links in this document based on their seo status and underlines bad words.
+        Update the color of all links and images/videos in this document based on their seo status.
         :return: None.
         """
-        self.run_spellcheck()
         # Changing paragraph style inside the loop changes address in memory and causes segfault. Create a list of
         # ranges to change and change the colors in a separate loop.
         ranges_list: List[Tuple[Tuple[int, int], Link]] = []
@@ -1385,6 +1385,8 @@ class CustomRichText(rt.RichTextCtrl):
                     if attrs.HasURL():
                         stored_link: Link = self._doc.find_link(attrs.GetURL())
                         if stored_link:
+                            stored_link.set_text(child.GetText())
+                            stored_link.test_self(False)
                             ranges_list.append((child.GetRange(), stored_link))
 
         for link_range, link in ranges_list:

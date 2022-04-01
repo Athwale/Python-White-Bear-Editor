@@ -5,6 +5,9 @@ Starting class for the whitebear editor GUI. This class is necessary and must be
 OnInit must be overridden here.
 # TODO fix bugs and package this into a binary. Package into rpm Ponorme se do pythonu nebo youtube.
 # TODO https://www.blog.pythonlibrary.org/2019/03/19/distributing-a-wxpython-application/
+
+# TODO if the user edits replace field and then replaces, add the word to dictionary and signal lists changed.
+
 # TODO richtext control does not yet support red waved underline, change underline once available.
 # TODO look at cookies from whitebear pomoci requests headers bacha ba presmerovani, set cookie warning
 """
