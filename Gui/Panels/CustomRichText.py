@@ -986,7 +986,6 @@ class CustomRichText(rt.RichTextCtrl):
         Run spellcheck on text to underline bad words.
         :return: None
         """
-        # todo ignore links
         def apply_effect():
             self.ApplyTextEffectToSelection(wx.TEXT_ATTR_EFFECT_STRIKETHROUGH)
 
@@ -1002,7 +1001,10 @@ class CustomRichText(rt.RichTextCtrl):
         self._checker.set_text(self.get_text())
         for _ in self._checker:
             self.SelectWord(self._checker.wordpos)
-            apply_effect()
+            attrs = rt.RichTextAttr()
+            attrs.SetFontFaceName(Strings.style_url)
+            if not self.HasCharacterAttributes(self.GetSelectionRange(), attrs):
+                apply_effect()
             self.SelectNone()
         self.SetCaretPosition(position)
         self.EndSuppressUndo()
