@@ -284,7 +284,7 @@ class Strings:
     warning_paste_into_url: str = 'Can not paste multiple paragraphs into url'
     warning_fatal_invalidity: str = '(Some required file(s) invalid)'
     warning_no_mistake: str = 'Self test OK'
-    warning_errors_in_document: str = 'Errors in current document found in'
+    warning_errors_in_document: str = 'Problems found in'
     warning_main_image: str = 'Main article image'
     warning_aside_image: str = 'Side images'
     warning_text_image: str = 'Images in text'

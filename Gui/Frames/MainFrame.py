@@ -1954,50 +1954,51 @@ class MainFrame(wx.Frame):
         """
         error_report = ''
         if self._current_document_instance.get_status_color() == Numbers.RED_COLOR:
-            error_report += f'{Strings.warning_errors_in_document}:\n\n'
             # Keywords, date, description, title
             for field, name in ((self._field_article_keywords, Strings.label_article_keywords),
                                 (self._field_article_description, Strings.label_article_description),
                                 (self._field_article_date, Strings.label_article_date),
                                 (self._field_article_name, Strings.label_article_title)):
                 if field.GetBackgroundColour() == Numbers.RED_COLOR:
-                    error_report += f'{name}\n'
+                    error_report += f'- {name}\n'
             # Menu item
             if self._current_document_instance.get_menu_item().get_status_color() == wx.RED:
-                error_report += f'{Strings.warning_menu_item}\n'
+                error_report += f'- {Strings.warning_menu_item}\n'
             # Main image
             if self._current_document_instance.get_article_image().get_status_color() == wx.RED:
-                error_report += f'{Strings.warning_main_image}\n'
+                error_report += f'- {Strings.warning_main_image}\n'
             # Aside images
             for img in self._current_document_instance.get_aside_images():
                 if img.get_status_color() == wx.RED:
-                    error_report += f'{Strings.warning_aside_image}: {img.get_caption()[0]}\n'
+                    error_report += f'- {Strings.warning_aside_image}: {img.get_caption()[0]}\n'
             # Text images
             for img in self._current_document_instance.get_text_images():
                 if img.get_status_color() == wx.RED:
-                    error_report += f'{Strings.warning_text_image}: {img.get_link_title()[0]}\n'
+                    error_report += f'- {Strings.warning_text_image}: {img.get_link_title()[0]}\n'
             # Text videos
             for vid in self._current_document_instance.get_videos():
                 if vid.get_status_color() == wx.RED:
-                    error_report += f'{Strings.warning_text_video}: {vid.get_title()[0]}\n'
+                    error_report += f'- {Strings.warning_text_video}: {vid.get_title()[0]}\n'
             # Text links
             for link in self._current_document_instance.get_links():
                 if link.get_status_color() == wx.RED:
-                    error_report += f'{Strings.warning_text_link}: {link.get_text()[0]}\n'
+                    error_report += f'- {Strings.warning_text_link}: {link.get_text()[0]}\n'
             # Main text spellcheck
             if not self._current_document_instance.is_spellcheck_ok():
-                error_report += f'{Strings.warning_text_spelling}\n'
-            # Menu page
-            if self._current_document_instance.get_menu_section().get_status_color() == Numbers.RED_COLOR:
-                error_report += f'{Strings.warning_menu_page}\n'
-            # Index page
-            if self._current_document_instance.get_index_document().get_status_color() == Numbers.RED_COLOR:
-                error_report += f'{Strings.warning_index}\n'
+                error_report += f'- {Strings.warning_text_spelling}\n'
+
+        # Menu page
+        if self._current_document_instance.get_menu_section().get_status_color() == Numbers.RED_COLOR:
+            error_report += f'- {Strings.warning_menu_page}\n'
+        # Index page
+        if self._current_document_instance.get_index_document().get_status_color() == Numbers.RED_COLOR:
+            error_report += f'- {Strings.warning_index}\n'
 
         if not error_report:
             wx.MessageBox(Strings.warning_no_mistake, Strings.label_dialog_self_test, wx.OK | wx.ICON_INFORMATION)
         else:
-            wx.MessageBox(error_report, Strings.label_dialog_self_test, wx.OK | wx.ICON_INFORMATION)
+            wx.MessageBox(f'{Strings.warning_errors_in_document}:\n\n{error_report}',
+                          Strings.label_dialog_self_test, wx.OK | wx.ICON_INFORMATION)
 
     def _spellcheck_done_handler(self, event: wx.CommandEvent) -> None:
         """
