@@ -520,6 +520,7 @@ class Strings:
     toolbar_save: str = 'Save'
     toolbar_color: str = 'Change color'
     toolbar_browser: str = 'Open in browser'
+    toolbar_self_test: str = 'Self test'
 
     button_close: str = 'Close'
     button_cancel: str = 'Cancel'

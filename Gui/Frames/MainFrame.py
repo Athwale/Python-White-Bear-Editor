@@ -312,6 +312,7 @@ class MainFrame(wx.Frame):
         Set up top toolbar for the frame.
         :return: None
         """
+        # TODO add icon for self test
         self.tool_bar: wx.ToolBar = self.CreateToolBar(style=wx.TB_DEFAULT_STYLE)
 
         # Document state information
@@ -350,6 +351,11 @@ class MainFrame(wx.Frame):
                                                                        self._scale_icon('web-browser.svg'),
                                                                        Strings.toolbar_browser)
         self._browser_tool.SetLongHelp(Strings.toolbar_browser)
+        self._test_tool: wx.ToolBarToolBase = self.tool_bar.AddTool(wx.ID_SPELL_CHECK, Strings.toolbar_self_test,
+                                                                    self._scale_icon('self-test.svg'),
+                                                                    Strings.toolbar_self_test)
+        self._test_tool.SetLongHelp(Strings.toolbar_self_test)
+        self._tool_ids.append(wx.ID_SPELL_CHECK)
 
         self.Bind(wx.EVT_MENU, self._forward_event, self.insert_img_tool)
         self.Bind(wx.EVT_MENU, self._forward_event, self.insert_video_tool)
