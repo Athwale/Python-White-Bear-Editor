@@ -152,7 +152,7 @@ class WhitebearDocumentIndex(WhitebearDocument):
         # Fill keywords.
         keywords = parsed_template.find_all(name='meta', attrs={'name': 'keywords', 'content': True})
         if len(keywords) == 1:
-            keywords[0]['content'] = self._meta_keywords
+            keywords[0]['content'] = ', '.join(self._meta_keywords)
         else:
             raise UnrecognizedFileException(Strings.exception_parse_multiple_authors)
 
