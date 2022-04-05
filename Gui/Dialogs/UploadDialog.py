@@ -143,7 +143,8 @@ class UploadDialog(wx.Dialog):
         self._content_current_file = wx.StaticText(self, -1, Strings.label_none,
                                                    style=wx.ST_ELLIPSIZE_MIDDLE | wx.ST_NO_AUTORESIZE)
         self._info_left_sizer.Add(self._label_current_file, flag=wx.BOTTOM | wx.LEFT, border=Numbers.widget_border_size)
-        self._info_right_sizer.Add(self._content_current_file, flag=wx.BOTTOM, border=Numbers.widget_border_size)
+        self._info_right_sizer.Add(self._content_current_file, 1, flag=wx.BOTTOM | wx.EXPAND,
+                                   border=Numbers.widget_border_size)
 
         self._content_percentage = wx.StaticText(self, -1, '0 %')
         self._info_right_sizer.Add(self._content_percentage, flag=wx.BOTTOM, border=Numbers.widget_border_size)

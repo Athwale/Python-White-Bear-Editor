@@ -312,7 +312,6 @@ class MainFrame(wx.Frame):
         Set up top toolbar for the frame.
         :return: None
         """
-        # TODO add icon for self test
         self.tool_bar: wx.ToolBar = self.CreateToolBar(style=wx.TB_DEFAULT_STYLE)
 
         # Document state information
