@@ -335,6 +335,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
                     self._links.append(link)
                 else:
                     raise WrongFormatException(Strings.exception_html_syntax_error)
+        self._plain_text += '\n'
         return paragraph
 
     def _process_visual_tags(self, parent_element: Tag, paragraph: Paragraph, bold: bool) -> bool:
