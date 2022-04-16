@@ -7,6 +7,15 @@ OnInit must be overridden here.
 # TODO https://www.blog.pythonlibrary.org/2019/03/19/distributing-a-wxpython-application/
 
 # TODO if the user edits replace field and then replaces, add the word to dictionary and signal lists changed.
+
+# TODO clicking enable article should rerun self test too and make it bold?
+# TODO changing image by deleting it so that the in text image is red and then importing a new one does not change the red sign.
+# TODO titles are somehow cut short
+# TODO server with automatic refresh on save for live preview
+# TODO edit on a link which is crossed does not take the crossed part into dialog.
+# TODO right click on side images is not working
+# TODO backspacing is slow
+
 # TODO richtext control does not yet support red waved underline, change underline once available.
 # TODO look at cookies from whitebear pomoci requests headers bacha ba presmerovani, set cookie warning
 """

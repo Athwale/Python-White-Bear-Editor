@@ -479,6 +479,7 @@ class Strings:
     label_ignored_location: str = 'Ignored words'
     label_spelling_language: str = 'Spelling language'
     label_restart_required: str = 'Restart editor to apply changes'
+    label_delete_images: str = 'Delete images:'
 
     status_loading: str = 'Loading and testing...'
     status_ready: str = 'Ready'
@@ -538,6 +539,7 @@ class Strings:
     button_spellcheck: str = 'Spellcheck'
     button_edit_dictionary: str = 'Edit dictionary'
     button_edit_ignored_list: str = 'Edit ignored words'
+    button_delete_images: str = 'Delete images'
 
     undo_last_action: str = 'Last action'
     undo_bold: str = 'Undo bold text'

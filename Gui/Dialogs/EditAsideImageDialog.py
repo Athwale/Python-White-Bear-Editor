@@ -132,6 +132,8 @@ class EditAsideImageDialog(SpellCheckedDialog):
         self._ok_button.SetDefault()
         self._browse_button = wx.Button(self, wx.ID_OPEN, Strings.button_browse)
         self._add_button = wx.Button(self, wx.ID_ADD, Strings.button_add)
+        self._delete_button = wx.Button(self, wx.ID_DELETE, Strings.button_delete_images)
+        self._delete_button.SetForegroundColour(wx.RED)
         grouping_sizer.Add(self._ok_button)
         grouping_sizer.Add((Numbers.widget_border_size, Numbers.widget_border_size))
         grouping_sizer.Add(self._cancel_button)
@@ -139,6 +141,8 @@ class EditAsideImageDialog(SpellCheckedDialog):
         grouping_sizer.Add(self._browse_button)
         grouping_sizer.Add((Numbers.widget_border_size, Numbers.widget_border_size))
         grouping_sizer.Add(self._add_button)
+        grouping_sizer.Add((Numbers.widget_border_size, Numbers.widget_border_size))
+        grouping_sizer.Add(self._delete_button)
         self._button_sizer.Add(grouping_sizer, flag=wx.ALIGN_CENTER_HORIZONTAL)
 
         # Putting the sizers together
@@ -163,6 +167,7 @@ class EditAsideImageDialog(SpellCheckedDialog):
         self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._cancel_button)
         self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._browse_button)
         self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._add_button)
+        self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._delete_button)
 
         self.Bind(wx.EVT_TEXT, self._handle_edit, self._field_image_caption)
         self.Bind(wx.EVT_TEXT, self._lock_fields, self._field_image_alt)
@@ -244,6 +249,22 @@ class EditAsideImageDialog(SpellCheckedDialog):
                     # Parameter expansion, expands tuple into the two arguments needed by the function.
                     self._change_image(*dlg.get_thumbnail_location())
             dlg.Destroy()
+        elif event.GetId() == wx.ID_DELETE:
+            # TODO delete image file button, rerun test after to make red
+            result = wx.MessageBox(f'{Strings.label_image_path}: {self._image_copy.get_original_image_path()}\n'
+                                   f'{Strings.label_image_thumbnail_path}: '
+                                   f'{self._image_copy.get_thumbnail_image_path()}',
+                                   Strings.label_delete_images,
+                                   wx.YES_NO | wx.ICON_QUESTION)
+            if result == wx.YES:
+                for path in (self._image_copy.get_thumbnail_image_path(), self._image_copy.get_original_image_path()):
+                    if os.path.exists(path) and os.access(path, os.R_OK) and os.access(path, os.W_OK):
+                        os.remove(path)
+                    else:
+                        wx.MessageBox(f'{Strings.warning_can_not_delete}:\n{path}', Strings.status_error,
+                                      wx.OK | wx.ICON_ERROR)
+                self._image_copy.test_self()
+                self._display_dialog_contents()
         else:
             # Leave the old image as it is and do not do anything.
             event.Skip()
