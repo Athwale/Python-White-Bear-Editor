@@ -250,7 +250,6 @@ class EditAsideImageDialog(SpellCheckedDialog):
                     self._change_image(*dlg.get_thumbnail_location())
             dlg.Destroy()
         elif event.GetId() == wx.ID_DELETE:
-            # TODO delete image file button, rerun test after to make red
             result = wx.MessageBox(f'{Strings.label_image_path}: {self._image_copy.get_original_image_path()}\n'
                                    f'{Strings.label_image_thumbnail_path}: '
                                    f'{self._image_copy.get_thumbnail_image_path()}',

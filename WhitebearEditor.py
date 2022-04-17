@@ -9,6 +9,7 @@ OnInit must be overridden here.
 # TODO if the user edits replace field and then replaces, add the word to dictionary and signal lists changed.
 
 # TODO clicking enable article should rerun self test too and make it bold?
+# TODO make logos borderless and add border in css
 # TODO changing image by deleting it so that the in text image is red and then importing a new one does not change the red sign.
 # TODO titles are somehow cut short
 # TODO server with automatic refresh on save for live preview
