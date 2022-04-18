@@ -10,11 +10,9 @@ OnInit must be overridden here.
 
 # TODO clicking enable article should rerun self test too and make it bold?
 # TODO make logos borderless and add border in css
-# TODO changing image by deleting it so that the in text image is red and then importing a new one does not change the red sign.
 # TODO titles are somehow cut short
 # TODO server with automatic refresh on save for live preview
 # TODO edit on a link which is crossed does not take the crossed part into dialog.
-# TODO right click on side images is not working
 # TODO backspacing is slow
 
 # TODO richtext control does not yet support red waved underline, change underline once available.

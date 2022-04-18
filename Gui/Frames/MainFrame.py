@@ -1446,6 +1446,8 @@ class MainFrame(wx.Frame):
         """
         # Force repeating search because the text has changed and indexes would no longer match.
         self._text_changed = True
+        # This ensures images are redrawn after changes.
+        self._main_text_area.Refresh()
         if not self._ignore_change:
             if event.GetInt():
                 # The event will have int 1 set if change has occurred

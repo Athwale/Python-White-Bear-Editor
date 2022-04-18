@@ -68,11 +68,6 @@ class ImageTextField(RichTextFieldTypeStandard):
         edit_dialog.Destroy()
 
         self.update_image()
-        # Refresh text area
-        # TODO image does not change after it is deleted, does not notify to make document bold, none of the dialogs do, should they?
-        parent.MoveLeft(0)
-        parent.Invalidate()
-        parent.Refresh()
         return result
 
     def update_image(self) -> None:

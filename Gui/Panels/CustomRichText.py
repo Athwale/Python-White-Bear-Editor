@@ -56,6 +56,7 @@ class CustomRichText(rt.RichTextCtrl):
         # Fix behavior on X11 server
         wx.TheClipboard.UsePrimarySelection(False)
 
+        self.AlwaysShowScrollbars(False, True)
         self._stylesheet = rt.RichTextStyleSheet()
         self._stylesheet.SetName('Stylesheet')
 
