@@ -124,6 +124,8 @@ class EditMenuItemDialog(SpellCheckedDialog):
         self._ok_button.SetDefault()
         self._browse_button = wx.Button(self, wx.ID_OPEN, Strings.button_browse)
         self._add_button = wx.Button(self, wx.ID_ADD, Strings.button_add)
+        self._delete_button = wx.Button(self, wx.ID_DELETE, Strings.button_delete_images)
+        self._delete_button.SetForegroundColour(wx.RED)
         grouping_sizer.Add(self._ok_button)
         grouping_sizer.Add((Numbers.widget_border_size, Numbers.widget_border_size))
         grouping_sizer.Add(self._cancel_button)
@@ -131,6 +133,8 @@ class EditMenuItemDialog(SpellCheckedDialog):
         grouping_sizer.Add(self._browse_button)
         grouping_sizer.Add((Numbers.widget_border_size, Numbers.widget_border_size))
         grouping_sizer.Add(self._add_button)
+        grouping_sizer.Add((Numbers.widget_border_size, Numbers.widget_border_size))
+        grouping_sizer.Add(self._delete_button)
         self._button_sizer.Add(grouping_sizer, flag=wx.ALIGN_CENTER_HORIZONTAL)
 
         # Putting the sizers together
@@ -152,6 +156,7 @@ class EditMenuItemDialog(SpellCheckedDialog):
         self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._add_button)
         self.Bind(wx.EVT_TEXT, self._lock_fields, self._field_image_alt)
         self.Bind(wx.EVT_TEXT, self._lock_fields, self._field_image_link_title)
+        self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._delete_button)
 
     # noinspection PyUnusedLocal
     def _handle_name_change(self, event: wx.CommandEvent) -> None:
@@ -261,6 +266,19 @@ class EditMenuItemDialog(SpellCheckedDialog):
                     # Parameter expansion, expands tuple into the two arguments needed by the function.
                     self._change_image(*dlg.get_logo_location())
             dlg.Destroy()
+        elif event.GetId() == wx.ID_DELETE:
+            result = wx.MessageBox(f'{Strings.label_image}: {self._item_copy.get_image_path()}\n',
+                                   Strings.label_delete_images,
+                                   wx.YES_NO | wx.ICON_QUESTION)
+            if result == wx.YES:
+                path = self._item_copy.get_image_path()
+                if os.path.exists(path) and os.access(path, os.R_OK) and os.access(path, os.W_OK):
+                    os.remove(path)
+                else:
+                    wx.MessageBox(f'{Strings.warning_can_not_delete}:\n{path}', Strings.status_error,
+                                  wx.OK | wx.ICON_ERROR)
+            self._item_copy.test_self()
+            self.display_dialog_contents()
         else:
             # Leave the original item as it is.
             event.Skip()
