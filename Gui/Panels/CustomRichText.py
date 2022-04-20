@@ -516,7 +516,15 @@ class CustomRichText(rt.RichTextCtrl):
             self.SetStyleEx(link_range, self._stylesheet.FindStyle(Strings.style_url).GetStyle(),
                             flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_CHARACTERS_ONLY)
             if self.DoesSelectionHaveTextEffectFlag(wx.TEXT_ATTR_EFFECT_STRIKETHROUGH):
+                self.BeginSuppressUndo()
                 self.ApplyTextEffectToSelection(wx.TEXT_ATTR_EFFECT_STRIKETHROUGH)
+                self.EndSuppressUndo()
+            else:
+                # Apply twice to first strike and then remove in case a portion was already stricken.
+                self.BeginSuppressUndo()
+                self.ApplyTextEffectToSelection(wx.TEXT_ATTR_EFFECT_STRIKETHROUGH)
+                self.ApplyTextEffectToSelection(wx.TEXT_ATTR_EFFECT_STRIKETHROUGH)
+                self.EndSuppressUndo()
 
     @staticmethod
     def get_style_at_pos(buffer: rt.RichTextBuffer, position) -> (str, str):
