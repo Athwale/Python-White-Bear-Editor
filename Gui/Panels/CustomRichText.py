@@ -512,9 +512,11 @@ class CustomRichText(rt.RichTextCtrl):
         :return: None
         """
         if self.HasSelection():
-            link_range = self.GetSelectionRange()
+            link_range: rt.RichTextRange = self.GetSelectionRange()
             self.SetStyleEx(link_range, self._stylesheet.FindStyle(Strings.style_url).GetStyle(),
                             flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_CHARACTERS_ONLY)
+            if self.DoesSelectionHaveTextEffectFlag(wx.TEXT_ATTR_EFFECT_STRIKETHROUGH):
+                self.ApplyTextEffectToSelection(wx.TEXT_ATTR_EFFECT_STRIKETHROUGH)
 
     @staticmethod
     def get_style_at_pos(buffer: rt.RichTextBuffer, position) -> (str, str):
@@ -987,6 +989,7 @@ class CustomRichText(rt.RichTextCtrl):
         Run spellcheck on text to underline bad words.
         :return: None
         """
+        # TODO edit on a link which has a crossed second word does not take the crossed part into dialog.
         def apply_effect():
             self.ApplyTextEffectToSelection(wx.TEXT_ATTR_EFFECT_STRIKETHROUGH)
 
