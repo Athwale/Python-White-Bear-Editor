@@ -997,7 +997,6 @@ class CustomRichText(rt.RichTextCtrl):
         Run spellcheck on text to underline bad words.
         :return: None
         """
-        # TODO edit on a link which has a crossed second word does not take the crossed part into dialog.
         def apply_effect():
             self.ApplyTextEffectToSelection(wx.TEXT_ATTR_EFFECT_STRIKETHROUGH)
 

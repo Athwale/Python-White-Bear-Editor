@@ -383,6 +383,7 @@ class MainFrame(wx.Frame):
         else:
             self._current_document_instance.set_enabled(False)
             self._public_checkbox.SetForegroundColour(wx.RED)
+        self._update_seo_colors()
 
     def _init_toolbar_controls(self) -> None:
         """
