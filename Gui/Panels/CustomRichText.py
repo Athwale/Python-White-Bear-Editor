@@ -80,6 +80,10 @@ class CustomRichText(rt.RichTextCtrl):
         self._spelling_timer = wx.Timer(self)
         self.Bind(wx.EVT_TIMER, self._on_spelling_timer, self._spelling_timer)
 
+        # Used to delay self test while fast edits are being made (holding a key).
+        self._test_delay_timer = wx.Timer(self)
+        self.Bind(wx.EVT_TIMER, self._on_test_delay_timer, self._test_delay_timer)
+
         self._main_frame = wx.GetTopLevelParent(self)
         self.Bind(wx.EVT_LISTBOX, self._style_picker_handler, self._style_picker)
         self.Bind(wx.EVT_TEXT_URL, self._url_in_text_click_handler, self)
@@ -94,7 +98,6 @@ class CustomRichText(rt.RichTextCtrl):
 
         self.Bind(wx.EVT_KEY_DOWN, self._on_key_down)
         self.Bind(wx.EVT_KEY_UP, self._update_gui_handler)
-        self.Bind(wx.EVT_COLOUR_CHANGED, self._refresh)
         # Text paste handling.
         self.Bind(wx.EVT_MENU, self._paste_handler, id=wx.ID_PASTE)
         self.Bind(wx.EVT_MENU, self._copy_handler, id=wx.ID_COPY)
@@ -131,6 +134,16 @@ class CustomRichText(rt.RichTextCtrl):
         :return: None
         """
         if self._load_indicator:
+            self._test_delay_timer.Start(Numbers.test_timeout, True)
+
+    # noinspection PyUnusedLocal
+    def _on_test_delay_timer(self, event: wx.CommandEvent) -> None:
+        """
+        When the timer runs out and if three left click were made, select whole current paragraph.
+        :param event: Not used.
+        :return: None
+        """
+        if self._load_indicator:
             self._send_color_event(True)
             if not self._spelling_timer.IsRunning():
                 self._spelling_timer.Start(Numbers.spellcheck_timeout)
@@ -150,17 +163,6 @@ class CustomRichText(rt.RichTextCtrl):
         else:
             color_evt.SetInt(0)
         wx.PostEvent(self.GetEventHandler(), color_evt)
-
-    def _refresh(self, evt: wx.CommandEvent) -> None:
-        """
-        Refresh the text field when something in it has changed and trigger the colour change event. This is emitted by
-        changing an image in text for example. Skip the event further to propagate the color change.
-        :param evt: Not used
-        :return: None
-        """
-        evt.Skip()
-        self.Invalidate()
-        self.Refresh()
 
     @staticmethod
     def _add_text_handlers() -> None:

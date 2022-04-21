@@ -41,6 +41,7 @@ class Numbers:
 
     three_click_timeout: int = 600
     spellcheck_timeout: int = 3000
+    test_timeout: int = 200
     photo_ratio: float = 4 / 3
     photo_ratio_tolerance: float = 0.01
 

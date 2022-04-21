@@ -1453,6 +1453,7 @@ class MainFrame(wx.Frame):
             if event.GetInt():
                 # The event will have int 1 set if change has occurred
                 self._current_document_instance.set_modified(True)
+            # TODO backspacing is slow because of this, pass in key down state.
             self._update_seo_colors()
 
     def _update_file_color(self, index: int = -1) -> None:
@@ -1904,6 +1905,7 @@ class MainFrame(wx.Frame):
         # Reset status color and calculate it again.
         self._current_document_instance.set_plain_text(self._main_text_area.get_text())
         # Do not run online test which is slow.
+        # TODO backspacing is slow because of this line. Run this only after backspace is released?
         self._current_document_instance.test_self()
         self._current_document_instance.get_index_document().test_self()
         self._current_document_instance.get_menu_section().test_self()
