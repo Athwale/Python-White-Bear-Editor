@@ -8,8 +8,9 @@ OnInit must be overridden here.
 
 # TODO if the user edits replace field and then replaces, add the word to dictionary and signal lists changed.
 
-# TODO titles are somehow cut short sometimes
 # TODO server with automatic refresh on save for live preview
+# TODO right click to add word to dictionary
+# TODO right click to make selected text an url
 
 # TODO richtext control does not yet support red waved underline, change underline once available.
 # TODO look at cookies from whitebear pomoci requests headers bacha ba presmerovani, set cookie warning

@@ -134,6 +134,7 @@ class CustomRichText(rt.RichTextCtrl):
         :return: None
         """
         if self._load_indicator:
+            # Single shot set to True because the timer should not fire events unless started by this method.
             self._test_delay_timer.Start(Numbers.test_timeout, True)
 
     # noinspection PyUnusedLocal
@@ -999,26 +1000,60 @@ class CustomRichText(rt.RichTextCtrl):
         Run spellcheck on text to underline bad words.
         :return: None
         """
-        def apply_effect():
-            self.ApplyTextEffectToSelection(wx.TEXT_ATTR_EFFECT_STRIKETHROUGH)
+        # TODO Typing with shift down sometimes does not respect style viz titles and numbers happens after spellcheck makes text stricken but onwy with shift.
+        def apply_effect(enable: bool) -> None:
+            """
+            Apply text effect to range of characters.
+            :param enable: True to turn effect on.
+            :return: None
+            """
+            # TODO use this as global method in the url style method too
+            # TODO adapt to removing effects too?
+            # self.ApplyTextEffectToSelection(wx.TEXT_ATTR_EFFECT_STRIKETHROUGH)
+            attrs: rt.RichTextAttr = rt.RichTextAttr()
+            attrs.SetFlags(wx.TEXT_ATTR_EFFECTS)
+            attrs.SetTextEffectFlags(wx.TEXT_ATTR_EFFECT_STRIKETHROUGH)
+            if enable:
+                attrs.SetTextEffects(wx.TEXT_ATTR_EFFECT_STRIKETHROUGH)
+            else:
+                attrs.SetTextEffects(attrs.GetTextEffectFlags() & ~wx.TEXT_ATTR_EFFECT_STRIKETHROUGH)
+
+            self.SetStyleEx(self.GetSelectionRange(), attrs, rt.RICHTEXT_SETSTYLE_WITH_UNDO |
+                            rt.RICHTEXT_SETSTYLE_OPTIMIZE | rt.RICHTEXT_SETSTYLE_CHARACTERS_ONLY)
+            '''
+            bool wxRichTextCtrl::ApplyTextEffectToSelection(int flags)
+            {
+                wxRichTextAttr attr;
+                attr.SetFlags(wxTEXT_ATTR_EFFECTS);
+                attr.SetTextEffectFlags(flags);
+                if (!DoesSelectionHaveTextEffectFlag(flags))
+                    attr.SetTextEffects(flags);
+                 else 
+                    attr.SetTextEffects(attr.GetTextEffectFlags() & ~flags);
+            
+                if (HasSelection())
+                    return SetStyleEx(GetSelectionRange(), attr, wxRICHTEXT_SETSTYLE_WITH_UNDO|wxRICHTEXT_SETSTYLE_OPTIMIZE|wxRICHTEXT_SETSTYLE_CHARACTERS_ONLY);
+            }
+            '''
 
         self._spelling_timer.Stop()
         self.BeginSuppressUndo()
         position = self.GetCaretPosition()
         # Apply twice to remove and reapply
         self.SelectAll()
-        apply_effect()
-        apply_effect()
+        apply_effect(False)
         self.SelectNone()
         self._checker.reload_language()
         self._checker.set_text(self.get_text())
         for _ in self._checker:
+            # TODO has something to do with this select, replace this with a range without selecting anything
             self.SelectWord(self._checker.wordpos)
             attrs = rt.RichTextAttr()
             attrs.SetFontFaceName(Strings.style_url)
             if not self.HasCharacterAttributes(self.GetSelectionRange(), attrs):
-                apply_effect()
+                apply_effect(True)
             self.SelectNone()
+
         self.SetCaretPosition(position)
         self.EndSuppressUndo()
 
@@ -1535,6 +1570,7 @@ class CustomRichText(rt.RichTextCtrl):
         Create an internal representation of the document using the article elements classes.
         :return: None
         """
+        # TODO titles are somehow cut short sometimes
         self._doc: WhitebearDocumentArticle
         last_was_paragraph = False
         last_was_list = False
