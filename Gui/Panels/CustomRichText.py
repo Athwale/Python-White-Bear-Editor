@@ -520,7 +520,7 @@ class CustomRichText(rt.RichTextCtrl):
                             flags=rt.RICHTEXT_SETSTYLE_WITH_UNDO | rt.RICHTEXT_SETSTYLE_CHARACTERS_ONLY)
             if self.DoesSelectionHaveTextEffectFlag(wx.TEXT_ATTR_EFFECT_STRIKETHROUGH):
                 self.BeginSuppressUndo()
-                self.apply_effect(False)
+                self.apply_effect(False, link_range)
                 self.EndSuppressUndo()
 
     @staticmethod
@@ -999,31 +999,28 @@ class CustomRichText(rt.RichTextCtrl):
         position = self.GetCaretPosition()
         # Apply twice to remove and reapply
         self.SelectAll()
-        self.apply_effect(False)
+        self.apply_effect(False, self.GetSelectionRange())
         self.SelectNone()
         self._checker.reload_language()
         self._checker.set_text(self.get_text())
         for _ in self._checker:
-            # TODO has something to do with this select, replace this with a range without selecting anything
-            self.SelectWord(self._checker.wordpos)
+            word_range = rt.RichTextRange(self._checker.wordpos, (self._checker.wordpos + len(self._checker.word)))
             attrs = rt.RichTextAttr()
             attrs.SetFontFaceName(Strings.style_url)
             if not self.HasCharacterAttributes(self.GetSelectionRange(), attrs):
-                self.apply_effect(True)
+                self.apply_effect(True, word_range)
             self.SelectNone()
 
         self.SetCaretPosition(position)
         self.EndSuppressUndo()
 
-    # TODO Typing with shift down sometimes does not respect style viz titles and numbers happens after spellcheck makes text stricken but onwy with shift.
-    def apply_effect(self, enable: bool) -> None:
+    def apply_effect(self, enable: bool, text_range: rt.RichTextRange) -> None:
         """
         Apply text effect to range of characters.
         :param enable: True to turn effect on.
+        :param text_range: Range for the effect.
         :return: None
         """
-        # TODO adapt to removing effects too?
-        # self.ApplyTextEffectToSelection(wx.TEXT_ATTR_EFFECT_STRIKETHROUGH)
         attrs: rt.RichTextAttr = rt.RichTextAttr()
         attrs.SetFlags(wx.TEXT_ATTR_EFFECTS)
         attrs.SetTextEffectFlags(wx.TEXT_ATTR_EFFECT_STRIKETHROUGH)
@@ -1031,9 +1028,7 @@ class CustomRichText(rt.RichTextCtrl):
             attrs.SetTextEffects(wx.TEXT_ATTR_EFFECT_STRIKETHROUGH)
         else:
             attrs.SetTextEffects(attrs.GetTextEffectFlags() & ~wx.TEXT_ATTR_EFFECT_STRIKETHROUGH)
-
-        self.SetStyleEx(self.GetSelectionRange(), attrs, rt.RICHTEXT_SETSTYLE_OPTIMIZE |
-                        rt.RICHTEXT_SETSTYLE_CHARACTERS_ONLY)
+        self.SetStyleEx(text_range, attrs, rt.RICHTEXT_SETSTYLE_OPTIMIZE | rt.RICHTEXT_SETSTYLE_CHARACTERS_ONLY)
 
     def _style_picker_handler(self, evt: wx.CommandEvent) -> None:
         """
