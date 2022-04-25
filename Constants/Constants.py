@@ -24,6 +24,7 @@ class Numbers:
     ID_EDIT_ROBOTS = wx.NewId()
     ID_EDIT_CSS = wx.NewId()
     ID_EDIT_MENU = wx.NewId()
+    ID_NONE_ITEM = wx.NewId()
 
     RED_COLOR = Colour(242, 207, 206)
     GREEN_COLOR = Colour(201, 255, 199)
@@ -298,6 +299,7 @@ class Strings:
     warning_file_missing: str = 'File not found:'
 
     label_menu_file: str = 'File'
+    label_menu_file_recent: str = 'Open recent directory'
     label_menu_item_new: str = 'New document...\tctrl+n'
     label_menu_item_new_hint: str = 'Create a new document'
     label_menu_item_open: str = 'Open directory...\tctrl+o'

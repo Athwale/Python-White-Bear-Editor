@@ -378,6 +378,15 @@ class ConfigManager:
             self.store_spelling_language(language)
         return language
 
+    def get_all_directories(self) -> [str]:
+        """
+        Get all working directories from config.
+        :return: All working directories from config or empty list.
+        """
+        if self._whole_conf.keys():
+            return [p for p in self._whole_conf.keys() if p.startswith('/')]
+        return []
+
     # Setters ----------------------------------------------------------------------------------------------------------
 
     def store_spelling_language(self, lang: str) -> None:

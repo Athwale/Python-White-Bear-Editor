@@ -11,8 +11,6 @@ OnInit must be overridden here.
 # TODO server with automatic refresh on save for live preview
 # TODO right click to add word to dictionary
 # TODO right click to make selected text an url
-# TODO strike under h3 moves text up a little for some reason
-# TODO add open recent dir menu submenu.
 
 # TODO richtext control does not yet support red waved underline, change underline once available.
 # TODO look at cookies from whitebear pomoci requests headers bacha ba presmerovani, set cookie warning

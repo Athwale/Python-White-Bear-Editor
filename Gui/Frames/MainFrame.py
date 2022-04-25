@@ -134,8 +134,8 @@ class MainFrame(wx.Frame):
         Set up menu bar for the frame.
         :return: None
         """
-        # Create menu bar and the menu itself
-        # All class instance variables have to be specified during the constructor
+        # Create menu bar and the menu itself.
+        # All class instance variables have to be specified during the constructor.
         self._menu_bar = wx.MenuBar()
         self._file_menu = wx.Menu(style=wx.MENU_TEAROFF)
         self._help_menu = wx.Menu(style=wx.MENU_TEAROFF)
@@ -190,8 +190,23 @@ class MainFrame(wx.Frame):
                                                   Strings.label_menu_item_delete_hint)
         self._disableable_menu_items.append(self._file_menu_item_delete)
 
+        recent = wx.Menu()
+        # Special None item that is always disabled.
+        none_item = wx.MenuItem(recent, Numbers.ID_NONE_ITEM, Strings.label_none)
+        last_open = self._config_manager.get_all_directories()
+        if not last_open:
+            recent.Append(none_item)
+            recent.Enable(Numbers.ID_NONE_ITEM, False)
+        else:
+            for directory in last_open:
+                dir_item = wx.MenuItem(recent, wx.ID_ANY, directory)
+                recent.Append(dir_item)
+                self._disableable_menu_items.append(dir_item)
+                self.Bind(wx.EVT_MENU, self._open_recent_handler, dir_item)
+
         # Put menu items into the menu buttons
         self._file_menu.Append(self._file_menu_item_open)
+        self._file_menu.Append(wx.ID_ANY, Strings.label_menu_file_recent, recent)
         self._file_menu.Append(self._file_menu_item_new_dir)
         self._file_menu.AppendSeparator()
         self._file_menu.Append(self._file_menu_item_new)
@@ -1143,7 +1158,7 @@ class MainFrame(wx.Frame):
         self._update_seo_colors()
         edit_dialog.Destroy()
 
-    def _close_button_handler(self, event: wx.CloseEvent):
+    def _close_button_handler(self, event: wx.CloseEvent) -> None:
         """
         Handle user exit from the editor. Save last known window position, size and last opened document.
         :param event: CloseEvent, if CanVeto is False the window must be destroyed the system is forcing it.
@@ -1177,8 +1192,22 @@ class MainFrame(wx.Frame):
                 # the close handler.
                 self.Destroy()
 
+    def _open_recent_handler(self, event: wx.CommandEvent) -> None:
+        """
+        Handle opening a recent directory from sub menu.
+        :param event: Used to get the path.
+        :return: None
+        """
+        menu_item: wx.MenuItem = self._file_menu.FindItemById(event.GetId())
+        directory_path = menu_item.GetItemLabel()
+        if not self._config_manager.set_active_dir(directory_path):
+            self._config_manager.add_directory(directory_path)
+            self._config_manager.set_active_dir(directory_path)
+        self._current_document_instance = None
+        self._load_working_directory(self._config_manager.get_working_dir())
+
     # noinspection PyUnusedLocal
-    def _open_button_handler(self, event):
+    def _open_button_handler(self, event: wx.CommandEvent):
         """
         Handle opening a new working directory. Show a selection dialog, store the new directory and load it into
         editor.
@@ -1453,7 +1482,6 @@ class MainFrame(wx.Frame):
             if event.GetInt():
                 # The event will have int 1 set if change has occurred
                 self._current_document_instance.set_modified(True)
-            # TODO backspacing is slow because of this, pass in key down state.
             self._update_seo_colors()
 
     def _update_file_color(self, index: int = -1) -> None:
@@ -1905,7 +1933,6 @@ class MainFrame(wx.Frame):
         # Reset status color and calculate it again.
         self._current_document_instance.set_plain_text(self._main_text_area.get_text())
         # Do not run online test which is slow.
-        # TODO backspacing is slow because of this line. Run this only after backspace is released?
         self._current_document_instance.test_self()
         self._current_document_instance.get_index_document().test_self()
         self._current_document_instance.get_menu_section().test_self()

@@ -996,6 +996,7 @@ class CustomRichText(rt.RichTextCtrl):
         """
         self._spelling_timer.Stop()
         self.BeginSuppressUndo()
+        # The word selection would move the caret if the position was not restored.
         position = self.GetCaretPosition()
         # Apply twice to remove and reapply
         self.SelectAll()
@@ -1007,7 +1008,7 @@ class CustomRichText(rt.RichTextCtrl):
             word_range = rt.RichTextRange(self._checker.wordpos, (self._checker.wordpos + len(self._checker.word)))
             attrs = rt.RichTextAttr()
             attrs.SetFontFaceName(Strings.style_url)
-            if not self.HasCharacterAttributes(self.GetSelectionRange(), attrs):
+            if not self.HasCharacterAttributes(word_range, attrs):
                 self.apply_effect(True, word_range)
             self.SelectNone()
 
@@ -1021,13 +1022,20 @@ class CustomRichText(rt.RichTextCtrl):
         :param text_range: Range for the effect.
         :return: None
         """
+        # TODO strike under h3 moves text up a little for some reason.
+        # TODO set the none flag for all styles by default??
+        effect = wx.TEXT_ATTR_EFFECT_STRIKETHROUGH
         attrs: rt.RichTextAttr = rt.RichTextAttr()
-        attrs.SetFlags(wx.TEXT_ATTR_EFFECTS)
-        attrs.SetTextEffectFlags(wx.TEXT_ATTR_EFFECT_STRIKETHROUGH)
+        attr = rt.RichTextAttr()
+        self.GetStyleForRange(text_range, attr)
         if enable:
-            attrs.SetTextEffects(wx.TEXT_ATTR_EFFECT_STRIKETHROUGH)
+            attrs.SetFlags(wx.TEXT_ATTR_EFFECTS)
+            attrs.SetTextEffects(effect)
+            attrs.SetTextEffectFlags(effect)
         else:
-            attrs.SetTextEffects(attrs.GetTextEffectFlags() & ~wx.TEXT_ATTR_EFFECT_STRIKETHROUGH)
+            attrs.SetFlags(attrs.GetFlags() & ~wx.TEXT_ATTR_EFFECTS)
+            attrs.SetTextEffects(attrs.GetTextEffectFlags() & ~effect)
+            attrs.SetTextEffectFlags(attrs.GetTextEffectFlags() & ~effect)
         self.SetStyleEx(text_range, attrs, rt.RICHTEXT_SETSTYLE_OPTIMIZE | rt.RICHTEXT_SETSTYLE_CHARACTERS_ONLY)
 
     def _style_picker_handler(self, evt: wx.CommandEvent) -> None:
