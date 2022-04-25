@@ -1022,21 +1022,15 @@ class CustomRichText(rt.RichTextCtrl):
         :param text_range: Range for the effect.
         :return: None
         """
-        # TODO strike under h3 moves text up a little for some reason.
-        # TODO set the none flag for all styles by default??
         effect = wx.TEXT_ATTR_EFFECT_STRIKETHROUGH
         attrs: rt.RichTextAttr = rt.RichTextAttr()
-        attr = rt.RichTextAttr()
-        self.GetStyleForRange(text_range, attr)
+        attrs.SetFlags(wx.TEXT_ATTR_EFFECTS)
+        attrs.SetTextEffectFlags(effect)
         if enable:
-            attrs.SetFlags(wx.TEXT_ATTR_EFFECTS)
             attrs.SetTextEffects(effect)
-            attrs.SetTextEffectFlags(effect)
         else:
-            attrs.SetFlags(attrs.GetFlags() & ~wx.TEXT_ATTR_EFFECTS)
             attrs.SetTextEffects(attrs.GetTextEffectFlags() & ~effect)
-            attrs.SetTextEffectFlags(attrs.GetTextEffectFlags() & ~effect)
-        self.SetStyleEx(text_range, attrs, rt.RICHTEXT_SETSTYLE_OPTIMIZE | rt.RICHTEXT_SETSTYLE_CHARACTERS_ONLY)
+        self.SetStyleEx(text_range, attrs)
 
     def _style_picker_handler(self, evt: wx.CommandEvent) -> None:
         """

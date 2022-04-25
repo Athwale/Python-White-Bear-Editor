@@ -9,14 +9,16 @@ class RichTextFrame(wx.Frame):
         self.rtc = rt.RichTextCtrl(self, style=wx.VSCROLL | wx.HSCROLL | wx.NO_BORDER)
         self.sizer = wx.BoxSizer(wx.VERTICAL)
 
-        # Create style stylesheet and control
         self._stylesheet = rt.RichTextStyleSheet()
         self._stylesheet.SetName('Stylesheet')
         self.rtc.SetStyleSheet(self._stylesheet)
-        self._button = wx.Button(self, -1, 'Strike')
+        self._button = wx.Button(self, wx.ID_APPLY, 'Strike')
+        self._button_1 = wx.Button(self, wx.ID_CANCEL, 'Unstrike')
         self.Bind(wx.EVT_BUTTON, self.strike_text, self._button)
+        self.Bind(wx.EVT_BUTTON, self.strike_text, self._button_1)
         self.sizer.Add(self.rtc, 1, flag=wx.EXPAND)
         self.sizer.Add(self._button)
+        self.sizer.Add(self._button_1)
         self.SetSizer(self.sizer)
 
         self._create_styles()
@@ -46,19 +48,23 @@ class RichTextFrame(wx.Frame):
     def strike_text(self, event: wx.CommandEvent) -> None:
         """
         Strike a range of text.
-        :param event: Unused.
+        :param event: Used for button id.
         :return: None
         """
+        strike = True
+        if event.GetId() == wx.ID_CANCEL:
+            strike = False
+
         self.rtc.BeginSuppressUndo()
         # The word selection would move the caret if the position was not restored.
         position = self.rtc.GetCaretPosition()
-        # Apply twice to remove and reapply
+        # Remove all striking from anything that was stricken previously.
         self.rtc.SelectAll()
         self.apply_effect(False, self.rtc.GetSelectionRange())
         self.rtc.SelectNone()
 
-        word_range = rt.RichTextRange(5, 10)
-        self.apply_effect(True, word_range)
+        word_range = rt.RichTextRange(5, 9)
+        self.apply_effect(strike, word_range)
 
         self.rtc.SetCaretPosition(position)
         self.rtc.EndSuppressUndo()
@@ -70,20 +76,16 @@ class RichTextFrame(wx.Frame):
         :param text_range: Range for the effect.
         :return: None
         """
-        # TODO red spellcheck underline is not implemented yet.
+        # TODO red wavy spellcheck underline is not implemented yet.
         effect = wx.TEXT_ATTR_EFFECT_STRIKETHROUGH
         attrs: rt.RichTextAttr = rt.RichTextAttr()
-        attr = rt.RichTextAttr()
-        self.rtc.GetStyleForRange(text_range, attr)
+        attrs.SetFlags(wx.TEXT_ATTR_EFFECTS)
+        attrs.SetTextEffectFlags(effect)
         if enable:
-            attrs.SetFlags(wx.TEXT_ATTR_EFFECTS)
             attrs.SetTextEffects(effect)
-            attrs.SetTextEffectFlags(effect)
         else:
-            attrs.SetFlags(attrs.GetFlags() & ~wx.TEXT_ATTR_EFFECTS)
             attrs.SetTextEffects(attrs.GetTextEffectFlags() & ~effect)
-            attrs.SetTextEffectFlags(attrs.GetTextEffectFlags() & ~effect)
-        self.rtc.SetStyleEx(text_range, attrs, rt.RICHTEXT_SETSTYLE_OPTIMIZE | rt.RICHTEXT_SETSTYLE_CHARACTERS_ONLY)
+        self.rtc.SetStyleEx(text_range, attrs)
 
     def _insert_sample_text(self) -> None:
         """
@@ -92,8 +94,7 @@ class RichTextFrame(wx.Frame):
         """
         self.rtc.ApplyStyle(self._stylesheet.FindParagraphStyle('paragraph'))
         self.rtc.BeginParagraphStyle('paragraph')
-        self.rtc.WriteText('Paragraph adding some text')
-        self.rtc.WriteText(' some more text after a link')
+        self.rtc.WriteText('Test text that shows an odd behavior.')
         self.rtc.Newline()
         self.rtc.EndParagraphStyle()
 
@@ -108,7 +109,7 @@ class MyApp(wx.App):
         self.frame = None
 
     def OnInit(self):
-        self.frame = RichTextFrame(None, -1, "RichTextCtrl", size=(900, 500), style=wx.DEFAULT_FRAME_STYLE)
+        self.frame = RichTextFrame(None, -1, "RichTextCtrl", size=(500, 300), style=wx.DEFAULT_FRAME_STYLE)
         self.SetTopWindow(self.frame)
         self.frame.Show()
         return True
