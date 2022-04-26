@@ -279,7 +279,8 @@ class Strings:
     warning_keyfile_inaccessible: str = 'Key file inaccessible'
     warning_keyfile_permissions: str = 'Key file must have 600 permissions'
     warning_rsa_passphrase: str = 'RSA passphrase'
-    warning_rsa_passphrase_wrong: str = 'Could not decrypt key'
+    warning_rsa_passphrase_wrong: str = 'Wrong password'
+    warning_rsa_encryption_fail: str = 'Encryption failure'
     warning_server_folders_repaired: str = 'Server folder structure repaired'
     warning_upload_unfinished: str = 'Upload has not finished.\nDo you want to force disconnect?\nThis may ' \
                                      'leave damaged files on the server.'

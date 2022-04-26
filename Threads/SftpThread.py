@@ -67,8 +67,11 @@ class SftpThread(threading.Thread):
             wx.CallAfter(self._parent.on_key_password_required)
         except AccessException as _:
             wx.CallAfter(self._parent.on_key_password_wrong)
-        except (SSHException, TimeoutError) as _:
-            wx.CallAfter(self._parent.on_connection_closed, Strings.status_failed)
+        except (SSHException, TimeoutError) as e:
+            wx.CallAfter(self._parent.on_connection_closed, f'{Strings.status_failed}: {e}')
+        except ValueError:
+            wx.CallAfter(self._parent.on_connection_closed, f'{Strings.status_failed}: '
+                                                            f'{Strings.warning_rsa_encryption_fail}')
         finally:
             self._uploader.close_all()
 

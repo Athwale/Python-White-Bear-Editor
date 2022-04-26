@@ -30,7 +30,15 @@ class Uploader:
         self._ssh_connection = None
 
     @staticmethod
-    def _get_key(password: str, keyfile: str):
+    def _get_key(keyfile: str, password: str = '',) -> paramiko.PKey:
+        """
+        Return a key instance of appropriate type or raise exception when the key can not be obtained.
+        :param password: Password to the key. If empty the key is assumed to not be encrypted.
+        :param keyfile: File with the key.
+        :return: Paramiko Pkey instance.
+        :raises AccessException when the key can not be decrypted.
+        :raises paramiko.PasswordRequiredException if the key requires a password.
+        """
         key = None
         for algorithm in (paramiko.RSAKey, paramiko.DSSKey, paramiko.Ed25519Key, paramiko.ECDSAKey):
             try:
@@ -38,6 +46,12 @@ class Uploader:
                     key = algorithm.from_private_key_file(keyfile, password=password)
                 else:
                     key = algorithm.from_private_key_file(keyfile)
+                if key:
+                    # Only look for the first key that can be decoded, looking further raises unnecessary exceptions.
+                    break
+            except paramiko.PasswordRequiredException as e:
+                # Send the password request up. Password required is otherwise caught by SSHException.
+                raise paramiko.PasswordRequiredException(e)
             except paramiko.SSHException as _:
                 pass
         if not key:
@@ -52,14 +66,12 @@ class Uploader:
         # Public part of the user's RSA keys must be in the right place on the proftpd SFTP server.
         # The SFTP server has its own RSA private and public (host) key used to authenticate itself to the client.
         # The public SFTP key must be added to known hosts using ssh key scan.
-        try:
-            if self._passphrase:
-                key = self._get_key(self._passphrase, self._priv_key)
-                del self._passphrase
-            else:
-                key = self._get_key(self._passphrase, self._priv_key)
-        except paramiko.PasswordRequiredException as e:
-            raise paramiko.PasswordRequiredException(e)
+        if self._passphrase:
+            key = self._get_key(self._priv_key, self._passphrase)
+            del self._passphrase
+        else:
+            key = self._get_key(self._priv_key)
+
         # Connect SSH client.
         self._ssh_connection = paramiko.SSHClient()
         self._ssh_connection.load_system_host_keys()
