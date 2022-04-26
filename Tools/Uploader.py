@@ -29,6 +29,21 @@ class Uploader:
         self._sftp_connection = None
         self._ssh_connection = None
 
+    @staticmethod
+    def _get_key(password: str, keyfile: str):
+        key = None
+        for algorithm in (paramiko.RSAKey, paramiko.DSSKey, paramiko.Ed25519Key, paramiko.ECDSAKey):
+            try:
+                if password:
+                    key = algorithm.from_private_key_file(keyfile, password=password)
+                else:
+                    key = algorithm.from_private_key_file(keyfile)
+            except paramiko.SSHException as _:
+                pass
+        if not key:
+            raise AccessException(Strings.warning_rsa_passphrase_wrong)
+        return key
+
     def connect(self) -> None:
         """
         Connect to a SFTP server using an SSH RSA key.
@@ -39,14 +54,12 @@ class Uploader:
         # The public SFTP key must be added to known hosts using ssh key scan.
         try:
             if self._passphrase:
-                key = paramiko.RSAKey.from_private_key_file(self._priv_key, password=self._passphrase)
+                key = self._get_key(self._passphrase, self._priv_key)
                 del self._passphrase
             else:
-                key = paramiko.RSAKey.from_private_key_file(self._priv_key)
+                key = self._get_key(self._passphrase, self._priv_key)
         except paramiko.PasswordRequiredException as e:
             raise paramiko.PasswordRequiredException(e)
-        except paramiko.SSHException as _:
-            raise AccessException(Strings.warning_rsa_passphrase_wrong)
         # Connect SSH client.
         self._ssh_connection = paramiko.SSHClient()
         self._ssh_connection.load_system_host_keys()
