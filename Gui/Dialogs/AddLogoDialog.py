@@ -180,7 +180,7 @@ class AddLogoDialog(wx.Dialog):
         logo_file: str = os.path.join(self._logos_path, new_name)
         if os.path.exists(logo_file + Strings.extension_jpg):
             result = wx.MessageBox(f'{Strings.warning_file_exists_overwrite}: \n{logo_file, Strings.status_error}',
-                                   wx.YES_NO | wx.ICON_ERROR)
+                                   Strings.status_error, wx.YES_NO | wx.ICON_ERROR)
             if result == wx.NO:
                 return False
         self._menu_image.SaveFile(logo_file + Strings.extension_jpg, wx.BITMAP_TYPE_JPEG)
