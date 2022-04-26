@@ -8,7 +8,6 @@ OnInit must be overridden here.
 
 # TODO if the user edits replace field and then replaces, add the word to dictionary and signal lists changed.
 
-# TODO server with automatic refresh on save for live preview
 # TODO right click to add word to dictionary
 # TODO right click to make selected text an url
 

@@ -2058,7 +2058,7 @@ class MainFrame(wx.Frame):
         :param event: Unused.
         :return: None
         """
-        webbrowser.open(self._current_document_instance.get_path(), new=2)
+        webbrowser.open(self._current_document_instance.get_path(), new=0)
 
     # noinspection PyUnusedLocal
     def _edit_text_file_handler(self, event: wx.CommandEvent) -> None:
