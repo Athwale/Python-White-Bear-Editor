@@ -1,6 +1,7 @@
 from typing import List
 
 import wx
+from PIL import Image
 from lxml import etree
 from lxml import html
 from lxml.etree import XMLSyntaxError, XMLSchemaParseError, ParserError
@@ -92,3 +93,14 @@ class Tools:
         field.GetStyle(0, style_carrier)
         style_carrier.SetBackgroundColour(color)
         field.SetStyle(0, len(field.GetValue()), style_carrier)
+
+    @staticmethod
+    def optimize_image(img_path: str) -> None:
+        """
+        Optimize and overwrite jpg and png images.
+        :param img_path: Full path to the image on disk.
+        :return: None
+        """
+        # TODO handle exceptions
+        img = Image.open(img_path)
+        img.save(img_path, optimize=True, quality=Numbers.image_quality)

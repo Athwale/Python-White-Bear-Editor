@@ -46,6 +46,7 @@ class Numbers:
     photo_ratio: float = 4 / 3
     photo_ratio_tolerance: float = 0.01
 
+    image_quality: int = 85
     min_keywords: int = 3
     minimal_window_size_width: int = 1200
     minimal_window_size_height: int = 700
