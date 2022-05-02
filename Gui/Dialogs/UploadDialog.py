@@ -6,6 +6,7 @@ import wx
 
 from Constants.Constants import Strings, Numbers
 from Resources.Fetch import Fetch
+from Threads.OptimizerThread import OptimizerThread
 from Threads.SftpThread import SftpThread
 from Tools.ConfigManager import ConfigManager
 from Tools.Document.WhitebearDocumentArticle import WhitebearDocumentArticle
@@ -38,8 +39,10 @@ class UploadDialog(wx.Dialog):
         self._id_counter = 0
         self._invalid_files = 0
         self._sftp_thread = None
+        self._optimizer_thread = None
         # If a menu or index is invalid, upload must be prevented until the user fixes it in a different dialog.
         self._prevent_upload = False
+        self._optimizer_error = False
 
         self._main_horizontal_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self._right_vertical_sizer = wx.BoxSizer(wx.VERTICAL)
@@ -106,6 +109,13 @@ class UploadDialog(wx.Dialog):
         # Upload statistics
         self._info_left_sizer = wx.BoxSizer(wx.VERTICAL)
         self._info_right_sizer = wx.BoxSizer(wx.VERTICAL)
+
+        self._label_optimizer = wx.StaticText(self, -1, f'{Strings.label_optimizer}:')
+        self._content_optimizer = wx.StaticText(self, -1, Strings.status_ready, style=wx.ST_ELLIPSIZE_MIDDLE |
+                                                wx.ST_NO_AUTORESIZE)
+        self._info_left_sizer.Add(self._label_optimizer, flag=wx.BOTTOM | wx.LEFT, border=Numbers.widget_border_size)
+        self._info_right_sizer.Add(self._content_optimizer, 1, flag=wx.BOTTOM | wx.EXPAND,
+                                   border=Numbers.widget_border_size)
 
         self._label_connection = wx.StaticText(self, -1, f'{Strings.label_connection}:')
         self._content_connection = wx.StaticText(self, -1, Strings.label_none)
@@ -268,6 +278,42 @@ class UploadDialog(wx.Dialog):
         """
         self._content_current_file.SetLabelText(os.path.relpath(file, start=self._config_manager.get_working_dir()))
 
+    def on_file_optimization(self, file: str) -> None:
+        """
+        Update the optimization file label.
+        :param file: The file.
+        :return: None
+        """
+        self._content_optimizer.SetLabelText(os.path.relpath(file, start=self._config_manager.get_working_dir()))
+
+    def on_optimization_done(self, files_done: int) -> None:
+        """
+        Called when optimizer thread finishes a file. Updates the progress bar.
+        :param files_done: Number of files that finished optimization.
+        :return: None
+        """
+        self._upload_gauge.SetValue(files_done)
+
+    def on_optimization_finished(self, error: bool) -> None:
+        """
+        Called when optimizer thread finishes optimizing all images.
+        :param error: True if there was an error during optimization.
+        :return: None
+        """
+        self._content_optimizer.SetLabelText(Strings.status_finished)
+        error = True
+        self._optimizer_error = error
+        # TODO continue to upload only after the optimization thread finished.
+
+    @staticmethod
+    def on_optimization_fail(file: str) -> None:
+        """
+        Called when optimizer thread fails to save a file.
+        :param file: The file that failed.
+        :return: None
+        """
+        wx.MessageBox(f'{Strings.warning_optimization_fail} {file}', Strings.status_warning, wx.OK | wx.ICON_WARNING)
+
     def on_file_upload_finished(self, file: str, fail: bool) -> None:
         """
         Called when SFTP put finishes uploading a file or finishes with fail. Updates the file list to indicate finished
@@ -320,6 +366,24 @@ class UploadDialog(wx.Dialog):
         formatted = "{:4.1f}".format(percentage)
         self._content_percentage.SetLabelText(f'{formatted} %')
 
+    def _optimize_images(self) -> None:
+        """
+        Optimize all jpg and png images involved in this upload.
+        :return: None
+        """
+        images_to_optimize = []
+        # TODO compare images visually and set correct optimization.
+        for file, state in self._upload_dict.values():
+            if state and (file.endswith(Strings.extension_png) or file.endswith(Strings.extension_jpg)):
+                # Only work on files which will be uploaded
+                images_to_optimize.append(file)
+
+        self._upload_gauge.SetRange(len(images_to_optimize))
+        self._upload_gauge.SetValue(0)
+        if images_to_optimize:
+            self._optimizer_thread = OptimizerThread(self, images_to_optimize)
+            self._optimizer_thread.start()
+
     def _upload_files(self, password=None) -> None:
         """
         Run a SFTP thread to upload the files.
@@ -330,9 +394,6 @@ class UploadDialog(wx.Dialog):
         # Contains tuples (full disk path, relative path on server)
         files_to_upload: List[Tuple[str, str]] = []
         self._content_connection.SetLabelText(Strings.status_connecting)
-        self._button_to_cancel()
-        self._upload_button.Disable()
-        self._disable_controls(False)
         item = -1
         while 1:
             item = self._file_list.GetNextItem(item, wx.LIST_NEXT_ALL, wx.LIST_STATE_DONTCARE)
@@ -346,11 +407,12 @@ class UploadDialog(wx.Dialog):
             # Reset item background color
             self._file_list.SetItemBackgroundColour(item, wx.WHITE)
 
-        self._sftp_thread = SftpThread(self, ip, int(port), self._field_user.GetValue(), self._field_keyfile.GetValue(),
-                                       password, files_to_upload)
         self._upload_gauge.SetRange(len(files_to_upload))
         self._upload_gauge.SetValue(0)
         if files_to_upload:
+            self._sftp_thread = SftpThread(self, ip, int(port), self._field_user.GetValue(),
+                                           self._field_keyfile.GetValue(),
+                                           password, files_to_upload)
             self._sftp_thread.start()
 
     def _disable_controls(self, enable: bool) -> None:
@@ -406,10 +468,19 @@ class UploadDialog(wx.Dialog):
             if path:
                 self._field_keyfile.SetValue(path)
         elif event.GetId() == Numbers.ID_UPLOAD:
-            if self._upload_button.GetLabel() == Strings.button_upload:
-                self._upload_files()
-            elif self._sftp_thread.is_alive():
-                self._sftp_thread.stop()
+            self._button_to_cancel()
+            self._upload_button.Disable()
+            self._disable_controls(False)
+            # TODO test setting error to true in optimizer.
+            # TODO stop before upload if finished method gets an error.
+            # TODO stop either of the threads.
+            self._optimize_images()
+            if not self._optimizer_error:
+                # Optimizer error is True when the optimizer thread fails to save an image.
+                if self._upload_button.GetLabel() == Strings.button_upload:
+                    self._upload_files()
+                elif self._sftp_thread.is_alive():
+                    self._sftp_thread.stop()
 
     def _close_button_handler(self, event: wx.CloseEvent) -> None:
         """

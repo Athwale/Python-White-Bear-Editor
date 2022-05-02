@@ -299,6 +299,7 @@ class Strings:
     warning_menu_page: str = 'Menu page'
     warning_index: str = 'Index page (Page setup)'
     warning_file_missing: str = 'File not found:'
+    warning_optimization_fail: str = 'Image optimization failed:'
 
     label_menu_file: str = 'File'
     label_menu_file_recent: str = 'Open recent directory'
@@ -461,6 +462,7 @@ class Strings:
     label_files_to_upload: str = 'Files to upload'
     label_invalid_files: str = 'Invalid files'
     label_ip_port: str = 'IP:port'
+    label_optimizer: str = 'Optimizer'
     label_ip_port_tip: str = 'SFTP server IPv4:Port'
     label_sftp: str = 'SFTP - SSH file transfer protocol IPv4 configuration'
     label_user: str = 'User'

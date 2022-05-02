@@ -101,6 +101,5 @@ class Tools:
         :param img_path: Full path to the image on disk.
         :return: None
         """
-        # TODO handle exceptions
         img = Image.open(img_path)
         img.save(img_path, optimize=True, quality=Numbers.image_quality)
