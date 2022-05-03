@@ -23,6 +23,7 @@ class UploadDialog(wx.Dialog):
         Display a modal dialog with a message with the text being selectable.
         :param parent: Parent frame.
         """
+        # TODO compare images visually and set correct optimization.
         wx.Dialog.__init__(self, parent, style=wx.DEFAULT_DIALOG_STYLE, title=Strings.label_upload,
                            size=(Numbers.upload_dialog_width, Numbers.upload_dialog_height))
         self.small_font = wx.Font(Numbers.small_font_size, wx.FONTFAMILY_DEFAULT,
@@ -42,7 +43,6 @@ class UploadDialog(wx.Dialog):
         self._optimizer_thread = None
         # If a menu or index is invalid, upload must be prevented until the user fixes it in a different dialog.
         self._prevent_upload = False
-        self._optimizer_error = False
 
         self._main_horizontal_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self._right_vertical_sizer = wx.BoxSizer(wx.VERTICAL)
@@ -250,7 +250,7 @@ class UploadDialog(wx.Dialog):
         self._button_to_upload()
         # Enable the upload button again if possible.
         self._validate_fields()
-        self._disable_controls(True)
+        self._enable_controls(True)
 
     def on_connection_established(self, status: str) -> None:
         """
@@ -301,9 +301,11 @@ class UploadDialog(wx.Dialog):
         :return: None
         """
         self._content_optimizer.SetLabelText(Strings.status_finished)
-        error = True
-        self._optimizer_error = error
-        # TODO continue to upload only after the optimization thread finished.
+        if not error:
+            self._upload_files()
+        else:
+            self._button_to_upload()
+            self._upload_button.Enable()
 
     @staticmethod
     def on_optimization_fail(file: str) -> None:
@@ -366,13 +368,12 @@ class UploadDialog(wx.Dialog):
         formatted = "{:4.1f}".format(percentage)
         self._content_percentage.SetLabelText(f'{formatted} %')
 
-    def _optimize_images(self) -> None:
+    def _optimize_and_upload(self) -> None:
         """
         Optimize all jpg and png images involved in this upload.
         :return: None
         """
         images_to_optimize = []
-        # TODO compare images visually and set correct optimization.
         for file, state in self._upload_dict.values():
             if state and (file.endswith(Strings.extension_png) or file.endswith(Strings.extension_jpg)):
                 # Only work on files which will be uploaded
@@ -380,9 +381,9 @@ class UploadDialog(wx.Dialog):
 
         self._upload_gauge.SetRange(len(images_to_optimize))
         self._upload_gauge.SetValue(0)
-        if images_to_optimize:
-            self._optimizer_thread = OptimizerThread(self, images_to_optimize)
-            self._optimizer_thread.start()
+        # Run even with no images, upload starts when optimization finishes.
+        self._optimizer_thread = OptimizerThread(self, images_to_optimize)
+        self._optimizer_thread.start()
 
     def _upload_files(self, password=None) -> None:
         """
@@ -415,10 +416,10 @@ class UploadDialog(wx.Dialog):
                                            password, files_to_upload)
             self._sftp_thread.start()
 
-    def _disable_controls(self, enable: bool) -> None:
+    def _enable_controls(self, enable: bool) -> None:
         """
         Disable all controls except the upload button.
-        :param enable: True to disable.
+        :param enable: False to disable.
         :return: None
         """
         self._add_button.Enable(enable)
@@ -468,19 +469,17 @@ class UploadDialog(wx.Dialog):
             if path:
                 self._field_keyfile.SetValue(path)
         elif event.GetId() == Numbers.ID_UPLOAD:
-            self._button_to_cancel()
-            self._upload_button.Disable()
-            self._disable_controls(False)
-            # TODO test setting error to true in optimizer.
-            # TODO stop before upload if finished method gets an error.
-            # TODO stop either of the threads.
-            self._optimize_images()
-            if not self._optimizer_error:
-                # Optimizer error is True when the optimizer thread fails to save an image.
-                if self._upload_button.GetLabel() == Strings.button_upload:
-                    self._upload_files()
-                elif self._sftp_thread.is_alive():
+            self._enable_controls(False)
+            if self._upload_button.GetLabel() == Strings.button_upload:
+                # Image optimizer continues to launch upload when finished.
+                self._button_to_cancel()
+                self._optimize_and_upload()
+            else:
+                if self._optimizer_thread:
+                    self._optimizer_thread.stop()
+                if self._sftp_thread:
                     self._sftp_thread.stop()
+                self._enable_controls(True)
 
     def _close_button_handler(self, event: wx.CloseEvent) -> None:
         """
