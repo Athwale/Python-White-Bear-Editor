@@ -23,7 +23,6 @@ class UploadDialog(wx.Dialog):
         Display a modal dialog with a message with the text being selectable.
         :param parent: Parent frame.
         """
-        # TODO compare images visually and set correct optimization.
         wx.Dialog.__init__(self, parent, style=wx.DEFAULT_DIALOG_STYLE, title=Strings.label_upload,
                            size=(Numbers.upload_dialog_width, Numbers.upload_dialog_height))
         self.small_font = wx.Font(Numbers.small_font_size, wx.FONTFAMILY_DEFAULT,
