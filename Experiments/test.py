@@ -1,6 +1,7 @@
 
 import wx
 import wx.richtext as rt
+from wx.richtext import RichTextField, RichTextCtrl, RichTextBuffer, RichTextFieldTypeStandard
 
 
 class RichTextFrame(wx.Frame):
@@ -9,94 +10,89 @@ class RichTextFrame(wx.Frame):
         self.rtc = rt.RichTextCtrl(self, style=wx.VSCROLL | wx.HSCROLL | wx.NO_BORDER)
         self.sizer = wx.BoxSizer(wx.VERTICAL)
 
-        self._stylesheet = rt.RichTextStyleSheet()
-        self._stylesheet.SetName('Stylesheet')
-        self.rtc.SetStyleSheet(self._stylesheet)
-        self._button = wx.Button(self, wx.ID_APPLY, 'Strike')
-        self._button_1 = wx.Button(self, wx.ID_CANCEL, 'Unstrike')
-        self.Bind(wx.EVT_BUTTON, self.strike_text, self._button)
-        self.Bind(wx.EVT_BUTTON, self.strike_text, self._button_1)
+        self._button = wx.Button(self, wx.ID_APPLY, 'Img')
+        self.Bind(wx.EVT_BUTTON, self.insert_image, self._button)
         self.sizer.Add(self.rtc, 1, flag=wx.EXPAND)
         self.sizer.Add(self._button)
-        self.sizer.Add(self._button_1)
         self.SetSizer(self.sizer)
 
-        self._create_styles()
-        self._insert_sample_text()
-
-    def _create_styles(self) -> None:
+    def insert_image(self, event: wx.CommandEvent) -> None:
         """
-        Create styles for rich text control.
+        Open a file dialog to insert an image.
+        :param event: Not used.
         :return: None
         """
-        # Normal style
-        stl_paragraph: rt.RichTextAttr = rt.RichTextAttr()
-        stl_paragraph.SetFontSize(12)
-        stl_paragraph.SetAlignment(wx.TEXT_ALIGNMENT_LEFT)
-        stl_paragraph.SetFontWeight(wx.FONTWEIGHT_NORMAL)
-        stl_paragraph.SetParagraphSpacingBefore(0)
-        stl_paragraph.SetParagraphSpacingAfter(0)
-        stl_paragraph.SetParagraphStyleName('par')
-        stl_paragraph.SetFontFaceName('par')
-        style_paragraph: rt.RichTextParagraphStyleDefinition = rt.RichTextParagraphStyleDefinition('paragraph')
-        style_paragraph.SetStyle(stl_paragraph)
-        style_paragraph.SetNextStyle('paragraph')
-        self._stylesheet.AddParagraphStyle(style_paragraph)
-        self.rtc.ApplyStyle(style_paragraph)
-        self.rtc.SetDefaultStyle(stl_paragraph)
+        image_path = ''
+        with wx.FileDialog(self, 'Select image', '.', style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST | wx.FD_PREVIEW) as dlg:
+            if dlg.ShowModal() == wx.ID_OK:
+                dlg: wx.FileDialog
+                image_path = dlg.GetPath()
 
-    def strike_text(self, event: wx.CommandEvent) -> None:
+        field_type = ImageTextField(image_path)
+        rt.RichTextBuffer.AddFieldType(field_type)
+
+        position = self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition())
+        buffer: rt.RichTextBuffer = self.rtc.GetFocusObject()
+        buffer.InsertFieldWithUndo(self.rtc.GetBuffer(), position, field_type.GetName(), rt.RichTextProperties(),
+                                   self.rtc, rt.RICHTEXT_INSERT_NONE, rt.RichTextAttr())
+
+
+class ImageTextField(RichTextFieldTypeStandard):
+    """
+    Custom RichTextFieldType class with image edit dialog.
+    """
+
+    def __init__(self, img_path: str):
         """
-        Strike a range of text.
-        :param event: Used for button id.
+        Constructor for a custom label for displaying images with ability to edit.
+        :param img_path: Path to image.
+        """
+        self._img = img_path
+        super().__init__('1', bitmap=wx.Bitmap(wx.Image(img_path, wx.BITMAP_TYPE_ANY)),
+                         displayStyle=RichTextFieldTypeStandard.RICHTEXT_FIELD_STYLE_RECTANGLE)
+        self.SetBorderColour(wx.RED)
+
+    def CanEditProperties(self, obj: RichTextField) -> bool:
+        """
+        Rerun True if the user can edit the label's properties.
+        :param obj: Unused
+        :return: True
+        """
+        return True
+
+    def GetPropertiesMenuLabel(self, obj: RichTextField) -> str:
+        """
+        Returns the label to be used for the properties' context menu item.
+        :param obj: Unused
+        :return: Label for the context menu.
+        """
+        return 'Edit image'
+
+    def EditProperties(self, obj: RichTextField, parent: RichTextCtrl, buffer: RichTextBuffer) -> None:
+        """
+        Edits the object's properties via a GUI.
+        :param obj: The RichTextField object that has been clicked.
+        :param parent: RichTextControl which contains the field.
+        :param buffer: The buffer of the control.
+        :return: The result of the GUI dialog.
+        """
+        image_path = ''
+        with wx.FileDialog(parent, 'Select img', '.', style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST | wx.FD_PREVIEW) as dlg:
+            if dlg.ShowModal() == wx.ID_OK:
+                dlg: wx.FileDialog
+                image_path = dlg.GetPath()
+        self.update_image(image_path)
+        parent.Refresh()
+
+    def update_image(self, img_path: str) -> None:
+        """
+        Redraw the image according to the seo status.
+        :param img_path: Path to image.
         :return: None
         """
-        strike = True
-        if event.GetId() == wx.ID_CANCEL:
-            strike = False
-
-        self.rtc.BeginSuppressUndo()
-        # The word selection would move the caret if the position was not restored.
-        position = self.rtc.GetCaretPosition()
-        # Remove all striking from anything that was stricken previously.
-        self.rtc.SelectAll()
-        self.apply_effect(False, self.rtc.GetSelectionRange())
-        self.rtc.SelectNone()
-
-        word_range = rt.RichTextRange(5, 9)
-        self.apply_effect(strike, word_range)
-
-        self.rtc.SetCaretPosition(position)
-        self.rtc.EndSuppressUndo()
-
-    def apply_effect(self, enable: bool, text_range: rt.RichTextRange) -> None:
-        """
-        Apply text effect to range of characters.
-        :param enable: True to turn effect on.
-        :param text_range: Range for the effect.
-        :return: None
-        """
-        # TODO red wavy spellcheck underline is not implemented yet.
-        effect = wx.TEXT_ATTR_EFFECT_STRIKETHROUGH
-        attrs: rt.RichTextAttr = rt.RichTextAttr()
-        attrs.SetFlags(wx.TEXT_ATTR_EFFECTS)
-        attrs.SetTextEffectFlags(effect)
-        if enable:
-            attrs.SetTextEffects(effect)
-        else:
-            attrs.SetTextEffects(attrs.GetTextEffectFlags() & ~effect)
-        self.rtc.SetStyleEx(text_range, attrs)
-
-    def _insert_sample_text(self) -> None:
-        """
-        Insert sample text.
-        :return: None
-        """
-        self.rtc.ApplyStyle(self._stylesheet.FindParagraphStyle('paragraph'))
-        self.rtc.BeginParagraphStyle('paragraph')
-        self.rtc.WriteText('Test text that shows an odd behavior.')
-        self.rtc.Newline()
-        self.rtc.EndParagraphStyle()
+        # TODO changing the image size to a smaller image does not change the label size
+        self.SetBorderColour(wx.BLUE)
+        self.SetBitmap(wx.Bitmap(wx.Image(img_path, wx.BITMAP_TYPE_ANY)))
 
 
 class MyApp(wx.App):
@@ -109,7 +105,7 @@ class MyApp(wx.App):
         self.frame = None
 
     def OnInit(self):
-        self.frame = RichTextFrame(None, -1, "RichTextCtrl", size=(500, 300), style=wx.DEFAULT_FRAME_STYLE)
+        self.frame = RichTextFrame(None, -1, "RichTextCtrl", size=(700, 700), style=wx.DEFAULT_FRAME_STYLE)
         self.SetTopWindow(self.frame)
         self.frame.Show()
         return True
