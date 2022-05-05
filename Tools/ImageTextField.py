@@ -72,9 +72,8 @@ class ImageTextField(RichTextFieldTypeStandard):
 
     def update_image(self) -> None:
         """
-        Redraw the image according to the seo status.
+        Redraw the image according to the seo status. After this call Invalidate and Refresh on the richtextctrl.
         :return: None
         """
-        # TODO changing a text image size down does not change the label size
         self.SetBorderColour(self._element.get_status_color())
         self.SetBitmap(wx.Bitmap(self._element.get_image()))

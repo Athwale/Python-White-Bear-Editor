@@ -1476,7 +1476,8 @@ class MainFrame(wx.Frame):
         """
         # Force repeating search because the text has changed and indexes would no longer match.
         self._text_changed = True
-        # This ensures images are redrawn after changes.
+        # This ensures images are redrawn after changes and size of the field is updated.
+        self._main_text_area.Invalidate()
         self._main_text_area.Refresh()
         if not self._ignore_change:
             if event.GetInt():

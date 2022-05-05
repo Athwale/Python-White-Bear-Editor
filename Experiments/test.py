@@ -11,12 +11,14 @@ class RichTextFrame(wx.Frame):
         self.sizer = wx.BoxSizer(wx.VERTICAL)
 
         self._button = wx.Button(self, wx.ID_APPLY, 'Img')
-        self.Bind(wx.EVT_BUTTON, self.insert_image, self._button)
+        self.Bind(wx.EVT_BUTTON, self.insert_image_handler, self._button)
         self.sizer.Add(self.rtc, 1, flag=wx.EXPAND)
         self.sizer.Add(self._button)
         self.SetSizer(self.sizer)
+        self.insert_image('/home/omejzlik/Pictures/big.jpg')
 
-    def insert_image(self, event: wx.CommandEvent) -> None:
+    # noinspection PyUnusedLocal
+    def insert_image_handler(self, event: wx.CommandEvent) -> None:
         """
         Open a file dialog to insert an image.
         :param event: Not used.
@@ -27,7 +29,14 @@ class RichTextFrame(wx.Frame):
             if dlg.ShowModal() == wx.ID_OK:
                 dlg: wx.FileDialog
                 image_path = dlg.GetPath()
+        self.insert_image(image_path)
 
+    def insert_image(self, image_path: str) -> None:
+        """
+        Insert an image field.
+        :param image_path: Path to image
+        :return: None
+        """
         field_type = ImageTextField(image_path)
         rt.RichTextBuffer.AddFieldType(field_type)
 
@@ -82,6 +91,7 @@ class ImageTextField(RichTextFieldTypeStandard):
                 dlg: wx.FileDialog
                 image_path = dlg.GetPath()
         self.update_image(image_path)
+        parent.Invalidate()
         parent.Refresh()
 
     def update_image(self, img_path: str) -> None:
