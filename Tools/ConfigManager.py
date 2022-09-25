@@ -106,7 +106,7 @@ class ConfigManager:
         :raises PermissionError if config file is not readable.
         """
         try:
-            with open(Strings.editor_config_file, "r") as yml:
+            with open(Strings.editor_config_file, "r", encoding='utf-8') as yml:
                 self._whole_conf = yaml.safe_load(yml)
                 if not self._whole_conf:
                     self._init_config()
@@ -121,7 +121,7 @@ class ConfigManager:
         """
         # At this point after constructor, the config file exists and is full or empty, but it is writeable.
         # This clears the file and writes new contents.
-        with open(Strings.editor_config_file, 'w') as file:
+        with open(Strings.editor_config_file, 'w', encoding='utf-8') as file:
             yaml.dump(self._whole_conf, file)
 
     def check_set_config_values(self) -> bool:

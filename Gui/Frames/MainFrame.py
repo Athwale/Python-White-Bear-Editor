@@ -1046,7 +1046,7 @@ class MainFrame(wx.Frame):
             file_path = self._get_new_file_path(suffix)
         if file_path:
             try:
-                with open(file_path, 'w', encoding='utf8') as file:
+                with open(file_path, 'w', encoding='utf-8') as file:
                     file.write(html_string)
             except IOError:
                 self._show_error_dialog(f'{Strings.warning_can_not_save}\n{Strings.exception_access_html}\n{file_path}')
@@ -1081,13 +1081,13 @@ class MainFrame(wx.Frame):
         last_save = datetime.now().strftime("%H:%M:%S")
         try:
             # Save sitemap
-            with open(sitemap_file, 'w', encoding='utf8') as file:
+            with open(sitemap_file, 'w', encoding='utf-8') as file:
                 file.write(sitemap)
                 self._set_status_text(f'{Strings.status_saved}: {last_save}', 3)
                 self._set_status_text(f'{Strings.label_saving}: {Strings.sitemap_file}', 3)
             # Save robots.txt if not present
             if not os.path.exists(robots_txt):
-                with open(robots_txt, 'w', encoding='utf8') as file:
+                with open(robots_txt, 'w', encoding='utf-8') as file:
                     file.write(f'{Strings.sitemap_keyword} {self._config_manager.get_url()}/{Strings.sitemap_file}')
                     self._set_status_text(f'{Strings.label_saving}: {Strings.robots_file}', 3)
         except IOError:

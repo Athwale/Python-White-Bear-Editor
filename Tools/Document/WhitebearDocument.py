@@ -87,7 +87,7 @@ class WhitebearDocument(SpellCheckedObject):
         Parse this document's html with bs4 and save it to an instance variable.
         :return: None
         """
-        with open(self._path, 'r') as document:
+        with open(self._path, 'r', encoding='utf-8') as document:
             contents = document.read()
             minimized = htmlmin.minify(contents, remove_empty_space=True, remove_comments=True)
             # Fix spaces around tags. Preserves &nbsp.

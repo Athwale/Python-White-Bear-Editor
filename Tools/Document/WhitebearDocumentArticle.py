@@ -447,7 +447,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
         :return: Tuple of boolean validation result and optional list of error messages.
         :raise UnrecognizedFileException if html parse fails
         """
-        with open(self.get_path(), 'r') as file:
+        with open(self.get_path(), 'r', encoding='utf-8') as file:
             html_string = file.read()
         self._valid, errors = Tools.validate(html_string, 'schema_article.xsd')
         return self._valid, errors
@@ -461,7 +461,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
         :raise UnrecognizedFileException if generated html fails validation.
         :raises UnrecognizedFileException if xml schema is incorrect.
         """
-        with open(Fetch.get_resource_path('article_template.html'), 'r') as template:
+        with open(Fetch.get_resource_path('article_template.html'), 'r', encoding='utf-8') as template:
             template_string = template.read()
         is_valid, errors = Tools.validate(template_string, 'schema_article_template.xsd')
         if not is_valid:
