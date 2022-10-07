@@ -1,5 +1,5 @@
 import os
-from datetime import date
+import pendulum
 from typing import List, Dict
 
 import wx
@@ -127,6 +127,9 @@ class NewFileDialog(wx.Dialog):
             self._field_name.Disable()
             self._box_menu.Disable()
 
+        # TODO remove
+        self._get_current_date()
+
     def _handle_buttons(self, event: wx.CommandEvent) -> None:
         """
         Handle button clicks, check if target file exists and prevent overwriting it.
@@ -155,11 +158,8 @@ class NewFileDialog(wx.Dialog):
         :return: Czech date string formatted for the article.
         """
         month_dict = {k: v for k, v in zip(range(1, 13), Strings.cz_months.split('|'))}
-        today = date.today()
-        day = today.strftime("%-d")
-        month = today.strftime("%-m")
-        year = today.strftime("%Y")
-        return f'{day}. {month_dict[int(month)]} {year}'
+        today = pendulum.today()
+        return f'{today.day}. {month_dict[int(today.month)]} {today.year}'
 
     def _get_document_path(self) -> bool:
         """
