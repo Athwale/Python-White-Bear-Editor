@@ -1,4 +1,5 @@
 import datetime
+import pendulum
 import os
 import re
 import time
@@ -687,17 +688,28 @@ class WhitebearDocumentArticle(WhitebearDocument):
 
     def get_computable_date(self) -> float:
         """
-        Convert article date into a flot timestamp.
+        Convert article date into a float timestamp.
         :return: Date as float timestamp.
         """
         month_dict = {k: v for k, v in zip(Strings.cz_months.split('|'), range(1, 13))}
         day = self._date.split('.', 1)[0]
         try:
-            month = month_dict[self._date.split(' ', 2)[1]]
+            month = f"{month_dict[self._date.split(' ', 2)[1]]:02}"
         except KeyError as _:
             # Return a value in case the date is wrong, the user will have to correct it when uploading anyway.
             return 1
         year = self._date.split(' ', 2)[2]
+
+        print('new:')
+        print(year)
+        print(month)
+        print(day)
+        print(pendulum.from_format(f'{year}/{month}/{day}', 'YYYY-MM-DD'))
+
+        print('old:')
+        print(time.mktime(datetime.datetime.
+                           strptime(f'{day}/{month}/{year}', "%d/%m/%Y").timetuple()))
+
         return time.mktime(datetime.datetime.
                            strptime(f'{day}/{month}/{year}', "%d/%m/%Y").timetuple())
 
