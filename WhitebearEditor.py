@@ -7,7 +7,6 @@ OnInit must be overridden here.
 # TODO https://www.blog.pythonlibrary.org/2019/03/19/distributing-a-wxpython-application/
 
 # TODO if the user edits replace field and then replaces, add the word to dictionary and signal lists changed.
-# TODO use pendulum instead of datetime
 # TODO richtext control does not yet support red waved underline, change underline once available.
 # TODO look at cookies from whitebear using requests headers, beware of redirect, set cookie warning if we use them?
 """

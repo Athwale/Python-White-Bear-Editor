@@ -127,9 +127,6 @@ class NewFileDialog(wx.Dialog):
             self._field_name.Disable()
             self._box_menu.Disable()
 
-        # TODO remove
-        self._get_current_date()
-
     def _handle_buttons(self, event: wx.CommandEvent) -> None:
         """
         Handle button clicks, check if target file exists and prevent overwriting it.

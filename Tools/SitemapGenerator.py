@@ -1,4 +1,4 @@
-from datetime import datetime
+import pendulum
 from typing import List
 
 from bs4 import BeautifulSoup
@@ -38,7 +38,7 @@ class SitemapGenerator:
             # Last modification
             lastmod_tag = self._soup.new_tag('lastmod')
             # Just use today for all.
-            lastmod_tag.string = datetime.now().strftime("%Y-%m-%d")
+            lastmod_tag.string = pendulum.now().strftime("%Y-%m-%d")
             url_tag.append(lastmod_tag)
             # Change frequency
             changefreq_tag = self._soup.new_tag('changefreq')
