@@ -1,8 +1,6 @@
-import datetime
 import pendulum
 import os
 import re
-import time
 from typing import List, Dict
 
 import wx
@@ -699,19 +697,7 @@ class WhitebearDocumentArticle(WhitebearDocument):
             # Return a value in case the date is wrong, the user will have to correct it when uploading anyway.
             return 1
         year = self._date.split(' ', 2)[2]
-
-        print('new:')
-        print(year)
-        print(month)
-        print(day)
-        print(pendulum.from_format(f'{year}/{month}/{day}', 'YYYY-MM-DD'))
-
-        print('old:')
-        print(time.mktime(datetime.datetime.
-                           strptime(f'{day}/{month}/{year}', "%d/%m/%Y").timetuple()))
-
-        return time.mktime(datetime.datetime.
-                           strptime(f'{day}/{month}/{year}', "%d/%m/%Y").timetuple())
+        return pendulum.from_format(f'{year}-{month}-{day}', 'YYYY-MM-DD').float_timestamp
 
     def get_article_image(self) -> AsideImage:
         """
