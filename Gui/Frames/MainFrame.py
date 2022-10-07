@@ -1,7 +1,7 @@
 import os
 import threading
 import webbrowser
-from datetime import datetime
+import pendulum
 from pathlib import Path
 from shutil import copyfile
 from typing import Dict, List, Callable
@@ -1026,7 +1026,7 @@ class MainFrame(wx.Frame):
         :param disable: Leave the editor disabled after threads finish.
         :return: None
         """
-        last_save = datetime.now().strftime("%H:%M:%S")
+        last_save = pendulum.now().to_time_string()
         file_path = doc.get_path()
         file_name = doc.get_filename()
         if isinstance(doc, WhitebearDocumentArticle):
@@ -1078,7 +1078,7 @@ class MainFrame(wx.Frame):
         """
         sitemap_file = os.path.join(self._config_manager.get_working_dir(), Strings.sitemap_file)
         robots_txt = os.path.join(self._config_manager.get_working_dir(), Strings.robots_file)
-        last_save = datetime.now().strftime("%H:%M:%S")
+        last_save = pendulum.now().to_time_string()
         try:
             # Save sitemap
             with open(sitemap_file, 'w', encoding='utf-8') as file:
