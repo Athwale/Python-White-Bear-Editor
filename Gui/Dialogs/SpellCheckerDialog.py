@@ -155,7 +155,7 @@ class SpellCheckerDialog(wx.Dialog):
             self.go_to_next()
         elif button_id == wx.ID_ADD:
             # Add new word to dictionary.
-            self._checker.add()
+            self._checker.add(str(self.replace_with_field.GetValue()).strip())
             self._word_lists_changed = True
             self.go_to_next()
         elif button_id == wx.ID_SETUP:
