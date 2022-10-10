@@ -3,7 +3,7 @@
 """
 Starting class for the whitebear editor GUI. This class is necessary and must be in all wx python programs.
 OnInit must be overridden here.
-# TODO fix bugs and package this into a binary. Package into rpm Ponorme se do pythonu nebo youtube.
+# TODO fix bugs and package this into a binary. Package into rpm.
 # TODO https://www.blog.pythonlibrary.org/2019/03/19/distributing-a-wxpython-application/
 
 # TODO richtext control does not yet support red waved underline, change underline once available.

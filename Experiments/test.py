@@ -7,18 +7,15 @@ from wx.richtext import RichTextField, RichTextCtrl, RichTextBuffer, RichTextFie
 class RichTextFrame(wx.Frame):
     def __init__(self, *args, **kw):
         wx.Frame.__init__(self, *args, **kw)
-        self.rtc = rt.RichTextCtrl(self, style=wx.VSCROLL | wx.HSCROLL | wx.NO_BORDER)
         self.sizer = wx.BoxSizer(wx.VERTICAL)
 
-        self._button = wx.Button(self, wx.ID_APPLY, 'Img')
-        self.Bind(wx.EVT_BUTTON, self.insert_image_handler, self._button)
-        self.sizer.Add(self.rtc, 1, flag=wx.EXPAND)
+        self._button = wx.Button(self, wx.ID_APPLY, 'Select image')
+        self.Bind(wx.EVT_BUTTON, self.pick_image_handler, self._button)
         self.sizer.Add(self._button)
         self.SetSizer(self.sizer)
-        self.insert_image('/home/omejzlik/Pictures/big.jpg')
 
     # noinspection PyUnusedLocal
-    def insert_image_handler(self, event: wx.CommandEvent) -> None:
+    def pick_image_handler(self, event: wx.CommandEvent) -> str:
         """
         Open a file dialog to insert an image.
         :param event: Not used.
@@ -29,80 +26,30 @@ class RichTextFrame(wx.Frame):
             if dlg.ShowModal() == wx.ID_OK:
                 dlg: wx.FileDialog
                 image_path = dlg.GetPath()
-        self.insert_image(image_path)
+        return image_path
 
-    def insert_image(self, image_path: str) -> None:
+    def process_image(self, img_path: str) -> None:
         """
-        Insert an image field.
-        :param image_path: Path to image
+        Process a logo.
+        :param img_path: Path to an image.
         :return: None
         """
-        field_type = ImageTextField(image_path)
-        rt.RichTextBuffer.AddFieldType(field_type)
+        def find_image():
+            for y in range(0, image.GetHeight()):
+                for x in range(0, image.GetWidth()):
+                    color = image.GetRed(x, y)
+                    image.SetRGB(x, y, 255, 0, 0)
+                    print(color)
+                    if color != 255:
+                        return x, y
 
-        position = self.rtc.GetAdjustedCaretPosition(self.rtc.GetCaretPosition())
-        buffer: rt.RichTextBuffer = self.rtc.GetFocusObject()
-        buffer.InsertFieldWithUndo(self.rtc.GetBuffer(), position, field_type.GetName(), rt.RichTextProperties(),
-                                   self.rtc, rt.RICHTEXT_INSERT_NONE, rt.RichTextAttr())
+        image = wx.Image(img_path)
+        image: wx.Image = image.ConvertToGreyscale()
 
+        print(find_image())
 
-class ImageTextField(RichTextFieldTypeStandard):
-    """
-    Custom RichTextFieldType class with image edit dialog.
-    """
-
-    def __init__(self, img_path: str):
-        """
-        Constructor for a custom label for displaying images with ability to edit.
-        :param img_path: Path to image.
-        """
-        self._img = img_path
-        super().__init__('1', bitmap=wx.Bitmap(wx.Image(img_path, wx.BITMAP_TYPE_ANY)),
-                         displayStyle=RichTextFieldTypeStandard.RICHTEXT_FIELD_STYLE_RECTANGLE)
-        self.SetBorderColour(wx.RED)
-
-    def CanEditProperties(self, obj: RichTextField) -> bool:
-        """
-        Rerun True if the user can edit the label's properties.
-        :param obj: Unused
-        :return: True
-        """
-        return True
-
-    def GetPropertiesMenuLabel(self, obj: RichTextField) -> str:
-        """
-        Returns the label to be used for the properties' context menu item.
-        :param obj: Unused
-        :return: Label for the context menu.
-        """
-        return 'Edit image'
-
-    def EditProperties(self, obj: RichTextField, parent: RichTextCtrl, buffer: RichTextBuffer) -> None:
-        """
-        Edits the object's properties via a GUI.
-        :param obj: The RichTextField object that has been clicked.
-        :param parent: RichTextControl which contains the field.
-        :param buffer: The buffer of the control.
-        :return: The result of the GUI dialog.
-        """
-        image_path = ''
-        with wx.FileDialog(parent, 'Select img', '.', style=wx.FD_OPEN | wx.FD_FILE_MUST_EXIST | wx.FD_PREVIEW) as dlg:
-            if dlg.ShowModal() == wx.ID_OK:
-                dlg: wx.FileDialog
-                image_path = dlg.GetPath()
-        self.update_image(image_path)
-        parent.Invalidate()
-        parent.Refresh()
-
-    def update_image(self, img_path: str) -> None:
-        """
-        Redraw the image according to the seo status.
-        :param img_path: Path to image.
-        :return: None
-        """
-        # TODO changing the image size to a smaller image does not change the label size
-        self.SetBorderColour(wx.BLUE)
-        self.SetBitmap(wx.Bitmap(wx.Image(img_path, wx.BITMAP_TYPE_ANY)))
+        bitmap = wx.StaticBitmap(self, -1, wx.Bitmap(image))
+        self.sizer.Add(bitmap)
 
 
 class MyApp(wx.App):
@@ -115,9 +62,10 @@ class MyApp(wx.App):
         self.frame = None
 
     def OnInit(self):
-        self.frame = RichTextFrame(None, -1, "RichTextCtrl", size=(700, 700), style=wx.DEFAULT_FRAME_STYLE)
+        self.frame = RichTextFrame(None, -1, "RichTextCtrl", size=(400, 400), style=wx.DEFAULT_FRAME_STYLE)
         self.SetTopWindow(self.frame)
         self.frame.Show()
+        self.frame.process_image('/home/omejzlik/PycharmProjects/Python-White-Bear-Editor/Experiments/Screenshot.png')
         return True
 
 
