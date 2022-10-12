@@ -34,19 +34,47 @@ class RichTextFrame(wx.Frame):
         :param img_path: Path to an image.
         :return: None
         """
-        def find_image():
-            for y in range(0, image.GetHeight()):
-                for x in range(0, image.GetWidth()):
+        def find_image(limit: int) -> (int, int):
+            """
+            Search for the beginning of an image based on red color threshold from the set direction.
+            :param limit: The red color threshold where we consider the image to be useful.
+            :return: Found coordinates.
+            """
+            # TODO make threshold user selectable
+            # todo do it all in one go?
+            # todo rewrite to white below threshold.
+            y_range = range(0, image.GetHeight() - 1)
+            x_range = range(0, image.GetWidth() - 1)
+            # Top will be set only once on the first matching pixel.
+            top = None
+            # Left will be gradually adjusted to the leftmost smallest x coordinate.
+            left = (image.GetWidth(), 0)
+            right = (0, 0)
+            bottom = None
+            for y in y_range:
+                for x in x_range:
                     color = image.GetRed(x, y)
-                    image.SetRGB(x, y, 255, 0, 0)
-                    print(color)
-                    if color != 255:
-                        return x, y
+                    # A shade of gray that we consider gray enough to count as the image we want.
+                    if color < limit:
+                        if not top:
+                            top = (x, y)
+                            image.SetRGB(x, y, 255, 0, 0)
+                        if x < left[0]:
+                            left = (x, y)
+                            image.SetRGB(x, y, 255, 0, 0)
+                    else:
+                        # Repaint all lighter colors with white
+                        image.SetRGB(x, y, 255, 255, 255)
+
+            print('top', top)
+            print('left', left)
+            print('right', right)
+            print('bottom', bottom)
 
         image = wx.Image(img_path)
         image: wx.Image = image.ConvertToGreyscale()
 
-        print(find_image())
+        print(find_image(limit=183))
 
         bitmap = wx.StaticBitmap(self, -1, wx.Bitmap(image))
         self.sizer.Add(bitmap)
@@ -62,7 +90,7 @@ class MyApp(wx.App):
         self.frame = None
 
     def OnInit(self):
-        self.frame = RichTextFrame(None, -1, "RichTextCtrl", size=(400, 400), style=wx.DEFAULT_FRAME_STYLE)
+        self.frame = RichTextFrame(None, -1, "RichTextCtrl", size=(300, 300), style=wx.DEFAULT_FRAME_STYLE)
         self.SetTopWindow(self.frame)
         self.frame.Show()
         self.frame.process_image('/home/omejzlik/PycharmProjects/Python-White-Bear-Editor/Experiments/Screenshot.png')
