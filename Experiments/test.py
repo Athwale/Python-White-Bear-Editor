@@ -49,7 +49,9 @@ class RichTextFrame(wx.Frame):
             top = None
             # Left will be gradually adjusted to the leftmost smallest x coordinate.
             left = (image.GetWidth(), 0)
+            # Right will be gradually adjusted to the rightmost highest x coordinate.
             right = (0, 0)
+            # Bottom is the last matching pixel.
             bottom = None
             for y in y_range:
                 for x in x_range:
@@ -58,10 +60,12 @@ class RichTextFrame(wx.Frame):
                     if color < limit:
                         if not top:
                             top = (x, y)
-                            image.SetRGB(x, y, 255, 0, 0)
                         if x < left[0]:
                             left = (x, y)
-                            image.SetRGB(x, y, 255, 0, 0)
+                        if x > right[0]:
+                            right = (x, y)
+                        else:
+                            bottom = (x, y)
                     else:
                         # Repaint all lighter colors with white
                         image.SetRGB(x, y, 255, 255, 255)
@@ -70,6 +74,8 @@ class RichTextFrame(wx.Frame):
             print('left', left)
             print('right', right)
             print('bottom', bottom)
+            for b in (top, left, right, bottom):
+                image.SetRGB(b[0], b[1], 255, 0, 0)
 
         image = wx.Image(img_path)
         image: wx.Image = image.ConvertToGreyscale()
