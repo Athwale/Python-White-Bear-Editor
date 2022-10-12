@@ -31,7 +31,7 @@ class RichTextFrame(wx.Frame):
         :param img_path: Path to an image.
         :return: None
         """
-        def find_image(limit: int) -> (int, int):
+        def prepare_image(limit: int) -> (int, int):
             """
             Search for the beginning of an image based on red color threshold from the set direction.
             :param limit: The red color threshold where we consider the image to be useful.
@@ -63,17 +63,18 @@ class RichTextFrame(wx.Frame):
                         # Repaint all lighter colors with white
                         image.SetRGB(x, y, 255, 255, 255)
 
-            # TODO draw bounding box around the selected area.
             top_left = (left[0], top[1])
             bottom_right = (right[0], bottom[1])
-
-            for b in (bottom_right, top_left):
-                image.SetRGB(b[0], b[1], 255, 0, 0)
+            for y in range(0, image.GetHeight() - 1):
+                for x in range(0, image.GetWidth() - 1):
+                    if x == top_left[0] or x == bottom_right[0]\
+                            or y == top_left[1] or y == bottom_right[1]:
+                        image.SetRGB(x, y, 255, 0, 0)
 
         image = wx.Image(img_path)
         image: wx.Image = image.ConvertToGreyscale()
 
-        print(find_image(limit=183))
+        print(prepare_image(limit=183))
 
         bitmap = wx.StaticBitmap(self, -1, wx.Bitmap(image))
         self.sizer.Add(bitmap)
