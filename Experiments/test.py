@@ -1,7 +1,4 @@
-
 import wx
-import wx.richtext as rt
-from wx.richtext import RichTextField, RichTextCtrl, RichTextBuffer, RichTextFieldTypeStandard
 
 
 class RichTextFrame(wx.Frame):
@@ -41,20 +38,16 @@ class RichTextFrame(wx.Frame):
             :return: Found coordinates.
             """
             # TODO make threshold user selectable
-            # todo do it all in one go?
-            # todo rewrite to white below threshold.
-            y_range = range(0, image.GetHeight() - 1)
-            x_range = range(0, image.GetWidth() - 1)
             # Top will be set only once on the first matching pixel.
             top = None
+            # Bottom is the last matching pixel.
+            bottom = None
             # Left will be gradually adjusted to the leftmost smallest x coordinate.
             left = (image.GetWidth(), 0)
             # Right will be gradually adjusted to the rightmost highest x coordinate.
             right = (0, 0)
-            # Bottom is the last matching pixel.
-            bottom = None
-            for y in y_range:
-                for x in x_range:
+            for y in range(0, image.GetHeight() - 1):
+                for x in range(0, image.GetWidth() - 1):
                     color = image.GetRed(x, y)
                     # A shade of gray that we consider gray enough to count as the image we want.
                     if color < limit:
@@ -70,11 +63,11 @@ class RichTextFrame(wx.Frame):
                         # Repaint all lighter colors with white
                         image.SetRGB(x, y, 255, 255, 255)
 
-            print('top', top)
-            print('left', left)
-            print('right', right)
-            print('bottom', bottom)
-            for b in (top, left, right, bottom):
+            # TODO draw bounding box around the selected area.
+            top_left = (left[0], top[1])
+            bottom_right = (right[0], bottom[1])
+
+            for b in (bottom_right, top_left):
                 image.SetRGB(b[0], b[1], 255, 0, 0)
 
         image = wx.Image(img_path)
