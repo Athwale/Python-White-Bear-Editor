@@ -1,5 +1,7 @@
 import wx
 
+from Constants.Constants import Numbers
+
 
 class RichTextFrame(wx.Frame):
     def __init__(self, *args, **kw):
@@ -37,20 +39,22 @@ class RichTextFrame(wx.Frame):
         # TODO https://discuss.wxpython.org/t/cropping-an-image-with-wxpython/34983/6
         # TODO make threshold user selectable
         # TODO make border selectable by user
+        # TODO try big, small, completely white, tall, short images
         # TODO create logo name based on article name not filename.
-        for img in self.prepare_image(image, limit=183):
-            print(img.GetWidth(), img.GetHeight())
+        for img in self.prepare_image(image, limit=183, border=6):
             bitmap = wx.StaticBitmap(self, -1, wx.Bitmap(img))
             self.sizer.Add(wx.StaticLine(self, -1))
             self.sizer.Add(bitmap)
         self.sizer.Layout()
 
-    def prepare_image(self, image: wx.Image, limit: int) -> (wx.Image, wx.Image):
+    @staticmethod
+    def prepare_image(image: wx.Image, limit: int, border: int) -> (wx.Image, wx.Image):
         """
         Search for the beginning of an image based on red color threshold from the set direction.
         :param image: The logo to process.
         :param limit: The red color threshold where we consider the image to be useful.
-        :return: Found coordinates.
+        :param border: How many white pixels to put around the image.
+        :return: 2 images - preview and finished logo.
         """
         # Bounding box will be drawn only into the preview.
         preview = image.Copy()
@@ -90,8 +94,20 @@ class RichTextFrame(wx.Frame):
                         or y == top_left[1] or y == bottom_right[1]:
                     preview.SetRGB(x, y, 255, 0, 0)
         # Get the selected sub image
-        # TODO then resize it to less than 96 pixels and pad it to 96 with white?
-        crop = image.GetSubImage(wx.Rect(wx.Point(top_left), wx.Point(bottom_right)))
+        crop: wx.Image = image.GetSubImage(wx.Rect(wx.Point(top_left), wx.Point(bottom_right)))
+        # Rescale it to fit into the logo size - border
+        aspect_ratio = crop.GetWidth() / crop.GetHeight()
+        if crop.GetWidth() > Numbers.menu_logo_image_size:
+            crop.Rescale(width=Numbers.menu_logo_image_size - border,
+                         height=int(Numbers.menu_logo_image_size * aspect_ratio) - border,
+                         quality=wx.IMAGE_QUALITY_HIGH)
+        elif crop.GetHeight() > Numbers.menu_logo_image_size:
+            crop.Rescale(width=int(Numbers.menu_logo_image_size * aspect_ratio) - border,
+                         height=Numbers.menu_logo_image_size - border,
+                         quality=wx.IMAGE_QUALITY_HIGH)
+        logo_size = (Numbers.menu_logo_image_size, Numbers.menu_logo_image_size)
+        position = (int(border / 2), int(border / 2))
+        crop.Resize(logo_size, position, 255, 255, 255)
         return preview, crop
 
 
