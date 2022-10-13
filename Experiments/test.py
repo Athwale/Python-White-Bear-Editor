@@ -14,9 +14,9 @@ class RichTextFrame(wx.Frame):
         self.SetSizer(self.sizer)
 
     # noinspection PyUnusedLocal
-    def pick_image_handler(self, event: wx.CommandEvent) -> str:
+    def pick_image_handler(self, event: wx.CommandEvent) -> None:
         """
-        Open a file dialog to insert an image.
+        Open a file dialog to select an image.
         :param event: Not used.
         :return: None
         """
@@ -25,7 +25,7 @@ class RichTextFrame(wx.Frame):
             if dlg.ShowModal() == wx.ID_OK:
                 dlg: wx.FileDialog
                 image_path = dlg.GetPath()
-        return image_path
+                self.process_image(image_path)
 
     def process_image(self, img_path: str) -> None:
         """
@@ -41,10 +41,12 @@ class RichTextFrame(wx.Frame):
         # TODO make border selectable by user
         # TODO try big, small, completely white, tall, short images
         # TODO create logo name based on article name not filename.
-        for img in self.prepare_image(image, limit=183, border=6):
-            bitmap = wx.StaticBitmap(self, -1, wx.Bitmap(img))
-            self.sizer.Add(wx.StaticLine(self, -1))
-            self.sizer.Add(bitmap)
+        images = self.prepare_image(image, limit=183, border=6)
+        if images:
+            for img in images:
+                bitmap = wx.StaticBitmap(self, -1, wx.Bitmap(img))
+                self.sizer.Add(wx.StaticLine(self, -1))
+                self.sizer.Add(bitmap)
         self.sizer.Layout()
 
     @staticmethod
@@ -84,6 +86,9 @@ class RichTextFrame(wx.Frame):
                     preview.SetRGB(x, y, 255, 255, 255)
                     image.SetRGB(x, y, 255, 255, 255)
 
+        if top is None or bottom is None:
+            return
+
         top_left = (left[0], top[1])
         bottom_right = (right[0], bottom[1])
 
@@ -93,9 +98,9 @@ class RichTextFrame(wx.Frame):
                 if x == top_left[0] or x == bottom_right[0]\
                         or y == top_left[1] or y == bottom_right[1]:
                     preview.SetRGB(x, y, 255, 0, 0)
-        # Get the selected sub image
+        # Get only the selected part of the image.
         crop: wx.Image = image.GetSubImage(wx.Rect(wx.Point(top_left), wx.Point(bottom_right)))
-        # Rescale it to fit into the logo size - border
+        # Rescale it to fit into the logo size - border and respect aspect ratio
         aspect_ratio = crop.GetWidth() / crop.GetHeight()
         if crop.GetWidth() > Numbers.menu_logo_image_size:
             crop.Rescale(width=Numbers.menu_logo_image_size - border,
@@ -107,6 +112,7 @@ class RichTextFrame(wx.Frame):
                          quality=wx.IMAGE_QUALITY_HIGH)
         logo_size = (Numbers.menu_logo_image_size, Numbers.menu_logo_image_size)
         position = (int(border / 2), int(border / 2))
+        # Place the small logo into the middle of the final correctly sized image with white background.
         crop.Resize(logo_size, position, 255, 255, 255)
         return preview, crop
 
@@ -124,7 +130,6 @@ class MyApp(wx.App):
         self.frame = RichTextFrame(None, -1, "RichTextCtrl", size=(300, 600), style=wx.DEFAULT_FRAME_STYLE)
         self.SetTopWindow(self.frame)
         self.frame.Show()
-        self.frame.process_image('/home/omejzlik/PycharmProjects/Python-White-Bear-Editor/Experiments/Screenshot.png')
         return True
 
 
