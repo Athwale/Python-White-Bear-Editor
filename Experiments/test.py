@@ -107,12 +107,11 @@ class RichTextFrame(wx.Frame):
         crop.Rescale(width=int(crop.GetWidth() * bounded_scale) - border,
                      height=int(crop.GetHeight() * bounded_scale) - border,
                      quality=wx.IMAGE_QUALITY_HIGH)
-        # TODO the size here must not be more than 96, how do you make it fit?
-        # TODO make the larger side 96 then find out by how much the other side is out of bounds?
         logo_size = (Numbers.menu_logo_image_size, Numbers.menu_logo_image_size)
-        position = (int(border / 2), int(border / 2))
         # Place the small logo into the middle of the final correctly sized image with white background.
-        crop.Resize(logo_size, position, 255, 255, 255)
+        x_center = int((Numbers.menu_logo_image_size - crop.GetWidth()) / 2)
+        y_center = int((Numbers.menu_logo_image_size - crop.GetHeight()) / 2)
+        crop.Resize(logo_size, (x_center, y_center), 255, 0, 0)
         return preview, crop
 
 
