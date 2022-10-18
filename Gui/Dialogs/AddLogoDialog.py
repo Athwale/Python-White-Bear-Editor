@@ -17,13 +17,9 @@ class AddLogoDialog(wx.Dialog):
         :param parent: Parent frame.
         :param work_dir: The working directory of the editor.
         """
-        # TODO add selected sub image preview.
-        # TODO add border, threshold spinners.
         # TODO refuse too large images 500x500?
         # TODO create name based on article name.
         # TODO try big, small, completely white, tall, short images
-
-        # TODO put the preview to the left, keep all info and controls in the middle
         # TODO make preview fixed size.
         wx.Dialog.__init__(self, parent, title=Strings.label_dialog_add_logo,
                            size=(Numbers.add_logo_dialog_width, Numbers.add_logo_dialog_height),
@@ -43,7 +39,7 @@ class AddLogoDialog(wx.Dialog):
 
         # Detection preview
         self._preview = wx.StaticBitmap(self, -1, wx.Bitmap(wx.Image(Fetch.get_resource_path('main_image_missing.png'),
-                                                                    wx.BITMAP_TYPE_PNG)))
+                                                                     wx.BITMAP_TYPE_PNG)))
         # Disk location
         self._original_disk_location_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self._label_image_original_path = wx.StaticText(self, -1, f'{Strings.label_image}: ')
@@ -67,6 +63,18 @@ class AddLogoDialog(wx.Dialog):
         self._information_sizer.Add(self._image_original_size_sub_sizer, flag=wx.EXPAND | wx.TOP,
                                     border=Numbers.widget_border_size)
 
+        # Selection size
+        self._image_selection_size_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self._label_selection_image_size = wx.StaticText(self, -1, Strings.label_selection_size)
+        self._content_image_selection_size = wx.StaticText(self, -1, Strings.label_none,
+                                                           style=wx.ST_ELLIPSIZE_MIDDLE | wx.ST_NO_AUTORESIZE)
+        self._image_selection_size_sub_sizer.Add(self._label_selection_image_size,
+                                                 flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
+        self._image_selection_size_sub_sizer.Add((13, -1))
+        self._image_selection_size_sub_sizer.Add(self._content_image_selection_size, 1, flag=wx.EXPAND)
+        self._information_sizer.Add(self._image_selection_size_sub_sizer, flag=wx.EXPAND | wx.TOP,
+                                    border=Numbers.widget_border_size)
+
         # Image name sub sizer
         self._name_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self._label_image_name = wx.StaticText(self, -1, f'{Strings.label_name}: ')
@@ -79,11 +87,33 @@ class AddLogoDialog(wx.Dialog):
         self._field_image_name_tip = Tools.get_warning_tip(self._field_image_name, Strings.label_image_name)
         self._field_image_name_tip.SetMessage('')
 
+        # Controls sub sizers
+        self._border_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self._label_border = wx.StaticText(self, -1, Strings.label_border)
+        self._border_spinner = wx.SpinCtrl(self, -1, '', min=0, max=Numbers.border_max, initial=Numbers.border_default)
+        self._border_sub_sizer.Add(self._label_border, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
+        self._border_sub_sizer.Add((3, -1))
+        self._border_sub_sizer.Add(self._border_spinner, proportion=1)
+        self._information_sizer.Add(self._border_sub_sizer, flag=wx.EXPAND | wx.TOP, border=Numbers.widget_border_size)
+
+        self._threshold_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self._label_threshold = wx.StaticText(self, -1, Strings.label_threshold)
+        self._threshold_spinner = wx.SpinCtrl(self, -1, '', min=0, max=Numbers.threshold_max,
+                                              initial=Numbers.threshold_default)
+        self._threshold_sub_sizer.Add(self._label_threshold, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
+        self._threshold_sub_sizer.Add((15, -1))
+        self._threshold_sub_sizer.Add(self._threshold_spinner, proportion=1)
+        self._information_sizer.Add(self._threshold_sub_sizer, flag=wx.EXPAND | wx.TOP,
+                                    border=Numbers.widget_border_size)
+
         # Image preview
         self._image_sizer = wx.BoxSizer(wx.VERTICAL)
         self._bitmap = wx.StaticBitmap(self, -1, wx.Bitmap(wx.Image(Fetch.get_resource_path('menu_image_missing.png'),
                                                                     wx.BITMAP_TYPE_PNG)))
+        self._logo_size_label = wx.StaticText(self, -1, f'{Numbers.menu_logo_image_size} x '
+                                                        f'{Numbers.menu_logo_image_size} px')
         self._image_sizer.Add(self._bitmap, flag=wx.ALL, border=1)
+        self._image_sizer.Add(self._logo_size_label, flag=wx.ALL | wx.ALIGN_CENTER_HORIZONTAL, border=1)
 
         # Buttons
         self._button_sizer = wx.BoxSizer(wx.VERTICAL)
@@ -105,7 +135,8 @@ class AddLogoDialog(wx.Dialog):
                                  border=Numbers.widget_border_size)
         self._horizontal_sizer.Add(self._preview, 1, flag=wx.TOP | wx.LEFT, border=Numbers.widget_border_size)
         self._horizontal_sizer.Add(self._vertical_sizer, 1)
-        self._horizontal_sizer.Add(self._image_sizer, flag=wx.TOP | wx.RIGHT, border=Numbers.widget_border_size)
+        self._horizontal_sizer.Add(self._image_sizer, flag=wx.TOP | wx.RIGHT | wx.EXPAND,
+                                   border=Numbers.widget_border_size)
         self._main_vertical_sizer.Add(self._horizontal_sizer, 1, flag=wx.EXPAND)
         self._main_vertical_sizer.Add(self._button_sizer, 0, flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM,
                                       border=Numbers.widget_border_size)
