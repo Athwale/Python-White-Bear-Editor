@@ -1,6 +1,7 @@
 import wx
 
 from Constants.Constants import Numbers
+from Exceptions.LogoException import LogoException
 
 
 class RichTextFrame(wx.Frame):
@@ -37,10 +38,10 @@ class RichTextFrame(wx.Frame):
         image: wx.Image = image.ConvertToGreyscale()
 
         # TODO https://discuss.wxpython.org/t/cropping-an-image-with-wxpython/34983/6
-        # TODO make threshold user selectable
-        # TODO make border selectable by user
+        # TODO make threshold, border user selectable
         # TODO try big, small, completely white, tall, short images
         # TODO create logo name based on article name not filename.
+        # TODO found image must be at least 96x96px otherwise return exception
         images = self.prepare_image(image, limit=183, border=6)
         if images:
             for img in images:
@@ -57,6 +58,7 @@ class RichTextFrame(wx.Frame):
         :param limit: The red color threshold where we consider the image to be useful.
         :param border: How many white pixels to put around the image.
         :return: 2 images - preview and finished logo.
+        :raises LogoException: If no image is found in the input image or the found image is too small.
         """
         # Bounding box will be drawn only into the preview.
         preview = image.Copy()
@@ -87,7 +89,7 @@ class RichTextFrame(wx.Frame):
                     image.SetRGB(x, y, 255, 255, 255)
 
         if top is None or bottom is None:
-            return
+            raise LogoException('error no image')
 
         top_left = (left[0], top[1])
         bottom_right = (right[0], bottom[1])
@@ -100,6 +102,8 @@ class RichTextFrame(wx.Frame):
                     preview.SetRGB(x, y, 255, 0, 0)
         # Get only the selected part of the image.
         crop: wx.Image = image.GetSubImage(wx.Rect(wx.Point(top_left), wx.Point(bottom_right)))
+        if crop.GetWidth() < Numbers.menu_logo_image_size or crop.GetHeight() < Numbers.menu_logo_image_size:
+            raise LogoException('error image too small')
         # Rescale it to fit into the logo size - border and respect aspect ratio
         width_scale = Numbers.menu_logo_image_size / crop.GetWidth()
         height_scale = Numbers.menu_logo_image_size / crop.GetHeight()
