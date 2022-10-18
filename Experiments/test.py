@@ -37,11 +37,6 @@ class RichTextFrame(wx.Frame):
         image = wx.Image(img_path)
         image: wx.Image = image.ConvertToGreyscale()
 
-        # TODO https://discuss.wxpython.org/t/cropping-an-image-with-wxpython/34983/6
-        # TODO make threshold, border user selectable
-        # TODO try big, small, completely white, tall, short images
-        # TODO create logo name based on article name not filename.
-        # TODO found image must be at least 96x96px otherwise return exception
         images = self.prepare_image(image, limit=183, border=6)
         if images:
             for img in images:

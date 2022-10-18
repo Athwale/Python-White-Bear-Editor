@@ -17,6 +17,14 @@ class AddLogoDialog(wx.Dialog):
         :param parent: Parent frame.
         :param work_dir: The working directory of the editor.
         """
+        # TODO add selected sub image preview.
+        # TODO add border, threshold spinners.
+        # TODO refuse too large images 500x500?
+        # TODO create name based on article name.
+        # TODO try big, small, completely white, tall, short images
+
+        # TODO put the preview to the left, keep all info and controls in the middle
+        # TODO make preview fixed size.
         wx.Dialog.__init__(self, parent, title=Strings.label_dialog_add_logo,
                            size=(Numbers.add_logo_dialog_width, Numbers.add_logo_dialog_height),
                            style=wx.DEFAULT_DIALOG_STYLE)
@@ -33,6 +41,9 @@ class AddLogoDialog(wx.Dialog):
         self._file_path = None
         self._config_manager = ConfigManager.get_instance()
 
+        # Detection preview
+        self._preview = wx.StaticBitmap(self, -1, wx.Bitmap(wx.Image(Fetch.get_resource_path('main_image_missing.png'),
+                                                                    wx.BITMAP_TYPE_PNG)))
         # Disk location
         self._original_disk_location_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self._label_image_original_path = wx.StaticText(self, -1, f'{Strings.label_image}: ')
@@ -92,6 +103,7 @@ class AddLogoDialog(wx.Dialog):
         # Putting the sizers together
         self._vertical_sizer.Add(self._information_sizer, 0, flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP,
                                  border=Numbers.widget_border_size)
+        self._horizontal_sizer.Add(self._preview, 1, flag=wx.TOP | wx.LEFT, border=Numbers.widget_border_size)
         self._horizontal_sizer.Add(self._vertical_sizer, 1)
         self._horizontal_sizer.Add(self._image_sizer, flag=wx.TOP | wx.RIGHT, border=Numbers.widget_border_size)
         self._main_vertical_sizer.Add(self._horizontal_sizer, 1, flag=wx.EXPAND)
