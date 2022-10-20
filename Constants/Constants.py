@@ -304,6 +304,8 @@ class Strings:
     warning_index: str = 'Index page (Page setup)'
     warning_file_missing: str = 'File not found:'
     warning_optimization_fail: str = 'Image optimization failed:'
+    warning_image_small: str = 'Image too small'
+    warning_no_image: str = 'No logo found inside the image'
 
     label_menu_file: str = 'File'
     label_menu_file_recent: str = 'Open recent directory'

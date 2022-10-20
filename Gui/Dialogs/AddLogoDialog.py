@@ -240,11 +240,18 @@ class AddLogoDialog(wx.Dialog):
         :return: None
         """
         # Create the base image for resizing.
-        # TODO handle exceptions
         # TODO interactive redraw on spinner changes.
-        preview_image, self._menu_image = self.process_image(self._image_path,
-                                                             self._threshold_spinner.GetValue(),
-                                                             self._border_spinner.GetValue())
+        try:
+            preview_image, self._menu_image = self.process_image(self._image_path,
+                                                                 self._threshold_spinner.GetValue(),
+                                                                 self._border_spinner.GetValue())
+        except LogoException as ex:
+            self._logo_bitmap.SetBitmap(wx.Bitmap(wx.Image(Fetch.get_resource_path('menu_image_missing.png'),
+                                                  wx.BITMAP_TYPE_PNG)))
+            self._preview_bitmap.SetBitmap(wx.Bitmap(wx.Image(Fetch.get_resource_path('preview_missing.png'),
+                                                     wx.BITMAP_TYPE_PNG)))
+            wx.MessageBox(f'{str(ex)}', Strings.status_error, wx.OK | wx.ICON_ERROR)
+            return
 
         self._content_image_original_path.SetLabelText(self._image_path)
         image_name: str = os.path.splitext(self._image_name)[0]
@@ -302,7 +309,7 @@ class AddLogoDialog(wx.Dialog):
                     image.SetRGB(x, y, 255, 255, 255)
 
         if top is None or bottom is None:
-            raise LogoException('error no image')
+            raise LogoException(Strings.warning_no_image)
 
         top_left = (left[0], top[1])
         bottom_right = (right[0], bottom[1])
@@ -316,7 +323,7 @@ class AddLogoDialog(wx.Dialog):
         # Get only the selected part of the image.
         crop: wx.Image = image.GetSubImage(wx.Rect(wx.Point(top_left), wx.Point(bottom_right)))
         if crop.GetWidth() < Numbers.menu_logo_image_size or crop.GetHeight() < Numbers.menu_logo_image_size:
-            raise LogoException('error image too small')
+            raise LogoException(Strings.warning_image_small)
         # Rescale it to fit into the logo size - border and respect aspect ratio
         width_scale = Numbers.menu_logo_image_size / crop.GetWidth()
         height_scale = Numbers.menu_logo_image_size / crop.GetHeight()
@@ -328,7 +335,7 @@ class AddLogoDialog(wx.Dialog):
         # Place the small logo into the middle of the final correctly sized image with white background.
         x_center = int((Numbers.menu_logo_image_size - crop.GetWidth()) / 2)
         y_center = int((Numbers.menu_logo_image_size - crop.GetHeight()) / 2)
-        crop.Resize(logo_size, (x_center, y_center), 255, 0, 0)
+        crop.Resize(logo_size, (x_center, y_center), 255, 255, 255)
         return preview, crop
 
     def get_logo_location(self) -> (str, str):
