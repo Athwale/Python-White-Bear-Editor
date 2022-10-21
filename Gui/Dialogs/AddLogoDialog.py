@@ -265,7 +265,17 @@ class AddLogoDialog(wx.Dialog):
         self._content_image_size.SetLabelText(f'{self._menu_image.GetWidth()} x {self._menu_image.GetHeight()} px')
         # Show the image.
         self._logo_bitmap.SetBitmap(wx.Bitmap(self._menu_image))
-        # TODO resize preview to fit into 300x225
+        if preview_image.GetWidth() > Numbers.main_image_width or preview_image.GetHeight() > Numbers.main_image_height:
+            width_scale = Numbers.main_image_width / preview_image.GetWidth()
+            height_scale = Numbers.main_image_height / preview_image.GetHeight()
+            bounded_scale = min(width_scale, height_scale)
+            preview_image.Rescale(width=int(preview_image.GetWidth() * bounded_scale),
+                                  height=int(preview_image.GetHeight() * bounded_scale),
+                                  quality=wx.IMAGE_QUALITY_HIGH)
+        # Place the small logo into the middle of the final correctly sized image with white background.
+        x_center = int((Numbers.main_image_width - preview_image.GetWidth()) / 2)
+        y_center = int((Numbers.main_image_height - preview_image.GetHeight()) / 2)
+        preview_image.Resize((Numbers.main_image_width, Numbers.main_image_height), (x_center, y_center), 255, 255, 255)
         self._preview_bitmap.SetBitmap(wx.Bitmap(preview_image))
         self.Layout()
 
