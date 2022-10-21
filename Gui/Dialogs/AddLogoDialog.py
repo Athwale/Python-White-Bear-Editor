@@ -150,6 +150,8 @@ class AddLogoDialog(wx.Dialog):
         self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._cancel_button)
         self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._browse_button)
         self.Bind(wx.EVT_TEXT, self._switch_default_button, self._field_image_name)
+        self.Bind(wx.EVT_SPINCTRL, self._spinner_handler, self._border_spinner)
+        self.Bind(wx.EVT_SPINCTRL, self._spinner_handler, self._threshold_spinner)
 
     # noinspection PyUnusedLocal
     def _switch_default_button(self, event: wx.CommandEvent) -> None:
@@ -234,28 +236,41 @@ class AddLogoDialog(wx.Dialog):
         # Exceptions from here are caught automatically
         return True
 
+    # noinspection PyUnusedLocal
+    def _spinner_handler(self, event: wx.CommandEvent) -> None:
+        """
+        Update images when the user changes settings.
+        :param event: Not used
+        :return: None
+        """
+        # TODO interactive redraw on spinner changes.
+        self._save_button.Disable()
+        if self._image_path and self._image_name:
+            self._load_image()
+            self._field_image_name.SetFocus()
+        if self._menu_image:
+            self._save_button.Enable()
+
     def _load_image(self) -> None:
         """
         Load and display the image and prepare a logo from it.
         :return: None
         """
         # Create the base image for resizing.
-        # TODO interactive redraw on spinner changes.
         try:
             preview_image, self._menu_image = self.process_image(self._image_path,
                                                                  self._threshold_spinner.GetValue(),
                                                                  self._border_spinner.GetValue())
-        except LogoException as ex:
+        except LogoException as _:
             self._logo_bitmap.SetBitmap(wx.Bitmap(wx.Image(Fetch.get_resource_path('menu_image_missing.png'),
                                                   wx.BITMAP_TYPE_PNG)))
             self._preview_bitmap.SetBitmap(wx.Bitmap(wx.Image(Fetch.get_resource_path('preview_missing.png'),
                                                      wx.BITMAP_TYPE_PNG)))
-            wx.MessageBox(f'{str(ex)}', Strings.status_error, wx.OK | wx.ICON_ERROR)
+            # TODO disable save
             return
 
         self._content_image_original_path.SetLabelText(self._image_path)
         image_name: str = os.path.splitext(self._image_name)[0]
-        # TODO preserve extension?.
         if self._article_name:
             self._field_image_name.SetValue(f'{Strings.label_logo}{self._article_name.capitalize()}')
         else:
@@ -343,9 +358,11 @@ class AddLogoDialog(wx.Dialog):
         width_scale = Numbers.menu_logo_image_size / crop.GetWidth()
         height_scale = Numbers.menu_logo_image_size / crop.GetHeight()
         bounded_scale = min(width_scale, height_scale)
-        crop.Rescale(width=int(crop.GetWidth() * bounded_scale) - border,
-                     height=int(crop.GetHeight() * bounded_scale) - border,
-                     quality=wx.IMAGE_QUALITY_HIGH)
+        width = int(crop.GetWidth() * bounded_scale) - border
+        height = int(crop.GetHeight() * bounded_scale) - border
+        width = width if width > 0 else 1
+        height = height if height > 0 else 1
+        crop.Rescale(width, height, quality=wx.IMAGE_QUALITY_HIGH)
         logo_size = (Numbers.menu_logo_image_size, Numbers.menu_logo_image_size)
         # Place the small logo into the middle of the final correctly sized image with white background.
         x_center = int((Numbers.menu_logo_image_size - crop.GetWidth()) / 2)
