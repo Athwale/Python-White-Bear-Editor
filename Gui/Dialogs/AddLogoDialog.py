@@ -32,6 +32,7 @@ class AddLogoDialog(wx.Dialog):
         self._image_path = None
         self._image_name = None
         self._menu_image = None
+        self._original_image_file = None
         self._logos_path = None
         self._working_directory = work_dir
         self._file_path = None
@@ -188,6 +189,7 @@ class AddLogoDialog(wx.Dialog):
             self._save_button.Disable()
             self._image_path, self._image_name = self._ask_for_image()
             if self._image_path and self._image_name:
+                self._original_image_file = None
                 self._border_spinner.SetValue(Numbers.border_default)
                 self._threshold_spinner.SetValue(Numbers.threshold_default)
                 self._load_image()
@@ -295,8 +297,7 @@ class AddLogoDialog(wx.Dialog):
         self.Layout()
         return True
 
-    @staticmethod
-    def process_image(img_path: str, limit: int, border: int) -> (wx.Image, wx.Image):
+    def process_image(self, img_path: str, limit: int, border: int) -> (wx.Image, wx.Image):
         """
         Search for the image based on red color threshold from the set direction. Then cut the image out and prepare
         the menu logo image of correct size.
@@ -306,11 +307,14 @@ class AddLogoDialog(wx.Dialog):
         :return: 2 images - preview and finished logo.
         :raises LogoException: If no image is found in the input image or the found image is too small.
         """
-        image = wx.Image(img_path)
-        if image.GetWidth() == Numbers.menu_logo_image_size and image.GetHeight() == Numbers.menu_logo_image_size:
+        if not self._original_image_file:
+            self._original_image_file = wx.Image(img_path)
+        if self._original_image_file.GetWidth() == Numbers.menu_logo_image_size and \
+                self._original_image_file.GetHeight() == Numbers.menu_logo_image_size:
             # We presume the image is supposed to be used as a logo as is.
-            return wx.Image(Fetch.get_resource_path('preview_noconvert.png'), wx.BITMAP_TYPE_PNG), image
-        image: wx.Image = image.ConvertToGreyscale()
+            return wx.Image(Fetch.get_resource_path('preview_noconvert.png'), wx.BITMAP_TYPE_PNG), \
+                   self._original_image_file
+        image: wx.Image = self._original_image_file.ConvertToGreyscale()
         # Bounding box will be drawn only into the preview.
         preview = image.Copy()
         # Top will be set only once on the first matching pixel.
