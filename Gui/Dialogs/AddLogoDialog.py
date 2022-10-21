@@ -188,6 +188,8 @@ class AddLogoDialog(wx.Dialog):
             self._save_button.Disable()
             self._image_path, self._image_name = self._ask_for_image()
             if self._image_path and self._image_name:
+                self._border_spinner.SetValue(Numbers.border_default)
+                self._threshold_spinner.SetValue(Numbers.threshold_default)
                 self._load_image()
                 self._field_image_name.SetFocus()
             if self._menu_image:
@@ -243,18 +245,17 @@ class AddLogoDialog(wx.Dialog):
         :param event: Not used
         :return: None
         """
-        # TODO interactive redraw on spinner changes.
+        # TODO slow on larger images.
         self._save_button.Disable()
         if self._image_path and self._image_name:
-            self._load_image()
-            self._field_image_name.SetFocus()
-        if self._menu_image:
-            self._save_button.Enable()
+            if self._load_image():
+                self._field_image_name.SetFocus()
+                self._save_button.Enable()
 
-    def _load_image(self) -> None:
+    def _load_image(self) -> bool:
         """
         Load and display the image and prepare a logo from it.
-        :return: None
+        :return: True if successful.
         """
         # Create the base image for resizing.
         try:
@@ -266,8 +267,7 @@ class AddLogoDialog(wx.Dialog):
                                                   wx.BITMAP_TYPE_PNG)))
             self._preview_bitmap.SetBitmap(wx.Bitmap(wx.Image(Fetch.get_resource_path('preview_missing.png'),
                                                      wx.BITMAP_TYPE_PNG)))
-            # TODO disable save
-            return
+            return False
 
         self._content_image_original_path.SetLabelText(self._image_path)
         image_name: str = os.path.splitext(self._image_name)[0]
@@ -293,6 +293,7 @@ class AddLogoDialog(wx.Dialog):
         preview_image.Resize((Numbers.main_image_width, Numbers.main_image_height), (x_center, y_center), 255, 255, 255)
         self._preview_bitmap.SetBitmap(wx.Bitmap(preview_image))
         self.Layout()
+        return True
 
     @staticmethod
     def process_image(img_path: str, limit: int, border: int) -> (wx.Image, wx.Image):
