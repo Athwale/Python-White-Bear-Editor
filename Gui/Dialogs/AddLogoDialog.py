@@ -11,17 +11,16 @@ from Tools.Tools import Tools
 
 class AddLogoDialog(wx.Dialog):
 
-    def __init__(self, parent, work_dir: str):
+    def __init__(self, parent, work_dir: str, article_name: str):
         """
         This dialog helps with adding a new menu logo into the folder structure of the website.
         Display a dialog with information about the image where the user can edit it.
         :param parent: Parent frame.
         :param work_dir: The working directory of the editor.
+        :param article_name: Name used to create the logo filename. If empty, image file name is used.
         """
         # TODO refuse too large images 500x500?
-        # TODO create name based on article name.
         # TODO try big, small, completely white, tall, short images
-        # TODO make preview fixed size.
         wx.Dialog.__init__(self, parent, title=Strings.label_dialog_add_logo,
                            size=(Numbers.add_logo_dialog_width, Numbers.add_logo_dialog_height),
                            style=wx.DEFAULT_DIALOG_STYLE)
@@ -36,6 +35,7 @@ class AddLogoDialog(wx.Dialog):
         self._logos_path = None
         self._working_directory = work_dir
         self._file_path = None
+        self._article_name = article_name
         self._config_manager = ConfigManager.get_instance()
 
         # Detection preview
@@ -255,12 +255,17 @@ class AddLogoDialog(wx.Dialog):
 
         self._content_image_original_path.SetLabelText(self._image_path)
         image_name: str = os.path.splitext(self._image_name)[0]
-        self._field_image_name.SetValue(f'{Strings.label_logo}{image_name.capitalize()}')
+        # TODO preserve extension?.
+        if self._article_name:
+            self._field_image_name.SetValue(f'{Strings.label_logo}{self._article_name.capitalize()}')
+        else:
+            self._field_image_name.SetValue(f'{Strings.label_logo}{image_name.capitalize()}')
         self._field_image_name.Enable()
 
         self._content_image_size.SetLabelText(f'{self._menu_image.GetWidth()} x {self._menu_image.GetHeight()} px')
         # Show the image.
         self._logo_bitmap.SetBitmap(wx.Bitmap(self._menu_image))
+        # TODO resize preview to fit into 300x225
         self._preview_bitmap.SetBitmap(wx.Bitmap(preview_image))
         self.Layout()
 
