@@ -247,7 +247,7 @@ class AddLogoDialog(wx.Dialog):
         :param event: Not used
         :return: None
         """
-        # TODO slow on larger images.
+        # TODO slow on larger images, typical photo 800x800 implicitly rescale to 300px?
         self._save_button.Disable()
         if self._image_path and self._image_name:
             if self._load_image():
@@ -261,14 +261,16 @@ class AddLogoDialog(wx.Dialog):
         """
         # Create the base image for resizing.
         try:
-            preview_image, self._menu_image = self.process_image(self._image_path,
-                                                                 self._threshold_spinner.GetValue(),
-                                                                 self._border_spinner.GetValue())
+            preview_image, self._menu_image, selection = self.process_image(self._image_path,
+                                                                            self._threshold_spinner.GetValue(),
+                                                                            self._border_spinner.GetValue())
         except LogoException as _:
             self._logo_bitmap.SetBitmap(wx.Bitmap(wx.Image(Fetch.get_resource_path('menu_image_missing.png'),
                                                   wx.BITMAP_TYPE_PNG)))
             self._preview_bitmap.SetBitmap(wx.Bitmap(wx.Image(Fetch.get_resource_path('preview_missing.png'),
                                                      wx.BITMAP_TYPE_PNG)))
+            self._content_image_selection_size.SetLabelText(Strings.label_none)
+            self._content_image_size.SetLabelText(Strings.label_none)
             return False
 
         self._content_image_original_path.SetLabelText(self._image_path)
@@ -279,7 +281,9 @@ class AddLogoDialog(wx.Dialog):
             self._field_image_name.SetValue(f'{Strings.label_logo}{image_name.capitalize()}')
         self._field_image_name.Enable()
 
-        self._content_image_size.SetLabelText(f'{self._menu_image.GetWidth()} x {self._menu_image.GetHeight()} px')
+        self._content_image_size.SetLabelText(f'{self._original_image_file.GetWidth()} x '
+                                              f'{self._original_image_file.GetHeight()} px')
+        self._content_image_selection_size.SetLabelText(f'{selection[0]} x {selection[1]} px')
         # Show the image.
         self._logo_bitmap.SetBitmap(wx.Bitmap(self._menu_image))
         if preview_image.GetWidth() > Numbers.main_image_width or preview_image.GetHeight() > Numbers.main_image_height:
@@ -297,24 +301,27 @@ class AddLogoDialog(wx.Dialog):
         self.Layout()
         return True
 
-    def process_image(self, img_path: str, limit: int, border: int) -> (wx.Image, wx.Image):
+    def process_image(self, img_path: str, limit: int, border: int) -> (wx.Image, wx.Image, (int, int)):
         """
         Search for the image based on red color threshold from the set direction. Then cut the image out and prepare
         the menu logo image of correct size.
         :param img_path: Path to an image.
         :param limit: The red color threshold where we consider the image to be useful.
         :param border: How many white pixels to put around the image.
-        :return: 2 images - preview and finished logo.
+        :return: 2 images - preview and finished logo and the size of the selected area.
         :raises LogoException: If no image is found in the input image or the found image is too small.
         """
         if not self._original_image_file:
-            self._original_image_file = wx.Image(img_path)
+            self._original_image_file = wx.Image(img_path, type=wx.BITMAP_TYPE_JPEG)
             self._original_image_file = self._original_image_file.ConvertToGreyscale()
+            # TODO Scale it down to 300px if too large.
+
             if self._original_image_file.GetWidth() == Numbers.menu_logo_image_size and \
                     self._original_image_file.GetHeight() == Numbers.menu_logo_image_size:
                 # We presume the image is supposed to be used as a logo as is.
                 return wx.Image(Fetch.get_resource_path('preview_noconvert.png'), wx.BITMAP_TYPE_PNG), \
-                       self._original_image_file
+                       self._original_image_file, (0, 0)
+
         image = self._original_image_file.Copy()
         # Top will be set only once on the first matching pixel.
         top = None
@@ -348,7 +355,6 @@ class AddLogoDialog(wx.Dialog):
         bottom_right = (right[0], bottom[1])
 
         # Draw a bounding box around the selected area into the preview.
-        # TODO make the preview just the cropped part?
         preview: wx.Image = image.Copy()
         for y in range(0, preview.GetHeight() - 1):
             for x in range(0, preview.GetWidth() - 1):
@@ -357,6 +363,7 @@ class AddLogoDialog(wx.Dialog):
                     preview.SetRGB(x, y, 255, 0, 0)
         # Get only the selected part of the image.
         crop: wx.Image = image.GetSubImage(wx.Rect(wx.Point(top_left), wx.Point(bottom_right)))
+        crop_size = crop.GetSize()
         if crop.GetWidth() < Numbers.menu_logo_image_size or crop.GetHeight() < Numbers.menu_logo_image_size:
             raise LogoException(Strings.warning_image_small)
         # Rescale it to fit into the logo size - border and respect aspect ratio
@@ -373,7 +380,7 @@ class AddLogoDialog(wx.Dialog):
         x_center = int((Numbers.menu_logo_image_size - crop.GetWidth()) / 2)
         y_center = int((Numbers.menu_logo_image_size - crop.GetHeight()) / 2)
         crop.Resize(logo_size, (x_center, y_center), 255, 255, 255)
-        return preview, crop
+        return preview, crop, (crop_size[0], crop_size[1])
 
     def get_logo_location(self) -> (str, str):
         """
