@@ -287,16 +287,9 @@ class AddLogoDialog(wx.Dialog):
         # Show the image.
         self._logo_bitmap.SetBitmap(wx.Bitmap(self._menu_image))
         if preview_image.GetWidth() > Numbers.main_image_width or preview_image.GetHeight() > Numbers.main_image_height:
-            width_scale = Numbers.main_image_width / preview_image.GetWidth()
-            height_scale = Numbers.main_image_height / preview_image.GetHeight()
-            bounded_scale = min(width_scale, height_scale)
-            preview_image.Rescale(width=int(preview_image.GetWidth() * bounded_scale),
-                                  height=int(preview_image.GetHeight() * bounded_scale),
-                                  quality=wx.IMAGE_QUALITY_HIGH)
-        # Place the small logo into the middle of the final correctly sized image with white background.
-        x_center = int((Numbers.main_image_width - preview_image.GetWidth()) / 2)
-        y_center = int((Numbers.main_image_height - preview_image.GetHeight()) / 2)
-        preview_image.Resize((Numbers.main_image_width, Numbers.main_image_height), (x_center, y_center), 255, 255, 255)
+            self._inplace_rescale(preview_image, Numbers.main_image_width, Numbers.main_image_height, 0)
+        # Place the scaled image into the middle of the final correctly sized image with white background.
+        self._inplace_bordered_resize(preview_image, Numbers.main_image_width, Numbers.main_image_height)
         self._preview_bitmap.SetBitmap(wx.Bitmap(preview_image))
         self.Layout()
         return True
@@ -314,7 +307,7 @@ class AddLogoDialog(wx.Dialog):
         if not self._original_image_file:
             self._original_image_file = wx.Image(img_path, type=wx.BITMAP_TYPE_JPEG)
             self._original_image_file = self._original_image_file.ConvertToGreyscale()
-            # TODO Scale it down to 300px if too large.
+            # TODO Scale it down to 280px if too large.
 
             if self._original_image_file.GetWidth() == Numbers.menu_logo_image_size and \
                     self._original_image_file.GetHeight() == Numbers.menu_logo_image_size:
@@ -366,21 +359,44 @@ class AddLogoDialog(wx.Dialog):
         crop_size = crop.GetSize()
         if crop.GetWidth() < Numbers.menu_logo_image_size or crop.GetHeight() < Numbers.menu_logo_image_size:
             raise LogoException(Strings.warning_image_small)
-        # Rescale it to fit into the logo size - border and respect aspect ratio
-        width_scale = Numbers.menu_logo_image_size / crop.GetWidth()
-        height_scale = Numbers.menu_logo_image_size / crop.GetHeight()
+        # Rescale it to fit into the logo size - border and respect aspect ratio.
+        self._inplace_rescale(crop, Numbers.menu_logo_image_size, Numbers.menu_logo_image_size, border)
+        self._inplace_bordered_resize(crop, Numbers.menu_logo_image_size, Numbers.menu_logo_image_size)
+        return preview, crop, (crop_size[0], crop_size[1])
+
+    @staticmethod
+    def _inplace_rescale(image: wx.Image, target_width: int, target_height: int, border: int) -> None:
+        """
+        Rescale image in place to fit into a defined size. The image will retain original aspect ratio.
+        :param image: Image to rescale
+        :param target_width: Width of the new image.
+        :param target_height: Height of the new image.
+        :param border: Leave space for a border.
+        :return: None
+        """
+        width_scale = target_width / image.GetWidth()
+        height_scale = target_height / image.GetHeight()
         bounded_scale = min(width_scale, height_scale)
-        width = int(crop.GetWidth() * bounded_scale) - border
-        height = int(crop.GetHeight() * bounded_scale) - border
+        width = int(image.GetWidth() * bounded_scale) - border
+        height = int(image.GetHeight() * bounded_scale) - border
         width = width if width > 0 else 1
         height = height if height > 0 else 1
-        crop.Rescale(width, height, quality=wx.IMAGE_QUALITY_HIGH)
-        logo_size = (Numbers.menu_logo_image_size, Numbers.menu_logo_image_size)
-        # Place the small logo into the middle of the final correctly sized image with white background.
-        x_center = int((Numbers.menu_logo_image_size - crop.GetWidth()) / 2)
-        y_center = int((Numbers.menu_logo_image_size - crop.GetHeight()) / 2)
-        crop.Resize(logo_size, (x_center, y_center), 255, 255, 255)
-        return preview, crop, (crop_size[0], crop_size[1])
+        image.Rescale(width, height, quality=wx.IMAGE_QUALITY_HIGH)
+
+    @staticmethod
+    def _inplace_bordered_resize(image: wx.Image, target_width: int, target_height: int) -> None:
+        """
+        Place the image into the center of a larger size image with white border or shrink the image if it is larger.
+        :param image: Image to resize.
+        :param target_width: Width of the new image.
+        :param target_height: Height of the new image.
+        :return:
+        """
+        size = (target_width, target_height)
+        # Place the small image into the middle of the final correctly sized image with white background.
+        x_center = int((target_width - image.GetWidth()) / 2)
+        y_center = int((target_height - image.GetHeight()) / 2)
+        image.Resize(size, (x_center, y_center), 255, 255, 255)
 
     def get_logo_location(self) -> (str, str):
         """
