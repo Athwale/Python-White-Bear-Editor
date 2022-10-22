@@ -309,14 +309,13 @@ class AddLogoDialog(wx.Dialog):
         """
         if not self._original_image_file:
             self._original_image_file = wx.Image(img_path)
-        if self._original_image_file.GetWidth() == Numbers.menu_logo_image_size and \
-                self._original_image_file.GetHeight() == Numbers.menu_logo_image_size:
-            # We presume the image is supposed to be used as a logo as is.
-            return wx.Image(Fetch.get_resource_path('preview_noconvert.png'), wx.BITMAP_TYPE_PNG), \
-                   self._original_image_file
-        image: wx.Image = self._original_image_file.ConvertToGreyscale()
-        # Bounding box will be drawn only into the preview.
-        preview = image.Copy()
+            self._original_image_file = self._original_image_file.ConvertToGreyscale()
+            if self._original_image_file.GetWidth() == Numbers.menu_logo_image_size and \
+                    self._original_image_file.GetHeight() == Numbers.menu_logo_image_size:
+                # We presume the image is supposed to be used as a logo as is.
+                return wx.Image(Fetch.get_resource_path('preview_noconvert.png'), wx.BITMAP_TYPE_PNG), \
+                       self._original_image_file
+        image = self._original_image_file.Copy()
         # Top will be set only once on the first matching pixel.
         top = None
         # Bottom is the last matching pixel.
@@ -338,9 +337,8 @@ class AddLogoDialog(wx.Dialog):
                         right = (x, y)
                     else:
                         bottom = (x, y)
-                else:
-                    # Repaint all lighter colors with white
-                    preview.SetRGB(x, y, 255, 255, 255)
+                elif color != 255:
+                    # Repaint all lighter colors with white if they need to be
                     image.SetRGB(x, y, 255, 255, 255)
 
         if top is None or bottom is None:
@@ -349,7 +347,9 @@ class AddLogoDialog(wx.Dialog):
         top_left = (left[0], top[1])
         bottom_right = (right[0], bottom[1])
 
-        # Draw a bounding box around the selected area.
+        # Draw a bounding box around the selected area into the preview.
+        # TODO make the preview just the cropped part?
+        preview: wx.Image = image.Copy()
         for y in range(0, preview.GetHeight() - 1):
             for x in range(0, preview.GetWidth() - 1):
                 if x == top_left[0] or x == bottom_right[0]\
