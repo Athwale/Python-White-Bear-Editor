@@ -3,6 +3,7 @@ import os
 import wx
 
 from Constants.Constants import Strings, Numbers
+from Exceptions.LogoException import LogoException
 from Resources.Fetch import Fetch
 from Tools.ConfigManager import ConfigManager
 from Tools.Tools import Tools
@@ -10,13 +11,16 @@ from Tools.Tools import Tools
 
 class AddLogoDialog(wx.Dialog):
 
-    def __init__(self, parent, work_dir: str):
+    def __init__(self, parent, work_dir: str, article_name: str):
         """
         This dialog helps with adding a new menu logo into the folder structure of the website.
         Display a dialog with information about the image where the user can edit it.
         :param parent: Parent frame.
         :param work_dir: The working directory of the editor.
+        :param article_name: Name used to create the logo filename. If empty, image file name is used.
         """
+        # TODO refuse too large images 500x500?
+        # TODO try big, small, completely white, tall, short images
         wx.Dialog.__init__(self, parent, title=Strings.label_dialog_add_logo,
                            size=(Numbers.add_logo_dialog_width, Numbers.add_logo_dialog_height),
                            style=wx.DEFAULT_DIALOG_STYLE)
@@ -28,11 +32,17 @@ class AddLogoDialog(wx.Dialog):
         self._image_path = None
         self._image_name = None
         self._menu_image = None
+        self._original_image_file = None
         self._logos_path = None
         self._working_directory = work_dir
         self._file_path = None
+        self._article_name = article_name
         self._config_manager = ConfigManager.get_instance()
 
+        # Detection preview
+        self._preview_bitmap = wx.StaticBitmap(self, -1,
+                                               wx.Bitmap(wx.Image(Fetch.get_resource_path('preview_missing.png'),
+                                                                  wx.BITMAP_TYPE_PNG)))
         # Disk location
         self._original_disk_location_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self._label_image_original_path = wx.StaticText(self, -1, f'{Strings.label_image}: ')
@@ -56,6 +66,18 @@ class AddLogoDialog(wx.Dialog):
         self._information_sizer.Add(self._image_original_size_sub_sizer, flag=wx.EXPAND | wx.TOP,
                                     border=Numbers.widget_border_size)
 
+        # Selection size
+        self._image_selection_size_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self._label_selection_image_size = wx.StaticText(self, -1, Strings.label_selection_size)
+        self._content_image_selection_size = wx.StaticText(self, -1, Strings.label_none,
+                                                           style=wx.ST_ELLIPSIZE_MIDDLE | wx.ST_NO_AUTORESIZE)
+        self._image_selection_size_sub_sizer.Add(self._label_selection_image_size,
+                                                 flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
+        self._image_selection_size_sub_sizer.Add((13, -1))
+        self._image_selection_size_sub_sizer.Add(self._content_image_selection_size, 1, flag=wx.EXPAND)
+        self._information_sizer.Add(self._image_selection_size_sub_sizer, flag=wx.EXPAND | wx.TOP,
+                                    border=Numbers.widget_border_size)
+
         # Image name sub sizer
         self._name_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self._label_image_name = wx.StaticText(self, -1, f'{Strings.label_name}: ')
@@ -68,11 +90,34 @@ class AddLogoDialog(wx.Dialog):
         self._field_image_name_tip = Tools.get_warning_tip(self._field_image_name, Strings.label_image_name)
         self._field_image_name_tip.SetMessage('')
 
+        # Controls sub sizers
+        self._border_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self._label_border = wx.StaticText(self, -1, Strings.label_border)
+        self._border_spinner = wx.SpinCtrl(self, -1, '', min=0, max=Numbers.border_max, initial=Numbers.border_default)
+        self._border_sub_sizer.Add(self._label_border, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
+        self._border_sub_sizer.Add((3, -1))
+        self._border_sub_sizer.Add(self._border_spinner, proportion=1)
+        self._information_sizer.Add(self._border_sub_sizer, flag=wx.EXPAND | wx.TOP, border=Numbers.widget_border_size)
+
+        self._threshold_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
+        self._label_threshold = wx.StaticText(self, -1, Strings.label_threshold)
+        self._threshold_spinner = wx.SpinCtrl(self, -1, '', min=0, max=Numbers.threshold_max,
+                                              initial=Numbers.threshold_default)
+        self._threshold_sub_sizer.Add(self._label_threshold, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
+        self._threshold_sub_sizer.Add((15, -1))
+        self._threshold_sub_sizer.Add(self._threshold_spinner, proportion=1)
+        self._information_sizer.Add(self._threshold_sub_sizer, flag=wx.EXPAND | wx.TOP,
+                                    border=Numbers.widget_border_size)
+
         # Image preview
         self._image_sizer = wx.BoxSizer(wx.VERTICAL)
-        self._bitmap = wx.StaticBitmap(self, -1, wx.Bitmap(wx.Image(Fetch.get_resource_path('menu_image_missing.png'),
-                                                                    wx.BITMAP_TYPE_PNG)))
-        self._image_sizer.Add(self._bitmap, flag=wx.ALL, border=1)
+        self._logo_bitmap = wx.StaticBitmap(self, -1,
+                                            wx.Bitmap(wx.Image(Fetch.get_resource_path('menu_image_missing.png'),
+                                                               wx.BITMAP_TYPE_PNG)))
+        self._logo_size_label = wx.StaticText(self, -1, f'{Numbers.menu_logo_image_size} x '
+                                                        f'{Numbers.menu_logo_image_size} px')
+        self._image_sizer.Add(self._logo_bitmap, flag=wx.ALL, border=1)
+        self._image_sizer.Add(self._logo_size_label, flag=wx.ALL | wx.ALIGN_CENTER_HORIZONTAL, border=1)
 
         # Buttons
         self._button_sizer = wx.BoxSizer(wx.VERTICAL)
@@ -92,8 +137,10 @@ class AddLogoDialog(wx.Dialog):
         # Putting the sizers together
         self._vertical_sizer.Add(self._information_sizer, 0, flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.TOP,
                                  border=Numbers.widget_border_size)
+        self._horizontal_sizer.Add(self._preview_bitmap, 1, flag=wx.TOP | wx.LEFT, border=Numbers.widget_border_size)
         self._horizontal_sizer.Add(self._vertical_sizer, 1)
-        self._horizontal_sizer.Add(self._image_sizer, flag=wx.TOP | wx.RIGHT, border=Numbers.widget_border_size)
+        self._horizontal_sizer.Add(self._image_sizer, flag=wx.TOP | wx.RIGHT | wx.EXPAND,
+                                   border=Numbers.widget_border_size)
         self._main_vertical_sizer.Add(self._horizontal_sizer, 1, flag=wx.EXPAND)
         self._main_vertical_sizer.Add(self._button_sizer, 0, flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM,
                                       border=Numbers.widget_border_size)
@@ -104,6 +151,8 @@ class AddLogoDialog(wx.Dialog):
         self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._cancel_button)
         self.Bind(wx.EVT_BUTTON, self._handle_buttons, self._browse_button)
         self.Bind(wx.EVT_TEXT, self._switch_default_button, self._field_image_name)
+        self.Bind(wx.EVT_SPINCTRL, self._spinner_handler, self._border_spinner)
+        self.Bind(wx.EVT_SPINCTRL, self._spinner_handler, self._threshold_spinner)
 
     # noinspection PyUnusedLocal
     def _switch_default_button(self, event: wx.CommandEvent) -> None:
@@ -140,10 +189,12 @@ class AddLogoDialog(wx.Dialog):
             self._save_button.Disable()
             self._image_path, self._image_name = self._ask_for_image()
             if self._image_path and self._image_name:
-                self._load_image()
-                self._field_image_name.SetFocus()
-            if self._menu_image:
-                self._save_button.Enable()
+                self._original_image_file = None
+                self._border_spinner.SetValue(Numbers.border_default)
+                self._threshold_spinner.SetValue(Numbers.threshold_default)
+                if self._load_image():
+                    self._field_image_name.SetFocus()
+                    self._save_button.Enable()
         elif event.GetId() == wx.ID_OK and self._save_button.IsEnabled():
             if self._save():
                 event.Skip()
@@ -188,31 +239,165 @@ class AddLogoDialog(wx.Dialog):
         # Exceptions from here are caught automatically
         return True
 
-    def _load_image(self) -> None:
+    # noinspection PyUnusedLocal
+    def _spinner_handler(self, event: wx.CommandEvent) -> None:
         """
-        Load and display the image and prepare a logo from it.
+        Update images when the user changes settings.
+        :param event: Not used
         :return: None
         """
+        self._save_button.Disable()
+        if self._image_path and self._image_name:
+            if self._load_image():
+                self._field_image_name.SetFocus()
+                self._save_button.Enable()
+
+    def _load_image(self) -> bool:
+        """
+        Load and display the image and prepare a logo from it.
+        :return: True if successful.
+        """
         # Create the base image for resizing.
-        self._menu_image = wx.Image(self._image_path, wx.BITMAP_TYPE_ANY)
-        # Check image is a square
-        if self._menu_image.GetWidth() != self._menu_image.GetHeight():
-            wx.MessageBox(Strings.warning_not_square, Strings.status_error, wx.OK | wx.ICON_ERROR)
-            self._save_button.Disable()
-            return
+        try:
+            preview_image, self._menu_image, selection = self.process_image(self._image_path,
+                                                                            self._threshold_spinner.GetValue(),
+                                                                            self._border_spinner.GetValue())
+        except LogoException as _:
+            self._logo_bitmap.SetBitmap(wx.Bitmap(wx.Image(Fetch.get_resource_path('menu_image_missing.png'),
+                                                  wx.BITMAP_TYPE_PNG)))
+            self._preview_bitmap.SetBitmap(wx.Bitmap(wx.Image(Fetch.get_resource_path('preview_missing.png'),
+                                                     wx.BITMAP_TYPE_PNG)))
+            self._content_image_selection_size.SetLabelText(Strings.label_none)
+            self._content_image_size.SetLabelText(Strings.label_none)
+            return False
 
         self._content_image_original_path.SetLabelText(self._image_path)
         image_name: str = os.path.splitext(self._image_name)[0]
-        self._field_image_name.SetValue(f'{Strings.label_logo}{image_name.capitalize()}')
+        if self._article_name:
+            self._field_image_name.SetValue(f'{Strings.label_logo}{self._article_name.capitalize()}')
+        else:
+            self._field_image_name.SetValue(f'{Strings.label_logo}{image_name.capitalize()}')
         self._field_image_name.Enable()
 
-        if self._menu_image.GetSize() != (Numbers.menu_logo_image_size, Numbers.menu_logo_image_size):
-            self._menu_image.Rescale(Numbers.menu_logo_image_size, Numbers.menu_logo_image_size, wx.IMAGE_QUALITY_HIGH)
-
-        self._content_image_size.SetLabelText(f'{self._menu_image.GetWidth()} x {self._menu_image.GetHeight()} px')
+        self._content_image_size.SetLabelText(f'{self._original_image_file.GetWidth()} x '
+                                              f'{self._original_image_file.GetHeight()} px')
+        self._content_image_selection_size.SetLabelText(f'{selection[0]} x {selection[1]} px')
         # Show the image.
-        self._bitmap.SetBitmap(wx.Bitmap(self._menu_image))
+        self._logo_bitmap.SetBitmap(wx.Bitmap(self._menu_image))
+        if preview_image.GetWidth() > Numbers.main_image_width or preview_image.GetHeight() > Numbers.main_image_height:
+            self._inplace_rescale(preview_image, Numbers.main_image_width, Numbers.main_image_height, 0)
+        # Place the scaled image into the middle of the final correctly sized image with white background.
+        self._inplace_bordered_resize(preview_image, Numbers.main_image_width, Numbers.main_image_height)
+        self._preview_bitmap.SetBitmap(wx.Bitmap(preview_image))
         self.Layout()
+        return True
+
+    def process_image(self, img_path: str, limit: int, border: int) -> (wx.Image, wx.Image, (int, int)):
+        """
+        Search for the image based on red color threshold from the set direction. Then cut the image out and prepare
+        the menu logo image of correct size.
+        :param img_path: Path to an image.
+        :param limit: The red color threshold where we consider the image to be useful.
+        :param border: How many white pixels to put around the image.
+        :return: 2 images - preview and finished logo and the size of the selected area.
+        :raises LogoException: If no image is found in the input image or the found image is too small.
+        """
+        if not self._original_image_file:
+            self._original_image_file = wx.Image(img_path, type=wx.BITMAP_TYPE_JPEG)
+            self._original_image_file = self._original_image_file.ConvertToGreyscale()
+            if self._original_image_file.GetWidth() > Numbers.logo_input_size_limit or \
+                    self._original_image_file.GetHeight() > Numbers.logo_input_size_limit:
+                # Rescale it down to if too large to be handled without lag.
+                self._inplace_rescale(self._original_image_file, Numbers.logo_input_size_limit,
+                                      Numbers.logo_input_size_limit, 0)
+            if self._original_image_file.GetWidth() == Numbers.menu_logo_image_size and \
+                    self._original_image_file.GetHeight() == Numbers.menu_logo_image_size:
+                # We presume the image is supposed to be used as a logo as is.
+                return wx.Image(Fetch.get_resource_path('preview_noconvert.png'), wx.BITMAP_TYPE_PNG), \
+                       self._original_image_file, (0, 0)
+
+        image: wx.Image = self._original_image_file.Copy()
+        # Top will be set only once on the first matching pixel.
+        top = None
+        # Bottom is the last matching pixel.
+        bottom = None
+        # Left will be gradually adjusted to the leftmost smallest x coordinate.
+        left = (image.GetWidth(), 0)
+        # Right will be gradually adjusted to the rightmost highest x coordinate.
+        right = (0, 0)
+        for y in range(0, image.GetHeight() - 1):
+            for x in range(0, image.GetWidth() - 1):
+                color = image.GetRed(x, y)
+                # A shade of gray that we consider gray enough to count as the image we want.
+                if color < limit:
+                    if not top:
+                        top = (x, y)
+                    if x < left[0]:
+                        left = (x, y)
+                    if x > right[0]:
+                        right = (x, y)
+                    else:
+                        bottom = (x, y)
+                elif color != 255:
+                    # Repaint all lighter colors with white if they need to be
+                    image.SetRGB(x, y, 255, 255, 255)
+
+        if top is None or bottom is None:
+            raise LogoException(Strings.warning_no_image)
+
+        top_left = (left[0], top[1])
+        bottom_right = (right[0], bottom[1])
+
+        # Draw a bounding box around the selected area into the preview.
+        preview: wx.Image = image.Copy()
+        for y in range(0, preview.GetHeight() - 1):
+            for x in range(0, preview.GetWidth() - 1):
+                if x == top_left[0] or x == bottom_right[0]\
+                        or y == top_left[1] or y == bottom_right[1]:
+                    preview.SetRGB(x, y, 255, 0, 0)
+        # Get only the selected part of the image.
+        crop: wx.Image = image.GetSubImage(wx.Rect(wx.Point(top_left), wx.Point(bottom_right)))
+        crop_size = crop.GetSize()
+        if crop.GetWidth() < Numbers.menu_logo_image_size or crop.GetHeight() < Numbers.menu_logo_image_size:
+            raise LogoException(Strings.warning_image_small)
+        # Rescale it to fit into the logo size - border and respect aspect ratio.
+        self._inplace_rescale(crop, Numbers.menu_logo_image_size, Numbers.menu_logo_image_size, border)
+        self._inplace_bordered_resize(crop, Numbers.menu_logo_image_size, Numbers.menu_logo_image_size)
+        return preview, crop, (crop_size[0], crop_size[1])
+
+    @staticmethod
+    def _inplace_rescale(image: wx.Image, target_width: int, target_height: int, border: int) -> None:
+        """
+        Rescale image in place to fit into a defined size. The image will retain original aspect ratio.
+        :param image: Image to rescale
+        :param target_width: Width of the new image.
+        :param target_height: Height of the new image.
+        :param border: Leave space for a border.
+        :return: None
+        """
+        width_scale = target_width / image.GetWidth()
+        height_scale = target_height / image.GetHeight()
+        bounded_scale = min(width_scale, height_scale)
+        width = int(image.GetWidth() * bounded_scale) - border
+        height = int(image.GetHeight() * bounded_scale) - border
+        width = width if width > 0 else 1
+        height = height if height > 0 else 1
+        image.Rescale(width, height, quality=wx.IMAGE_QUALITY_HIGH)
+
+    @staticmethod
+    def _inplace_bordered_resize(image: wx.Image, target_width: int, target_height: int) -> None:
+        """
+        Place the image into the center of a larger size image with white border or shrink the image if it is larger.
+        :param image: Image to resize.
+        :param target_width: Width of the new image.
+        :param target_height: Height of the new image.
+        :return:
+        """
+        size = (target_width, target_height)
+        # Place the small image into the middle of the final correctly sized image with white background.
+        x_center = int((target_width - image.GetWidth()) / 2)
+        y_center = int((target_height - image.GetHeight()) / 2)
+        image.Resize(size, (x_center, y_center), 255, 255, 255)
 
     def get_logo_location(self) -> (str, str):
         """

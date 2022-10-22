@@ -1590,7 +1590,7 @@ class MainFrame(wx.Frame):
         :param event: Not used
         :return: None
         """
-        dlg = AddLogoDialog(self, self._current_document_instance.get_working_directory())
+        dlg = AddLogoDialog(self, self._current_document_instance.get_working_directory(), '')
         dlg.ShowModal()
         dlg.Destroy()
 

@@ -46,6 +46,11 @@ class Numbers:
     photo_ratio: float = 4 / 3
     photo_ratio_tolerance: float = 0.01
 
+    border_max: int = 90
+    border_default: int = 6
+    threshold_max: int = 255
+    threshold_default: int = 159
+    logo_input_size_limit: int = 250
     image_quality: int = 95
     min_keywords: int = 3
     minimal_window_size_width: int = 1200
@@ -67,8 +72,8 @@ class Numbers:
     edit_menu_item_dialog_height: int = 315
     add_image_dialog_width: int = 1000
     add_image_dialog_height: int = 360
-    add_logo_dialog_width: int = 500
-    add_logo_dialog_height: int = 235
+    add_logo_dialog_width: int = 760
+    add_logo_dialog_height: int = 361
     page_setup_dialog_width: int = 900
     page_setup_dialog_height: int = 860
     new_file_dialog_width: int = 600
@@ -300,6 +305,8 @@ class Strings:
     warning_index: str = 'Index page (Page setup)'
     warning_file_missing: str = 'File not found:'
     warning_optimization_fail: str = 'Image optimization failed:'
+    warning_image_small: str = 'Image too small'
+    warning_no_image: str = 'No logo found inside the image'
 
     label_menu_file: str = 'File'
     label_menu_file_recent: str = 'Open recent directory'
@@ -487,6 +494,9 @@ class Strings:
     label_spelling_language: str = 'Spelling language'
     label_restart_required: str = 'Restart editor to apply changes'
     label_delete_images: str = 'Delete images:'
+    label_border: str = 'Border:'
+    label_threshold: str = 'Limit:'
+    label_selection_size: str = 'Crop:'
 
     status_loading: str = 'Loading and testing...'
     status_ready: str = 'Ready'
