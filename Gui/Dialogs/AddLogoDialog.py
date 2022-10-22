@@ -19,8 +19,6 @@ class AddLogoDialog(wx.Dialog):
         :param work_dir: The working directory of the editor.
         :param article_name: Name used to create the logo filename. If empty, image file name is used.
         """
-        # TODO refuse too large images 500x500?
-        # TODO try big, small, completely white, tall, short images
         wx.Dialog.__init__(self, parent, title=Strings.label_dialog_add_logo,
                            size=(Numbers.add_logo_dialog_width, Numbers.add_logo_dialog_height),
                            style=wx.DEFAULT_DIALOG_STYLE)
