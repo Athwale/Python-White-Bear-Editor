@@ -50,6 +50,7 @@ class Numbers:
     border_default: int = 6
     threshold_max: int = 255
     threshold_default: int = 159
+    logo_input_size_limit: int = 250
     image_quality: int = 95
     min_keywords: int = 3
     minimal_window_size_width: int = 1200

@@ -247,7 +247,6 @@ class AddLogoDialog(wx.Dialog):
         :param event: Not used
         :return: None
         """
-        # TODO slow on larger images, typical photo 800x800 implicitly rescale to 300px?
         self._save_button.Disable()
         if self._image_path and self._image_name:
             if self._load_image():
@@ -259,6 +258,7 @@ class AddLogoDialog(wx.Dialog):
         Load and display the image and prepare a logo from it.
         :return: True if successful.
         """
+        # TODO save not disable on load of invalid image
         # Create the base image for resizing.
         try:
             preview_image, self._menu_image, selection = self.process_image(self._image_path,
@@ -307,15 +307,18 @@ class AddLogoDialog(wx.Dialog):
         if not self._original_image_file:
             self._original_image_file = wx.Image(img_path, type=wx.BITMAP_TYPE_JPEG)
             self._original_image_file = self._original_image_file.ConvertToGreyscale()
-            # TODO Scale it down to 280px if too large.
-
+            if self._original_image_file.GetWidth() > Numbers.logo_input_size_limit or \
+                    self._original_image_file.GetHeight() > Numbers.logo_input_size_limit:
+                # Rescale it down to if too large to be handled without lag.
+                self._inplace_rescale(self._original_image_file, Numbers.logo_input_size_limit,
+                                      Numbers.logo_input_size_limit, 0)
             if self._original_image_file.GetWidth() == Numbers.menu_logo_image_size and \
                     self._original_image_file.GetHeight() == Numbers.menu_logo_image_size:
                 # We presume the image is supposed to be used as a logo as is.
                 return wx.Image(Fetch.get_resource_path('preview_noconvert.png'), wx.BITMAP_TYPE_PNG), \
                        self._original_image_file, (0, 0)
 
-        image = self._original_image_file.Copy()
+        image: wx.Image = self._original_image_file.Copy()
         # Top will be set only once on the first matching pixel.
         top = None
         # Bottom is the last matching pixel.
