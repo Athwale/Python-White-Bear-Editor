@@ -192,10 +192,9 @@ class AddLogoDialog(wx.Dialog):
                 self._original_image_file = None
                 self._border_spinner.SetValue(Numbers.border_default)
                 self._threshold_spinner.SetValue(Numbers.threshold_default)
-                self._load_image()
-                self._field_image_name.SetFocus()
-            if self._menu_image:
-                self._save_button.Enable()
+                if self._load_image():
+                    self._field_image_name.SetFocus()
+                    self._save_button.Enable()
         elif event.GetId() == wx.ID_OK and self._save_button.IsEnabled():
             if self._save():
                 event.Skip()
@@ -258,7 +257,6 @@ class AddLogoDialog(wx.Dialog):
         Load and display the image and prepare a logo from it.
         :return: True if successful.
         """
-        # TODO save not disable on load of invalid image
         # Create the base image for resizing.
         try:
             preview_image, self._menu_image, selection = self.process_image(self._image_path,
