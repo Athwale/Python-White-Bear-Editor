@@ -283,7 +283,7 @@ class AddLogoDialog(wx.Dialog):
         # Show the image.
         self._logo_bitmap.SetBitmap(wx.Bitmap(self._menu_image))
         if preview_image.GetWidth() > Numbers.main_image_width or preview_image.GetHeight() > Numbers.main_image_height:
-            self._inplace_rescale(preview_image, Numbers.main_image_width, Numbers.main_image_height, 0)
+            Tools.inplace_rescale(preview_image, Numbers.main_image_width, Numbers.main_image_height, 0)
         # Place the scaled image into the middle of the final correctly sized image with white background.
         self._inplace_bordered_resize(preview_image, Numbers.main_image_width, Numbers.main_image_height)
         self._preview_bitmap.SetBitmap(wx.Bitmap(preview_image))
@@ -306,7 +306,7 @@ class AddLogoDialog(wx.Dialog):
             if self._original_image_file.GetWidth() > Numbers.logo_input_size_limit or \
                     self._original_image_file.GetHeight() > Numbers.logo_input_size_limit:
                 # Rescale it down to if too large to be handled without lag.
-                self._inplace_rescale(self._original_image_file, Numbers.logo_input_size_limit,
+                Tools.inplace_rescale(self._original_image_file, Numbers.logo_input_size_limit,
                                       Numbers.logo_input_size_limit, 0)
             if self._original_image_file.GetWidth() == Numbers.menu_logo_image_size and \
                     self._original_image_file.GetHeight() == Numbers.menu_logo_image_size:
@@ -359,28 +359,9 @@ class AddLogoDialog(wx.Dialog):
         if crop.GetWidth() < Numbers.menu_logo_image_size or crop.GetHeight() < Numbers.menu_logo_image_size:
             raise LogoException(Strings.warning_image_small)
         # Rescale it to fit into the logo size - border and respect aspect ratio.
-        self._inplace_rescale(crop, Numbers.menu_logo_image_size, Numbers.menu_logo_image_size, border)
+        Tools.inplace_rescale(crop, Numbers.menu_logo_image_size, Numbers.menu_logo_image_size, border)
         self._inplace_bordered_resize(crop, Numbers.menu_logo_image_size, Numbers.menu_logo_image_size)
         return preview, crop, (crop_size[0], crop_size[1])
-
-    @staticmethod
-    def _inplace_rescale(image: wx.Image, target_width: int, target_height: int, border: int) -> None:
-        """
-        Rescale image in place to fit into a defined size. The image will retain original aspect ratio.
-        :param image: Image to rescale
-        :param target_width: Width of the new image.
-        :param target_height: Height of the new image.
-        :param border: Leave space for a border.
-        :return: None
-        """
-        width_scale = target_width / image.GetWidth()
-        height_scale = target_height / image.GetHeight()
-        bounded_scale = min(width_scale, height_scale)
-        width = int(image.GetWidth() * bounded_scale) - border
-        height = int(image.GetHeight() * bounded_scale) - border
-        width = width if width > 0 else 1
-        height = height if height > 0 else 1
-        image.Rescale(width, height, quality=wx.IMAGE_QUALITY_HIGH)
 
     @staticmethod
     def _inplace_bordered_resize(image: wx.Image, target_width: int, target_height: int) -> None:

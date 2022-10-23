@@ -272,7 +272,7 @@ class AddImageDialog(wx.Dialog):
             self._radio_aside.SetValue(True)
             self._label_warning.Show(False)
         if self._full_image.GetWidth() > Numbers.original_image_max_width:
-            # Resize the original image to 50% if too big.
+            # Resize the original image to 50% if too big. Conserves space on server.
             self._full_image.Rescale(self._full_image.GetWidth() / 2, self._full_image.GetHeight() / 2,
                                      wx.IMAGE_QUALITY_HIGH)
         # Display the originals image width
@@ -300,12 +300,10 @@ class AddImageDialog(wx.Dialog):
                                                         f' px')
         self._bitmap.SetBitmap(wx.Bitmap(self._thumbnail))
         height = self._thumbnail.GetHeight()
-        if height < Numbers.main_image_height:
-            height = Numbers.main_image_height + 20
-        elif height == Numbers.main_image_height:
-            height = Numbers.main_image_height + 120
+        if height == Numbers.main_image_height:
+            height = Numbers.main_image_height + 135
         else:
-            height += 120
+            height += 135
         self.SetSize(Numbers.add_image_dialog_width, height)
         self.Layout()
 

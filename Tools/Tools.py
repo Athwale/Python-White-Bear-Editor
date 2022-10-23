@@ -103,3 +103,22 @@ class Tools:
         """
         img = Image.open(img_path)
         img.save(img_path, optimize=True, quality=Numbers.image_quality)
+
+    @staticmethod
+    def inplace_rescale(image: wx.Image, target_width: int, target_height: int, border: int) -> None:
+        """
+        Rescale image in place to fit into a defined size. The image will retain original aspect ratio.
+        :param image: Image to rescale
+        :param target_width: Width of the new image.
+        :param target_height: Height of the new image.
+        :param border: Leave space for a border.
+        :return: None
+        """
+        width_scale = target_width / image.GetWidth()
+        height_scale = target_height / image.GetHeight()
+        bounded_scale = min(width_scale, height_scale)
+        width = int(image.GetWidth() * bounded_scale) - border
+        height = int(image.GetHeight() * bounded_scale) - border
+        width = width if width > 0 else 1
+        height = height if height > 0 else 1
+        image.Rescale(width, height, quality=wx.IMAGE_QUALITY_HIGH)
