@@ -183,6 +183,7 @@ class Strings:
     article: str = 'article'
     menu: str = 'menu'
     index: str = 'index'
+    birds: str = 'files/ptaci'
     file: str = 'File'
     robots_file: str = 'robots.txt'
     css_file: str = 'styles.css'

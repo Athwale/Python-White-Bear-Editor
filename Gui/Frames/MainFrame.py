@@ -997,7 +997,7 @@ class MainFrame(wx.Frame):
         :param disable: Leave the editor disabled after threads finish.
         :return: None
         """
-        pages = [Strings.index + Strings.extension_html]
+        pages = [Strings.index + Strings.extension_html, Strings.birds + Strings.extension_html]
         pages.extend(list(self._articles))
         pages.extend(list(self._menus))
         sitemap_thread = SitemapThread(self, pages, self._config_manager.get_working_dir(), disable)

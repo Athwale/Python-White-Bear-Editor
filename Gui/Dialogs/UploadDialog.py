@@ -587,7 +587,6 @@ class UploadDialog(wx.Dialog):
 
         if self._upload_dict or (self._index.is_saved() and self._index.is_modified() and
                                  self._index.get_html_to_save()):
-            # TODO what if index changes and the editor is closed
             # If any files were changed, add index, robots and sitemap.
             # This must be done here, the setup dialog may not have a physical index file on disk yet.
             self._index.update_content()

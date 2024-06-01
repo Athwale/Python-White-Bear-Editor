@@ -9,6 +9,7 @@ OnInit must be overridden here.
 
 # TODO richtext control does not yet support red waved underline, change underline once available.
 # TODO look at cookies from whitebear using requests headers, beware of redirect, set cookie warning if we use them?
+# TODO fix status display.
 """
 
 import wx
