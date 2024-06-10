@@ -10,16 +10,18 @@ White-bear website editor written in Python 3.
 ### Goals:
 
 - Generate fast static html5 pages from easily written text.
+- Generate robots.txt and sitemap.xml.
 - CSS3 Styles separated from content.
-- Easy page deployment on a simple http server, pages are simple static html.
+- Easy page deployment onto server with one button.
 - Automatically generate index page.
 - Automatically generate menu pages.
 - Check common SEO issues.
 - Use HTML structure set by the original handwritten white-bear pages.
-- Simplify adding/converting various types of text and side images.
+- Simplify adding/converting various types of text and side images and article icons.
 - Simplify article logo management.
 - Validate pages against xsd templates.
 - Include SFTP client for fast page upload.
+- Spell check all texts and perform rule check on all website parts.
 
 #### Fedora development/run requirements:
 
