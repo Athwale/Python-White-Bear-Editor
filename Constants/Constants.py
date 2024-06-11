@@ -96,8 +96,8 @@ class Numbers:
     splashscreen_dialog_size: (int, int) = (350, 350)
     spellcheck_dialog_width: int = 500
     spellcheck_dialog_height: int = 357
-    spellcheck_setup_dialog_width: int = 570
-    spellcheck_setup_dialog_height: int = 257
+    spellcheck_setup_dialog_width: int = 460
+    spellcheck_setup_dialog_height: int = 210
 
     # Styling
     main_heading_size = 18

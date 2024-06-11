@@ -66,7 +66,7 @@ class UploadDialog(wx.Dialog):
         self._label_ip_port = wx.StaticText(self, -1, f'{Strings.label_ip_port}: ')
         self._field_ip_port = wx.TextCtrl(self, -1)
         self._ip_sub_sizer.Add(self._label_ip_port, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
-        self._ip_sub_sizer.Add(4, -1)
+        self._ip_sub_sizer.Add(3, -1)
         self._ip_sub_sizer.Add(self._field_ip_port, proportion=1)
         self._config_sizer.Add(self._ip_sub_sizer, flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT,
                                border=Numbers.widget_border_size)
@@ -78,7 +78,7 @@ class UploadDialog(wx.Dialog):
         self._label_user = wx.StaticText(self, -1, f'{Strings.label_user}: ')
         self._field_user = wx.TextCtrl(self, -1)
         self._user_sub_sizer.Add(self._label_user, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
-        self._user_sub_sizer.Add(17, -1)
+        self._user_sub_sizer.Add(13, -1)
         self._user_sub_sizer.Add(self._field_user, proportion=1)
         self._config_sizer.Add(self._user_sub_sizer, flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT,
                                border=Numbers.widget_border_size)
