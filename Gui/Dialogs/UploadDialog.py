@@ -2,6 +2,7 @@ import os
 import stat
 from typing import Dict, List, Tuple
 
+import pendulum
 import wx
 
 from Constants.Constants import Strings, Numbers
@@ -357,6 +358,8 @@ class UploadDialog(wx.Dialog):
         self._content_successful.SetLabelText(str(counter_green))
         self._content_failed.SetLabelText(str(counter_red))
         self._upload_gauge.SetValue(counter_green)
+        if counter_red == 0:
+            self._config_manager.store_last_upload_date(pendulum.now().to_time_string())
 
     def on_percentage_update(self, percentage: float) -> None:
         """
@@ -603,6 +606,14 @@ class UploadDialog(wx.Dialog):
 
         for item_id, (file, seo_status) in sorted(self._upload_dict.items()):
             self._append_into_list(item_id, file, enabled=seo_status)
+
+        # TODO detect changed files based on date of last upload
+        last_upload = self._config_manager.get_last_upload_date()
+        if last_upload:
+            print(last_upload)
+        else:
+            # TODO save upload date is successful
+            print('no last upload date')
 
         # Fill SFTP config
         self._field_ip_port.SetValue(self._config_manager.get_ip_port())

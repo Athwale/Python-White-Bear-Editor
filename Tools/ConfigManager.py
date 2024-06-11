@@ -22,6 +22,7 @@ class ConfigManager:
     CONF_POSITION: str = 'pos'
     CONF_SIZE: str = 'size'
     CONF_LANG: str = 'spellLang'
+    CONF_LAST_UPLOAD: str = 'lastUpload'
 
     CONF_GLOBAL_TITLE: str = 'title'
     CONF_AUTHOR: str = 'author'
@@ -83,6 +84,7 @@ class ConfigManager:
                 self.CONF_IP: '',
                 self.CONF_USER: '',
                 self.CONF_KEYFILE: '',
+                self.CONF_LAST_UPLOAD: '',
                 self.CONF_ONLINE_TEST: '1',
                 self.CONF_SPELLCHECK_TEST: '1',
                 self.CONF_LANG: enchant.get_default_language(),
@@ -141,7 +143,6 @@ class ConfigManager:
                 # These values are necessary.
                 correct = False
                 self._dir_conf[name] = ''
-
         return correct
 
     def set_active_dir(self, path: str) -> bool:
@@ -387,7 +388,25 @@ class ConfigManager:
             return [p for p in self._whole_conf.keys() if p.startswith('/')]
         return []
 
+    def get_last_upload_date(self) -> str:
+        """
+        Get date of last upload.
+        :return: Date of last upload.
+        """
+        if self.CONF_LAST_UPLOAD not in self._dir_conf:
+            self._dir_conf[self.CONF_LAST_UPLOAD] = ''
+        return self._dir_conf[self.CONF_LAST_UPLOAD]
+
     # Setters ----------------------------------------------------------------------------------------------------------
+
+    def store_last_upload_date(self, date: str) -> None:
+        """
+        Save a last upload date
+        :param date: New last upload date.
+        :return: None
+        """
+        self._dir_conf[self.CONF_LAST_UPLOAD] = date
+        self.save_config_file()
 
     def store_spelling_language(self, lang: str) -> None:
         """
