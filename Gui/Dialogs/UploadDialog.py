@@ -7,6 +7,7 @@ import wx
 
 from Constants.Constants import Strings, Numbers
 from Resources.Fetch import Fetch
+from pathlib import Path
 from Threads.OptimizerThread import OptimizerThread
 from Threads.SftpThread import SftpThread
 from Tools.ConfigManager import ConfigManager
@@ -359,7 +360,7 @@ class UploadDialog(wx.Dialog):
         self._content_failed.SetLabelText(str(counter_red))
         self._upload_gauge.SetValue(counter_green)
         if counter_red == 0:
-            self._config_manager.store_last_upload_date(pendulum.now().to_time_string())
+            self._config_manager.store_last_upload_date(pendulum.now().to_datetime_string())
 
     def on_percentage_update(self, percentage: float) -> None:
         """
@@ -604,16 +605,14 @@ class UploadDialog(wx.Dialog):
             self._add_if_not_in(os.path.join(self._config_manager.get_working_dir(), Strings.robots_file), True)
             self._add_if_not_in(os.path.join(self._config_manager.get_working_dir(), Strings.sitemap_file), True)
 
-        for item_id, (file, seo_status) in sorted(self._upload_dict.items()):
-            self._append_into_list(item_id, file, enabled=seo_status)
-
-        # TODO detect changed files based on date of last upload
         last_upload = self._config_manager.get_last_upload_date()
         if last_upload:
-            print(last_upload)
-        else:
-            # TODO save upload date is successful
-            print('no last upload date')
+            for f in Path.cwd().rglob("*"):
+                if pendulum.from_timestamp(f.lstat().st_mtime).to_datetime_string() > last_upload:
+                    self._add_if_not_in(str(f), True)
+
+        for item_id, (file, seo_status) in sorted(self._upload_dict.items()):
+            self._append_into_list(item_id, file, enabled=seo_status)
 
         # Fill SFTP config
         self._field_ip_port.SetValue(self._config_manager.get_ip_port())
