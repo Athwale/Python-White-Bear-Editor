@@ -219,8 +219,8 @@ class CustomRichText(rt.RichTextCtrl):
         stl_heading_4.SetFontSize(Numbers.heading_4_size)
         stl_heading_4.SetAlignment(wx.TEXT_ALIGNMENT_LEFT)
         stl_heading_4.SetFontWeight(wx.FONTWEIGHT_BOLD)
-        stl_heading_4.SetParagraphSpacingBefore(Numbers.paragraph_spacing / 2)
-        stl_heading_4.SetParagraphSpacingAfter(Numbers.paragraph_spacing / 2)
+        stl_heading_4.SetParagraphSpacingBefore(int(Numbers.paragraph_spacing / 2))
+        stl_heading_4.SetParagraphSpacingAfter(int(Numbers.paragraph_spacing / 2))
         stl_heading_4.SetParagraphStyleName(Strings.style_heading_4)
         stl_heading_4.SetFontFaceName(Strings.style_heading_4)
         # Debug
