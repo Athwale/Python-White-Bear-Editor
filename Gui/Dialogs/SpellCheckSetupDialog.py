@@ -23,7 +23,6 @@ class SpellCheckSetupDialog(wx.Dialog):
         """
         # Gnome shell requires hunspell which can not be uninstalled.
         wx.Dialog.__init__(self, parent, title=Strings.label_dialog_spellcheck_setup,
-                           size=(Numbers.spellcheck_setup_dialog_width, Numbers.spellcheck_setup_dialog_height),
                            style=wx.DEFAULT_DIALOG_STYLE)
         self._config_manager: ConfigManager = ConfigManager.get_instance()
         self._checker = SpellCheckerWithIgnoreList(self._config_manager.get_spelling_lang())
@@ -108,6 +107,7 @@ class SpellCheckSetupDialog(wx.Dialog):
         self._main_vertical_sizer.Add(self._button_sizer, 0, flag=wx.EXPAND | wx.LEFT | wx.RIGHT | wx.BOTTOM | wx.TOP,
                                       border=Numbers.widget_border_size)
         self.SetSizer(self._main_vertical_sizer)
+        self.Fit()
         self._display_dialog_contents()
 
         # Bind handlers

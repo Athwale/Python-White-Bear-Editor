@@ -37,7 +37,6 @@ class EditDefaultValuesDialog(SpellCheckedDialog):
         self._label_main_title = wx.StaticText(self, -1, f'{Strings.label_global_title}: ')
         self._field_global_title = wx.TextCtrl(self, -1)
         self._title_sub_sizer.Add(self._label_main_title, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
-        self._title_sub_sizer.Add((2, -1))
         self._title_sub_sizer.Add(self._field_global_title, proportion=1)
         self._information_sizer.Add(self._title_sub_sizer, flag=wx.EXPAND | wx.TOP, border=Numbers.widget_border_size)
         self._field_global_title_tip = Tools.get_warning_tip(self._field_global_title, Strings.label_global_title)
@@ -48,7 +47,6 @@ class EditDefaultValuesDialog(SpellCheckedDialog):
         self._label_url = wx.StaticText(self, -1, f'{Strings.label_website_url}: ')
         self._field_url = wx.TextCtrl(self, -1)
         self._url_sub_sizer.Add(self._label_url, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
-        self._url_sub_sizer.Add((37, -1))
         self._url_sub_sizer.Add(self._field_url, proportion=1)
         self._information_sizer.Add(self._url_sub_sizer, flag=wx.EXPAND | wx.TOP, border=Numbers.widget_border_size)
         self._field_url_tip = Tools.get_warning_tip(self._field_url, Strings.label_website_url)
@@ -62,12 +60,11 @@ class EditDefaultValuesDialog(SpellCheckedDialog):
         self._news_spinner = wx.SpinCtrl(self, -1, style=wx.SP_ARROW_KEYS, min=Numbers.min_news, max=Numbers.max_news,
                                          initial=Numbers.default_news)
         self._author_sub_sizer.Add(self._label_author, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
-        self._author_sub_sizer.Add((16, -1))
         self._author_sub_sizer.Add(self._field_author, proportion=1)
         self._author_sub_sizer.Add(Numbers.widget_border_size, Numbers.widget_border_size)
         self._author_sub_sizer.Add(self._label_news, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
         self._author_sub_sizer.Add(Numbers.widget_border_size, Numbers.widget_border_size)
-        self._author_sub_sizer.Add(self._news_spinner, proportion=0.3)
+        self._author_sub_sizer.Add(self._news_spinner, proportion=1)
         self._information_sizer.Add(self._author_sub_sizer, flag=wx.EXPAND | wx.TOP, border=Numbers.widget_border_size)
         self._field_author_tip = Tools.get_warning_tip(self._field_author, Strings.label_author)
         self._field_author_tip.SetMessage(Strings.label_author_tip)
@@ -77,7 +74,6 @@ class EditDefaultValuesDialog(SpellCheckedDialog):
         self._label_contact = wx.StaticText(self, -1, f'{Strings.label_contact}: ')
         self._field_contact = wx.TextCtrl(self, -1)
         self._contact_sub_sizer.Add(self._label_contact, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
-        self._contact_sub_sizer.Add((11, -1))
         self._contact_sub_sizer.Add(self._field_contact, proportion=1)
         self._information_sizer.Add(self._contact_sub_sizer, flag=wx.EXPAND | wx.TOP, border=Numbers.widget_border_size)
         self._field_contact_tip = Tools.get_warning_tip(self._field_contact, Strings.label_contact)
@@ -93,6 +89,13 @@ class EditDefaultValuesDialog(SpellCheckedDialog):
                                     border=Numbers.widget_border_size)
         self._field_keywords_tip = Tools.get_warning_tip(self._field_meta_keywords, Strings.label_article_keywords)
         self._field_keywords_tip.SetMessage(Strings.label_default_keywords_tip)
+
+        size = self._label_main_title.GetSize()
+        self._label_main_title.SetMinSize((size[0] + 3, size[1]))
+        self._label_url.SetMinSize((size[0] + 3, size[1]))
+        self._label_author.SetMinSize((size[0] + 3, size[1]))
+        self._label_contact.SetMinSize((size[0] + 3, size[1]))
+        self._label_meta_keywords.SetMinSize((size[0] + 3, size[1]))
 
         # --------------------------------------------------------------------------------------------------------------
         # Description sub sizer

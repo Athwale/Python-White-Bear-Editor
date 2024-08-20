@@ -8,7 +8,7 @@ from Gui.Panels.CustomRichText import CustomRichText
 class RichTextSpellCheckerDialog(SpellCheckerDialog):
     """
     Spellchecker dialog that works with a customized rich text control. It uses an external instance of
-    enchant spellchecker.
+    enchant spellchecker using hunspell.
     """
 
     def __init__(self, parent, text_area: CustomRichText) -> None:

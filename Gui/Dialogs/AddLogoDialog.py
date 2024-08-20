@@ -82,7 +82,6 @@ class AddLogoDialog(wx.Dialog):
         self._field_image_name = wx.TextCtrl(self, -1)
         self._field_image_name.Disable()
         self._name_sub_sizer.Add(self._label_image_name, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
-        self._name_sub_sizer.Add((5, -1))
         self._name_sub_sizer.Add(self._field_image_name, proportion=1)
         self._information_sizer.Add(self._name_sub_sizer, flag=wx.EXPAND | wx.TOP, border=Numbers.widget_border_size)
         self._field_image_name_tip = Tools.get_warning_tip(self._field_image_name, Strings.label_image_name)
@@ -93,7 +92,6 @@ class AddLogoDialog(wx.Dialog):
         self._label_border = wx.StaticText(self, -1, Strings.label_border)
         self._border_spinner = wx.SpinCtrl(self, -1, '', min=0, max=Numbers.border_max, initial=Numbers.border_default)
         self._border_sub_sizer.Add(self._label_border, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
-        self._border_sub_sizer.Add((3, -1))
         self._border_sub_sizer.Add(self._border_spinner, proportion=1)
         self._information_sizer.Add(self._border_sub_sizer, flag=wx.EXPAND | wx.TOP, border=Numbers.widget_border_size)
 
@@ -102,10 +100,14 @@ class AddLogoDialog(wx.Dialog):
         self._threshold_spinner = wx.SpinCtrl(self, -1, '', min=0, max=Numbers.threshold_max,
                                               initial=Numbers.threshold_default)
         self._threshold_sub_sizer.Add(self._label_threshold, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
-        self._threshold_sub_sizer.Add((15, -1))
         self._threshold_sub_sizer.Add(self._threshold_spinner, proportion=1)
         self._information_sizer.Add(self._threshold_sub_sizer, flag=wx.EXPAND | wx.TOP,
                                     border=Numbers.widget_border_size)
+
+        size = self._label_border.GetSize()
+        self._label_image_name.SetMinSize((size[0] + 3, size[1]))
+        self._label_threshold.SetMinSize((size[0] + 3, size[1]))
+        self._label_border.SetMinSize((size[0] + 3, size[1]))
 
         # Image preview
         self._image_sizer = wx.BoxSizer(wx.VERTICAL)

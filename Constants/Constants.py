@@ -58,7 +58,7 @@ class Numbers:
     initial_panel_size: int = 220
     minimal_panel_size: int = 150
     maximal_panel_size: int = 300
-    small_font_size: int = 9
+    small_font_size: int = 8
     widget_border_size: int = 3
     photo_column_width: int = 306
     edit_aside_image_dialog_width: int = 900
@@ -96,8 +96,6 @@ class Numbers:
     splashscreen_dialog_size: (int, int) = (350, 350)
     spellcheck_dialog_width: int = 500
     spellcheck_dialog_height: int = 357
-    spellcheck_setup_dialog_width: int = 460
-    spellcheck_setup_dialog_height: int = 210
 
     # Styling
     main_heading_size = 18
@@ -125,6 +123,7 @@ class Numbers:
     min_body_word_length: int = 250
     article_name_min_length: int = 3
     article_name_max_length: int = 255
+    logo_text_width: int = 35
     menu_name_min_length: int = 3
     menu_name_max_length: int = 31
     article_image_caption_min: int = 5
@@ -239,6 +238,7 @@ class Strings:
                                  f'{Numbers.article_name_max_length} characters long'
     seo_error_menu_name_length: str = f'Length must be: {Numbers.menu_name_min_length} - ' \
                                       f'{Numbers.menu_name_max_length} characters long'
+    seo_error_menu_name_width: str = f'Width in pixels must be less than {Numbers.logo_text_width}'
     seo_error_default_value: str = 'Default value can not be used'
     seo_error_date_format: str = 'Date format incorrect (example: 31. Ledna 2020)'
     seo_error_date_format_day: str = 'Date format incorrect, day must be: 1 - 31'

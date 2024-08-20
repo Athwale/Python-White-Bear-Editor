@@ -37,7 +37,6 @@ class EditLinkDialog(SpellCheckedDialog):
         self.Bind(wx.EVT_TEXT, self._combobox_handler, self._field_url)
 
         self._url_sub_sizer.Add(self._label_url, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
-        self._url_sub_sizer.Add((35, -1))
         self._url_sub_sizer.Add(self._field_url, proportion=1)
         self._information_sizer.Add(self._url_sub_sizer, flag=wx.EXPAND | wx.TOP, border=Numbers.widget_border_size)
         self._field_url_tip = Tools.get_warning_tip(self._field_url, Strings.label_url)
@@ -47,7 +46,6 @@ class EditLinkDialog(SpellCheckedDialog):
         self._label_link_title = wx.StaticText(self, -1, f'{Strings.label_link_title}: ')
         self._field_link_title = wx.TextCtrl(self, -1)
         self._title_sub_sizer.Add(self._label_link_title, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
-        self._title_sub_sizer.Add((8, -1))
         self._title_sub_sizer.Add(self._field_link_title, proportion=1)
         self._information_sizer.Add(self._title_sub_sizer, flag=wx.EXPAND | wx.TOP, border=Numbers.widget_border_size)
         self._field_link_title_tip = Tools.get_warning_tip(self._field_link_title, Strings.label_link_title)
@@ -57,10 +55,12 @@ class EditLinkDialog(SpellCheckedDialog):
         self._label_link_text = wx.StaticText(self, -1, f'{Strings.label_text}: ')
         self._field_link_text = wx.TextCtrl(self, -1)
         self._text_sub_sizer.Add(self._label_link_text, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
-        self._text_sub_sizer.Add((35, -1))
         self._text_sub_sizer.Add(self._field_link_text, proportion=1)
         self._information_sizer.Add(self._text_sub_sizer, flag=wx.EXPAND | wx.TOP, border=Numbers.widget_border_size)
         self._field_link_text_tip = Tools.get_warning_tip(self._field_link_text, Strings.label_text)
+
+        self._label_url.SetMinSize(self._label_link_title.GetSize())
+        self._label_link_text.SetMinSize(self._label_link_title.GetSize())
 
         # Target blank checkbox
         self._checkbox_target_blank = wx.CheckBox(self, -1, label=Strings.label_open_in_new_page)

@@ -62,7 +62,6 @@ class EditMenuItemDialog(SpellCheckedDialog):
         self._content_image_size = wx.StaticText(self, -1, Strings.label_none)
         self._image_size_sub_sizer.Add(self._label_image_size,
                                        flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
-        self._image_size_sub_sizer.Add((16, -1))
         self._image_size_sub_sizer.Add(self._content_image_size,
                                        flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
         self._information_sizer.Add(self._image_size_sub_sizer, flag=wx.EXPAND | wx.TOP,
@@ -73,7 +72,6 @@ class EditMenuItemDialog(SpellCheckedDialog):
         self._label_item_name = wx.StaticText(self, -1, f'{Strings.label_menu_name}: ')
         self._field_item_name = wx.TextCtrl(self, -1)
         self._name_sub_sizer.Add(self._label_item_name, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
-        self._name_sub_sizer.Add((18, -1))
         self._name_sub_sizer.Add(self._field_item_name, proportion=1)
         self._information_sizer.Add(self._name_sub_sizer, flag=wx.EXPAND | wx.TOP, border=Numbers.widget_border_size)
         self._field_item_name_tip = Tools.get_warning_tip(self._field_item_name,
@@ -84,7 +82,6 @@ class EditMenuItemDialog(SpellCheckedDialog):
         self._label_image_title = wx.StaticText(self, -1, f'{Strings.label_link_title}: ')
         self._field_image_link_title = wx.TextCtrl(self, Numbers.ID_IMAGE_LINK)
         self._title_sub_sizer.Add(self._label_image_title, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
-        self._title_sub_sizer.Add((39, -1))
         self._title_sub_sizer.Add(self._field_image_link_title, proportion=1)
         self._information_sizer.Add(self._title_sub_sizer, flag=wx.EXPAND | wx.TOP, border=Numbers.widget_border_size)
         self._field_image_link_title_tip = Tools.get_warning_tip(self._field_image_link_title,
@@ -95,10 +92,12 @@ class EditMenuItemDialog(SpellCheckedDialog):
         self._label_image_alt = wx.StaticText(self, -1, f'{Strings.label_alt_description}: ')
         self._field_image_alt = wx.TextCtrl(self, Numbers.ID_IMAGE_ALT)
         self._alt_sub_sizer.Add(self._label_image_alt, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
-        self._alt_sub_sizer.Add((5, -1))
         self._alt_sub_sizer.Add(self._field_image_alt, proportion=1)
         self._information_sizer.Add(self._alt_sub_sizer, flag=wx.EXPAND | wx.TOP, border=Numbers.widget_border_size)
         self._field_image_alt_tip = Tools.get_warning_tip(self._field_image_alt, Strings.label_article_image_alt)
+
+        self._label_item_name.SetMinSize(self._label_image_alt.GetSize())
+        self._label_image_title.SetMinSize(self._label_image_alt.GetSize())
 
         # Image preview
         self._image_sizer = wx.BoxSizer(wx.VERTICAL)
@@ -197,13 +196,16 @@ class EditMenuItemDialog(SpellCheckedDialog):
         self._content_item_name.SetLabelText(text)
         self._content_item_name.Wrap(Numbers.menu_logo_image_size)
         self._image_sizer.Layout()
-        if self._content_item_name.GetSize()[1] > 30 or len(
+        if self._content_item_name.GetSize()[1] > Numbers.logo_text_width or len(
                 self._field_item_name.GetValue()) < Numbers.menu_name_min_length:
             # The menu name would have 3 or 0 lines which we do not want
             self._ok_button.Disable()
             self._content_item_name.SetBackgroundColour(Numbers.RED_COLOR)
             self._field_item_name.SetBackgroundColour(Numbers.RED_COLOR)
-            self._field_item_name_tip.SetMessage(f'{Strings.seo_check}\n{Strings.seo_error_menu_name_length}')
+            if len(self._field_item_name.GetValue()) < Numbers.menu_name_min_length:
+                self._field_item_name_tip.SetMessage(f'{Strings.seo_check}\n{Strings.seo_error_menu_name_length}')
+            if self._content_item_name.GetSize()[1] > Numbers.logo_text_width:
+                self._field_item_name_tip.SetMessage(f'{Strings.seo_check}\n{Strings.seo_error_menu_name_width}')
             self._field_item_name_tip.EnableTip(True)
         else:
             self._content_item_name.SetBackgroundColour(wx.NullColour)

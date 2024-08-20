@@ -76,7 +76,6 @@ class AddImageDialog(wx.Dialog):
         self._field_image_name = wx.TextCtrl(self, -1)
         self._field_image_name.Disable()
         self._name_sub_sizer.Add(self._label_image_name, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
-        self._name_sub_sizer.Add((5, -1))
         self._name_sub_sizer.Add(self._field_image_name, proportion=1)
         self._information_sizer.Add(self._name_sub_sizer, flag=wx.EXPAND | wx.TOP, border=Numbers.widget_border_size)
         self._field_image_name_tip = Tools.get_warning_tip(self._field_image_name, Strings.label_image_name)

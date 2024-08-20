@@ -8,8 +8,8 @@ from Tools.SpellCheckerWithIgnoredList import SpellCheckerWithIgnoreList
 
 class SpellCheckerDialog(wx.Dialog):
     """
-    Spellchecker dialog that works with a string. It uses an external instance of enchant spellchecker.
-    To get the fixed string back use the checker instance passed into the dialog.
+    Spellchecker dialog that works with a string. It uses an external instance of enchant spellchecker using hunspell
+    dictionaries. To get the fixed string back use the checker instance passed into the dialog.
     """
 
     def __init__(self, parent, title, text: str) -> None:

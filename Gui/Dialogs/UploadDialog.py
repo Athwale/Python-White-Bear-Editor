@@ -68,7 +68,6 @@ class UploadDialog(wx.Dialog):
         self._label_ip_port = wx.StaticText(self, -1, f'{Strings.label_ip_port}: ')
         self._field_ip_port = wx.TextCtrl(self, -1)
         self._ip_sub_sizer.Add(self._label_ip_port, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
-        self._ip_sub_sizer.Add(3, -1)
         self._ip_sub_sizer.Add(self._field_ip_port, proportion=1)
         self._config_sizer.Add(self._ip_sub_sizer, flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT,
                                border=Numbers.widget_border_size)
@@ -80,7 +79,6 @@ class UploadDialog(wx.Dialog):
         self._label_user = wx.StaticText(self, -1, f'{Strings.label_user}: ')
         self._field_user = wx.TextCtrl(self, -1)
         self._user_sub_sizer.Add(self._label_user, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
-        self._user_sub_sizer.Add(13, -1)
         self._user_sub_sizer.Add(self._field_user, proportion=1)
         self._config_sizer.Add(self._user_sub_sizer, flag=wx.EXPAND | wx.TOP | wx.LEFT | wx.RIGHT,
                                border=Numbers.widget_border_size)
@@ -99,6 +97,9 @@ class UploadDialog(wx.Dialog):
                                border=Numbers.widget_border_size)
         self._field_keyfile_tip = Tools.get_warning_tip(self._field_keyfile, Strings.label_key_file)
         self._field_keyfile_tip.SetMessage(Strings.label_key_file_tip)
+
+        self._label_ip_port.SetMinSize(self._label_keyfile.GetSize())
+        self._label_user.SetMinSize(self._label_keyfile.GetSize())
 
         # Upload bar
         self._gauge_sizer = wx.BoxSizer(wx.VERTICAL)

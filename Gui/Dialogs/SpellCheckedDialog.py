@@ -10,7 +10,7 @@ class SpellCheckedDialog(wx.Dialog):
 
     def __init__(self, parent, title, size, style):
         """
-        Special dialog master class containing spellcheck function. This is used to inherit this functionality
+        Special dialog master class containing spellchecking function. This is used to inherit this functionality
         in all dialogs that need spellchecking.
         :param parent: Parent dialog.
         :param title: Dialog title.

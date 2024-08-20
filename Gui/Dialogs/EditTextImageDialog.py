@@ -1,6 +1,7 @@
 import os
 
 import wx
+from docutils.nodes import label
 
 from Constants.Constants import Strings, Numbers
 from Gui.Dialogs.AddImageDialog import AddImageDialog
@@ -82,7 +83,6 @@ class EditTextImageDialog(SpellCheckedDialog):
         self._label_image_title = wx.StaticText(self, -1, f'{Strings.label_link_title}: ')
         self._field_image_link_title = wx.TextCtrl(self, -1)
         self._title_sub_sizer.Add(self._label_image_title, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
-        self._title_sub_sizer.Add((39, -1))
         self._title_sub_sizer.Add(self._field_image_link_title, proportion=1)
         self._information_sizer.Add(self._title_sub_sizer, flag=wx.EXPAND | wx.TOP, border=Numbers.widget_border_size)
         self._field_image_link_title_tip = Tools.get_warning_tip(self._field_image_link_title,
@@ -93,10 +93,11 @@ class EditTextImageDialog(SpellCheckedDialog):
         self._label_image_alt = wx.StaticText(self, -1, f'{Strings.label_alt_description}: ')
         self._field_image_alt = wx.TextCtrl(self, Numbers.ID_IMAGE_ALT)
         self._alt_sub_sizer.Add(self._label_image_alt, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
-        self._alt_sub_sizer.Add((5, -1))
         self._alt_sub_sizer.Add(self._field_image_alt, proportion=1)
         self._information_sizer.Add(self._alt_sub_sizer, flag=wx.EXPAND | wx.TOP, border=Numbers.widget_border_size)
         self._field_image_alt_tip = Tools.get_warning_tip(self._field_image_alt, Strings.label_article_image_alt)
+
+        self._label_image_title.SetMinSize(self._label_image_alt.GetSize())
 
         # Target blank checkbox all link always open in new page
         self._checkbox_target_blank = wx.CheckBox(self, -1, label=Strings.label_open_in_new_page)

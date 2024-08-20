@@ -12,6 +12,7 @@ class PlainTextEditDialog(wx.Dialog):
     def __init__(self, parent, file: Path):
         """
         Show a simple plain text editor with a file opened with the ability to save the file.
+        Used for robots.txt and styles.
         :param parent: Parent frame.
         :param file: File to open and display.
         """

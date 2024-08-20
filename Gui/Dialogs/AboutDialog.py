@@ -8,7 +8,7 @@ class AboutDialog(wx.Dialog):
 
     def __init__(self, parent):
         """
-        Display a modal dialog with a message with the text being selectable.
+        Display a dialog with a message with the text being selectable.
         :param parent: Parent frame.
         """
         wx.Dialog.__init__(self, parent, title=Strings.label_dialog_about,

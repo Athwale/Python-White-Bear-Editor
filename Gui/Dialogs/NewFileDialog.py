@@ -70,10 +70,11 @@ class NewFileDialog(wx.Dialog):
         self._box_menu.SetSelection(0)
         self._box_menu.SetBackgroundColour(Numbers.RED_COLOR)
         self._category_sub_sizer.Add(self._label_category, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
-        self._category_sub_sizer.Add(13, -1)
         self._category_sub_sizer.Add(self._box_menu, proportion=1)
         self._information_sizer.Add(self._category_sub_sizer, flag=wx.EXPAND | wx.TOP,
                                     border=Numbers.widget_border_size)
+
+        self._label_category.SetMinSize(self._label_file_name.GetSize())
 
         # Image buttons
         self._image_buttons_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)

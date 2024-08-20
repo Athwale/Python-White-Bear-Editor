@@ -14,8 +14,7 @@ class EditMenuDialog(SpellCheckedDialog):
 
     def __init__(self, parent, menus: Dict[str, WhitebearDocumentMenu], work_dir: str):
         """
-        Display a dialog that allows editing additional data used in html generation.
-        Default main title, author, contact, keywords, main page meta description. script, main page red/black text
+        Display a dialog that allows editing menu sections.
         :param parent: The parent frame.
         :param menus: A dictionary of filename.html, WhitebearDocumentMenu
         :param work_dir: Working directory of the editor.
@@ -45,12 +44,11 @@ class EditMenuDialog(SpellCheckedDialog):
         self._left_vertical_sizer.Add(self._add_button, flag=wx.ALL | wx.ALIGN_CENTER_HORIZONTAL,
                                       border=Numbers.widget_border_size)
 
-        # Page name sub sizer
+        # Menu page name sub sizer
         self._page_name_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self._label_page_name = wx.StaticText(self, -1, f'{Strings.label_menu_name}: ')
         self._field_page_name = wx.TextCtrl(self, -1)
         self._page_name_sub_sizer.Add(self._label_page_name, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
-        self._page_name_sub_sizer.Add((2, -1))
         self._page_name_sub_sizer.Add(self._field_page_name, proportion=1)
         self._information_sizer.Add(self._page_name_sub_sizer, flag=wx.EXPAND | wx.TOP,
                                     border=Numbers.widget_border_size)
@@ -62,12 +60,13 @@ class EditMenuDialog(SpellCheckedDialog):
         self._label_meta_keywords = wx.StaticText(self, -1, f'{Strings.label_default_keywords}: ')
         self._field_meta_keywords = wx.TextCtrl(self, -1)
         self._meta_keywords_sub_sizer.Add(self._label_meta_keywords, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
-        self._meta_keywords_sub_sizer.Add((15, -1))
         self._meta_keywords_sub_sizer.Add(self._field_meta_keywords, proportion=1)
         self._information_sizer.Add(self._meta_keywords_sub_sizer, flag=wx.EXPAND | wx.TOP,
                                     border=Numbers.widget_border_size)
         self._field_keywords_tip = Tools.get_warning_tip(self._field_meta_keywords, Strings.label_menu_meta_keywords)
         self._field_keywords_tip.SetMessage(Strings.label_menu_meta_keywords)
+
+        self._label_meta_keywords.SetMinSize(self._label_page_name.GetSize())
 
         # --------------------------------------------------------------------------------------------------------------
         # Description sub sizer

@@ -25,7 +25,7 @@ White-bear website editor written in Python 3.
 
 #### Fedora development/run requirements:
 
-- sudo yum install python3-wxpython4 gcc gcc-c++ gtk3 gtk3-devel python3-devel python3-html5lib python3-webcolors python3-pendulum python3-paramiko
+- sudo yum install python3-wxpython4 gcc gcc-c++ gtk3 gtk3-devel python3-devel python3-html5lib python3-webcolors python3-pendulum python3-paramiko python3-enchant hunspell-cs
 - sudo pip3 install tinycss
 - sudo pip3 install htmlmin
 

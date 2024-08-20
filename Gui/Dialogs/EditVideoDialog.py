@@ -32,7 +32,6 @@ class EditVideoDialog(SpellCheckedDialog):
         self._label_video_title = wx.StaticText(self, -1, f'{Strings.label_link_title}: ')
         self._field_video_link_title = wx.TextCtrl(self, -1)
         self._title_sub_sizer.Add(self._label_video_title, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
-        self._title_sub_sizer.Add((5, -1))
         self._title_sub_sizer.Add(self._field_video_link_title, proportion=1)
         self._information_sizer.Add(self._title_sub_sizer, flag=wx.EXPAND | wx.TOP, border=Numbers.widget_border_size)
         self._field_video_link_title_tip = Tools.get_warning_tip(self._field_video_link_title,
@@ -44,10 +43,11 @@ class EditVideoDialog(SpellCheckedDialog):
         self._label_video_url = wx.StaticText(self, -1, f'{Strings.label_url}: ')
         self._field_video_url = wx.TextCtrl(self, -1)
         self._url_sub_sizer.Add(self._label_video_url, flag=wx.ALIGN_LEFT | wx.ALIGN_CENTER_VERTICAL)
-        self._url_sub_sizer.Add((29, -1))
         self._url_sub_sizer.Add(self._field_video_url, proportion=1)
         self._information_sizer.Add(self._url_sub_sizer, flag=wx.EXPAND | wx.TOP, border=Numbers.widget_border_size)
         self._field_video_url_tip = Tools.get_warning_tip(self._field_video_url, Strings.label_url)
+
+        self._label_video_url.SetMinSize(self._label_video_title.GetSize())
 
         # Size
         self._video_size_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
