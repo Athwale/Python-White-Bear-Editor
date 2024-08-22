@@ -272,7 +272,7 @@ class AddImageDialog(wx.Dialog):
             self._label_warning.Show(False)
         if self._full_image.GetWidth() > Numbers.original_image_max_width:
             # Resize the original image to 50% if too big. Conserves space on server.
-            self._full_image.Rescale(self._full_image.GetWidth() / 2, self._full_image.GetHeight() / 2,
+            self._full_image.Rescale(int(self._full_image.GetWidth() / 2), int(self._full_image.GetHeight() / 2),
                                      wx.IMAGE_QUALITY_HIGH)
         # Display the originals image width
         self._content_image_original_size.SetLabelText(f'{self._full_image.GetWidth()} x {self._full_image.GetHeight()}'
@@ -290,7 +290,7 @@ class AddImageDialog(wx.Dialog):
             # Text image thumbnail must be max 534px wide create a thumbnail and resize it if needed.
             if self._thumbnail.GetWidth() > Numbers.text_image_max_size:
                 new_height = self._thumbnail.GetHeight() * (Numbers.text_image_max_size / self._thumbnail.GetWidth())
-                self._thumbnail.Rescale(Numbers.text_image_max_size, new_height, wx.IMAGE_QUALITY_HIGH)
+                self._thumbnail.Rescale(Numbers.text_image_max_size, int(new_height), wx.IMAGE_QUALITY_HIGH)
         else:
             # The other option is aside or main image which must be exactly 300x225px.
             self._thumbnail.Rescale(Numbers.main_image_width, Numbers.main_image_height, wx.IMAGE_QUALITY_HIGH)

@@ -155,6 +155,8 @@ class SpellCheckerDialog(wx.Dialog):
             self.go_to_next()
         elif button_id == wx.ID_ADD:
             # Add new word to dictionary.
+            # TODO add to dictionary adds the word from replace not the highlighted one.
+            # TODO when adding word to dict, add a Capital letter variant as well.
             self._checker.add(str(self.replace_with_field.GetValue()).strip())
             self._word_lists_changed = True
             self.go_to_next()

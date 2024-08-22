@@ -9,6 +9,10 @@ OnInit must be overridden here.
 
 # TODO richtext control does not yet support red waved underline, change underline once available.
 # TODO look at cookies from whitebear using requests headers, beware of redirect, set cookie warning if we use them?
+# TODO settings from spellcheck dialog do not open
+# TODO side panel stretched with less images.
+# TODO add files to selectable item in inserting url.
+# TODO copy paste with link does not work.
 """
 
 import wx

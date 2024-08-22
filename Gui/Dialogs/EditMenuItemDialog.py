@@ -259,7 +259,7 @@ class EditMenuItemDialog(SpellCheckedDialog):
             else:
                 self.display_dialog_contents()
         elif event.GetId() == wx.ID_ADD:
-            dlg = AddLogoDialog(self, self._work_dir, self._item_copy.get_article_name())
+            dlg = AddLogoDialog(self, self._work_dir, self._item_copy.get_article_name()[0])
             saved = dlg.ShowModal()
             if saved == wx.ID_OK:
                 result = wx.MessageBox(Strings.label_use_image, Strings.label_image, wx.YES_NO | wx.ICON_QUESTION)

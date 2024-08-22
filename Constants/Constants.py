@@ -165,8 +165,8 @@ class Strings:
     home_page: str = 'Hlavní strana'
     image_extensions: str = f'JPG and PNG files (*{extension_jpg};*{extension_png})|*.[jJ][pP][gG];*.[pP][nN][gG]|' \
                             f'PNG files (*{extension_png})|*{extension_png}'
-    image_jpg_only: str = 'JPG files (*' + extension_jpg + ')|*' + extension_jpg
-    html_wildcard: str = 'HTML files (*' + extension_html + ')|*' + extension_html
+    image_jpg_only: str = f'JPG files (*{extension_jpg}|*.[jJ][pP][gG]'
+    html_wildcard: str = f'HTML files (*{extension_html})|*{extension_html}'
     default_file: str = 'untitled'
     home_directory: str = os.path.expanduser('~')
     editor_config_file: str = os.path.join(home_directory, '.config', 'whitebearEditor.yml')
