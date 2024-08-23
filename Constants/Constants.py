@@ -94,7 +94,7 @@ class Numbers:
     color_icon_width: int = 20
     color_icon_height: int = 20
     splashscreen_dialog_size: (int, int) = (350, 350)
-    spellcheck_dialog_width: int = 500
+    spellcheck_dialog_width: int = 600
     spellcheck_dialog_height: int = 357
 
     # Styling
@@ -487,7 +487,9 @@ class Strings:
                                   'directory.\nExisting files on server are overwritten.'
     label_server_overwrite: str = 'Existing files on server are overwritten.'
     label_article_public: str = 'Enable article'
-    label_replace_with: str = 'Replace with:'
+    label_replace: str = 'Replace:'
+    label_with: str = 'with:'
+    label_word: str = 'Word:'
     label_unrecognized_word: str = 'Unrecognized word:'
     label_dictionary_provider: str = 'Dictionary provider'
     label_dictionary_location: str = 'Personal dictionary'

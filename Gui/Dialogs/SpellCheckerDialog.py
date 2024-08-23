@@ -34,7 +34,10 @@ class SpellCheckerDialog(wx.Dialog):
         self.mistake_preview_field = wx.TextCtrl(self, -1, size=wx.Size(-1, 71),
                                                  style=wx.TE_MULTILINE | wx.TE_READONLY | wx.TE_RICH)
         self.replace_with_field = wx.TextCtrl(self, -1, style=wx.TE_PROCESS_ENTER)
+        self.highlighted_field = wx.TextCtrl(self, -1, style=wx.TE_PROCESS_ENTER)
+        self.highlighted_field.SetForegroundColour(wx.RED)
         self.suggestions_list = wx.ListBox(self, -1, style=wx.LB_SINGLE)
+        self.word = wx.StaticText(self, -1, '')
         self._init_layout()
 
         self.Bind(wx.EVT_LISTBOX, self.list_select_handler, self.suggestions_list)
@@ -52,7 +55,10 @@ class SpellCheckerDialog(wx.Dialog):
         buttons_sizer = wx.BoxSizer(wx.VERTICAL)
         replace_with_sizer = wx.BoxSizer(wx.HORIZONTAL)
 
-        replace_with_sizer.Add(wx.StaticText(self, -1, Strings.label_replace_with), 0,
+        replace_with_sizer.Add(wx.StaticText(self, -1, Strings.label_replace), 0,
+                               wx.ALL | wx.ALIGN_CENTER_VERTICAL, Numbers.widget_border_size)
+        replace_with_sizer.Add(self.highlighted_field, 1, wx.ALIGN_CENTER_VERTICAL)
+        replace_with_sizer.Add(wx.StaticText(self, -1, Strings.label_with), 0,
                                wx.ALL | wx.ALIGN_CENTER_VERTICAL, Numbers.widget_border_size)
         replace_with_sizer.Add(self.replace_with_field, 1, wx.ALIGN_CENTER_VERTICAL)
 
@@ -62,7 +68,7 @@ class SpellCheckerDialog(wx.Dialog):
         text_fields_sizer.Add(replace_with_sizer, 0, wx.EXPAND | wx.TOP, Numbers.widget_border_size)
         text_fields_sizer.Add(self.suggestions_list, 1, wx.EXPAND | wx.TOP, Numbers.widget_border_size)
 
-        buttons_sizer.AddSpacer(mistakes_label.GetSize()[1] + Numbers.widget_border_size)
+        buttons_sizer.Add(self.word, 0, wx.BOTTOM, Numbers.widget_border_size)
         for button_id, label, action in ((wx.ID_REPLACE, Strings.button_replace, self.buttons_handler),
                                          (wx.ID_ADD, Strings.button_add_to_dict, self.buttons_handler),
                                          (wx.ID_IGNORE, Strings.button_ignore_all, self.buttons_handler)):
@@ -75,7 +81,7 @@ class SpellCheckerDialog(wx.Dialog):
         # Close and settings buttons will never have to be disabled and therefore is not in _buttons.
         settings_button = wx.Button(self, wx.ID_SETUP, Strings.button_settings, size=size)
         buttons_sizer.Add(settings_button, 0)
-        settings_button.Bind(wx.EVT_BUTTON, self._close_button_handler)
+        settings_button.Bind(wx.EVT_BUTTON, self.buttons_handler)
 
         close_button = wx.Button(self, wx.ID_CLOSE, Strings.button_close, size=size)
         buttons_sizer.Add(close_button, 0, wx.TOP, Numbers.widget_border_size)
@@ -99,7 +105,9 @@ class SpellCheckerDialog(wx.Dialog):
             self.enable_buttons(False)
             self.mistake_preview_field.Clear()
             self.replace_with_field.Clear()
+            self.highlighted_field.Clear()
             self.suggestions_list.Clear()
+            self.word.SetLabelText('')
             return False
         # Display mistake context with wrong word in red.
         self.mistake_preview_field.Clear()
@@ -115,7 +123,10 @@ class SpellCheckerDialog(wx.Dialog):
         # Display suggestions in the replacements list
         suggestions = self._checker.suggest()
         self.suggestions_list.Set(suggestions)
+        self.suggestions_list.SetSelection(0)
         self.replace_with_field.SetValue(suggestions[0] if suggestions else '')
+        self.highlighted_field.SetValue(self._checker.word)
+        self.word.SetLabelText(f'{Strings.label_word} {self._checker.word}')
         self.enable_buttons()
         return True
 
@@ -155,9 +166,8 @@ class SpellCheckerDialog(wx.Dialog):
             self.go_to_next()
         elif button_id == wx.ID_ADD:
             # Add new word to dictionary.
-            # TODO add to dictionary adds the word from replace not the highlighted one.
-            # TODO when adding word to dict, add a Capital letter variant as well.
-            self._checker.add(str(self.replace_with_field.GetValue()).strip())
+            self._checker.add(str(self.highlighted_field.GetValue()).strip())
+            self._checker.add(str(self.highlighted_field.GetValue()).strip().capitalize())
             self._word_lists_changed = True
             self.go_to_next()
         elif button_id == wx.ID_SETUP:

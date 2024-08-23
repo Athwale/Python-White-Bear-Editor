@@ -12,7 +12,7 @@ OnInit must be overridden here.
 # TODO settings from spellcheck dialog do not open
 # TODO side panel stretched with less images.
 # TODO add files to selectable item in inserting url.
-# TODO copy paste with link does not work.
+# TODO copy paste with link does not work, maybe just a link that is empty.
 """
 
 import wx
