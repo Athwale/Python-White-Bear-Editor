@@ -1,4 +1,7 @@
+from pathlib import Path
+
 import wx
+from bodhi.client.cli import download
 
 from Constants.Constants import Strings, Numbers
 from Gui.Dialogs.SpellCheckedDialog import SpellCheckedDialog
@@ -31,6 +34,14 @@ class EditLinkDialog(SpellCheckedDialog):
         self._url_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self._label_url = wx.StaticText(self, -1, f'{Strings.label_url}: ')
         choices = self._link.get_loaded_pages()
+        # Add files from files folder to the list
+        extra_files = Path(self._config_manager.get_working_dir() / Path(Strings.folder_files))
+        choices.extend(
+            [str(l.relative_to(self._config_manager.get_working_dir())) for l in list(Path.glob(extra_files,
+                                                                                                '*.pdf'))])
+        choices.extend(
+            [str(l.relative_to(self._config_manager.get_working_dir())) for l in list(Path.glob(extra_files,
+                                                                                                '*.ino'))])
         choices.append(f'{Strings.index}{Strings.extension_html}')
         self._field_url = wx.ComboBox(self, -1, choices=choices, style=wx.CB_DROPDOWN | wx.CB_SORT)
         # Fires when you type in the box
