@@ -780,6 +780,9 @@ class MainFrame(wx.Frame):
             self._file_menu_item_new.Enable(True)
             self._file_menu_item_edit_menu.Enable(True)
             self.tool_bar.EnableTool(wx.ID_NEW, True)
+        self.Refresh()
+        self.Layout()
+        self.Update()
 
     def _load_working_directory(self, path: str) -> None:
         """
@@ -969,6 +972,7 @@ class MainFrame(wx.Frame):
         :param disable: Leave the editor disabled after threads finish.
         :return: False if save canceled.
         """
+        # TODO saving sometimes causes segfault. Maybe threads interfering?
         self._main_text_area.convert_document()
         if confirm:
             result = wx.MessageBox(Strings.label_menu_item_save_hint, Strings.toolbar_save, wx.YES_NO | wx.ICON_WARNING)
@@ -1960,6 +1964,7 @@ class MainFrame(wx.Frame):
         :return: None
         """
         # We must run this at least once to find errors.
+        self._save_current_doc()
         self._update_seo_colors()
         # First run spellcheck dialog on metadata and article name if needed.
         for field, name in ((self._field_article_keywords, Strings.label_article_keywords),

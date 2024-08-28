@@ -833,16 +833,29 @@ class CustomRichText(rt.RichTextCtrl):
                             # Find the copied link in the lookaside.
                             stored_link = None
                             for link in self._link_lookaside:
-                                if link.get_id() == attrs.GetURL():
-                                    stored_link = link
-                            # Create a copy of the found link to allow independent modification.
-                            new_link = Link(stored_link.get_text()[0], stored_link.get_url()[0],
-                                            stored_link.get_title()[0], self._doc.get_other_articles(),
-                                            self._doc.get_working_directory())
-                            new_link.test_self(self._config_manager.get_online_test())
-                            self._doc.add_link(new_link)
-                            # Set the new id to the pasted url to differentiate them.
-                            attrs.SetURL(new_link.get_id())
+                                if link:
+                                    if link.get_id() == attrs.GetURL():
+                                        stored_link = link
+                                    # Create a copy of the found link to allow independent modification.
+                                    # TODO broken when the pasted selection has an OK link and a red link
+                                    new_link = Link(stored_link.get_text()[0], stored_link.get_url()[0],
+                                                    stored_link.get_title()[0], self._doc.get_other_articles(),
+                                                    self._doc.get_working_directory())
+                                    new_link.test_self(self._config_manager.get_online_test())
+                                    self._doc.add_link(new_link)
+                                    # Set the new id to the pasted url to differentiate them.
+                                    attrs.SetURL(new_link.get_id())
+                                else:
+                                    # None link is a new red empty one.
+                                    # Create a new empty separate link.
+                                    new_link = Link(child.GetText(), Strings.url_stub, child.GetText(),
+                                                    self._doc.get_other_articles(),
+                                                    self._doc.get_working_directory())
+                                    new_link.test_self(self._config_manager.get_online_test())
+
+                                    self._doc.add_link(new_link)
+                                    # Set the new id to the pasted url to differentiate them.
+                                    attrs.SetURL(new_link.get_id())
                 stored_element = None
                 new_field = None
                 for child in p.GetChildren():
@@ -1545,7 +1558,7 @@ class CustomRichText(rt.RichTextCtrl):
         Create an internal representation of the document using the article elements classes.
         :return: None
         """
-        # TODO titles are somehow cut short sometimes
+        # TODO titles are somehow cut short sometimes.
         self._doc: WhitebearDocumentArticle
         last_was_paragraph = False
         last_was_list = False

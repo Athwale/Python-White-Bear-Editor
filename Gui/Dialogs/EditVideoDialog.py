@@ -38,7 +38,6 @@ class EditVideoDialog(SpellCheckedDialog):
                                                                  Strings.label_video_link_title)
 
         # Url sub sizer
-        # TODO cancel does not work when inserting a new video and having an empty dialog.
         self._url_sub_sizer = wx.BoxSizer(wx.HORIZONTAL)
         self._label_video_url = wx.StaticText(self, -1, f'{Strings.label_url}: ')
         self._field_video_url = wx.TextCtrl(self, -1)
@@ -134,6 +133,8 @@ class EditVideoDialog(SpellCheckedDialog):
         self.Enable()
         self.SetTitle(Strings.label_dialog_edit_video)
         if result and self._video.get_status_color() != Numbers.RED_COLOR:
+            self.EndModal(return_value)
+        elif return_value == wx.ID_CANCEL:
             self.EndModal(return_value)
         else:
             self._display_dialog_contents()

@@ -71,6 +71,10 @@ class Link(SpellCheckedObject):
             self._text_error_message = Strings.seo_error_name_length
             result = False
 
+        # Check if it is a new empty link
+        if self._url == Strings.url_stub:
+            result = False
+
         # Check url, if it is one of whitebear pages set local to True and do not try to download it.
         if self._url in list(self._loaded_pages) or self._url == 'index.html':
             self._is_local = True
